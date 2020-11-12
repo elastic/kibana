@@ -8,13 +8,7 @@ import { RESERVED_DIR_JEST_INTEGRATION_TESTS } from '../../../src/dev/constants'
 
 export default {
   rootDir: '../../',
-  roots: [
-    '<rootDir>/plugins',
-    '<rootDir>/legacy/plugins',
-    '<rootDir>/legacy/server',
-    '<rootDir>/legacy/common',
-    '<rootDir>/test_utils/jest/integration_tests',
-  ],
+  roots: ['<rootDir>/plugins', '<rootDir>/legacy/plugins'],
   collectCoverageFrom: ['legacy/plugins/**/*.js', 'legacy/common/**/*.js', 'legacy/server/**/*.js'],
   moduleNameMapper: {
     '\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$':

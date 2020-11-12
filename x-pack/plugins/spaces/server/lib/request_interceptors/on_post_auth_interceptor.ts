@@ -6,7 +6,7 @@
 import { Logger, CoreSetup } from 'src/core/server';
 import { Space } from '../../../common/model/space';
 import { wrapError } from '../errors';
-import { SpacesServiceSetup } from '../../spaces_service/spaces_service';
+import { SpacesServiceStart } from '../../spaces_service/spaces_service';
 import { PluginsSetup } from '../../plugin';
 import { getSpaceSelectorUrl } from '../get_space_selector_url';
 import { DEFAULT_SPACE_ID, ENTER_SPACE_PATH } from '../../../common/constants';
@@ -15,13 +15,13 @@ import { addSpaceIdToPath } from '../../../common';
 export interface OnPostAuthInterceptorDeps {
   http: CoreSetup['http'];
   features: PluginsSetup['features'];
-  spacesService: SpacesServiceSetup;
+  getSpacesService: () => SpacesServiceStart;
   log: Logger;
 }
 
 export function initSpacesOnPostAuthRequestInterceptor({
   features,
-  spacesService,
+  getSpacesService,
   log,
   http,
 }: OnPostAuthInterceptorDeps) {
@@ -29,6 +29,8 @@ export function initSpacesOnPostAuthRequestInterceptor({
     const serverBasePath = http.basePath.serverBasePath;
 
     const path = request.url.pathname;
+
+    const spacesService = getSpacesService();
 
     const spaceId = spacesService.getSpaceId(request);
 
@@ -43,7 +45,7 @@ export function initSpacesOnPostAuthRequestInterceptor({
     // which is not available at the time of "onRequest".
     if (isRequestingKibanaRoot) {
       try {
-        const spacesClient = spacesService.scopedClient(request);
+        const spacesClient = spacesService.createSpacesClient(request);
         const spaces = await spacesClient.getAll();
 
         if (spaces.length === 1) {
@@ -76,7 +78,7 @@ export function initSpacesOnPostAuthRequestInterceptor({
       try {
         log.debug(`Verifying access to space "${spaceId}"`);
 
-        const spacesClient = spacesService.scopedClient(request);
+        const spacesClient = spacesService.createSpacesClient(request);
         space = await spacesClient.get(spaceId);
       } catch (error) {
         const wrappedError = wrapError(error);

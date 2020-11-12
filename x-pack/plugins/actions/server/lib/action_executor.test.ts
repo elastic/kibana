@@ -31,7 +31,7 @@ const executeParams = {
   request: {} as KibanaRequest,
 };
 
-const spacesMock = spacesServiceMock.createSetupContract();
+const spacesMock = spacesServiceMock.createStartContract();
 const loggerMock = loggingSystemMock.create().get();
 const getActionsClientWithRequest = jest.fn();
 actionExecutor.initialize({

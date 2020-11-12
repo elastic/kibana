@@ -11,24 +11,27 @@ import { namespaceToSpaceId, spaceIdToNamespace } from '../lib/utils/namespace';
 
 const createSetupContractMock = (spaceId = DEFAULT_SPACE_ID) => {
   const setupContract: jest.Mocked<SpacesServiceSetup> = {
-    getSpaceId: jest.fn().mockReturnValue(spaceId),
-    isInDefaultSpace: jest.fn().mockReturnValue(spaceId === DEFAULT_SPACE_ID),
-    getBasePath: jest.fn().mockReturnValue(''),
-    scopedClient: jest.fn().mockReturnValue(spacesClientMock.create()),
     namespaceToSpaceId: jest.fn().mockImplementation(namespaceToSpaceId),
     spaceIdToNamespace: jest.fn().mockImplementation(spaceIdToNamespace),
-    getActiveSpace: jest.fn(),
+    getSpaceId: jest.fn().mockReturnValue(spaceId),
+
     clientService: {
       registerClientWrapper: jest.fn(),
-      setRepositoryFactory: jest.fn(),
+      setClientRepositoryFactory: jest.fn(),
     },
   };
   return setupContract;
 };
 
-const createStartContractMock = () => {
+const createStartContractMock = (spaceId = DEFAULT_SPACE_ID) => {
   const startContract: jest.Mocked<SpacesServiceStart> = {
+    namespaceToSpaceId: jest.fn().mockImplementation(namespaceToSpaceId),
+    spaceIdToNamespace: jest.fn().mockImplementation(spaceIdToNamespace),
     createSpacesClient: jest.fn().mockReturnValue(spacesClientMock.create()),
+    getSpaceId: jest.fn().mockReturnValue(spaceId),
+    isInDefaultSpace: jest.fn().mockReturnValue(spaceId === DEFAULT_SPACE_ID),
+    getBasePath: jest.fn().mockReturnValue(''),
+    getActiveSpace: jest.fn(),
   };
   return startContract;
 };

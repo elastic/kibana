@@ -18,13 +18,13 @@ const service = new SpacesService(log);
 
 describe('createSpacesTutorialContextFactory', () => {
   it('should create a valid context factory', async () => {
-    const spacesService = spacesServiceMock.createSetupContract();
-    expect(typeof createSpacesTutorialContextFactory(spacesService)).toEqual('function');
+    const spacesService = spacesServiceMock.createStartContract();
+    expect(typeof createSpacesTutorialContextFactory(() => spacesService)).toEqual('function');
   });
 
   it('should create context with the current space id for space my-space-id', async () => {
-    const spacesService = spacesServiceMock.createSetupContract('my-space-id');
-    const contextFactory = createSpacesTutorialContextFactory(spacesService);
+    const spacesService = spacesServiceMock.createStartContract('my-space-id');
+    const contextFactory = createSpacesTutorialContextFactory(() => spacesService);
 
     const request = {};
 
@@ -35,11 +35,13 @@ describe('createSpacesTutorialContextFactory', () => {
   });
 
   it('should create context with the current space id for the default space', async () => {
-    const spacesService = await service.setup({
+    service.setup({
       http: coreMock.createSetup().http,
       config$: Rx.of(spacesConfig),
     });
-    const contextFactory = createSpacesTutorialContextFactory(spacesService);
+    const contextFactory = createSpacesTutorialContextFactory(() =>
+      service.start(coreMock.createStart())
+    );
 
     const request = {};
 

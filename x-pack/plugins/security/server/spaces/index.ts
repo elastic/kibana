@@ -4,4 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+export { LegacySpacesAuditLogger } from './legacy_audit_logger';
 export { SecureSpacesClientWrapper } from './secure_spaces_client_wrapper';

@@ -22,7 +22,6 @@ import {
   coreMock,
 } from 'src/core/server/mocks';
 import { SpacesService } from '../../../spaces_service';
-import { SpacesClient } from '../../../lib/spaces_client';
 import { initCopyToSpacesApi } from './copy_to_space';
 import { spacesConfig } from '../../../lib/__fixtures__';
 import { ObjectType } from '@kbn/config-schema';
@@ -73,21 +72,21 @@ describe('copy to space', () => {
     coreStart.savedObjects = savedObjects;
 
     const service = new SpacesService(log);
-    const spacesService = await service.setup({
+    const spacesServiceSetup = service.setup({
       http: (httpService as unknown) as CoreSetup['http'],
       config$: Rx.of(spacesConfig),
     });
 
-    spacesService.scopedClient = jest.fn(() => {
-      return new SpacesClient(() => null, spacesConfig, savedObjectsRepositoryMock);
-    });
+    spacesServiceSetup.clientService.setClientRepositoryFactory(() => savedObjectsRepositoryMock);
+
+    const spacesServiceStart = service.start(coreStart);
 
     initCopyToSpacesApi({
       externalRouter: router,
       getStartServices: async () => [coreStart, {}, {}],
       getImportExportObjectLimit: () => 1000,
       log,
-      spacesService,
+      getSpacesService: () => spacesServiceStart,
     });
 
     const [

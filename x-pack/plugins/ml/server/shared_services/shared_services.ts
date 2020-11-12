@@ -11,7 +11,7 @@ import { IClusterClient, IScopedClusterClient, SavedObjectsClientContract } from
 import { KibanaRequest } from '../../.././../../src/core/server/http';
 import { MlLicense } from '../../common/license';
 
-import { SpacesPluginSetup } from '../../../spaces/server';
+import { SpacesPluginStart } from '../../../spaces/server';
 import { CloudSetup } from '../../../cloud/server';
 import { licenseChecks } from './license_checks';
 import { MlSystemProvider, getMlSystemProvider } from './providers/system';
@@ -59,7 +59,7 @@ type OkCallback = (okParams: OkParams) => any;
 
 export function createSharedServices(
   mlLicense: MlLicense,
-  spaces: SpacesPluginSetup | undefined,
+  getSpaces: (() => Promise<SpacesPluginStart>) | undefined,
   cloud: CloudSetup,
   resolveMlCapabilities: ResolveMlCapabilities,
   getClusterClient: () => IClusterClient | null
@@ -104,7 +104,7 @@ export function createSharedServices(
     ...getAnomalyDetectorsProvider(getGuards),
     ...getModulesProvider(getGuards),
     ...getResultsServiceProvider(getGuards),
-    ...getMlSystemProvider(getGuards, mlLicense, spaces, cloud, resolveMlCapabilities),
+    ...getMlSystemProvider(getGuards, mlLicense, getSpaces, cloud, resolveMlCapabilities),
   };
 }
 

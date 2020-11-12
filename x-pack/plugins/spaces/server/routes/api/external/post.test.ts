@@ -18,7 +18,6 @@ import {
   coreMock,
 } from 'src/core/server/mocks';
 import { SpacesService } from '../../../spaces_service';
-import { SpacesClient } from '../../../lib/spaces_client';
 import { initPostSpacesApi } from './post';
 import { spacesConfig } from '../../../lib/__fixtures__';
 import { ObjectType } from '@kbn/config-schema';
@@ -37,26 +36,21 @@ describe('Spaces Public API', () => {
     const log = loggingSystemMock.create().get('spaces');
 
     const service = new SpacesService(log);
-    const spacesService = await service.setup({
+    const spacesServiceSetup = service.setup({
       http: (httpService as unknown) as CoreSetup['http'],
       config$: Rx.of(spacesConfig),
     });
 
-    spacesService.scopedClient = jest.fn(() => {
-      return new SpacesClient(
-        () => null,
+    spacesServiceSetup.clientService.setClientRepositoryFactory(() => savedObjectsRepositoryMock);
 
-        spacesConfig,
-        savedObjectsRepositoryMock
-      );
-    });
+    const spacesServiceStart = service.start(coreStart);
 
     initPostSpacesApi({
       externalRouter: router,
       getStartServices: async () => [coreStart, {}, {}],
       getImportExportObjectLimit: () => 1000,
       log,
-      spacesService,
+      getSpacesService: () => spacesServiceStart,
     });
 
     const [routeDefinition, routeHandler] = router.post.mock.calls[0];

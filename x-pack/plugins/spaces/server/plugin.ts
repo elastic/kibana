@@ -31,6 +31,7 @@ import { setupCapabilities } from './capabilities';
 import { SpacesSavedObjectsService } from './saved_objects';
 import { DefaultSpaceService } from './default_space';
 import { SpacesLicenseService } from '../common/licensing';
+import { SpacesClientRepositoryFactory, SpacesClientWrapper } from './lib/spaces_client';
 
 export interface PluginsSetup {
   features: FeaturesPluginSetup;
@@ -45,6 +46,10 @@ export interface PluginsStart {
 
 export interface SpacesPluginSetup {
   spacesService: SpacesServiceSetup;
+  spacesClient: {
+    setClientRepositoryFactory: (factory: SpacesClientRepositoryFactory) => void;
+    registerClientWrapper: (wrapper: SpacesClientWrapper) => void;
+  };
 }
 
 export interface SpacesPluginStart {
@@ -60,19 +65,23 @@ export class Plugin {
 
   private readonly spacesLicenseService = new SpacesLicenseService();
 
-  private defaultSpaceService?: DefaultSpaceService;
+  private readonly spacesService: SpacesService;
 
-  private spacesService?: SpacesService;
+  private spacesServiceStart?: SpacesServiceStart;
+
+  private defaultSpaceService?: DefaultSpaceService;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config$ = initializerContext.config.create<ConfigType>();
     this.kibanaIndexConfig$ = initializerContext.config.legacy.globalConfig$;
     this.log = initializerContext.logger.get();
+    this.spacesService = new SpacesService(this.log);
   }
 
   public start(core: CoreStart) {
+    this.spacesServiceStart = this.spacesService.start(core);
     return {
-      spacesService: this.spacesService!.start(core),
+      spacesService: this.spacesServiceStart,
     };
   }
 
@@ -80,15 +89,20 @@ export class Plugin {
     core: CoreSetup<PluginsStart>,
     plugins: PluginsSetup
   ): Promise<SpacesPluginSetup> {
-    this.spacesService = new SpacesService(this.log);
-
     const spacesServiceSetup = this.spacesService.setup({
       http: core.http,
       config$: this.config$,
     });
 
+    const getSpacesService = () => {
+      if (!this.spacesServiceStart) {
+        throw new Error('spaces service has not been initialized!');
+      }
+      return this.spacesServiceStart;
+    };
+
     const savedObjectsService = new SpacesSavedObjectsService();
-    savedObjectsService.setup({ core, spacesService: spacesServiceSetup });
+    savedObjectsService.setup({ core, getSpacesService });
 
     const { license } = this.spacesLicenseService.setup({ license$: plugins.licensing.license$ });
 
@@ -113,23 +127,28 @@ export class Plugin {
       log: this.log,
       getStartServices: core.getStartServices,
       getImportExportObjectLimit: core.savedObjects.getImportExportObjectLimit,
-      spacesService: spacesServiceSetup,
+      getSpacesService,
     });
 
     const internalRouter = core.http.createRouter();
     initInternalSpacesApi({
       internalRouter,
-      spacesService: spacesServiceSetup,
+      getSpacesService,
     });
 
     initSpacesRequestInterceptors({
       http: core.http,
       log: this.log,
-      spacesService: spacesServiceSetup,
+      getSpacesService: () => {
+        if (!this.spacesServiceStart) {
+          throw new Error('Spaces Service is not yet initialized');
+        }
+        return this.spacesServiceStart;
+      },
       features: plugins.features,
     });
 
-    setupCapabilities(core, spacesServiceSetup, this.log);
+    setupCapabilities(core, getSpacesService, this.log);
 
     if (plugins.usageCollection) {
       registerSpacesUsageCollector(plugins.usageCollection, {
@@ -141,12 +160,15 @@ export class Plugin {
 
     if (plugins.home) {
       plugins.home.tutorials.addScopedTutorialContextFactory(
-        createSpacesTutorialContextFactory(spacesServiceSetup)
+        createSpacesTutorialContextFactory(getSpacesService)
       );
     }
 
     return {
       spacesService: spacesServiceSetup,
+      spacesClient: {
+        ...spacesServiceSetup.clientService,
+      },
     };
   }
 

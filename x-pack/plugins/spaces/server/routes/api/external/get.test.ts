@@ -19,7 +19,6 @@ import {
   coreMock,
 } from 'src/core/server/mocks';
 import { SpacesService } from '../../../spaces_service';
-import { SpacesClient } from '../../../lib/spaces_client';
 import { spacesConfig } from '../../../lib/__fixtures__';
 
 describe('GET space', () => {
@@ -37,21 +36,21 @@ describe('GET space', () => {
     const log = loggingSystemMock.create().get('spaces');
 
     const service = new SpacesService(log);
-    const spacesService = await service.setup({
+    const spacesServiceSetup = service.setup({
       http: (httpService as unknown) as CoreSetup['http'],
       config$: Rx.of(spacesConfig),
     });
 
-    spacesService.scopedClient = jest.fn(() => {
-      return new SpacesClient(() => null, spacesConfig, savedObjectsRepositoryMock);
-    });
+    spacesServiceSetup.clientService.setClientRepositoryFactory(() => savedObjectsRepositoryMock);
+
+    const spacesServiceStart = service.start(coreStart);
 
     initGetSpaceApi({
       externalRouter: router,
       getStartServices: async () => [coreStart, {}, {}],
       getImportExportObjectLimit: () => 1000,
       log,
-      spacesService,
+      getSpacesService: () => spacesServiceStart,
     });
 
     return {

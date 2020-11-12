@@ -9,6 +9,7 @@ import { KibanaRequest } from 'src/core/server';
 import { GetAllSpacesPurpose, GetSpaceResult } from '../../../spaces/common/model/types';
 import { Space, ISpacesClient } from '../../../spaces/server';
 import { LegacySpacesAuditLogger } from './legacy_audit_logger';
+import { AuthorizationServiceSetup } from '../authorization';
 import { SecurityPluginSetup } from '..';
 
 const PURPOSE_PRIVILEGE_MAP: Record<
@@ -47,7 +48,7 @@ export class SecureSpacesClientWrapper implements ISpacesClient {
   public async getAll({
     purpose = 'any',
     includeAuthorizedPurposes,
-  }: GetAllSpacesOptions = {}): Promise<Space[]> {
+  }: GetAllSpacesOptions = {}): Promise<GetSpaceResult[]> {
     const allSpaces = await this.spacesClient.getAll({ purpose, includeAuthorizedPurposes });
 
     if (!this.useRbac) {

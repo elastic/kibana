@@ -42,7 +42,7 @@ describe('checkAccess', () => {
       },
     },
   };
-  const mockSpaces = spacesMock.createSetup();
+  const mockSpaces = spacesMock.createStart();
   const mockDependencies = {
     request: { auth: { isAuthenticated: true } },
     config: { host: 'http://localhost:3002' },

@@ -18,7 +18,7 @@ import {
   SavedObjectsClientContract,
 } from 'kibana/server';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
-import { PluginsSetup, RouteInitialization } from './types';
+import { PluginsSetup, PluginsStart, RouteInitialization } from './types';
 import { PLUGIN_ID } from '../common/constants/app';
 import { MlCapabilities } from '../common/types/capabilities';
 
@@ -56,7 +56,8 @@ import { RouteGuard } from './lib/route_guard';
 export type MlPluginSetup = SharedServices;
 export type MlPluginStart = void;
 
-export class MlServerPlugin implements Plugin<MlPluginSetup, MlPluginStart, PluginsSetup> {
+export class MlServerPlugin
+  implements Plugin<MlPluginSetup, MlPluginStart, PluginsSetup, PluginsStart> {
   private log: Logger;
   private version: string;
   private mlLicense: MlLicense;
@@ -70,7 +71,7 @@ export class MlServerPlugin implements Plugin<MlPluginSetup, MlPluginStart, Plug
     this.mlLicense = new MlLicense();
   }
 
-  public setup(coreSetup: CoreSetup, plugins: PluginsSetup): MlPluginSetup {
+  public setup(coreSetup: CoreSetup<PluginsStart>, plugins: PluginsSetup): MlPluginSetup {
     const { admin, user, apmUser } = getPluginPrivileges();
 
     plugins.features.registerKibanaFeature({
@@ -143,6 +144,10 @@ export class MlServerPlugin implements Plugin<MlPluginSetup, MlPluginStart, Plug
       return capabilities.ml as MlCapabilities;
     };
 
+    const getSpaces = plugins.spaces
+      ? () => coreSetup.getStartServices().then(([, { spaces }]) => spaces!)
+      : undefined;
+
     annotationRoutes(routeInit, plugins.security);
     calendars(routeInit);
     dataFeedRoutes(routeInit);
@@ -161,7 +166,7 @@ export class MlServerPlugin implements Plugin<MlPluginSetup, MlPluginStart, Plug
     jobValidationRoutes(routeInit, this.version);
     savedObjectsRoutes(routeInit);
     systemRoutes(routeInit, {
-      spaces: plugins.spaces,
+      getSpaces,
       cloud: plugins.cloud,
       resolveMlCapabilities,
     });
@@ -173,7 +178,7 @@ export class MlServerPlugin implements Plugin<MlPluginSetup, MlPluginStart, Plug
     return {
       ...createSharedServices(
         this.mlLicense,
-        plugins.spaces,
+        getSpaces,
         plugins.cloud,
         resolveMlCapabilities,
         () => this.clusterClient

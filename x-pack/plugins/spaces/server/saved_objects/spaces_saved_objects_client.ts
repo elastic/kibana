@@ -22,14 +22,14 @@ import {
   ISavedObjectTypeRegistry,
 } from '../../../../../src/core/server';
 import { ALL_SPACES_ID } from '../../common/constants';
-import { SpacesServiceSetup } from '../spaces_service/spaces_service';
+import { SpacesServiceStart } from '../spaces_service/spaces_service';
 import { spaceIdToNamespace } from '../lib/utils/namespace';
 import { ISpacesClient } from '../lib/spaces_client';
 
 interface SpacesSavedObjectsClientOptions {
   baseClient: SavedObjectsClientContract;
   request: any;
-  spacesService: SpacesServiceSetup;
+  getSpacesService: () => SpacesServiceStart;
   typeRegistry: ISavedObjectTypeRegistry;
 }
 
@@ -55,10 +55,12 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
   public readonly errors: SavedObjectsClientContract['errors'];
 
   constructor(options: SpacesSavedObjectsClientOptions) {
-    const { baseClient, request, spacesService, typeRegistry } = options;
+    const { baseClient, request, getSpacesService, typeRegistry } = options;
+
+    const spacesService = getSpacesService();
 
     this.client = baseClient;
-    this.spacesClient = spacesService.scopedClient(request);
+    this.spacesClient = spacesService.createSpacesClient(request);
     this.spaceId = spacesService.getSpaceId(request);
     this.types = typeRegistry.getAllTypes().map((t) => t.name);
     this.errors = baseClient.errors;

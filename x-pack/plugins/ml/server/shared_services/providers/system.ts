@@ -10,7 +10,7 @@ import { RequestParams } from '@elastic/elasticsearch';
 import { MlLicense } from '../../../common/license';
 import { CloudSetup } from '../../../../cloud/server';
 import { spacesUtilsProvider } from '../../lib/spaces_utils';
-import { SpacesPluginSetup } from '../../../../spaces/server';
+import { SpacesPluginStart } from '../../../../spaces/server';
 import { capabilitiesProvider } from '../../lib/capabilities';
 import { MlInfoResponse } from '../../../common/types/ml_server_info';
 import { MlCapabilitiesResponse, ResolveMlCapabilities } from '../../../common/types/capabilities';
@@ -33,7 +33,7 @@ export interface MlSystemProvider {
 export function getMlSystemProvider(
   getGuards: GetGuards,
   mlLicense: MlLicense,
-  spaces: SpacesPluginSetup | undefined,
+  getSpaces: (() => Promise<SpacesPluginStart>) | undefined,
   cloud: CloudSetup | undefined,
   resolveMlCapabilities: ResolveMlCapabilities
 ): MlSystemProvider {
@@ -45,8 +45,8 @@ export function getMlSystemProvider(
             .isMinimumLicense()
             .ok(async ({ mlClient }) => {
               const { isMlEnabledInSpace } =
-                spaces !== undefined
-                  ? spacesUtilsProvider(spaces, request)
+                getSpaces !== undefined
+                  ? spacesUtilsProvider(getSpaces, request)
                   : { isMlEnabledInSpace: async () => true };
 
               const mlCapabilities = await resolveMlCapabilities(request);

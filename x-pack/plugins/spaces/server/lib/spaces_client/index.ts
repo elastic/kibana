@@ -9,4 +9,6 @@ export {
   SpacesClientService,
   SpacesClientServiceSetup,
   SpacesClientServiceStart,
+  SpacesClientRepositoryFactory,
+  SpacesClientWrapper,
 } from './spaces_client_service';

@@ -23,17 +23,17 @@ describe('Spaces Plugin', () => {
       const spacesSetup = await plugin.setup(core, { features, licensing });
       expect(spacesSetup).toMatchInlineSnapshot(`
         Object {
+          "spacesClient": Object {
+            "registerClientWrapper": [Function],
+            "setClientRepositoryFactory": [Function],
+          },
           "spacesService": Object {
             "clientService": Object {
               "registerClientWrapper": [Function],
-              "setRepositoryFactory": [Function],
+              "setClientRepositoryFactory": [Function],
             },
-            "getActiveSpace": [Function],
-            "getBasePath": [Function],
             "getSpaceId": [Function],
-            "isInDefaultSpace": [Function],
             "namespaceToSpaceId": [Function],
-            "scopedClient": [Function],
             "spaceIdToNamespace": [Function],
           },
         }

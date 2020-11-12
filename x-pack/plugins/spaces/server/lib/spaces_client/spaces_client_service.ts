@@ -5,7 +5,12 @@
  */
 
 import { Observable } from 'rxjs';
-import { KibanaRequest, CoreStart, ISavedObjectsRepository } from 'src/core/server';
+import {
+  KibanaRequest,
+  CoreStart,
+  ISavedObjectsRepository,
+  SavedObjectsServiceStart,
+} from 'src/core/server';
 import { ConfigType } from '../../config';
 import { SpacesClient, ISpacesClient } from './spaces_client';
 
@@ -14,7 +19,7 @@ export type SpacesClientWrapper = (
   baseClient: ISpacesClient
 ) => ISpacesClient;
 
-type RepositoryFactory = (
+export type SpacesClientRepositoryFactory = (
   request: KibanaRequest,
   savedObjectsStart: SavedObjectsServiceStart
 ) => ISavedObjectsRepository;
@@ -25,7 +30,7 @@ export interface SpacesClientServiceSetup {
    * whenever a new instance of the SpacesClient is created. By default, a repository
    * scoped the current user will be created.
    */
-  setRepositoryFactory: (factory: RepositoryFactory) => void;
+  setClientRepositoryFactory: (factory: SpacesClientRepositoryFactory) => void;
 
   /**
    * Sets the client wrapper that should be used to optionally "wrap" each instance of the SpacesClient.
@@ -44,27 +49,26 @@ export interface SpacesClientServiceStart {
   createSpacesClient: (request: KibanaRequest) => ISpacesClient;
 }
 
-export class SpacesClientService {
-  private repositoryFactory?: RepositoryFactory;
+interface SetupDeps {
+  config$: Observable<ConfigType>;
+}
 
-  private savedObjectsStart?: SavedObjectsServiceStart;
+export class SpacesClientService {
+  private repositoryFactory?: SpacesClientRepositoryFactory;
 
   private config?: ConfigType;
 
   private clientWrapper?: SpacesClientWrapper;
 
-  constructor(
-    private readonly debugLogger: (message: string) => void,
-    config$: Observable<ConfigType>
-  ) {
+  constructor(private readonly debugLogger: (message: string) => void) {}
+
+  public setup({ config$ }: SetupDeps): SpacesClientServiceSetup {
     config$.subscribe((nextConfig) => {
       this.config = nextConfig;
     });
-  }
 
-  public setup(): SpacesClientServiceSetup {
     return {
-      setRepositoryFactory: (repositoryFactory: RepositoryFactory) => {
+      setClientRepositoryFactory: (repositoryFactory: SpacesClientRepositoryFactory) => {
         if (this.repositoryFactory) {
           throw new Error(`Repository factory has already been set`);
         }
@@ -80,17 +84,20 @@ export class SpacesClientService {
   }
 
   public start(coreStart: CoreStart): SpacesClientServiceStart {
-    this.savedObjectsStart = coreStart.savedObjects;
     if (!this.repositoryFactory) {
       this.repositoryFactory = (request, savedObjectsStart) =>
         savedObjectsStart.createScopedRepository(request, ['space']);
     }
     return {
       createSpacesClient: (request: KibanaRequest) => {
+        if (!this.config) {
+          throw new Error('Initialization error: spaces config is not available');
+        }
+
         const baseClient = new SpacesClient(
           this.debugLogger,
-          this.config!,
-          this.repositoryFactory!(request, this.savedObjectsStart!)
+          this.config,
+          this.repositoryFactory!(request, coreStart.savedObjects)
         );
         if (this.clientWrapper) {
           return this.clientWrapper(request, baseClient);

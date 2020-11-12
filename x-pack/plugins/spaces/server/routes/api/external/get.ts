@@ -11,7 +11,7 @@ import { ExternalRouteDeps } from '.';
 import { createLicensedRouteHandler } from '../../lib';
 
 export function initGetSpaceApi(deps: ExternalRouteDeps) {
-  const { externalRouter, spacesService } = deps;
+  const { externalRouter, getSpacesService } = deps;
 
   externalRouter.get(
     {
@@ -24,7 +24,7 @@ export function initGetSpaceApi(deps: ExternalRouteDeps) {
     },
     createLicensedRouteHandler(async (context, request, response) => {
       const spaceId = request.params.id;
-      const spacesClient = spacesService.scopedClient(request);
+      const spacesClient = getSpacesService().createSpacesClient(request);
 
       try {
         const space = await spacesClient.get(spaceId);

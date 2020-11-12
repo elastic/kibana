@@ -16,7 +16,7 @@ import {
   KibanaRequest,
 } from 'src/core/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { SpacesPluginSetup } from '../../spaces/server';
+import { SpacesPluginStart } from '../../spaces/server';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
 import { SecurityPluginSetup } from '../../security/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
@@ -49,8 +49,11 @@ import { registerWorkplaceSearchRoutes } from './routes/workplace_search';
 export interface PluginsSetup {
   usageCollection?: UsageCollectionSetup;
   security?: SecurityPluginSetup;
-  spaces?: SpacesPluginSetup;
   features: FeaturesPluginSetup;
+}
+
+interface PluginsStart {
+  spaces?: SpacesPluginStart;
 }
 
 export interface IRouteDependencies {
@@ -71,8 +74,8 @@ export class EnterpriseSearchPlugin implements Plugin {
   }
 
   public async setup(
-    { capabilities, http, savedObjects, getStartServices }: CoreSetup,
-    { usageCollection, security, spaces, features }: PluginsSetup
+    { capabilities, http, savedObjects, getStartServices }: CoreSetup<PluginsStart>,
+    { usageCollection, security, features }: PluginsSetup
   ) {
     const config = await this.config.pipe(first()).toPromise();
     const log = this.logger;
@@ -99,6 +102,8 @@ export class EnterpriseSearchPlugin implements Plugin {
      * Register user access to the Enterprise Search plugins
      */
     capabilities.registerSwitcher(async (request: KibanaRequest) => {
+      const [, { spaces }] = await getStartServices();
+
       const dependencies = { config, security, spaces, request, log };
 
       const { hasAppSearchAccess, hasWorkplaceSearchAccess } = await checkAccess(dependencies);

@@ -5,7 +5,7 @@
  */
 
 import { KibanaRequest, Logger } from 'src/core/server';
-import { SpacesPluginSetup } from '../../../spaces/server';
+import { SpacesPluginStart } from '../../../spaces/server';
 import { SecurityPluginSetup } from '../../../security/server';
 import { ConfigType } from '../';
 
@@ -14,7 +14,7 @@ import { callEnterpriseSearchConfigAPI } from './enterprise_search_config_api';
 interface ICheckAccess {
   request: KibanaRequest;
   security?: SecurityPluginSetup;
-  spaces?: SpacesPluginSetup;
+  spaces?: SpacesPluginStart;
   config: ConfigType;
   log: Logger;
 }

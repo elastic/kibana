@@ -19,7 +19,7 @@ import { RouteInitialization, SystemRouteDeps } from '../types';
  */
 export function systemRoutes(
   { router, mlLicense, routeGuard }: RouteInitialization,
-  { spaces, cloud, resolveMlCapabilities }: SystemRouteDeps
+  { getSpaces, cloud, resolveMlCapabilities }: SystemRouteDeps
 ) {
   async function getNodeCount(client: IScopedClusterClient) {
     const { body } = await client.asInternalUser.nodes.info({
@@ -119,8 +119,8 @@ export function systemRoutes(
       try {
         // if spaces is disabled force isMlEnabledInSpace to be true
         const { isMlEnabledInSpace } =
-          spaces !== undefined
-            ? spacesUtilsProvider(spaces, (request as unknown) as Request)
+          getSpaces !== undefined
+            ? spacesUtilsProvider(getSpaces, (request as unknown) as Request)
             : { isMlEnabledInSpace: async () => true };
 
         const mlCapabilities = await resolveMlCapabilities(request);

@@ -8,6 +8,7 @@ import { SpacesClient } from './spaces_client';
 import { ConfigType, ConfigSchema } from '../../config';
 import { ISavedObjectsRepository } from 'src/core/server';
 import { GetAllSpacesPurpose } from '../../../common/model/types';
+import { savedObjectsRepositoryMock } from '../../../../../../src/core/server/mocks';
 
 const createMockDebugLogger = () => {
   return jest.fn();
@@ -68,9 +69,7 @@ describe('#getAll', () => {
 
   test(`finds spaces using callWithRequestRepository`, async () => {
     const mockDebugLogger = createMockDebugLogger();
-    const mockCallWithRequestRepository = ({
-      find: jest.fn(),
-    } as unknown) as jest.Mocked<ISavedObjectsRepository>;
+    const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
     mockCallWithRequestRepository.find.mockResolvedValue({
       saved_objects: savedObjects,
     } as any);
@@ -102,6 +101,8 @@ describe('#getAll', () => {
 describe('#get', () => {
   const savedObject = {
     id: 'foo',
+    type: 'foo',
+    references: [],
     attributes: {
       name: 'foo-name',
       description: 'foo-description',
@@ -119,9 +120,8 @@ describe('#get', () => {
   test(`gets space using callWithRequestRepository`, async () => {
     const mockDebugLogger = createMockDebugLogger();
     const mockConfig = createMockConfig();
-    const mockCallWithRequestRepository = {
-      get: jest.fn().mockReturnValue(savedObject),
-    };
+    const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
+    mockCallWithRequestRepository.get.mockResolvedValue(savedObject);
 
     const client = new SpacesClient(
       mockDebugLogger,
@@ -157,6 +157,8 @@ describe('#create', () => {
 
   const savedObject = {
     id,
+    type: 'foo',
+    references: [],
     attributes: {
       name: 'foo-name',
       description: 'foo-description',
@@ -173,71 +175,69 @@ describe('#create', () => {
     disabledFeatures: [],
   };
 
-  describe(`authorization is null`, () => {
-    test(`creates space using callWithRequestRepository when we're under the max`, async () => {
-      const maxSpaces = 5;
-      const mockDebugLogger = createMockDebugLogger();
-      const mockCallWithRequestRepository = {
-        create: jest.fn().mockReturnValue(savedObject),
-        find: jest.fn().mockReturnValue({
-          total: maxSpaces - 1,
-        }),
-      };
-      const mockConfig = createMockConfig({
-        maxSpaces,
-        enabled: true,
-      });
+  test(`creates space using callWithRequestRepository when we're under the max`, async () => {
+    const maxSpaces = 5;
+    const mockDebugLogger = createMockDebugLogger();
+    const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
+    mockCallWithRequestRepository.create.mockResolvedValue(savedObject);
+    mockCallWithRequestRepository.find.mockResolvedValue({
+      total: maxSpaces - 1,
+    } as any);
 
-      const client = new SpacesClient(
-        mockDebugLogger,
-        mockConfig,
-        (mockCallWithRequestRepository as unknown) as ISavedObjectsRepository
-      );
-
-      const actualSpace = await client.create(spaceToCreate);
-
-      expect(actualSpace).toEqual(expectedReturnedSpace);
-      expect(mockCallWithRequestRepository.find).toHaveBeenCalledWith({
-        type: 'space',
-        page: 1,
-        perPage: 0,
-      });
-      expect(mockCallWithRequestRepository.create).toHaveBeenCalledWith('space', attributes, {
-        id,
-      });
+    const mockConfig = createMockConfig({
+      maxSpaces,
+      enabled: true,
     });
 
-    test(`throws bad request when we are at the maximum number of spaces`, async () => {
-      const maxSpaces = 5;
-      const mockDebugLogger = createMockDebugLogger();
-      const mockCallWithRequestRepository = {
-        create: jest.fn().mockReturnValue(savedObject),
-        find: jest.fn().mockReturnValue({
-          total: maxSpaces,
-        }),
-      };
-      const mockConfig = createMockConfig({
-        maxSpaces,
-        enabled: true,
-      });
+    const client = new SpacesClient(
+      mockDebugLogger,
+      mockConfig,
+      (mockCallWithRequestRepository as unknown) as ISavedObjectsRepository
+    );
 
-      const client = new SpacesClient(
-        mockDebugLogger,
-        mockConfig,
-        (mockCallWithRequestRepository as unknown) as ISavedObjectsRepository
-      );
+    const actualSpace = await client.create(spaceToCreate);
 
-      expect(client.create(spaceToCreate)).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Unable to create Space, this exceeds the maximum number of spaces set by the xpack.spaces.maxSpaces setting"`
-      );
-
-      expect(mockCallWithRequestRepository.find).toHaveBeenCalledWith({
-        type: 'space',
-        page: 1,
-        perPage: 0,
-      });
-      expect(mockCallWithRequestRepository.create).not.toHaveBeenCalled();
+    expect(actualSpace).toEqual(expectedReturnedSpace);
+    expect(mockCallWithRequestRepository.find).toHaveBeenCalledWith({
+      type: 'space',
+      page: 1,
+      perPage: 0,
     });
+    expect(mockCallWithRequestRepository.create).toHaveBeenCalledWith('space', attributes, {
+      id,
+    });
+  });
+
+  test(`throws bad request when we are at the maximum number of spaces`, async () => {
+    const maxSpaces = 5;
+    const mockDebugLogger = createMockDebugLogger();
+    const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
+    mockCallWithRequestRepository.create.mockResolvedValue(savedObject);
+    mockCallWithRequestRepository.find.mockResolvedValue({
+      total: maxSpaces,
+    } as any);
+
+    const mockConfig = createMockConfig({
+      maxSpaces,
+      enabled: true,
+    });
+
+    const client = new SpacesClient(
+      mockDebugLogger,
+      mockConfig,
+      (mockCallWithRequestRepository as unknown) as ISavedObjectsRepository
+    );
+
+    expect(client.create(spaceToCreate)).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Unable to create Space, this exceeds the maximum number of spaces set by the xpack.spaces.maxSpaces setting"`
+    );
+
+    expect(mockCallWithRequestRepository.find).toHaveBeenCalledWith({
+      type: 'space',
+      page: 1,
+      perPage: 0,
+    });
+    expect(mockCallWithRequestRepository.create).not.toHaveBeenCalled();
   });
 });
 
@@ -260,6 +260,8 @@ describe('#update', () => {
 
   const savedObject = {
     id: 'foo',
+    type: 'foo',
+    references: [],
     attributes: {
       name: 'foo-name',
       description: 'foo-description',
@@ -278,27 +280,23 @@ describe('#update', () => {
     disabledFeatures: [],
   };
 
-  describe(`authorization is null`, () => {
-    test(`updates space using callWithRequestRepository`, async () => {
-      const mockDebugLogger = createMockDebugLogger();
-      const mockConfig = createMockConfig();
-      const mockCallWithRequestRepository = {
-        update: jest.fn(),
-        get: jest.fn().mockReturnValue(savedObject),
-      };
+  test(`updates space using callWithRequestRepository`, async () => {
+    const mockDebugLogger = createMockDebugLogger();
+    const mockConfig = createMockConfig();
+    const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
+    mockCallWithRequestRepository.get.mockResolvedValue(savedObject);
 
-      const client = new SpacesClient(
-        mockDebugLogger,
-        mockConfig,
-        (mockCallWithRequestRepository as unknown) as ISavedObjectsRepository
-      );
-      const id = savedObject.id;
-      const actualSpace = await client.update(id, spaceToUpdate);
+    const client = new SpacesClient(
+      mockDebugLogger,
+      mockConfig,
+      (mockCallWithRequestRepository as unknown) as ISavedObjectsRepository
+    );
+    const id = savedObject.id;
+    const actualSpace = await client.update(id, spaceToUpdate);
 
-      expect(actualSpace).toEqual(expectedReturnedSpace);
-      expect(mockCallWithRequestRepository.update).toHaveBeenCalledWith('space', id, attributes);
-      expect(mockCallWithRequestRepository.get).toHaveBeenCalledWith('space', id);
-    });
+    expect(actualSpace).toEqual(expectedReturnedSpace);
+    expect(mockCallWithRequestRepository.update).toHaveBeenCalledWith('space', id, attributes);
+    expect(mockCallWithRequestRepository.get).toHaveBeenCalledWith('space', id);
   });
 });
 
@@ -317,6 +315,8 @@ describe('#delete', () => {
 
   const notReservedSavedObject = {
     id,
+    type: 'foo',
+    references: [],
     attributes: {
       name: 'foo-name',
       description: 'foo-description',
@@ -324,47 +324,42 @@ describe('#delete', () => {
     },
   };
 
-  describe(`authorization is null`, () => {
-    test(`throws bad request when the space is reserved`, async () => {
-      const mockDebugLogger = createMockDebugLogger();
-      const mockConfig = createMockConfig();
-      const mockCallWithRequestRepository = {
-        get: jest.fn().mockReturnValue(reservedSavedObject),
-      };
+  test(`throws bad request when the space is reserved`, async () => {
+    const mockDebugLogger = createMockDebugLogger();
+    const mockConfig = createMockConfig();
+    const mockCallWithRequestRepository = {
+      get: jest.fn().mockReturnValue(reservedSavedObject),
+    };
 
-      const client = new SpacesClient(
-        mockDebugLogger,
-        mockConfig,
-        (mockCallWithRequestRepository as unknown) as ISavedObjectsRepository
-      );
+    const client = new SpacesClient(
+      mockDebugLogger,
+      mockConfig,
+      (mockCallWithRequestRepository as unknown) as ISavedObjectsRepository
+    );
 
-      expect(client.delete(id)).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"This Space cannot be deleted because it is reserved."`
-      );
+    expect(client.delete(id)).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"This Space cannot be deleted because it is reserved."`
+    );
 
-      expect(mockCallWithRequestRepository.get).toHaveBeenCalledWith('space', id);
-    });
+    expect(mockCallWithRequestRepository.get).toHaveBeenCalledWith('space', id);
+  });
 
-    test(`deletes space using callWithRequestRepository when space isn't reserved`, async () => {
-      const mockDebugLogger = createMockDebugLogger();
-      const mockConfig = createMockConfig();
-      const mockCallWithRequestRepository = {
-        get: jest.fn().mockReturnValue(notReservedSavedObject),
-        delete: jest.fn(),
-        deleteByNamespace: jest.fn(),
-      };
+  test(`deletes space using callWithRequestRepository when space isn't reserved`, async () => {
+    const mockDebugLogger = createMockDebugLogger();
+    const mockConfig = createMockConfig();
+    const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
+    mockCallWithRequestRepository.get.mockResolvedValue(notReservedSavedObject);
 
-      const client = new SpacesClient(
-        mockDebugLogger,
-        mockConfig,
-        (mockCallWithRequestRepository as unknown) as ISavedObjectsRepository
-      );
+    const client = new SpacesClient(
+      mockDebugLogger,
+      mockConfig,
+      (mockCallWithRequestRepository as unknown) as ISavedObjectsRepository
+    );
 
-      await client.delete(id);
+    await client.delete(id);
 
-      expect(mockCallWithRequestRepository.get).toHaveBeenCalledWith('space', id);
-      expect(mockCallWithRequestRepository.delete).toHaveBeenCalledWith('space', id);
-      expect(mockCallWithRequestRepository.deleteByNamespace).toHaveBeenCalledWith(id);
-    });
+    expect(mockCallWithRequestRepository.get).toHaveBeenCalledWith('space', id);
+    expect(mockCallWithRequestRepository.delete).toHaveBeenCalledWith('space', id);
+    expect(mockCallWithRequestRepository.deleteByNamespace).toHaveBeenCalledWith(id);
   });
 });

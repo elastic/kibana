@@ -13,7 +13,7 @@ import { ExternalRouteDeps } from '.';
 import { createLicensedRouteHandler } from '../../lib';
 
 export function initPutSpacesApi(deps: ExternalRouteDeps) {
-  const { externalRouter, spacesService } = deps;
+  const { externalRouter, getSpacesService } = deps;
 
   externalRouter.put(
     {
@@ -26,7 +26,7 @@ export function initPutSpacesApi(deps: ExternalRouteDeps) {
       },
     },
     createLicensedRouteHandler(async (context, request, response) => {
-      const spacesClient = spacesService.scopedClient(request);
+      const spacesClient = getSpacesService().createSpacesClient(request);
 
       const space = request.body;
       const id = request.params.id;

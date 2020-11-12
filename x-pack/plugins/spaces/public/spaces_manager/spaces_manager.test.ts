@@ -123,5 +123,47 @@ describe('SpacesManager', () => {
       );
       expect(result).toEqual({ shareToAllSpaces });
     });
+
+    it('allows the share if security is disabled', async () => {
+      const coreStart = coreMock.createStart();
+      coreStart.http.get.mockResolvedValueOnce({});
+      coreStart.http.get.mockRejectedValueOnce({
+        body: {
+          statusCode: 404,
+        },
+      });
+      const spacesManager = new SpacesManager(coreStart.http);
+      expect(coreStart.http.get).toHaveBeenCalledTimes(1); // initial call to get active space
+
+      const result = await spacesManager.getShareSavedObjectPermissions('foo');
+      expect(coreStart.http.get).toHaveBeenCalledTimes(2);
+      expect(coreStart.http.get).toHaveBeenLastCalledWith(
+        '/internal/security/_share_saved_object_permissions',
+        {
+          query: { type: 'foo' },
+        }
+      );
+      expect(result).toEqual({ shareToAllSpaces: true });
+    });
+
+    it('throws all other errors', async () => {
+      const coreStart = coreMock.createStart();
+      coreStart.http.get.mockResolvedValueOnce({});
+      coreStart.http.get.mockRejectedValueOnce(new Error('Get out of here!'));
+      const spacesManager = new SpacesManager(coreStart.http);
+      expect(coreStart.http.get).toHaveBeenCalledTimes(1); // initial call to get active space
+
+      await expect(
+        spacesManager.getShareSavedObjectPermissions('foo')
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`"Get out of here!"`);
+
+      expect(coreStart.http.get).toHaveBeenCalledTimes(2);
+      expect(coreStart.http.get).toHaveBeenLastCalledWith(
+        '/internal/security/_share_saved_object_permissions',
+        {
+          query: { type: 'foo' },
+        }
+      );
+    });
   });
 });

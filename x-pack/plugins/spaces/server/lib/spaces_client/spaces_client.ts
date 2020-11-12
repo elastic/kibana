@@ -43,17 +43,16 @@ export class SpacesClient {
 
     this.debugLogger(`SpacesClient.getAll(). querying all spaces`);
 
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    const { saved_objects } = await this.repository.find({
+    const { saved_objects: savedObjects } = await this.repository.find({
       type: 'space',
       page: 1,
       perPage: this.config.maxSpaces,
       sortField: 'name.keyword',
     });
 
-    this.debugLogger(`SpacesClient.getAll(). Found ${saved_objects.length} spaces.`);
+    this.debugLogger(`SpacesClient.getAll(). Found ${savedObjects.length} spaces.`);
 
-    return saved_objects.map(this.transformSavedObjectToSpace);
+    return savedObjects.map(this.transformSavedObjectToSpace);
   }
 
   public async get(id: string): Promise<Space> {

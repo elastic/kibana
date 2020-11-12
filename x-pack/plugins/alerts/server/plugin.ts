@@ -13,7 +13,7 @@ import {
   EncryptedSavedObjectsPluginStart,
 } from '../../encrypted_saved_objects/server';
 import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
-import { SpacesPluginSetup, SpacesServiceSetup } from '../../spaces/server';
+import { SpacesPluginStart } from '../../spaces/server';
 import { AlertsClient } from './alerts_client';
 import { AlertTypeRegistry } from './alert_type_registry';
 import { TaskRunnerFactory } from './task_runner';
@@ -97,7 +97,6 @@ export interface AlertingPluginsSetup {
   actions: ActionsPluginSetupContract;
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
   licensing: LicensingPluginSetup;
-  spaces?: SpacesPluginSetup;
   usageCollection?: UsageCollectionSetup;
   eventLog: IEventLogService;
   statusService: StatusServiceSetup;
@@ -108,6 +107,7 @@ export interface AlertingPluginsStart {
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   features: FeaturesPluginStart;
   eventLog: IEventLogClientService;
+  spaces?: SpacesPluginStart;
 }
 
 export class AlertingPlugin {
@@ -118,7 +118,6 @@ export class AlertingPlugin {
   private serverBasePath?: string;
   private licenseState: LicenseState | null = null;
   private isESOUsingEphemeralEncryptionKey?: boolean;
-  private spaces?: SpacesServiceSetup;
   private security?: SecurityPluginSetup;
   private readonly alertsClientFactory: AlertsClientFactory;
   private readonly telemetryLogger: Logger;
@@ -147,7 +146,6 @@ export class AlertingPlugin {
     plugins: AlertingPluginsSetup
   ): Promise<PluginSetupContract> {
     this.licenseState = new LicenseState(plugins.licensing.license$);
-    this.spaces = plugins.spaces?.spacesService;
     this.security = plugins.security;
 
     core.capabilities.registerProvider(() => {
@@ -249,7 +247,6 @@ export class AlertingPlugin {
 
   public start(core: CoreStart, plugins: AlertingPluginsStart): PluginStartContract {
     const {
-      spaces,
       isESOUsingEphemeralEncryptionKey,
       logger,
       taskRunnerFactory,
@@ -262,18 +259,30 @@ export class AlertingPlugin {
       includedHiddenTypes: ['alert'],
     });
 
+    const getBasePath = (spaceId?: string): string => {
+      return plugins.spaces && spaceId
+        ? plugins.spaces.spacesService.getBasePath(spaceId)
+        : this.serverBasePath!;
+    };
+
+    const spaceIdToNamespace = (spaceId?: string): string | undefined => {
+      return plugins.spaces && spaceId
+        ? plugins.spaces.spacesService.spaceIdToNamespace(spaceId)
+        : undefined;
+    };
+
     alertsClientFactory.initialize({
       alertTypeRegistry: alertTypeRegistry!,
       logger,
       taskManager: plugins.taskManager,
       securityPluginSetup: security,
       encryptedSavedObjectsClient,
-      spaceIdToNamespace: this.spaceIdToNamespace,
+      spaceIdToNamespace,
       getSpaceId(request: KibanaRequest) {
-        return spaces?.getSpaceId(request);
+        return plugins.spaces?.spacesService.getSpaceId(request);
       },
       async getSpace(request: KibanaRequest) {
-        return spaces?.getActiveSpace(request);
+        return plugins.spaces?.spacesService.getActiveSpace(request);
       },
       actions: plugins.actions,
       features: plugins.features,
@@ -294,10 +303,10 @@ export class AlertingPlugin {
       logger,
       getServices: this.getServicesFactory(core.savedObjects, core.elasticsearch),
       getAlertsClientWithRequest,
-      spaceIdToNamespace: this.spaceIdToNamespace,
+      spaceIdToNamespace,
       actionsPlugin: plugins.actions,
       encryptedSavedObjectsClient,
-      getBasePath: this.getBasePath,
+      getBasePath,
       eventLogger: this.eventLogger!,
       internalSavedObjectsRepository: core.savedObjects.createInternalRepository(['alert']),
     });
@@ -348,14 +357,6 @@ export class AlertingPlugin {
       },
     });
   }
-
-  private spaceIdToNamespace = (spaceId?: string): string | undefined => {
-    return this.spaces && spaceId ? this.spaces.spaceIdToNamespace(spaceId) : undefined;
-  };
-
-  private getBasePath = (spaceId?: string): string => {
-    return this.spaces && spaceId ? this.spaces.getBasePath(spaceId) : this.serverBasePath!;
-  };
 
   private getScopedClientWithAlertSavedObjectType(
     savedObjects: SavedObjectsServiceStart,

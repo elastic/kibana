@@ -9,8 +9,15 @@ function createSetupMock() {
   return { spacesService: spacesServiceMock.createSetupContract() };
 }
 
+function createStartMock() {
+  return {
+    spacesService: spacesServiceMock.createStartContract(),
+  };
+}
+
 export const spacesMock = {
   createSetup: createSetupMock,
+  createStart: createStartMock,
 };
 
 export { spacesClientMock } from './lib/spaces_client/spaces_client.mock';

@@ -37,8 +37,7 @@ import { securityFeatures } from './features';
 import { ElasticsearchService } from './elasticsearch';
 import { SessionManagementService } from './session_management';
 import { registerSecurityUsageCollector } from './usage_collector';
-import { SecureSpacesClientWrapper } from './spaces';
-import { LegacySpacesAuditLogger } from './spaces/legacy_audit_logger';
+import { SecureSpacesClientWrapper, LegacySpacesAuditLogger } from './spaces';
 
 export type SpacesService = Pick<
   SpacesPluginSetup['spacesService'],
@@ -213,12 +212,14 @@ export class Plugin {
     });
 
     if (spaces) {
-      spaces.spacesService.clientService.setRepositoryFactory((request, savedObjectsStart) => {
-        if (authz.mode.useRbacForRequest(request)) {
-          return savedObjectsStart.createInternalRepository(['space']);
+      spaces.spacesService.clientService.setClientRepositoryFactory(
+        (request, savedObjectsStart) => {
+          if (authz.mode.useRbacForRequest(request)) {
+            return savedObjectsStart.createInternalRepository(['space']);
+          }
+          return savedObjectsStart.createScopedRepository(request, ['space']);
         }
-        return savedObjectsStart.createScopedRepository(request, ['space']);
-      });
+      );
 
       const spacesAuditLogger = new LegacySpacesAuditLogger(audit.getLogger());
 
