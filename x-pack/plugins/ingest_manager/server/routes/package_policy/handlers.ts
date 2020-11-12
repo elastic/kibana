@@ -124,16 +124,40 @@ export const updatePackagePolicyHandler: RequestHandler<
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
   const user = (await appContextService.getSecurity()?.authc.getCurrentUser(request)) || undefined;
-  try {
-    const packagePolicy = await packagePolicyService.get(soClient, request.params.packagePolicyId);
+  const logger = appContextService.getLogger();
+  const packagePolicy = await packagePolicyService.get(soClient, request.params.packagePolicyId);
 
-    if (!packagePolicy) {
-      throw Boom.notFound('Package policy not found');
+  if (!packagePolicy) {
+    throw Boom.notFound('Package policy not found');
+  }
+
+  let newData = { ...request.body };
+  const pkg = newData.package || packagePolicy.package;
+  const inputs = newData.inputs || packagePolicy.inputs;
+  try {
+    // If we have external callbacks, then process those now before creating the actual package policy
+    const externalCallbacks = appContextService.getExternalCallbacks('packagePolicyUpdate');
+    if (externalCallbacks && externalCallbacks.size > 0) {
+      let updatedNewData: NewPackagePolicy = newData;
+
+      for (const callback of externalCallbacks) {
+        try {
+          // ensure that the returned value by the callback passes schema validation
+          updatedNewData = CreatePackagePolicyRequestSchema.body.validate(
+            await callback(updatedNewData, context, request)
+          );
+        } catch (error) {
+          // Log the error, but keep going and process the other callbacks
+          logger.error(
+            'An external registered [packagePolicyUpdate] callback failed when executed'
+          );
+          logger.error(error);
+        }
+      }
+
+      newData = updatedNewData;
     }
 
-    const newData = { ...request.body };
-    const pkg = newData.package || packagePolicy.package;
-    const inputs = newData.inputs || packagePolicy.inputs;
     if (pkg && (newData.inputs || newData.package)) {
       const pkgInfo = await getPackageInfo({
         savedObjectsClient: soClient,

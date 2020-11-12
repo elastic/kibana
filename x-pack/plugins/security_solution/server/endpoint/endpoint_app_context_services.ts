@@ -16,7 +16,10 @@ import {
   PackageService,
 } from '../../../ingest_manager/server';
 import { PluginStartContract as AlertsPluginStartContract } from '../../../alerts/server';
-import { getPackagePolicyCreateCallback } from './ingest_integration';
+import {
+  getPackagePolicyCreateCallback,
+  getPackagePolicyUpdateCallback,
+} from './ingest_integration';
 import { ManifestManager } from './services/artifacts';
 import { MetadataQueryStrategy } from './types';
 import { MetadataQueryStrategyVersions } from '../../common/endpoint/types';
@@ -102,6 +105,18 @@ export class EndpointAppContextService {
       dependencies.registerIngestCallback(
         'packagePolicyCreate',
         getPackagePolicyCreateCallback(
+          dependencies.logger,
+          this.manifestManager,
+          dependencies.appClientFactory,
+          dependencies.config.maxTimelineImportExportSize,
+          dependencies.security,
+          dependencies.alerts
+        )
+      );
+
+      dependencies.registerIngestCallback(
+        'packagePolicyUpdate',
+        getPackagePolicyUpdateCallback(
           dependencies.logger,
           this.manifestManager,
           dependencies.appClientFactory,

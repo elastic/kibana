@@ -51,7 +51,12 @@ import {
   registerSettingsRoutes,
   registerAppRoutes,
 } from './routes';
-import { EsAssetReference, IngestManagerConfigType, NewPackagePolicy } from '../common';
+import {
+  EsAssetReference,
+  IngestManagerConfigType,
+  NewPackagePolicy,
+  UpdatePackagePolicy,
+} from '../common';
 import {
   appContextService,
   licenseService,
@@ -118,7 +123,13 @@ export type ExternalCallback = [
     newPackagePolicy: NewPackagePolicy,
     context: RequestHandlerContext,
     request: KibanaRequest
-  ) => Promise<NewPackagePolicy>
+  ) => Promise<NewPackagePolicy>,
+  'packagePolicyUpdate',
+  (
+    newPackagePolicy: UpdatePackagePolicy,
+    context: RequestHandlerContext,
+    request: KibanaRequest
+  ) => Promise<UpdatePackagePolicy>
 ];
 
 export type ExternalCallbacksStorage = Map<ExternalCallback[0], Set<ExternalCallback[1]>>;

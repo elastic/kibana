@@ -8,7 +8,7 @@ import { PluginStartContract as AlertsStartContract } from '../../../alerts/serv
 import { SecurityPluginSetup } from '../../../security/server';
 import { ExternalCallback } from '../../../ingest_manager/server';
 import { KibanaRequest, Logger, RequestHandlerContext } from '../../../../../src/core/server';
-import { NewPackagePolicy } from '../../../ingest_manager/common/types/models';
+import { NewPackagePolicy, UpdatePackagePolicy } from '../../../ingest_manager/common/types/models';
 import { factory as policyConfigFactory } from '../../common/endpoint/models/policy_config';
 import { NewPolicyData } from '../../common/endpoint/types';
 import { ManifestManager } from './services/artifacts';
@@ -25,6 +25,8 @@ const getManifest = async (logger: Logger, manifestManager: ManifestManager): Pr
   let manifest: Manifest | null = null;
 
   try {
+    logger.warn(`RUNNING MANIFEST.....`);
+
     manifest = await manifestManager.getLastComputedManifest();
 
     // If we have not yet computed a manifest, then we have to do so now. This should only happen
@@ -73,6 +75,38 @@ const getManifest = async (logger: Logger, manifestManager: ManifestManager): Pr
   return manifest ?? Manifest.getDefault();
 };
 
+export const getPackagePolicyUpdateCallback = (
+  logger: Logger,
+  manifestManager: ManifestManager,
+  appClientFactory: AppClientFactory,
+  maxTimelineImportExportSize: number,
+  securitySetup: SecurityPluginSetup,
+  alerts: AlertsStartContract
+): ExternalCallback[3] => {
+  const handlePackagePolicyUpdate = async (
+    newPackagePolicy: UpdatePackagePolicy,
+    context: RequestHandlerContext,
+    request: KibanaRequest
+  ): Promise<UpdatePackagePolicy> => {
+    logger.warn(`RUNNING UPDATE CALLBACK.....`);
+
+    // We only care about Endpoint package policies
+    if (newPackagePolicy.package?.name !== 'endpoint') {
+      return newPackagePolicy;
+    }
+
+    logger.warn(`READY TO RETURN...`);
+
+    logger.warn(newPackagePolicy);
+
+    const updatedPackagePolicy = newPackagePolicy as NewPolicyData;
+
+    return updatedPackagePolicy;
+  };
+
+  return handlePackagePolicyUpdate;
+};
+
 /**
  * Callback to handle creation of PackagePolicies in Ingest Manager
  */
@@ -89,11 +123,14 @@ export const getPackagePolicyCreateCallback = (
     context: RequestHandlerContext,
     request: KibanaRequest
   ): Promise<NewPackagePolicy> => {
+    logger.warn(`RUNNING ANYTHING.....`);
+
     // We only care about Endpoint package policies
     if (newPackagePolicy.package?.name !== 'endpoint') {
       return newPackagePolicy;
     }
 
+    logger.warn(`RUNNING ENDPOINT.....`);
     // prep for detection rules creation
     const appClient = appClientFactory.create(request);
     const frameworkRequest = await buildFrameworkRequest(context, securitySetup, request);
