@@ -10,6 +10,8 @@ import { i18n } from '@kbn/i18n';
 import { EuiLink, EuiSpacer, EuiSwitch, EuiText, EuiTextColor, EuiTitle } from '@elastic/eui';
 import { useActions, useValues } from 'kea';
 
+import { DOCS_PREFIX } from '../../../routes';
+
 import { LogRetentionLogic } from './log_retention_logic';
 import { AnalyticsLogRetentionMessage, ApiLogRetentionMessage } from './messaging';
 import { LogRetentionOptions } from './types';
@@ -41,10 +43,7 @@ export const LogRetentionPanel: React.FC = () => {
           {i18n.translate('xpack.enterpriseSearch.appSearch.settings.logRetention.description', {
             defaultMessage: 'Manage the default write settings for API Logs and Analytics.',
           })}{' '}
-          <EuiLink
-            href="https://www.elastic.co/guide/en/app-search/current/logs.html"
-            target="_blank"
-          >
+          <EuiLink href={`${DOCS_PREFIX}/logs.html`} target="_blank">
             {i18n.translate('xpack.enterpriseSearch.appSearch.settings.logRetention.learnMore', {
               defaultMessage: 'Learn more about retention settings.',
             })}
