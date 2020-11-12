@@ -9,7 +9,7 @@ import { IndicesStatsParams, Client } from 'elasticsearch';
 import {
   ESSearchRequest,
   ESSearchResponse,
-} from '../../../../typings/elasticsearch';
+} from '../../../../../../typings/elasticsearch';
 import { ApmIndicesConfig } from '../../settings/apm_indices/get_apm_indices';
 import { tasks } from './tasks';
 import { APMDataTelemetry } from '../types';
