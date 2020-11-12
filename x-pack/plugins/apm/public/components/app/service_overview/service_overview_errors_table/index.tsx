@@ -12,6 +12,7 @@ import { EuiBasicTable } from '@elastic/eui';
 import { EuiBasicTableColumn } from '@elastic/eui';
 import styled from 'styled-components';
 import { EuiToolTip } from '@elastic/eui';
+import { asInteger } from '../../../../../common/utils/formatters';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/useFetcher';
 import { useUrlParams } from '../../../../hooks/useUrlParams';
 import { ErrorOverviewLink } from '../../../shared/Links/apm/ErrorOverviewLink';
@@ -32,8 +33,8 @@ interface ErrorGroupItem {
   last_seen: number;
   group_id: string;
   occurrences: {
-    value: number | null;
-    timeseries: Array<{ x: number; y: number }>;
+    value: number;
+    timeseries: Array<{ x: number; y: number }> | null;
   };
 }
 
@@ -81,7 +82,7 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
       name: i18n.translate('xpack.apm.serviceOverview.errorsTableColumnName', {
         defaultMessage: 'Name',
       }),
-      width: '70%',
+      width: '60%',
       render: (_, { name, group_id: errorGroupId }) => {
         return (
           <ErrorDetailLinkWrapper>
@@ -121,13 +122,13 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
         return (
           <SparkPlotWithValueLabel
             color="euiColorVis7"
-            series={occurrences.timeseries}
+            series={occurrences.timeseries ?? undefined}
             valueLabel={i18n.translate(
               'xpack.apm.serviceOveriew.errorsTableOccurrences',
               {
                 defaultMessage: `{occurrencesCount} occ.`,
                 values: {
-                  occurrencesCount: occurrences.value,
+                  occurrencesCount: asInteger(occurrences.value),
                 },
               }
             )}
