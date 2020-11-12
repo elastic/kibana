@@ -47,7 +47,7 @@ export interface Ecs {
   zeek?: ZeekEcs;
   http?: HttpEcs;
   url?: UrlEcs;
-  timestamp?: string;
+  timestamp?: string[];
   message?: string[];
   user?: UserEcs;
   winlog?: WinlogEcs;

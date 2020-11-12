@@ -7,5 +7,28 @@
 export const toArray = <T = string>(value: T | T[] | null): T[] =>
   Array.isArray(value) ? value : value == null ? [] : [value];
 
-export const toStringArray = <T = string>(value: T | T[] | null): T[] | string[] =>
-  Array.isArray(value) ? value : value == null ? [] : [`${value}`];
+export const toStringArray = <T = string>(value: T | T[] | null): string[] =>
+  Array.isArray(value)
+    ? value.reduce<string[]>((acc, v) => {
+        if (v != null) {
+          switch (typeof v) {
+            case 'number':
+            case 'boolean':
+              return [...acc, v.toString()];
+            case 'object':
+              try {
+                return [...acc, JSON.stringify(value)];
+              } catch {
+                return [...acc, 'Invalid Object'];
+              }
+            case 'string':
+              return [...acc, v];
+            default:
+              return [...acc, `${v}`];
+          }
+        }
+        return acc;
+      }, [])
+    : value == null
+    ? []
+    : [`${value}`];

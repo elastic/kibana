@@ -68,7 +68,7 @@ export const buildTimelineEventsAllQuery = ({
       size: querySize,
       track_total_hits: true,
       sort: getSortField(sort),
-      _source: fields,
+      fields,
     },
   };
 
