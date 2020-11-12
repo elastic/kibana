@@ -5,8 +5,15 @@
  */
 
 import { schema } from '@kbn/config-schema';
+
+// @ts-ignore
 import { GrokdebuggerRequest } from '../../../models/grokdebugger_request';
+// @ts-ignore
 import { GrokdebuggerResponse } from '../../../models/grokdebugger_response';
+
+import { handleEsError } from '../../../shared_imports';
+
+import { KibanaFramework } from '../../../lib/kibana_framework';
 
 const requestBodySchema = schema.object({
   pattern: schema.string(),
@@ -15,7 +22,7 @@ const requestBodySchema = schema.object({
   customPatterns: schema.object({}, { unknowns: 'allow' }),
 });
 
-export function registerGrokSimulateRoute(framework) {
+export function registerGrokSimulateRoute(framework: KibanaFramework) {
   framework.registerRoute(
     {
       method: 'post',
@@ -27,19 +34,17 @@ export function registerGrokSimulateRoute(framework) {
     async (requestContext, request, response) => {
       try {
         const grokdebuggerRequest = GrokdebuggerRequest.fromDownstreamJSON(request.body);
-        const simulateResponseFromES = await framework.callWithRequest(
-          requestContext,
-          'ingest.simulate',
+        const simulateResponseFromES = await requestContext.core.elasticsearch.client.asCurrentUser.ingest.simulate(
           { body: grokdebuggerRequest.upstreamJSON }
         );
-        const grokdebuggerResponse = GrokdebuggerResponse.fromUpstreamJSON(simulateResponseFromES);
+        const grokdebuggerResponse = GrokdebuggerResponse.fromUpstreamJSON(
+          simulateResponseFromES.body
+        );
         return response.ok({
           body: grokdebuggerResponse,
         });
       } catch (error) {
-        return response.internalError({
-          body: error.message,
-        });
+        return handleEsError({ error, response });
       }
     }
   );
