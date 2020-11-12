@@ -32,16 +32,14 @@ describe('UI Extension services', () => {
         return { default: ((() => {}) as unknown) as PackagePolicyEditExtensionComponent };
       });
       register({
-        type: 'integration-policy',
-        view: 'edit',
-        integration: 'endpoint',
+        view: 'package-policy-edit',
+        package: 'endpoint',
         component: LazyCustomView,
       });
 
-      expect(storage.endpoint['integration-policy']!.edit).toEqual({
-        type: 'integration-policy',
-        view: 'edit',
-        integration: 'endpoint',
+      expect(storage.endpoint['package-policy-edit']).toEqual({
+        view: 'package-policy-edit',
+        package: 'endpoint',
         component: LazyCustomView,
       });
     });
@@ -55,25 +53,22 @@ describe('UI Extension services', () => {
       });
 
       register({
-        type: 'integration-policy',
-        view: 'edit',
-        integration: 'endpoint',
+        view: 'package-policy-edit',
+        package: 'endpoint',
         component: LazyCustomView,
       });
 
       expect(() => {
         register({
-          type: 'integration-policy',
-          view: 'edit',
-          integration: 'endpoint',
+          view: 'package-policy-edit',
+          package: 'endpoint',
           component: LazyCustomView2,
         });
       }).toThrow();
 
-      expect(storage.endpoint['integration-policy']!.edit).toEqual({
-        type: 'integration-policy',
-        view: 'edit',
-        integration: 'endpoint',
+      expect(storage.endpoint['package-policy-edit']).toEqual({
+        view: 'package-policy-edit',
+        package: 'endpoint',
         component: LazyCustomView,
       });
     });
