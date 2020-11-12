@@ -9,7 +9,7 @@ import { IESAggSource } from '../sources/es_agg_source';
 import { AGG_TYPE, FIELD_ORIGIN } from '../../../common/constants';
 import { ESDocField } from './es_doc_field';
 import { TopTermPercentageField } from './top_term_percentage_field';
-import { ESAggField, IESAggField } from './es_agg_field';
+import { CountAggField, IESAggField } from './count_agg_field';
 import { ESFieldedAggField } from './es_fielded_agg_field';
 
 export function esAggFieldsFactory(
@@ -20,7 +20,7 @@ export function esAggFieldsFactory(
 ): IESAggField[] {
   let aggField;
   if (aggDescriptor.type === AGG_TYPE.COUNT) {
-    aggField = new ESAggField({
+    aggField = new CountAggField({
       label: aggDescriptor.label,
       source,
       origin,

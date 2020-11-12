@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IESAggField } from './es_agg_field';
+import { IESAggField } from './count_agg_field';
 import { IVectorSource } from '../sources/vector_source';
 import { ITooltipProperty, TooltipProperty } from '../tooltips/tooltip_property';
 import { TOP_TERM_PERCENTAGE_SUFFIX } from '../../../common/constants';

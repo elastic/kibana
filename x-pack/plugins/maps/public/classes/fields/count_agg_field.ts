@@ -28,7 +28,7 @@ export interface IESAggFieldParams {
 }
 
 // Agg without field. Essentially a count-aggregation.
-export class ESAggField implements IESAggField {
+export class CountAggField implements IESAggField {
   private readonly _source: IESAggSource;
   private readonly _origin: FIELD_ORIGIN;
   private readonly _label?: string;

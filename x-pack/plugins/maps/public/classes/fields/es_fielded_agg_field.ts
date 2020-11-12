@@ -6,8 +6,8 @@
 
 import { IField } from './field';
 import { AGG_TYPE } from '../../../common/constants';
-import { ESAggField } from './es_agg_field';
-import { IESAggFieldParams } from './es_agg_field';
+import { CountAggField } from './count_agg_field';
+import { IESAggFieldParams } from './count_agg_field';
 import { isMetricCountable } from '../util/is_metric_countable';
 
 export interface IESFieldedAggParams extends IESAggFieldParams {
@@ -15,7 +15,7 @@ export interface IESFieldedAggParams extends IESAggFieldParams {
   aggType: AGG_TYPE;
 }
 
-export class ESFieldedAggField extends ESAggField {
+export class ESFieldedAggField extends CountAggField {
   private readonly _esDocField?: IField;
   private readonly _aggType: AGG_TYPE;
 

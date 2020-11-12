@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ESAggField } from './es_agg_field';
+import { CountAggField } from './count_agg_field';
 import { AGG_TYPE, FIELD_ORIGIN } from '../../../common/constants';
 import { IESAggSource } from '../sources/es_agg_source';
 import { IIndexPattern } from 'src/plugins/data/public';
@@ -39,7 +39,7 @@ const defaultParams = {
 
 describe('supportsFieldMeta', () => {
   test('Counting aggregations should not support field meta', () => {
-    const countMetric = new ESAggField({ ...defaultParams });
+    const countMetric = new CountAggField({ ...defaultParams });
     expect(countMetric.supportsFieldMeta()).toBe(false);
   });
 });
