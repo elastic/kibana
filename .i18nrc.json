@@ -60,6 +60,8 @@
     "visTypeVislib": "src/plugins/vis_type_vislib",
     "visTypeXy": "src/plugins/vis_type_xy",
     "visualizations": "src/plugins/visualizations",
+    "lensOss": "src/plugins/lens_oss",
+    "mapsOss": "src/plugins/maps_oss",
     "visualize": "src/plugins/visualize",
     "apmOss": "src/plugins/apm_oss",
     "usageCollection": "src/plugins/usage_collection"

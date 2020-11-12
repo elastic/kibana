@@ -26,7 +26,7 @@ import ReactDOM from 'react-dom';
 import angular from 'angular';
 import deepEqual from 'fast-deep-equal';
 
-import { Observable, pipe, Subscription, merge } from 'rxjs';
+import { Observable, pipe, Subscription, merge, EMPTY } from 'rxjs';
 import {
   filter,
   map,
@@ -35,6 +35,7 @@ import {
   startWith,
   switchMap,
   distinctUntilChanged,
+  catchError,
 } from 'rxjs/operators';
 import { History } from 'history';
 import { SavedObjectSaveOpts, SavedObject } from 'src/plugins/saved_objects/public';
@@ -80,7 +81,6 @@ import { getTopNavConfig } from './top_nav/get_top_nav_config';
 import { TopNavIds } from './top_nav/top_nav_ids';
 import { getDashboardTitle } from './dashboard_strings';
 import { DashboardAppScope } from './dashboard_app';
-import { convertSavedDashboardPanelToPanelState } from './lib/embeddable_saved_object_converters';
 import { RenderDeps } from './application';
 import {
   IKbnUrlStateStorage,
@@ -96,6 +96,7 @@ import {
   subscribeWithScope,
 } from '../../../kibana_legacy/public';
 import { migrateLegacyQuery } from './lib/migrate_legacy_query';
+import { convertSavedDashboardPanelToPanelState } from '../../common/embeddable/embeddable_saved_object_converters';
 
 export interface DashboardAppControllerDependencies extends RenderDeps {
   $scope: DashboardAppScope;
@@ -464,7 +465,10 @@ export class DashboardAppController {
                 switchMap((newChildIds: string[]) =>
                   merge(
                     ...newChildIds.map((childId) =>
-                      dashboardContainer!.getChild(childId).getOutput$()
+                      dashboardContainer!
+                        .getChild(childId)
+                        .getOutput$()
+                        .pipe(catchError(() => EMPTY))
                     )
                   )
                 )

@@ -78,10 +78,12 @@ export function alertInstanceSummaryFromEventLog(
       // intentionally no break here
       case EVENT_LOG_ACTIONS.activeInstance:
         status.status = 'Active';
+        status.actionGroupId = event?.kibana?.alerting?.action_group_id;
         break;
       case EVENT_LOG_ACTIONS.resolvedInstance:
         status.status = 'OK';
         status.activeStartDate = undefined;
+        status.actionGroupId = undefined;
     }
   }
 
@@ -118,6 +120,7 @@ function getAlertInstanceStatus(
   const status: AlertInstanceStatus = {
     status: 'OK',
     muted: false,
+    actionGroupId: undefined,
     activeStartDate: undefined,
   };
   instances.set(instanceId, status);

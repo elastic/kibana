@@ -208,7 +208,9 @@ export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
           jsonString: settings,
         }); // Using mocked EuiCodeEditor
       }
+    });
 
+    await act(async () => {
       clickNextButton();
     });
 
