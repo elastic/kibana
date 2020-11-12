@@ -30,7 +30,7 @@ const TabComponent = ({ currentTime, node, nodeType, options }: TabProps) => {
   );
 
   return (
-    <ProcessListTabContent>
+    <TabContent>
       <SummaryTable isLoading={loading} processList={response ?? []} />
       <EuiSpacer size="m" />
       <EuiSearchBar
@@ -63,7 +63,7 @@ const TabComponent = ({ currentTime, node, nodeType, options }: TabProps) => {
         processList={response ?? []}
         searchFilter={searchFilter}
       />
-    </ProcessListTabContent>
+    </TabContent>
   );
 };
 
@@ -74,8 +74,3 @@ export const ProcessesTab = {
   }),
   content: TabComponent,
 };
-
-const ProcessListTabContent = euiStyled(TabContent)`
-  padding-left: 0;
-  padding-right: 0;
-`;

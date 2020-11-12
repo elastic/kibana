@@ -15,6 +15,18 @@ export interface TabProps {
   nodeType: InventoryItemType;
 }
 
+export const OVERLAY_Y_START = 266;
+export const OVERLAY_BOTTOM_MARGIN = 16;
+export const OVERLAY_HEADER_SIZE = 96;
+const contentHeightOffset = OVERLAY_Y_START + OVERLAY_BOTTOM_MARGIN + OVERLAY_HEADER_SIZE;
 export const TabContent = euiStyled.div`
+<<<<<<< HEAD
   padding: ${(props) => props.theme.eui.paddingSizes.l};
+||||||| parent of 097ff579d2c... Fix overlay sizing
+=======
+  padding: ${(props) => props.theme.eui.paddingSizes.s};
+  height: calc(100vh - ${contentHeightOffset}px);
+  overflow-y: auto;
+  overflow-x: hidden;
+>>>>>>> 097ff579d2c... Fix overlay sizing
 `;
