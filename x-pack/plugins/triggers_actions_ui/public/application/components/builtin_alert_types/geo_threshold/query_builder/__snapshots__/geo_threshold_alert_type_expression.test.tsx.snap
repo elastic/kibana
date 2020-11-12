@@ -17,6 +17,7 @@ exports[`should render BoundaryIndexExpression 1`] = `
       >
         <GeoIndexPatternSelect
           IndexPatternSelectComponent={null}
+          http={null}
           includedGeoTypes={
             Array [
               "geo_shape",
@@ -39,6 +40,7 @@ exports[`should render BoundaryIndexExpression 1`] = `
           fields={Array []}
           onChange={[Function]}
           placeholder="Select geo field"
+          value=""
         />
       </EuiFormRow>
       <EuiFormRow
@@ -55,7 +57,7 @@ exports[`should render BoundaryIndexExpression 1`] = `
           fields={Array []}
           onChange={[Function]}
           placeholder="Select boundary name"
-          value={null}
+          value="testNameField"
         />
       </EuiFormRow>
     </React.Fragment>
@@ -81,6 +83,7 @@ exports[`should render EntityIndexExpression 1`] = `
       >
         <GeoIndexPatternSelect
           IndexPatternSelectComponent={null}
+          http={null}
           includedGeoTypes={
             Array [
               "geo_point",
@@ -109,13 +112,7 @@ exports[`should render EntityIndexExpression 1`] = `
           fields={Array []}
           onChange={[Function]}
           placeholder="Select time field"
-          value={
-            Object {
-              "aggregatable": true,
-              "name": "string",
-              "type": "date",
-            }
-          }
+          value="testDateField"
         />
       </EuiFormRow>
       <EuiFormRow
@@ -132,13 +129,7 @@ exports[`should render EntityIndexExpression 1`] = `
           fields={Array []}
           onChange={[Function]}
           placeholder="Select geo field"
-          value={
-            Object {
-              "aggregatable": true,
-              "name": "string",
-              "type": "geo_point",
-            }
-          }
+          value="testGeoField"
         />
       </EuiFormRow>
     </React.Fragment>
@@ -164,6 +155,7 @@ exports[`should render EntityIndexExpression w/ invalid flag if invalid 1`] = `
       >
         <GeoIndexPatternSelect
           IndexPatternSelectComponent={null}
+          http={null}
           includedGeoTypes={
             Array [
               "geo_point",
@@ -192,13 +184,7 @@ exports[`should render EntityIndexExpression w/ invalid flag if invalid 1`] = `
           fields={Array []}
           onChange={[Function]}
           placeholder="Select time field"
-          value={
-            Object {
-              "aggregatable": true,
-              "name": "string",
-              "type": "date",
-            }
-          }
+          value="testDateField"
         />
       </EuiFormRow>
       <EuiFormRow
@@ -215,13 +201,7 @@ exports[`should render EntityIndexExpression w/ invalid flag if invalid 1`] = `
           fields={Array []}
           onChange={[Function]}
           placeholder="Select geo field"
-          value={
-            Object {
-              "aggregatable": true,
-              "name": "string",
-              "type": "geo_point",
-            }
-          }
+          value="testGeoField"
         />
       </EuiFormRow>
     </React.Fragment>
