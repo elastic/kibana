@@ -52,6 +52,8 @@ export const useMatrixHistogram = ({
   startDate,
   threshold,
   skip = false,
+  sort,
+  isPtrIncluded,
 }: MatrixHistogramQueryProps): [
   boolean,
   UseMatrixHistogramArgs,
@@ -74,7 +76,10 @@ export const useMatrixHistogram = ({
       to: endDate,
     },
     stackByField,
+    sort,
     threshold,
+    isPtrIncluded,
+    isHistogram: true,
   });
 
   const [matrixHistogramResponse, setMatrixHistogramResponse] = useState<UseMatrixHistogramArgs>({
@@ -166,13 +171,25 @@ export const useMatrixHistogram = ({
         },
         stackByField,
         threshold,
+        sort,
+        isPtrIncluded,
       };
       if (!deepEqual(prevRequest, myRequest)) {
         return myRequest;
       }
       return prevRequest;
     });
-  }, [indexNames, endDate, filterQuery, startDate, stackByField, histogramType, threshold]);
+  }, [
+    indexNames,
+    endDate,
+    filterQuery,
+    startDate,
+    stackByField,
+    histogramType,
+    threshold,
+    sort,
+    isPtrIncluded,
+  ]);
 
   useEffect(() => {
     if (!skip) {

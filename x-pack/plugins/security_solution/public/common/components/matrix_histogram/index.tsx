@@ -71,6 +71,7 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
   histogramType,
   hideHistogramIfEmpty = false,
   id,
+  isPtrIncluded = false,
   indexNames,
   legendPosition,
   mapping,
@@ -82,6 +83,7 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
   stackByOptions,
   startDate,
   subtitle,
+  sort,
   timelineId,
   title,
   titleSize,
@@ -138,6 +140,8 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
     indexNames,
     startDate,
     stackByField: selectedStackByOption.value,
+    sort,
+    isPtrIncluded,
   });
 
   const titleWithStackByField = useMemo(

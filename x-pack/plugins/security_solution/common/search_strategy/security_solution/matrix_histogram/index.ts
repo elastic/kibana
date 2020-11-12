@@ -6,7 +6,7 @@
 
 import { IEsSearchResponse } from '../../../../../../../src/plugins/data/common';
 import { AuthenticationHit } from '../hosts';
-import { Inspect, Maybe, TimerangeInput } from '../../common';
+import { Inspect, Maybe, SortField, TimerangeInput } from '../../common';
 import { RequestBasicOptions } from '../';
 import { AlertsGroupData } from './alerts';
 import { AnomaliesActionGroupData, AnomalyHit } from './anomalies';
@@ -37,6 +37,9 @@ export interface MatrixHistogramRequestOptions extends RequestBasicOptions {
   stackByField: string;
   threshold?: { field: string | undefined; value: number } | undefined;
   inspect?: Maybe<Inspect>;
+  isHistogram?: boolean;
+  isPtrIncluded?: boolean;
+  sort?: SortField;
 }
 
 export interface MatrixHistogramStrategyResponse extends IEsSearchResponse {

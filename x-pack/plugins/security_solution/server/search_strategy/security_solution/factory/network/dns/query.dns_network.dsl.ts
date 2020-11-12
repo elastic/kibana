@@ -4,7 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { set } from '@elastic/safer-lodash-set';
 import { isEmpty } from 'lodash/fp';
+import moment from 'moment';
 
 import {
   Direction,
@@ -12,7 +14,10 @@ import {
   NetworkDnsRequestOptions,
   NetworkDnsFields,
 } from '../../../../../../common/search_strategy';
-import { createQueryFilterClauses } from '../../../../../utils/build_query';
+import {
+  calculateTimeSeriesInterval,
+  createQueryFilterClauses,
+} from '../../../../../utils/build_query';
 
 const HUGE_QUERY_SIZE = 1000000;
 
@@ -61,12 +66,30 @@ const createIncludePTRFilter = (isPtrIncluded: boolean) =>
         ],
       };
 
+const getHistogramAggregation = ({ from, to }: { from: string; to: string }) => {
+  const interval = calculateTimeSeriesInterval(from, to);
+  const histogramTimestampField = '@timestamp';
+
+  return {
+    date_histogram: {
+      field: histogramTimestampField,
+      fixed_interval: interval,
+      min_doc_count: 0,
+      extended_bounds: {
+        min: moment(from).valueOf(),
+        max: moment(to).valueOf(),
+      },
+    },
+  };
+};
+
 export const buildDnsQuery = ({
   defaultIndex,
   docValueFields,
   filterQuery,
   isPtrIncluded = false,
-  sort,
+  isHistogram = false,
+  sort = { field: NetworkDnsFields.queryCount, direction: Direction.desc },
   pagination,
   stackByField = 'dns.question.registered_domain',
   timerange: { from, to },
@@ -84,22 +107,12 @@ export const buildDnsQuery = ({
     },
   ];
   const { cursorStart, querySize } = pagination ?? {};
-  const getBucketSort = () => {
-    let bucketSort = {};
-    if (sort != null) {
-      bucketSort = { ...bucketSort, sort: [getQueryOrder(sort), { _key: { order: 'asc' } }] };
-    }
 
-    if (cursorStart != null) {
-      bucketSort = { ...bucketSort, from: cursorStart };
-    }
-
-    if (querySize != null) {
-      bucketSort = { ...bucketSort, size: querySize };
-    }
-
-    return bucketSort;
-  };
+  const size = isHistogram
+    ? {}
+    : {
+        size: querySize,
+      };
 
   const dslQuery = {
     allowNoIndices: true,
@@ -116,7 +129,11 @@ export const buildDnsQuery = ({
           },
           aggs: {
             bucket_sort: {
-              bucket_sort: getBucketSort(),
+              bucket_sort: {
+                sort: [getQueryOrder(sort), { _key: { order: Direction.asc } }],
+                from: isHistogram ? 0 : cursorStart,
+                ...size,
+              },
             },
             unique_domains: {
               cardinality: {
@@ -147,5 +164,11 @@ export const buildDnsQuery = ({
     track_total_hits: false,
   };
 
-  return dslQuery;
+  return isHistogram
+    ? set(
+        dslQuery,
+        'body.aggregations.dns_name_query_count.aggs.dns_question_name',
+        getHistogramAggregation({ from, to })
+      )
+    : dslQuery;
 };

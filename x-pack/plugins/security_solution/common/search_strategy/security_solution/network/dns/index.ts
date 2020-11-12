@@ -25,9 +25,10 @@ export enum NetworkDnsFields {
 
 export interface NetworkDnsRequestOptions extends RequestBasicOptions {
   isPtrIncluded?: boolean;
-  sort: SortField<NetworkDnsFields>;
+  isHistogram?: boolean;
+  sort?: SortField<NetworkDnsFields>;
   stackByField?: Maybe<string>;
-  pagination: PaginationInputPaginated;
+  pagination?: PaginationInputPaginated;
 }
 
 export interface NetworkDnsStrategyResponse extends IEsSearchResponse {
