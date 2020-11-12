@@ -70,9 +70,10 @@ export class VisTypeVislibPlugin
     }
     // Register non-converted types
     visLibVisTypeDefinitions.forEach(visualizations.createBaseVisualization);
-    visualizations.createBaseVisualization(pieVisTypeDefinition);
+    // visualizations.createBaseVisualization(pieVisTypeDefinition);
     expressions.registerRenderer(getVislibVisRenderer(core, charts));
-    [createVisTypeVislibVisFn(), createPieVisFn()].forEach(expressions.registerFunction);
+    // [createVisTypeVislibVisFn(), createPieVisFn()].forEach(expressions.registerFunction);
+    [createVisTypeVislibVisFn()].forEach(expressions.registerFunction);
   }
 
   public start(core: CoreStart, { data }: VisTypeVislibPluginStartDependencies) {
