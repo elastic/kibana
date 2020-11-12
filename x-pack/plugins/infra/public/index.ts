@@ -28,3 +28,4 @@ export type InfraAppId = 'logs' | 'metrics';
 
 // Shared components
 export { LazyLogStreamWrapper as LogStream } from './components/log_stream/lazy_log_stream_wrapper';
+export { useLinkProps } from './hooks/use_link_props';

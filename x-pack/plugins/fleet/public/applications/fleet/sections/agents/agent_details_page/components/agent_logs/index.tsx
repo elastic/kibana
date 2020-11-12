@@ -5,15 +5,18 @@
  */
 import React, { memo, useMemo, useState, useCallback } from 'react';
 import styled from 'styled-components';
+import { encode } from 'rison-node';
 import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSuperDatePicker,
   EuiFilterGroup,
   EuiPanel,
+  EuiButtonEmpty,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { TimeRange, esKuery } from '../../../../../../../../../../../src/plugins/data/public';
-import { LogStream } from '../../../../../../../../../infra/public';
+import { LogStream, useLinkProps } from '../../../../../../../../../infra/public';
 import { Agent } from '../../../../../types';
 import { useStartServices } from '../../../../../hooks';
 import { DATASET_FIELD, AGENT_DATASET, LOG_LEVEL_FIELD, AGENT_ID_FIELD } from './constants';
@@ -26,13 +29,18 @@ const DEFAULT_DATE_RANGE = {
   end: 'now',
 };
 
-const FlexGroup = styled(EuiFlexGroup)`
+const WrapperFlexGroup = styled(EuiFlexGroup)`
   height: 100%;
+`;
+
+const DatePickerFlexItem = styled(EuiFlexItem)`
+  max-width: 312px;
 `;
 
 export const AgentLogs: React.FunctionComponent<{ agent: Agent }> = memo(({ agent }) => {
   const { data } = useStartServices();
 
+  // Util to convert date expressions (returned by datepicker) to timestamps (used by LogStream)
   const getDateRangeTimestamps = useCallback(
     (timeRange: TimeRange) => {
       const { min, max } = data.query.timefilter.timefilter.calculateBounds(timeRange);
@@ -116,8 +124,24 @@ export const AgentLogs: React.FunctionComponent<{ agent: Agent }> = memo(({ agen
     query,
   ]);
 
+  const viewInLogsUrl = useLinkProps({
+    app: 'logs',
+    pathname: 'stream',
+    search: {
+      logPosition: encode({
+        start: dateRange.startExpression,
+        end: dateRange.endExpression,
+        streamLive: false,
+      }),
+      logFilter: encode({
+        expression: LOG_STREAM_QUERY,
+        kind: 'kuery',
+      }),
+    },
+  });
+
   return (
-    <FlexGroup direction="column" gutterSize="m">
+    <WrapperFlexGroup direction="column" gutterSize="m">
       <EuiFlexItem grow={false}>
         <EuiFlexGroup gutterSize="m">
           <EuiFlexItem>
@@ -157,8 +181,9 @@ export const AgentLogs: React.FunctionComponent<{ agent: Agent }> = memo(({ agen
               />
             </EuiFilterGroup>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
+          <DatePickerFlexItem grow={false}>
             <EuiSuperDatePicker
+              showUpdateButton={false}
               start={dateRange.startExpression}
               end={dateRange.endExpression}
               onTimeChange={({ start, end }) => {
@@ -168,6 +193,14 @@ export const AgentLogs: React.FunctionComponent<{ agent: Agent }> = memo(({ agen
                 });
               }}
             />
+          </DatePickerFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty href={viewInLogsUrl.href} iconType="popout" flush="both">
+              <FormattedMessage
+                id="xpack.fleet.agentLogs.openInLogsUiLinkText"
+                defaultMessage="Open in Logs"
+              />
+            </EuiButtonEmpty>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
@@ -181,6 +214,6 @@ export const AgentLogs: React.FunctionComponent<{ agent: Agent }> = memo(({ agen
           />
         </EuiPanel>
       </EuiFlexItem>
-    </FlexGroup>
+    </WrapperFlexGroup>
   );
 });
