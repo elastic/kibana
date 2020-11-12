@@ -15,7 +15,7 @@ export interface IESFieldedAggParams extends IESAggFieldParams {
   aggType: AGG_TYPE;
 }
 
-export class ESFieldedAggField extends CountAggField {
+export class AggField extends CountAggField {
   private readonly _esDocField?: IField;
   private readonly _aggType: AGG_TYPE;
 
