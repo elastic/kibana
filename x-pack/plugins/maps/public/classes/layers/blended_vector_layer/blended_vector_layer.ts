@@ -47,7 +47,9 @@ interface CountData {
   isSyncClustered: boolean;
 }
 
-function getAggType(dynamicProperty: IDynamicStyleProperty<DynamicStylePropertyOptions>): AGG_TYPE {
+function getAggType(
+  dynamicProperty: IDynamicStyleProperty<DynamicStylePropertyOptions>
+): AGG_TYPE.AVG | AGG_TYPE.TERMS {
   return dynamicProperty.isOrdinal() ? AGG_TYPE.AVG : AGG_TYPE.TERMS;
 }
 

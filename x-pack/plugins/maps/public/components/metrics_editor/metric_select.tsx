@@ -52,6 +52,12 @@ const AGG_OPTIONS = [
     }),
     value: AGG_TYPE.UNIQUE_COUNT,
   },
+  {
+    label: i18n.translate('xpack.maps.metricSelect.percentileDropDownOptionLabel', {
+      defaultMessage: 'Percentile',
+    }),
+    value: AGG_TYPE.PERCENTILE,
+  },
 ];
 
 type Props = Omit<EuiComboBoxProps<AGG_TYPE>, 'onChange'> & {

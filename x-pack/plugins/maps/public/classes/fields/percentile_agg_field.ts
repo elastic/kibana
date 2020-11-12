@@ -6,19 +6,23 @@
 
 import { IField } from './field';
 import { AGG_TYPE } from '../../../common/constants';
-import { AggField, IESFieldedAggParams } from './agg_field';
+import { AggField } from './agg_field';
 import { IndexPattern } from '../../../../../../src/plugins/data/common/index_patterns/index_patterns';
-import { addFieldToDSL, getField } from '../../../common/elasticsearch_util';
+import { IESAggField, IESAggFieldParams } from './agg_field_types';
+import { CountAggField } from './count_agg_field';
+import { ESDocField } from './es_doc_field';
 
-export interface IESPercentileAggParams extends IESFieldedAggParams {
+export interface IESPercentileAggParams extends IESAggFieldParams {
   esDocField?: IField;
   percentile: number;
 }
 
-export class PercentileAggField extends AggField {
+export class PercentileAggField extends CountAggField implements IESAggField {
   private readonly _percentile: number;
+  private readonly _esDocField: ESDocField;
   constructor(params: IESPercentileAggParams) {
     super(params);
+    this._esDocField = params.esDocField;
     this._percentile = params.percentile;
   }
 
@@ -34,7 +38,19 @@ export class PercentileAggField extends AggField {
     throw new Error('todo');
   }
 
-  getAggType(): AGG_TYPE {
+  _getAggType(): AGG_TYPE {
     return AGG_TYPE.PERCENTILE;
+  }
+
+  async getOrdinalFieldMetaRequest(): Promise<unknown> {
+    return this._esDocField ? await this._esDocField.getOrdinalFieldMetaRequest() : null;
+  }
+
+  async getCategoricalFieldMetaRequest(size: number): Promise<unknown> {
+    return this._esDocField ? await this._esDocField.getCategoricalFieldMetaRequest(size) : null;
+  }
+
+  isValid(): boolean {
+    return !!this._esDocField;
   }
 }
