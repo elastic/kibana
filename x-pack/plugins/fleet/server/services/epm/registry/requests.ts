@@ -93,6 +93,7 @@ export function getFetchOptions(targetUrl: string): RequestInit | undefined {
   logger.debug(`Using ${proxyUrl} as proxy for ${targetUrl}`);
 
   return {
+    // @ts-expect-error The types exposed by 'HttpsProxyAgent' isn't up to date with 'Agent'
     agent: getProxyAgent({ proxyUrl, targetUrl }),
   };
 }
