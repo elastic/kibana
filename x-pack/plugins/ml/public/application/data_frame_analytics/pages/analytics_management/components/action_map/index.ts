@@ -4,6 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { analyticsAuditMessagesProvider } from './analytics_audit_messages';
-export { modelsProvider } from './models_provider';
-export { AnalyticsManager } from './analytics_manager';
+export { MapButton } from './map_button';
+export { useMapAction } from './use_map_action';
