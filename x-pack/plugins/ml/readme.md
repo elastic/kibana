@@ -6,7 +6,7 @@ Elastic.
 ## Requirements
 
 To use machine learning features, you must have a Platinum or Enterprise license 
-or a free 14-day trial. File Data Visualizer requires a Basic license. For more 
+or a free 14-day Trial. File Data Visualizer requires a Basic license. For more 
 info, refer to 
 [Set up machine learning features](https://www.elastic.co/guide/en/machine-learning/master/setup.html).
 
@@ -103,33 +103,33 @@ Run the following commands from the `x-pack` directory and use separate terminal
 for test server and test runner. The test server command starts an Elasticsearch
 and Kibana instance that the tests will be run against.
 
-1. Functional UI tests with `trial` license (default config):
+1. Functional UI tests with `Trial` license (default config):
 
         node scripts/functional_tests_server.js
         node scripts/functional_test_runner.js --include-tag mlqa
 
-    ML functional `trial` license tests are located in `x-pack/test/functional/apps/ml`.
+    ML functional `Trial` license tests are located in `x-pack/test/functional/apps/ml`.
 
-1. Functional UI tests with `basic` license:
+1. Functional UI tests with `Basic` license:
 
         node scripts/functional_tests_server.js --config test/functional_basic/config.ts
         node scripts/functional_test_runner.js --config test/functional_basic/config.ts --include-tag mlqa
 
-    ML functional `basic` license tests are located in `x-pack/test/functional_basic/apps/ml`.
+    ML functional `Basic` license tests are located in `x-pack/test/functional_basic/apps/ml`.
 
-1. API integration tests with `trial` license:
+1. API integration tests with `Trial` license:
 
         node scripts/functional_tests_server.js
         node scripts/functional_test_runner.js --config test/api_integration/config.ts --include-tag mlqa
         
-   ML API integration `trial` license tests are located in `x-pack/test/api_integration/apis/ml`.
+   ML API integration `Trial` license tests are located in `x-pack/test/api_integration/apis/ml`.
 
-1. API integration tests with `basic` license:
+1. API integration tests with `Basic` license:
 
         node scripts/functional_tests_server.js --config test/api_integration_basic/config.ts
         node scripts/functional_test_runner.js --config test/api_integration_basic/config.ts --include-tag mlqa
         
-   ML API integration `basic` license tests are located in `x-pack/test/api_integration_basic/apis/ml`.
+   ML API integration `Basic` license tests are located in `x-pack/test/api_integration_basic/apis/ml`.
 
 ## Shared functions
 
