@@ -5,8 +5,8 @@
  */
 
 import { AssetParts } from '../../../types';
-import { getBufferExtractor, pathParts, splitPkgKey } from './index';
-import { untarBuffer, unzipBuffer } from './extract';
+import { pathParts, splitPkgKey } from './index';
+import { getBufferExtractor, untarBuffer, unzipBuffer } from '../archive';
 
 const testPaths = [
   {

@@ -26,8 +26,6 @@ import { getRegistryUrl } from './registry_url';
 import { appContextService } from '../..';
 import { PackageNotFoundError, PackageCacheError } from '../../../errors';
 
-export { ArchiveEntry, getBufferExtractor } from './extract';
-
 export interface SearchParams {
   category?: CategoryId;
   experimental?: boolean;

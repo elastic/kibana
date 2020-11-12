@@ -12,6 +12,7 @@ import {
   InstallablePackage,
 } from '../../../../types';
 import * as Registry from '../../registry';
+import { ArchiveEntry } from '../../archive';
 import { CallESAsCurrentUser } from '../../../../types';
 import { saveInstalledEsRefs } from '../../packages/install';
 import { getInstallationObject } from '../../packages';
@@ -192,7 +193,7 @@ async function installPipeline({
   return { id: pipeline.nameForInstallation, type: ElasticsearchAssetType.ingestPipeline };
 }
 
-const isDirectory = ({ path }: Registry.ArchiveEntry) => path.endsWith('/');
+const isDirectory = ({ path }: ArchiveEntry) => path.endsWith('/');
 
 const isDataStreamPipeline = (path: string, dataStreamDataset: string) => {
   const pathParts = Registry.pathParts(path);
