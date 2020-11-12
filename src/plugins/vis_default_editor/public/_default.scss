@@ -1,8 +1,10 @@
 .visEditor--default {
+  height: 1px;
   flex: 1 1 auto;
   display: flex;
 
   @include euiBreakpoint('xs', 's', 'm') {
+    height: 100%;
     flex-direction: column;
   }
 }
@@ -13,9 +15,8 @@
 
 .visEditor__collapsibleSidebar {
   background: $euiColorLightestShade;
-  min-width: $vis-editor-sidebar-min-width;
-  max-width: 100%;
   position: relative;
+  display: flex;
   flex-shrink: 0;
 
   @include euiBreakpoint('xs', 's', 'm') {
@@ -38,7 +39,7 @@
   }
 
   @include euiBreakpoint('xs', 's', 'm') {
-    height: $euiSizeXXL; // Just enough room for the collapse button
+    height: $euiSizeXXL !important; // Just enough room for the collapse button
     width: 100% !important;
   }
 }
@@ -54,7 +55,6 @@
  */
 
 .visEditor__resizer {
-  @include kbnResizer($euiSizeM);
   @include euiBreakpoint('xs', 's', 'm') {
     display: none;
   }

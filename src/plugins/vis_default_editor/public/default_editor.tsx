@@ -22,6 +22,7 @@ import 'brace/mode/json';
 
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { EventEmitter } from 'events';
+import { EuiResizableContainer } from '@elastic/eui';
 
 import { EditorRenderProps } from 'src/plugins/visualize/public';
 import { Vis, VisualizeEmbeddableContract } from 'src/plugins/visualizations/public';
@@ -90,35 +91,42 @@ function DefaultEditor({
           ...core,
         }}
       >
-        <PanelsContainer
-          className="visEditor--default"
-          resizerClassName={`visEditor__resizer ${
-            isCollapsed ? 'visEditor__resizer-isHidden' : ''
-          }`}
-        >
-          <Panel className="visEditor__visualization" initialWidth={100 - editorInitialWidth}>
-            <div className="visEditor__canvas" ref={visRef} data-shared-items-container />
-          </Panel>
+        <EuiResizableContainer className="visEditor--default">
+          {(EuiResizablePanel, EuiResizableButton) => (
+            <>
+              <EuiResizablePanel
+                className="visEditor__visualization"
+                initialSize={100 - editorInitialWidth}
+              >
+                <div className="visEditor__canvas" ref={visRef} data-shared-items-container />
+              </EuiResizablePanel>
 
-          <Panel
-            className={`visEditor__collapsibleSidebar ${
-              isCollapsed ? 'visEditor__collapsibleSidebar-isClosed' : ''
-            }`}
-            initialWidth={editorInitialWidth}
-          >
-            <DefaultEditorSideBar
-              embeddableHandler={embeddableHandler}
-              isCollapsed={isCollapsed}
-              onClickCollapse={onClickCollapse}
-              vis={vis}
-              uiState={uiState}
-              isLinkedSearch={linked}
-              savedSearch={savedSearch}
-              timeRange={timeRange}
-              eventEmitter={eventEmitter}
-            />
-          </Panel>
-        </PanelsContainer>
+              <EuiResizableButton
+                className={`visEditor__resizer ${isCollapsed ? 'visEditor__resizer-isHidden' : ''}`}
+              />
+
+              <EuiResizablePanel
+                className={`visEditor__collapsibleSidebar ${
+                  isCollapsed ? 'visEditor__collapsibleSidebar-isClosed' : ''
+                }`}
+                initialSize={editorInitialWidth}
+                minSize={isCollapsed ? '0' : '350px'}
+              >
+                <DefaultEditorSideBar
+                  embeddableHandler={embeddableHandler}
+                  isCollapsed={isCollapsed}
+                  onClickCollapse={onClickCollapse}
+                  vis={vis}
+                  uiState={uiState}
+                  isLinkedSearch={linked}
+                  savedSearch={savedSearch}
+                  timeRange={timeRange}
+                  eventEmitter={eventEmitter}
+                />
+              </EuiResizablePanel>
+            </>
+          )}
+        </EuiResizableContainer>
       </KibanaContextProvider>
     </core.i18n.Context>
   );
