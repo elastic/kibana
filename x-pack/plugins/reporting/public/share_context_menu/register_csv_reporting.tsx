@@ -97,7 +97,6 @@ export const csvReportingProvider = ({
               toasts={toasts}
               reportType="csv"
               layoutId={undefined}
-              objectType={objectType}
               objectId={objectId}
               getJobParams={getJobParams}
               isDirty={isDirty}
