@@ -247,7 +247,14 @@ export class JobsList extends Component {
         name: i18n.translate('xpack.ml.jobsList.spacesLabel', {
           defaultMessage: 'Spaces',
         }),
-        render: (item) => <JobSpacesList spaces={item.spaces} />,
+        render: (item) => (
+          <JobSpacesList
+            spaceIds={item.spaceIds}
+            jobId={item.id}
+            jobType="anomaly-detector"
+            refresh={this.props.refreshJobs}
+          />
+        ),
       });
       // Remove actions if Ml not enabled in current space
       if (this.props.isMlEnabledInSpace === false) {

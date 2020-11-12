@@ -148,7 +148,8 @@ export const useColumns = (
   expandedRowItemIds: DataFrameAnalyticsId[],
   setExpandedRowItemIds: React.Dispatch<React.SetStateAction<DataFrameAnalyticsId[]>>,
   isManagementTable: boolean = false,
-  isMlEnabledInSpace: boolean = true
+  isMlEnabledInSpace: boolean = true,
+  refresh: () => void = () => {}
 ) => {
   const { actions, modals } = useActions(isManagementTable);
   function toggleDetails(item: DataFrameAnalyticsListRow) {
@@ -280,8 +281,15 @@ export const useColumns = (
         defaultMessage: 'Spaces',
       }),
       render: (item: DataFrameAnalyticsListRow) =>
-        Array.isArray(item.spaces) ? <JobSpacesList spaces={item.spaces} /> : null,
-      width: '75px',
+        Array.isArray(item.spaceIds) ? (
+          <JobSpacesList
+            spaceIds={item.spaceIds ?? []}
+            jobId={item.id}
+            jobType="data-frame-analytics"
+            refresh={refresh}
+          />
+        ) : null,
+      width: '90px',
     });
 
     // Remove actions if Ml not enabled in current space

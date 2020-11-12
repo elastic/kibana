@@ -19,8 +19,10 @@ import {
   EuiTabbedContent,
   EuiText,
   EuiTitle,
+  EuiTabbedContentTab,
 } from '@elastic/eui';
 
+import { createSpacesContext, SpacesContext } from '../../../../contexts/spaces';
 import { ManagementAppMountParams } from '../../../../../../../../../src/plugins/management/public/';
 
 import { checkGetManagementMlJobsResolver } from '../../../../capabilities/check_capabilities';
@@ -40,12 +42,10 @@ import {
   getDefaultAnomalyDetectionJobsListState,
 } from '../../../../jobs/jobs_list/jobs';
 import { getMlGlobalServices } from '../../../../app';
+import { JobSpacesRepairFlyout } from '../../../../components/job_spaces_repair';
 
-interface Tab {
+interface Tab extends EuiTabbedContentTab {
   'data-test-subj': string;
-  id: string;
-  name: string;
-  content: any;
 }
 
 function useTabs(isMlEnabledInSpace: boolean): Tab[] {
@@ -111,15 +111,18 @@ export const JobsListPage: FC<{
 }> = ({ coreStart, share, history }) => {
   const [initialized, setInitialized] = useState(false);
   const [accessDenied, setAccessDenied] = useState(false);
+  const [showRepairFlyout, setShowRepairFlyout] = useState(false);
   const [isMlEnabledInSpace, setIsMlEnabledInSpace] = useState(false);
   const tabs = useTabs(isMlEnabledInSpace);
   const [currentTabId, setCurrentTabId] = useState(tabs[0].id);
   const I18nContext = coreStart.i18n.Context;
+  const spacesContext = useMemo(() => createSpacesContext(coreStart.http), []);
 
   const check = async () => {
     try {
       const checkPrivilege = await checkGetManagementMlJobsResolver();
       setIsMlEnabledInSpace(checkPrivilege.mlFeatureEnabledInSpace);
+      spacesContext.allSpaces = await spacesContext.spacesManager.getSpaces();
     } catch (e) {
       setAccessDenied(true);
     }
@@ -162,6 +165,10 @@ export const JobsListPage: FC<{
     );
   }
 
+  function onCloseRepairFlyout() {
+    setShowRepairFlyout(false);
+  }
+
   if (accessDenied) {
     return <AccessDeniedPage />;
   }
@@ -172,51 +179,64 @@ export const JobsListPage: FC<{
         <KibanaContextProvider
           services={{ ...coreStart, share, mlServices: getMlGlobalServices(coreStart.http) }}
         >
-          <Router history={history}>
-            <EuiPageContent
-              id="kibanaManagementMLSection"
-              data-test-subj="mlPageStackManagementJobsList"
-            >
-              <EuiTitle size="l">
-                <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
-                  <EuiFlexItem grow={false}>
-                    <h1>
-                      {i18n.translate('xpack.ml.management.jobsList.jobsListTitle', {
-                        defaultMessage: 'Machine Learning Jobs',
+          <SpacesContext.Provider value={spacesContext}>
+            <Router history={history}>
+              <EuiPageContent
+                id="kibanaManagementMLSection"
+                data-test-subj="mlPageStackManagementJobsList"
+              >
+                <EuiTitle size="l">
+                  <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+                    <EuiFlexItem grow={false}>
+                      <h1>
+                        {i18n.translate('xpack.ml.management.jobsList.jobsListTitle', {
+                          defaultMessage: 'Machine Learning Jobs',
+                        })}
+                      </h1>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiButtonEmpty
+                        target="_blank"
+                        iconType="help"
+                        iconSide="left"
+                        color="primary"
+                        href={
+                          currentTabId === 'anomaly_detection_jobs'
+                            ? anomalyDetectionJobsUrl
+                            : anomalyJobsUrl
+                        }
+                      >
+                        {currentTabId === 'anomaly_detection_jobs'
+                          ? anomalyDetectionDocsLabel
+                          : analyticsDocsLabel}
+                      </EuiButtonEmpty>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiTitle>
+                <EuiSpacer size="s" />
+                <EuiTitle size="s">
+                  <EuiText color="subdued">
+                    {i18n.translate('xpack.ml.management.jobsList.jobsListTagline', {
+                      defaultMessage: 'View machine learning analytics and anomaly detection jobs.',
+                    })}
+                  </EuiText>
+                </EuiTitle>
+                <EuiSpacer size="l" />
+                <EuiPageContentBody>
+                  <>
+                    <EuiButtonEmpty onClick={() => setShowRepairFlyout(true)}>
+                      {i18n.translate('xpack.ml.management.jobsList.repairFlyoutButton', {
+                        defaultMessage: 'Repair saved objects',
                       })}
-                    </h1>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiButtonEmpty
-                      target="_blank"
-                      iconType="help"
-                      iconSide="left"
-                      color="primary"
-                      href={
-                        currentTabId === 'anomaly_detection_jobs'
-                          ? anomalyDetectionJobsUrl
-                          : anomalyJobsUrl
-                      }
-                    >
-                      {currentTabId === 'anomaly_detection_jobs'
-                        ? anomalyDetectionDocsLabel
-                        : analyticsDocsLabel}
                     </EuiButtonEmpty>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiTitle>
-              <EuiSpacer size="s" />
-              <EuiTitle size="s">
-                <EuiText color="subdued">
-                  {i18n.translate('xpack.ml.management.jobsList.jobsListTagline', {
-                    defaultMessage: 'View machine learning analytics and anomaly detection jobs.',
-                  })}
-                </EuiText>
-              </EuiTitle>
-              <EuiSpacer size="l" />
-              <EuiPageContentBody>{renderTabs()}</EuiPageContentBody>
-            </EuiPageContent>
-          </Router>
+                    {showRepairFlyout && <JobSpacesRepairFlyout onClose={onCloseRepairFlyout} />}
+                  </>
+                  <EuiSpacer size="s" />
+                  {renderTabs()}
+                </EuiPageContentBody>
+              </EuiPageContent>
+            </Router>
+          </SpacesContext.Provider>
         </KibanaContextProvider>
       </I18nContext>
     </RedirectAppLinks>

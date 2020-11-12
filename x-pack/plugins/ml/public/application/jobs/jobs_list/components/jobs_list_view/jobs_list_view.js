@@ -266,7 +266,7 @@ export class JobsListView extends Component {
             delete job.fullJob;
           }
           job.latestTimestampSortValue = job.latestTimestampMs || 0;
-          job.spaces =
+          job.spaceIds =
             this.props.isManagementTable && spaces && spaces[job.id] !== undefined
               ? spaces[job.id]
               : [];
@@ -381,6 +381,7 @@ export class JobsListView extends Component {
             isMlEnabledInSpace={this.props.isMlEnabledInSpace}
             jobsViewState={this.props.jobsViewState}
             onJobsViewStateUpdate={this.props.onJobsViewStateUpdate}
+            refreshJobs={() => this.refreshJobSummaryList(true)}
           />
         </div>
       </div>

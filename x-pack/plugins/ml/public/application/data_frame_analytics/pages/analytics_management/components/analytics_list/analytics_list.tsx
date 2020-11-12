@@ -167,7 +167,7 @@ export const DataFrameAnalyticsList: FC<Props> = ({
   const getAnalyticsCallback = useCallback(() => getAnalytics(true), []);
 
   // Subscribe to the refresh observable to trigger reloading the analytics list.
-  useRefreshAnalyticsList(
+  const { refresh } = useRefreshAnalyticsList(
     {
       isLoading: setIsLoading,
       onRefresh: getAnalyticsCallback,
@@ -179,7 +179,8 @@ export const DataFrameAnalyticsList: FC<Props> = ({
     expandedRowItemIds,
     setExpandedRowItemIds,
     isManagementTable,
-    isMlEnabledInSpace
+    isMlEnabledInSpace,
+    refresh
   );
 
   const { onTableChange, pagination, sorting } = useTableSettings<DataFrameAnalyticsListRow>(

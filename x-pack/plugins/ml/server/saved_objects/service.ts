@@ -247,7 +247,8 @@ export function jobSavedObjectServiceFactory(
           results[id] = {
             success: true,
           };
-        } catch (error) {
+        } catch (e) {
+          const error = e.isBoom && e.output?.payload ? e.output.payload : e;
           results[id] = {
             success: false,
             error,
@@ -268,7 +269,8 @@ export function jobSavedObjectServiceFactory(
           results[job.attributes.job_id] = {
             success: true,
           };
-        } catch (error) {
+        } catch (e) {
+          const error = e.isBoom && e.output?.payload ? e.output.payload : e;
           results[job.attributes.job_id] = {
             success: false,
             error,
