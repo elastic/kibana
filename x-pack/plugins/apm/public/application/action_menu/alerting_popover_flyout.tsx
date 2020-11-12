@@ -5,39 +5,37 @@
  */
 
 import {
-  EuiButtonEmpty,
   EuiContextMenu,
   EuiContextMenuPanelDescriptor,
+  EuiHeaderLink,
   EuiPopover,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
-import { AlertType } from '../../../../../common/alert_types';
-import { useApmPluginContext } from '../../../../hooks/useApmPluginContext';
-import { AlertingFlyout } from '../../../alerting/AlertingFlyout';
+import { IBasePath } from '../../../../../../src/core/public';
+import { AlertType } from '../../../common/alert_types';
+import { AlertingFlyout } from '../../components/alerting/AlertingFlyout';
 
-const alertLabel = i18n.translate(
-  'xpack.apm.serviceDetails.alertsMenu.alerts',
-  { defaultMessage: 'Alerts' }
-);
+const alertLabel = i18n.translate('xpack.apm.home.alertsMenu.alerts', {
+  defaultMessage: 'Alerts',
+});
 const transactionDurationLabel = i18n.translate(
-  'xpack.apm.serviceDetails.alertsMenu.transactionDuration',
+  'xpack.apm.home.alertsMenu.transactionDuration',
   { defaultMessage: 'Transaction duration' }
 );
 const transactionErrorRateLabel = i18n.translate(
-  'xpack.apm.serviceDetails.alertsMenu.transactionErrorRate',
+  'xpack.apm.home.alertsMenu.transactionErrorRate',
   { defaultMessage: 'Transaction error rate' }
 );
-const errorCountLabel = i18n.translate(
-  'xpack.apm.serviceDetails.alertsMenu.errorCount',
-  { defaultMessage: 'Error count' }
-);
+const errorCountLabel = i18n.translate('xpack.apm.home.alertsMenu.errorCount', {
+  defaultMessage: 'Error count',
+});
 const createThresholdAlertLabel = i18n.translate(
-  'xpack.apm.serviceDetails.alertsMenu.createThresholdAlert',
+  'xpack.apm.home.alertsMenu.createThresholdAlert',
   { defaultMessage: 'Create threshold alert' }
 );
 const createAnomalyAlertAlertLabel = i18n.translate(
-  'xpack.apm.serviceDetails.alertsMenu.createAnomalyAlert',
+  'xpack.apm.home.alertsMenu.createAnomalyAlert',
   { defaultMessage: 'Create anomaly alert' }
 );
 
@@ -48,28 +46,32 @@ const CREATE_TRANSACTION_ERROR_RATE_ALERT_PANEL_ID =
 const CREATE_ERROR_COUNT_ALERT_PANEL_ID = 'create_error_count_panel';
 
 interface Props {
+  basePath: IBasePath;
   canReadAlerts: boolean;
   canSaveAlerts: boolean;
   canReadAnomalies: boolean;
+  includeTransactionDuration: boolean;
 }
 
-export function AlertingPopoverAndFlyout(props: Props) {
-  const { canSaveAlerts, canReadAlerts, canReadAnomalies } = props;
-
-  const plugin = useApmPluginContext();
-
+export function AlertingPopoverAndFlyout({
+  basePath,
+  canSaveAlerts,
+  canReadAlerts,
+  canReadAnomalies,
+  includeTransactionDuration,
+}: Props) {
   const [popoverOpen, setPopoverOpen] = useState(false);
-
   const [alertType, setAlertType] = useState<AlertType | null>(null);
 
   const button = (
-    <EuiButtonEmpty
+    <EuiHeaderLink
+      color="primary"
       iconType="arrowDown"
       iconSide="right"
-      onClick={() => setPopoverOpen(true)}
+      onClick={() => setPopoverOpen((prevState) => !prevState)}
     >
       {alertLabel}
-    </EuiButtonEmpty>
+    </EuiHeaderLink>
   );
 
   const panels: EuiContextMenuPanelDescriptor[] = [
@@ -97,10 +99,10 @@ export function AlertingPopoverAndFlyout(props: Props) {
           ? [
               {
                 name: i18n.translate(
-                  'xpack.apm.serviceDetails.alertsMenu.viewActiveAlerts',
+                  'xpack.apm.home.alertsMenu.viewActiveAlerts',
                   { defaultMessage: 'View active alerts' }
                 ),
-                href: plugin.core.http.basePath.prepend(
+                href: basePath.prepend(
                   '/app/management/insightsAndAlerting/triggersActions/alerts'
                 ),
                 icon: 'tableOfContents',
@@ -116,13 +118,17 @@ export function AlertingPopoverAndFlyout(props: Props) {
       title: transactionDurationLabel,
       items: [
         // threshold alerts
-        {
-          name: createThresholdAlertLabel,
-          onClick: () => {
-            setAlertType(AlertType.TransactionDuration);
-            setPopoverOpen(false);
-          },
-        },
+        ...(includeTransactionDuration
+          ? [
+              {
+                name: createThresholdAlertLabel,
+                onClick: () => {
+                  setAlertType(AlertType.TransactionDuration);
+                  setPopoverOpen(false);
+                },
+              },
+            ]
+          : []),
 
         // anomaly alerts
         ...(canReadAnomalies
