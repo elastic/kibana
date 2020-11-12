@@ -60,6 +60,12 @@ export const AlertsBadge: React.FC<Props> = (props: Props) => {
     !inSetupMode && alertCount > MAX_TO_SHOW_IN_LIST
   );
 
+  React.useEffect(() => {
+    if (inSetupMode && showByNode) {
+      setShowByNode(false);
+    }
+  }, [inSetupMode, showByNode]);
+
   if (alerts.length === 0) {
     return null;
   }
