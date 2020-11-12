@@ -4,7 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TimestampOverrideOrUndefined } from '../../../../common/detection_engine/schemas/common/schemas';
+import {
+  SortOrderOrUndefined,
+  TimestampOverrideOrUndefined,
+} from '../../../../common/detection_engine/schemas/common/schemas';
 
 interface BuildEventsSearchQuery {
   aggregations?: unknown;
@@ -13,6 +16,7 @@ interface BuildEventsSearchQuery {
   to: string;
   filter: unknown;
   size: number;
+  sortOrder?: SortOrderOrUndefined;
   searchAfterSortId: string | number | undefined;
   timestampOverride: TimestampOverrideOrUndefined;
 }
@@ -25,6 +29,7 @@ export const buildEventsSearchQuery = ({
   filter,
   size,
   searchAfterSortId,
+  sortOrder,
   timestampOverride,
 }: BuildEventsSearchQuery) => {
   const timestamp = timestampOverride ?? '@timestamp';
@@ -108,7 +113,7 @@ export const buildEventsSearchQuery = ({
       sort: [
         {
           [timestamp]: {
-            order: 'asc',
+            order: sortOrder ?? 'asc',
           },
         },
       ],
