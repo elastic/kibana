@@ -294,13 +294,32 @@ describe('Policy Details', () => {
       });
 
       it('malware popup and message customization options are shown', () => {
-        // licenseMock.hasAtLeast.mockReturnValue(true);
+        // use query for finding stuff, if it doesn't find it, just returns null
         const userNotificationCheckbox = policyView.find(
           'EuiCheckbox[data-test-subj="malwareUserNotificationCheckbox"]'
         );
-        /* const userNotificationCustomMessage = policyView.find(
-        'EuiCheckbox[data-test-subj="malwareUserNotificationCustomMessage"]'*/
-        expect(userNotificationCheckbox).not.toBeUndefined();
+        const userNotificationCustomMessageTextArea = policyView.find(
+          'EuiTextArea[data-test-subj="malwareUserNotificationCustomMessage"]'
+        );
+        expect(userNotificationCheckbox).toHaveLength(1);
+        expect(userNotificationCustomMessageTextArea).toHaveLength(1);
+      });
+    });
+    describe('when the subscription tier is gold or lower', () => {
+      beforeEach(() => {
+        (licenseService.isPlatinumPlus as jest.Mock).mockReturnValue(false);
+        policyView = render(<PolicyDetails />);
+      });
+
+      it('malware popup and message customization options are hidden', () => {
+        const userNotificationCheckbox = policyView.find(
+          'EuiCheckbox[data-test-subj="malwareUserNotificationCheckbox"]'
+        );
+        const userNotificationCustomMessageTextArea = policyView.find(
+          'EuiTextArea[data-test-subj="malwareUserNotificationCustomMessage"]'
+        );
+        expect(userNotificationCheckbox).toHaveLength(0);
+        expect(userNotificationCustomMessageTextArea).toHaveLength(0);
       });
     });
   });
