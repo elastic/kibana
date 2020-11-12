@@ -6,14 +6,10 @@
 
 import { IndexPattern } from 'src/plugins/data/public';
 import { IField } from './field';
-import { AggDescriptor } from '../../../common/descriptor_types';
 import { IESAggSource } from '../sources/es_agg_source';
 import { IVectorSource } from '../sources/vector_source';
-import { ESDocField } from './es_doc_field';
 import { AGG_TYPE, FIELD_ORIGIN } from '../../../common/constants';
-import { isMetricCountable } from '../util/is_metric_countable';
-import { getField, addFieldToDSL } from '../../../common/elasticsearch_util';
-import { TopTermPercentageField } from './top_term_percentage_field';
+import { addFieldToDSL, getField } from '../../../common/elasticsearch_util';
 import { ITooltipProperty, TooltipProperty } from '../tooltips/tooltip_property';
 import { ESAggTooltipProperty } from '../tooltips/es_agg_tooltip_property';
 
@@ -24,34 +20,24 @@ export interface IESAggField extends IField {
   getBucketCount(): number;
 }
 
+export interface IESAggFieldParams {
+  label?: string;
+  source: IESAggSource;
+  origin: FIELD_ORIGIN;
+  canReadFromGeoJson?: boolean;
+}
+
+// Agg without field. Essentially a count-aggregation.
 export class ESAggField implements IESAggField {
   private readonly _source: IESAggSource;
   private readonly _origin: FIELD_ORIGIN;
   private readonly _label?: string;
-  private readonly _aggType: AGG_TYPE;
-  private readonly _esDocField?: IField | undefined;
   private readonly _canReadFromGeoJson: boolean;
 
-  constructor({
-    label,
-    source,
-    aggType,
-    esDocField,
-    origin,
-    canReadFromGeoJson = true,
-  }: {
-    label?: string;
-    source: IESAggSource;
-    aggType: AGG_TYPE;
-    esDocField?: IField;
-    origin: FIELD_ORIGIN;
-    canReadFromGeoJson?: boolean;
-  }) {
+  constructor({ label, source, origin, canReadFromGeoJson = true }: IESAggFieldParams) {
     this._source = source;
     this._origin = origin;
     this._label = label;
-    this._aggType = aggType;
-    this._esDocField = esDocField;
     this._canReadFromGeoJson = canReadFromGeoJson;
   }
 
@@ -78,11 +64,11 @@ export class ESAggField implements IESAggField {
   }
 
   getAggType(): AGG_TYPE {
-    return this._aggType;
+    return AGG_TYPE.COUNT;
   }
 
   isValid(): boolean {
-    return this.getAggType() === AGG_TYPE.COUNT ? true : !!this._esDocField;
+    return true;
   }
 
   async getDataType(): Promise<string> {
@@ -90,7 +76,7 @@ export class ESAggField implements IESAggField {
   }
 
   _getESDocFieldName(): string {
-    return this._esDocField ? this._esDocField.getName() : '';
+    return '';
   }
 
   async createTooltipProperty(value: string | string[] | undefined): Promise<ITooltipProperty> {
@@ -119,20 +105,19 @@ export class ESAggField implements IESAggField {
 
   supportsFieldMeta(): boolean {
     // count and sum aggregations are not within field bounds so they do not support field meta.
-    return !isMetricCountable(this.getAggType());
+    return false;
   }
 
   canValueBeFormatted(): boolean {
-    // Do not use field formatters for counting metrics
-    return ![AGG_TYPE.COUNT, AGG_TYPE.UNIQUE_COUNT].includes(this.getAggType());
+    return false;
   }
 
   async getOrdinalFieldMetaRequest(): Promise<unknown> {
-    return this._esDocField ? this._esDocField.getOrdinalFieldMetaRequest() : null;
+    return null;
   }
 
   async getCategoricalFieldMetaRequest(size: number): Promise<unknown> {
-    return this._esDocField ? this._esDocField.getCategoricalFieldMetaRequest(size) : null;
+    return null;
   }
 
   supportsAutoDomain(): boolean {
@@ -142,30 +127,4 @@ export class ESAggField implements IESAggField {
   canReadFromGeoJson(): boolean {
     return this._canReadFromGeoJson;
   }
-}
-
-export function esAggFieldsFactory(
-  aggDescriptor: AggDescriptor,
-  source: IESAggSource,
-  origin: FIELD_ORIGIN,
-  canReadFromGeoJson: boolean = true
-): IESAggField[] {
-  const aggField = new ESAggField({
-    label: aggDescriptor.label,
-    esDocField: aggDescriptor.field
-      ? new ESDocField({ fieldName: aggDescriptor.field, source, origin })
-      : undefined,
-    aggType: aggDescriptor.type,
-    source,
-    origin,
-    canReadFromGeoJson,
-  });
-
-  const aggFields: IESAggField[] = [aggField];
-
-  if (aggDescriptor.field && aggDescriptor.type === AGG_TYPE.TERMS) {
-    aggFields.push(new TopTermPercentageField(aggField, canReadFromGeoJson));
-  }
-
-  return aggFields;
 }

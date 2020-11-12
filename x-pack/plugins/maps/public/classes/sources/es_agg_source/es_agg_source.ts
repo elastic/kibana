@@ -9,7 +9,7 @@ import { Adapters } from 'src/plugins/inspector/public';
 import { GeoJsonProperties } from 'geojson';
 import { IESSource } from '../es_source';
 import { AbstractESSource } from '../es_source';
-import { esAggFieldsFactory } from '../../fields/es_agg_field';
+import { esAggFieldsFactory } from '../../fields/es_agg_factory';
 import { AGG_TYPE, COUNT_PROP_LABEL, FIELD_ORIGIN } from '../../../../common/constants';
 import { IESAggField } from '../../fields/es_agg_field';
 import { getSourceAggKey } from '../../../../common/get_agg_key';

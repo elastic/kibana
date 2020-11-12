@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ESAggField, esAggFieldsFactory } from './es_agg_field';
+import { ESAggField } from './es_agg_field';
 import { AGG_TYPE, FIELD_ORIGIN } from '../../../common/constants';
 import { IESAggSource } from '../sources/es_agg_source';
 import { IIndexPattern } from 'src/plugins/data/public';
@@ -56,25 +56,5 @@ describe('supportsFieldMeta', () => {
     expect(sumMetric.supportsFieldMeta()).toBe(false);
     const uniqueCountMetric = new ESAggField({ ...defaultParams, aggType: AGG_TYPE.UNIQUE_COUNT });
     expect(uniqueCountMetric.supportsFieldMeta()).toBe(false);
-  });
-});
-
-describe('esAggFieldsFactory', () => {
-  test('Should only create top terms field when term field is not provided', () => {
-    const fields = esAggFieldsFactory(
-      { type: AGG_TYPE.TERMS },
-      mockEsAggSource,
-      FIELD_ORIGIN.SOURCE
-    );
-    expect(fields.length).toBe(1);
-  });
-
-  test('Should create top terms and top terms percentage fields', () => {
-    const fields = esAggFieldsFactory(
-      { type: AGG_TYPE.TERMS, field: 'myField' },
-      mockEsAggSource,
-      FIELD_ORIGIN.SOURCE
-    );
-    expect(fields.length).toBe(2);
   });
 });
