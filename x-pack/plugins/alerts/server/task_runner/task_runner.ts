@@ -212,16 +212,6 @@ export class TaskRunner {
       alertInstance.hasScheduledActions()
     );
 
-    if (!alert.muteAll) {
-      scheduleActionsForResolvedInstances(
-        alertInstances,
-        executionHandler,
-        originalAlertInstanceIds,
-        instancesWithScheduledActions,
-        alert.mutedInstanceIds
-      );
-    }
-
     generateNewAndResolvedInstanceEvents({
       eventLogger,
       originalAlertInstances,
@@ -232,6 +222,14 @@ export class TaskRunner {
     });
 
     if (!muteAll) {
+      scheduleActionsForResolvedInstances(
+        alertInstances,
+        executionHandler,
+        originalAlertInstances,
+        instancesWithScheduledActions,
+        alert.mutedInstanceIds
+      );
+
       const mutedInstanceIdsSet = new Set(mutedInstanceIds);
 
       await Promise.all(
@@ -492,25 +490,18 @@ function generateNewAndResolvedInstanceEvents(params: GenerateNewAndResolvedInst
 }
 
 function scheduleActionsForResolvedInstances(
-  alertInstancesMap: {
-    [x: string]: AlertInstance<
-      {
-        [x: string]: unknown;
-      },
-      {
-        [x: string]: unknown;
-      }
-    >;
-  },
+  alertInstancesMap: Record<string, AlertInstance>,
   executionHandler: ReturnType<typeof createExecutionHandler>,
-  originalAlertInstanceIds: string[],
+  originalAlertInstances: Record<string, AlertInstance>,
   currentAlertInstances: Dictionary<AlertInstance>,
   mutedInstanceIds: string[]
 ) {
   const currentAlertInstanceIds = Object.keys(currentAlertInstances);
+  const originalAlertInstanceIds = Object.keys(originalAlertInstances);
   const resolvedIds = without(
     originalAlertInstanceIds,
-    ...[...currentAlertInstanceIds, ...mutedInstanceIds]
+    ...currentAlertInstanceIds,
+    ...mutedInstanceIds
   );
   for (const id of resolvedIds) {
     const instance = alertInstancesMap[id];

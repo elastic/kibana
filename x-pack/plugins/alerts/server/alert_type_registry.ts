@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 import typeDetect from 'type-detect';
 import { intersection } from 'lodash';
+import _ from 'lodash';
 import { RunContext, TaskManagerSetupContract } from '../../task_manager/server';
 import { TaskRunnerFactory } from './task_runner';
 import {
@@ -86,7 +87,7 @@ export class AlertTypeRegistry {
     }
     alertType.actionVariables = normalizedActionVariables(alertType.actionVariables);
     validateActionGroups(alertType.id, alertType.actionGroups);
-    alertType.actionGroups = [...alertType.actionGroups, ...getBuiltinActionGroups()];
+    alertType.actionGroups = [...alertType.actionGroups, ..._.cloneDeep(getBuiltinActionGroups())];
     this.alertTypes.set(alertIdSchema.validate(alertType.id), { ...alertType } as AlertType);
     this.taskManager.registerTaskDefinitions({
       [`alerting:${alertType.id}`]: {
