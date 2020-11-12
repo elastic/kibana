@@ -10,7 +10,7 @@ import { AGG_TYPE, FIELD_ORIGIN } from '../../../common/constants';
 import { ESDocField } from './es_doc_field';
 import { TopTermPercentageField } from './top_term_percentage_field';
 import { ESAggField, IESAggField } from './es_agg_field';
-import { ESFieldedAggField } from './es_fielded_agg';
+import { ESFieldedAggField } from './es_fielded_agg_field';
 
 export function esAggFieldsFactory(
   aggDescriptor: AggDescriptor,
