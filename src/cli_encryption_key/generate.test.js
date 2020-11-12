@@ -66,18 +66,19 @@ describe('encryption key generation', () => {
   });
 
   it('should prompt the user to write keys if the interactive flag is set', () => {
-    const confirmSpy = jest.spyOn(prompt, 'confirm').mockResolvedValue(false);
+    const confirm = jest.spyOn(prompt, 'confirm').mockResolvedValue(true);
     generate(encryptionConfig, { interactive: false });
-    expect(confirmSpy).not.toHaveBeenCalled();
+    expect(confirm).not.toHaveBeenCalled();
     generate(encryptionConfig, { interactive: true });
-    expect(confirmSpy).toHaveBeenCalledWith('Write to kibana.yml?');
+    expect(confirm).toHaveBeenCalledWith('Set xpack.encryptedSavedObjects.encryptionKey?');
   });
 
   it('should write keys if confirm is true', async () => {
     jest.spyOn(prompt, 'confirm').mockResolvedValue(true);
-    fs.appendFileSync = jest.fn();
+    jest.spyOn(prompt, 'question').mockResolvedValue(true);
+    fs.writeFileSync = jest.fn();
     await generate(encryptionConfig, { interactive: true });
-    expect(fs.appendFileSync).toHaveBeenCalled();
+    expect(fs.writeFileSync).toHaveBeenCalled();
   });
   afterEach(() => {
     jest.restoreAllMocks();
