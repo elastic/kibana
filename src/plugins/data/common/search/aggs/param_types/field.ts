@@ -85,14 +85,6 @@ export class FieldParamType extends BaseParamType {
 
       const validField = this.getAvailableFields(aggConfig).find((f: any) => f.name === fieldName);
       if (!validField) {
-        // eslint-disable-next-line no-console
-        console.error('Error field', JSON.stringify(field));
-        // eslint-disable-next-line no-console
-        console.error('Error AggConfig', JSON.stringify(aggConfig));
-        // eslint-disable-next-line no-console
-        console.error('Error fields', JSON.stringify(aggConfig.getIndexPattern().fields));
-        // eslint-disable-next-line no-console
-        console.error('Error indexpattern', JSON.stringify(aggConfig.getIndexPattern()));
         throw new Error(
           i18n.translate(
             'data.search.aggs.paramTypes.field.invalidSavedFieldParameterErrorMessage',
