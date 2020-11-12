@@ -40,11 +40,27 @@ export type AbstractESSourceDescriptor = AbstractSourceDescriptor & {
   applyGlobalTime: boolean;
 };
 
-export type AggDescriptor = {
-  field?: string; // count aggregation does not require field. All other aggregation types do
-  label?: string;
+export type AbstractAggDescriptor = {
   type: AGG_TYPE;
+  label?: string;
 };
+
+export type CountAggDescriptor = AbstractAggDescriptor & {
+  type: AGG_TYPE.COUNT;
+};
+
+export type FieldedAggDescriptor = AbstractAggDescriptor & {
+  type:
+    | AGG_TYPE.UNIQUE_COUNT
+    | AGG_TYPE.MAX
+    | AGG_TYPE.MIN
+    | AGG_TYPE.SUM
+    | AGG_TYPE.AVG
+    | AGG_TYPE.TERMS;
+  field?: string;
+};
+
+export type AggDescriptor = CountAggDescriptor | FieldedAggDescriptor;
 
 export type AbstractESAggSourceDescriptor = AbstractESSourceDescriptor & {
   metrics: AggDescriptor[];

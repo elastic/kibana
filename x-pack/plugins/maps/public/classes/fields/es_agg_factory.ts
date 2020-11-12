@@ -29,9 +29,10 @@ export function esAggFieldsFactory(
   } else {
     aggField = new ESFieldedAggField({
       label: aggDescriptor.label,
-      esDocField: aggDescriptor.field
-        ? new ESDocField({ fieldName: aggDescriptor.field, source, origin })
-        : undefined,
+      esDocField:
+        'field' in aggDescriptor && aggDescriptor.field
+          ? new ESDocField({ fieldName: aggDescriptor.field, source, origin })
+          : undefined,
       aggType: aggDescriptor.type,
       source,
       origin,
@@ -41,7 +42,7 @@ export function esAggFieldsFactory(
 
   const aggFields: IESAggField[] = [aggField];
 
-  if (aggDescriptor.field && aggDescriptor.type === AGG_TYPE.TERMS) {
+  if ('field' in aggDescriptor && aggDescriptor.type === AGG_TYPE.TERMS) {
     aggFields.push(new TopTermPercentageField(aggField, canReadFromGeoJson));
   }
 

@@ -12,7 +12,7 @@ import { EuiButtonEmpty, EuiComboBoxOptionOption, EuiFieldText, EuiFormRow } fro
 import { FormattedMessage } from '@kbn/i18n/react';
 import { MetricSelect } from './metric_select';
 import { SingleFieldSelect } from '../single_field_select';
-import { AggDescriptor } from '../../../common/descriptor_types';
+import { AggDescriptor, FieldedAggDescriptor } from '../../../common/descriptor_types';
 import { AGG_TYPE } from '../../../common/constants';
 import { getTermsFields } from '../../index_pattern_util';
 import { IFieldType } from '../../../../../../src/plugins/data/public';
@@ -57,32 +57,41 @@ export function MetricEditor({
     if (!metricAggregationType) {
       return;
     }
-    const newMetricProps = {
-      ...metric,
-      type: metricAggregationType,
-    };
 
     // unset field when new agg type does not support currently selected field.
-    if (metric.field && metricAggregationType !== AGG_TYPE.COUNT) {
+    if ('field' in metric && metric.field && metricAggregationType !== AGG_TYPE.COUNT) {
       const fieldsForNewAggType = filterFieldsForAgg(fields, metricAggregationType);
       const found = fieldsForNewAggType.find((field) => {
         return field.name === metric.field;
       });
-      if (!found) {
-        newMetricProps.field = undefined;
+      if (found) {
+        onChange({
+          type: metricAggregationType,
+          label: metric.label,
+          field: metric.field,
+        });
+      } else {
+        onChange({
+          type: metricAggregationType,
+          label: metric.label,
+        });
       }
+    } else {
+      onChange({
+        type: metricAggregationType,
+        label: metric.label,
+      });
     }
-
-    onChange(newMetricProps);
   };
   const onFieldChange = (fieldName?: string) => {
-    if (!fieldName) {
+    if (!fieldName || metric.type === AGG_TYPE.COUNT) {
       return;
     }
     onChange({
-      ...metric,
+      label: metric.label,
+      type: metric.type,
       field: fieldName,
-    });
+    } as FieldedAggDescriptor);
   };
   const onLabelChange = (e: ChangeEvent<HTMLInputElement>) => {
     onChange({
