@@ -11,3 +11,5 @@ export { nextTick, getRandomString, findTestSubject, TestBed } from '../../../..
 export { setupEnvironment, WithAppDependencies, services } from './setup_environment';
 
 export { TestSubjects } from './test_subjects';
+
+export { BRANCH } from './constants';
