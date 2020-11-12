@@ -33,7 +33,10 @@ import {
   addNotes as dispatchAddNotes,
   updateNote as dispatchUpdateNote,
 } from '../../../common/store/app/actions';
-import { setTimelineRangeDatePicker as dispatchSetTimelineRangeDatePicker } from '../../../common/store/inputs/actions';
+import {
+  setTimelineRangeDatePicker as dispatchSetTimelineRangeDatePicker,
+  setRelativeRangeDatePicker as dispatchSetRelativeRangeDatePicker,
+} from '../../../common/store/inputs/actions';
 import {
   setKqlFilterQueryDraft as dispatchSetKqlFilterQueryDraft,
   applyKqlFilterQuery as dispatchApplyKqlFilterQuery,
@@ -256,6 +259,15 @@ export const defaultTimelineToTimelineModel = (
   const timelineEntries = {
     ...timeline,
     columns: timeline.columns != null ? timeline.columns.map(setTimelineColumn) : defaultHeaders,
+    dateRange:
+      timeline.status === TimelineStatus.immutable &&
+      timeline.timelineType === TimelineType.template
+        ? {
+            ...timeline.dateRange,
+            start: DEFAULT_FROM_MOMENT.toISOString(),
+            end: DEFAULT_TO_MOMENT.toISOString(),
+          }
+        : timeline.dateRange,
     dataProviders: getDataProviders(duplicate, timeline.dataProviders, timelineType),
     eventIdToNoteIds: setEventIdToNoteIds(duplicate, timeline.eventIdToNoteIds),
     filters: timeline.filters != null ? timeline.filters.map(setTimelineFilters) : [],
@@ -345,27 +357,13 @@ export const queryTimelineById = <TCache>({
           timelineType
         );
 
-        const overrideDaterange =
-          timeline.status === TimelineStatus.immutable &&
-          timeline.timelineType === TimelineType.template
-            ? {
-                ...timeline.dateRange,
-                start: DEFAULT_FROM_MOMENT.toISOString(),
-                end: DEFAULT_TO_MOMENT.toISOString(),
-              }
-            : timeline.dateRange;
-
         if (onOpenTimeline != null) {
-          onOpenTimeline({ ...timeline, dateRange: overrideDaterange });
+          onOpenTimeline({ ...timeline });
         } else if (updateTimeline) {
-          const { from, to } =
-            timeline.status === TimelineStatus.immutable &&
-            timeline.timelineType === TimelineType.template
-              ? { from: overrideDaterange.start, to: overrideDaterange.end }
-              : normalizeTimeRange({
-                  from: getOr(null, 'dateRange.start', timeline),
-                  to: getOr(null, 'dateRange.end', timeline),
-                });
+          const { from, to } = normalizeTimeRange({
+            from: getOr(null, 'dateRange.start', timeline),
+            to: getOr(null, 'dateRange.end', timeline),
+          });
           updateTimeline({
             duplicate,
             from,
@@ -404,7 +402,22 @@ export const dispatchUpdateTimeline = (dispatch: Dispatch): DispatchUpdateTimeli
       eventType: timeline.eventType,
     })
   );
-  dispatch(dispatchSetTimelineRangeDatePicker({ from, to }));
+  if (
+    timeline.status === TimelineStatus.immutable &&
+    timeline.timelineType === TimelineType.template
+  ) {
+    dispatch(
+      dispatchSetRelativeRangeDatePicker({
+        id: 'timeline',
+        fromStr: 'now-24h',
+        toStr: 'now',
+        from: DEFAULT_FROM_MOMENT.toISOString(),
+        to: DEFAULT_TO_MOMENT.toISOString(),
+      })
+    );
+  } else {
+    dispatch(dispatchSetTimelineRangeDatePicker({ from, to }));
+  }
   dispatch(dispatchAddTimeline({ id, timeline, savedTimeline: duplicate }));
   if (
     timeline.kqlQuery != null &&
