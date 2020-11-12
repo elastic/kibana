@@ -20,7 +20,6 @@ export {
   ArrayItem,
   useForm,
   useFormContext,
-  useFormData,
   UseMultiFields,
   VALIDATION_TYPES,
   ValidationFunc,
