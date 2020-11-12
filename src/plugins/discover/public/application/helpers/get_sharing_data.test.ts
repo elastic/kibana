@@ -40,7 +40,10 @@ describe('getSharingData', () => {
         "conflictedTypesFields": Array [],
         "fields": Array [],
         "indexPatternId": "the-index-pattern-id",
-        "metaFields": undefined,
+        "metaFields": Array [
+          "_index",
+          "_score",
+        ],
         "searchRequest": Object {
           "body": Object {
             "_source": Object {

@@ -17,13 +17,58 @@
  * under the License.
  */
 
-import { IndexPattern } from '../kibana_services';
+import { IndexPattern, indexPatterns } from '../kibana_services';
+import { IIndexPatternFieldList } from '../../../data/common/index_patterns/fields';
 
-export const indexPatternMock = ({
+const fields = [
+  {
+    name: '_index',
+    type: 'string',
+    scripted: false,
+    filterable: true,
+  },
+  {
+    name: 'message',
+    type: 'string',
+    scripted: false,
+    filterable: false,
+  },
+  {
+    name: 'extension',
+    type: 'string',
+    scripted: false,
+    filterable: true,
+  },
+  {
+    name: 'bytes',
+    type: 'number',
+    scripted: false,
+    filterable: true,
+  },
+  {
+    name: 'scripted',
+    type: 'number',
+    scripted: true,
+    filterable: false,
+  },
+] as IIndexPatternFieldList;
+
+fields.getByName = (name: string) => {
+  return fields.find((field) => field.name === name);
+};
+
+const indexPattern = ({
   id: 'the-index-pattern-id',
   title: 'the-index-pattern-title',
-  fields: [],
+  metaFields: ['_index', '_score'],
+  flattenHit: undefined,
+  formatHit: jest.fn((hit) => hit._source),
+  fields,
   getComputedFields: () => ({}),
   getSourceFiltering: () => ({}),
   getFieldByName: () => ({}),
 } as unknown) as IndexPattern;
+
+indexPattern.flattenHit = indexPatterns.flattenHitWrapper(indexPattern, indexPattern.metaFields);
+
+export const indexPatternMock = indexPattern;

@@ -24,7 +24,7 @@ import { SavedSearch } from '../../../saved_searches';
 import { IndexPattern } from '../../../../../data/common/index_patterns/index_patterns';
 import { DiscoverServices } from '../../../build_services';
 import { GetStateReturn } from '../../angular/discover_state';
-import { setBreadcrumbsTitle } from '../../helpers/set_breadcrumbs_title';
+import { setBreadcrumbsTitle } from '../../helpers/breadcrumbs';
 import { persistSavedSearch } from '../../helpers/persist_saved_search';
 
 async function saveDataSource({

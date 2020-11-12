@@ -65,11 +65,48 @@ describe('updateSearchSource', () => {
         },
         "fields": Object {
           "index": Object {
-            "fields": Array [],
+            "fields": Array [
+              Object {
+                "filterable": true,
+                "name": "_index",
+                "scripted": false,
+                "type": "string",
+              },
+              Object {
+                "filterable": false,
+                "name": "message",
+                "scripted": false,
+                "type": "string",
+              },
+              Object {
+                "filterable": true,
+                "name": "extension",
+                "scripted": false,
+                "type": "string",
+              },
+              Object {
+                "filterable": true,
+                "name": "bytes",
+                "scripted": false,
+                "type": "number",
+              },
+              Object {
+                "filterable": false,
+                "name": "scripted",
+                "scripted": true,
+                "type": "number",
+              },
+            ],
+            "flattenHit": [Function],
+            "formatHit": [MockFunction],
             "getComputedFields": [Function],
             "getFieldByName": [Function],
             "getSourceFiltering": [Function],
             "id": "the-index-pattern-id",
+            "metaFields": Array [
+              "_index",
+              "_score",
+            ],
             "title": "the-index-pattern-title",
           },
           "size": 500,

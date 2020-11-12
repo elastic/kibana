@@ -49,7 +49,11 @@ import {
   subscribeWithScope,
   tabifyAggResponse,
 } from '../../kibana_services';
-import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../helpers/breadcrumbs';
+import {
+  getRootBreadcrumbs,
+  getSavedSearchBreadcrumbs,
+  setBreadcrumbsTitle,
+} from '../helpers/breadcrumbs';
 import { validateTimeRange } from '../helpers/validate_time_range';
 import { popularizeField } from '../helpers/popularize_field';
 import { getSwitchIndexPatternAppState } from '../helpers/get_switch_index_pattern_app_state';
@@ -63,7 +67,7 @@ import {
 import { resolveIndexPattern, loadIndexPattern } from '../helpers/resolve_index_pattern';
 import { getTopNavLinks } from '../components/top_nav/get_top_nav_links';
 import { updateSearchSource } from '../helpers/update_search_source';
-import { setBreadcrumbsTitle } from '../helpers/set_breadcrumbs_title';
+import { calcFieldCounts } from '../helpers/calc_field_counts';
 
 const services = getServices();
 
@@ -621,16 +625,11 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
     $scope.hits = resp.hits.total;
     $scope.rows = resp.hits.hits;
 
-    // if we haven't counted yet, reset the counts
-    const counts = ($scope.fieldCounts = $scope.fieldCounts || {});
-
-    $scope.rows.forEach((hit) => {
-      const fields = Object.keys($scope.indexPattern.flattenHit(hit));
-      fields.forEach((fieldName) => {
-        counts[fieldName] = (counts[fieldName] || 0) + 1;
-      });
-    });
-
+    $scope.fieldCounts = calcFieldCounts(
+      $scope.fieldCounts || {},
+      resp.hits.hits,
+      $scope.indexPattern
+    );
     $scope.fetchStatus = fetchStatuses.COMPLETE;
   }
 
@@ -656,13 +655,6 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
       from: dateMath.parse(from),
       to: dateMath.parse(to, { roundUp: true }),
     };
-  };
-
-  $scope.toMoment = function (datetime) {
-    if (!datetime) {
-      return;
-    }
-    return moment(datetime).format(config.get('dateFormat'));
   };
 
   $scope.resetQuery = function () {
