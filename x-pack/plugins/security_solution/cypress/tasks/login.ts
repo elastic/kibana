@@ -134,7 +134,7 @@ export const loginWithRole = async (role: string) => {
  * To speed the execution of tests, prefer this non-interactive authentication,
  * which is faster than authentication via Kibana's interactive login page.
  */
-export const login = (role: string | undefined) => {
+export const login = (role?: string) => {
   if (role != null) {
     loginWithRole(role);
   } else if (credentialsProvidedByEnvironment()) {
@@ -215,7 +215,7 @@ const loginViaConfig = () => {
  * Authenticates with Kibana, visits the specified `url`, and waits for the
  * Kibana global nav to be displayed before continuing
  */
-export const loginAndWaitForPage = (url: string, role: string | undefined) => {
+export const loginAndWaitForPage = (url: string, role?: string) => {
   login(role);
   cy.viewport('macbook-15');
   cy.visit(
@@ -224,14 +224,14 @@ export const loginAndWaitForPage = (url: string, role: string | undefined) => {
   cy.get('[data-test-subj="headerGlobalNav"]');
 };
 
-export const loginAndWaitForPageWithoutDateRange = (url: string, role: string | undefined) => {
+export const loginAndWaitForPageWithoutDateRange = (url: string, role?: string) => {
   login(role);
   cy.viewport('macbook-15');
   cy.visit(role ? getUrlWithRoute(role, url) : url);
   cy.get('[data-test-subj="headerGlobalNav"]', { timeout: 120000 });
 };
 
-export const loginAndWaitForTimeline = (timelineId: string, role: string | undefined) => {
+export const loginAndWaitForTimeline = (timelineId: string, role?: string) => {
   const route = `/app/security/timelines?timeline=(id:'${timelineId}',isOpen:!t)`;
 
   login(role);
