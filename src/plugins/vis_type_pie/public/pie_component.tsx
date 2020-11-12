@@ -70,6 +70,12 @@ export interface PieComponentProps {
 }
 
 export type PieComponentType = typeof PieComponent;
+interface BucketColumns extends DatatableColumn {
+  format?: {
+    id?: string;
+    params?: { pattern?: string; [key: string]: any };
+  };
+}
 
 const EMPTY_SLICE = Symbol('empty_slice');
 
@@ -82,12 +88,14 @@ const PieComponent = (props: PieComponentProps) => {
   const chartBaseTheme = getThemeService().useChartsBaseTheme();
   const defaultPalette = getColorsService().getAll()[0];
 
-  const [showLegend, setShowLegend] = useState<boolean>(() => {
-    // TODO: Check when this bwc can safely be removed
-    const bwcLegendStateDefault =
-      props.visParams.addLegend == null ? true : props.visParams.addLegend;
-    return props.uiState?.get('vis.legendOpen', bwcLegendStateDefault) as boolean;
-  });
+  // const [showLegend, setShowLegend] = useState<boolean>(() => {
+  //   // TODO: Check when this bwc can safely be removed
+  //   const bwcLegendStateDefault =
+  //     props.visParams.addLegend == null ? true : props.visParams.addLegend;
+  //   return props.uiState?.get('vis.legendOpen', bwcLegendStateDefault) as boolean;
+  // });
+
+  const [showLegend, setShowLegend] = useState(true);
 
   const fillLabel: Partial<PartitionFillLabel> = {
     textInvertible: true,
@@ -239,6 +247,10 @@ const PieComponent = (props: PieComponentProps) => {
     circlePadding: 4,
     emptySizeRatio: visParams.isDonut ? 0.3 : 0,
   };
+  if (!visParams.labels.show) {
+    // Force all labels to be linked, then prevent links from showing
+    config.linkLabel = { maxCount: 0, maximumSection: Number.POSITIVE_INFINITY };
+  }
 
   const metricColumn = visData.columns[visParams.dimensions.metric.accessor];
   const metricFieldFormatter = getFormatService().deserialize(visParams.dimensions.metric.format);
@@ -249,10 +261,10 @@ const PieComponent = (props: PieComponentProps) => {
     },
   });
 
-  const bucketColumns: DatatableColumn[] = [];
+  const bucketColumns: BucketColumns[] = [];
   if (visParams.dimensions.buckets) {
     visParams.dimensions.buckets.forEach((b) => {
-      bucketColumns.push(visData.columns[b.accessor]);
+      bucketColumns.push({ ...visData.columns[b.accessor], format: b.format });
     });
   } else {
     bucketColumns.push(visData.columns[0]);
@@ -269,12 +281,9 @@ const PieComponent = (props: PieComponentProps) => {
       groupByRollup: (d: Datum) => d[col.id] ?? EMPTY_SLICE,
       showAccessor: (d: Datum) => d !== EMPTY_SLICE,
       nodeLabel: (d: unknown) => {
-        if (!visParams.labels.show || d === EMPTY_SLICE) {
-          return '';
+        if (col.meta.params) {
+          return getFormatService().deserialize(col.format).convert(d) ?? '';
         }
-        // if (col.meta.params) {
-        //   return getFormatService().deserialize(col.format).convert(d) ?? '';
-        // }
         return String(d);
       },
       fillLabel,
@@ -317,7 +326,7 @@ const PieComponent = (props: PieComponentProps) => {
         <Settings
           showLegend={showLegend}
           legendPosition={visParams.legendPosition || Position.Right}
-          legendMaxDepth={1}
+          legendMaxDepth={undefined}
           // onElementClick={(args) => {
           //   const context = getFilterContext(args[0][0] as LayerValue[], groups, firstTable);
 
@@ -332,9 +341,11 @@ const PieComponent = (props: PieComponentProps) => {
           data={visData.rows}
           valueAccessor={(d: Datum) => getSliceValue(d, metricColumn)}
           percentFormatter={(d: number) => percentFormatter.convert(d / 100)}
-          valueGetter={!visParams.labels.show ? undefined : 'percent'}
+          valueGetter={!visParams.labels.show || !visParams.labels.values ? undefined : 'percent'}
           valueFormatter={(d: number) =>
-            !visParams.labels.show ? '' : metricFieldFormatter.convert(d)
+            !visParams.labels.show || !visParams.labels.values
+              ? ''
+              : metricFieldFormatter.convert(d)
           }
           layers={layers}
           config={config}
