@@ -29,6 +29,7 @@ import { SAMPLE_SIZE_SETTING } from '../../../common';
 describe('updateSearchSource', () => {
   test('updates a given search source', async () => {
     const searchSourceMock = createSearchSourceMock({});
+    const sampleSize = 250;
     const result = updateSearchSource(searchSourceMock, {
       indexPattern: indexPatternMock,
       services: ({
@@ -36,7 +37,7 @@ describe('updateSearchSource', () => {
         uiSettings: ({
           get: (key: string) => {
             if (key === SAMPLE_SIZE_SETTING) {
-              return 500;
+              return sampleSize;
             }
             return false;
           },
@@ -44,81 +45,7 @@ describe('updateSearchSource', () => {
       } as unknown) as DiscoverServices,
       state: ({ sort: [] } as unknown) as AppState,
     });
-    expect(result).toMatchInlineSnapshot(`
-      SearchSource {
-        "dependencies": Object {
-          "getConfig": [MockFunction],
-          "legacy": Object {
-            "callMsearch": [MockFunction],
-            "loadingCount$": BehaviorSubject {
-              "_isScalar": false,
-              "_value": 0,
-              "closed": false,
-              "hasError": false,
-              "isStopped": false,
-              "observers": Array [],
-              "thrownError": null,
-            },
-          },
-          "onResponse": [MockFunction],
-          "search": [MockFunction],
-        },
-        "fields": Object {
-          "index": Object {
-            "fields": Array [
-              Object {
-                "filterable": true,
-                "name": "_index",
-                "scripted": false,
-                "type": "string",
-              },
-              Object {
-                "filterable": false,
-                "name": "message",
-                "scripted": false,
-                "type": "string",
-              },
-              Object {
-                "filterable": true,
-                "name": "extension",
-                "scripted": false,
-                "type": "string",
-              },
-              Object {
-                "filterable": true,
-                "name": "bytes",
-                "scripted": false,
-                "type": "number",
-              },
-              Object {
-                "filterable": false,
-                "name": "scripted",
-                "scripted": true,
-                "type": "number",
-              },
-            ],
-            "flattenHit": [Function],
-            "formatHit": [MockFunction],
-            "getComputedFields": [Function],
-            "getFieldByName": [Function],
-            "getSourceFiltering": [Function],
-            "id": "the-index-pattern-id",
-            "metaFields": Array [
-              "_index",
-              "_score",
-            ],
-            "title": "the-index-pattern-title",
-          },
-          "size": 500,
-          "sort": Array [],
-        },
-        "history": Array [],
-        "id": "data_source1",
-        "inheritOptions": Object {},
-        "parent": undefined,
-        "requestStartHandlers": Array [],
-        "searchStrategyId": undefined,
-      }
-    `);
+    expect(result.getField('index')).toEqual(indexPatternMock);
+    expect(result.getField('size')).toEqual(sampleSize);
   });
 });
