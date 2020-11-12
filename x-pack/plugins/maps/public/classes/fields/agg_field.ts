@@ -12,6 +12,8 @@ import { isMetricCountable } from '../util/is_metric_countable';
 import { IESAggFieldParams } from './agg_field_types';
 import { addFieldToDSL, getField } from '../../../common/elasticsearch_util';
 
+const TERMS_AGG_SHARD_SIZE = 5;
+
 export interface IESFieldedAggParams extends IESAggFieldParams {
   esDocField?: IField;
   aggType: AGG_TYPE;
@@ -37,25 +39,29 @@ export class AggField extends CountAggField {
 
   supportsFieldMeta(): boolean {
     // count and sum aggregations are not within field bounds so they do not support field meta.
-    return !isMetricCountable(this.getAggType());
+    return !isMetricCountable(this._getAggType());
   }
 
   canValueBeFormatted(): boolean {
-    // Do not use field formatters for counting metrics
-    return ![AGG_TYPE.COUNT, AGG_TYPE.UNIQUE_COUNT].includes(this.getAggType());
+    return this._getAggType() !== AGG_TYPE.UNIQUE_COUNT;
   }
 
-  getAggType(): AGG_TYPE {
+  _getAggType(): AGG_TYPE {
     return this._aggType;
   }
 
   getValueAggDsl(indexPattern: IndexPattern): unknown {
     const field = getField(indexPattern, this.getRootName());
-    const aggType = this.getAggType();
+    const aggType = this._getAggType();
     const aggBody = aggType === AGG_TYPE.TERMS ? { size: 1, shard_size: TERMS_AGG_SHARD_SIZE } : {};
     return {
       [aggType]: addFieldToDSL(aggBody, field),
     };
+  }
+
+  getBucketCount(): number {
+    // terms aggregation increases the overall number of buckets per split bucket
+    return this._getAggType() === AGG_TYPE.TERMS ? TERMS_AGG_SHARD_SIZE : 0;
   }
 
   async getOrdinalFieldMetaRequest(): Promise<unknown> {

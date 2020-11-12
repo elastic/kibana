@@ -12,8 +12,6 @@ import { ITooltipProperty, TooltipProperty } from '../tooltips/tooltip_property'
 import { ESAggTooltipProperty } from '../tooltips/es_agg_tooltip_property';
 import { IESAggField, IESAggFieldParams } from './agg_field_types';
 
-const TERMS_AGG_SHARD_SIZE = 5;
-
 // Agg without field. Essentially a count-aggregation.
 export class CountAggField implements IESAggField {
   private readonly _source: IESAggSource;
@@ -28,6 +26,14 @@ export class CountAggField implements IESAggField {
     this._canReadFromGeoJson = canReadFromGeoJson;
   }
 
+  _getESDocFieldName(): string {
+    return '';
+  }
+
+  _getAggType(): AGG_TYPE {
+    return AGG_TYPE.COUNT;
+  }
+
   getSource(): IVectorSource {
     return this._source;
   }
@@ -37,7 +43,7 @@ export class CountAggField implements IESAggField {
   }
 
   getName(): string {
-    return this._source.getAggKey(this.getAggType(), this.getRootName());
+    return this._source.getAggKey(this._getAggType(), this.getRootName());
   }
 
   getRootName(): string {
@@ -47,11 +53,7 @@ export class CountAggField implements IESAggField {
   async getLabel(): Promise<string> {
     return this._label
       ? this._label
-      : this._source.getAggLabel(this.getAggType(), this.getRootName());
-  }
-
-  getAggType(): AGG_TYPE {
-    return AGG_TYPE.COUNT;
+      : this._source.getAggLabel(this._getAggType(), this.getRootName());
   }
 
   isValid(): boolean {
@@ -59,31 +61,25 @@ export class CountAggField implements IESAggField {
   }
 
   async getDataType(): Promise<string> {
-    return this.getAggType() === AGG_TYPE.TERMS ? 'string' : 'number';
-  }
-
-  _getESDocFieldName(): string {
-    return '';
+    return this._getAggType() === AGG_TYPE.TERMS ? 'string' : 'number';
   }
 
   async createTooltipProperty(value: string | string[] | undefined): Promise<ITooltipProperty> {
     const indexPattern = await this._source.getIndexPattern();
     const tooltipProperty = new TooltipProperty(this.getName(), await this.getLabel(), value);
-    return new ESAggTooltipProperty(tooltipProperty, indexPattern, this, this.getAggType());
+    return new ESAggTooltipProperty(tooltipProperty, indexPattern, this, this._getAggType());
   }
 
   getValueAggDsl(indexPattern: IndexPattern): unknown | null {
     return null;
   }
 
-  getBucketCount(): number {
-    // terms aggregation increases the overall number of buckets per split bucket
-    return this.getAggType() === AGG_TYPE.TERMS ? TERMS_AGG_SHARD_SIZE : 0;
+  supportsFieldMeta(): boolean {
+    return false;
   }
 
-  supportsFieldMeta(): boolean {
-    // count and sum aggregations are not within field bounds so they do not support field meta.
-    return false;
+  getBucketCount() {
+    return 0;
   }
 
   canValueBeFormatted(): boolean {
