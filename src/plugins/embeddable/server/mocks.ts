@@ -17,14 +17,14 @@
  * under the License.
  */
 
-import { EmbeddableInput } from '..';
+import { createEmbeddablePersistableStateServiceMock } from '../common/mocks';
+import { EmbeddableSetup, EmbeddableStart } from './plugin';
 
-export interface SavedObjectEmbeddableInput extends EmbeddableInput {
-  savedObjectId: string;
-}
+export const createEmbeddableSetupMock = (): jest.Mocked<EmbeddableSetup> => ({
+  ...createEmbeddablePersistableStateServiceMock(),
+  registerEmbeddableFactory: jest.fn(),
+  registerEnhancement: jest.fn(),
+});
 
-export function isSavedObjectEmbeddableInput(
-  input: EmbeddableInput | SavedObjectEmbeddableInput
-): input is SavedObjectEmbeddableInput {
-  return Boolean((input as SavedObjectEmbeddableInput).savedObjectId);
-}
+export const createEmbeddableStartMock = (): jest.Mocked<EmbeddableStart> =>
+  createEmbeddablePersistableStateServiceMock();
