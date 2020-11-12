@@ -6,7 +6,7 @@
 
 export default function ({ loadTestFile }) {
   describe('Fleet Endpoints', function () {
-    this.tags('ciGroup7');
+    this.tags('ciGroup10');
     // Fleet setup
     loadTestFile(require.resolve('./setup'));
     // Agent setup
