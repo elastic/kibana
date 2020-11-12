@@ -20,9 +20,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
-  CustomConfigurePackagePolicyContent,
-  CustomConfigurePackagePolicyProps,
   pagePathGetters,
+  PackagePolicyEditExtensionComponentProps,
 } from '../../../../../../../fleet/public';
 import { getPolicyDetailPath, getTrustedAppsListPath } from '../../../../common/routing';
 import { MANAGEMENT_APP_ID } from '../../../../common/constants';
@@ -37,42 +36,21 @@ import { useNavigateToAppEventHandler } from '../../../../../common/hooks/endpoi
  * Exports Endpoint-specific package policy instructions
  * for use in the Ingest app create / edit package policy
  */
-export const ConfigureEndpointPackagePolicy = memo<CustomConfigurePackagePolicyContent>(
-  ({
-    from,
-    packagePolicyId,
-    packagePolicy: { policy_id: agentPolicyId },
-  }: CustomConfigurePackagePolicyProps) => {
+export const EndpointPolicyEditExtension = memo<PackagePolicyEditExtensionComponentProps>(
+  ({ policy }) => {
     return (
       <>
         <EuiSpacer size="m" />
-        <EuiCallOut
-          data-test-subj={`endpointPackagePolicy_${from === 'edit' ? 'edit' : 'create'}`}
-          iconType="iInCircle"
-        >
+        <EuiCallOut data-test-subj="endpointPackagePolicy_edit" iconType="iInCircle">
           <EuiText size="s">
-            {from === 'edit' ? (
-              <>
-                <EditFlowMessage
-                  agentPolicyId={agentPolicyId}
-                  integrationPolicyId={packagePolicyId!}
-                />
-              </>
-            ) : (
-              <p>
-                <FormattedMessage
-                  id="xpack.securitySolution.endpoint.ingestManager.createPackagePolicy.endpointConfiguration"
-                  defaultMessage="We'll save your integration with our recommended defaults. You can change this later by editing the Endpoint Security integration within your agent policy."
-                />
-              </p>
-            )}
+            <EditFlowMessage agentPolicyId={policy.policy_id} integrationPolicyId={policy.id} />
           </EuiText>
         </EuiCallOut>
       </>
     );
   }
 );
-ConfigureEndpointPackagePolicy.displayName = 'ConfigureEndpointPackagePolicy';
+EndpointPolicyEditExtension.displayName = 'EndpointPolicyEditExtension';
 
 const EditFlowMessage = memo<{
   agentPolicyId: string;
