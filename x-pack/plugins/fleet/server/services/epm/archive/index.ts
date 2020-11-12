@@ -15,9 +15,15 @@ import {
 } from './cache';
 import { getBufferExtractor } from './extract';
 
+
 export * from './cache';
 export { untarBuffer, unzipBuffer, getBufferExtractor } from './extract';
 export { parseAndVerifyArchiveEntries } from './validation';
+
+import { parseAndVerifyArchiveEntries } from './validation';
+
+
+
 
 export interface ArchiveEntry {
   path: string;
