@@ -4,8 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { esAggFieldsFactory } from './es_agg_field';
+import { esAggFieldsFactory } from './es_agg_factory';
 import { AGG_TYPE, FIELD_ORIGIN } from '../../../common/constants';
+import { IESAggSource } from '../sources/es_agg_source';
+
+const mockEsAggSource = {
+  getAggKey: (aggType: AGG_TYPE, fieldName: string) => {
+    return 'agg_key';
+  },
+  getAggLabel: (aggType: AGG_TYPE, fieldName: string) => {
+    return 'agg_label';
+  },
+  getIndexPattern: async () => {
+    return mockIndexPattern;
+  },
+} as IESAggSource;
 
 describe('esAggFieldsFactory', () => {
   test('Should only create top terms field when term field is not provided', () => {

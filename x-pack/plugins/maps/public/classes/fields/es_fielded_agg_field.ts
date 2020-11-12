@@ -15,7 +15,7 @@ export interface IESFieldedAggParams extends IESAggFieldParams {
   aggType: AGG_TYPE;
 }
 
-export class ESFieldedAgg extends ESAggField {
+export class ESFieldedAggField extends ESAggField {
   private readonly _esDocField?: IField;
   private readonly _aggType: AGG_TYPE;
 

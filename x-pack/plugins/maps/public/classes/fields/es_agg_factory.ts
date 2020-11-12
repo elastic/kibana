@@ -10,7 +10,7 @@ import { AGG_TYPE, FIELD_ORIGIN } from '../../../common/constants';
 import { ESDocField } from './es_doc_field';
 import { TopTermPercentageField } from './top_term_percentage_field';
 import { ESAggField, IESAggField } from './es_agg_field';
-import { ESFieldedAgg } from './es_fielded_agg';
+import { ESFieldedAggField } from './es_fielded_agg';
 
 export function esAggFieldsFactory(
   aggDescriptor: AggDescriptor,
@@ -27,7 +27,7 @@ export function esAggFieldsFactory(
       canReadFromGeoJson,
     });
   } else {
-    aggField = new ESFieldedAgg({
+    aggField = new ESFieldedAggField({
       label: aggDescriptor.label,
       esDocField: aggDescriptor.field
         ? new ESDocField({ fieldName: aggDescriptor.field, source, origin })
