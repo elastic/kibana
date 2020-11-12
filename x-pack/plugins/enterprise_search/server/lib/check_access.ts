@@ -61,7 +61,7 @@ export const checkAccess = async ({
   if (spaces && attemptSpaceRetrieval) {
     try {
       const space = await spaces.spacesService.getActiveSpace(request);
-      allowedAtSpace = !space.disabledFeatures?.includes('enterpriseSearch') ?? true;
+      allowedAtSpace = !space.disabledFeatures?.includes('enterpriseSearch');
     } catch (err) {
       if (err?.output?.statusCode === 403) {
         allowedAtSpace = false;

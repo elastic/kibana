@@ -16,13 +16,13 @@ export type SpacesClientWrapper = (
 
 type RepositoryFactory = (
   request: KibanaRequest,
-  savedObjectsStart: CoreStart['savedObjects']
+  savedObjectsStart: SavedObjectsServiceStart
 ) => ISavedObjectsRepository;
 
 export interface SpacesClientServiceSetup {
   /**
    * Sets the factory that should be used to create the Saved Objects Repository
-   * whenever a new instance of the SpaceClient is created. By default, a repository
+   * whenever a new instance of the SpacesClient is created. By default, a repository
    * scoped the current user will be created.
    */
   setRepositoryFactory: (factory: RepositoryFactory) => void;
@@ -47,7 +47,7 @@ export interface SpacesClientServiceStart {
 export class SpacesClientService {
   private repositoryFactory?: RepositoryFactory;
 
-  private savedObjectsStart?: CoreStart['savedObjects'];
+  private savedObjectsStart?: SavedObjectsServiceStart;
 
   private config?: ConfigType;
 

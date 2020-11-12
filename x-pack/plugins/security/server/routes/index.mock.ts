@@ -16,7 +16,7 @@ import { ConfigSchema, createConfig } from '../config';
 import { licenseMock } from '../../common/licensing/index.mock';
 import { sessionMock } from '../session_management/session.mock';
 import { RouteDefinitionParams } from '.';
-import { DeeplyMockedKeys } from '@kbn/utility-types/target/jest';
+import { DeeplyMockedKeys } from '@kbn/utility-types/jest';
 
 export const routeDefinitionParamsMock = {
   create: (config: Record<string, unknown> = {}) =>

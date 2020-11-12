@@ -33,12 +33,12 @@ interface GetAllSpacesOptions {
 }
 
 export class SecureSpacesClientWrapper implements ISpacesClient {
-  private useRbac: boolean;
+  private readonly useRbac = this.authorization.mode.useRbacForRequest(this.request);
 
   constructor(
     private readonly spacesClient: ISpacesClient,
     private readonly request: KibanaRequest,
-    private readonly authorization: SecurityPluginSetup['authz'],
+    private readonly authorization: AuthorizationServiceSetup,
     private readonly legacyAuditLogger: LegacySpacesAuditLogger
   ) {
     this.useRbac = authorization.mode.useRbacForRequest(request);
@@ -56,14 +56,14 @@ export class SecureSpacesClientWrapper implements ISpacesClient {
 
     const spaceIds = allSpaces.map((space: Space) => space.id);
 
-    const checkPrivileges = this.authorization!.checkPrivilegesWithRequest(this.request);
+    const checkPrivileges = this.authorization.checkPrivilegesWithRequest(this.request);
 
     // Collect all privileges which need to be checked
     const allPrivileges = Object.entries(PURPOSE_PRIVILEGE_MAP).reduce(
       (acc, [getSpacesPurpose, privilegeFactory]) =>
         !includeAuthorizedPurposes && getSpacesPurpose !== purpose
           ? acc
-          : { ...acc, [getSpacesPurpose]: privilegeFactory(this.authorization!) },
+          : { ...acc, [getSpacesPurpose]: privilegeFactory(this.authorization) },
       {} as Record<GetAllSpacesPurpose, string[]>
     );
 
@@ -85,7 +85,7 @@ export class SecureSpacesClientWrapper implements ISpacesClient {
       .map((space: Space) => {
         if (!includeAuthorizedPurposes) {
           // Check if the user is authorized for a single purpose
-          const requiredActions = PURPOSE_PRIVILEGE_MAP[purpose!](this.authorization!);
+          const requiredActions = PURPOSE_PRIVILEGE_MAP[purpose](this.authorization);
           return checkHasAllRequired(space, requiredActions) ? space : null;
         }
 
@@ -93,7 +93,7 @@ export class SecureSpacesClientWrapper implements ISpacesClient {
         let hasAnyAuthorization = false;
         const authorizedPurposes = Object.entries(PURPOSE_PRIVILEGE_MAP).reduce(
           (acc, [purposeKey, privilegeFactory]) => {
-            const requiredActions = privilegeFactory(this.authorization!);
+            const requiredActions = privilegeFactory(this.authorization);
             const hasAllRequired = checkHasAllRequired(space, requiredActions);
             hasAnyAuthorization = hasAnyAuthorization || hasAllRequired;
             return { ...acc, [purposeKey]: hasAllRequired };
@@ -119,7 +119,7 @@ export class SecureSpacesClientWrapper implements ISpacesClient {
     return authorizedSpaces;
   }
 
-  public async get(id: string): Promise<Space> {
+  public async get(id: string) {
     if (this.useRbac) {
       await this.ensureAuthorizedAtSpace(
         id,
@@ -132,7 +132,7 @@ export class SecureSpacesClientWrapper implements ISpacesClient {
     return this.spacesClient.get(id);
   }
 
-  public async create(space: Space): Promise<Space> {
+  public async create(space: Space) {
     if (this.useRbac) {
       await this.ensureAuthorizedGlobally(
         this.authorization.actions.space.manage,
@@ -144,7 +144,7 @@ export class SecureSpacesClientWrapper implements ISpacesClient {
     return this.spacesClient.create(space);
   }
 
-  public async update(id: string, space: Space): Promise<Space> {
+  public async update(id: string, space: Space) {
     if (this.useRbac) {
       await this.ensureAuthorizedGlobally(
         this.authorization.actions.space.manage,
@@ -156,7 +156,7 @@ export class SecureSpacesClientWrapper implements ISpacesClient {
     return this.spacesClient.update(id, space);
   }
 
-  public async delete(id: string): Promise<void> {
+  public async delete(id: string) {
     if (this.useRbac) {
       await this.ensureAuthorizedGlobally(
         this.authorization.actions.space.manage,
@@ -174,7 +174,6 @@ export class SecureSpacesClientWrapper implements ISpacesClient {
 
     if (hasAllRequested) {
       this.legacyAuditLogger.spacesAuthorizationSuccess(username, method);
-      return;
     } else {
       this.legacyAuditLogger.spacesAuthorizationFailure(username, method);
       throw Boom.forbidden(forbiddenMessage);
@@ -187,14 +186,13 @@ export class SecureSpacesClientWrapper implements ISpacesClient {
     method: string,
     forbiddenMessage: string
   ) {
-    const checkPrivileges = this.authorization!.checkPrivilegesWithRequest(this.request);
+    const checkPrivileges = this.authorization.checkPrivilegesWithRequest(this.request);
     const { username, hasAllRequested } = await checkPrivileges.atSpace(spaceId, {
       kibana: action,
     });
 
     if (hasAllRequested) {
       this.legacyAuditLogger.spacesAuthorizationSuccess(username, method, [spaceId]);
-      return;
     } else {
       this.legacyAuditLogger.spacesAuthorizationFailure(username, method, [spaceId]);
       throw Boom.forbidden(forbiddenMessage);
