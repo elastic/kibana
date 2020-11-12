@@ -62,7 +62,10 @@ export const serializeMigrateAndAllocateActions = (
       }
       break;
     case 'none':
-      actions.migrate = { enabled: false };
+      actions.migrate = {
+        ...originalActions?.migrate,
+        enabled: false,
+      };
       break;
     default:
   }

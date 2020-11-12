@@ -51,6 +51,12 @@ export const createSerializer = (originalPolicy?: SerializedPolicy) => (
           hotPhaseActions.rollover.max_size = `${hotPhaseActions.rollover.max_size}${_meta.hot.maxStorageSizeUnit}`;
         }
 
+        if (!updatedPolicy.phases.hot!.actions?.forcemerge) {
+          delete hotPhaseActions.forcemerge;
+        } else if (_meta.hot.bestCompression) {
+          hotPhaseActions.forcemerge!.index_codec = 'best_compression';
+        }
+
         if (_meta.hot.bestCompression && hotPhaseActions.forcemerge) {
           hotPhaseActions.forcemerge.index_codec = 'best_compression';
         }
@@ -93,7 +99,7 @@ export const createSerializer = (originalPolicy?: SerializedPolicy) => (
         warmPhase.actions.forcemerge!.index_codec = 'best_compression';
       }
 
-      if (!updatedPolicy.phases.warm!.actions?.set_priority && warmPhase.actions.set_priority) {
+      if (!updatedPolicy.phases.warm!.actions?.set_priority) {
         delete warmPhase.actions.set_priority;
       }
 
@@ -121,7 +127,7 @@ export const createSerializer = (originalPolicy?: SerializedPolicy) => (
       );
 
       if (_meta.cold.freezeEnabled) {
-        coldPhase.actions.freeze = {};
+        coldPhase.actions.freeze = coldPhase.actions.freeze ?? {};
       } else {
         delete coldPhase.actions.freeze;
       }
