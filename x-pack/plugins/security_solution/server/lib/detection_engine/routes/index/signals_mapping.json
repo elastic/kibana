@@ -334,12 +334,12 @@
           "status": {
             "type": "keyword"
           },
-          "threshold_bucket": {
+          "threshold_result": {
             "properties": {
               "count": {
-                "type": "float"
+                "type": "long"
               },
-              "match_value": {
+              "value": {
                 "type": "keyword"
               }
             }

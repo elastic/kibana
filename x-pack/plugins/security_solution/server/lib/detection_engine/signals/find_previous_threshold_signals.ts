@@ -42,7 +42,7 @@ export const findPreviousThresholdSignals = async ({
   const aggregations = {
     threshold: {
       terms: {
-        field: 'signal.threshold_bucket.match_value',
+        field: 'signal.threshold_result.value',
       },
       aggs: {
         lastSignalTimestamp: {

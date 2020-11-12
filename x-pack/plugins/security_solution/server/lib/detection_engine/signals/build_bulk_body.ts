@@ -71,8 +71,7 @@ export const buildBulkBody = ({
     ...buildSignal([doc], rule),
     ...additionalSignalFields(doc),
   };
-  delete doc._source.threshold_count; // TODO: remove/deprecate
-  delete doc._source.threshold_bucket;
+  delete doc._source.threshold_result;
   const event = buildEventTypeSignal(doc);
   const signalHit: SignalHit = {
     ...doc._source,
