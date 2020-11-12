@@ -41,11 +41,9 @@ import {
   UiSettingsPublicToCommon,
 } from './index_patterns';
 import {
-  setFieldFormats,
   setIndexPatterns,
   setNotifications,
   setOverlays,
-  setQueryService,
   setSearchService,
   setUiSettings,
 } from './services';
@@ -159,7 +157,7 @@ export class DataPublicPlugin
     });
 
     return {
-      autocomplete: this.autocomplete.setup(core),
+      autocomplete: this.autocomplete.setup(core, { timefilter: queryService.timefilter }),
       search: searchService,
       fieldFormats: this.fieldFormatsService.setup(core),
       query: queryService,
@@ -176,7 +174,6 @@ export class DataPublicPlugin
     setUiSettings(uiSettings);
 
     const fieldFormats = this.fieldFormatsService.start();
-    setFieldFormats(fieldFormats);
 
     const indexPatterns = new IndexPatternsService({
       uiSettings: new UiSettingsPublicToCommon(uiSettings),
@@ -200,7 +197,6 @@ export class DataPublicPlugin
       savedObjectsClient: savedObjects.client,
       uiSettings,
     });
-    setQueryService(query);
 
     const search = this.searchService.start(core, { fieldFormats, indexPatterns });
     setSearchService(search);
