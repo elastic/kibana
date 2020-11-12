@@ -635,20 +635,20 @@ export const EndpointList = () => {
       {hasListData && (
         <>
           <EuiText color="subdued" size="xs" data-test-subj="endpointListTableTotal">
-            <FormattedMessage
-              id="xpack.securitySolution.endpoint.list.totalCount"
-              defaultMessage="{totalItemCount, plural, one {# Host} other {# Hosts}}"
-              values={{ totalItemCount }}
-            />
-          </EuiText>
-          {totalItemCount > MAX_PAGINATED_ITEM && (pageIndex + 1) * pageSize >= MAX_PAGINATED_ITEM && (
-            <EuiCallOut size="s" color="warning">
+            {totalItemCount > MAX_PAGINATED_ITEM + 1 ? (
               <FormattedMessage
-                id="xpack.securitySolution.endpoint.list.maxItem"
-                defaultMessage="we are only showing the first 10k. Changeme."
+                id="xpack.securitySolution.endpoint.list.totalCount"
+                defaultMessage="Showing {limit} of {totalItemCount, plural, one {# Host} other {# Hosts}}"
+                values={{ totalItemCount, limit: MAX_PAGINATED_ITEM + 1 }}
               />
-            </EuiCallOut>
-          )}
+            ) : (
+              <FormattedMessage
+                id="xpack.securitySolution.endpoint.list.totalCount"
+                defaultMessage="{totalItemCount, plural, one {# Host} other {# Hosts}}"
+                values={{ totalItemCount }}
+              />
+            )}
+          </EuiText>
           <EuiHorizontalRule margin="xs" />
         </>
       )}
