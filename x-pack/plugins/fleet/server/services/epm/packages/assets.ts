@@ -6,7 +6,7 @@
 
 import { InstallablePackage } from '../../../types';
 import * as Registry from '../registry';
-import { getArchiveFilelist } from '../archive/cache';
+import { ArchiveEntry, getArchiveFilelist, getAsset } from '../archive';
 
 // paths from RegistryPackage are routes to the assets on EPR
 // e.g. `/package/nginx/1.2.0/data_stream/access/fields/fields.yml`
@@ -51,15 +51,15 @@ export async function getAssetsData(
   packageInfo: InstallablePackage,
   filter = (path: string): boolean => true,
   datasetName?: string
-): Promise<Registry.ArchiveEntry[]> {
+): Promise<ArchiveEntry[]> {
   // TODO: Needs to be called to fill the cache but should not be required
 
   await Registry.ensureCachedArchiveInfo(packageInfo.name, packageInfo.version, 'registry');
 
   // Gather all asset data
   const assets = getAssets(packageInfo, filter, datasetName);
-  const entries: Registry.ArchiveEntry[] = assets.map((path) => {
-    const buffer = Registry.getAsset(path);
+  const entries: ArchiveEntry[] = assets.map((path) => {
+    const buffer = getAsset(path);
 
     return { path, buffer };
   });
