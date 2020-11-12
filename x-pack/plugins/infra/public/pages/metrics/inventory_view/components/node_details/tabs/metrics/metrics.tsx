@@ -4,7 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, useMemo, useRef } from 'react';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+import { NumberListProps } from '../../../../../../../../../../../src/plugins/vis_default_editor/public/components/controls/components/number_list/number_list';
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { first, last } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import {
@@ -17,35 +24,50 @@ import {
   PointerEvent,
 } from '@elastic/charts';
 import moment from 'moment';
-import { EuiFlexItem, EuiText, EuiFlexGroup, EuiIcon } from '@elastic/eui';
-import { TabContent, TabProps } from './shared';
-import { useSnapshot } from '../../../hooks/use_snaphot';
-import { useWaffleOptionsContext } from '../../../hooks/use_waffle_options';
-import { useSourceContext } from '../../../../../../containers/source';
-import { findInventoryFields } from '../../../../../../../common/inventory_models';
-import { convertKueryToElasticSearchQuery } from '../../../../../../utils/kuery';
-import { SnapshotMetricType } from '../../../../../../../common/inventory_models/types';
+import { TabContent, TabProps } from '../shared';
+import { useSnapshot } from '../../../../hooks/use_snaphot';
+import { useWaffleOptionsContext } from '../../../../hooks/use_waffle_options';
+import { useSourceContext } from '../../../../../../../containers/source';
+import { findInventoryFields } from '../../../../../../../../common/inventory_models';
+import { convertKueryToElasticSearchQuery } from '../../../../../../../utils/kuery';
+import { SnapshotMetricType } from '../../../../../../../../common/inventory_models/types';
 import {
   MetricsExplorerChartType,
   MetricsExplorerOptionsMetric,
-} from '../../../../metrics_explorer/hooks/use_metrics_explorer_options';
-import { Color, colorTransformer } from '../../../../../../../common/color_palette';
+} from '../../../../../metrics_explorer/hooks/use_metrics_explorer_options';
+import { Color } from '../../../../../../../../common/color_palette';
 import {
   MetricsExplorerAggregation,
   MetricsExplorerSeries,
-} from '../../../../../../../common/http_api';
-import { MetricExplorerSeriesChart } from '../../../../metrics_explorer/components/series_chart';
-import { createInventoryMetricFormatter } from '../../../lib/create_inventory_metric_formatter';
-import { calculateDomain } from '../../../../metrics_explorer/components/helpers/calculate_domain';
-import { getTimelineChartTheme } from '../../../../metrics_explorer/components/helpers/get_chart_theme';
-import { useUiSetting } from '../../../../../../../../../../src/plugins/kibana_react/public';
-import { euiStyled } from '../../../../../../../../observability/public';
+} from '../../../../../../../../common/http_api';
+import { MetricExplorerSeriesChart } from '../../../../../metrics_explorer/components/series_chart';
+import { createInventoryMetricFormatter } from '../../../../lib/create_inventory_metric_formatter';
+import { calculateDomain } from '../../../../../metrics_explorer/components/helpers/calculate_domain';
+import { getTimelineChartTheme } from '../../../../../metrics_explorer/components/helpers/get_chart_theme';
+import { useUiSetting } from '../../../../../../../../../../../src/plugins/kibana_react/public';
+import { euiStyled } from '../../../../../../../../../observability/public';
+import { ChartHeader } from './chart_header';
+import {
+  SYSTEM_METRIC_NAME,
+  USER_METRIC_NAME,
+  INBOUND_METRIC_NAME,
+  OUTBOUND_METRIC_NAME,
+  USED_MEMORY_METRIC_NAME,
+  FREE_MEMORY_METRIC_NAME,
+  CPU_CHART_TITLE,
+  LOAD_CHART_TITLE,
+  MEMORY_CHART_TITLE,
+  NETWORK_CHART_TITLE,
+} from './translations';
+import { TimeDropdown } from './time_dropdown';
 
 const TabComponent = (props: TabProps) => {
   const cpuChartRef = useRef<Chart>(null);
   const networkChartRef = useRef<Chart>(null);
   const memoryChartRef = useRef<Chart>(null);
   const loadChartRef = useRef<Chart>(null);
+  const [time, setTime] = useState(60 * 60 * 1000);
+  const chartRefs = [cpuChartRef, networkChartRef, memoryChartRef, loadChartRef];
   const { sourceId, createDerivedIndexPattern } = useSourceContext();
   const { nodeType, accountId, region } = useWaffleOptionsContext();
   const { currentTime, options, node } = props;
@@ -69,28 +91,39 @@ const TabComponent = (props: TabProps) => {
     };
   }, []);
 
-  const metrics: Array<{ type: SnapshotMetricType; [k: string]: any }> = [
-    { type: 'rx' },
-    { type: 'tx' },
-    buildCustomMetric('system.cpu.user.pct', 'user'),
-    buildCustomMetric('system.cpu.system.pct', 'system'),
-    buildCustomMetric('system.load.1', 'load1m'),
-    buildCustomMetric('system.load.5', 'load5m'),
-    buildCustomMetric('system.load.15', 'load15m'),
-    buildCustomMetric('system.memory.actual.used.bytes', 'usedMemory'),
-    buildCustomMetric('system.memory.actual.free', 'freeMemory'),
-  ];
+  const updateTime = useCallback(
+    (e: React.ChangeEvent<HTMLSelectElement>) => {
+      setTime(Number(e.currentTarget.value));
+    },
+    [setTime]
+  );
 
-  const { nodes } = useSnapshot(
+  const { nodes, reload } = useSnapshot(
     filter,
-    metrics,
+    [
+      { type: 'rx' },
+      { type: 'tx' },
+      buildCustomMetric('system.cpu.user.pct', 'user'),
+      buildCustomMetric('system.cpu.system.pct', 'system'),
+      buildCustomMetric('system.load.1', 'load1m'),
+      buildCustomMetric('system.load.5', 'load5m'),
+      buildCustomMetric('system.load.15', 'load15m'),
+      buildCustomMetric('system.memory.actual.used.bytes', 'usedMemory'),
+      buildCustomMetric('system.memory.actual.free', 'freeMemory'),
+    ],
     [],
     nodeType,
     sourceId,
     currentTime,
     accountId,
     region,
-    true
+    false,
+    {
+      interval: '1m',
+      to: currentTime,
+      from: currentTime - time,
+      ignoreLookback: true,
+    }
   );
 
   const getDomain = useCallback(
@@ -118,19 +151,13 @@ const TabComponent = (props: TabProps) => {
     return niceTimeFormatter([firstTimestamp, lastTimestamp]);
   }, []);
 
-  type MetricType = 'network' | 'cpu' | 'memory' | 'load';
-  const getFormatter = useCallback((metric: MetricType) => {
-    switch (metric) {
-      case 'network':
-        return createInventoryMetricFormatter({ type: 'rx' });
-      case 'cpu':
-        return createInventoryMetricFormatter({ type: 'cpu' });
-      case 'memory':
-        return createInventoryMetricFormatter({ type: 'memory' });
-      case 'load':
-        return createInventoryMetricFormatter({ type: 'load' });
-    }
-  }, []);
+  const networkFormatter = useMemo(() => createInventoryMetricFormatter({ type: 'rx' }), []);
+  const cpuFormatter = useMemo(() => createInventoryMetricFormatter({ type: 'cpu' }), []);
+  const memoryFormatter = useMemo(
+    () => createInventoryMetricFormatter({ type: 's3BucketSize' }),
+    []
+  );
+  const loadFormatter = useMemo(() => createInventoryMetricFormatter({ type: 'load' }), []);
 
   const mergeTimeseries = useCallback((...series: MetricsExplorerSeries[]) => {
     const base = series[0];
@@ -145,34 +172,30 @@ const TabComponent = (props: TabProps) => {
     return base;
   }, []);
 
-  const buildChartMetricLabels = useCallback((labels: string[]) => {
-    const baseMetric = {
-      color: Color.color0,
-      aggregation: 'avg' as MetricsExplorerAggregation,
-      label: 'System',
-    };
+  const buildChartMetricLabels = useCallback(
+    (labels: string[], aggregation: MetricsExplorerAggregation) => {
+      const baseMetric = {
+        color: Color.color0,
+        aggregation,
+        label: 'System',
+      };
 
-    return labels.map((label, idx) => {
-      return { ...baseMetric, color: Color[`color${idx}` as Color], label };
-    });
-  }, []);
+      return labels.map((label, idx) => {
+        return { ...baseMetric, color: Color[`color${idx}` as Color], label };
+      });
+    },
+    []
+  );
 
   const pointerUpdate = useCallback(
     (event: PointerEvent) => {
-      if (cpuChartRef.current) {
-        cpuChartRef.current.dispatchExternalPointerEvent(event);
-      }
-      if (loadChartRef.current) {
-        loadChartRef.current.dispatchExternalPointerEvent(event);
-      }
-      if (networkChartRef.current) {
-        networkChartRef.current.dispatchExternalPointerEvent(event);
-      }
-      if (memoryChartRef.current) {
-        memoryChartRef.current.dispatchExternalPointerEvent(event);
-      }
+      chartRefs.forEach((ref) => {
+        if (ref.current) {
+          ref.current.dispatchExternalPointerEvent(event);
+        }
+      });
     },
-    [cpuChartRef, loadChartRef, networkChartRef, memoryChartRef]
+    [chartRefs]
   );
 
   const isDarkMode = useUiSetting<boolean>('theme:darkMode');
@@ -181,59 +204,86 @@ const TabComponent = (props: TabProps) => {
       moment(tooltipValue.value).format('Y-MM-DD HH:mm:ss.SSS'),
   };
 
-  if (!nodes.length) {
+  const getTimeseries = useCallback(
+    (metricName: string) => {
+      if (!nodes || !nodes.length) {
+        return null;
+      }
+      return nodes[0].metrics.find((m) => m.name === metricName)!.timeseries!;
+    },
+    [nodes]
+  );
+
+  const systemMetricsTs = useMemo(() => getTimeseries('system'), [getTimeseries]);
+  const userMetricsTs = useMemo(() => getTimeseries('user'), [getTimeseries]);
+  const rxMetricsTs = useMemo(() => getTimeseries('rx'), [getTimeseries]);
+  const txMetricsTs = useMemo(() => getTimeseries('tx'), [getTimeseries]);
+  const load1mMetricsTs = useMemo(() => getTimeseries('load1m'), [getTimeseries]);
+  const load5mMetricsTs = useMemo(() => getTimeseries('load5m'), [getTimeseries]);
+  const load15mMetricsTs = useMemo(() => getTimeseries('load15m'), [getTimeseries]);
+  const usedMemoryMetricsTs = useMemo(() => getTimeseries('usedMemory'), [getTimeseries]);
+  const freeMemoryMetricsTs = useMemo(() => getTimeseries('freeMemory'), [getTimeseries]);
+
+  useEffect(() => {
+    reload();
+  }, [time, reload]);
+
+  if (
+    !systemMetricsTs ||
+    !userMetricsTs ||
+    !rxMetricsTs ||
+    !txMetricsTs ||
+    !load1mMetricsTs ||
+    !load5mMetricsTs ||
+    !load15mMetricsTs ||
+    !usedMemoryMetricsTs ||
+    !freeMemoryMetricsTs
+  ) {
     return <div />;
   }
 
-  const systemMetrics = nodes[0].metrics.find((m) => m.name === 'system')!;
-  const userMetrics = nodes[0].metrics.find((m) => m.name === 'user')!;
-  const rxMetrics = nodes[0].metrics.find((m) => m.name === 'rx')!;
-  const txMetrics = nodes[0].metrics.find((m) => m.name === 'tx')!;
-  const load1mMetrics = nodes[0].metrics.find((m) => m.name === 'load1m')!;
-  const load5mMetrics = nodes[0].metrics.find((m) => m.name === 'load5m')!;
-  const load15mMetrics = nodes[0].metrics.find((m) => m.name === 'load15m')!;
-  const usedMemoryMetrics = nodes[0].metrics.find((m) => m.name === 'usedMemory')!;
-  const freeMemoryMetrics = nodes[0].metrics.find((m) => m.name === 'freeMemory')!;
-
-  const cpuChartMetrics = buildChartMetricLabels(['System', 'User']);
-  const networkChartMetrics = buildChartMetricLabels(['Network In', 'Network Out']);
-  const loadChartMetrics = buildChartMetricLabels(['Load 1', 'Load 5', 'Load 15']);
-  const memoryChartMetrics = buildChartMetricLabels(['Used', 'Free']);
-
-  const cpuTimeseries = mergeTimeseries(systemMetrics.timeseries!, userMetrics.timeseries!);
-  const networkTimeseries = mergeTimeseries(rxMetrics.timeseries!, txMetrics.timeseries!);
-  const loadTimeseries = mergeTimeseries(
-    load1mMetrics.timeseries!,
-    load5mMetrics.timeseries!,
-    load15mMetrics.timeseries!
+  const cpuChartMetrics = buildChartMetricLabels([SYSTEM_METRIC_NAME, USER_METRIC_NAME], 'avg');
+  const networkChartMetrics = buildChartMetricLabels(
+    [INBOUND_METRIC_NAME, OUTBOUND_METRIC_NAME],
+    'rate'
   );
-  // TODO: get memory stuff
-  const memoryTimeseries = mergeTimeseries(
-    usedMemoryMetrics.timeseries!,
-    freeMemoryMetrics.timeseries!
+  const loadChartMetrics = buildChartMetricLabels(['1m', '5m', '15m'], 'avg');
+  const memoryChartMetrics = buildChartMetricLabels(
+    [USED_MEMORY_METRIC_NAME, FREE_MEMORY_METRIC_NAME],
+    'rate'
   );
 
-  const formatter = dateFormatter(rxMetrics.timeseries!);
+  const cpuTimeseries = mergeTimeseries(systemMetricsTs, userMetricsTs);
+  const networkTimeseries = mergeTimeseries(rxMetricsTs, txMetricsTs);
+  const loadTimeseries = mergeTimeseries(load1mMetricsTs, load5mMetricsTs, load15mMetricsTs);
+  const memoryTimeseries = mergeTimeseries(usedMemoryMetricsTs, freeMemoryMetricsTs);
+
+  const formatter = dateFormatter(rxMetricsTs);
 
   return (
     <TabContent>
+      <div>
+        <TimepickerWrapper>
+          <TimeDropdown value={time} onChange={updateTime} />
+        </TimepickerWrapper>
+      </div>
       <ChartsContainer>
         <ChartContainerWrapper>
-          <ChartHeader title="CPU %" metrics={cpuChartMetrics} />
+          <ChartHeader title={CPU_CHART_TITLE} metrics={cpuChartMetrics} />
           <ChartContainer>
             <Chart ref={cpuChartRef}>
               <MetricExplorerSeriesChart
                 type={MetricsExplorerChartType.line}
                 metric={cpuChartMetrics[0]}
                 id={'0'}
-                series={systemMetrics.timeseries!}
+                series={systemMetricsTs!}
                 stack={false}
               />
               <MetricExplorerSeriesChart
                 type={MetricsExplorerChartType.line}
                 metric={cpuChartMetrics[1]}
                 id={'0'}
-                series={userMetrics.timeseries!}
+                series={userMetricsTs}
                 stack={false}
               />
               <Axis
@@ -245,7 +295,7 @@ const TabComponent = (props: TabProps) => {
               <Axis
                 id={'values'}
                 position={Position.Left}
-                tickFormat={getFormatter('cpu')}
+                tickFormat={cpuFormatter}
                 domain={getDomain(cpuTimeseries, cpuChartMetrics)}
                 ticks={6}
                 showGridLines
@@ -260,28 +310,28 @@ const TabComponent = (props: TabProps) => {
         </ChartContainerWrapper>
 
         <ChartContainerWrapper>
-          <ChartHeader title="Load" metrics={loadChartMetrics} />
+          <ChartHeader title={LOAD_CHART_TITLE} metrics={loadChartMetrics} />
           <ChartContainer>
             <Chart ref={loadChartRef}>
               <MetricExplorerSeriesChart
                 type={MetricsExplorerChartType.line}
                 metric={loadChartMetrics[0]}
                 id="0"
-                series={load1mMetrics.timeseries!}
+                series={load1mMetricsTs}
                 stack={false}
               />
               <MetricExplorerSeriesChart
                 type={MetricsExplorerChartType.line}
                 metric={loadChartMetrics[1]}
                 id="0"
-                series={load5mMetrics.timeseries!}
+                series={load5mMetricsTs}
                 stack={false}
               />
               <MetricExplorerSeriesChart
                 type={MetricsExplorerChartType.line}
                 metric={loadChartMetrics[2]}
                 id="0"
-                series={load15mMetrics.timeseries!}
+                series={load15mMetricsTs}
                 stack={false}
               />
               <Axis
@@ -293,7 +343,7 @@ const TabComponent = (props: TabProps) => {
               <Axis
                 id={'values1'}
                 position={Position.Left}
-                tickFormat={getFormatter('load')}
+                tickFormat={loadFormatter}
                 domain={getDomain(loadTimeseries, loadChartMetrics)}
                 ticks={6}
                 showGridLines
@@ -308,21 +358,21 @@ const TabComponent = (props: TabProps) => {
         </ChartContainerWrapper>
 
         <ChartContainerWrapper>
-          <ChartHeader title="Memory" metrics={memoryChartMetrics} />
+          <ChartHeader title={MEMORY_CHART_TITLE} metrics={memoryChartMetrics} />
           <ChartContainer>
             <Chart ref={memoryChartRef}>
               <MetricExplorerSeriesChart
                 type={MetricsExplorerChartType.line}
                 metric={memoryChartMetrics[0]}
                 id="0"
-                series={usedMemoryMetrics.timeseries!}
+                series={usedMemoryMetricsTs}
                 stack={false}
               />
               <MetricExplorerSeriesChart
                 type={MetricsExplorerChartType.line}
                 metric={memoryChartMetrics[1]}
                 id="0"
-                series={freeMemoryMetrics.timeseries!}
+                series={freeMemoryMetricsTs}
                 stack={false}
               />
               <Axis
@@ -334,7 +384,7 @@ const TabComponent = (props: TabProps) => {
               <Axis
                 id={'values'}
                 position={Position.Left}
-                tickFormat={getFormatter('network')}
+                tickFormat={memoryFormatter}
                 domain={getDomain(memoryTimeseries, memoryChartMetrics)}
                 ticks={6}
                 showGridLines
@@ -349,21 +399,21 @@ const TabComponent = (props: TabProps) => {
         </ChartContainerWrapper>
 
         <ChartContainerWrapper>
-          <ChartHeader title="Network" metrics={networkChartMetrics} />
+          <ChartHeader title={NETWORK_CHART_TITLE} metrics={networkChartMetrics} />
           <ChartContainer>
             <Chart ref={networkChartRef}>
               <MetricExplorerSeriesChart
                 type={MetricsExplorerChartType.line}
                 metric={networkChartMetrics[0]}
                 id="0"
-                series={rxMetrics.timeseries!}
+                series={rxMetricsTs}
                 stack={false}
               />
               <MetricExplorerSeriesChart
                 type={MetricsExplorerChartType.line}
                 metric={networkChartMetrics[1]}
                 id="0"
-                series={txMetrics.timeseries!}
+                series={txMetricsTs}
                 stack={false}
               />
               <Axis
@@ -375,7 +425,7 @@ const TabComponent = (props: TabProps) => {
               <Axis
                 id={'values'}
                 position={Position.Left}
-                tickFormat={getFormatter('network')}
+                tickFormat={networkFormatter}
                 domain={getDomain(networkTimeseries, networkChartMetrics)}
                 ticks={6}
                 showGridLines
@@ -399,15 +449,13 @@ const ChartsContainer = euiStyled.div`
   flex-wrap: wrap;
 `;
 
-const ChartHeaderWrapper = euiStyled.div`
-  display: flex;
-  width: 100%;
-  padding: ${(props) => props.theme.eui.paddingSizes.s} ${(props) =>
-  props.theme.eui.paddingSizes.m};
-`;
-
 const ChartContainerWrapper = euiStyled.div`
   width: 50%
+`;
+
+const TimepickerWrapper = euiStyled.div`
+  padding: ${(props) => props.theme.eui.paddingSizes.m};
+  width: 50%;
 `;
 
 const ChartContainer: React.FC = ({ children }) => (
@@ -420,36 +468,6 @@ const ChartContainer: React.FC = ({ children }) => (
     {children}
   </div>
 );
-
-interface HeaderProps {
-  title: string;
-  metrics: MetricsExplorerOptionsMetric[];
-}
-const ChartHeader = ({ title, metrics }: HeaderProps) => {
-  return (
-    <ChartHeaderWrapper>
-      <EuiFlexItem style={{ flex: 1 }} grow={true}>
-        <EuiText>
-          <strong>{title}</strong>
-        </EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiFlexGroup gutterSize={'s'} alignItems={'center'}>
-          {metrics.map((chartMetric) => (
-            <EuiFlexGroup key={chartMetric.label!} gutterSize={'s'} alignItems={'center'}>
-              <EuiFlexItem grow={false}>
-                <EuiIcon color={colorTransformer(chartMetric.color!)} type={'dot'} />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiText size={'xs'}>{chartMetric.label}</EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          ))}
-        </EuiFlexGroup>
-      </EuiFlexItem>
-    </ChartHeaderWrapper>
-  );
-};
 
 export const MetricsTab = {
   id: 'metrics',
