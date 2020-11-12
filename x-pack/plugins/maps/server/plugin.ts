@@ -194,7 +194,7 @@ export class MapsPlugin implements Plugin {
           catalogue: [APP_ID],
           savedObject: {
             all: [],
-            read: [MAP_SAVED_OBJECT_TYPE, 'index-pattern', 'query'],
+            read: [MAP_SAVED_OBJECT_TYPE, 'index-pattern', 'query', 'tag'],
           },
           ui: ['show'],
         },

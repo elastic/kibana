@@ -148,7 +148,7 @@ export function GisPageProvider({ getService, getPageObjects }: FtrProviderConte
       await renderable.waitForRender();
     }
 
-    async saveMap(name: string, uncheckReturnToOriginModeSwitch = false) {
+    async saveMap(name: string, uncheckReturnToOriginModeSwitch = false, tags?: string[]) {
       await testSubjects.click('mapSaveButton');
       await testSubjects.setValue('savedObjectTitle', name);
       if (uncheckReturnToOriginModeSwitch) {
@@ -159,6 +159,13 @@ export function GisPageProvider({ getService, getPageObjects }: FtrProviderConte
           throw new Error('Unable to uncheck "returnToOriginModeSwitch", it does not exist.');
         }
         await testSubjects.setEuiSwitch('returnToOriginModeSwitch', 'uncheck');
+      }
+      if (tags) {
+        await testSubjects.click('savedObjectTagSelector');
+        for (const tagName of tags) {
+          await testSubjects.click(`tagSelectorOption-${tagName.replace(' ', '_')}`);
+        }
+        await testSubjects.click('savedObjectTitle');
       }
       await testSubjects.clickWhenNotDisabled('confirmSaveSavedObjectButton');
     }
