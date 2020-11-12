@@ -32,9 +32,13 @@ export const FilterPopover = ({
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const inputRef = React.useRef<HTMLInputElement>();
 
-  const setPopoverOpen = (isOpen: boolean) => {
-    setIsPopoverOpen(isOpen);
-    setIsOpenByCreation(isOpen);
+  const closePopover = () => {
+    if (isOpenByCreation) {
+      setIsOpenByCreation(false);
+    }
+    if (isPopoverOpen) {
+      setIsPopoverOpen(false);
+    }
   };
 
   const setFilterLabel = (label: string) => setFilter({ ...filter, label });
@@ -57,14 +61,7 @@ export const FilterPopover = ({
       panelClassName="lnsIndexPatternDimensionEditor__filtersEditor"
       isOpen={isOpenByCreation || isPopoverOpen}
       ownFocus
-      closePopover={() => {
-        if (isOpenByCreation) {
-          setIsOpenByCreation(false);
-        }
-        if (isPopoverOpen) {
-          setIsPopoverOpen(false);
-        }
-      }}
+      closePopover={() => closePopover()}
       button={
         <Button
           onClick={() => {
@@ -91,12 +88,7 @@ export const FilterPopover = ({
         onChange={setFilterLabel}
         placeholder={getPlaceholder(filter.input.query)}
         inputRef={inputRef}
-        onSubmit={() => {
-          if (isOpenByCreation) {
-            setIsOpenByCreation(false);
-          }
-          setIsPopoverOpen(false);
-        }}
+        onSubmit={() => closePopover()}
         dataTestSubj="indexPattern-filters-label"
       />
     </EuiPopover>
