@@ -73,6 +73,15 @@ export const AlwaysFiringExpression: React.FunctionComponent<AlertTypeParamsExpr
     thresholds = pick(DEFAULT_THRESHOLDS, defaultActionGroupId),
   } = alertParams;
 
+  const actionGroupsWithConditions = actionGroups.map((actionGroup) =>
+    Number.isInteger(thresholds[actionGroup.id as AlwaysFiringActionGroupIds])
+      ? {
+          ...actionGroup,
+          conditions: thresholds[actionGroup.id as AlwaysFiringActionGroupIds]!,
+        }
+      : actionGroup
+  );
+
   return (
     <Fragment>
       <EuiFlexGroup gutterSize="s" wrap direction="column">
@@ -96,14 +105,7 @@ export const AlwaysFiringExpression: React.FunctionComponent<AlertTypeParamsExpr
         <EuiFlexItem grow={true}>
           <AlertConditions
             headline={'Set different thresholds for randomly generated T-Shirt sizes'}
-            actionGroups={actionGroups.map((actionGroup) =>
-              Number.isInteger(thresholds[actionGroup.id as AlwaysFiringActionGroupIds])
-                ? {
-                    ...actionGroup,
-                    conditions: thresholds[actionGroup.id as AlwaysFiringActionGroupIds]!,
-                  }
-                : actionGroup
-            )}
+            actionGroups={actionGroupsWithConditions}
             onInitializeConditionsFor={(actionGroup) => {
               setAlertParams('thresholds', {
                 ...thresholds,
