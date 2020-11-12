@@ -12,7 +12,7 @@ import { EuiButtonEmpty, EuiComboBoxOptionOption, EuiFieldText, EuiFormRow } fro
 import { FormattedMessage } from '@kbn/i18n/react';
 import { MetricSelect } from './metric_select';
 import { SingleFieldSelect } from '../single_field_select';
-import { AggDescriptor, FieldedAggDescriptor } from '../../../common/descriptor_types';
+import { AggDescriptor } from '../../../common/descriptor_types';
 import { AGG_TYPE } from '../../../common/constants';
 import { getTermsFields } from '../../index_pattern_util';
 import { IFieldType } from '../../../../../../src/plugins/data/public';
@@ -91,7 +91,7 @@ export function MetricEditor({
       label: metric.label,
       type: metric.type,
       field: fieldName,
-    } as FieldedAggDescriptor);
+    });
   };
   const onLabelChange = (e: ChangeEvent<HTMLInputElement>) => {
     onChange({
