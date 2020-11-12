@@ -4,81 +4,74 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { memo, useState, useEffect } from 'react';
-import { EuiSuggest, EuiSuggestItemProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
-  QuerySuggestion,
+  QueryStringInput,
   IFieldType,
 } from '../../../../../../../../../../../src/plugins/data/public';
-import { useStartServices, useDebounce } from '../../../../../hooks';
-import { transformSuggestionType } from '../../../../../components/search_bar';
-import { AGENT_LOG_INDEX_PATTERN } from './constants';
+import { useStartServices } from '../../../../../hooks';
+import {
+  AGENT_LOG_INDEX_PATTERN,
+  AGENT_ID_FIELD,
+  DATASET_FIELD,
+  LOG_LEVEL_FIELD,
+} from './constants';
+
+const EXCLUDED_FIELDS = [AGENT_ID_FIELD.name, DATASET_FIELD.name, LOG_LEVEL_FIELD.name];
 
 export const LogQueryBar: React.FunctionComponent<{
   query: string;
-  onUpdateQuery: (query: string, runQuery?: boolean) => void;
   isQueryValid: boolean;
-}> = memo(({ query, onUpdateQuery, isQueryValid }) => {
+  onUpdateQuery: (query: string, runQuery?: boolean) => void;
+}> = memo(({ query, isQueryValid, onUpdateQuery }) => {
   const { data } = useStartServices();
-  const [isSearchBarLoading, setIsSearchBarLoading] = useState<boolean>(true);
-  const [querySuggestions, setQuerySuggestions] = useState<QuerySuggestion[]>();
-  const debouncedQuery = useDebounce(query, 500);
+  const [indexPatternFields, setIndexPatternFields] = useState<IFieldType[]>();
 
   useEffect(() => {
-    const fetchSuggestions = async () => {
-      setIsSearchBarLoading(true);
-      const fields = (await data.indexPatterns.getFieldsForWildcard({
-        pattern: AGENT_LOG_INDEX_PATTERN,
-      })) as IFieldType[];
-
-      // TODO: strip out irrelevant fields such as data_stream.* and elastic_agent.*
+    const fetchFields = async () => {
       try {
-        const suggestions = await data.autocomplete.getQuerySuggestions({
-          language: 'kuery',
-          indexPatterns: [
-            {
-              title: AGENT_LOG_INDEX_PATTERN,
-              fields,
-            },
-          ],
-          query: debouncedQuery,
-          selectionStart: debouncedQuery.length,
-          selectionEnd: debouncedQuery.length,
+        const fields = (
+          ((await data.indexPatterns.getFieldsForWildcard({
+            pattern: AGENT_LOG_INDEX_PATTERN,
+          })) as IFieldType[]) || []
+        ).filter((field) => {
+          return !EXCLUDED_FIELDS.includes(field.name);
         });
-
-        setQuerySuggestions(suggestions);
+        setIndexPatternFields(fields);
       } catch (err) {
-        setQuerySuggestions([]);
+        setIndexPatternFields(undefined);
       }
-
-      setIsSearchBarLoading(false);
     };
-    fetchSuggestions();
-  }, [data.autocomplete, data.indexPatterns, debouncedQuery]);
+    fetchFields();
+  }, [data.indexPatterns]);
 
   return (
-    <EuiSuggest
-      // @ts-ignore
-      value={query}
-      icon="search"
-      isLoading={isSearchBarLoading}
+    <QueryStringInput
+      indexPatterns={
+        indexPatternFields
+          ? [
+              {
+                title: AGENT_LOG_INDEX_PATTERN,
+                fields: indexPatternFields,
+              },
+            ]
+          : []
+      }
+      query={{
+        query,
+        language: 'kuery',
+      }}
       isInvalid={!isQueryValid}
+      disableAutoFocus={true}
       placeholder={i18n.translate('xpack.fleet.agentLogs.searchPlaceholderText', {
         defaultMessage: 'Search logs…',
       })}
-      onInputChange={(target) => {
-        // @ts-ignore
-        onUpdateQuery(target.value);
+      onChange={(newQuery) => {
+        onUpdateQuery(newQuery.query as string);
       }}
-      onItemClick={(suggestion: EuiSuggestItemProps) => {
-        onUpdateQuery(`${query} ${suggestion.label}`, true);
+      onSubmit={(newQuery) => {
+        onUpdateQuery(newQuery.query as string, true);
       }}
-      suggestions={(querySuggestions || []).map((suggestion) => {
-        return {
-          label: suggestion.text,
-          type: transformSuggestionType(suggestion.type),
-        };
-      })}
     />
   );
 });
