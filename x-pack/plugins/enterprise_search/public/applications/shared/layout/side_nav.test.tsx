@@ -79,6 +79,30 @@ describe('SideNavLink', () => {
     expect(wrapper.find('.enterpriseSearchNavLinks__item--isActive')).toHaveLength(1);
   });
 
+  it("won't set an active class when route is a subroute of 'to'", () => {
+    (useLocation as jest.Mock).mockImplementationOnce(() => ({ pathname: '/documents/1234' }));
+
+    const wrapper = shallow(
+      <SideNavLink to="/documents" isRoot>
+        Link
+      </SideNavLink>
+    );
+
+    expect(wrapper.find('.enterpriseSearchNavLinks__item--isActive')).toHaveLength(0);
+  });
+
+  it('sets an active class if the current path is a subRoute of "to", and shouldShowActiveForSubroutes is true', () => {
+    (useLocation as jest.Mock).mockImplementationOnce(() => ({ pathname: '/documents/1234' }));
+
+    const wrapper = shallow(
+      <SideNavLink to="/documents" isRoot shouldShowActiveForSubroutes>
+        Link
+      </SideNavLink>
+    );
+
+    expect(wrapper.find('.enterpriseSearchNavLinks__item--isActive')).toHaveLength(1);
+  });
+
   it('passes down custom classes and props', () => {
     const wrapper = shallow(
       <SideNavLink to="/" className="testing" data-test-subj="testing">
