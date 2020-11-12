@@ -340,7 +340,6 @@ export class HeadlessChromiumDriver {
       hostname === conditions.hostname &&
       protocol === `${conditions.protocol}:` &&
       this._shouldUseCustomHeadersForPort(conditions, port) &&
-      // @ts-expect-error according to the types `pathname` is `string | undefined`, but it's actually `string | null`
       pathname.startsWith(`${conditions.basePath}/`)
     );
   }
