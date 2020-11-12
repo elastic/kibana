@@ -98,6 +98,10 @@ export interface PluginStartDependencies {
  * Represents Security Plugin instance that will be managed by the Kibana plugin system.
  */
 export class Plugin {
+
+
+  console.log('Hello everybody');
+
   private readonly logger: Logger;
   private spacesService?: SpacesService | symbol = Symbol('not accessed');
   private securityLicenseService?: SecurityLicenseService;
