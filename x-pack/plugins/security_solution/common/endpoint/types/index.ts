@@ -120,6 +120,10 @@ export interface FieldsObject {
  */
 export interface ResolverNode {
   data: FieldsObject;
+  id: string | number;
+  // the very root node might not have the parent field defined
+  parent?: string | number;
+  name?: string;
   stats: EventStats;
 }
 

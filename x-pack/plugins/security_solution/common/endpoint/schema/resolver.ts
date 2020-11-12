@@ -41,6 +41,7 @@ export const validateTree = {
       // the ancestry field is optional
       ancestry: schema.maybe(schema.string({ minLength: 1 })),
       id: schema.string({ minLength: 1 }),
+      name: schema.maybe(schema.string({ minLength: 1 })),
       parent: schema.string({ minLength: 1 }),
     }),
     // only allowing strings and numbers for node IDs because Elasticsearch only allows those types for collapsing:

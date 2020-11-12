@@ -31,6 +31,10 @@ export interface Schema {
    */
   id: string;
   /**
+   * field to use for the name of the node
+   */
+  name?: string;
+  /**
    * parent represents the field that is the edge between two nodes.
    */
   parent: string;
@@ -49,6 +53,10 @@ export function docValueFields(schema: Schema): Array<{ field: string }> {
   const filter = [{ field: '@timestamp' }, { field: schema.id }, { field: schema.parent }];
   if (schema.ancestry) {
     filter.push({ field: schema.ancestry });
+  }
+
+  if (schema.name) {
+    filter.push({ field: schema.name });
   }
   return filter;
 }

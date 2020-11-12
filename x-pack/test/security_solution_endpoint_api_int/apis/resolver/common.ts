@@ -224,6 +224,8 @@ const verifyAncestry = ({
       // make sure the origin node from the request exists in the generated data and has the same fields
       const originID = getID(tree.origin, schema);
       const originParentID = getParent(tree.origin, schema);
+      expect(tree.origin.id).to.be(originID);
+      expect(tree.origin.parent).to.be(originParentID);
       expect(allGenNodes.get(String(originID))?.id).to.be(String(originID));
       expect(allGenNodes.get(String(originParentID))?.id).to.be(String(originParentID));
       expect(originID).to.be(entityIDSafeVersion(allGenNodes.get(String(originID))!.lifecycle[0]));
@@ -258,9 +260,13 @@ const verifyAncestry = ({
       if (i < tree.ancestors.length - 1) {
         // the current node's parent ID should match the parent's ID field
         expect(parent).to.be(getID(tree.ancestors[i + 1], schema));
+        expect(parent).to.not.be(undefined);
+        expect(tree.ancestors[i].parent).to.not.be(undefined);
+        expect(tree.ancestors[i].parent).to.be(parent);
       }
       // the current node's ID must exist in the generated tree
       expect(allGenNodes.get(String(id))?.id).to.be(id);
+      expect(tree.ancestors[i].id).to.be(id);
     }
   }
 };
@@ -291,6 +297,9 @@ const verifyChildren = ({
         const id = getID(node, schema);
         const parent = getParent(node, schema);
         const genNode = allGenNodes.get(String(id));
+        expect(id).to.be(node.id);
+        expect(parent).to.be(node.parent);
+        expect(node.parent).to.not.be(undefined);
         // make sure the id field is the same in the returned node as the generated one
         expect(id).to.be(entityIDSafeVersion(genNode!.lifecycle[0]));
         // make sure the parent field is the same in the returned node as the generated one
