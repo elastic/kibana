@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FleetStart, registerPackagePolicyComponent } from '../../../../../fleet/public';
+import { FleetStart } from '../../../../../fleet/public';
 import {
   dataPluginMock,
   Start as DataPublicStartMock,
@@ -58,7 +58,7 @@ export const depsStartMock: () => DepsStartMock = () => {
     data: dataMock,
     fleet: {
       isInitialized: () => Promise.resolve(true),
-      registerPackagePolicyComponent,
+      registerExtension: jest.fn(),
     },
   };
 };

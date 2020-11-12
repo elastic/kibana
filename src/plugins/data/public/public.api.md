@@ -84,6 +84,7 @@ import { TransportRequestPromise } from '@elastic/elasticsearch/lib/Transport';
 import { TypeOf } from '@kbn/config-schema';
 import { UiActionsSetup } from 'src/plugins/ui_actions/public';
 import { UiActionsStart } from 'src/plugins/ui_actions/public';
+import { UiStatsMetricType } from '@kbn/analytics';
 import { Unit } from '@elastic/datemath';
 import { UnregisterCallback } from 'history';
 import { UserProvidedValues } from 'src/core/server/types';
@@ -1840,6 +1841,8 @@ export interface QuerySuggestionGetFnArgs {
     selectionStart: number;
     // (undocumented)
     signal?: AbortSignal;
+    // (undocumented)
+    useTimeRange?: boolean;
 }
 
 // Warning: (ae-missing-release-tag) "QuerySuggestionTypes" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
@@ -1996,8 +1999,8 @@ export const search: {
 // Warning: (ae-missing-release-tag) "SearchBar" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export const SearchBar: React.ComponentClass<Pick<Pick<SearchBarProps, "query" | "isLoading" | "filters" | "onRefresh" | "onRefreshChange" | "refreshInterval" | "intl" | "indexPatterns" | "dataTestSubj" | "screenTitle" | "showQueryInput" | "showDatePicker" | "showAutoRefreshOnly" | "dateRangeFrom" | "dateRangeTo" | "isRefreshPaused" | "customSubmitButton" | "timeHistory" | "indicateNoData" | "onFiltersUpdated" | "savedQuery" | "showSaveQuery" | "onClearSavedQuery" | "showQueryBar" | "showFilterBar" | "onQueryChange" | "onQuerySubmit" | "onSaved" | "onSavedQueryUpdated">, "query" | "isLoading" | "filters" | "onRefresh" | "onRefreshChange" | "refreshInterval" | "indexPatterns" | "dataTestSubj" | "screenTitle" | "showQueryInput" | "showDatePicker" | "showAutoRefreshOnly" | "dateRangeFrom" | "dateRangeTo" | "isRefreshPaused" | "customSubmitButton" | "timeHistory" | "indicateNoData" | "onFiltersUpdated" | "savedQuery" | "showSaveQuery" | "onClearSavedQuery" | "showQueryBar" | "showFilterBar" | "onQueryChange" | "onQuerySubmit" | "onSaved" | "onSavedQueryUpdated">, any> & {
-    WrappedComponent: React.ComponentType<Pick<SearchBarProps, "query" | "isLoading" | "filters" | "onRefresh" | "onRefreshChange" | "refreshInterval" | "intl" | "indexPatterns" | "dataTestSubj" | "screenTitle" | "showQueryInput" | "showDatePicker" | "showAutoRefreshOnly" | "dateRangeFrom" | "dateRangeTo" | "isRefreshPaused" | "customSubmitButton" | "timeHistory" | "indicateNoData" | "onFiltersUpdated" | "savedQuery" | "showSaveQuery" | "onClearSavedQuery" | "showQueryBar" | "showFilterBar" | "onQueryChange" | "onQuerySubmit" | "onSaved" | "onSavedQueryUpdated"> & ReactIntl.InjectedIntlProps>;
+export const SearchBar: React.ComponentClass<Pick<Pick<SearchBarProps, "query" | "isLoading" | "filters" | "onRefresh" | "onRefreshChange" | "refreshInterval" | "intl" | "indexPatterns" | "dataTestSubj" | "screenTitle" | "showQueryInput" | "showDatePicker" | "showAutoRefreshOnly" | "dateRangeFrom" | "dateRangeTo" | "isRefreshPaused" | "customSubmitButton" | "timeHistory" | "indicateNoData" | "onFiltersUpdated" | "trackUiMetric" | "savedQuery" | "showSaveQuery" | "onClearSavedQuery" | "showQueryBar" | "showFilterBar" | "onQueryChange" | "onQuerySubmit" | "onSaved" | "onSavedQueryUpdated">, "query" | "isLoading" | "filters" | "onRefresh" | "onRefreshChange" | "refreshInterval" | "indexPatterns" | "dataTestSubj" | "screenTitle" | "showQueryInput" | "showDatePicker" | "showAutoRefreshOnly" | "dateRangeFrom" | "dateRangeTo" | "isRefreshPaused" | "customSubmitButton" | "timeHistory" | "indicateNoData" | "onFiltersUpdated" | "trackUiMetric" | "savedQuery" | "showSaveQuery" | "onClearSavedQuery" | "showQueryBar" | "showFilterBar" | "onQueryChange" | "onQuerySubmit" | "onSaved" | "onSavedQueryUpdated">, any> & {
+    WrappedComponent: React.ComponentType<Pick<SearchBarProps, "query" | "isLoading" | "filters" | "onRefresh" | "onRefreshChange" | "refreshInterval" | "intl" | "indexPatterns" | "dataTestSubj" | "screenTitle" | "showQueryInput" | "showDatePicker" | "showAutoRefreshOnly" | "dateRangeFrom" | "dateRangeTo" | "isRefreshPaused" | "customSubmitButton" | "timeHistory" | "indicateNoData" | "onFiltersUpdated" | "trackUiMetric" | "savedQuery" | "showSaveQuery" | "onClearSavedQuery" | "showQueryBar" | "showFilterBar" | "onQueryChange" | "onQuerySubmit" | "onSaved" | "onSavedQueryUpdated"> & ReactIntl.InjectedIntlProps>;
 };
 
 // Warning: (ae-forgotten-export) The symbol "SearchBarOwnProps" needs to be exported by the entry point index.d.ts
@@ -2309,6 +2312,7 @@ export const UI_SETTINGS: {
     readonly INDEXPATTERN_PLACEHOLDER: "indexPattern:placeholder";
     readonly FILTERS_PINNED_BY_DEFAULT: "filters:pinnedByDefault";
     readonly FILTERS_EDITOR_SUGGEST_VALUES: "filterEditor:suggestValues";
+    readonly AUTOCOMPLETE_USE_TIMERANGE: "autocomplete:useTimeRange";
 };
 
 

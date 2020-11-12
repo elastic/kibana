@@ -32,6 +32,8 @@ import {
 import { PackageInstallProvider } from './sections/epm/hooks';
 import { FleetStatusProvider, useBreadcrumbs } from './hooks';
 import { IntraAppStateProvider } from './hooks/use_intra_app_state';
+import { UIExtensionsStorage } from './types';
+import { UIExtensionsContext } from './hooks/use_ui_extension';
 
 export interface ProtectedRouteProps extends RouteProps {
   isAllowed?: boolean;
@@ -231,6 +233,7 @@ const IngestManagerApp = ({
   config,
   history,
   kibanaVersion,
+  extensions,
 }: {
   basepath: string;
   coreStart: CoreStart;
@@ -239,6 +242,7 @@ const IngestManagerApp = ({
   config: FleetConfigType;
   history: AppMountParameters['history'];
   kibanaVersion: string;
+  extensions: UIExtensionsStorage;
 }) => {
   const isDarkMode = useObservable<boolean>(coreStart.uiSettings.get$('theme:darkMode'));
   return (
@@ -248,7 +252,9 @@ const IngestManagerApp = ({
           <ConfigContext.Provider value={config}>
             <KibanaVersionContext.Provider value={kibanaVersion}>
               <EuiThemeProvider darkMode={isDarkMode}>
-                <IngestManagerRoutes history={history} basepath={basepath} />
+                <UIExtensionsContext.Provider value={extensions}>
+                  <IngestManagerRoutes history={history} basepath={basepath} />
+                </UIExtensionsContext.Provider>
               </EuiThemeProvider>
             </KibanaVersionContext.Provider>
           </ConfigContext.Provider>
@@ -264,7 +270,8 @@ export function renderApp(
   setupDeps: FleetSetupDeps,
   startDeps: FleetStartDeps,
   config: FleetConfigType,
-  kibanaVersion: string
+  kibanaVersion: string,
+  extensions: UIExtensionsStorage
 ) {
   ReactDOM.render(
     <IngestManagerApp
@@ -275,6 +282,7 @@ export function renderApp(
       config={config}
       history={history}
       kibanaVersion={kibanaVersion}
+      extensions={extensions}
     />,
     element
   );

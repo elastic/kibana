@@ -30,7 +30,8 @@ import {
   TutorialDirectoryHeaderLink,
   TutorialModuleNotice,
 } from './applications/fleet/components/home_integration';
-import { registerPackagePolicyComponent } from './applications/fleet/sections/agent_policy/create_package_policy_page/components/custom_package_policy';
+import { createExtensionRegistrationCallback } from './applications/fleet/services/ui_extensions';
+import { UIExtensionRegistrationCallback, UIExtensionsStorage } from './applications/fleet/types';
 
 export { FleetConfigType } from '../common/types';
 
@@ -43,7 +44,7 @@ export interface FleetSetup {}
  * Describes public Fleet plugin contract returned at the `start` stage.
  */
 export interface FleetStart {
-  registerPackagePolicyComponent: typeof registerPackagePolicyComponent;
+  registerExtension: UIExtensionRegistrationCallback;
   isInitialized: () => Promise<true>;
 }
 
@@ -60,6 +61,7 @@ export interface FleetStartDeps {
 export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDeps, FleetStartDeps> {
   private config: FleetConfigType;
   private kibanaVersion: string;
+  private extensions: UIExtensionsStorage = {};
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = this.initializerContext.config.get<FleetConfigType>();
@@ -69,6 +71,7 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
   public setup(core: CoreSetup, deps: FleetSetupDeps) {
     const config = this.config;
     const kibanaVersion = this.kibanaVersion;
+    const extensions = this.extensions;
 
     // Set up http client
     setHttpClient(core.http);
@@ -90,7 +93,15 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
           FleetStart
         ];
         const { renderApp, teardownFleet } = await import('./applications/fleet/');
-        const unmount = renderApp(coreStart, params, deps, startDeps, config, kibanaVersion);
+        const unmount = renderApp(
+          coreStart,
+          params,
+          deps,
+          startDeps,
+          config,
+          kibanaVersion,
+          extensions
+        );
 
         return () => {
           unmount();
@@ -166,7 +177,8 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
 
         return successPromise;
       },
-      registerPackagePolicyComponent,
+
+      registerExtension: createExtensionRegistrationCallback(this.extensions),
     };
   }
 
