@@ -58,7 +58,7 @@ export class ExpressionRenderHandler {
   private renderSubject: Rx.BehaviorSubject<number | null>;
   private eventsSubject: Rx.Subject<unknown>;
   private updateSubject: Rx.Subject<UpdateValue | null>;
-  private handlers: IInterpreterRenderHandlers;
+  private handlers: Omit<IInterpreterRenderHandlers, 'data'>;
   private onRenderError: RenderErrorHandlerFnType;
 
   constructor(
@@ -102,7 +102,7 @@ export class ExpressionRenderHandler {
 
   render = async (
     value: ExpressionValueError | ExpressionValueRender<unknown>,
-    uiState: object = {}
+    data: object = {}
   ) => {
     if (!value || typeof value !== 'object') {
       return this.handleRenderError(new Error('invalid data provided to the expression renderer'));
@@ -128,7 +128,7 @@ export class ExpressionRenderHandler {
         .get(value.as)!
         .render(this.element, value.value, {
           ...this.handlers,
-          uiState,
+          data,
         } as any);
     } catch (e) {
       return this.handleRenderError(e);
@@ -148,8 +148,11 @@ export class ExpressionRenderHandler {
     return this.element;
   };
 
-  handleRenderError = (error: ExpressionRenderError) => {
-    this.onRenderError(this.element, error, this.handlers);
+  handleRenderError = (error: ExpressionRenderError, data: object = {}) => {
+    this.onRenderError(this.element, error, {
+      ...this.handlers,
+      data,
+    });
   };
 }
 

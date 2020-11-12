@@ -103,7 +103,7 @@ export function getTableVisualizationControllerClass(
 
         if (!this.$scope && this.$compile) {
           this.$scope = this.$rootScope.$new();
-          this.$scope.uiState = handlers.uiState;
+          this.$scope.uiState = handlers.data;
           this.$scope.filter = handlers.event;
           updateScope();
           this.el.find('div').append(this.$compile(tableVisTemplate)(this.$scope));

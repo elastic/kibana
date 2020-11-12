@@ -70,5 +70,12 @@ export interface IInterpreterRenderHandlers {
   reload: () => void;
   update: (params: any) => void;
   event: (event: any) => void;
-  uiState?: PersistedState;
+
+  /**
+   * Any "data" object you want to pass to your renderer. Those are ususally
+   * Kibana services like Persisted State, or UI Actiosn, etc., or you can also
+   * use it to pass extra props to your renderer, which you don't want to pass
+   * through the expression result.
+   */
+  data: object;
 }

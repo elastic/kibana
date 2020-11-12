@@ -21,6 +21,7 @@ import React, { useEffect, useMemo, useRef } from 'react';
 import { EuiResizeObserver } from '@elastic/eui';
 import { debounce } from 'lodash';
 
+import { PersistedState } from '../../visualizations/public';
 import { IInterpreterRenderHandlers } from '../../expressions/public';
 import { ChartsPluginSetup } from '../../charts/public';
 
@@ -63,15 +64,17 @@ const VislibWrapper = ({ core, charts, visData, visConfig, handlers }: VislibWra
 
   useEffect(updateChart, [updateChart]);
 
-  useEffect(() => {
-    if (handlers.uiState) {
-      handlers.uiState.on('change', updateChart);
+  const uiState = handlers.data as PersistedState;
 
-      return () => {
-        handlers.uiState?.off('change', updateChart);
-      };
-    }
-  }, [handlers.uiState, updateChart]);
+  useEffect(() => {
+    if (!uiState) return;
+
+    uiState.on('change', updateChart);
+
+    return () => {
+      uiState.off('change', updateChart);
+    };
+  }, [uiState, updateChart]);
 
   return (
     <EuiResizeObserver onResize={updateChart}>

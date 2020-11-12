@@ -50,10 +50,17 @@ export interface IExpressionLoaderParams {
   disableCaching?: boolean;
   customFunctions?: [];
   customRenderers?: [];
-  uiState?: unknown;
   inspectorAdapters?: Adapters;
   onRenderError?: RenderErrorHandlerFnType;
   searchSessionId?: string;
+
+  /**
+   * Any "data" object you want to pass to your renderer. Those are ususally
+   * Kibana services like Persisted State, or UI Actiosn, etc., or you can also
+   * use it to pass extra props to your renderer, which you don't want to pass
+   * through the expression result.
+   */
+  data?: object;
 }
 
 export interface ExpressionRenderError extends Error {

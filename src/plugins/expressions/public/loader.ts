@@ -22,7 +22,7 @@ import { filter, map } from 'rxjs/operators';
 import { defaults } from 'lodash';
 import { Adapters } from '../../inspector/public';
 import { IExpressionLoaderParams } from './types';
-import { ExpressionAstExpression } from '../common';
+import { ExpressionAstExpression, ExpressionValueError, ExpressionValueRender } from '../common';
 import { ExecutionContract } from '../common/execution/execution_contract';
 
 import { ExpressionRenderHandler } from './render';
@@ -161,8 +161,8 @@ export class ExpressionLoader {
     this.dataSubject.next(data);
   };
 
-  private render(data: Data): void {
-    this.renderHandler.render(data, this.params.uiState);
+  private render(value: ExpressionValueError | ExpressionValueRender<unknown>): void {
+    this.renderHandler.render(value, this.params.data);
   }
 
   private setParams(params?: IExpressionLoaderParams) {
@@ -177,8 +177,8 @@ export class ExpressionLoader {
         this.params.searchContext || {}
       ) as any;
     }
-    if (params.uiState && this.params) {
-      this.params.uiState = params.uiState;
+    if (params.data && this.params) {
+      this.params.data = params.data;
     }
     if (params.variables && this.params) {
       this.params.variables = params.variables;

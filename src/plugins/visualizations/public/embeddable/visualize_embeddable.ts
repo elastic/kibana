@@ -375,7 +375,7 @@ export class VisualizeEmbeddable
         filters: this.input.filters,
       },
       searchSessionId: this.input.searchSessionId,
-      uiState: this.vis.uiState,
+      data: this.vis.uiState,
       inspectorAdapters: this.inspectorAdapters,
     };
     if (this.abortController) {
