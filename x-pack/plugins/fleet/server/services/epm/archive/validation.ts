@@ -26,7 +26,7 @@ const MANIFEST_NAME = 'manifest.yml';
 // https://github.com/elastic/package-spec/
 export async function parseAndVerifyArchiveEntries(
   entries: ArchiveEntry[]
-): Promise<{ paths: string[]; archivePackageInfo: ArchivePackage }> {
+): Promise<{ paths: string[]; packageInfo: ArchivePackage }> {
   const paths: string[] = [];
   entries.forEach(({ path, buffer }) => {
     paths.push(path);
@@ -34,7 +34,7 @@ export async function parseAndVerifyArchiveEntries(
   });
 
   return {
-    archivePackageInfo: parseAndVerifyArchive(paths),
+    packageInfo: parseAndVerifyArchive(paths),
     paths,
   };
 }

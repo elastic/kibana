@@ -28,6 +28,12 @@ import {
 } from '../../../types';
 import * as Registry from '../registry';
 import {
+  addEntriesToMemoryStore,
+  setArchiveFilelist,
+  parseAndVerifyArchiveEntries,
+  unpackBufferEntries,
+} from '../archive';
+import {
   getInstallation,
   getInstallationObject,
   bulkInstallPackages,
@@ -42,7 +48,6 @@ import {
 } from '../../../errors';
 import { getPackageSavedObjects } from './get';
 import { appContextService } from '../../app_context';
-import { getArchivePackage } from '../archive';
 import { _installPackage } from './_install_package';
 
 export async function installLatestPackage(options: {
@@ -259,14 +264,14 @@ async function installPackageFromRegistry({
     throw new PackageOutdatedError(`${pkgkey} is out-of-date and cannot be installed or updated`);
   }
 
-  const { paths, registryPackageInfo } = await Registry.getRegistryPackage(pkgName, pkgVersion);
+  const { paths, packageInfo } = await Registry.getRegistryPackage(pkgName, pkgVersion);
 
   return _installPackage({
     savedObjectsClient,
     callCluster,
     installedPkg,
     paths,
-    packageInfo: registryPackageInfo,
+    packageInfo,
     installType,
     installSource: 'registry',
   });
@@ -289,16 +294,19 @@ async function installPackageByUpload({
   archiveBuffer,
   contentType,
 }: InstallUploadedArchiveParams): Promise<AssetReference[]> {
-  const { paths, archivePackageInfo } = await getArchivePackage({ archiveBuffer, contentType });
+  const entries = await unpackBufferEntries(archiveBuffer, contentType);
+  const { packageInfo } = await parseAndVerifyArchiveEntries(entries);
+  const paths = addEntriesToMemoryStore(entries);
+  setArchiveFilelist(packageInfo.name, packageInfo.version, paths);
 
   const installedPkg = await getInstallationObject({
     savedObjectsClient,
-    pkgName: archivePackageInfo.name,
+    pkgName: packageInfo.name,
   });
-  const installType = getInstallType({ pkgVersion: archivePackageInfo.version, installedPkg });
+  const installType = getInstallType({ pkgVersion: packageInfo.version, installedPkg });
   if (installType !== 'install') {
     throw new PackageOperationNotSupportedError(
-      `Package upload only supports fresh installations. Package ${archivePackageInfo.name} is already installed, please uninstall first.`
+      `Package upload only supports fresh installations. Package ${packageInfo.name} is already installed, please uninstall first.`
     );
   }
 
@@ -307,7 +315,7 @@ async function installPackageByUpload({
     callCluster,
     installedPkg,
     paths,
-    packageInfo: archivePackageInfo,
+    packageInfo,
     installType,
     installSource: 'upload',
   });

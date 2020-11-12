@@ -5,7 +5,7 @@
  */
 import { pkgToPkgKey } from '../registry/index';
 import { ArchiveEntry } from './index';
-import { ArchivePackage, RegistryPackage } from '../../../../common';
+import { InstallSource, ArchivePackage, RegistryPackage } from '../../../../common';
 
 const archiveEntryCache: Map<ArchiveEntry['path'], ArchiveEntry['buffer']> = new Map();
 export const getArchiveEntry = (key: string) => archiveEntryCache.get(key);
@@ -26,6 +26,30 @@ export const deleteArchiveFilelist = (name: string, version: string) =>
   archiveFilelistCache.delete(pkgToPkgKey({ name, version }));
 
 const packageInfoCache: Map<string, ArchivePackage | RegistryPackage> = new Map();
-export const getPackageInfo = (name: string, version: string) => {
-  return packageInfoCache.get(pkgToPkgKey({ name, version }));
+interface PackageInfoParams {
+  name: string;
+  version: string;
+  installSource: InstallSource;
+}
+const getPackageInfoKey = ({ name, version, installSource }: PackageInfoParams) =>
+  `${name}-${version}-${installSource}`;
+export const getPackageInfo = (args: PackageInfoParams) => {
+  const packageInfo = packageInfoCache.get(getPackageInfoKey(args));
+  if (args.installSource === 'registry') {
+    return packageInfo as RegistryPackage;
+  } else if (args.installSource === 'upload') {
+    return packageInfo as ArchivePackage;
+  } else {
+    throw new Error(`Unknown installSource: ${args.installSource}`);
+  }
+};
+
+export const setPackageInfo = ({
+  name,
+  version,
+  installSource,
+  packageInfo,
+}: PackageInfoParams & { packageInfo: ArchivePackage | RegistryPackage }) => {
+  const key = getPackageInfoKey({ name, version, installSource });
+  return packageInfoCache.set(key, packageInfo);
 };

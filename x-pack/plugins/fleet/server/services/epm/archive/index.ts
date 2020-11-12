@@ -4,55 +4,35 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ArchivePackage, AssetParts } from '../../../../common/types';
+import { AssetParts } from '../../../../common/types';
 import { PackageInvalidArchiveError, PackageUnsupportedMediaTypeError } from '../../../errors';
 import {
   getArchiveEntry,
   setArchiveEntry,
   deleteArchiveEntry,
   getArchiveFilelist,
-  setArchiveFilelist,
   deleteArchiveFilelist,
 } from './cache';
 import { getBufferExtractor } from './extract';
-import { parseAndVerifyArchiveEntries } from './validation';
 
 export * from './cache';
 export { untarBuffer, unzipBuffer, getBufferExtractor } from './extract';
+export { parseAndVerifyArchiveEntries } from './validation';
 
 export interface ArchiveEntry {
   path: string;
   buffer?: Buffer;
 }
 
-export async function getArchivePackage({
-  archiveBuffer,
-  contentType,
-}: {
-  archiveBuffer: Buffer;
-  contentType: string;
-}): Promise<{ paths: string[]; archivePackageInfo: ArchivePackage }> {
-  const entries = await unpackArchiveEntries(archiveBuffer, contentType);
-  const { archivePackageInfo } = await parseAndVerifyArchiveEntries(entries);
-  const paths = addEntriesToMemoryStore(entries);
-
-  setArchiveFilelist(archivePackageInfo.name, archivePackageInfo.version, paths);
-
-  return {
-    paths,
-    archivePackageInfo,
-  };
-}
-
-export async function unpackArchiveToCache(
+export async function unpackBufferToCache(
   archiveBuffer: Buffer,
   contentType: string
 ): Promise<string[]> {
-  const entries = await unpackArchiveEntries(archiveBuffer, contentType);
+  const entries = await unpackBufferEntries(archiveBuffer, contentType);
   return addEntriesToMemoryStore(entries);
 }
 
-function addEntriesToMemoryStore(entries: ArchiveEntry[]) {
+export function addEntriesToMemoryStore(entries: ArchiveEntry[]) {
   const paths: string[] = [];
   entries.forEach((entry) => {
     const { path, buffer } = entry;
@@ -65,7 +45,7 @@ function addEntriesToMemoryStore(entries: ArchiveEntry[]) {
   return paths;
 }
 
-export async function unpackArchiveEntries(
+export async function unpackBufferEntries(
   archiveBuffer: Buffer,
   contentType: string
 ): Promise<ArchiveEntry[]> {

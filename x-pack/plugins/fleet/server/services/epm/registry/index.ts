@@ -21,7 +21,9 @@ import {
   getArchiveFilelist,
   getPathParts,
   setArchiveFilelist,
-  unpackArchiveToCache,
+  unpackBufferToCache,
+  getPackageInfo,
+  setPackageInfo,
 } from '../archive';
 import { fetchUrl, getResponse, getResponseStream } from './requests';
 import { streamToBuffer } from '../streams';
@@ -126,10 +128,20 @@ export async function fetchCategories(params?: CategoriesParams): Promise<Catego
   return fetchUrl(url.toString()).then(JSON.parse);
 }
 
+export async function getInfo(name: string, version: string) {
+  const installSource = 'registry';
+  let packageInfo = getPackageInfo({ name, version, installSource });
+  if (!packageInfo) {
+    packageInfo = await fetchInfo(name, version);
+    setPackageInfo({ name, version, packageInfo, installSource });
+  }
+  return packageInfo as RegistryPackage;
+}
+
 export async function getRegistryPackage(
   pkgName: string,
   pkgVersion: string
-): Promise<{ paths: string[]; registryPackageInfo: RegistryPackage }> {
+): Promise<{ paths: string[]; packageInfo: RegistryPackage }> {
   let paths = getArchiveFilelist(pkgName, pkgVersion);
   if (!paths || paths.length === 0) {
     const { archiveBuffer, archivePath } = await fetchArchiveBuffer(pkgName, pkgVersion);
@@ -137,14 +149,14 @@ export async function getRegistryPackage(
     if (!contentType) {
       throw new Error(`Unknown compression format for '${archivePath}'. Please use .zip or .gz`);
     }
-    paths = await unpackArchiveToCache(archiveBuffer, contentType);
+    paths = await unpackBufferToCache(archiveBuffer, contentType);
     setArchiveFilelist(pkgName, pkgVersion, paths);
   }
 
   // TODO: cache this as well?
-  const registryPackageInfo = await fetchInfo(pkgName, pkgVersion);
+  const packageInfo = await getInfo(pkgName, pkgVersion);
 
-  return { paths, registryPackageInfo };
+  return { paths, packageInfo };
 }
 
 export async function ensureCachedArchiveInfo(
@@ -168,7 +180,7 @@ async function fetchArchiveBuffer(
   pkgName: string,
   pkgVersion: string
 ): Promise<{ archiveBuffer: Buffer; archivePath: string }> {
-  const { download: archivePath } = await fetchInfo(pkgName, pkgVersion);
+  const { download: archivePath } = await getInfo(pkgName, pkgVersion);
   const archiveUrl = `${getRegistryUrl()}${archivePath}`;
   const archiveBuffer = await getResponseStream(archiveUrl).then(streamToBuffer);
 
