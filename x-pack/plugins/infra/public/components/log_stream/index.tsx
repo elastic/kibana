@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo, useCallback, useEffect } from 'react';
 import { noop } from 'lodash';
 import useMount from 'react-use/lib/useMount';
+import usePrevious from 'react-use/lib/usePrevious';
 import { euiStyled } from '../../../../observability/public';
 
 import { LogEntriesCursor } from '../../../common/http_api';
@@ -78,6 +79,8 @@ Read more at https://github.com/elastic/kibana/blob/master/src/plugins/kibana_re
   });
 
   // Derived state
+  const prevSourceId = usePrevious(sourceId);
+
   const isReloading =
     isLoadingSourceConfiguration || loadingState === 'uninitialized' || loadingState === 'loading';
 
@@ -101,9 +104,14 @@ Read more at https://github.com/elastic/kibana/blob/master/src/plugins/kibana_re
 
   // Component lifetime
   useMount(() => {
-    loadSourceConfiguration();
     fetchEntries();
   });
+
+  useEffect(() => {
+    if (!prevSourceId || sourceId !== prevSourceId) {
+      loadSourceConfiguration();
+    }
+  }, [prevSourceId, sourceId, loadSourceConfiguration]);
 
   // Pagination handler
   const handlePagination = useCallback(
