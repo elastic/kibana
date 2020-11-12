@@ -17,7 +17,6 @@ import {
   HomePublicPluginSetup,
   FeatureCatalogueCategory,
 } from '../../../../src/plugins/home/public';
-import { Storage } from '../../../../src/plugins/kibana_utils/public';
 import { LicensingPluginSetup } from '../../licensing/public';
 import { PLUGIN_ID, CheckPermissionsResponse, PostIngestSetupResponse } from '../common';
 import { BASE_PATH } from './applications/fleet/constants';
@@ -59,9 +58,7 @@ export interface IngestManagerStartDeps {
   data: DataPublicPluginStart;
 }
 
-export interface IngestManagerStartServices extends CoreStart, IngestManagerStartDeps {
-  storage: Storage;
-}
+export interface IngestManagerStartServices extends CoreStart, IngestManagerStartDeps {}
 
 export class IngestManagerPlugin
   implements
@@ -69,7 +66,6 @@ export class IngestManagerPlugin
   private config: IngestManagerConfigType;
   private kibanaVersion: string;
   private extensions: UIExtensionsStorage = {};
-  private storage = new Storage(localStorage);
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = this.initializerContext.config.get<IngestManagerConfigType>();
@@ -103,7 +99,6 @@ export class IngestManagerPlugin
         const startServices: IngestManagerStartServices = {
           ...coreStartServices,
           ...startDepsServices,
-          storage: this.storage,
         };
         const { renderApp, teardownIngestManager } = await import('./applications/fleet');
         const unmount = renderApp(
