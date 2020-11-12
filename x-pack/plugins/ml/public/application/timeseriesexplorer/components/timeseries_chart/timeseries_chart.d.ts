@@ -10,6 +10,7 @@ import React from 'react';
 import { Annotation } from '../../../../../common/types/annotations';
 import { CombinedJob } from '../../../../../common/types/anomaly_detection_jobs';
 import { ChartTooltipService } from '../../../components/chart_tooltip';
+import { AnnotationUpdatesService } from '../../../services/annotations_service';
 
 interface Props {
   selectedJob: CombinedJob;
@@ -45,6 +46,7 @@ interface TimeseriesChartProps {
   zoomFromFocusLoaded: object;
   zoomToFocusLoaded: object;
   tooltipService: object;
+  annotationUpdatesService: AnnotationUpdatesService;
 }
 
 declare class TimeseriesChart extends React.Component<Props, any> {

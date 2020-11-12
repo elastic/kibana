@@ -36,6 +36,7 @@ import {
   annotation$,
   annotationsRefreshed,
   AnnotationState,
+  AnnotationUpdatesService,
 } from '../../../services/annotations_service';
 import { AnnotationDescriptionList } from '../annotation_description_list';
 import { DeleteAnnotationModal } from '../delete_annotation_modal';
@@ -402,7 +403,11 @@ export class AnnotationFlyoutUI extends Component<CommonProps & Props> {
   }
 }
 
-export const AnnotationFlyoutContainer: FC<any> = (props) => {
+interface AnnotationFlyoutContainerProps extends CommonProps, Props {
+  annotationUpdatesService: AnnotationUpdatesService;
+}
+
+export const AnnotationFlyoutContainer: FC<any> = (props: AnnotationFlyoutContainerProps) => {
   const { annotationUpdatesService, ...restProps } = props;
   const annotationProp = useObservable<AnnotationState>(annotationUpdatesService.update$());
 
