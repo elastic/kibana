@@ -70,6 +70,7 @@ Once the server is running, follow instructions from the webpage served at `loca
 image::images/elastic-maps-server-instructions.png[Set-up instructions]
 
 
+
 [float]
 [[elastic-maps-server-configuration]]
 ==== Configuration
