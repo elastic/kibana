@@ -24,12 +24,10 @@ import {
   unpackArchiveToCache,
 } from '../archive';
 import { fetchUrl, getResponse, getResponseStream } from './requests';
-import { streamToBuffer } from './streams';
+import { streamToBuffer } from '../streams';
 import { getRegistryUrl } from './registry_url';
 import { appContextService } from '../..';
 import { PackageNotFoundError, PackageCacheError } from '../../../errors';
-
-export { ArchiveEntry, getBufferExtractor } from './extract';
 
 export interface SearchParams {
   category?: CategoryId;
