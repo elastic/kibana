@@ -9,7 +9,7 @@ import { logEntryCursorRT } from '../../log_entry';
 import { jsonArrayRT } from '../../typed_json';
 import { errorRT } from '../common/errors';
 
-export const LOG_ENTRY_SEARCH_STRATEGY = 'infra/log-entry';
+export const LOG_ENTRY_SEARCH_STRATEGY = 'infra-log-entry';
 
 export const logEntrySearchRequestParamsRT = rt.type({
   sourceId: rt.string,
@@ -22,6 +22,8 @@ const logEntryFieldRT = rt.type({
   field: rt.string,
   value: jsonArrayRT,
 });
+
+export type LogEntryField = rt.TypeOf<typeof logEntryFieldRT>;
 
 export const logEntryRT = rt.type({
   id: rt.string,

@@ -19,28 +19,35 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import moment from 'moment';
 import React, { useCallback, useMemo } from 'react';
-
 import { euiStyled } from '../../../../../observability/public';
+import {
+  LogEntry,
+  LogEntryField,
+} from '../../../../common/search_strategies/log_entries/log_entry';
 import { TimeKey } from '../../../../common/time';
 import { InfraLoadingPanel } from '../../loading';
+import { FieldValue } from '../log_text_stream/field_value';
 import { LogEntryActionsMenu } from './log_entry_actions_menu';
-import { LogEntriesItem, LogEntriesItemField } from '../../../../common/http_api';
 
 export interface LogEntryFlyoutProps {
-  flyoutItem: LogEntriesItem | null;
+  flyoutError: string | null;
+  flyoutItem: LogEntry | null;
   setFlyoutVisibility: (visible: boolean) => void;
   setFilter: (filter: string, flyoutItemId: string, timeKey?: TimeKey) => void;
   loading: boolean;
 }
 
+const emptyHighlightTerms: string[] = [];
+
 export const LogEntryFlyout = ({
+  flyoutError,
   flyoutItem,
   loading,
   setFlyoutVisibility,
   setFilter,
 }: LogEntryFlyoutProps) => {
   const createFilterHandler = useCallback(
-    (field: LogEntriesItemField) => () => {
+    (field: LogEntryField) => () => {
       if (!flyoutItem) {
         return;
       }
@@ -78,7 +85,7 @@ export const LogEntryFlyout = ({
           defaultMessage: 'Value',
         }),
         sortable: true,
-        render: (_name: string, item: LogEntriesItemField) => (
+        render: (_name: string, item: LogEntryField) => (
           <span>
             <EuiToolTip
               content={i18n.translate('xpack.infra.logFlyout.setFilterTooltip', {
@@ -94,7 +101,11 @@ export const LogEntryFlyout = ({
                 onClick={createFilterHandler(item)}
               />
             </EuiToolTip>
-            {formatValue(item.value)}
+            <FieldValue
+              highlightTerms={emptyHighlightTerms}
+              isActiveHighlight={false}
+              value={item.value}
+            />
           </span>
         ),
       },
@@ -117,12 +128,12 @@ export const LogEntryFlyout = ({
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            {flyoutItem !== null ? <LogEntryActionsMenu logItem={flyoutItem} /> : null}
+            {flyoutItem !== null ? <LogEntryActionsMenu logEntry={flyoutItem} /> : null}
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        {loading || flyoutItem === null ? (
+        {loading ? (
           <InfraFlyoutLoadingPanel>
             <InfraLoadingPanel
               height="100%"
@@ -132,8 +143,10 @@ export const LogEntryFlyout = ({
               })}
             />
           </InfraFlyoutLoadingPanel>
-        ) : (
+        ) : flyoutItem ? (
           <EuiBasicTable columns={columns} items={flyoutItem.fields} />
+        ) : (
+          <InfraFlyoutLoadingPanel>{flyoutError}</InfraFlyoutLoadingPanel>
         )}
       </EuiFlyoutBody>
     </EuiFlyout>
@@ -147,7 +160,3 @@ export const InfraFlyoutLoadingPanel = euiStyled.div`
   bottom: 0;
   left: 0;
 `;
-
-function formatValue(value: string[]) {
-  return value.length > 1 ? value.join(', ') : value[0];
-}

@@ -6,13 +6,30 @@
 
 import * as rt from 'io-ts';
 
-export const commonSearchSuccessResponseFieldsRT = rt.type({
-  _shards: rt.type({
-    total: rt.number,
-    successful: rt.number,
-    skipped: rt.number,
-    failed: rt.number,
+export const shardFailureRT = rt.type({
+  index: rt.string,
+  node: rt.string,
+  reason: rt.type({
+    reason: rt.string,
+    type: rt.string,
   }),
+  shard: rt.number,
+});
+
+export type ShardFailure = rt.TypeOf<typeof shardFailureRT>;
+
+export const commonSearchSuccessResponseFieldsRT = rt.type({
+  _shards: rt.intersection([
+    rt.type({
+      total: rt.number,
+      successful: rt.number,
+      skipped: rt.number,
+      failed: rt.number,
+    }),
+    rt.partial({
+      failures: rt.array(shardFailureRT),
+    }),
+  ]),
   timed_out: rt.boolean,
   took: rt.number,
 });

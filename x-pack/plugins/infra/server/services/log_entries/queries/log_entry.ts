@@ -43,6 +43,8 @@ export const logEntryHitRT = rt.intersection([
   }),
 ]);
 
+export type LogEntryHit = rt.TypeOf<typeof logEntryHitRT>;
+
 export const getLogEntryResponseRT = rt.intersection([
   commonSearchSuccessResponseFieldsRT,
   rt.type({

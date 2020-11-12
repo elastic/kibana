@@ -7,6 +7,11 @@
 import * as rt from 'io-ts';
 
 export const errorRT = rt.type({
-  type: rt.string,
-  reason: rt.string,
+  type: rt.literal('shardFailure'),
+  shardInfo: rt.type({
+    shard: rt.number,
+    index: rt.string,
+    node: rt.string,
+  }),
+  message: rt.string,
 });

@@ -25,8 +25,9 @@ import {
   logEntrySearchResponsePayloadRT,
 } from '../../../common/search_strategies/log_entries/log_entry';
 import type { IInfraSources } from '../../lib/sources';
+import { ShardFailure } from '../../utils/elasticsearch_runtime_types';
 import { jsonFromBase64StringRT } from '../../utils/typed_search_strategy';
-import { createGetLogEntryQuery, getLogEntryResponseRT } from './queries/log_entry';
+import { createGetLogEntryQuery, getLogEntryResponseRT, LogEntryHit } from './queries/log_entry';
 
 type LogEntrySearchRequest = IKibanaSearchRequest<LogEntrySearchRequestParams>;
 type LogEntrySearchResponse = IKibanaSearchResponse<LogEntrySearchResponsePayload>;
@@ -102,13 +103,10 @@ export const logEntrySearchStrategyProvider = ({
               ? { id: logEntrySearchRequestStateRT.encode({ esRequestId: esResponse.id }) }
               : {}),
             rawResponse: logEntrySearchResponsePayloadRT.encode({
-              data:
-                esResponse.rawResponse.hits.hits.map((hit) => ({
-                  id: hit._id,
-                  index: hit._index,
-                  key: getLogEntryCursorFromHit(hit),
-                  fields: Object.entries(hit.fields).map(([field, value]) => ({ field, value })),
-                }))[0] ?? null,
+              data: esResponse.rawResponse.hits.hits.map(createLogEntryFromHit)[0] ?? null,
+              errors: (esResponse.rawResponse._shards.failures ?? []).map(
+                createErrorFromShardFailure
+              ),
             }),
           }))
         );
@@ -119,3 +117,20 @@ export const logEntrySearchStrategyProvider = ({
     },
   };
 };
+
+const createLogEntryFromHit = (hit: LogEntryHit) => ({
+  id: hit._id,
+  index: hit._index,
+  key: getLogEntryCursorFromHit(hit),
+  fields: Object.entries(hit.fields).map(([field, value]) => ({ field, value })),
+});
+
+const createErrorFromShardFailure = (failure: ShardFailure) => ({
+  type: 'shardFailure' as const,
+  shardInfo: {
+    index: failure.index,
+    node: failure.node,
+    shard: failure.shard,
+  },
+  message: failure.reason.reason,
+});
