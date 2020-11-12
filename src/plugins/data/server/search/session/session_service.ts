@@ -59,7 +59,7 @@ export class BackgroundSessionService {
   };
 
   // TODO: Generate the `userId` from the realm type/realm name/username
-  public save = (
+  public save = async (
     sessionId: string,
     name: string,
     url: string,
@@ -72,7 +72,7 @@ export class BackgroundSessionService {
 
     const idMapping = Object.fromEntries(searchMap.entries());
     const attributes = { name, url, userId, expires: expires.toISOString(), idMapping };
-    const session = savedObjectsClient.create<BackgroundSessionSavedObjectAttributes>(
+    const session = await savedObjectsClient.create<BackgroundSessionSavedObjectAttributes>(
       BACKGROUND_SESSION_TYPE,
       attributes,
       { id: sessionId }
