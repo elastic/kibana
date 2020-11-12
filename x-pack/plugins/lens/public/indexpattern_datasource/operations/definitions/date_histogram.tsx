@@ -19,7 +19,7 @@ import {
   EuiTextColor,
   EuiSpacer,
 } from '@elastic/eui';
-import { updateColumnParam } from '../../state_helpers';
+import { updateColumnParam } from '../layer_helpers';
 import { OperationDefinition } from './index';
 import { FieldBasedIndexPatternColumn } from './column_types';
 import { IndexPatternAggRestrictions, search } from '../../../../../../../src/plugins/data/public';
@@ -59,7 +59,7 @@ export const dateHistogramOperation: OperationDefinition<
       };
     }
   },
-  buildColumn({ suggestedPriority, field }) {
+  buildColumn({ field }) {
     let interval = autoInterval;
     let timeZone: string | undefined;
     if (field.aggregationRestrictions && field.aggregationRestrictions.date_histogram) {
@@ -70,7 +70,6 @@ export const dateHistogramOperation: OperationDefinition<
       label: field.displayName,
       dataType: 'date',
       operationType: 'date_histogram',
-      suggestedPriority,
       sourceField: field.name,
       isBucketed: true,
       scale: 'interval',
@@ -112,7 +111,7 @@ export const dateHistogramOperation: OperationDefinition<
 
     return column;
   },
-  onFieldChange: (oldColumn, indexPattern, field) => {
+  onFieldChange: (oldColumn, field) => {
     return {
       ...oldColumn,
       label: field.displayName,
@@ -168,15 +167,7 @@ export const dateHistogramOperation: OperationDefinition<
       const isCalendarInterval = calendarOnlyIntervals.has(newInterval.unit);
       const value = `${isCalendarInterval ? '1' : newInterval.value}${newInterval.unit || 'd'}`;
 
-      setState(
-        updateColumnParam({
-          state,
-          layerId,
-          currentColumn,
-          value,
-          paramName: 'interval',
-        })
-      );
+      setState(updateColumnParam({ state, layerId, currentColumn, paramName: 'interval', value }));
     };
 
     return (
