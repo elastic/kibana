@@ -10,13 +10,13 @@ bootstrapCache="$HOME/.kibana/bootstrap_cache/$targetBranch.tar"
 ###
 if [ -f "$bootstrapCache" ]; then
   echo "extracting bootstrap_cache from $bootstrapCache";
-  tar -xf "$bootstrapCache";
+  tar -xf "$bootstrapCache" --exclude node_modules;
 else
   branchBootstrapCache="$HOME/.kibana/bootstrap_cache/$(jq -r .branch package.json).tar"
 
   if [ -f "$branchBootstrapCache" ]; then
     echo "extracting bootstrap_cache from $branchBootstrapCache";
-    tar -xf "$branchBootstrapCache";
+    tar -xf "$branchBootstrapCache" --exclude node_modules;
   else
     echo ""
     echo ""
