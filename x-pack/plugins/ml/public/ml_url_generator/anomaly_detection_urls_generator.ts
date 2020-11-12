@@ -34,15 +34,15 @@ export function createAnomalyDetectionJobManagementUrl(
   }
   const { jobId, groupIds, globalState } = params;
   if (jobId || groupIds) {
-    let queryText;
+    const queryTextArr = [];
     if (jobId) {
-      queryText = getJobQueryText(jobId);
+      queryTextArr.push(getJobQueryText(jobId));
     }
     if (groupIds) {
-      queryText = getGroupQueryText(groupIds);
+      queryTextArr.push(getGroupQueryText(groupIds));
     }
     const queryState: Partial<AnomalyDetectionJobsListState> = {
-      queryText,
+      ...(queryTextArr.length > 0 ? { queryText: queryTextArr.join(' ') } : {}),
     };
 
     url = setStateToKbnUrl<Partial<AnomalyDetectionJobsListState>>(
