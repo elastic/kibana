@@ -98,7 +98,8 @@ export const additionalSignalFields = (doc: BaseSignalHit) => {
     parent: buildParent(removeClashes(doc)),
     original_time: doc._source['@timestamp'],
     original_event: doc._source.event ?? undefined,
-    threshold_count: doc._source.threshold_count ?? undefined,
+    threshold_count: doc._source.threshold_count ?? undefined, // TODO: remove/deprecate
+    threshold_bucket: doc._source.threshold_bucket,
     original_signal:
       doc._source.signal != null && !isEventTypeSignal(doc) ? doc._source.signal : undefined,
   };

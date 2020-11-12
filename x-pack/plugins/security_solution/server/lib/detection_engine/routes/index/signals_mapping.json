@@ -334,8 +334,15 @@
           "status": {
             "type": "keyword"
           },
-          "threshold_count": {
-            "type": "float"
+          "threshold_bucket": {
+            "properties": {
+              "count": {
+                "type": "float"
+              },
+              "match_value": {
+                "type": "keyword"
+              }
+            }
           },
           "depth": {
             "type": "integer"

@@ -149,7 +149,11 @@ const getTransformedHits = (
 
     const source = {
       '@timestamp': get(timestampOverride ?? '@timestamp', hit._source),
-      threshold_count: totalResults,
+      threshold_count: totalResults, // TODO: remove/deprecate this
+      threshold_bucket: {
+        count: totalResults,
+        match_value: ruleId,
+      },
       ...getThresholdSignalQueryFields(hit, filter),
     };
 
@@ -176,7 +180,11 @@ const getTransformedHits = (
 
         const source = {
           '@timestamp': get(timestampOverride ?? '@timestamp', hit._source),
-          threshold_count: docCount,
+          threshold_count: docCount, // TODO: remove/deprecate this
+          threshold_bucket: {
+            count: docCount,
+            match_value: get(threshold.field, hit._source),
+          },
           ...getThresholdSignalQueryFields(hit, filter),
         };
 

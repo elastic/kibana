@@ -42,7 +42,7 @@ export const findPreviousThresholdSignals = async ({
   const aggregations = {
     threshold: {
       terms: {
-        field: bucketByField ?? 'signal.rule.rule_id',
+        field: 'signal.threshold_bucket.match_value',
       },
       aggs: {
         lastSignalTimestamp: {
@@ -55,8 +55,19 @@ export const findPreviousThresholdSignals = async ({
   };
 
   const filter = {
-    term: {
-      'signal.rule.rule_id': ruleId,
+    bool: {
+      must: [
+        {
+          term: {
+            'signal.rule.rule_id': ruleId,
+          },
+        },
+        {
+          term: {
+            'signal.rule.threshold.field': bucketByField,
+          },
+        },
+      ],
     },
   };
 
