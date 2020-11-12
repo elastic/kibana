@@ -6,7 +6,7 @@
 
 import fetch, { FetchError, Response, RequestInit } from 'node-fetch';
 import pRetry from 'p-retry';
-import { streamToString } from './streams';
+import { streamToString } from '../../../streams';
 import { appContextService } from '../../app_context';
 import { RegistryError, RegistryConnectionError, RegistryResponseError } from '../../../errors';
 import { getProxyAgent, getRegistryProxyUrl } from './proxy';

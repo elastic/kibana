@@ -6,7 +6,7 @@
 
 import tar from 'tar';
 import yauzl from 'yauzl';
-import { bufferToStream, streamToBuffer } from './streams';
+import { bufferToStream, streamToBuffer } from '../../../streams';
 
 export interface ArchiveEntry {
   path: string;
