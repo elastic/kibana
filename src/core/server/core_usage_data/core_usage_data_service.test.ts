@@ -177,6 +177,7 @@ describe('CoreUsageDataService', () => {
                   "supportedProtocols": Array [
                     "TLSv1.1",
                     "TLSv1.2",
+                    "TLSv1.3",
                   ],
                   "truststoreConfigured": false,
                 },
