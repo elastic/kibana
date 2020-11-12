@@ -58,7 +58,7 @@ know the top-selling products and on what day of the week these products sell th
 [[find-the-data-you-want-to-use]]
 === Step 2. Find your data
 
-Tell {kib} where to find the data you want to explore, then specify the time range in which to view that data.
+Tell {kib} where to find the data you want to explore, and then specify the time range in which to view that data.
 
 . Open the main menu, and select **Discover**.
 
@@ -78,7 +78,7 @@ If you are using the sample data, this value was set when you added the data.
 If you  are using your own data, and it does not have a time field, the range selection is not available.
 
 . To view the count of documents for a given time in the specified range,
-click and drag the mouse over the histogram, and then click *Refresh*.
+click and drag the mouse over the histogram.
 
 [float]
 [[explore-fields-in-your-data]]
@@ -92,6 +92,8 @@ which can be overwhelming. You’ll modify this table to display only your field
 what’s in your data. You can also search for a field by name.
 
 . Find the `manufacturer` field, and then click it to view the five most popular values for that field.
++
+**Discover** fetches a maximum of 500 documents, which it uses to calculate the popular values.
 +
 [role="screenshot"]
 image:images/filter-field.png[Fields list that displays the top five search results]
@@ -131,8 +133,9 @@ Search the ecommerce data for documents where the country matches US:
 
 Whereas the query defines the set of documents you are interested in,
 filters enable you to zero in on different subsets of those documents.
-You can filter results to include or exclude specific fields,
-filter by data type, filter for a value in a range, and more.
+You can filter results to include or exclude specific fields, filter for a value in a range,
+and more. The **Add filter** popup prompts you with the fields you can filter
+and the operators you can use.
 
 Exclude documents where day of week is not Wednesday:
 
@@ -195,10 +198,8 @@ image:images/visualize-from-discover.png[Visualization that opens from Discover 
 [float]
 === What’s next?
 
-There’s much more you can do with your data.
 
-
-* <<kuery-query, Get examples of KQL queries>> that you can try.
+* <<kuery-query, Learn more about the structure of a KQL query>>.
 
 * <<kibana-discover-settings, Configure Discover>> to better meet your needs.
 In **Advanced Settings**, you can configure the number of documents to show,
