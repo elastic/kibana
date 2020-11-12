@@ -157,7 +157,7 @@ describe('validateParams()', () => {
     expect(validateParams(actionType, params)).toEqual(params);
   });
 
-  test('should validate and pass when params is valid and optional timestamp is null', () => {
+  test('should validate and pass when params is valid and optional timestamp is undefined', () => {
     expect(validateParams(actionType, {})).toEqual({});
 
     const params = {
@@ -166,7 +166,7 @@ describe('validateParams()', () => {
       summary: 'a summary',
       source: 'a source',
       severity: 'critical',
-      timestamp: null,
+      timestamp: undefined,
       component: 'a component',
       group: 'a group',
       class: 'a class',
