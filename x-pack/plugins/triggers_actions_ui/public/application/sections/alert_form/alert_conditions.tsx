@@ -3,18 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { Fragment, PropsWithChildren } from 'react';
-import { i18n } from '@kbn/i18n';
+import React, { PropsWithChildren } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import {
-  EuiFlexItem,
-  EuiText,
-  EuiFlexGroup,
-  EuiTitle,
-  EuiFormRow,
-  EuiButtonIcon,
-  EuiButtonEmpty,
-} from '@elastic/eui';
+import { EuiFlexItem, EuiText, EuiFlexGroup, EuiTitle, EuiButtonEmpty } from '@elastic/eui';
 import { partition } from 'lodash';
 import { ActionGroup } from '../../../../../alerts/common';
 
