@@ -225,10 +225,7 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
         }),
         content:
           ilmPolicyName && ilmPolicyLink ? (
-            <EuiLink
-              data-test-subj={'ilmPolicyLink'}
-              {...reactRouterNavigate(history, ilmPolicyLink)}
-            >
+            <EuiLink data-test-subj={'ilmPolicyLink'} href={ilmPolicyLink}>
               {ilmPolicyName}
             </EuiLink>
           ) : (

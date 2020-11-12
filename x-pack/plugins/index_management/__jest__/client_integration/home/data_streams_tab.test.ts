@@ -269,6 +269,7 @@ describe('Data Streams tab', () => {
 
         component.update();
         expect(find('summaryTab').exists()).toBeTruthy();
+        expect(find('title').text().trim()).toBe('indexTemplate');
       });
     });
   });
