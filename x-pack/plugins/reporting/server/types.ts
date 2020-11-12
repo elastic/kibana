@@ -8,15 +8,15 @@ import { KibanaRequest, RequestHandlerContext } from 'src/core/server';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { DataPluginStart } from 'src/plugins/data/server/plugin';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { SpacesPluginSetup } from '../../spaces/server';
-import { CancellationToken } from '../../../plugins/reporting/common';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 import { LicensingPluginSetup } from '../../licensing/server';
 import { AuthenticatedUser, SecurityPluginSetup } from '../../security/server';
+import { SpacesPluginSetup } from '../../spaces/server';
+import { CancellationToken } from '../common';
+import { BaseParams } from '../common/types';
 import { ReportingConfigType } from './config';
 import { ReportingCore } from './core';
 import { LevelLogger } from './lib';
-import { LayoutParams } from './lib/layouts';
 import { ReportTaskParams, TaskRunResult } from './lib/tasks';
 
 /*
@@ -47,14 +47,7 @@ export type ReportingUser = { username: AuthenticatedUser['username'] } | false;
 export type CaptureConfig = ReportingConfigType['capture'];
 export type ScrollConfig = ReportingConfigType['csv']['scroll'];
 
-export interface BaseParams {
-  browserTimezone?: string; // browserTimezone is optional: it is not in old POST URLs that were generated prior to being added to this interface
-  layout?: LayoutParams;
-  objectType: string;
-  title: string;
-  savedObjectId?: string; // legacy (7.x) only
-  queryString?: string; // legacy (7.x) only
-}
+export { BaseParams };
 
 // base params decorated with encrypted headers that come into runJob functions
 export interface BasePayload extends BaseParams {
