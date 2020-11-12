@@ -8,7 +8,7 @@ import React, { FC, useState, useCallback, useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
-  EuiBasicTable,
+  EuiInMemoryTable,
   EuiFlexGroup,
   EuiFlexItem,
   EuiTitle,
@@ -18,6 +18,7 @@ import {
   EuiButtonIcon,
   EuiBadge,
   SearchFilterConfig,
+  EuiSearchBarProps,
 } from '@elastic/eui';
 
 import { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
@@ -41,7 +42,7 @@ import {
   useRefreshAnalyticsList,
 } from '../../../../common';
 import { useTableSettings } from '../analytics_list/use_table_settings';
-import { filterAnalyticsModels, AnalyticsSearchBar } from '../analytics_search_bar';
+import { filterAnalyticsModels } from '../../../../common/search_bar_filters';
 import { ML_PAGES } from '../../../../../../../common/constants/ml_url_generator';
 import { DataFrameAnalysisConfigType } from '../../../../../../../common/types/data_frame_analytics';
 import { timeFormatter } from '../../../../../../../common/util/date_utils';
@@ -401,7 +402,7 @@ export const ModelsList: FC = () => {
         ]
       : [];
 
-  const { onTableChange, pageOfItems, pagination, sorting } = useTableSettings<ModelItem>(
+  const { onTableChange, pagination, sorting } = useTableSettings<ModelItem>(
     ModelsTableToConfigMapping.id,
     filteredModels
   );
@@ -452,6 +453,29 @@ export const ModelsList: FC = () => {
       }
     : undefined;
 
+  const search: EuiSearchBarProps = {
+    query: searchQueryText,
+    onChange: (searchChange) => {
+      if (searchChange.error !== null) {
+        return false;
+      }
+      setSearchQueryText(searchChange.queryText);
+      return true;
+    },
+    box: {
+      incremental: true,
+    },
+    ...(inferenceTypesOptions && inferenceTypesOptions.length > 0
+      ? {
+          filters,
+        }
+      : {}),
+    ...(selectedModels.length > 0
+      ? {
+          toolsLeft,
+        }
+      : {}),
+  };
   return (
     <>
       <EuiSpacer size="m" />
@@ -464,31 +488,21 @@ export const ModelsList: FC = () => {
       </EuiFlexGroup>
       <EuiSpacer size="m" />
       <div data-test-subj="mlModelsTableContainer">
-        <EuiFlexGroup alignItems="center">
-          {selectedModels.length > 0 && toolsLeft}
-          <EuiFlexItem>
-            <AnalyticsSearchBar
-              filters={filters}
-              searchQueryText={searchQueryText}
-              setSearchQueryText={setSearchQueryText}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="l" />
-        <EuiBasicTable<ModelItem>
+        <EuiInMemoryTable<ModelItem>
+          allowNeutralSort={false}
           columns={columns}
           hasActions={true}
           isExpandable={true}
-          isSelectable={false}
-          items={pageOfItems}
-          itemId={ModelsTableToConfigMapping.id}
           itemIdToExpandedRowMap={itemIdToExpandedRowMap}
+          isSelectable={false}
+          items={items}
+          itemId={ModelsTableToConfigMapping.id}
           loading={isLoading}
-          onChange={onTableChange}
-          selection={selection}
-          pagination={pagination!}
+          onTableChange={onTableChange}
+          pagination={pagination}
           sorting={sorting}
-          data-test-subj={isLoading ? 'mlModelsTable loading' : 'mlModelsTable loaded'}
+          search={search}
+          selection={selection}
           rowProps={(item) => ({
             'data-test-subj': `mlModelsTableRow row-${item.model_id}`,
           })}

@@ -81,3 +81,8 @@ export const dataAnalyticsJobUpdateSchema = schema.object({
 export const stopsDataFrameAnalyticsJobQuerySchema = schema.object({
   force: schema.maybe(schema.boolean()),
 });
+
+export const jobsExistSchema = schema.object({
+  analyticsIds: schema.arrayOf(schema.string()),
+  allSpaces: schema.maybe(schema.boolean()),
+});
