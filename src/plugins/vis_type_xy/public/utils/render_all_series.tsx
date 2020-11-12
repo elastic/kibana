@@ -30,6 +30,7 @@ import {
   AccessorFn,
 } from '@elastic/charts';
 import { Accessor } from '@elastic/charts/dist/utils/accessor';
+import { ColorVariant } from '@elastic/charts/dist/utils/commons';
 
 import { DatatableRow } from '../../../expressions/public';
 import { BUCKET_TYPES } from '../../../data/public';
@@ -154,6 +155,8 @@ export const renderAllSeries = (
 
         case ChartType.Area:
         case ChartType.Line:
+          const markSizeAccessor = showCircles ? aspects.z?.accessor ?? undefined : undefined;
+
           return (
             <AreaSeries
               key={id}
@@ -168,7 +171,7 @@ export const renderAllSeries = (
               yScaleType={yAxisScale?.type}
               xAccessor={xAccessor}
               yAccessors={[yAspect.accessor]}
-              markSizeAccessor={showCircles ? aspects.z?.accessor ?? undefined : undefined}
+              markSizeAccessor={markSizeAccessor}
               markFormat={aspects.z?.formatter}
               splitSeriesAccessors={splitSeriesAccessors}
               data={data}
@@ -189,6 +192,7 @@ export const renderAllSeries = (
                 },
                 point: {
                   visible: showCircles,
+                  fill: markSizeAccessor ? ColorVariant.Series : undefined,
                 },
               }}
             />
