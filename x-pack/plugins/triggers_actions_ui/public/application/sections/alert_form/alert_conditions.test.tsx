@@ -7,13 +7,14 @@ import * as React from 'react';
 import { mountWithIntl, nextTick } from 'test_utils/enzyme_helpers';
 import { act } from 'react-dom/test-utils';
 import { ReactWrapper } from 'enzyme';
-import { ActionGroupWithCondition, AlertConditions } from './alert_conditions';
+import AlertConditions, { ActionGroupWithCondition } from './alert_conditions';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiTitle,
   EuiDescriptionList,
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 
 describe('alert_conditions', () => {
@@ -151,6 +152,56 @@ describe('alert_conditions', () => {
     `);
 
     expect(wrapper.find(EuiDescriptionList).find(EuiDescriptionListDescription).length).toEqual(2);
+  });
+
+  it('render add buttons for action group without conditions', async () => {
+    const onInitializeConditionsFor = jest.fn();
+
+    const ConditionForm = ({
+      actionGroup,
+    }: {
+      actionGroup?: ActionGroupWithCondition<{ someProp: string }>;
+    }) => {
+      return (
+        <EuiDescriptionList>
+          <EuiDescriptionListTitle>ID</EuiDescriptionListTitle>
+          <EuiDescriptionListDescription>{actionGroup?.id}</EuiDescriptionListDescription>
+        </EuiDescriptionList>
+      );
+    };
+
+    const wrapper = await setup(
+      <AlertConditions
+        actionGroups={[
+          {
+            id: 'shouldRender',
+            name: 'Should Render',
+            conditions: { someProp: 'shouldRender on a prop' },
+          },
+          {
+            id: 'shouldntRender',
+            name: 'Should Not Render',
+          },
+        ]}
+        onInitializeConditionsFor={onInitializeConditionsFor}
+      >
+        <ConditionForm />
+      </AlertConditions>
+    );
+
+    expect(wrapper.find(EuiButtonEmpty).get(0)).toMatchInlineSnapshot(`
+      <EuiButtonEmpty
+        onClick={[Function]}
+      >
+        Should Not Render
+      </EuiButtonEmpty>
+    `);
+    wrapper.find(EuiButtonEmpty).simulate('click');
+
+    expect(onInitializeConditionsFor).toHaveBeenCalledWith({
+      id: 'shouldntRender',
+      name: 'Should Not Render',
+    });
   });
 
   it('passes in any additional props the container passes in', async () => {

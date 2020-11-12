@@ -437,7 +437,9 @@ export const AlertForm = ({
         </EuiFlexGroup>
       )}
       <EuiHorizontalRule />
-      {AlertParamsExpressionComponent ? (
+      {AlertParamsExpressionComponent &&
+      defaultActionGroupId &&
+      alertTypesIndex?.has(alert.alertTypeId) ? (
         <Suspense fallback={<CenterJustifiedSpinner />}>
           <AlertParamsExpressionComponent
             alertParams={alert.params}
@@ -447,6 +449,8 @@ export const AlertForm = ({
             setAlertParams={setAlertParams}
             setAlertProperty={setAlertProperty}
             alertsContext={alertsContext}
+            defaultActionGroupId={defaultActionGroupId}
+            actionGroups={alertTypesIndex.get(alert.alertTypeId)!.actionGroups}
           />
         </Suspense>
       ) : null}

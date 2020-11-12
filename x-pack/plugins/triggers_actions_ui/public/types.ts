@@ -169,6 +169,8 @@ export interface AlertTypeParamsExpressionProps<
   setAlertProperty: (key: string, value: any) => void;
   errors: IErrorObject;
   alertsContext: AlertsContextValue;
+  defaultActionGroupId: string;
+  actionGroups: ActionGroup[];
 }
 
 export interface AlertTypeModel<AlertParamsType = any, AlertsContextValue = any> {
