@@ -6,25 +6,25 @@
 
 /* global jest */
 
-import React from 'react';
-import { ReactWrapper, mount, MountRendererProps } from 'enzyme';
+import { render, waitFor } from '@testing-library/react';
+import { mount, MountRendererProps, ReactWrapper } from 'enzyme';
 import enzymeToJson from 'enzyme-to-json';
 import { Location } from 'history';
 import moment from 'moment';
 import { Moment } from 'moment-timezone';
-import { render, waitFor } from '@testing-library/react';
+import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { APMConfig } from '../../server';
-import { PromiseReturnType } from '../../typings/common';
-import { EuiThemeProvider } from '../../../observability/public';
 import {
   ESFilter,
-  ESSearchResponse,
   ESSearchRequest,
-} from '../../typings/elasticsearch';
-import { MockApmPluginContextWrapper } from '../context/ApmPluginContext/MockApmPluginContext';
+  ESSearchResponse,
+} from '../../../../typings/elasticsearch';
+import { EuiThemeProvider } from '../../../observability/public';
+import { PromiseReturnType } from '../../../observability/typings/common';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { APMConfig } from '../../server';
 import { UIFilters } from '../../typings/ui_filters';
+import { MockApmPluginContextWrapper } from '../context/ApmPluginContext/MockApmPluginContext';
 import { UrlParamsProvider } from '../context/UrlParamsContext';
 
 const originalConsoleWarn = console.warn; // eslint-disable-line no-console
