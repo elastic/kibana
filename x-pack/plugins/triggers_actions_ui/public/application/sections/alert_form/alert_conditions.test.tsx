@@ -7,7 +7,7 @@ import * as React from 'react';
 import { mountWithIntl, nextTick } from 'test_utils/enzyme_helpers';
 import { act } from 'react-dom/test-utils';
 import { ReactWrapper } from 'enzyme';
-import AlertConditions, { ActionGroupWithCondition } from './alert_conditions';
+import { AlertConditions, ActionGroupWithCondition } from './alert_conditions';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiTitle,

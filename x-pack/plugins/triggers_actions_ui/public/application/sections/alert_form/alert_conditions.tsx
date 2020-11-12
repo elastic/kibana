@@ -18,9 +18,19 @@ import {
 import { partition } from 'lodash';
 import { ActionGroup } from '../../../../../alerts/common';
 
-export interface ActionGroupWithCondition<T> extends ActionGroup {
-  conditions?: T;
-}
+export type ActionGroupWithCondition<T> = ActionGroup &
+  (
+    | // allow isRequired=false with or without conditions
+    {
+        conditions?: T;
+        isRequired?: false;
+      }
+    // but if isRequired=true then conditions must be specified
+    | {
+        conditions: T;
+        isRequired: true;
+      }
+  );
 
 export interface AlertConditionsProps<ConditionProps> {
   headline?: string;
@@ -107,52 +117,3 @@ export const AlertConditions = <ConditionProps extends any>({
     </EuiFlexGroup>
   );
 };
-
-export type AlertConditionsGroup<ConditionProps> = {
-  actionGroup?: ActionGroupWithCondition<ConditionProps>;
-} & Pick<AlertConditionsProps<ConditionProps>, 'onResetConditionsFor'>;
-
-export const AlertConditionsGroup = <ConditionProps extends unknown>({
-  actionGroup,
-  onResetConditionsFor,
-  children,
-  ...otherProps
-}: PropsWithChildren<AlertConditionsGroup<ConditionProps>>) => {
-  if (!actionGroup) {
-    return null;
-  }
-
-  return (
-    <EuiFormRow
-      label={actionGroup.name}
-      fullWidth
-      labelAppend={
-        onResetConditionsFor && (
-          <EuiButtonIcon
-            iconType="minusInCircle"
-            color="danger"
-            aria-label={i18n.translate(
-              'xpack.triggersActionsUI.sections.alertAdd.conditions.removeConditionLabel',
-              {
-                defaultMessage: 'Remove',
-              }
-            )}
-            onClick={() => onResetConditionsFor(actionGroup)}
-          />
-        )
-      }
-    >
-      {React.isValidElement(children) ? (
-        React.cloneElement(React.Children.only(children), {
-          actionGroup,
-          ...otherProps,
-        })
-      ) : (
-        <Fragment />
-      )}
-    </EuiFormRow>
-  );
-};
-
-// eslint-disable-next-line import/no-default-export
-export { AlertConditions as default };
