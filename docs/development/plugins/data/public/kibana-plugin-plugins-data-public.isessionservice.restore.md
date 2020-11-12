@@ -9,5 +9,5 @@ Restores existing session
 <b>Signature:</b>
 
 ```typescript
-restore: (sessionId: string) => void;
+restore: (sessionId: string) => Promise<any>;
 ```

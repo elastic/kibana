@@ -15,8 +15,15 @@ export interface ISessionService
 |  Property | Type | Description |
 |  --- | --- | --- |
 |  [clear](./kibana-plugin-plugins-data-public.isessionservice.clear.md) | <code>() =&gt; void</code> | Clears the active session. |
+|  [delete](./kibana-plugin-plugins-data-public.isessionservice.delete.md) | <code>(sessionId: string) =&gt; Promise&lt;any&gt;</code> | Deletes a session |
+|  [find](./kibana-plugin-plugins-data-public.isessionservice.find.md) | <code>(options: SearchSessionFindOptions) =&gt; Promise&lt;any&gt;</code> | Gets a list of saved sessions |
+|  [get](./kibana-plugin-plugins-data-public.isessionservice.get.md) | <code>(sessionId: string) =&gt; Promise&lt;any&gt;</code> | Gets a saved session |
 |  [getSession$](./kibana-plugin-plugins-data-public.isessionservice.getsession_.md) | <code>() =&gt; Observable&lt;string &#124; undefined&gt;</code> | Returns the observable that emits an update every time the session ID changes |
 |  [getSessionId](./kibana-plugin-plugins-data-public.isessionservice.getsessionid.md) | <code>() =&gt; string &#124; undefined</code> | Returns the active session ID |
-|  [restore](./kibana-plugin-plugins-data-public.isessionservice.restore.md) | <code>(sessionId: string) =&gt; void</code> | Restores existing session |
+|  [isRestore](./kibana-plugin-plugins-data-public.isessionservice.isrestore.md) | <code>() =&gt; boolean</code> | Whether the active session is restored (i.e. reusing previous search IDs) |
+|  [isStored](./kibana-plugin-plugins-data-public.isessionservice.isstored.md) | <code>() =&gt; boolean</code> | Whether the active session is already saved (i.e. sent to background) |
+|  [restore](./kibana-plugin-plugins-data-public.isessionservice.restore.md) | <code>(sessionId: string) =&gt; Promise&lt;any&gt;</code> | Restores existing session |
+|  [save](./kibana-plugin-plugins-data-public.isessionservice.save.md) | <code>(name: string, url: string) =&gt; Promise&lt;any&gt;</code> | Saves a session |
 |  [start](./kibana-plugin-plugins-data-public.isessionservice.start.md) | <code>() =&gt; string</code> | Starts a new session |
+|  [update](./kibana-plugin-plugins-data-public.isessionservice.update.md) | <code>(sessionId: string, attributes: Partial&lt;BackgroundSessionSavedObjectAttributes&gt;) =&gt; Promise&lt;any&gt;</code> | Updates a session |
 

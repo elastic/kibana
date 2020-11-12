@@ -1423,6 +1423,8 @@ export type ISearchGeneric = <SearchStrategyRequest extends IKibanaSearchRequest
 // @public (undocumented)
 export interface ISearchOptions {
     abortSignal?: AbortSignal;
+    isRestore?: boolean;
+    isStored?: boolean;
     sessionId?: string;
     strategy?: string;
 }
@@ -1475,10 +1477,19 @@ export const isErrorResponse: (response?: IKibanaSearchResponse<any> | undefined
 // @public (undocumented)
 export interface ISessionService {
     clear: () => void;
+    delete: (sessionId: string) => Promise<any>;
+    // Warning: (ae-forgotten-export) The symbol "SearchSessionFindOptions" needs to be exported by the entry point index.d.ts
+    find: (options: SearchSessionFindOptions) => Promise<any>;
+    get: (sessionId: string) => Promise<any>;
     getSession$: () => Observable<string | undefined>;
     getSessionId: () => string | undefined;
-    restore: (sessionId: string) => void;
+    isRestore: () => boolean;
+    isStored: () => boolean;
+    restore: (sessionId: string) => Promise<any>;
+    save: (name: string, url: string) => Promise<any>;
     start: () => string;
+    // Warning: (ae-forgotten-export) The symbol "BackgroundSessionSavedObjectAttributes" needs to be exported by the entry point index.d.ts
+    update: (sessionId: string, attributes: Partial<BackgroundSessionSavedObjectAttributes>) => Promise<any>;
 }
 
 // Warning: (ae-missing-release-tag) "isFilter" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
@@ -2046,7 +2057,7 @@ export class SearchInterceptor {
     // @internal
     protected pendingCount$: BehaviorSubject<number>;
     // @internal (undocumented)
-    protected runSearch(request: IKibanaSearchRequest, signal: AbortSignal, strategy?: string): Promise<IKibanaSearchResponse>;
+    protected runSearch(request: IKibanaSearchRequest, options?: ISearchOptions): Promise<IKibanaSearchResponse>;
     search(request: IKibanaSearchRequest, options?: ISearchOptions): Observable<IKibanaSearchResponse>;
     // @internal (undocumented)
     protected setupAbortSignal({ abortSignal, timeout, }: {
