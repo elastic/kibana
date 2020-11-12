@@ -23,7 +23,7 @@ import './side_nav.scss';
  * Side navigation - product & icon + links wrapper
  */
 
-interface ISideNavProps {
+interface SideNavProps {
   // Expects product plugin constants (@see common/constants.ts)
   product: {
     NAME: string;
@@ -31,7 +31,7 @@ interface ISideNavProps {
   };
 }
 
-export const SideNav: React.FC<ISideNavProps> = ({ product, children }) => {
+export const SideNav: React.FC<SideNavProps> = ({ product, children }) => {
   return (
     <nav
       id="enterpriseSearchNav"
@@ -61,7 +61,7 @@ export const SideNav: React.FC<ISideNavProps> = ({ product, children }) => {
  * Side navigation link item
  */
 
-interface ISideNavLinkProps {
+interface SideNavLinkProps {
   to: string;
   isExternal?: boolean;
   className?: string;
@@ -69,7 +69,7 @@ interface ISideNavLinkProps {
   subNav?: React.ReactNode;
 }
 
-export const SideNavLink: React.FC<ISideNavLinkProps> = ({
+export const SideNavLink: React.FC<SideNavLinkProps> = ({
   isExternal,
   to,
   children,
@@ -106,6 +106,23 @@ export const SideNavLink: React.FC<ISideNavLinkProps> = ({
         </EuiLink>
       )}
       {subNav && <ul className="enterpriseSearchNavLinks__subNav">{subNav}</ul>}
+    </li>
+  );
+};
+
+/**
+ * Side navigation non-link item
+ */
+
+interface SideNavItemProps {
+  className?: string;
+}
+
+export const SideNavItem: React.FC<SideNavItemProps> = ({ children, className, ...rest }) => {
+  const classes = classNames('enterpriseSearchNavLinks__item', className);
+  return (
+    <li {...rest} className={classes}>
+      {children}
     </li>
   );
 };

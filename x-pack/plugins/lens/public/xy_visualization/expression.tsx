@@ -20,12 +20,13 @@ import {
   GeometryValue,
   XYChartSeriesIdentifier,
   StackMode,
+  VerticalAlignment,
+  HorizontalAlignment,
 } from '@elastic/charts';
 import { I18nProvider } from '@kbn/i18n/react';
 import {
   ExpressionFunctionDefinition,
   ExpressionRenderDefinition,
-  ExpressionValueSearchContext,
   Datatable,
   DatatableRow,
 } from 'src/plugins/expressions/public';
@@ -41,7 +42,7 @@ import {
 import { XYArgs, SeriesType, visualizationTypes } from './types';
 import { VisualizationContainer } from '../visualization_container';
 import { isHorizontalChart, getSeriesColor } from './state_helpers';
-import { parseInterval } from '../../../../../src/plugins/data/common';
+import { ExpressionValueSearchContext, search } from '../../../../../src/plugins/data/public';
 import {
   ChartsPluginSetup,
   PaletteRegistry,
@@ -131,6 +132,11 @@ export const xyChart: ExpressionFunctionDefinition<
         defaultMessage: 'Define how missing values are treated',
       }),
     },
+    valueLabels: {
+      types: ['string'],
+      options: ['hide', 'inside'],
+      help: '',
+    },
     tickLabelsVisibilitySettings: {
       types: ['lens_xy_tickLabelsConfig'],
       help: i18n.translate('xpack.lens.xyChart.tickLabelsSettings.help', {
@@ -214,6 +220,27 @@ export const getXyChartRenderer = (dependencies: {
   },
 });
 
+function getValueLabelsStyling(isHorizontal: boolean) {
+  const VALUE_LABELS_MAX_FONTSIZE = 15;
+  const VALUE_LABELS_MIN_FONTSIZE = 10;
+  const VALUE_LABELS_VERTICAL_OFFSET = -10;
+  const VALUE_LABELS_HORIZONTAL_OFFSET = 10;
+
+  return {
+    displayValue: {
+      fontSize: { min: VALUE_LABELS_MIN_FONTSIZE, max: VALUE_LABELS_MAX_FONTSIZE },
+      fill: { textInverted: true, textBorder: 2 },
+      alignment: isHorizontal
+        ? {
+            vertical: VerticalAlignment.Middle,
+          }
+        : { horizontal: HorizontalAlignment.Center },
+      offsetX: isHorizontal ? VALUE_LABELS_HORIZONTAL_OFFSET : 0,
+      offsetY: isHorizontal ? 0 : VALUE_LABELS_VERTICAL_OFFSET,
+    },
+  };
+}
+
 function getIconForSeriesType(seriesType: SeriesType): IconType {
   return visualizationTypes.find((c) => c.id === seriesType)!.icon || 'empty';
 }
@@ -254,7 +281,7 @@ export function XYChart({
   onClickValue,
   onSelectRange,
 }: XYChartRenderProps) {
-  const { legend, layers, fittingFunction, gridlinesVisibilitySettings } = args;
+  const { legend, layers, fittingFunction, gridlinesVisibilitySettings, valueLabels } = args;
   const chartTheme = chartsThemeService.useChartsTheme();
   const chartBaseTheme = chartsThemeService.useChartsBaseTheme();
 
@@ -341,7 +368,8 @@ export function XYChart({
     // add minInterval only for single point in domain
     if (data.dateRange && isSingleTimestampInXDomain()) {
       const params = xAxisColumn?.meta?.sourceParams?.params as Record<string, string>;
-      if (params?.interval !== 'auto') return parseInterval(params?.interval)?.asMilliseconds();
+      if (params?.interval !== 'auto')
+        return search.aggs.parseInterval(params?.interval)?.asMilliseconds();
 
       const { fromDate, toDate } = data.dateRange;
       const duration = moment(toDate).diff(moment(fromDate));
@@ -396,6 +424,15 @@ export function XYChart({
     return style;
   };
 
+  const shouldShowValueLabels =
+    // No stacked bar charts
+    filteredLayers.every((layer) => !layer.seriesType.includes('stacked')) &&
+    // No histogram charts
+    !isHistogramViz;
+
+  const valueLabelsStyling =
+    shouldShowValueLabels && valueLabels !== 'hide' && getValueLabelsStyling(shouldRotate);
+
   const colorAssignments = getColorAssignments(args.layers, data, formatFactory);
 
   return (
@@ -408,7 +445,16 @@ export function XYChart({
         }
         legendPosition={legend.position}
         showLegendExtra={false}
-        theme={chartTheme}
+        theme={{
+          ...chartTheme,
+          barSeriesStyle: {
+            ...chartTheme.barSeriesStyle,
+            ...valueLabelsStyling,
+          },
+          background: {
+            color: undefined, // removes background for embeddables
+          },
+        }}
         baseTheme={chartBaseTheme}
         tooltip={{
           headerFormatter: (d) => safeXAccessorLabelRenderer(d.value),
@@ -613,6 +659,10 @@ export function XYChart({
             });
           }
 
+          const yAxis = yAxesConfiguration.find((axisConfiguration) =>
+            axisConfiguration.series.find((currentSeries) => currentSeries.accessor === accessor)
+          );
+
           const seriesProps: SeriesSpec = {
             splitSeriesAccessors: splitAccessor ? [splitAccessor] : [],
             stackAccessors: seriesType.includes('stacked') ? [xAccessor as string] : [],
@@ -649,9 +699,7 @@ export function XYChart({
                 palette.params
               );
             },
-            groupId: yAxesConfiguration.find((axisConfiguration) =>
-              axisConfiguration.series.find((currentSeries) => currentSeries.accessor === accessor)
-            )?.groupId,
+            groupId: yAxis?.groupId,
             enableHistogramMode:
               isHistogram &&
               (seriesType.includes('stacked') || !splitAccessor) &&
@@ -723,7 +771,19 @@ export function XYChart({
             case 'bar_horizontal':
             case 'bar_horizontal_stacked':
             case 'bar_horizontal_percentage_stacked':
-              return <BarSeries key={index} {...seriesProps} />;
+              const valueLabelsSettings = {
+                displayValueSettings: {
+                  // This format double fixes two issues in elastic-chart
+                  // * when rotating the chart, the formatter is not correctly picked
+                  // * in some scenarios value labels are not strings, and this breaks the elastic-chart lib
+                  valueFormatter: (d: unknown) => yAxis?.formatter?.convert(d) || '',
+                  showValueLabel: shouldShowValueLabels && valueLabels !== 'hide',
+                  isAlternatingValueLabel: false,
+                  isValueContainedInElement: true,
+                  hideClippedValue: true,
+                },
+              };
+              return <BarSeries key={index} {...seriesProps} {...valueLabelsSettings} />;
             case 'area_stacked':
             case 'area_percentage_stacked':
               return (

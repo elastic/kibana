@@ -325,6 +325,7 @@ function getTopSuggestion(
     activeVisualizationId: props.visualizationId,
     visualizationState: props.visualizationState,
     subVisualizationId,
+    activeData: props.framePublicAPI.activeData,
     mainPalette,
   });
   const suggestions = unfilteredSuggestions.filter((suggestion) => {
