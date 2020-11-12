@@ -22,7 +22,12 @@ import { Observable } from 'rxjs';
 import { filter } from 'rxjs/operators';
 import { ExpressionRenderError, RenderErrorHandlerFnType, IExpressionLoaderParams } from './types';
 import { renderErrorHandler as defaultRenderErrorHandler } from './render_error_handler';
-import { IInterpreterRenderHandlers, ExpressionAstExpression } from '../common';
+import {
+  IInterpreterRenderHandlers,
+  ExpressionAstExpression,
+  ExpressionValueRender,
+  ExpressionValueError,
+} from '../common';
 
 import { getRenderersRegistry } from './services';
 
@@ -95,14 +100,17 @@ export class ExpressionRenderHandler {
     };
   }
 
-  render = async (data: any, uiState: any = {}) => {
-    if (!data || typeof data !== 'object') {
+  render = async (
+    value: ExpressionValueError | ExpressionValueRender<unknown>,
+    uiState: object = {}
+  ) => {
+    if (!value || typeof value !== 'object') {
       return this.handleRenderError(new Error('invalid data provided to the expression renderer'));
     }
 
-    if (data.type !== 'render' || !data.as) {
-      if (data.type === 'error') {
-        return this.handleRenderError(data.error);
+    if (value.type !== 'render' || !value.as) {
+      if (value.type === 'error') {
+        return this.handleRenderError(value.error);
       } else {
         return this.handleRenderError(
           new Error('invalid data provided to the expression renderer')
@@ -110,15 +118,15 @@ export class ExpressionRenderHandler {
       }
     }
 
-    if (!getRenderersRegistry().get(data.as)) {
-      return this.handleRenderError(new Error(`invalid renderer id '${data.as}'`));
+    if (!getRenderersRegistry().get(value.as)) {
+      return this.handleRenderError(new Error(`invalid renderer id '${value.as}'`));
     }
 
     try {
       // Rendering is asynchronous, completed by handlers.done()
       await getRenderersRegistry()
-        .get(data.as)!
-        .render(this.element, data.value, {
+        .get(value.as)!
+        .render(this.element, value.value, {
           ...this.handlers,
           uiState,
         } as any);
