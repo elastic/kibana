@@ -6,7 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
-import { Service } from '../../types';
+import { Logger } from 'src/core/server';
 import { STACK_ALERTS_FEATURE_ID } from '../../../common';
 import { getGeoThresholdExecutor } from './geo_threshold';
 import {
@@ -178,7 +178,7 @@ export interface GeoThresholdParams {
 }
 
 export function getAlertType(
-  service: Omit<Service, 'indexThreshold'>
+  logger: Logger
 ): {
   defaultActionGroupId: string;
   actionGroups: ActionGroup[];
@@ -227,7 +227,7 @@ export function getAlertType(
     name: alertTypeName,
     actionGroups: [{ id: ActionGroupId, name: actionGroupName }],
     defaultActionGroupId: ActionGroupId,
-    executor: getGeoThresholdExecutor(service),
+    executor: getGeoThresholdExecutor(logger),
     producer: STACK_ALERTS_FEATURE_ID,
     validate: {
       params: ParamsSchema,

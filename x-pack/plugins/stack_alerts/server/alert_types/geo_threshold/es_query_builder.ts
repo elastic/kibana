@@ -6,7 +6,7 @@
 
 import { ILegacyScopedClusterClient } from 'kibana/server';
 import { SearchResponse } from 'elasticsearch';
-import { Logger } from '../../types';
+import { Logger } from 'src/core/server';
 import {
   Query,
   IIndexPattern,
