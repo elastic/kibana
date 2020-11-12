@@ -35,7 +35,7 @@ Cypress.Commands.add('stubSearchStrategyApi', function (
   searchStrategyName = 'securitySolutionSearchStrategy'
 ) {
   cy.fixture(dataFileName).as(`${dataFileName}JSON`);
-  cy.route2('POST', `internal/search/${searchStrategyName}`, { fixture: dataFileName });
+  cy.route2('POST', `/internal/search/${searchStrategyName}`, { fixture: dataFileName });
 });
 
 Cypress.Commands.add(

@@ -15,7 +15,7 @@ const EXPECTED_EXPORTED_TIMELINE_PATH = 'cypress/test_files/expected_timelines_e
 describe('Export timelines', () => {
   before(() => {
     esArchiverLoad('timeline');
-    cy.route2('POST', 'api/timeline/_export?file_name=timelines_export.ndjson').as('export');
+    cy.route2('POST', '/api/timeline/_export?file_name=timelines_export.ndjson').as('export');
   });
 
   after(() => {

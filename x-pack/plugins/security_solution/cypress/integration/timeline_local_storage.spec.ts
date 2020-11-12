@@ -35,6 +35,9 @@ describe('persistent timeline', () => {
 
       cy.get(DRAGGABLE_HEADER).should('have.length', expectedNumberOfTimelineColumns);
 
+      // Wait to make sure changes are saved properly
+      cy.wait(500);
+
       reload(waitsForEventsToBeLoaded);
 
       cy.get(DRAGGABLE_HEADER).should('have.length', expectedNumberOfTimelineColumns);
