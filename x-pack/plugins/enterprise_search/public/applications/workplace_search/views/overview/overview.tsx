@@ -17,7 +17,7 @@ import { SendWorkplaceSearchTelemetry as SendTelemetry } from '../../../shared/t
 import { AppLogic } from '../../app_logic';
 import { OverviewLogic } from './overview_logic';
 
-import { Loading } from '../../components/shared/loading';
+import { Loading } from '../../../shared/loading';
 import { ProductButton } from '../../components/shared/product_button';
 import { ViewContentHeader } from '../../components/shared/view_content_header';
 
