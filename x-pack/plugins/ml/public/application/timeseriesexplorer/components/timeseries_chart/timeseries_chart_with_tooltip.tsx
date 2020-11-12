@@ -16,6 +16,7 @@ import { useMlKibana, useNotifications } from '../../../contexts/kibana';
 import { getBoundsRoundedToInterval } from '../../../util/time_buckets';
 import { ANNOTATION_EVENT_USER } from '../../../../../common/constants/annotations';
 import { getControlsForDetector } from '../../get_controls_for_detector';
+import { MlAnnotationComponent } from '../../../components/annotations/annotations_service';
 
 interface TimeSeriesChartWithTooltipsProps {
   bounds: any;
@@ -119,22 +120,29 @@ export const TimeSeriesChartWithTooltips: FC<TimeSeriesChartWithTooltipsProps> =
 
   return (
     <div className="ml-timeseries-chart" data-test-subj="mlSingleMetricViewerChart">
-      <MlTooltipComponent>
-        {(tooltipService) => (
-          <TimeseriesChart
-            {...chartProps}
-            annotationData={annotationData}
-            bounds={bounds}
-            detectorIndex={detectorIndex}
-            renderFocusChartOnly={renderFocusChartOnly}
-            selectedJob={selectedJob}
-            showAnnotations={showAnnotations}
-            showForecast={showForecast}
-            showModelBounds={showModelBounds}
-            tooltipService={tooltipService}
-          />
-        )}
-      </MlTooltipComponent>
+      <MlAnnotationComponent>
+        {(annotationService) => {
+          return (
+            <MlTooltipComponent>
+              {(tooltipService) => (
+                <TimeseriesChart
+                  {...chartProps}
+                  annotationService={annotationService}
+                  annotationData={annotationData}
+                  bounds={bounds}
+                  detectorIndex={detectorIndex}
+                  renderFocusChartOnly={renderFocusChartOnly}
+                  selectedJob={selectedJob}
+                  showAnnotations={showAnnotations}
+                  showForecast={showForecast}
+                  showModelBounds={showModelBounds}
+                  tooltipService={tooltipService}
+                />
+              )}
+            </MlTooltipComponent>
+          );
+        }}
+      </MlAnnotationComponent>
     </div>
   );
 };

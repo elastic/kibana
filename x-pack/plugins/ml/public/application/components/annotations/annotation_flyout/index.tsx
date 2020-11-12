@@ -28,7 +28,6 @@ import {
 import { CommonProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { distinctUntilChanged } from 'rxjs/operators';
 import {
   ANNOTATION_MAX_LENGTH_CHARS,
   ANNOTATION_EVENT_USER,
@@ -48,6 +47,7 @@ import {
 } from '../../../../../common/types/annotations';
 import { PartitionFieldsType } from '../../../../../common/types/anomalies';
 import { PARTITION_FIELDS } from '../../../../../common/constants/anomalies';
+import { MlAnnotationComponent } from '../annotations_service';
 
 interface ViewableDetector {
   index: number;
@@ -402,18 +402,12 @@ export class AnnotationFlyoutUI extends Component<CommonProps & Props> {
   }
 }
 
-export const AnnotationFlyout: FC<any> = (props) => {
-  const annotationProp = useObservable(
-    annotation$.pipe(
-      distinctUntilChanged((prev, curr) => {
-        // prevent re-rendering
-        return prev !== null && curr !== null;
-      })
-    )
-  );
+export const AnnotationFlyoutContainer: FC<any> = (props) => {
+  const { annotationUpdatesService, ...restProps } = props;
+  const annotationProp = useObservable<AnnotationState>(annotationUpdatesService.update$());
 
   const cancelEditingHandler = useCallback(() => {
-    annotation$.next(null);
+    annotationUpdatesService.setValue(null);
   }, []);
 
   if (annotationProp === undefined || annotationProp === null) {
@@ -441,7 +435,22 @@ export const AnnotationFlyout: FC<any> = (props) => {
           </h2>
         </EuiTitle>
       </EuiFlyoutHeader>
-      <AnnotationFlyoutUI {...props} />
+      <AnnotationFlyoutUI {...restProps} />
     </EuiFlyout>
+  );
+};
+
+export const AnnotationFlyout: FC<any> = (props) => {
+  return (
+    <MlAnnotationComponent>
+      {(annotationUpdatesService) => {
+        return (
+          <AnnotationFlyoutContainer
+            annotationUpdatesService={annotationUpdatesService}
+            {...props}
+          />
+        );
+      }}
+    </MlAnnotationComponent>
   );
 };

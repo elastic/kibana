@@ -21,7 +21,6 @@ import {
   getSeverityWithLow,
   getMultiBucketImpactLabel,
 } from '../../../../../common/util/anomaly_utils';
-import { annotation$ } from '../../../services/annotations_service';
 import { formatValue } from '../../../formatters/format_value';
 import {
   LINE_CHART_ANOMALY_RADIUS,
@@ -51,7 +50,6 @@ import {
   unhighlightFocusChartAnnotation,
   ANNOTATION_MIN_WIDTH,
 } from './timeseries_chart_annotations';
-import { distinctUntilChanged } from 'rxjs/operators';
 
 const focusZoomPanelHeight = 25;
 const focusChartHeight = 310;
@@ -1799,14 +1797,8 @@ class TimeseriesChartIntl extends Component {
 }
 
 export const TimeseriesChart = (props) => {
-  const annotationProp = useObservable(
-    annotation$.pipe(
-      distinctUntilChanged((prev, curr) => {
-        // prevent re-rendering
-        return prev !== null && curr !== null;
-      })
-    )
-  );
+  const { annotationService } = props;
+  const annotationProp = useObservable(annotationService.update$());
 
   if (annotationProp === undefined) {
     return null;
