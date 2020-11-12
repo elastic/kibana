@@ -61,6 +61,8 @@ function createChoroplethLayerDescriptor({
           indexPatternTitle: rightIndexPatternTitle,
           term: rightTermField,
           metrics: [metricsDescriptor],
+          applyGlobalQuery: true,
+          applyGlobalTime: true,
         },
       },
     ],

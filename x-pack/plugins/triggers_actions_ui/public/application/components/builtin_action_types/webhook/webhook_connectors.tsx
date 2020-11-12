@@ -261,7 +261,6 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
               fullWidth
               readOnly={readOnly}
               value={url || ''}
-              placeholder="https://<site-url> or http://<site-url>"
               data-test-subj="webhookUrlText"
               onChange={(e) => {
                 editActionConfig('url', e.target.value);
