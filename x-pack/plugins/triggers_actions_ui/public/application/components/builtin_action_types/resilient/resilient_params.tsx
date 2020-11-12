@@ -222,7 +222,7 @@ const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<Resilient
           editAction={editSubActionProperty}
           messageVariables={messageVariables}
           paramsProperty={'title'}
-          inputTargetValue={title || ''}
+          inputTargetValue={title}
           errors={errors.title as string[]}
         />
       </EuiFormRow>
@@ -256,7 +256,7 @@ const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<Resilient
                 editAction={editSubActionProperty}
                 messageVariables={messageVariables}
                 paramsProperty={'savedObjectId'}
-                inputTargetValue={savedObjectId || ''}
+                inputTargetValue={savedObjectId}
               />
             </EuiFormControlLayout>
           </EuiFormRow>
@@ -268,7 +268,7 @@ const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<Resilient
         editAction={editSubActionProperty}
         messageVariables={messageVariables}
         paramsProperty={'description'}
-        inputTargetValue={description || ''}
+        inputTargetValue={description}
         label={i18n.translate(
           'xpack.triggersActionsUI.components.builtinActionTypes.resilient.descriptionTextAreaFieldLabel',
           {

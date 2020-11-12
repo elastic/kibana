@@ -195,7 +195,7 @@ export const EmailParamsFields = ({
           editAction={editAction}
           messageVariables={messageVariables}
           paramsProperty={'subject'}
-          inputTargetValue={subject || ''}
+          inputTargetValue={subject}
           errors={errors.subject as string[]}
         />
       </EuiFormRow>
@@ -204,7 +204,7 @@ export const EmailParamsFields = ({
         editAction={editAction}
         messageVariables={messageVariables}
         paramsProperty={'message'}
-        inputTargetValue={message || ''}
+        inputTargetValue={message}
         label={i18n.translate(
           'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.messageTextAreaFieldLabel',
           {

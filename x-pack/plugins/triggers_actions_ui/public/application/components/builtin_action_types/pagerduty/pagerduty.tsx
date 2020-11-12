@@ -5,7 +5,6 @@
  */
 import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
-import { isEmpty } from 'lodash';
 import moment from 'moment';
 import { ActionTypeModel, ValidationResult } from '../../../../types';
 import {
@@ -64,10 +63,6 @@ export function getActionType(): ActionTypeModel<
         dedupKey: new Array<string>(),
       };
       validationResult.errors = errors;
-
-      if (isEmpty(actionParams)) {
-        return validationResult;
-      }
 
       if (
         !actionParams.dedupKey?.length &&
