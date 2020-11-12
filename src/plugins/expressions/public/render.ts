@@ -101,7 +101,7 @@ export class ExpressionRenderHandler {
   }
 
   render = async (
-    value: ExpressionValueError | ExpressionValueRender<unknown>,
+    value: false | ExpressionValueError | ExpressionValueRender<unknown>,
     data: object = {}
   ) => {
     if (!value || typeof value !== 'object') {

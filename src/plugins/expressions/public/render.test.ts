@@ -22,7 +22,21 @@ import { Observable } from 'rxjs';
 import { ExpressionRenderError } from './types';
 import { getRenderersRegistry } from './services';
 import { first, take, toArray } from 'rxjs/operators';
-import { IInterpreterRenderHandlers } from '../common';
+import { ExpressionValueError, ExpressionValueRender, IInterpreterRenderHandlers } from '../common';
+
+const errorValue: ExpressionValueError = {
+  type: 'error',
+  error: {
+    name: 'name',
+    message: 'foo',
+  },
+};
+
+const renderValue: ExpressionValueRender<unknown> = {
+  type: 'render',
+  as: 'test',
+  value: {},
+};
 
 const element: HTMLElement = {} as HTMLElement;
 const mockNotificationService = {
@@ -90,11 +104,11 @@ describe('ExpressionRenderHandler', () => {
 
     it('in case of error render$ should emit when error renderer is finished', async () => {
       const expressionRenderHandler = new ExpressionRenderHandler(element);
-      expressionRenderHandler.render(false);
+      expressionRenderHandler.render(errorValue);
       const promise1 = expressionRenderHandler.render$.pipe(first()).toPromise();
       await expect(promise1).resolves.toEqual(1);
 
-      expressionRenderHandler.render(false);
+      expressionRenderHandler.render(errorValue);
       const promise2 = expressionRenderHandler.render$.pipe(first()).toPromise();
       await expect(promise2).resolves.toEqual(2);
     });
@@ -122,7 +136,7 @@ describe('ExpressionRenderHandler', () => {
       const expressionRenderHandler = new ExpressionRenderHandler(element, {
         onRenderError: mockMockErrorRenderFunction,
       });
-      await expressionRenderHandler.render({ type: 'render', as: 'something' });
+      await expressionRenderHandler.render({ type: 'render', as: 'something', value: {} });
       expect(getHandledError()!.message).toEqual('renderer error');
     });
 
@@ -135,7 +149,7 @@ describe('ExpressionRenderHandler', () => {
           resolve();
         });
 
-        expressionRenderHandler.render({ type: 'render', as: 'test' });
+        expressionRenderHandler.render(renderValue);
       });
     });
 
@@ -185,9 +199,9 @@ describe('ExpressionRenderHandler', () => {
     // that observables will emit previous result if subscription happens after render
     it('should emit previous render and error results', async () => {
       const expressionRenderHandler = new ExpressionRenderHandler(element);
-      expressionRenderHandler.render(false);
+      expressionRenderHandler.render(errorValue);
       const renderPromise = expressionRenderHandler.render$.pipe(take(2), toArray()).toPromise();
-      expressionRenderHandler.render(false);
+      expressionRenderHandler.render(errorValue);
       await expect(renderPromise).resolves.toEqual([1, 2]);
     });
   });
