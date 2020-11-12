@@ -83,7 +83,7 @@ function validateBody(anyParams: unknown): string | undefined {
 function validateDate(dateString: string): string | undefined {
   const parsed = Date.parse(dateString);
   if (isNaN(parsed)) {
-    return i18n.translate('xpack.stackAlerts.indexThreshold.invalidDateErrorMessage', {
+    return i18n.translate('xpack.triggersActionsUI.data.coreQueryParams.invalidDateErrorMessage', {
       defaultMessage: 'invalid date {date}',
       values: {
         date: dateString,

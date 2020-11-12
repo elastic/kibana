@@ -8,7 +8,7 @@ import { schema, TypeOf } from '@kbn/config-schema';
 
 export const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
-  enableGeoTrackingThresholdAlert: schema.maybe(schema.boolean({ defaultValue: false })),
+  enableGeoTrackingThresholdAlert: schema.boolean({ defaultValue: false }),
 });
 
 export type Config = TypeOf<typeof configSchema>;
