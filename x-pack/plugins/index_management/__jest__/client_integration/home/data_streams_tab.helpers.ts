@@ -30,6 +30,7 @@ export interface DataStreamsTabTestBed extends TestBed<TestSubjects> {
     clickDeleteActionAt: (index: number) => void;
     clickConfirmDelete: () => void;
     clickDeleteDataStreamButton: () => void;
+    clickDetailPanelIndexTemplateLink: () => void;
   };
   findDeleteActionAt: (index: number) => ReactWrapper;
   findDeleteConfirmationModal: () => ReactWrapper;
@@ -38,6 +39,7 @@ export interface DataStreamsTabTestBed extends TestBed<TestSubjects> {
   findEmptyPromptIndexTemplateLink: () => ReactWrapper;
   findDetailPanelIlmPolicyLink: () => ReactWrapper;
   findDetailPanelIlmPolicyName: () => ReactWrapper;
+  findDetailPanelIndexTemplateLink: () => ReactWrapper;
 }
 
 export const setup = async (overridingDependencies: any = {}): Promise<DataStreamsTabTestBed> => {
@@ -143,6 +145,17 @@ export const setup = async (overridingDependencies: any = {}): Promise<DataStrea
     find('deleteDataStreamButton').simulate('click');
   };
 
+  const clickDetailPanelIndexTemplateLink = async () => {
+    const { component, router, find } = testBed;
+    const indexTemplateLink = find('indexTemplateLink');
+
+    await act(async () => {
+      router.navigateTo(indexTemplateLink.props().href!);
+    });
+
+    component.update();
+  };
+
   const findDetailPanel = () => {
     const { find } = testBed;
     return find('dataStreamDetailPanel');
@@ -156,6 +169,11 @@ export const setup = async (overridingDependencies: any = {}): Promise<DataStrea
   const findDetailPanelIlmPolicyLink = () => {
     const { find } = testBed;
     return find('ilmPolicyLink');
+  };
+
+  const findDetailPanelIndexTemplateLink = () => {
+    const { find } = testBed;
+    return find('indexTemplateLink');
   };
 
   const findDetailPanelIlmPolicyName = () => {
@@ -176,6 +194,7 @@ export const setup = async (overridingDependencies: any = {}): Promise<DataStrea
       clickDeleteActionAt,
       clickConfirmDelete,
       clickDeleteDataStreamButton,
+      clickDetailPanelIndexTemplateLink,
     },
     findDeleteActionAt,
     findDeleteConfirmationModal,
@@ -184,6 +203,7 @@ export const setup = async (overridingDependencies: any = {}): Promise<DataStrea
     findEmptyPromptIndexTemplateLink,
     findDetailPanelIlmPolicyLink,
     findDetailPanelIlmPolicyName,
+    findDetailPanelIndexTemplateLink,
   };
 };
 

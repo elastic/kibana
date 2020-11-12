@@ -119,3 +119,5 @@ export {
 } from '../../../../common';
 
 export * from './intra_app_route_state';
+
+export * from './ui_extensions';
