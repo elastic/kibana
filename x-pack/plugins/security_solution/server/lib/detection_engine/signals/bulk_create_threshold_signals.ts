@@ -181,9 +181,9 @@ const getTransformedHits = (
           '@timestamp': get(timestampOverride ?? '@timestamp', hit._source),
           threshold_result: {
             count: docCount,
+            matched: getThresholdSignalQueryFields(hit, filter),
             value: get(threshold.field, hit._source),
           },
-          ...getThresholdSignalQueryFields(hit, filter),
         };
 
         set(source, threshold.field, key);
