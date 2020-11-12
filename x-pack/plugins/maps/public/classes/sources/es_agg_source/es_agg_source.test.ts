@@ -6,7 +6,7 @@
 
 import { AbstractESAggSource } from '../es_agg_source';
 import { IField } from '../../fields/field';
-import { IESAggField } from '../../fields/agg_field_types';
+import { IESAggField } from '../../fields/agg';
 import _ from 'lodash';
 import { AGG_TYPE } from '../../../../common/constants';
 import { AggDescriptor } from '../../../../common/descriptor_types';
