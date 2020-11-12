@@ -150,10 +150,10 @@ function validateActionGroups(alertTypeId: string, actionGroups: ActionGroup[]) 
     getBuiltinActionGroups().map((item) => item.id)
   );
   if (reservedActionGroups.length > 0) {
-    throw Boom.badRequest(
+    throw new Error(
       i18n.translate('xpack.alerts.alertTypeRegistry.register.reservedActionGroupUsageError', {
         defaultMessage:
-          'Alert type by id {alertTypeId} cannot be registered. Action groups [{actionGroups}] is reserved by framework.',
+          'Alert type [id="{alertTypeId}"] cannot be registered. Action groups [{actionGroups}] are reserved by the framework.',
         values: {
           actionGroups: reservedActionGroups.join(', '),
           alertTypeId,
