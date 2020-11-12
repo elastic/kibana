@@ -40,7 +40,7 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
 
       await PageObjects.common.sleep(2000);
       await PageObjects.dashboard.waitForRenderComplete();
-      await browser.setScreenshotSize(1000, 1000);
+      await browser.setScreenshotSize(1600, 1200);
     });
 
     it('[Metricbeat System] Overview ECS should match snapshot', async function () {
