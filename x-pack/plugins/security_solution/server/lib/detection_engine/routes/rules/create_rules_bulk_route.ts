@@ -4,21 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint-disable complexity */
-
-import uuid from 'uuid';
-import { transformRuleToAlertAction } from '../../../../../common/detection_engine/transform_actions';
 import { validate } from '../../../../../common/validate';
 import { createRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/create_rules_type_dependents';
 import { createRulesBulkSchema } from '../../../../../common/detection_engine/schemas/request/create_rules_bulk_schema';
 import { rulesBulkSchema } from '../../../../../common/detection_engine/schemas/response/rules_bulk_schema';
 import { IRouter } from '../../../../../../../../src/core/server';
-import {
-  DEFAULT_MAX_SIGNALS,
-  DETECTION_ENGINE_RULES_URL,
-  SERVER_APP_ID,
-  SIGNALS_ID,
-} from '../../../../../common/constants';
+import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { SetupPlugins } from '../../../../plugin';
 import { buildMlAuthz } from '../../../machine_learning/authz';
 import { throwHttpError } from '../../../machine_learning/validation';
@@ -30,9 +21,7 @@ import { buildRouteValidation } from '../../../../utils/build_validation/route_v
 
 import { transformBulkError, createBulkErrorObject, buildSiemResponse } from '../utils';
 import { updateRulesNotifications } from '../../rules/update_rules_notifications';
-import { typeSpecificSnakeToCamel } from '../../schemas/rule_converters';
-import { InternalRuleCreate } from '../../schemas/rule_schemas';
-import { addTags } from '../../rules/add_tags';
+import { convertCreateAPIToInternalSchema } from '../../schemas/rule_converters';
 
 export const createRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) => {
   router.post(
@@ -84,50 +73,7 @@ export const createRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) =>
                 });
               }
             }
-            const typeSpecificParams = typeSpecificSnakeToCamel(payloadRule);
-            const newRuleId = payloadRule.rule_id ?? uuid.v4();
-            const throttle = payloadRule.throttle ?? null;
-            const internalRule: InternalRuleCreate = {
-              name: payloadRule.name,
-              tags: addTags(payloadRule.tags ?? [], newRuleId, false),
-              alertTypeId: SIGNALS_ID,
-              consumer: SERVER_APP_ID,
-              params: {
-                author: payloadRule.author ?? [],
-                buildingBlockType: payloadRule.building_block_type,
-                description: payloadRule.description,
-                ruleId: newRuleId,
-                falsePositives: payloadRule.false_positives ?? [],
-                from: payloadRule.from ?? 'now-6m',
-                immutable: false,
-                license: payloadRule.license,
-                outputIndex: payloadRule.output_index ?? siemClient.getSignalsIndex(),
-                timelineId: payloadRule.timeline_id,
-                timelineTitle: payloadRule.timeline_title,
-                meta: payloadRule.meta,
-                maxSignals: payloadRule.max_signals ?? DEFAULT_MAX_SIGNALS,
-                riskScore: payloadRule.risk_score,
-                riskScoreMapping: payloadRule.risk_score_mapping ?? [],
-                ruleNameOverride: payloadRule.rule_name_override,
-                severity: payloadRule.severity,
-                severityMapping: payloadRule.severity_mapping ?? [],
-                threat: payloadRule.threat ?? [],
-                timestampOverride: payloadRule.timestamp_override,
-                to: payloadRule.to ?? 'now',
-                references: payloadRule.references ?? [],
-                note: payloadRule.note,
-                version: payloadRule.version ?? 1,
-                exceptionsList: payloadRule.exceptions_list ?? [],
-                ...typeSpecificParams,
-              },
-              schedule: { interval: payloadRule.interval ?? '5m' },
-              enabled: payloadRule.enabled ?? true,
-              actions:
-                throttle === 'rule'
-                  ? (payloadRule.actions ?? []).map(transformRuleToAlertAction)
-                  : [],
-              throttle: null,
-            };
+            const internalRule = convertCreateAPIToInternalSchema(payloadRule, siemClient);
             try {
               const validationErrors = createRuleValidateTypeDependents(payloadRule);
               if (validationErrors.length) {
@@ -159,13 +105,17 @@ export const createRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) =>
                 savedObjectsClient,
                 enabled: createdRule.enabled,
                 actions: payloadRule.actions,
-                throttle,
+                throttle: payloadRule.throttle ?? null,
                 name: createdRule.name,
               });
 
-              return transformValidateBulkError(newRuleId, createdRule, ruleActions);
+              return transformValidateBulkError(
+                internalRule.params.ruleId,
+                createdRule,
+                ruleActions
+              );
             } catch (err) {
-              return transformBulkError(newRuleId, err);
+              return transformBulkError(internalRule.params.ruleId, err);
             }
           })
       );

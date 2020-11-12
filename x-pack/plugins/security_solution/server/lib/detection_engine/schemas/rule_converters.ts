@@ -4,14 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { InternalRuleResponse, TypeSpecificRuleParams } from './rule_schemas';
+import uuid from 'uuid';
+import { InternalRuleCreate, InternalRuleResponse, TypeSpecificRuleParams } from './rule_schemas';
 import { assertUnreachable } from '../../../../common/utility_types';
 import {
+  CreateRulesSchema,
   CreateTypeSpecific,
   FullResponseSchema,
   ResponseTypeSpecific,
 } from '../../../../common/detection_engine/schemas/request';
 import { RuleActions } from '../rule_actions/types';
+import { AppClient } from '../../../types';
+import { addTags } from '../rules/add_tags';
+import { DEFAULT_MAX_SIGNALS, SERVER_APP_ID, SIGNALS_ID } from '../../../../common/constants';
+import { transformRuleToAlertAction } from '../../../../common/detection_engine/transform_actions';
 
 // These functions provide conversions from the request API schema to the internal rule schema and from the internal rule schema
 // to the response API schema. This provides static type-check assurances that the internal schema is in sync with the API schema for
@@ -92,6 +98,52 @@ export const typeSpecificSnakeToCamel = (params: CreateTypeSpecific): TypeSpecif
       return assertUnreachable(params);
     }
   }
+};
+
+export const convertCreateAPIToInternalSchema = (
+  input: CreateRulesSchema,
+  siemClient: AppClient
+): InternalRuleCreate => {
+  const typeSpecificParams = typeSpecificSnakeToCamel(input);
+  const newRuleId = input.rule_id ?? uuid.v4();
+  return {
+    name: input.name,
+    tags: addTags(input.tags ?? [], newRuleId, false),
+    alertTypeId: SIGNALS_ID,
+    consumer: SERVER_APP_ID,
+    params: {
+      author: input.author ?? [],
+      buildingBlockType: input.building_block_type,
+      description: input.description,
+      ruleId: newRuleId,
+      falsePositives: input.false_positives ?? [],
+      from: input.from ?? 'now-6m',
+      immutable: false,
+      license: input.license,
+      outputIndex: input.output_index ?? siemClient.getSignalsIndex(),
+      timelineId: input.timeline_id,
+      timelineTitle: input.timeline_title,
+      meta: input.meta,
+      maxSignals: input.max_signals ?? DEFAULT_MAX_SIGNALS,
+      riskScore: input.risk_score,
+      riskScoreMapping: input.risk_score_mapping ?? [],
+      ruleNameOverride: input.rule_name_override,
+      severity: input.severity,
+      severityMapping: input.severity_mapping ?? [],
+      threat: input.threat ?? [],
+      timestampOverride: input.timestamp_override,
+      to: input.to ?? 'now',
+      references: input.references ?? [],
+      note: input.note,
+      version: input.version ?? 1,
+      exceptionsList: input.exceptions_list ?? [],
+      ...typeSpecificParams,
+    },
+    schedule: { interval: input.interval ?? '5m' },
+    enabled: input.enabled ?? true,
+    actions: input.throttle === 'rule' ? (input.actions ?? []).map(transformRuleToAlertAction) : [],
+    throttle: null,
+  };
 };
 
 // Converts the internal rule data structure to the response API schema

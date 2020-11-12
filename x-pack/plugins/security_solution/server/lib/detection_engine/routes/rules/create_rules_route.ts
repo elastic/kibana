@@ -4,18 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint-disable complexity */
-
-import uuid from 'uuid';
-
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import { IRouter } from '../../../../../../../../src/core/server';
-import {
-  DETECTION_ENGINE_RULES_URL,
-  SIGNALS_ID,
-  SERVER_APP_ID,
-  DEFAULT_MAX_SIGNALS,
-} from '../../../../../common/constants';
+import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { SetupPlugins } from '../../../../plugin';
 import { buildMlAuthz } from '../../../machine_learning/authz';
 import { throwHttpError } from '../../../machine_learning/validation';
@@ -24,13 +15,10 @@ import { getIndexExists } from '../../index/get_index_exists';
 import { transformError, buildSiemResponse } from '../utils';
 import { updateRulesNotifications } from '../../rules/update_rules_notifications';
 import { ruleStatusSavedObjectsClientFactory } from '../../signals/rule_status_saved_objects_client';
-import { addTags } from '../../rules/add_tags';
-import { transformRuleToAlertAction } from '../../../../../common/detection_engine/transform_actions';
 import { createRulesSchema } from '../../../../../common/detection_engine/schemas/request';
 import { newTransformValidate } from './validate';
-import { InternalRuleCreate } from '../../schemas/rule_schemas';
-import { typeSpecificSnakeToCamel } from '../../schemas/rule_converters';
 import { createRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/create_rules_type_dependents';
+import { convertCreateAPIToInternalSchema } from '../../schemas/rule_converters';
 
 export const createRulesRoute = (router: IRouter, ml: SetupPlugins['ml']): void => {
   router.post(
@@ -73,48 +61,7 @@ export const createRulesRoute = (router: IRouter, ml: SetupPlugins['ml']): void 
           }
         }
 
-        const typeSpecificParams = typeSpecificSnakeToCamel(request.body);
-        const newRuleId = request.body.rule_id ?? uuid.v4();
-        const throttle = request.body.throttle ?? null;
-        const internalRule: InternalRuleCreate = {
-          name: request.body.name,
-          tags: addTags(request.body.tags ?? [], newRuleId, false),
-          alertTypeId: SIGNALS_ID,
-          consumer: SERVER_APP_ID,
-          params: {
-            author: request.body.author ?? [],
-            buildingBlockType: request.body.building_block_type,
-            description: request.body.description,
-            ruleId: newRuleId,
-            falsePositives: request.body.false_positives ?? [],
-            from: request.body.from ?? 'now-6m',
-            immutable: false,
-            license: request.body.license,
-            outputIndex: request.body.output_index ?? siemClient.getSignalsIndex(),
-            timelineId: request.body.timeline_id,
-            timelineTitle: request.body.timeline_title,
-            meta: request.body.meta,
-            maxSignals: request.body.max_signals ?? DEFAULT_MAX_SIGNALS,
-            riskScore: request.body.risk_score,
-            riskScoreMapping: request.body.risk_score_mapping ?? [],
-            ruleNameOverride: request.body.rule_name_override,
-            severity: request.body.severity,
-            severityMapping: request.body.severity_mapping ?? [],
-            threat: request.body.threat ?? [],
-            timestampOverride: request.body.timestamp_override,
-            to: request.body.to ?? 'now',
-            references: request.body.references ?? [],
-            note: request.body.note,
-            version: request.body.version ?? 1,
-            exceptionsList: request.body.exceptions_list ?? [],
-            ...typeSpecificParams,
-          },
-          schedule: { interval: request.body.interval ?? '5m' },
-          enabled: request.body.enabled ?? true,
-          actions:
-            throttle === 'rule' ? (request.body.actions ?? []).map(transformRuleToAlertAction) : [],
-          throttle: null,
-        };
+        const internalRule = convertCreateAPIToInternalSchema(request.body, siemClient);
 
         const mlAuthz = buildMlAuthz({
           license: context.licensing.license,
@@ -148,7 +95,7 @@ export const createRulesRoute = (router: IRouter, ml: SetupPlugins['ml']): void 
           savedObjectsClient,
           enabled: createdRule.enabled,
           actions: request.body.actions,
-          throttle,
+          throttle: request.body.throttle ?? null,
           name: createdRule.name,
         });
 
