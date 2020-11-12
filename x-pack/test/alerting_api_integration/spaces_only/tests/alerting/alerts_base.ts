@@ -210,6 +210,67 @@ instanceStateValue: true
       });
     });
 
+    it('should not fire actions when an alert instance is resolved, but alert is muted', async () => {
+      const reference = alertUtils.generateReference();
+
+      const { body: createdAction } = await supertestWithoutAuth
+        .post(`${getUrlPrefix(space.id)}/api/actions/action`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          name: 'MY action',
+          actionTypeId: 'test.noop',
+          config: {},
+          secrets: {},
+        })
+        .expect(200);
+
+      // pattern of when the alert should fire.
+      const pattern = {
+        instance: [false, true, true],
+      };
+
+      const createdAlert = await supertestWithoutAuth
+        .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
+        .set('kbn-xsrf', 'foo')
+        .send(
+          getTestAlertData({
+            alertTypeId: 'test.patternFiring',
+            schedule: { interval: '1s' },
+            throttle: null,
+            params: {
+              pattern,
+            },
+            actions: [
+              {
+                id: createdAction.id,
+                group: 'default',
+                params: {},
+              },
+              {
+                group: ResolvedActionGroup.id,
+                id: indexRecordActionId,
+                params: {
+                  index: ES_TEST_INDEX_NAME,
+                  reference,
+                  message: 'Resolved message',
+                },
+              },
+            ],
+          })
+        );
+
+      await alertUtils.muteAll(createdAlert.id);
+
+      expect(createdAlert.status).to.eql(200);
+      const alertId = createdAlert.body.id;
+      objectRemover.add(space.id, alertId, 'alert', 'alerts');
+
+      const actionTestRecord = (
+        await esTestIndexTool.waitForDocs('action:test.index-record', reference, 0)
+      )[0];
+      expect(actionTestRecord).to.eql(0);
+    });
+
     it('should reschedule failing alerts using the Task Manager retry logic with alert schedule interval', async () => {
       /*
         Alerts should set the Task Manager schedule interval with initial value.
