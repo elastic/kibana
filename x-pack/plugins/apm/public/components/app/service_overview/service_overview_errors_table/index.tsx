@@ -21,7 +21,7 @@ import { SparkPlotWithValueLabel } from '../../../shared/charts/spark_plot/spark
 import { callApmApi } from '../../../../services/rest/createCallApmApi';
 import { TimestampTooltip } from '../../../shared/TimestampTooltip';
 import { ErrorDetailLink } from '../../../shared/Links/apm/ErrorDetailLink';
-import { truncate } from '../../../../style/variables';
+import { px, truncate, unit } from '../../../../style/variables';
 import { FetchWrapper } from './fetch_wrapper';
 
 interface Props {
@@ -82,7 +82,6 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
       name: i18n.translate('xpack.apm.serviceOverview.errorsTableColumnName', {
         defaultMessage: 'Name',
       }),
-      width: '60%',
       render: (_, { name, group_id: errorGroupId }) => {
         return (
           <ErrorDetailLinkWrapper>
@@ -109,6 +108,7 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
       render: (_, { last_seen: lastSeen }) => {
         return <TimestampTooltip time={lastSeen} timeUnit="minutes" />;
       },
+      width: px(unit * 8),
     },
     {
       field: 'occurrences',
@@ -118,6 +118,7 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
           defaultMessage: 'Occurrences',
         }
       ),
+      width: px(unit * 12),
       render: (_, { occurrences }) => {
         return (
           <SparkPlotWithValueLabel
