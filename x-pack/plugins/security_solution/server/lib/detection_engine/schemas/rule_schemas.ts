@@ -6,7 +6,7 @@
 
 import * as t from 'io-ts';
 
-import { listArray } from '../../../../common/detection_engine/schemas/types/lists';
+import { listArrayOrUndefined } from '../../../../common/detection_engine/schemas/types/lists';
 import {
   threat_mapping,
   threat_index,
@@ -15,7 +15,7 @@ import {
   itemsPerSearchOrUndefined,
 } from '../../../../common/detection_engine/schemas/types/threat_mapping';
 import {
-  author,
+  authorOrUndefined,
   buildingBlockTypeOrUndefined,
   description,
   enabled,
@@ -37,10 +37,10 @@ import {
   machine_learning_job_id,
   max_signals,
   risk_score,
-  risk_score_mapping,
+  riskScoreMappingOrUndefined,
   ruleNameOverrideOrUndefined,
   severity,
-  severity_mapping,
+  severityMappingOrUndefined,
   tags,
   timestampOverrideOrUndefined,
   threat,
@@ -64,7 +64,7 @@ import { SIGNALS_ID, SERVER_APP_ID } from '../../../../common/constants';
 const nonEqlLanguages = t.keyof({ kuery: null, lucene: null });
 export const baseRuleParams = t.exact(
   t.type({
-    author,
+    author: authorOrUndefined,
     buildingBlockType: buildingBlockTypeOrUndefined,
     description,
     note: noteOrUndefined,
@@ -80,16 +80,16 @@ export const baseRuleParams = t.exact(
     // maxSignals not used in ML rules but probably should be used
     maxSignals: max_signals,
     riskScore: risk_score,
-    riskScoreMapping: risk_score_mapping,
+    riskScoreMapping: riskScoreMappingOrUndefined,
     ruleNameOverride: ruleNameOverrideOrUndefined,
     severity,
-    severityMapping: severity_mapping,
+    severityMapping: severityMappingOrUndefined,
     timestampOverride: timestampOverrideOrUndefined,
     threat,
     to,
     references,
     version,
-    exceptionsList: listArray,
+    exceptionsList: listArrayOrUndefined,
   })
 );
 export type BaseRuleParams = t.TypeOf<typeof baseRuleParams>;

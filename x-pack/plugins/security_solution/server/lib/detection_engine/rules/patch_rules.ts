@@ -181,7 +181,7 @@ export const patchRules = async ({
   };
   const [validated, errors] = validate(newRule, internalRuleUpdate);
   if (errors != null || validated === null) {
-    throw new PatchError('Applying patch would create invalid rule', 400);
+    throw new PatchError(`Applying patch would create invalid rule: ${errors}`, 400);
   }
 
   const update = await alertsClient.update({
