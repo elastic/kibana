@@ -39,7 +39,7 @@ export interface Axis {
   tickLength: number;
   timezone: string;
   tickDecimals?: number;
-  tickFormatter: ((val: number) => string) | ((val: number, axis: any) => string);
+  tickFormatter: (val: number) => string;
   tickGenerator?(axis: Axis): number[];
   units?: { type: string };
   domain?: {
