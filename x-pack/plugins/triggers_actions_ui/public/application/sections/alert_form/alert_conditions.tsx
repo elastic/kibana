@@ -55,7 +55,7 @@ export const AlertConditions = <ConditionProps extends any>({
             </EuiFlexItem>
             {headline && (
               <EuiFlexItem>
-                <EuiText color="subdued" size="s">
+                <EuiText color="subdued" size="s" data-test-subj="alertConditionsHeadline">
                   {headline}
                 </EuiText>
               </EuiFlexItem>

@@ -5,7 +5,7 @@
  */
 
 import uuid from 'uuid';
-import { range, random } from 'lodash';
+import { range } from 'lodash';
 import { AlertType } from '../../../../plugins/alerts/server';
 import {
   DEFAULT_INSTANCES_TO_GENERATE,

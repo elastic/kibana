@@ -45,10 +45,15 @@ describe('alert_conditions', () => {
       wrapper.find(EuiTitle).find(FormattedMessage).prop('defaultMessage')
     ).toMatchInlineSnapshot(`"Conditions:"`);
 
-    expect(wrapper.find('EuiFlexItem').get(1)).toMatchInlineSnapshot(`
-      <EuiFlexItem>
+    expect(wrapper.find('[data-test-subj="alertConditionsHeadline"]').get(0))
+      .toMatchInlineSnapshot(`
+      <EuiText
+        color="subdued"
+        data-test-subj="alertConditionsHeadline"
+        size="s"
+      >
         Set different threshold with their own status
-      </EuiFlexItem>
+      </EuiText>
     `);
   });
 
@@ -174,13 +179,13 @@ describe('alert_conditions', () => {
       <AlertConditions
         actionGroups={[
           {
-            id: 'shouldRender',
-            name: 'Should Render',
+            id: 'shouldntRenderLink',
+            name: 'Should Not Render Link',
             conditions: { someProp: 'shouldRender on a prop' },
           },
           {
-            id: 'shouldntRender',
-            name: 'Should Not Render',
+            id: 'shouldRenderLink',
+            name: 'Should Render A Link',
           },
         ]}
         onInitializeConditionsFor={onInitializeConditionsFor}
@@ -191,16 +196,18 @@ describe('alert_conditions', () => {
 
     expect(wrapper.find(EuiButtonEmpty).get(0)).toMatchInlineSnapshot(`
       <EuiButtonEmpty
+        flush="left"
         onClick={[Function]}
+        size="s"
       >
-        Should Not Render
+        Should Render A Link
       </EuiButtonEmpty>
     `);
     wrapper.find(EuiButtonEmpty).simulate('click');
 
     expect(onInitializeConditionsFor).toHaveBeenCalledWith({
-      id: 'shouldntRender',
-      name: 'Should Not Render',
+      id: 'shouldRenderLink',
+      name: 'Should Render A Link',
     });
   });
 
@@ -234,7 +241,7 @@ describe('alert_conditions', () => {
       );
     };
 
-    const wrapper = await setup(
+    await setup(
       <AlertConditions
         actionGroups={[
           { id: 'default', name: 'Default', conditions: { someProp: 'my prop value' } },
