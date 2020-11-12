@@ -13,6 +13,7 @@ import {
   SavedQueryUpdateSchema,
   ThreatMatchCreateSchema,
   ThreatMatchUpdateSchema,
+  ThresholdCreateSchema,
 } from './rule_schemas';
 
 export const getCreateRulesSchemaMock = (ruleId = 'rule-1'): QueryCreateSchema => ({
@@ -93,6 +94,20 @@ export const getCreateMachineLearningRulesSchemaMock = (
   type: 'machine_learning',
   anomaly_threshold: 58,
   machine_learning_job_id: 'typical-ml-job-id',
+});
+
+export const getCreateThresholdRulesSchemaMock = (ruleId = 'rule-1'): ThresholdCreateSchema => ({
+  description: 'Detecting root and admin users',
+  name: 'Query with a rule id',
+  severity: 'high',
+  risk_score: 55,
+  rule_id: ruleId,
+  type: 'threshold',
+  query: 'user.name: root or user.name: admin',
+  threshold: {
+    field: 'some.field',
+    value: 4,
+  },
 });
 
 export const getUpdateRulesSchemaMock = (

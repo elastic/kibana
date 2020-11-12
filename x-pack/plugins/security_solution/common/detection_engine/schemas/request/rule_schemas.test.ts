@@ -13,6 +13,7 @@ import {
   getCreateSavedQueryRulesSchemaMock,
   getCreateThreatMatchRulesSchemaMock,
   getCreateRulesSchemaMock,
+  getCreateThresholdRulesSchemaMock,
 } from './rule_schemas.mock';
 import { getListArrayMock } from '../types/lists.mock';
 
@@ -41,7 +42,7 @@ describe('create rules schema', () => {
   });
 
   test('[rule_id] does not validate', () => {
-    const payload = {
+    const payload: Partial<CreateRulesSchema> = {
       rule_id: 'rule-1',
     };
 
@@ -53,7 +54,7 @@ describe('create rules schema', () => {
   });
 
   test('[rule_id, description] does not validate', () => {
-    const payload = {
+    const payload: Partial<CreateRulesSchema> = {
       rule_id: 'rule-1',
       description: 'some description',
     };
@@ -66,7 +67,7 @@ describe('create rules schema', () => {
   });
 
   test('[rule_id, description, from] does not validate', () => {
-    const payload = {
+    const payload: Partial<CreateRulesSchema> = {
       rule_id: 'rule-1',
       description: 'some description',
       from: 'now-5m',
@@ -80,7 +81,7 @@ describe('create rules schema', () => {
   });
 
   test('[rule_id, description, from, to] does not validate', () => {
-    const payload = {
+    const payload: Partial<CreateRulesSchema> = {
       rule_id: 'rule-1',
       description: 'some description',
       from: 'now-5m',
@@ -95,7 +96,7 @@ describe('create rules schema', () => {
   });
 
   test('[rule_id, description, from, to, name] does not validate', () => {
-    const payload = {
+    const payload: Partial<CreateRulesSchema> = {
       rule_id: 'rule-1',
       description: 'some description',
       from: 'now-5m',
@@ -111,7 +112,7 @@ describe('create rules schema', () => {
   });
 
   test('[rule_id, description, from, to, name, severity] does not validate', () => {
-    const payload = {
+    const payload: Partial<CreateRulesSchema> = {
       rule_id: 'rule-1',
       description: 'some description',
       from: 'now-5m',
@@ -128,7 +129,7 @@ describe('create rules schema', () => {
   });
 
   test('[rule_id, description, from, to, name, severity, type] does not validate', () => {
-    const payload = {
+    const payload: Partial<CreateRulesSchema> = {
       rule_id: 'rule-1',
       description: 'some description',
       from: 'now-5m',
@@ -148,7 +149,7 @@ describe('create rules schema', () => {
   });
 
   test('[rule_id, description, from, to, name, severity, type, interval] does not validate', () => {
-    const payload = {
+    const payload: Partial<CreateRulesSchema> = {
       rule_id: 'rule-1',
       description: 'some description',
       from: 'now-5m',
@@ -169,7 +170,7 @@ describe('create rules schema', () => {
   });
 
   test('[rule_id, description, from, to, name, severity, type, interval, index] does not validate', () => {
-    const payload = {
+    const payload: Partial<CreateRulesSchema> = {
       rule_id: 'rule-1',
       description: 'some description',
       from: 'now-5m',
@@ -191,7 +192,7 @@ describe('create rules schema', () => {
   });
 
   test('[rule_id, description, from, to, name, severity, type, query, index, interval] does validate', () => {
-    const payload = {
+    const payload: CreateRulesSchema = {
       rule_id: 'rule-1',
       risk_score: 50,
       description: 'some description',
@@ -213,7 +214,7 @@ describe('create rules schema', () => {
   });
 
   test('[rule_id, description, from, to, index, name, severity, interval, type, query, language] does not validate', () => {
-    const payload = {
+    const payload: Partial<CreateRulesSchema> = {
       rule_id: 'rule-1',
       description: 'some description',
       from: 'now-5m',
@@ -449,7 +450,7 @@ describe('create rules schema', () => {
   });
 
   test('language validates with kuery', () => {
-    const payload = {
+    const payload: CreateRulesSchema = {
       ...getCreateRulesSchemaMock(),
       language: 'kuery',
     };
@@ -462,7 +463,7 @@ describe('create rules schema', () => {
   });
 
   test('language validates with lucene', () => {
-    const payload = {
+    const payload: CreateRulesSchema = {
       ...getCreateRulesSchemaMock(),
       language: 'lucene',
     };
@@ -490,7 +491,7 @@ describe('create rules schema', () => {
   });
 
   test('max_signals cannot be negative', () => {
-    const payload = {
+    const payload: CreateRulesSchema = {
       ...getCreateRulesSchemaMock(),
       max_signals: -1,
     };
@@ -505,7 +506,7 @@ describe('create rules schema', () => {
   });
 
   test('max_signals cannot be zero', () => {
-    const payload = {
+    const payload: CreateRulesSchema = {
       ...getCreateRulesSchemaMock(),
       max_signals: 0,
     };
@@ -518,7 +519,7 @@ describe('create rules schema', () => {
   });
 
   test('max_signals can be 1', () => {
-    const payload = {
+    const payload: CreateRulesSchema = {
       ...getCreateRulesSchemaMock(),
       max_signals: 1,
     };
@@ -531,7 +532,7 @@ describe('create rules schema', () => {
   });
 
   test('You can optionally send in an array of tags', () => {
-    const payload = {
+    const payload: CreateRulesSchema = {
       ...getCreateRulesSchemaMock(),
       tags: ['tag_1', 'tag_2'],
     };
@@ -641,7 +642,7 @@ describe('create rules schema', () => {
   });
 
   test('You can optionally send in an array of false positives', () => {
-    const payload = {
+    const payload: CreateRulesSchema = {
       ...getCreateRulesSchemaMock(),
       false_positives: ['false_1', 'false_2'],
     };
@@ -683,7 +684,7 @@ describe('create rules schema', () => {
   });
 
   test('You cannot set the risk_score to 101', () => {
-    const payload = {
+    const payload: CreateRulesSchema = {
       ...getCreateRulesSchemaMock(),
       risk_score: 101,
     };
@@ -698,7 +699,7 @@ describe('create rules schema', () => {
   });
 
   test('You cannot set the risk_score to -1', () => {
-    const payload = {
+    const payload: CreateRulesSchema = {
       ...getCreateRulesSchemaMock(),
       risk_score: -1,
     };
@@ -711,7 +712,7 @@ describe('create rules schema', () => {
   });
 
   test('You can set the risk_score to 0', () => {
-    const payload = {
+    const payload: CreateRulesSchema = {
       ...getCreateRulesSchemaMock(),
       risk_score: 0,
     };
@@ -724,7 +725,7 @@ describe('create rules schema', () => {
   });
 
   test('You can set the risk_score to 100', () => {
-    const payload = {
+    const payload: CreateRulesSchema = {
       ...getCreateRulesSchemaMock(),
       risk_score: 100,
     };
@@ -737,7 +738,7 @@ describe('create rules schema', () => {
   });
 
   test('You can set meta to any object you want', () => {
-    const payload = {
+    const payload: CreateRulesSchema = {
       ...getCreateRulesSchemaMock(),
       meta: {
         somethingMadeUp: { somethingElse: true },
@@ -768,7 +769,7 @@ describe('create rules schema', () => {
 
   test('You can omit the query string when filters are present', () => {
     const { query, ...noQuery } = getCreateRulesSchemaMock();
-    const payload = {
+    const payload: CreateRulesSchema = {
       ...noQuery,
       filters: [],
     };
@@ -781,7 +782,7 @@ describe('create rules schema', () => {
   });
 
   test('validates with timeline_id and timeline_title', () => {
-    const payload = {
+    const payload: CreateRulesSchema = {
       ...getCreateRulesSchemaMock(),
       timeline_id: 'timeline-id',
       timeline_title: 'timeline-title',
@@ -891,7 +892,7 @@ describe('create rules schema', () => {
 
   describe('note', () => {
     test('You can set note to a string', () => {
-      const payload = {
+      const payload: CreateRulesSchema = {
         ...getCreateRulesSchemaMock(),
         note: '# documentation markdown here',
       };
@@ -904,7 +905,7 @@ describe('create rules schema', () => {
     });
 
     test('You can set note to an empty string', () => {
-      const payload = {
+      const payload: CreateRulesSchema = {
         ...getCreateRulesSchemaMock(),
         note: '',
       };
@@ -934,7 +935,7 @@ describe('create rules schema', () => {
     });
 
     test('empty name is not valid', () => {
-      const payload = {
+      const payload: CreateRulesSchema = {
         ...getCreateRulesSchemaMock(),
         name: '',
       };
@@ -947,7 +948,7 @@ describe('create rules schema', () => {
     });
 
     test('empty description is not valid', () => {
-      const payload = {
+      const payload: CreateRulesSchema = {
         ...getCreateRulesSchemaMock(),
         description: '',
       };
@@ -962,7 +963,7 @@ describe('create rules schema', () => {
     });
 
     test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, note] does validate', () => {
-      const payload = {
+      const payload: CreateRulesSchema = {
         rule_id: 'rule-1',
         description: 'some description',
         from: 'now-5m',
@@ -985,7 +986,7 @@ describe('create rules schema', () => {
   });
 
   test('machine_learning type does validate', () => {
-    const payload = {
+    const payload: CreateRulesSchema = {
       type: 'machine_learning',
       anomaly_threshold: 50,
       machine_learning_job_id: 'linux_anomalous_network_activity_ecs',
@@ -1014,9 +1015,44 @@ describe('create rules schema', () => {
     expect(message.schema).toEqual(payload);
   });
 
+  test('saved_id is required when type is saved_query and will not validate without it', () => {
+    /* eslint-disable @typescript-eslint/naming-convention */
+    const { saved_id, ...payload } = getCreateSavedQueryRulesSchemaMock();
+    const decoded = createRulesSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "undefined" supplied to "saved_id"',
+    ]);
+    expect(message.schema).toEqual({});
+  });
+
+  test('threshold is required when type is threshold and will not validate without it', () => {
+    const { threshold, ...payload } = getCreateThresholdRulesSchemaMock();
+    const decoded = createRulesSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "undefined" supplied to "threshold"',
+    ]);
+    expect(message.schema).toEqual({});
+  });
+
+  test('threshold rules fail validation if threshold is not greater than 0', () => {
+    const payload = getCreateThresholdRulesSchemaMock();
+    payload.threshold.value = 0;
+    const decoded = createRulesSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "0" supplied to "threshold,value"',
+    ]);
+    expect(message.schema).toEqual({});
+  });
+
   describe('exception_list', () => {
     test('[rule_id, description, from, to, index, name, severity, interval, type, filters, risk_score, note, and exceptions_list] does validate', () => {
-      const payload = {
+      const payload: CreateRulesSchema = {
         rule_id: 'rule-1',
         description: 'some description',
         from: 'now-5m',
@@ -1040,7 +1076,7 @@ describe('create rules schema', () => {
     });
 
     test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, note, and empty exceptions_list] does validate', () => {
-      const payload = {
+      const payload: CreateRulesSchema = {
         rule_id: 'rule-1',
         description: 'some description',
         from: 'now-5m',
@@ -1092,7 +1128,7 @@ describe('create rules schema', () => {
     });
 
     test('[rule_id, description, from, to, index, name, severity, interval, type, filters, risk_score, note, and non-existent exceptions_list] does validate with empty exceptions_list', () => {
-      const payload = {
+      const payload: CreateRulesSchema = {
         rule_id: 'rule-1',
         description: 'some description',
         from: 'now-5m',
@@ -1123,6 +1159,37 @@ describe('create rules schema', () => {
       const message = pipe(checked, foldLeftRight);
       expect(getPaths(left(message.errors))).toEqual([]);
       expect(message.schema).toEqual(payload);
+    });
+
+    test('threat_index, threat_query, and threat_mapping are required when type is "threat_match" and validation fails without them', () => {
+      /* eslint-disable @typescript-eslint/naming-convention */
+      const {
+        threat_index,
+        threat_query,
+        threat_mapping,
+        ...payload
+      } = getCreateThreatMatchRulesSchemaMock();
+      const decoded = createRulesSchema.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+      expect(getPaths(left(message.errors))).toEqual([
+        'Invalid value "undefined" supplied to "threat_query"',
+        'Invalid value "undefined" supplied to "threat_mapping"',
+        'Invalid value "undefined" supplied to "threat_index"',
+      ]);
+      expect(message.schema).toEqual({});
+    });
+
+    test('fails validation when threat_mapping is an empty array', () => {
+      const payload = getCreateThreatMatchRulesSchemaMock();
+      payload.threat_mapping = [];
+      const decoded = createRulesSchema.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+      expect(getPaths(left(message.errors))).toEqual([
+        'Invalid value "[]" supplied to "threat_mapping"',
+      ]);
+      expect(message.schema).toEqual({});
     });
   });
 });
