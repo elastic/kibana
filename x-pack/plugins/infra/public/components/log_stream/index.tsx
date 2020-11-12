@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useMemo, useCallback, useEffect } from 'react';
-import { noop } from 'lodash';
-import useMount from 'react-use/lib/useMount';
+import React, { useMemo, useCallback } from 'react';
+import { noop, isUndefined } from 'lodash';
 import usePrevious from 'react-use/lib/usePrevious';
+import useDeepCompareEffect from 'react-use/lib/useDeepCompareEffect';
 import { euiStyled } from '../../../../observability/public';
 
 import { LogEntriesCursor } from '../../../common/http_api';
@@ -30,15 +30,17 @@ export interface LogStreamProps {
   height?: string | number;
 }
 
-export const LogStream: React.FC<LogStreamProps> = ({
-  sourceId = 'default',
-  startTimestamp,
-  endTimestamp,
-  query,
-  center,
-  highlight,
-  height = '400px',
-}) => {
+export const LogStream: React.FC<LogStreamProps> = (props) => {
+  const {
+    sourceId = 'default',
+    startTimestamp,
+    endTimestamp,
+    query,
+    center,
+    highlight,
+    height = '400px',
+  } = props;
+
   // source boilerplate
   const { services } = useKibana();
   if (!services?.http?.fetch) {
@@ -79,7 +81,7 @@ Read more at https://github.com/elastic/kibana/blob/master/src/plugins/kibana_re
   });
 
   // Derived state
-  const prevSourceId = usePrevious(sourceId);
+  const prevProps = usePrevious(props);
 
   const isReloading =
     isLoadingSourceConfiguration || loadingState === 'uninitialized' || loadingState === 'loading';
@@ -103,15 +105,26 @@ Read more at https://github.com/elastic/kibana/blob/master/src/plugins/kibana_re
   const parsedHeight = typeof height === 'number' ? `${height}px` : height;
 
   // Component lifetime
-  useMount(() => {
-    fetchEntries();
-  });
+  useDeepCompareEffect(() => {
+    const shouldReloadSourceConfiguration =
+      isUndefined(prevProps) || sourceId !== prevProps.sourceId;
 
-  useEffect(() => {
-    if (!prevSourceId || sourceId !== prevSourceId) {
+    const shouldReloadEntries =
+      isUndefined(prevProps) ||
+      shouldReloadSourceConfiguration ||
+      prevProps.startTimestamp !== startTimestamp ||
+      prevProps.endTimestamp !== endTimestamp ||
+      prevProps.query !== query ||
+      prevProps.center !== center;
+
+    if (shouldReloadSourceConfiguration) {
       loadSourceConfiguration();
     }
-  }, [prevSourceId, sourceId, loadSourceConfiguration]);
+
+    if (shouldReloadEntries) {
+      fetchEntries();
+    }
+  }, [prevProps, props, loadSourceConfiguration, fetchEntries]);
 
   // Pagination handler
   const handlePagination = useCallback(
