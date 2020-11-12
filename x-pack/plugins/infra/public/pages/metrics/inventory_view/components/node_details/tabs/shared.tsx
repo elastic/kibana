@@ -17,4 +17,6 @@ export interface TabProps {
 
 export const TabContent = euiStyled.div`
   padding: ${(props) => props.theme.eui.paddingSizes.l};
+  height: 400px;
+  overflow-y: auto;
 `;

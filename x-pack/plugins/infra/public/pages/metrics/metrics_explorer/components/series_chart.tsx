@@ -6,6 +6,7 @@
 
 import React from 'react';
 import {
+  Chart,
   ScaleType,
   AreaSeries,
   BarSeries,

@@ -26,7 +26,7 @@ const SnapshotNodeMetricOptionalRT = rt.partial({
 });
 
 const SnapshotNodeMetricRequiredRT = rt.type({
-  name: SnapshotMetricTypeRT,
+  name: rt.string,
 });
 
 export const SnapshotNodeMetricRT = rt.intersection([
