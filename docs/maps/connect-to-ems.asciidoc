@@ -62,6 +62,7 @@ Once the server is running, follow instructions from the webpage served at the r
 [role="screenshot"]
 image::images/self-hosted-instructions.png[Set-up instructions]
 
+
 [float]
 ==== Configuration
 
@@ -104,6 +105,12 @@ TIP: Basemaps and boundaries available can be explored from the `/maps` endpoint
 
 
 [float]
+==== Kibana configuration
+
+Once the self-hosted Elastic Maps Service is running, you need to add the `map.emsUrl` configuration key in your `kibana.yml` file pointing to the root of the service. This setting is enough to configure Kibana to ask for EMS basemaps and boundaries from the new instance.
+
+
+[float]
 ==== Status check
 
 The self-hosted Elastic Maps Service will run a status check periodically and it will be exposed in two different forms:
@@ -112,6 +119,7 @@ The self-hosted Elastic Maps Service will run a status check periodically and it
 * The Docker https://docs.docker.com/engine/reference/builder/#healthcheck[`HEALTHCHECK`] instruction is run by default and will inform about the healthiness of the service.
 
 IMPORTANT: The server won't respond to any data request if the license validation is not fulfilled.
+
 
 [float]
 ==== Logging
