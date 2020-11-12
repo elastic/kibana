@@ -119,7 +119,7 @@ const FilterOutBtn = ({ Component, rowIndex, columnId }: any) => {
 
 export function buildCellActions(field: IndexPatternField) {
   if (!field.aggregatable) {
-    return [];
+    return undefined;
   }
 
   return [FilterInBtn, FilterOutBtn];
