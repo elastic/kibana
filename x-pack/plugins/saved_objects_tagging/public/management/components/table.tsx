@@ -69,9 +69,11 @@ export const TagTable: FC<TagTableProps> = ({
   const actions: Array<EuiTableAction<TagWithRelations>> = [];
   if (capabilities.edit) {
     actions.push({
-      name: i18n.translate('xpack.savedObjectsTagging.management.table.actions.edit.title', {
-        defaultMessage: 'Edit',
-      }),
+      name: ({ name }) =>
+        i18n.translate('xpack.savedObjectsTagging.management.table.actions.edit.title', {
+          defaultMessage: 'Edit {name} tag',
+          values: { name },
+        }),
       description: i18n.translate(
         'xpack.savedObjectsTagging.management.table.actions.edit.description',
         {
@@ -86,9 +88,11 @@ export const TagTable: FC<TagTableProps> = ({
   }
   if (capabilities.delete) {
     actions.push({
-      name: i18n.translate('xpack.savedObjectsTagging.management.table.actions.delete.title', {
-        defaultMessage: 'Delete',
-      }),
+      name: ({ name }) =>
+        i18n.translate('xpack.savedObjectsTagging.management.table.actions.delete.title', {
+          defaultMessage: 'Delete {name} tag',
+          values: { name },
+        }),
       description: i18n.translate(
         'xpack.savedObjectsTagging.management.table.actions.delete.description',
         {
@@ -187,6 +191,10 @@ export const TagTable: FC<TagTableProps> = ({
       items={tags}
       pagination={tablePagination}
       sorting={sorting}
+      tableCaption={i18n.translate('xpack.savedObjectsTagging.management.table.columns.caption', {
+        defaultMessage: 'Tags',
+      })}
+      rowHeader="name"
       selection={
         allowSelection
           ? {

@@ -19,6 +19,10 @@ export interface TagBulkAction {
    */
   label: string;
   /**
+   * Optional aria-label if the visual label isn't descriptive enough.
+   */
+  'aria-label'?: string;
+  /**
    * An optional icon to display before the label in the context menu.
    */
   icon?: EuiIconType;
