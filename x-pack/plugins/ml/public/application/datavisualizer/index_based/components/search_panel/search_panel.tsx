@@ -48,20 +48,20 @@ const searchSizeOptions = [1000, 5000, 10000, 100000, -1].map((v) => {
     value: String(v),
     inputDisplay:
       v > 0 ? (
-        <div data-test-subj={`mlDataVisualizerShardSizeOption ${v}`}>
+        <span data-test-subj={`mlDataVisualizerShardSizeOption ${v}`}>
           <FormattedMessage
             id="xpack.ml.datavisualizer.searchPanel.sampleSizeOptionLabel"
             defaultMessage="Sample size (per shard): {wrappedValue}"
             values={{ wrappedValue: <b>{v}</b> }}
           />
-        </div>
+        </span>
       ) : (
-        <div data-test-subj={`mlDataVisualizerShardSizeOption all`}>
+        <span data-test-subj={`mlDataVisualizerShardSizeOption all`}>
           <FormattedMessage
             id="xpack.ml.datavisualizer.searchPanel.allOptionLabel"
             defaultMessage="Search all"
           />
-        </div>
+        </span>
       ),
   };
 });

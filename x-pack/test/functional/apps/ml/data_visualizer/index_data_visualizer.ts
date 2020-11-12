@@ -346,11 +346,6 @@ export default function ({ getService }: FtrProviderContext) {
       );
 
       if (testData.expected.metricCards !== undefined && testData.expected.metricCards.length > 0) {
-        await ml.testExecution.logTestStep(`${testData.suiteTitle} displays the Metrics panel`);
-        await ml.dataVisualizerIndexBased.assertFieldsPanelForTypesExist([
-          ML_JOB_FIELD_TYPES.NUMBER,
-        ]);
-
         await ml.testExecution.logTestStep(
           `${testData.suiteTitle} displays the expected metric field cards and contents`
         );

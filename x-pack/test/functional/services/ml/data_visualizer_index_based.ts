@@ -53,10 +53,14 @@ export function MachineLearningDataVisualizerIndexBasedProvider(
       await testSubjects.existOrFail(`mlFieldDataCard ${fieldName} ${cardType}`);
     },
 
-    async assertNonMetricCardContents(cardType: string, fieldName: string, exampleCount?: number) {
+    async assertCardContentsExists(cardType: string, fieldName?: string) {
       await testSubjects.existOrFail(
         `mlFieldDataCard ${fieldName} ${cardType} > mlFieldDataCardContent`
       );
+    },
+
+    async assertNonMetricCardContents(cardType: string, fieldName: string, exampleCount?: number) {
+      await this.assertCardContentsExists(cardType, fieldName);
 
       // Currently the data used in the data visualizer tests only contains these field types.
       if (cardType === ML_JOB_FIELD_TYPES.DATE) {
@@ -69,7 +73,7 @@ export function MachineLearningDataVisualizerIndexBasedProvider(
     },
 
     async assertDocumentCountCardContents() {
-      await testSubjects.existOrFail('mlFieldDataCard undefined number > mlFieldDataCardContent');
+      await this.assertCardContentsExists('number', undefined);
       await testSubjects.existOrFail(
         'mlFieldDataCard undefined number > mlFieldDataCardDocumentCountChart'
       );
@@ -82,19 +86,10 @@ export function MachineLearningDataVisualizerIndexBasedProvider(
       selectedDetailsMode: 'distribution' | 'top_values',
       topValuesCount: number
     ) {
-      await testSubjects.existOrFail(
-        `mlFieldDataCard ${fieldName} number > mlFieldDataCardContent`
-      );
-
-      await testSubjects.existOrFail(
-        `mlFieldDataCard ${fieldName} number > mlFieldDataCardDocCount`
-      );
-
+      await this.assertCardContentsExists('number', fieldName);
+      await this.assertFieldDocCountExists('number', fieldName);
       await this.assertFieldDocCountContents('number', fieldName, docCountFormatted);
-
-      await testSubjects.existOrFail(
-        `mlFieldDataCard ${fieldName} number > mlFieldDataCardCardinality`
-      );
+      await this.assertFieldCardinalityExists('number', fieldName);
 
       await this.assertNumberStatsContents(fieldName, 'Min', statsMaxDecimalPlaces);
       await this.assertNumberStatsContents(fieldName, 'Median', statsMaxDecimalPlaces);
@@ -136,22 +131,14 @@ export function MachineLearningDataVisualizerIndexBasedProvider(
     },
 
     async assertDateCardContents(fieldName: string) {
-      await testSubjects.existOrFail(`mlFieldDataCard ${fieldName} date > mlFieldDataCardDocCount`);
-
+      await this.assertFieldDocCountExists('date', fieldName);
       await testSubjects.existOrFail(`mlFieldDataCard ${fieldName} date > mlFieldDataCardEarliest`);
-
       await testSubjects.existOrFail(`mlFieldDataCard ${fieldName} date > mlFieldDataCardLatest`);
     },
 
     async assertKeywordCardContents(fieldName: string, expectedTopValuesCount: number) {
-      await testSubjects.existOrFail(
-        `mlFieldDataCard ${fieldName} keyword > mlFieldDataCardDocCount`
-      );
-
-      await testSubjects.existOrFail(
-        `mlFieldDataCard ${fieldName} keyword > mlFieldDataCardCardinality`
-      );
-
+      await this.assertFieldDocCountExists('keyword', fieldName);
+      await this.assertFieldCardinalityExists('keyword', fieldName);
       await this.assertTopValuesContents('keyword', fieldName, expectedTopValuesCount);
     },
 
@@ -166,6 +153,12 @@ export function MachineLearningDataVisualizerIndexBasedProvider(
       );
     },
 
+    async assertFieldDocCountExists(cardType: string, fieldName: string) {
+      await testSubjects.existOrFail(
+        `mlFieldDataCard ${fieldName} ${cardType} > mlFieldDataCardDocCount`
+      );
+    },
+
     async assertFieldDocCountContents(
       cardType: string,
       fieldName: string,
@@ -177,6 +170,12 @@ export function MachineLearningDataVisualizerIndexBasedProvider(
       expect(docCountText).to.contain(
         docCountFormatted,
         `Expected doc count for '${fieldName}'  to be '${docCountFormatted}' (got contents '${docCountText}')`
+      );
+    },
+
+    async assertFieldCardinalityExists(cardType: string, fieldName: string) {
+      await testSubjects.existOrFail(
+        `mlFieldDataCard ${fieldName} ${cardType} > mlFieldDataCardCardinality`
       );
     },
 
