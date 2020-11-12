@@ -5,6 +5,7 @@
  */
 import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
+import { isEmpty } from 'lodash';
 import { ActionTypeModel, ValidationResult } from '../../../../types';
 import { EmailActionParams, EmailConfig, EmailSecrets, EmailActionConnector } from '../types';
 
@@ -127,6 +128,11 @@ export function getActionType(): ActionTypeModel<EmailConfig, EmailSecrets, Emai
         subject: new Array<string>(),
       };
       validationResult.errors = errors;
+
+      if (isEmpty(actionParams)) {
+        return validationResult;
+      }
+
       if (
         (!(actionParams.to instanceof Array) || actionParams.to.length === 0) &&
         (!(actionParams.cc instanceof Array) || actionParams.cc.length === 0) &&

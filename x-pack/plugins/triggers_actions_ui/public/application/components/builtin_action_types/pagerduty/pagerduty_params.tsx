@@ -161,7 +161,7 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
           editAction={editAction}
           messageVariables={messageVariables}
           paramsProperty={'summary'}
-          inputTargetValue={summary}
+          inputTargetValue={summary || ''}
           errors={errors.summary as string[]}
         />
       </EuiFormRow>
@@ -193,7 +193,7 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
               editAction={editAction}
               messageVariables={messageVariables}
               paramsProperty={'dedupKey'}
-              inputTargetValue={dedupKey}
+              inputTargetValue={dedupKey || ''}
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -214,7 +214,7 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
               editAction={editAction}
               messageVariables={messageVariables}
               paramsProperty={'timestamp'}
-              inputTargetValue={timestamp}
+              inputTargetValue={timestamp || ''}
               errors={errors.timestamp as string[]}
             />
           </EuiFormRow>
@@ -235,7 +235,7 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
           editAction={editAction}
           messageVariables={messageVariables}
           paramsProperty={'component'}
-          inputTargetValue={component}
+          inputTargetValue={component || ''}
         />
       </EuiFormRow>
       <EuiFormRow
@@ -252,7 +252,7 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
           editAction={editAction}
           messageVariables={messageVariables}
           paramsProperty={'group'}
-          inputTargetValue={group}
+          inputTargetValue={group || ''}
         />
       </EuiFormRow>
       <EuiFormRow
@@ -269,7 +269,7 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
           editAction={editAction}
           messageVariables={messageVariables}
           paramsProperty={'source'}
-          inputTargetValue={source}
+          inputTargetValue={source || ''}
         />
       </EuiFormRow>
       <EuiFormRow
@@ -287,7 +287,7 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
           editAction={editAction}
           messageVariables={messageVariables}
           paramsProperty={'class'}
-          inputTargetValue={actionParams.class}
+          inputTargetValue={actionParams.class || ''}
         />
       </EuiFormRow>
     </Fragment>

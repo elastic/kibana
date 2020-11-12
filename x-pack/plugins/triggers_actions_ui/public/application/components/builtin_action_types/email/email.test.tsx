@@ -173,6 +173,18 @@ describe('connector validation', () => {
 });
 
 describe('action params validation', () => {
+  test('action params validation succeeds when action params are empty', () => {
+    expect(actionTypeModel.validateParams({})).toEqual({
+      errors: {
+        to: [],
+        cc: [],
+        bcc: [],
+        message: [],
+        subject: [],
+      },
+    });
+  });
+
   test('action params validation succeeds when action params is valid', () => {
     const actionParams = {
       to: [],

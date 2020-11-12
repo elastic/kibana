@@ -5,6 +5,7 @@
  */
 
 import { lazy } from 'react';
+import { isEmpty } from 'lodash';
 import { ValidationResult, ActionTypeModel } from '../../../../types';
 import { connectorConfiguration } from './config';
 import logo from './logo.svg';
@@ -68,6 +69,11 @@ export function getActionType(): ActionTypeModel<
         title: new Array<string>(),
       };
       validationResult.errors = errors;
+
+      if (isEmpty(actionParams)) {
+        return validationResult;
+      }
+
       if (actionParams.subActionParams && !actionParams.subActionParams.title?.length) {
         errors.title.push(i18n.TITLE_REQUIRED);
       }
