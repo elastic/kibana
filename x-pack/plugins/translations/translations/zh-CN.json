@@ -4927,7 +4927,6 @@
     "xpack.apm.jvmsTable.noJvmsLabel": "未找到任何 JVM",
     "xpack.apm.jvmsTable.nonHeapMemoryColumnLabel": "非堆内存平均值",
     "xpack.apm.jvmsTable.threadCountColumnLabel": "线程计数最大值",
-    "xpack.apm.kueryBar.disabledPlaceholder": "搜索在此不可用",
     "xpack.apm.kueryBar.placeholder": "搜索{event, select,\n            transaction {事务}\n            metric {指标}\n            error {错误}\n            other {事务、错误和指标}\n          }（例如 {queryExample}）",
     "xpack.apm.license.betaBadge": "公测版",
     "xpack.apm.license.betaTooltipMessage": "此功能当前为公测版。如果遇到任何错误或有任何反馈，请报告问题或访问我们的论坛。",
