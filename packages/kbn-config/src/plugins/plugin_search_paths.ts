@@ -22,15 +22,15 @@ interface SearchOptions {
   rootDir: string;
   oss: boolean;
   examples: boolean;
+  thirdParty: boolean;
 }
 
-export function getPluginSearchPaths({ rootDir, oss, examples }: SearchOptions) {
+export function getPluginSearchPaths({ rootDir, oss, examples, thirdParty }: SearchOptions) {
   return [
     resolve(rootDir, 'src', 'plugins'),
     ...(oss ? [] : [resolve(rootDir, 'x-pack', 'plugins')]),
-    resolve(rootDir, 'plugins'),
+    ...(thirdParty ? [resolve(rootDir, 'plugins'), resolve(rootDir, '..', 'kibana-extra')] : []),
     ...(examples ? [resolve(rootDir, 'examples')] : []),
     ...(examples && !oss ? [resolve(rootDir, 'x-pack', 'examples')] : []),
-    resolve(rootDir, '..', 'kibana-extra'),
   ];
 }

@@ -17,9 +17,12 @@
  * under the License.
  */
 import Path from 'path';
-import { REPO_ROOT } from '@kbn/dev-utils';
 import { getPluginSearchPaths } from '@kbn/config';
-import { KibanaPlatformPlugin, simpleKibanaPlatformPluginDiscovery } from '@kbn/dev-utils';
+import {
+  KibanaPlatformPlugin,
+  REPO_ROOT,
+  simpleKibanaPlatformPluginDiscovery,
+} from '@kbn/dev-utils';
 
 export interface SearchOptions {
   oss: boolean;
@@ -36,6 +39,7 @@ export function findPlugins({
     rootDir: REPO_ROOT,
     oss,
     examples,
+    thirdParty: true,
   });
 
   for (const extraScanDir of extraPluginScanDirs) {

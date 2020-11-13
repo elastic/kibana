@@ -19,57 +19,75 @@
 
 import dedent from 'dedent';
 import { parseDependencyTree, parseCircular, prettyCircular } from 'dpdm';
-import { differenceWith, fromPairs, isEqual, toPairs } from 'lodash';
-import { run } from '@kbn/dev-utils';
+import { relative } from 'path';
+import { getPluginSearchPaths } from '@kbn/config';
+import { REPO_ROOT, run } from '@kbn/dev-utils';
 
 interface Options {
   debug?: boolean;
 }
 
-interface CircularDepList {
-  [key: string]: string;
-}
+type CircularDepList = Set<string>;
 
-const allowedList: CircularDepList = {
-  'src/plugins/data': 'src/plugins/expressions',
-  'src/plugins/expressions': 'src/plugins/visualizations',
-  'src/plugins/home': 'src/plugins/discover',
-  'src/plugins/ui_actions': 'src/plugins/embeddable',
-  'src/plugins/vis_default_editor': 'src/plugins/visualize',
-  'src/plugins/visualizations': 'src/plugins/vis_default_editor',
-  'x-pack/plugins/apm': 'x-pack/plugins/infra',
-  'x-pack/plugins/lists': 'x-pack/plugins/security_solution',
-  'x-pack/plugins/security': 'x-pack/plugins/spaces',
-};
+const allowedList: CircularDepList = new Set([
+  'src/plugins/charts -> src/plugins/expressions',
+  'src/plugins/charts -> src/plugins/vis_default_editor',
+  'src/plugins/dashboard -> src/plugins/visualizations',
+  'src/plugins/dashboard -> src/plugins/visualize',
+  'src/plugins/data -> src/plugins/discover',
+  'src/plugins/data -> src/plugins/embeddable',
+  'src/plugins/data -> src/plugins/home',
+  'src/plugins/data -> src/plugins/navigation',
+  'src/plugins/data -> src/plugins/saved_objects',
+  'src/plugins/data -> src/plugins/ui_actions',
+  'src/plugins/data -> src/plugins/vis_default_editor',
+  'src/plugins/data -> src/plugins/visualizations',
+  'src/plugins/data -> src/plugins/visualize',
+  'src/plugins/discover -> src/plugins/embeddable',
+  'src/plugins/embeddable -> src/plugins/ui_actions',
+  'src/plugins/embeddable -> src/plugins/visualizations',
+  'src/plugins/embeddable -> src/plugins/visualize',
+  'src/plugins/expressions -> src/plugins/visualizations',
+  'src/plugins/vis_default_editor -> src/plugins/visualizations',
+  'src/plugins/vis_default_editor -> src/plugins/visualize',
+  'src/plugins/visualizations -> src/plugins/visualize',
+  'x-pack/plugins/apm -> x-pack/plugins/infra',
+  'x-pack/plugins/lists -> x-pack/plugins/security_solution',
+  'x-pack/plugins/security -> x-pack/plugins/spaces',
+]);
 
 run(
   async ({ flags, log }) => {
     const { debug = false } = flags as Options;
-    const foundList: CircularDepList = {};
-    const depTree = await parseDependencyTree(
-      ['{src,x-pack}/plugins/**/*', '{x-pack/examples,examples}/**/*'],
-      {
-        include: /((src|x-pack)\/plugins|examples|x-pack\/examples)\/.*/,
-      }
-    );
+    const foundList: CircularDepList = new Set();
+
+    const pluginSearchPathGlobs = getPluginSearchPaths({
+      rootDir: REPO_ROOT,
+      oss: false,
+      examples: true,
+      thirdParty: false,
+    }).map((pluginFolderPath) => `${relative(REPO_ROOT, pluginFolderPath)}/**/*`);
+
+    const depTree = await parseDependencyTree(pluginSearchPathGlobs, {
+      context: REPO_ROOT,
+      include: /(plugins|examples)\/.*/,
+    });
 
     // Build list of circular dependencies as well as the circular dependencies full paths
     const circularDependenciesFullPaths = parseCircular(depTree).filter((circularDeps) => {
       const first = circularDeps[0];
       const last = circularDeps[circularDeps.length - 1];
-      const firstMatch = first.match(
-        /((src|x-pack)\/plugins|examples|x-pack\/examples)\/([^\/]*)\/.*/
-      );
-      const lastMatch = last.match(
-        /((src|x-pack)\/plugins|examples|x-pack\/examples)\/([^\/]*)\/.*/
-      );
+      const matchRegex = /((src|x-pack)\/plugins|examples|x-pack\/examples)\/([^\/]*)\/.*/;
+      const firstMatch = first.match(matchRegex);
+      const lastMatch = last.match(matchRegex);
 
-      if (firstMatch && lastMatch && firstMatch.length === 3 && lastMatch.length === 3) {
-        const firstPlugin = `${firstMatch[0]}/${firstMatch[2]}`;
-        const lastPlugin = `${lastMatch[0]}/${lastMatch[2]}`;
+      if (firstMatch && lastMatch && firstMatch.length === 4 && lastMatch.length === 4) {
+        const firstPlugin = `${firstMatch[1]}/${firstMatch[3]}`;
+        const lastPlugin = `${lastMatch[1]}/${lastMatch[3]}`;
+        const sortedPlugins = [firstPlugin, lastPlugin].sort();
 
         if (firstPlugin !== lastPlugin) {
-          foundList[firstPlugin] = lastPlugin;
+          foundList.add(`${sortedPlugins[0]} -> ${sortedPlugins[1]}`);
           return true;
         }
       }
@@ -92,18 +110,20 @@ run(
     }
 
     // Always log the result of comparing the found list with the allowed list
-    const diffObject = (first: CircularDepList, second: CircularDepList) =>
-      fromPairs(differenceWith(toPairs(first), toPairs(second), isEqual));
+    const diffSet = (first: CircularDepList, second: CircularDepList) =>
+      new Set([...first].filter((circularDep) => !second.has(circularDep)));
 
     const printList = (list: CircularDepList) => {
-      return Object.keys(list).reduce((listStr, key) => {
-        return listStr ? `${listStr}\n${key} -> ${list[key]}` : `${key} -> ${list[key]}`;
-      }, '');
+      return Array.from(list)
+        .sort()
+        .reduce((listStr, entry) => {
+          return listStr ? `${listStr}\n'${entry}',` : `'${entry}',`;
+        }, '');
     };
 
-    const foundDifferences = diffObject(foundList, allowedList);
+    const foundDifferences = diffSet(foundList, allowedList);
 
-    if (Object.keys(foundDifferences).length > 0) {
+    if (foundDifferences.size > 0) {
       log.error(
         dedent(`
       !!!!!!!!!!!!!!!!! OUT OF DATE ALLOWED LIST !!!!!!!!!!!!!!!!!
@@ -114,13 +134,13 @@ run(
       ! 'node scripts/find_plugins_with_circular_deps --debug'   !
       !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-      The allowed circular dependencies list is:
+      The allowed circular dependencies list is (#${allowedList.size}):
       ${printList(allowedList)}
 
-      The found circular dependencies list is:
+      The found circular dependencies list is (#${foundList.size}):
       ${printList(foundList)}
 
-      The differences between both are:
+      The differences between both are (#${foundList.size}):
       ${printList(foundDifferences)}
       `)
       );

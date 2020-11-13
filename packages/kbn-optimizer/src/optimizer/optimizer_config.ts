@@ -174,6 +174,7 @@ export class OptimizerConfig {
         rootDir: repoRoot,
         oss,
         examples,
+        thirdParty: true,
       });
 
     if (!pluginScanDirs.every((p) => Path.isAbsolute(p))) {
