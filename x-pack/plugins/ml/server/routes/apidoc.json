@@ -148,6 +148,12 @@
     "InitializeJobSavedObjects",
     "AssignJobsToSpaces",
     "RemoveJobsFromSpaces",
-    "JobsSpaces"
+    "JobsSpaces",
+
+    "TrainedModels",
+    "GetTrainedModel",
+    "GetTrainedModelStats",
+    "GetTrainedModelPipelines",
+    "DeleteTrainedModel"
   ]
 }
