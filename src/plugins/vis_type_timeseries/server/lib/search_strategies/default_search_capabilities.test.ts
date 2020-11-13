@@ -17,13 +17,14 @@
  * under the License.
  */
 import { DefaultSearchCapabilities } from './default_search_capabilities';
+import { ReqFacade } from './strategies/abstract_search_strategy';
 
 describe('DefaultSearchCapabilities', () => {
-  let defaultSearchCapabilities;
-  let req;
+  let defaultSearchCapabilities: DefaultSearchCapabilities;
+  let req: ReqFacade;
 
   beforeEach(() => {
-    req = {};
+    req = {} as ReqFacade;
     defaultSearchCapabilities = new DefaultSearchCapabilities(req);
   });
 
@@ -45,13 +46,13 @@ describe('DefaultSearchCapabilities', () => {
   });
 
   test('should return Search Timezone', () => {
-    defaultSearchCapabilities.request = {
+    defaultSearchCapabilities.request = ({
       payload: {
         timerange: {
           timezone: 'UTC',
         },
       },
-    };
+    } as unknown) as ReqFacade;
 
     expect(defaultSearchCapabilities.searchTimezone).toEqual('UTC');
   });

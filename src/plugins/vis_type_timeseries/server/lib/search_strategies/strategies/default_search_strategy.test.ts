@@ -17,13 +17,14 @@
  * under the License.
  */
 import { DefaultSearchStrategy } from './default_search_strategy';
+import { ReqFacade } from './abstract_search_strategy';
 
 describe('DefaultSearchStrategy', () => {
-  let defaultSearchStrategy;
-  let req;
+  let defaultSearchStrategy: DefaultSearchStrategy;
+  let req: ReqFacade;
 
   beforeEach(() => {
-    req = {};
+    req = {} as ReqFacade;
     defaultSearchStrategy = new DefaultSearchStrategy();
   });
 

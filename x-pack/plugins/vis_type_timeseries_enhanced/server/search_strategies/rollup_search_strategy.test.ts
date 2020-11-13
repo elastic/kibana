@@ -100,7 +100,10 @@ describe('Rollup Search Strategy', () => {
     });
 
     test('isViable should be false for invalid index', async () => {
-      const result = await rollupSearchStrategy.checkForViability(request, null);
+      const result = await rollupSearchStrategy.checkForViability(
+        request,
+        (null as unknown) as string
+      );
 
       expect(result).toEqual({
         isViable: false,

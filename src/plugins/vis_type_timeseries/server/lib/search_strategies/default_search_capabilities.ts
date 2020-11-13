@@ -30,7 +30,7 @@ const getTimezoneFromRequest = (request: ReqFacade<any>) => {
 };
 
 export class DefaultSearchCapabilities {
-  constructor(protected request: ReqFacade, public fieldsCapabilities: Record<string, any> = {}) {}
+  constructor(public request: ReqFacade, public fieldsCapabilities: Record<string, any> = {}) {}
 
   public get defaultTimeInterval() {
     return null;
