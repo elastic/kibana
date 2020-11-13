@@ -876,9 +876,6 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             .auth(user.username, user.password)
             .send(updatedData);
 
-          const apiKeyIds = await getAlertingApiKeysToInvalidate();
-          expect(apiKeyIds.apiKeysToInvalidate.length > 1).to.be(true);
-
           const statusUpdates: string[] = [];
           await retry.try(async () => {
             const alertTask = (await getAlertingTaskById(createdAlert.scheduledTaskId)).docs[0];
@@ -913,6 +910,9 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
                 expect(alertTask.status).to.eql('idle');
                 // ensure the alert is rescheduled to a minute from now
                 ensureDatetimeIsWithinRange(Date.parse(alertTask.runAt), 60 * 1000);
+
+                const apiKeyIds = await getAlertingApiKeysToInvalidate();
+                expect(apiKeyIds.apiKeysToInvalidate.length).to.be(0);
               });
               break;
             default:
