@@ -51,7 +51,7 @@ const updateTimeBuckets = (
   const buckets = customBuckets || agg.buckets;
   buckets.setBounds(bounds);
   // for interval options we should add '1' so that we didn't get error in converter function (for example 'day' -> '1day')
-  if (find(intervalOptions, { val: agg.params.interval })) {
+  if (agg.params.interval !== autoInterval && find(intervalOptions, { val: agg.params.interval })) {
     buckets.setInterval(1 + agg.params.interval);
   } else {
     buckets.setInterval(agg.params.interval);
