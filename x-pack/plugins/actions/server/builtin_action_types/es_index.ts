@@ -39,10 +39,11 @@ const ParamsSchema = schema.object({
   documents: schema.arrayOf(schema.recordOf(schema.string(), schema.any())),
 });
 
+export const ES_INDEX_ACTION_TYPE_ID = '.index';
 // action type definition
 export function getActionType({ logger }: { logger: Logger }): ESIndexActionType {
   return {
-    id: '.index',
+    id: ES_INDEX_ACTION_TYPE_ID,
     minimumLicenseRequired: 'basic',
     name: i18n.translate('xpack.actions.builtin.esIndexTitle', {
       defaultMessage: 'Index',
