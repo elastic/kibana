@@ -11957,10 +11957,10 @@ dotignore@^0.1.2:
   dependencies:
     minimatch "^3.0.4"
 
-dpdm@3.4.3:
-  version "3.4.3"
-  resolved "https://registry.yarnpkg.com/dpdm/-/dpdm-3.4.3.tgz#44a9fa9c6c39d164aa05f918968b94b170905fc9"
-  integrity sha512-F9GZbsh7KKxA3hJ35JQJVB3A/k9Mq7RRlZyrD2rPNFrvFUb36c18kwGPLEiyCyU+TxT35d+7USwhSy18s1L3XA==
+dpdm@3.5.0:
+  version "3.5.0"
+  resolved "https://registry.yarnpkg.com/dpdm/-/dpdm-3.5.0.tgz#414402f21928694bc86cfe8e3583dc8fc97d013e"
+  integrity sha512-bff2gDpYyzmIOMwRp0Bsk0T4e/qgLRCeuGHZYEsJV0LRzuTUkXirCiLcme7Ebu/LVoQ8yAKiody5/1e51tsmFw==
   dependencies:
     "@types/fs-extra" "^8.0.0"
     "@types/glob" "^7.1.1"

@@ -621,7 +621,7 @@
     "delete-empty": "^2.0.0",
     "dependency-check": "^4.1.0",
     "diff": "^4.0.1",
-    "dpdm": "3.4.3",
+    "dpdm": "3.5.0",
     "ejs": "^3.1.5",
     "enzyme": "^3.11.0",
     "enzyme-adapter-react-16": "^1.15.2",
