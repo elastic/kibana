@@ -13,7 +13,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const listingTable = getService('listingTable');
   const testSubjects = getService('testSubjects');
   const find = getService('find');
-  const PageObjects = getPageObjects(['visualize', 'tagManagement', 'visEditor', 'header']);
+  const PageObjects = getPageObjects(['visualize', 'tagManagement', 'visEditor', 'common']);
 
   /**
    * Select tags in the searchbar's tag filter.
@@ -98,17 +98,22 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await selectSavedObjectTags('tag-1');
 
         await testSubjects.click('confirmSaveSavedObjectButton');
-        await testSubjects.existOrFail('saveVisualizationSuccess');
+        await PageObjects.common.waitForSaveModalToClose();
 
         await PageObjects.visualize.gotoVisualizationLandingPage();
         await listingTable.waitUntilTableIsLoaded();
+
+        // //// TODO: remove, here for screenshot
+        const foo = await listingTable.getAllItemsNames();
+        expect(foo).to.contain('vis-with-new-tag');
+        //////
 
         await selectFilterTags('tag-1');
         const itemNames = await listingTable.getAllItemsNames();
         expect(itemNames).to.contain('My new markdown viz');
       });
 
-      it('allows to assign tags to the new visualization', async () => {
+      it('allows to create a tag from the tag selector', async () => {
         const { tagModal } = PageObjects.tagManagement;
 
         await PageObjects.visualize.navigateToNewVisualization();
@@ -139,9 +144,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(await tagModal.isOpened()).to.be(false);
 
         await testSubjects.click('confirmSaveSavedObjectButton');
+        await PageObjects.common.waitForSaveModalToClose();
 
         await PageObjects.visualize.gotoVisualizationLandingPage();
         await listingTable.waitUntilTableIsLoaded();
+
+        // //// TODO: remove, here for screenshot
+        const foo = await listingTable.getAllItemsNames();
+        expect(foo).to.contain('vis-with-new-tag');
+        //////
 
         await selectFilterTags('my-new-tag');
         const itemNames = await listingTable.getAllItemsNames();
@@ -162,6 +173,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await selectSavedObjectTags('tag-2');
 
         await testSubjects.click('confirmSaveSavedObjectButton');
+        await PageObjects.common.waitForSaveModalToClose();
+
         await PageObjects.visualize.gotoVisualizationLandingPage();
         await listingTable.waitUntilTableIsLoaded();
 
