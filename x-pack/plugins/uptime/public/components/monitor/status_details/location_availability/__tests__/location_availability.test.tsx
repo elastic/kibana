@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { shallowWithIntl } from '@kbn/test/jest';
 import { LocationAvailability } from '../location_availability';
 import { MonitorLocations } from '../../../../../../common/runtime_types';
 import { LocationMissingWarning } from '../../location_map/location_missing';

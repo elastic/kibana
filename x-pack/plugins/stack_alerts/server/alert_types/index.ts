@@ -4,15 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Service, IRouter, AlertingSetup } from '../types';
+import { Logger } from 'src/core/server';
+import { AlertingSetup, StackAlertsStartDeps } from '../types';
 import { register as registerIndexThreshold } from './index_threshold';
 import { register as registerGeoThreshold } from './geo_threshold';
 
 interface RegisterAlertTypesParams {
-  service: Service;
-  router: IRouter;
+  logger: Logger;
+  data: Promise<StackAlertsStartDeps['triggersActionsUi']['data']>;
   alerts: AlertingSetup;
-  baseRoute: string;
 }
 
 export function registerBuiltInAlertTypes(params: RegisterAlertTypesParams) {
