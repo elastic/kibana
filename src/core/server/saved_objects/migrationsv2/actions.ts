@@ -22,10 +22,10 @@ import * as TaskEither from 'fp-ts/lib/TaskEither';
 import * as Option from 'fp-ts/lib/Option';
 import { ElasticsearchClientError } from '@elastic/elasticsearch/lib/errors';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { errors } from '@elastic/elasticsearch';
+import { errors as EsErrors } from '@elastic/elasticsearch';
 import { ElasticsearchClient, ShardsResponse } from '../../elasticsearch';
 import { IndexMapping } from '../mappings';
-import { SavedObjectsRawDoc, SavedObjectsRawDocSource } from '../serialization';
+import { SavedObjectsRawDoc } from '../serialization';
 
 export type AllResponses =
   | CloneIndexResponse
@@ -37,11 +37,11 @@ export type AllResponses =
   | UpdateByQueryResponse
   | UpdateAndPickupMappingsResponse;
 
-export type ExpectedErrors = errors.NoLivingConnectionsError;
-// | errors.ConnectionError
-// | errors.TimeoutError
-// | errors.ResponseError;
-export type ActionResponse<T = AllResponses> = Either.Either<ExpectedErrors, T>;
+export type ExpectedErrors =
+  | EsErrors.NoLivingConnectionsError
+  | EsErrors.ConnectionError
+  | EsErrors.TimeoutError
+  | EsErrors.ResponseError;
 
 const retryResponseStatuses = [
   503, // ServiceUnavailable
@@ -53,10 +53,10 @@ const retryResponseStatuses = [
 
 const catchRetryableEsClientErrors = (e: ElasticsearchClientError) => {
   if (
-    e instanceof errors.NoLivingConnectionsError ||
-    e instanceof errors.ConnectionError ||
-    e instanceof errors.TimeoutError ||
-    (e instanceof errors.ResponseError &&
+    e instanceof EsErrors.NoLivingConnectionsError ||
+    e instanceof EsErrors.ConnectionError ||
+    e instanceof EsErrors.TimeoutError ||
+    (e instanceof EsErrors.ResponseError &&
       (retryResponseStatuses.includes(e.statusCode) ||
         e.body?.error?.type === 'snapshot_in_progress_exception'))
   ) {
@@ -98,7 +98,7 @@ export const fetchIndices = (
 };
 
 export interface SetIndexWriteBlockResponse {
-  setIndexWriteBlock: boolean;
+  acknowledged: boolean;
 }
 
 export const setIndexWriteBlock = (
@@ -119,15 +119,11 @@ export const setIndexWriteBlock = (
       // lock is already in place `shards_acknowledged` is always false.
       // Follow-up with ES-team, do we need to check index status >= yellow?
       return Either.right({
-        setIndexWriteBlock: res.body.acknowledged,
+        acknowledged: res.body.acknowledged,
       });
     })
     .catch(catchRetryableEsClientErrors);
 };
-
-export interface CloneIndexResponse {
-  cloneIndex: AcknowledgeResponse;
-}
 
 const waitForStatus = (
   client: ElasticsearchClient,
@@ -141,6 +137,8 @@ const waitForStatus = (
     })
     .catch(catchRetryableEsClientErrors);
 };
+
+export type CloneIndexResponse = AcknowledgeResponse;
 
 /**
  * Makes a clone of the source index into the target.
@@ -192,7 +190,7 @@ export const cloneIndex = (
           shardsAcknowledged: res.body.shards_acknowledged,
         });
       })
-      .catch((error: errors.ResponseError) => {
+      .catch((error: EsErrors.ResponseError) => {
         if (error.message === 'resource_already_exists_exception') {
           /**
            * If the target index already exists it means a previous clone
@@ -214,14 +212,14 @@ export const cloneIndex = (
     TaskEither.chain((res) => {
       if (res.acknowledged && res.shardsAcknowledged) {
         // If the cluster state was updated and all shards ackd we're done
-        return TaskEither.right({ cloneIndex: res });
+        return TaskEither.right(res);
       } else {
         // Otherwise, wait until the target index has a 'green' status.
         return pipe(
           waitForStatus(client, target, 'green'),
           TaskEither.map((value) => {
             /** When the index status is 'green' we know that all shards were started */
-            return { cloneIndex: { acknowledged: true, shardsAcknowledged: true } };
+            return { acknowledged: true, shardsAcknowledged: true };
           })
         );
       }
@@ -230,7 +228,9 @@ export const cloneIndex = (
 };
 
 export interface WaitForTaskResponse {
-  waitForTask: { completed: boolean; failures: Option.Option<any[]>; description: string };
+  completed: boolean;
+  failures: Option.Option<any[]>;
+  description: string;
 }
 
 /**
@@ -255,12 +255,10 @@ export const waitForTask = (
     })
     .then(({ body }) => {
       return Either.right({
-        waitForTask: {
-          completed: body.completed,
-          failures:
-            body.response.failures.length > 0 ? Option.some(body.response.failures) : Option.none,
-          description: body.task.description,
-        },
+        completed: body.completed,
+        failures:
+          body.response.failures.length > 0 ? Option.some(body.response.failures) : Option.none,
+        description: body.task.description,
       });
     })
     .catch(catchRetryableEsClientErrors);
@@ -282,7 +280,7 @@ export const deleteIndex = (
 };
 
 export interface UpdateByQueryResponse {
-  updateByQuery: { taskId: string };
+  taskId: string;
 }
 
 /**
@@ -311,7 +309,7 @@ export const updateByQuery = (
       // Return an error when targeting missing or closed indices
       allow_no_indices: false,
       index,
-      // For v1 migrations we reindexed using a batch size of 100 documents
+      // Update documents in batches of 100 documents at a time
       // TODO: profile performance to see how much difference `scroll_size` makes
       scroll_size: 100,
       body: {
@@ -330,14 +328,13 @@ export const updateByQuery = (
       wait_for_completion: false,
     })
     .then(({ body: { task: taskId } }) => {
-      return Either.right({ updateByQuery: { taskId } });
+      return Either.right({ taskId });
     })
     .catch(catchRetryableEsClientErrors);
 };
 
-//* ******* UNUSED  */
 export interface ReindexResponse {
-  reindex: { taskId: string };
+  taskId: string;
 }
 
 /**
@@ -390,7 +387,7 @@ export const reindex = (
       wait_for_completion: false,
     })
     .then(({ body: { task: taskId } }) => {
-      return Either.right({ reindex: { taskId } });
+      return Either.right({ taskId });
     })
     .catch(catchRetryableEsClientErrors);
 };
@@ -429,9 +426,7 @@ export interface AcknowledgeResponse {
   shardsAcknowledged: boolean;
 }
 
-export interface CreateIndexResponse {
-  createIndex: AcknowledgeResponse;
-}
+export type CreateIndexResponse = AcknowledgeResponse;
 
 /**
  * Creates an index with the given mappings
@@ -515,14 +510,14 @@ export const createIndex = (
     TaskEither.chain((res) => {
       if (res.acknowledged && res.shardsAcknowledged) {
         // If the cluster state was updated and all shards ackd we're done
-        return TaskEither.right({ createIndex: res });
+        return TaskEither.right(res);
       } else {
         // Otherwise, wait until the target index has a 'green' status.
         return pipe(
           waitForStatus(client, indexName, 'green'),
-          TaskEither.map((value) => {
+          TaskEither.map(() => {
             /** When the index status is 'green' we know that all shards were started */
-            return { createIndex: { acknowledged: true, shardsAcknowledged: true } };
+            return { acknowledged: true, shardsAcknowledged: true };
           })
         );
       }
@@ -531,7 +526,7 @@ export const createIndex = (
 };
 
 export interface UpdateAndPickupMappingsResponse {
-  updateAndPickupMappings: { taskId: string };
+  taskId: string;
 }
 
 /**
@@ -555,7 +550,6 @@ export const updateAndPickupMappings = (
         body: mappings,
       })
       .then((res) => {
-        console.log(res.body);
         // TODO do we need to check res.body.acknowledged?
         return Either.right({ acknowledged: res.body.acknowledged });
       })
@@ -566,9 +560,6 @@ export const updateAndPickupMappings = (
     putMappingTask,
     TaskEither.chain((res) => {
       return updateByQuery(client, index);
-    }),
-    TaskEither.map((res) => {
-      return { updateAndPickupMappings: { taskId: res.updateByQuery.taskId } };
     })
   );
 };
@@ -578,9 +569,11 @@ interface ElasticSearchResponse {
   timed_out: boolean;
   _scroll_id: string;
   _shards: ShardsResponse;
-  hits?: {
+  hits: {
     total: number;
-    hits: SavedObjectsRawDoc[];
+    // when `filter_path` is specified, ES doesn't return empty arrays, so if
+    // there are no search results res.hits.hits will be undefined.
+    hits?: SavedObjectsRawDoc[];
   };
 }
 
@@ -624,24 +617,136 @@ export const search = (
       },
       // Reduce the response payload size by only returning the data we care about
       filter_path: [
+        '_scroll_id',
         '_shards',
         'hits.total',
         'hits.hits._id',
         'hits.hits._source',
-        'hits.hits._version',
+        'hits.hits._seq_no',
+        'hits.hits._primary_term',
       ],
     })
     .then((res) => {
+      console.log(res.body.hits.hits);
       // Check that all shards successfully executed the query
       // Kibana uses a single shard by default but users can override this
-      console.log(res);
       if (res.body._shards.successful < res.body._shards.total) {
         return Either.left(new Error('Search request did not successfully execute on all shards'));
       }
       if (res.body.timed_out) {
         return Either.left(new Error('Search request timeout'));
       }
-      return Either.right({ scrollId: res.body._scroll_id, docs: res.body.hits?.hits });
+      return Either.right({ scrollId: res.body._scroll_id, docs: res.body.hits.hits ?? [] });
+    })
+    .catch(catchRetryableEsClientErrors);
+};
+
+export const scroll = (
+  client: ElasticsearchClient,
+  scrollId: string
+): TaskEither.TaskEither<ExpectedErrors | Error, SearchResponse> => () => {
+  return client
+    .scroll<ElasticSearchResponse>({
+      // How long to keep the scroll context alive. This only needs to be long
+      // enough to process a single batch since every new scroll request will
+      // reset this scroll's expiry.
+      // Because we transform and write each batch before reading the next
+      // batch this needs to be long enough to complete the bulk update and
+      // potentially retry transient failures.
+      // TODO (profile/tune this parameter):
+      //  - Can we make it smaller? How do migrations behave when the scroll expires
+      //  - Is it too large? How do migrations behave when we go into a bootloop and
+      // continuously open new scroll requests?
+      scroll: '5m',
+      scroll_id: scrollId,
+    })
+    .then((res) => {
+      console.log(res);
+      // Check that all shards successfully executed the query
+      // Kibana uses a single shard by default but users can override this
+      if (res.body._shards.successful < res.body._shards.total) {
+        return Either.left(new Error('Search request did not successfully execute on all shards'));
+      }
+      if (res.body.timed_out) {
+        return Either.left(new Error('Search request timeout'));
+      }
+      return Either.right({ scrollId: res.body._scroll_id, docs: res.body.hits.hits ?? [] });
+    })
+    .catch(catchRetryableEsClientErrors);
+};
+
+export const clearScroll = (
+  client: ElasticsearchClient,
+  scrollId: string
+): TaskEither.TaskEither<ExpectedErrors | Error, { succeeded: boolean }> => () => {
+  return client
+    .clearScroll<{ succeeded: boolean; freed: number }>({
+      scroll_id: scrollId,
+    })
+    .then((res) => {
+      if (res.body.succeeded) {
+        return Either.right({ succeeded: true });
+      } else {
+        return Either.left(new Error('Unable to free search scroll'));
+      }
+    })
+    .catch(catchRetryableEsClientErrors);
+};
+
+export const bulkIndex = (
+  client: ElasticsearchClient,
+  index: string,
+  docs: SavedObjectsRawDoc[]
+): TaskEither.TaskEither<ExpectedErrors | Error, { succeeded: boolean }> => () => {
+  return client
+    .bulk<{
+      took: number;
+      errors: boolean;
+      items: [
+        {
+          index: { _id: string; status: number } & {
+            // | { result: string; _shards: ShardsResponse } |
+            error: { type: string; reason: string }; // the filter_path should restrict responses
+          };
+        }
+      ];
+    }>({
+      require_alias: false,
+      wait_for_active_shards: 'all',
+      refresh: 'wait_for',
+      filter_path: ['items.*.error'],
+      body: docs.flatMap((doc) => {
+        return [
+          {
+            index: {
+              _index: index,
+              _id: doc._id,
+              // overwrite existing documents
+              op_type: 'index',
+              // use optimistic concurrency control to ensure that outdated
+              // documents are only overwritten once with the latest version
+              if_seq_no: doc._seq_no,
+              if_primary_term: doc._primary_term,
+            },
+          },
+          doc._source,
+        ];
+      }),
+    })
+    .then((res) => {
+      console.log(res.body.errors, res.body?.items?.[0]);
+      // TODO follow-up with es-distrib team: update operations can cause
+      // version conflicts even when no seq_no is specified, can we be sure
+      // that a version conflict can _only_ be caused by another Kibana
+      // writing to the index?
+      const errors = (res.body.items ?? []).filter(
+        (item) => item.index.error.type !== 'version_conflict_engine_exception'
+      );
+      if (errors.length === 0) {
+        return Either.right({ succeeded: true });
+      } else {
+        return Either.left(new Error(JSON.stringify(errors)));
+      }
     })
     .catch(catchRetryableEsClientErrors);
 };

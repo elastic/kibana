@@ -152,11 +152,6 @@ export type DeleteLegacyState = LegacyBaseState & {
   controlState: 'DELETE_LEGACY';
 };
 
-export type NewDeleteLegacyState = LegacyBaseState & {
-  /** Delete the legacy index */
-  controlState: 'NEW_DELETE_LEGACY';
-};
-
 export type State =
   | FatalState
   | InitState
@@ -404,13 +399,13 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       stateP = {
         ...stateP,
         controlState: 'PRE_MIGRATE_LEGACY_WAIT_FOR_TASK',
-        preMigrationUpdateTaskId: res.right.updateByQuery.taskId,
+        preMigrationUpdateTaskId: res.right.taskId,
       };
     }
     return stateP;
   } else if (stateP.controlState === 'PRE_MIGRATE_LEGACY_WAIT_FOR_TASK') {
     const res = resW as ResponseType<typeof stateP.controlState>;
-    if (Either.isRight(res) && Option.isSome(res.right.waitForTask.failures)) {
+    if (Either.isRight(res) && Option.isSome(res.right.failures)) {
       // TODO: ignore index closed error
       return { ...stateP, controlState: 'FATAL' };
     }
@@ -427,13 +422,13 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       stateP = {
         ...stateP,
         controlState: 'UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK',
-        updateTargetMappingsTaskId: res.right.updateAndPickupMappings.taskId,
+        updateTargetMappingsTaskId: res.right.taskId,
       };
     }
     return stateP;
   } else if (stateP.controlState === 'UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK') {
     const res = resW as ResponseType<typeof stateP.controlState>;
-    if (Either.isRight(res) && Option.isSome(res.right.waitForTask.failures)) {
+    if (Either.isRight(res) && Option.isSome(res.right.failures)) {
       return { ...stateP, controlState: 'FATAL' };
     }
     const outdatedDocumentsQuery = {
@@ -444,7 +439,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
               { exists: { field: type } },
               {
                 bool: {
-                  must_not: { term: { [`migrationVersion.${type}`]: latestVersion } },
+                  must_not: { term: { [`migrationVersion.${type}`]: '7.11.0' } }, // TODO replace with `latestVersion`
                 },
               },
             ],
@@ -458,22 +453,43 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       outdatedDocumentsQuery,
     };
   } else if (stateP.controlState === 'TARGET_DOCUMENTS_SEARCH') {
-    // If there are no migrations defined, we're done
-    if (Object.keys(stateP.migrationVersionPerType).length <= 0) {
-      return { ...stateP, controlState: 'DONE' };
+    const res = resW as ResponseType<typeof stateP.controlState>;
+    if (Either.isRight(res)) {
+      // If there are no more results, clear the scroll
+      if (res.right.docs.length === 0) {
+        return {
+          ...stateP,
+          controlState: 'TARGET_DOCUMENTS_CLEAR_SCROLL',
+          transformDocumentsScrollId: res.right.scrollId,
+        };
+      }
+
+      return {
+        ...stateP,
+        controlState: 'TARGET_DOCUMENTS_TRANSFORM',
+        transformDocumentsScrollId: res.right.scrollId,
+        outdatedDocuments: res.right.docs,
+      };
     }
-    return {
-      ...stateP,
-      controlState: 'TARGET_DOCUMENTS_SCROLL',
-      transformDocumentsScrollId: '',
-    };
+    return stateP;
   } else if (stateP.controlState === 'TARGET_DOCUMENTS_SCROLL') {
-    // TODO: if no results: TARGET_DOCUMENTS_CLEAR_SCROLL
-    return {
-      ...stateP,
-      controlState: 'TARGET_DOCUMENTS_TRANSFORM',
-      outdatedDocuments: [], // TODO
-    };
+    const res = resW as ResponseType<typeof stateP.controlState>;
+    if (Either.isRight(res)) {
+      // If there are no more results, clear the scroll
+      if (res.right.docs.length === 0) {
+        return {
+          ...stateP,
+          controlState: 'TARGET_DOCUMENTS_CLEAR_SCROLL',
+        };
+      }
+      return {
+        ...stateP,
+        controlState: 'TARGET_DOCUMENTS_TRANSFORM',
+        transformDocumentsScrollId: res.right.scrollId,
+        outdatedDocuments: res.right.docs,
+      };
+    }
+    return stateP;
   } else if (stateP.controlState === 'TARGET_DOCUMENTS_TRANSFORM') {
     return {
       ...stateP,
@@ -498,7 +514,7 @@ export const nextActionMap = (
   return {
     FATAL: null,
     DONE: null,
-    INIT: Actions.fetchIndices(client, ['*', '.kibana', '.kibana_current', '.kibana_7.11.0']),
+    INIT: Actions.fetchIndices(client, ['.kibana', '.kibana_7.11.0']),
     SET_SOURCE_WRITE_BLOCK: Actions.setIndexWriteBlock(client, state.source),
     INIT_NEW_INDICES: Actions.createIndex(client, state.target, state.targetMappings),
     CLONE_SOURCE: Actions.cloneIndex(client, state.source, state.target),
@@ -519,20 +535,22 @@ export const nextActionMap = (
       state.target,
       (state as TargetDocumentsSearch).outdatedDocumentsQuery
     ),
-    TARGET_DOCUMENTS_SCROLL: Actions.updateAndPickupMappings(
+    TARGET_DOCUMENTS_SCROLL: Actions.scroll(
       client,
-      state.target,
-      state.targetMappings
+      (state as TargetDocumentsScroll).transformDocumentsScrollId
     ),
-    TARGET_DOCUMENTS_CLEAR_SCROLL: Actions.updateAndPickupMappings(
+    TARGET_DOCUMENTS_CLEAR_SCROLL: Actions.clearScroll(
       client,
-      state.target,
-      state.targetMappings
+      (state as TargetDocumentsClearScroll).transformDocumentsScrollId
     ),
-    TARGET_DOCUMENTS_TRANSFORM: Actions.updateAndPickupMappings(
-      client,
-      state.target,
-      state.targetMappings
+    TARGET_DOCUMENTS_TRANSFORM: pipe(
+      TaskEither.tryCatch(
+        () => transformRawDocs((state as TargetDocumentsTransform).outdatedDocuments),
+        (e) => {
+          throw e;
+        }
+      ),
+      TaskEither.chain((docs) => Actions.bulkIndex(client, state.target, docs))
     ),
     CLONE_LEGACY: pipe(
       // Clone legacy index into a new source index, will ignore index exists error
@@ -542,9 +560,7 @@ export const nextActionMap = (
         // Kibana instance already completed the legacy pre-migration and
         // deleted it
         if (error.message === 'index_not_found_exception') {
-          return TaskEither.right({
-            cloneIndex: { acknowledged: true, shardsAcknowledged: true },
-          });
+          return TaskEither.right({ acknowledged: true, shardsAcknowledged: true });
         } else {
           return TaskEither.left(error);
         }
@@ -557,7 +573,7 @@ export const nextActionMap = (
         // Kibana instance already completed the legacy pre-migration and
         // deleted it
         if (error.message === 'index_not_found_exception') {
-          return TaskEither.right({ setIndexWriteBlock: true });
+          return TaskEither.right({ acknowledged: true });
         } else {
           return TaskEither.left(error);
         }

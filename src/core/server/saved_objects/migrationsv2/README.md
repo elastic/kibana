@@ -7,13 +7,16 @@ When upgrading from a legacy index additional steps are required before the
 regular migration process can start.
 
 We have the following potential legacy indices:
+ - v5.x index that wasn't upgraded -> kibana should refuse to start the migration
+ - v5.x index that was upgraded to v6.x: `.kibana-6` _index_ with `.kibana` _alias_
  - < v6.5 `.kibana` _index_ (Saved Object Migrations were
    introduced in v6.5 https://github.com/elastic/kibana/pull/20243)
+ - TODO: Test versions which introduced the `kibana_index_template` template?
  - < v7.4 `.kibana_task_manager` _index_ (Task Manager started
    using Saved Objects in v7.4 https://github.com/elastic/kibana/pull/39829)
 
 Test plan:
-1. Ensure that all Kibana minors >= 6.0 and <= 7.4 can successfully upgrade to
+1. Ensure that the different versions of Kibana can successfully upgrade to
    7.11. Testing upgrades from 6.4 and 7.3 are particularly important.
 2. Ensure that multiple Kibana nodes can migrate a legacy index in parallel
    (choose a representative legacy version to test with e.g. v6.4). Add a lot
@@ -36,9 +39,10 @@ Test plan:
 For a successful migration the following behaviour should be observed: 
  1. The `.kibana` index should be reindexed into a `.kibana_pre6.5.0` index
  2. The `.kibana` index should be deleted
- 3. The `.kibana_pre6.5.0` index should have a write block applied
- 4. Documents from `.kibana_pre6.5.0` should be migrated into `.kibana_7.11.0_001`
- 5. Once migration has completed, the `.kibana_current` and `.kibana_7.11.0`
+ 3. The `.kibana_index_template` should be deleted
+ 4. The `.kibana_pre6.5.0` index should have a write block applied
+ 5. Documents from `.kibana_pre6.5.0` should be migrated into `.kibana_7.11.0_001`
+ 6. Once migration has completed, the `.kibana_current` and `.kibana_7.11.0`
     aliases should point to the `.kibana_7.11.0_001` index.
 
 ### 2. Plugins enabled/disabled
