@@ -47,11 +47,7 @@ async function getCustomEsClient(getStartServices: CoreSetup['getStartServices']
   return core.elasticsearch.legacy.createClient('rollup', esClientConfig);
 }
 
-export interface RollupPluginSetup {
-  getRollupEsClient: () => Promise<ILegacyCustomClusterClient>;
-}
-
-export class RollupPlugin implements Plugin<RollupPluginSetup, void, any, any> {
+export class RollupPlugin implements Plugin<void, void, any, any> {
   private readonly logger: Logger;
   private readonly globalConfig$: Observable<SharedGlobalConfig>;
   private readonly license: License;
@@ -146,13 +142,6 @@ export class RollupPlugin implements Plugin<RollupPluginSetup, void, any, any> {
     if (indexManagement && indexManagement.indexDataEnricher) {
       indexManagement.indexDataEnricher.add(rollupDataEnricher);
     }
-
-    return {
-      getRollupEsClient: async () =>
-        this.rollupEsClient
-          ? Promise.resolve(this.rollupEsClient)
-          : getCustomEsClient(getStartServices),
-    };
   }
 
   start() {}

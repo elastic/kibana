@@ -47,7 +47,7 @@ export interface ReqFacade<T = unknown> extends FakeRequest {
 }
 
 export abstract class AbstractSearchStrategy {
-  async search(req: ReqFacade<VisPayload>, bodies: any[], options = {}) {
+  async search(req: ReqFacade<VisPayload>, bodies: any[], indexType?: string) {
     const requests: any[] = [];
     const { sessionId } = req.payload;
 
@@ -56,13 +56,13 @@ export abstract class AbstractSearchStrategy {
         req.requestContext
           .search!.search(
             {
+              indexType,
               params: {
                 ...body,
               },
             },
             {
               sessionId,
-              ...options,
             }
           )
           .toPromise()

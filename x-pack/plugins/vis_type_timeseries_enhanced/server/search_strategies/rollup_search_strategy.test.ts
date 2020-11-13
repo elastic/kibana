@@ -47,18 +47,10 @@ describe('Rollup Search Strategy', () => {
     },
   } as unknown) as ReqFacade;
 
-  const getRollupService = jest.fn().mockImplementation(() => {
-    return {
-      callAsCurrentUser: async () => {
-        return rollupResolvedData;
-      },
-    };
-  });
-
   const indexPattern = 'indexPattern';
 
   test('should create instance of RollupSearchRequest', () => {
-    const rollupSearchStrategy = new RollupSearchStrategy(getRollupService);
+    const rollupSearchStrategy = new RollupSearchStrategy();
 
     expect(rollupSearchStrategy.name).toBe('rollup');
   });
@@ -68,7 +60,7 @@ describe('Rollup Search Strategy', () => {
     const rollupIndex = 'rollupIndex';
 
     beforeEach(() => {
-      rollupSearchStrategy = new RollupSearchStrategy(getRollupService);
+      rollupSearchStrategy = new RollupSearchStrategy();
       rollupSearchStrategy.getRollupData = jest.fn(() =>
         Promise.resolve({
           [rollupIndex]: {
@@ -116,15 +108,14 @@ describe('Rollup Search Strategy', () => {
     let rollupSearchStrategy: RollupSearchStrategy;
 
     beforeEach(() => {
-      rollupSearchStrategy = new RollupSearchStrategy(getRollupService);
+      rollupSearchStrategy = new RollupSearchStrategy();
     });
 
     test('should return rollup data', async () => {
-      rollupResolvedData = Promise.resolve('data');
+      rollupResolvedData = Promise.resolve({ body: 'data' });
 
       const rollupData = await rollupSearchStrategy.getRollupData(request, indexPattern);
 
-      expect(getRollupService).toHaveBeenCalled();
       expect(rollupData).toBe('data');
     });
 
@@ -144,7 +135,7 @@ describe('Rollup Search Strategy', () => {
     const rollupIndex = 'rollupIndex';
 
     beforeEach(() => {
-      rollupSearchStrategy = new RollupSearchStrategy(getRollupService);
+      rollupSearchStrategy = new RollupSearchStrategy();
       fieldsCapabilities = {
         [rollupIndex]: {
           aggs: {

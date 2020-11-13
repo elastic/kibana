@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { keyBy, isString } from 'lodash';
-import { ILegacyScopedClusterClient } from 'src/core/server';
 import {
   AbstractSearchStrategy,
   ReqFacade,
@@ -25,31 +24,16 @@ const isIndexPatternValid = (indexPattern: string) =>
 export class RollupSearchStrategy extends AbstractSearchStrategy {
   name = 'rollup';
 
-  constructor(private getRollupService: (reg: ReqFacade) => Promise<ILegacyScopedClusterClient>) {
-    super();
-  }
-
-  async search(req: ReqFacade, bodies: any[], options = {}) {
-    const rollupService = await this.getRollupService(req);
-    const requests: any[] = [];
-
-    bodies.forEach((body) => {
-      requests.push(
-        rollupService.callAsCurrentUser('rollup.search', {
-          ...body,
-          rest_total_hits_as_int: true,
-        })
-      );
-    });
-    return Promise.all(requests);
+  async search(req: ReqFacade, bodies: any[]) {
+    return super.search(req, bodies, 'rollup');
   }
 
   async getRollupData(req: ReqFacade, indexPattern: string) {
-    const rollupService = await this.getRollupService(req);
-    return rollupService
-      .callAsCurrentUser('rollup.rollupIndexCapabilities', {
-        indexPattern,
+    return req.requestContext.core.elasticsearch.client.asCurrentUser.rollup
+      .getRollupIndexCaps({
+        index: indexPattern,
       })
+      .then((data) => data.body)
       .catch(() => Promise.resolve({}));
   }
 

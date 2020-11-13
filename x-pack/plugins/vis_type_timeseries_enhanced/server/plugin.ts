@@ -5,13 +5,12 @@
  */
 
 import { Plugin, PluginInitializerContext, Logger, CoreSetup } from 'src/core/server';
-import { ReqFacade, VisTypeTimeseriesSetup } from 'src/plugins/vis_type_timeseries/server';
+import { VisTypeTimeseriesSetup } from 'src/plugins/vis_type_timeseries/server';
 import { RollupPluginSetup } from '../../rollup/server';
 import { RollupSearchStrategy } from './search_strategies/rollup_search_strategy';
 
 interface VisTypeTimeseriesEnhancedSetupDependencies {
   visTypeTimeseries: VisTypeTimeseriesSetup;
-  rollup: RollupPluginSetup;
 }
 
 export class VisTypeTimeseriesEnhanced
@@ -24,15 +23,11 @@ export class VisTypeTimeseriesEnhanced
 
   public async setup(
     core: CoreSetup,
-    { visTypeTimeseries, rollup }: VisTypeTimeseriesEnhancedSetupDependencies
+    { visTypeTimeseries }: VisTypeTimeseriesEnhancedSetupDependencies
   ) {
     this.logger.debug('Starting plugin');
 
-    const getRollupService = async (request: ReqFacade) =>
-      (await rollup.getRollupEsClient()).asScoped(request);
-    const rollupSearchStrategy = new RollupSearchStrategy(getRollupService);
-
-    visTypeTimeseries.addSearchStrategy(rollupSearchStrategy);
+    visTypeTimeseries.addSearchStrategy(new RollupSearchStrategy());
   }
 
   public start() {}
