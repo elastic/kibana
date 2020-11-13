@@ -454,6 +454,7 @@ of buckets to try to represent.
 
 [horizontal]
 [[visualization-colormapping]]`visualization:colorMapping`::
+**Deprecated**
 Maps values to specified colors in visualizations.
 
 [[visualization-dimmingopacity]]`visualization:dimmingOpacity`::

@@ -43,6 +43,15 @@ export class ChartsServerPlugin implements Plugin<object, object> {
         description: i18n.translate('charts.advancedSettings.visualization.colorMappingText', {
           defaultMessage: 'Maps values to specified colors within visualizations',
         }),
+        deprecation: {
+          message: i18n.translate(
+            'charts.advancedSettings.visualization.colorMappingTextDeprecation',
+            {
+              defaultMessage: 'This setting is deprecated.',
+            }
+          ),
+          docLinksKey: 'visualizationSettings',
+        },
         category: ['visualization'],
         schema: schema.string(),
       },
