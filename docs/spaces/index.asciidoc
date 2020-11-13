@@ -26,6 +26,11 @@ Kibana supports spaces in several ways.  You can:
 * <<spaces-delete-started, Disable the Spaces feature>>
 
 [float]
+==== Required permissions
+
+The `kibana_admin` role or equivilent is required to manage **Spaces**.
+
+[float]
 [[spaces-managing]]
 === View, create, and delete spaces
 

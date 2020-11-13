@@ -21,7 +21,7 @@ import http from 'http';
 import https from 'https';
 import net from 'net';
 import stream from 'stream';
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { URL } from 'url';
 
 interface Args {

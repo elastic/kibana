@@ -22,6 +22,7 @@
   "severity": "high",
   "tags": [
     "Elastic",
+    "Cloud",
     "Azure",
     "Continuous Monitoring",
     "SecOps",

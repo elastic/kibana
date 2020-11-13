@@ -262,12 +262,45 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await esArchiver.load('endpoint/resolver_tree/library_events', { useCreate: true });
         await queryBar.setQuery('');
         await queryBar.submitQuery();
-        const expectedLibraryData = ['329 network', '1 library', '1 library'];
+        const expectedLibraryData = [
+          '1 authentication',
+          '1 session',
+          '329 network',
+          '1 library',
+          '1 library',
+        ];
         await pageObjects.hosts.navigateToEventsPanel();
         await pageObjects.hosts.executeQueryAndOpenResolver(
           'event.dataset : endpoint.events.library'
         );
+        // This lines will move the resolver view for clear visibility  of the related events.
+        for (let i = 0; i < 7; i++) {
+          await (await testSubjects.find('resolver:graph-controls:west-button')).click();
+        }
         await pageObjects.hosts.runNodeEvents(expectedLibraryData);
+      });
+
+      it('Check Related Events for event.alert Node', async () => {
+        await esArchiver.load('empty_kibana');
+        await esArchiver.load('endpoint/resolver_tree/alert_events', { useCreate: true });
+        await queryBar.setQuery('');
+        await queryBar.submitQuery();
+        const expectedAlertData = [
+          '1 library',
+          '157 file',
+          '520 registry',
+          '3 file',
+          '5 library',
+          '5 library',
+        ];
+        await pageObjects.hosts.navigateToEventsPanel();
+        await pageObjects.hosts.executeQueryAndOpenResolver('event.dataset : endpoint.alerts');
+        await (await testSubjects.find('resolver:graph-controls:zoom-out')).click();
+        await browser.setWindowSize(2100, 1500);
+        for (let i = 0; i < 2; i++) {
+          await (await testSubjects.find('resolver:graph-controls:east-button')).click();
+        }
+        await pageObjects.hosts.runNodeEvents(expectedAlertData);
       });
     });
   });

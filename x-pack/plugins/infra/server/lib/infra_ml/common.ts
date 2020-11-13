@@ -62,7 +62,8 @@ export async function getLogEntryDatasets(
           endTime,
           COMPOSITE_AGGREGATION_BATCH_SIZE,
           afterLatestBatchKey
-        )
+        ),
+        jobIds
       )
     );
 

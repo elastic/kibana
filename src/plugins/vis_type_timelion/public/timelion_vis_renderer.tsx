@@ -42,12 +42,6 @@ export const getTimelionVisRenderer: (
     const [seriesList] = visData.sheet;
     const showNoResult = !seriesList || !seriesList.list.length;
 
-    if (showNoResult) {
-      // send the render complete event when there is no data to show
-      // to notify that a chart is updated
-      handlers.done();
-    }
-
     render(
       <VisualizationContainer handlers={handlers} showNoResult={showNoResult}>
         <KibanaContextProvider services={{ ...deps }}>

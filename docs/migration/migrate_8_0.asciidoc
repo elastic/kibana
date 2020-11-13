@@ -167,4 +167,14 @@ The `xpack.` prefix has been removed for all telemetry configurations.
 *Impact:*
 For any configurations beginning with `xpack.telemetry`, remove the `xpack` prefix. Use {kibana-ref}/telemetry-settings-kbn.html#telemetry-general-settings[`telemetry.enabled`] instead.
 
+[float]
+=== SysV init support has been removed
+
+*Details:*
+All supported operating systems support using systemd service files.  Any system that doesn't already have service aliased to use kibana.service should use `systemctl start kibana.service` instead of the `service start kibana`.
+
+*Impact:*
+Any installations using `.deb` or `.rpm` packages using SysV will need to migrate to systemd.
+
+
 // end::notable-breaking-changes[]

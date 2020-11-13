@@ -14,7 +14,7 @@ import {
   MetadataQueryStrategyVersions,
 } from '../../../../common/endpoint/types';
 import { ServerApiError } from '../../../common/types';
-import { GetPackagesResponse } from '../../../../../ingest_manager/common';
+import { GetPackagesResponse } from '../../../../../fleet/common';
 import { IIndexPattern } from '../../../../../../../src/plugins/data/public';
 
 export interface EndpointState {

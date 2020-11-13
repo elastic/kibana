@@ -105,10 +105,10 @@ export interface HttpRequestParams {
 }
 
 export function httpRequestEvent({ request }: HttpRequestParams): AuditEvent {
-  const { pathname, search } = request.url;
+  const url = request.rewrittenUrl ?? request.url;
 
   return {
-    message: `User is requesting [${pathname}] endpoint`,
+    message: `User is requesting [${url.pathname}] endpoint`,
     event: {
       action: 'http_request',
       category: EventCategory.WEB,
@@ -120,11 +120,11 @@ export function httpRequestEvent({ request }: HttpRequestParams): AuditEvent {
       },
     },
     url: {
-      domain: request.url.hostname,
-      path: pathname,
-      port: request.url.port ? parseInt(request.url.port, 10) : undefined,
-      query: search?.slice(1) || undefined,
-      scheme: request.url.protocol,
+      domain: url.hostname,
+      path: url.pathname,
+      port: url.port ? parseInt(url.port, 10) : undefined,
+      query: url.search ? url.search.slice(1) : undefined,
+      scheme: url.protocol,
     },
   };
 }
@@ -175,6 +175,7 @@ export enum SavedObjectAction {
   FIND = 'saved_object_find',
   ADD_TO_SPACES = 'saved_object_add_to_spaces',
   DELETE_FROM_SPACES = 'saved_object_delete_from_spaces',
+  REMOVE_REFERENCES = 'saved_object_remove_references',
 }
 
 const eventVerbs = {
@@ -185,6 +186,11 @@ const eventVerbs = {
   saved_object_find: ['access', 'accessing', 'accessed'],
   saved_object_add_to_spaces: ['update', 'updating', 'updated'],
   saved_object_delete_from_spaces: ['update', 'updating', 'updated'],
+  saved_object_remove_references: [
+    'remove references to',
+    'removing references to',
+    'removed references to',
+  ],
 };
 
 const eventTypes = {
@@ -195,6 +201,7 @@ const eventTypes = {
   saved_object_find: EventType.ACCESS,
   saved_object_add_to_spaces: EventType.CHANGE,
   saved_object_delete_from_spaces: EventType.CHANGE,
+  saved_object_remove_references: EventType.CHANGE,
 };
 
 export interface SavedObjectParams {
@@ -213,7 +220,7 @@ export function savedObjectEvent({
   deleteFromSpaces,
   outcome,
   error,
-}: SavedObjectParams): AuditEvent {
+}: SavedObjectParams): AuditEvent | undefined {
   const doc = savedObject ? `${savedObject.type} [id=${savedObject.id}]` : 'saved objects';
   const [present, progressive, past] = eventVerbs[action];
   const message = error
@@ -222,6 +229,14 @@ export function savedObjectEvent({
     ? `User is ${progressive} ${doc}`
     : `User has ${past} ${doc}`;
   const type = eventTypes[action];
+
+  if (
+    type === EventType.ACCESS &&
+    savedObject &&
+    (savedObject.type === 'config' || savedObject.type === 'telemetry')
+  ) {
+    return;
+  }
 
   return {
     message,

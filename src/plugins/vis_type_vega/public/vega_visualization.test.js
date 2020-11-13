@@ -30,8 +30,6 @@ import vegaMapGraph from './test_utils/vega_map_test.json';
 import { VegaParser } from './data_model/vega_parser';
 import { SearchAPI } from './data_model/search_api';
 
-import { createVegaTypeDefinition } from './vega_type';
-
 import { setInjectedVars, setData, setSavedObjects, setNotifications } from './services';
 import { coreMock } from '../../../core/public/mocks';
 import { dataPluginMock } from '../../data/public/mocks';
@@ -49,9 +47,7 @@ jest.mock('./lib/vega', () => ({
 describe('VegaVisualizations', () => {
   let domNode;
   let VegaVisualization;
-  let vis;
   let vegaVisualizationDependencies;
-  let vegaVisType;
 
   let mockWidth;
   let mockedWidthValue;
@@ -91,22 +87,12 @@ describe('VegaVisualizations', () => {
       getServiceSettings: mockGetServiceSettings,
     };
 
-    vegaVisType = createVegaTypeDefinition(vegaVisualizationDependencies);
     VegaVisualization = createVegaVisualization(vegaVisualizationDependencies);
   });
 
   describe('VegaVisualization - basics', () => {
     beforeEach(async () => {
       setupDOM();
-
-      vis = {
-        type: vegaVisType,
-        API: {
-          events: {
-            applyFilter: jest.fn(),
-          },
-        },
-      };
     });
 
     afterEach(() => {
@@ -117,7 +103,7 @@ describe('VegaVisualizations', () => {
     test('should show vegalite graph and update on resize (may fail in dev env)', async () => {
       let vegaVis;
       try {
-        vegaVis = new VegaVisualization(domNode, vis);
+        vegaVis = new VegaVisualization(domNode, jest.fn());
 
         const vegaParser = new VegaParser(
           JSON.stringify(vegaliteGraph),
@@ -137,7 +123,7 @@ describe('VegaVisualizations', () => {
         mockedWidthValue = 256;
         mockedHeightValue = 256;
 
-        await vegaVis._vegaView.resize();
+        await vegaVis.vegaView.resize();
 
         expect(domNode.innerHTML).toMatchSnapshot();
       } finally {
@@ -148,7 +134,7 @@ describe('VegaVisualizations', () => {
     test('should show vega graph (may fail in dev env)', async () => {
       let vegaVis;
       try {
-        vegaVis = new VegaVisualization(domNode, vis);
+        vegaVis = new VegaVisualization(domNode, jest.fn());
         const vegaParser = new VegaParser(
           JSON.stringify(vegaGraph),
           new SearchAPI({
@@ -172,7 +158,7 @@ describe('VegaVisualizations', () => {
     test('should show vega blank rectangle on top of a map (vegamap)', async () => {
       let vegaVis;
       try {
-        vegaVis = new VegaVisualization(domNode, vis);
+        vegaVis = new VegaVisualization(domNode, jest.fn());
         const vegaParser = new VegaParser(
           JSON.stringify(vegaMapGraph),
           new SearchAPI({

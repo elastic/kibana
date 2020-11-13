@@ -10,7 +10,9 @@ import { pick } from 'lodash';
 import React from 'react';
 import { useLocation } from 'react-router-dom';
 import url from 'url';
+import { pickKeys } from '../../../../../common/utils/pick_keys';
 import { useApmPluginContext } from '../../../../hooks/useApmPluginContext';
+import { useUrlParams } from '../../../../hooks/useUrlParams';
 import { APMQueryParams, fromQuery, toQuery } from '../url_helpers';
 
 interface Props extends EuiLinkAnchorProps {
@@ -21,7 +23,7 @@ interface Props extends EuiLinkAnchorProps {
 
 export type APMLinkExtendProps = Omit<Props, 'path'>;
 
-export const PERSISTENT_APM_PARAMS = [
+export const PERSISTENT_APM_PARAMS: Array<keyof APMQueryParams> = [
   'kuery',
   'rangeFrom',
   'rangeTo',
@@ -29,6 +31,21 @@ export const PERSISTENT_APM_PARAMS = [
   'refreshInterval',
   'environment',
 ];
+
+/**
+ * Hook to get a link for a path with persisted filters
+ */
+export function useAPMHref(
+  path: string,
+  persistentFilters: Array<keyof APMQueryParams> = PERSISTENT_APM_PARAMS
+) {
+  const { urlParams } = useUrlParams();
+  const { basePath } = useApmPluginContext().core.http;
+  const { search } = useLocation();
+  const query = pickKeys(urlParams as APMQueryParams, ...persistentFilters);
+
+  return getAPMHref({ basePath, path, query, search });
+}
 
 /**
  * Get an APM link for a path.

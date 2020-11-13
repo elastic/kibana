@@ -20,9 +20,11 @@
 import React from 'react';
 import { ContextAppLegacy } from './context_app_legacy';
 import { IIndexPattern } from '../../../../../data/common/index_patterns';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 import { DocTableLegacy } from '../../angular/doc_table/create_doc_table_react';
 import { findTestSubject } from '@elastic/eui/lib/test';
+import { ActionBar } from '../../angular/context/components/action_bar/action_bar';
+import { ContextErrorMessage } from '../context_error_message';
 
 describe('ContextAppLegacy test', () => {
   const hit = {
@@ -48,28 +50,47 @@ describe('ContextAppLegacy test', () => {
     columns: ['_source'],
     filter: () => {},
     hits: [hit],
-    infiniteScroll: true,
     sorting: ['order_date', 'desc'],
     minimumVisibleRows: 5,
     indexPattern,
     status: 'loaded',
+    reason: 'no reason',
+    defaultStepSize: 5,
+    predecessorCount: 10,
+    successorCount: 10,
+    predecessorAvailable: 10,
+    successorAvailable: 10,
+    onChangePredecessorCount: jest.fn(),
+    onChangeSuccessorCount: jest.fn(),
+    predecessorStatus: 'loaded',
+    successorStatus: 'loaded',
   };
 
   it('renders correctly', () => {
     const component = mountWithIntl(<ContextAppLegacy {...defaultProps} />);
-    expect(component).toMatchSnapshot();
     expect(component.find(DocTableLegacy).length).toBe(1);
     const loadingIndicator = findTestSubject(component, 'contextApp_loadingIndicator');
     expect(loadingIndicator.length).toBe(0);
+    expect(component.find(ActionBar).length).toBe(2);
   });
 
   it('renders loading indicator', () => {
     const props = { ...defaultProps };
     props.status = 'loading';
     const component = mountWithIntl(<ContextAppLegacy {...props} />);
-    expect(component).toMatchSnapshot();
-    expect(component.find('DocTableLegacy').length).toBe(0);
+    expect(component.find(DocTableLegacy).length).toBe(0);
     const loadingIndicator = findTestSubject(component, 'contextApp_loadingIndicator');
     expect(loadingIndicator.length).toBe(1);
+    expect(component.find(ActionBar).length).toBe(2);
+  });
+
+  it('renders error message', () => {
+    const props = { ...defaultProps };
+    props.status = 'failed';
+    props.reason = 'something went wrong';
+    const component = mountWithIntl(<ContextAppLegacy {...props} />);
+    expect(component.find(DocTableLegacy).length).toBe(0);
+    const errorMessage = component.find(ContextErrorMessage);
+    expect(errorMessage.length).toBe(1);
   });
 });

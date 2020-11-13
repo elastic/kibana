@@ -24,6 +24,9 @@ jest.mock('../kibana_services', () => ({
       };
     },
   }),
+  getMapsCapabilities() {
+    return { save: true };
+  },
 }));
 
 import { DEFAULT_MAP_STORE_STATE } from '../reducers/store';

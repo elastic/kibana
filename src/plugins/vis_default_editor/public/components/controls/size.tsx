@@ -55,7 +55,7 @@ function SizeParamEditor({
       label={label}
       fullWidth={true}
       isInvalid={showValidation ? !isValid : false}
-      compressed
+      display="rowCompressed"
     >
       <EuiFieldNumber
         value={isUndefined(value) ? '' : value}

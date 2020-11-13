@@ -15,7 +15,6 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import numeral from '@elastic/numeral';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useUrlParams } from '../../../../hooks/useUrlParams';
 import { useFetcher } from '../../../../hooks/useFetcher';
@@ -102,11 +101,6 @@ export function JSErrors() {
     });
   };
 
-  const errorRate =
-    totalPageViews > 0
-      ? ((data?.totalErrorPages ?? 0) / totalPageViews) * 100
-      : 0;
-
   const totalErrors = data?.totalErrors ?? 0;
 
   return (
@@ -133,20 +127,6 @@ export function JSErrors() {
             isLoading={status !== 'success'}
           />
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiStat
-            data-test-subj={'uxJsErrorRate'}
-            titleSize="s"
-            title={i18n.translate('xpack.apm.rum.jsErrors.errorRateValue', {
-              defaultMessage: '{errorRate} %',
-              values: {
-                errorRate: errorRate.toFixed(0),
-              },
-            })}
-            description={I18LABELS.errorRate}
-            isLoading={status !== 'success'}
-          />
-        </EuiFlexItem>{' '}
       </EuiFlexGroup>
       <EuiSpacer size="s" />
       <EuiBasicTable

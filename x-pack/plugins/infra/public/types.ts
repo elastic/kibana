@@ -18,6 +18,7 @@ import type {
   ObservabilityPluginStart,
 } from '../../observability/public';
 import type { SpacesPluginStart } from '../../spaces/public';
+import { MlPluginStart } from '../../ml/public';
 
 // Our own setup and start contract values
 export type InfraClientSetupExports = void;
@@ -38,6 +39,7 @@ export interface InfraClientStartDeps {
   spaces: SpacesPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
   usageCollection: UsageCollectionStart;
+  ml: MlPluginStart;
 }
 
 export type InfraClientCoreSetup = CoreSetup<InfraClientStartDeps, InfraClientStartExports>;

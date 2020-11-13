@@ -5,7 +5,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { useDebounce } from 'react-use';
+import useDebounce from 'react-use/lib/useDebounce';
 import { EuiFieldText, keys } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -16,6 +16,7 @@ export const LabelInput = ({
   inputRef,
   onSubmit,
   dataTestSubj,
+  compressed,
 }: {
   value: string;
   onChange: (value: string) => void;
@@ -23,6 +24,7 @@ export const LabelInput = ({
   inputRef?: React.MutableRefObject<HTMLInputElement | undefined>;
   onSubmit?: () => void;
   dataTestSubj?: string;
+  compressed?: boolean;
 }) => {
   const [inputValue, setInputValue] = useState(value);
 
@@ -57,6 +59,7 @@ export const LabelInput = ({
       prepend={i18n.translate('xpack.lens.labelInput.label', {
         defaultMessage: 'Label',
       })}
+      compressed={compressed}
     />
   );
 };

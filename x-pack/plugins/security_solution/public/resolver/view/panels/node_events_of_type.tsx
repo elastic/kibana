@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/* eslint-disable react/display-name */
+
 import React, { memo, useCallback, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -18,7 +20,7 @@ import {
 import { useSelector } from 'react-redux';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { StyledPanel } from '../styles';
-import { BoldCode, noTimestampRetrievedText, StyledTime } from './panel_content_utilities';
+import { BoldCode, StyledTime } from './styles';
 import { Breadcrumbs } from './breadcrumbs';
 import * as eventModel from '../../../../common/endpoint/models/event';
 import { SafeResolverEvent } from '../../../../common/endpoint/types';
@@ -99,8 +101,6 @@ export const NodeEventsInCategory = memo(function ({
   );
 });
 
-NodeEventsInCategory.displayName = 'NodeEventsInCategory';
-
 /**
  * Rendered for each event in the list.
  */
@@ -114,7 +114,11 @@ const NodeEventsListItem = memo(function ({
   eventCategory: string;
 }) {
   const timestamp = eventModel.eventTimestamp(event);
-  const date = useFormattedDate(timestamp) || noTimestampRetrievedText;
+  const date =
+    useFormattedDate(timestamp) ||
+    i18n.translate('xpack.securitySolution.enpdoint.resolver.panelutils.noTimestampRetrieved', {
+      defaultMessage: 'No timestamp retrieved',
+    });
   const linkProps = useLinkProps({
     panelView: 'eventDetail',
     panelParameters: {

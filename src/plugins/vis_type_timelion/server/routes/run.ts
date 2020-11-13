@@ -75,6 +75,7 @@ export function runRoute(
               to: schema.maybe(schema.string()),
             })
           ),
+          sessionId: schema.maybe(schema.string()),
         }),
       },
     },

@@ -8,6 +8,7 @@ import _ from 'lodash';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import {
+  ExecutionContextSearch,
   Filter,
   IIndexPattern,
   Query,
@@ -15,7 +16,7 @@ import {
   TimeRange,
   IndexPattern,
 } from 'src/plugins/data/public';
-import { ExecutionContextSearch } from 'src/plugins/expressions';
+import { PaletteOutput } from 'src/plugins/charts/public';
 
 import { Subscription } from 'rxjs';
 import { toExpression, Ast } from '@kbn/interpreter/common';
@@ -43,14 +44,16 @@ import { getEditPath, DOC_TYPE } from '../../../common';
 import { IBasePath } from '../../../../../../src/core/public';
 import { LensAttributeService } from '../../lens_attribute_service';
 
-export type LensSavedObjectAttributes = Omit<Document, 'id' | 'type'>;
+export type LensSavedObjectAttributes = Omit<Document, 'savedObjectId' | 'type'>;
 
 export type LensByValueInput = {
   attributes: LensSavedObjectAttributes;
 } & EmbeddableInput;
 
 export type LensByReferenceInput = SavedObjectEmbeddableInput & EmbeddableInput;
-export type LensEmbeddableInput = LensByValueInput | LensByReferenceInput;
+export type LensEmbeddableInput = (LensByValueInput | LensByReferenceInput) & {
+  palette?: PaletteOutput;
+};
 
 export interface LensEmbeddableOutput extends EmbeddableOutput {
   indexPatterns?: IIndexPattern[];
@@ -127,7 +130,15 @@ export class Embeddable
   }
 
   async initializeSavedVis(input: LensEmbeddableInput) {
-    const attributes = await this.deps.attributeService.unwrapAttributes(input);
+    const attributes:
+      | LensSavedObjectAttributes
+      | false = await this.deps.attributeService.unwrapAttributes(input).catch((e: Error) => {
+      this.onFatalError(e);
+      return false;
+    });
+    if (!attributes) {
+      return;
+    }
     this.savedVis = {
       ...attributes,
       type: this.type,
@@ -172,11 +183,14 @@ export class Embeddable
     if (!this.savedVis || !this.isInitialized) {
       return;
     }
+    const input = this.getInput();
     render(
       <ExpressionWrapper
         ExpressionRenderer={this.expressionRenderer}
         expression={this.expression || null}
         searchContext={this.getMergedSearchContext()}
+        variables={input.palette ? { theme: { palette: input.palette } } : {}}
+        searchSessionId={this.input.searchSessionId}
         handleEvent={this.handleEvent}
       />,
       domNode
@@ -245,8 +259,10 @@ export class Embeddable
     if (!this.savedVis) {
       return;
     }
-    const promises = this.savedVis.references
-      .filter(({ type }) => type === 'index-pattern')
+    const promises = _.uniqBy(
+      this.savedVis.references.filter(({ type }) => type === 'index-pattern'),
+      'id'
+    )
       .map(async ({ id }) => {
         try {
           return await this.deps.indexPatternService.get(id);

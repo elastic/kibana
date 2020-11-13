@@ -66,7 +66,7 @@ const PolicyEmptyState = React.memo<{
             <EuiText size="s" color="subdued">
               <FormattedMessage
                 id="xpack.securitySolution.endpoint.policyList.onboardingSectionOne"
-                defaultMessage="Endpoint Security protects your hosts with threat prevention, detection, and deep security data visibility."
+                defaultMessage="Protect your hosts with threat prevention, detection, and deep security data visibility."
               />
             </EuiText>
             <EuiSpacer size="m" />

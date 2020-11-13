@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { EnvironmentService, EnvironmentServiceSetup } from './environment';
 
 const createSetupMock = (): jest.Mocked<EnvironmentServiceSetup> => {

@@ -30,25 +30,47 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       expect(response.status).to.eql(200);
       expect(response.body.config).key('incidentConfiguration');
       expect(response.body.config).not.key('casesConfiguration');
-      expect(response.body.config.incidentConfiguration).to.eql({
-        mapping: [
-          {
-            actionType: 'overwrite',
-            source: 'title',
-            target: 'summary',
-          },
-          {
-            actionType: 'overwrite',
-            source: 'description',
-            target: 'description',
-          },
-          {
-            actionType: 'append',
-            source: 'comments',
-            target: 'comments',
-          },
-        ],
+      expect(response.body.config).to.eql({
+        apiUrl:
+          'http://elastic:changeme@localhost:5620/api/_actions-FTS-external-service-simulators/jira',
+        incidentConfiguration: {
+          mapping: [
+            {
+              actionType: 'overwrite',
+              source: 'title',
+              target: 'summary',
+            },
+            {
+              actionType: 'overwrite',
+              source: 'description',
+              target: 'description',
+            },
+            {
+              actionType: 'append',
+              source: 'comments',
+              target: 'comments',
+            },
+          ],
+        },
+        projectKey: 'CK',
       });
+    });
+
+    it('7.11.0 migrates webhook connector configurations to have `hasAuth` property', async () => {
+      const responseWithAuth = await supertest.get(
+        `${getUrlPrefix(``)}/api/actions/action/949f909b-20a0-46e3-aadb-6a4d117bb592`
+      );
+
+      expect(responseWithAuth.status).to.eql(200);
+      expect(responseWithAuth.body.config).key('hasAuth');
+      expect(responseWithAuth.body.config.hasAuth).to.eql(true);
+
+      const responseNoAuth = await supertest.get(
+        `${getUrlPrefix(``)}/api/actions/action/7434121e-045a-47d6-a0a6-0b6da752397a`
+      );
+      expect(responseNoAuth.status).to.eql(200);
+      expect(responseNoAuth.body.config).key('hasAuth');
+      expect(responseNoAuth.body.config.hasAuth).to.eql(false);
     });
   });
 }

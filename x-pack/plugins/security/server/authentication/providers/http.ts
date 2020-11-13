@@ -56,7 +56,9 @@ export class HTTPAuthenticationProvider extends BaseAuthenticationProvider {
    * @param request Request instance.
    */
   public async authenticate(request: KibanaRequest) {
-    this.logger.debug(`Trying to authenticate user request to ${request.url.path}.`);
+    this.logger.debug(
+      `Trying to authenticate user request to ${request.url.pathname}${request.url.search}.`
+    );
 
     const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request);
     if (authorizationHeader == null) {
@@ -72,12 +74,12 @@ export class HTTPAuthenticationProvider extends BaseAuthenticationProvider {
     try {
       const user = await this.getUser(request);
       this.logger.debug(
-        `Request to ${request.url.path} has been authenticated via authorization header with "${authorizationHeader.scheme}" scheme.`
+        `Request to ${request.url.pathname}${request.url.search} has been authenticated via authorization header with "${authorizationHeader.scheme}" scheme.`
       );
       return AuthenticationResult.succeeded(user);
     } catch (err) {
       this.logger.debug(
-        `Failed to authenticate request to ${request.url.path} via authorization header with "${authorizationHeader.scheme}" scheme: ${err.message}`
+        `Failed to authenticate request to ${request.url.pathname}${request.url.search} via authorization header with "${authorizationHeader.scheme}" scheme: ${err.message}`
       );
       return AuthenticationResult.failed(err);
     }

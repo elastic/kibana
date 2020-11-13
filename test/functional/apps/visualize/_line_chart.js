@@ -37,7 +37,7 @@ export default function ({ getService, getPageObjects }) {
 
     const initLineChart = async function () {
       log.debug('navigateToApp visualize');
-      await PageObjects.visualize.navigateToNewVisualization();
+      await PageObjects.visualize.navigateToNewAggBasedVisualization();
       log.debug('clickLineChart');
       await PageObjects.visualize.clickLineChart();
       await PageObjects.visualize.clickNewSearch();
@@ -244,7 +244,7 @@ export default function ({ getService, getPageObjects }) {
     describe('pipeline aggregations', () => {
       before(async () => {
         log.debug('navigateToApp visualize');
-        await PageObjects.visualize.navigateToNewVisualization();
+        await PageObjects.visualize.navigateToNewAggBasedVisualization();
         log.debug('clickLineChart');
         await PageObjects.visualize.clickLineChart();
         await PageObjects.visualize.clickNewSearch();

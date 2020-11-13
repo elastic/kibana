@@ -11,13 +11,16 @@
   "language": "eql",
   "license": "Elastic License",
   "name": "Execution of File Written or Modified by Microsoft Office",
-  "query": "sequence with maxspan=2h\n  [file where event.type != \"delete\" and file.extension == \"exe\" and\n     process.name in (\"winword.exe\",\n                      \"excel.exe\",\n                      \"outlook.exe\",\n                      \"powerpnt.exe\",\n                      \"eqnedt32.exe\",\n                      \"fltldr.exe\",\n                      \"mspub.exe\",\n                      \"msaccess.exe\")\n  ] by host.id, file.path\n  [process where event.type in (\"start\", \"process_started\")] by host.id, process.executable\n",
+  "query": "sequence with maxspan=2h\n  [file where event.type != \"deletion\" and file.extension : \"exe\" and\n     (process.name : \"WINWORD.EXE\" or\n      process.name : \"EXCEL.EXE\" or\n      process.name : \"OUTLOOK.EXE\" or\n      process.name : \"POWERPNT.EXE\" or\n      process.name : \"eqnedt32.exe\" or\n      process.name : \"fltldr.exe\" or\n      process.name : \"MSPUB.EXE\" or\n      process.name : \"MSACCESS.EXE\")\n  ] by host.id, file.path\n  [process where event.type in (\"start\", \"process_started\")] by host.id, process.executable\n",
   "risk_score": 21,
   "rule_id": "0d8ad79f-9025-45d8-80c1-4f0cd3c5e8e5",
   "severity": "high",
   "tags": [
     "Elastic",
-    "Windows"
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Execution"
   ],
   "threat": [
     {
