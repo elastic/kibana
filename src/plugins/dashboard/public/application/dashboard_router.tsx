@@ -24,7 +24,6 @@ import { I18nProvider } from '@kbn/i18n/react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Switch, Route, RouteComponentProps, HashRouter } from 'react-router-dom';
 import { parse, ParsedQuery } from 'query-string';
-import { isNil } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import {
   createKbnUrlStateStorage,
@@ -37,7 +36,7 @@ import {
   DashboardAppServices,
   DashboardEmbedSettings,
   DashboardMountProps,
-  RedirectToDashboardProps,
+  RedirectToProps,
 } from './types';
 import { DashboardApp } from './dashboard_app';
 import { createDashboardListingFilterUrl } from '../dashboard_constants';
@@ -93,21 +92,21 @@ export async function mountApp({
     uiSettings: coreStart.uiSettings,
     scopedHistory: () => scopedHistory,
     indexPatterns: dataStart.indexPatterns,
-    savedObjectsTagging: savedObjectsTaggingOss?.getTaggingApi(),
     localStorage: new Storage(localStorage),
     addBasePath: coreStart.http.basePath.prepend,
     savedQueryService: dataStart.query.savedQueries,
     savedObjectsClient: coreStart.savedObjects.client,
     savedDashboards: dashboardStart.getSavedDashboardLoader(),
+    savedObjectsTagging: savedObjectsTaggingOss?.getTaggingApi(),
     dashboardCapabilities: {
       hideWriteControls: dashboardConfig.getHideWriteControls(),
-      visualizeCapabilities: { save: Boolean(coreStart.application.capabilities.visualize?.save) },
-      mapsCapabilities: { save: Boolean(coreStart.application.capabilities.maps?.save) },
-      createNew: Boolean(coreStart.application.capabilities.dashboard.createNew),
       show: Boolean(coreStart.application.capabilities.dashboard.show),
-      showWriteControls: Boolean(coreStart.application.capabilities.dashboard.showWriteControls),
-      createShortUrl: Boolean(coreStart.application.capabilities.dashboard.createShortUrl),
       saveQuery: Boolean(coreStart.application.capabilities.dashboard.saveQuery),
+      createNew: Boolean(coreStart.application.capabilities.dashboard.createNew),
+      mapsCapabilities: { save: Boolean(coreStart.application.capabilities.maps?.save) },
+      createShortUrl: Boolean(coreStart.application.capabilities.dashboard.createShortUrl),
+      visualizeCapabilities: { save: Boolean(coreStart.application.capabilities.visualize?.save) },
+      showWriteControls: Boolean(coreStart.application.capabilities.dashboard.showWriteControls),
     },
   };
 
@@ -118,16 +117,18 @@ export async function mountApp({
       ...withNotifyOnErrors(core.notifications.toasts),
     });
 
-  const redirect = (
-    routeProps: RouteComponentProps,
-    { id, useReplace, listingFilter: filter }: RedirectToDashboardProps
-  ) => {
-    const historyFunction = useReplace ? routeProps.history.replace : routeProps.history.push;
-    const destination = id
-      ? createDashboardEditUrl(id)
-      : !isNil(filter)
-      ? createDashboardListingFilterUrl(filter)
-      : DashboardConstants.CREATE_NEW_DASHBOARD_URL;
+  const redirect = (routeProps: RouteComponentProps, redirectTo: RedirectToProps) => {
+    const historyFunction = redirectTo.useReplace
+      ? routeProps.history.replace
+      : routeProps.history.push;
+    let destination;
+    if (redirectTo.destination === 'dashboard') {
+      destination = redirectTo.id
+        ? createDashboardEditUrl(redirectTo.id)
+        : DashboardConstants.CREATE_NEW_DASHBOARD_URL;
+    } else {
+      destination = createDashboardListingFilterUrl(redirectTo.filter);
+    }
     historyFunction(destination);
   };
 
@@ -153,7 +154,7 @@ export async function mountApp({
         history={routeProps.history}
         embedSettings={embedSettings}
         savedDashboardId={routeProps.match.params.id}
-        redirectToDashboard={(props: RedirectToDashboardProps) => redirect(routeProps, props)}
+        redirectTo={(props: RedirectToProps) => redirect(routeProps, props)}
       />
     );
   };
@@ -165,18 +166,25 @@ export async function mountApp({
     const routeParams = parse(routeProps.history.location.search);
     const title = (routeParams.title as string) || undefined;
     const filter = (routeParams.filter as string) || undefined;
+
     return (
       <DashboardListing
         initialFilter={filter}
         title={title}
         kbnUrlStateStorage={getUrlStateStorage(routeProps.history)}
-        redirectToDashboard={(props: RedirectToDashboardProps) => redirect(routeProps, props)}
+        redirectTo={(props: RedirectToProps) => redirect(routeProps, props)}
       />
     );
   };
 
   // make sure the index pattern list is up to date
   await dataStart.indexPatterns.clearCache();
+
+  // dispatch synthetic hash change event to update hash history objects
+  // this is necessary because hash updates triggered by using popState won't trigger this event naturally.
+  const unlistenParentHistory = scopedHistory.listen(() => {
+    window.dispatchEvent(new HashChangeEvent('hashchange'));
+  });
 
   const app = (
     <I18nProvider>
@@ -201,6 +209,7 @@ export async function mountApp({
   render(app, element);
   return () => {
     dataStart.search.session.clear();
+    unlistenParentHistory();
     unmountComponentAtNode(element);
     appUnMounted();
   };

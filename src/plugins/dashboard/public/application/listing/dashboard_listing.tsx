@@ -36,9 +36,9 @@ export const EMPTY_FILTER = '';
 // This component does not try to tackle these problems (yet) and is just feature matching the legacy component
 // TODO support server side sorting/paging once title and description are sortable on the server.
 export const DashboardListing = ({
-  initialFilter,
   title,
-  redirectToDashboard,
+  redirectTo,
+  initialFilter,
   kbnUrlStateStorage,
 }: DashboardListingProps) => {
   const {
@@ -84,9 +84,17 @@ export const DashboardListing = ({
             (dashboard) => dashboard.attributes.title.toLowerCase() === title.toLowerCase()
           );
           if (matchingDashboards.length === 1) {
-            redirectToDashboard({ id: matchingDashboards[0].id, useReplace: true });
+            redirectTo({
+              destination: 'dashboard',
+              id: matchingDashboards[0].id,
+              useReplace: true,
+            });
           } else {
-            redirectToDashboard({ listingFilter: title, useReplace: true });
+            redirectTo({
+              destination: 'listing',
+              useReplace: true,
+              filter: title,
+            });
           }
         });
     }
@@ -94,21 +102,24 @@ export const DashboardListing = ({
     return () => {
       stopSyncingQueryServiceStateWithUrl();
     };
-  }, [title, savedObjectsClient, redirectToDashboard, data.query, kbnUrlStateStorage]);
+  }, [title, savedObjectsClient, redirectTo, data.query, kbnUrlStateStorage]);
 
   const hideWriteControls = dashboardCapabilities.hideWriteControls;
   const listingLimit = savedObjects.settings.getListingLimit();
 
-  const tableColumns = getTableColumns((id) => redirectToDashboard({ id }), savedObjectsTagging);
+  const tableColumns = getTableColumns(
+    (id) => redirectTo({ destination: 'dashboard', id }),
+    savedObjectsTagging
+  );
   const noItemsFragment = getNoItemsMessage(hideWriteControls, core.application, () =>
-    redirectToDashboard({})
+    redirectTo({ destination: 'dashboard' })
   );
 
   return (
     <TableListView
       headingId="dashboardListingHeading"
       rowHeader="title"
-      createItem={() => redirectToDashboard({})}
+      createItem={hideWriteControls ? undefined : () => redirectTo({ destination: 'dashboard' })}
       findItems={(search) => savedDashboards.find(search, listingLimit)}
       deleteItems={
         hideWriteControls
@@ -119,7 +130,7 @@ export const DashboardListing = ({
       editItem={
         hideWriteControls
           ? undefined
-          : ({ id }: { id: string | undefined }) => redirectToDashboard({ id })
+          : ({ id }: { id: string | undefined }) => redirectTo({ destination: 'dashboard', id })
       }
       searchFilters={
         savedObjectsTagging ? [savedObjectsTagging.ui.getSearchBarFilter({ useName: true })] : []

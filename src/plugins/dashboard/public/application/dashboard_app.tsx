@@ -317,9 +317,9 @@ const isActiveState = (
 };
 
 export function DashboardApp({
-  redirectToDashboard,
   savedDashboardId,
   embedSettings,
+  redirectTo,
   history,
 }: DashboardAppProps) {
   const {
@@ -737,11 +737,11 @@ export function DashboardApp({
               })
               .then((isConfirmed) => {
                 if (isConfirmed) {
-                  redirectToDashboard({ listingFilter: '' });
+                  redirectTo({ destination: 'listing' });
                 }
               });
           } else {
-            redirectToDashboard({ listingFilter: '' });
+            redirectTo({ destination: 'listing' });
           }
         },
       },
@@ -758,8 +758,8 @@ export function DashboardApp({
     dashboardCapabilities.showWriteControls,
     state.dashboardStateManager,
     data.query.timefilter.timefilter,
-    redirectToDashboard,
     core.overlays,
+    redirectTo,
     chrome,
   ]);
 
@@ -789,13 +789,13 @@ export function DashboardApp({
       {isActiveState(state) && (
         <DashboardTopNav
           createNew={createNew}
+          redirectTo={redirectTo}
           embedSettings={embedSettings}
           updateViewMode={updateViewMode}
           addFromLibrary={addFromLibrary}
           lastDashboardId={savedDashboardId}
           indexPatterns={state.indexPatterns}
           savedDashboard={state.savedDashboard}
-          redirectToDashboard={redirectToDashboard}
           timefilter={data.query.timefilter.timefilter}
           dashboardContainer={state.dashboardContainer}
           dashboardStateManager={state.dashboardStateManager}

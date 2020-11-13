@@ -46,18 +46,16 @@ import { DashboardStateManager } from './dashboard_state_manager';
 import { SavedObjectsTaggingApi } from '../../../saved_objects_tagging_oss/public';
 import { DashboardContainer, SavedObjectDashboard } from '..';
 
-export type RedirectToDashboard = (props: RedirectToDashboardProps) => void;
+export type DashboardRedirect = (props: RedirectToProps) => void;
+export type RedirectToProps =
+  | { destination: 'dashboard'; id?: string; useReplace?: boolean }
+  | { destination: 'listing'; filter?: string; useReplace?: boolean };
 
-export interface RedirectToDashboardProps {
-  id?: string;
-  listingFilter?: string;
-  useReplace?: boolean;
-}
 export interface DashboardAppProps {
-  savedDashboardId?: string;
-  history: History; // TODO: Remove history after state deangularize?
   embedSettings?: DashboardEmbedSettings;
-  redirectToDashboard: RedirectToDashboard;
+  redirectTo: DashboardRedirect;
+  savedDashboardId?: string;
+  history: History;
 }
 
 export interface DashboardEmbedSettings {
@@ -93,7 +91,7 @@ export interface DashboardTopNavState {
 
 export type DashboardTopNavProps = Omit<DashboardAppComponentActiveState, 'initialized'> & {
   timefilter: TimefilterContract;
-  redirectToDashboard: RedirectToDashboard;
+  redirectTo: DashboardRedirect;
   addFromLibrary: () => void;
   updateViewMode: (newViewMode: ViewMode) => void;
   onQuerySubmit: (_payload: unknown, isUpdate: boolean | undefined) => void;
@@ -103,10 +101,10 @@ export type DashboardTopNavProps = Omit<DashboardAppComponentActiveState, 'initi
 };
 
 export interface DashboardListingProps {
+  kbnUrlStateStorage: IKbnUrlStateStorage;
+  redirectTo: DashboardRedirect;
   initialFilter?: string;
   title?: string;
-  redirectToDashboard: RedirectToDashboard;
-  kbnUrlStateStorage: IKbnUrlStateStorage;
 }
 
 export interface DashboardMountProps {

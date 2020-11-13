@@ -59,7 +59,6 @@ interface UrlParamValues extends Omit<UrlParamsSelectedMap, UrlParams.SHOW_FILTE
 
 export function DashboardTopNav({
   dashboardStateManager,
-  redirectToDashboard,
   lastDashboardId,
   updateViewMode,
   addFromLibrary,
@@ -67,6 +66,7 @@ export function DashboardTopNav({
   onQuerySubmit,
   embedSettings,
   indexPatterns,
+  redirectTo,
   timefilter,
   createNew,
 }: DashboardTopNavProps) {
@@ -118,12 +118,12 @@ export function DashboardTopNav({
         // when calling kbnUrl.change() angular schedules url update and when angular finally starts to process it,
         // the update is considered outdated and angular skips it
         // so have to use implementation of dashboardStateManager.changeDashboardUrl, which workarounds those issues
-        // redirectToDashboard({ id: savedDashboard.id });
-        dashboardStateManager.changeDashboardUrl(
-          savedDashboard.id
-            ? createDashboardEditUrl(savedDashboard.id)
-            : DashboardConstants.CREATE_NEW_DASHBOARD_URL
-        );
+        redirectTo({ destination: 'dashboard', id: savedDashboard.id });
+        // dashboardStateManager.changeDashboardUrl(
+        //   savedDashboard.id
+        //     ? createDashboardEditUrl(savedDashboard.id)
+        //     : DashboardConstants.CREATE_NEW_DASHBOARD_URL
+        // );
       }
 
       core.overlays
@@ -140,12 +140,12 @@ export function DashboardTopNav({
         });
     },
     [
+      redirectTo,
       timefilter,
       core.overlays,
       updateViewMode,
       savedDashboard.id,
       dashboardStateManager,
-      // redirectToDashboard,
     ]
   );
 
@@ -175,8 +175,7 @@ export function DashboardTopNav({
             });
 
             if (id !== lastDashboardId) {
-              redirectToDashboard({ id });
-              // dashboardStateManager.changeDashboardUrl(createDashboardEditUrl(id));
+              redirectTo({ destination: 'dashboard', id });
             } else {
               chrome.docTitle.change(dashboardStateManager.savedDashboard.lastSavedTitle);
               updateViewMode(ViewMode.VIEW);
@@ -201,10 +200,10 @@ export function DashboardTopNav({
     [
       core.notifications.toasts,
       dashboardStateManager,
-      redirectToDashboard,
       lastDashboardId,
       chrome.docTitle,
       updateViewMode,
+      redirectTo,
       timefilter,
     ]
   );

@@ -32,7 +32,7 @@ export function createDashboardEditUrl(id: string) {
   return `${DashboardConstants.VIEW_DASHBOARD_URL}/${id}`;
 }
 
-export function createDashboardListingFilterUrl(filter: string) {
+export function createDashboardListingFilterUrl(filter: string | undefined) {
   return filter
     ? `${DashboardConstants.LANDING_PAGE_PATH}?filter="${filter}"`
     : DashboardConstants.LANDING_PAGE_PATH;
