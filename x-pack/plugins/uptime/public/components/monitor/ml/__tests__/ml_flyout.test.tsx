@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { renderWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { renderWithIntl, shallowWithIntl } from '@kbn/test/jest';
 import { MLFlyoutView } from '../ml_flyout';
 import { UptimeSettingsContext } from '../../../../contexts';
 import { CLIENT_DEFAULTS } from '../../../../../common/constants';
