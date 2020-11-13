@@ -46,9 +46,13 @@ describe('Workload Statistics Aggregator', () => {
       aggregations: {
         taskType: {
           buckets: [],
+          doc_count_error_upper_bound: 0,
+          sum_other_doc_count: 0,
         },
         schedule: {
           buckets: [],
+          doc_count_error_upper_bound: 0,
+          sum_other_doc_count: 0,
         },
         idleTasks: {
           doc_count: 0,
@@ -158,6 +162,8 @@ describe('Workload Statistics Aggregator', () => {
       },
       aggregations: {
         schedule: {
+          doc_count_error_upper_bound: 0,
+          sum_other_doc_count: 0,
           buckets: [
             {
               key: '3600s',
@@ -174,11 +180,15 @@ describe('Workload Statistics Aggregator', () => {
           ],
         },
         taskType: {
+          doc_count_error_upper_bound: 0,
+          sum_other_doc_count: 0,
           buckets: [
             {
               key: 'actions_telemetry',
               doc_count: 2,
               status: {
+                doc_count_error_upper_bound: 0,
+                sum_other_doc_count: 0,
                 buckets: [
                   {
                     key: 'idle',
@@ -191,6 +201,8 @@ describe('Workload Statistics Aggregator', () => {
               key: 'alerting_telemetry',
               doc_count: 1,
               status: {
+                doc_count_error_upper_bound: 0,
+                sum_other_doc_count: 0,
                 buckets: [
                   {
                     key: 'idle',
@@ -203,6 +215,8 @@ describe('Workload Statistics Aggregator', () => {
               key: 'session_cleanup',
               doc_count: 1,
               status: {
+                doc_count_error_upper_bound: 0,
+                sum_other_doc_count: 0,
                 buckets: [
                   {
                     key: 'idle',
@@ -608,6 +622,7 @@ describe('padBuckets', () => {
               key: 1601668047000,
               doc_count: 1,
               interval: {
+                doc_count_error_upper_bound: 0,
                 sum_other_doc_count: 0,
                 buckets: [],
               },
@@ -617,6 +632,7 @@ describe('padBuckets', () => {
               key: 1601668050000,
               doc_count: 1,
               interval: {
+                doc_count_error_upper_bound: 0,
                 sum_other_doc_count: 0,
                 buckets: [],
               },
@@ -626,6 +642,7 @@ describe('padBuckets', () => {
               key: 1601668053000,
               doc_count: 0,
               interval: {
+                doc_count_error_upper_bound: 0,
                 sum_other_doc_count: 0,
                 buckets: [],
               },
@@ -635,6 +652,7 @@ describe('padBuckets', () => {
               key: 1601668056000,
               doc_count: 0,
               interval: {
+                doc_count_error_upper_bound: 0,
                 sum_other_doc_count: 0,
                 buckets: [],
               },
@@ -644,6 +662,7 @@ describe('padBuckets', () => {
               key: 1601668059000,
               doc_count: 0,
               interval: {
+                doc_count_error_upper_bound: 0,
                 sum_other_doc_count: 0,
                 buckets: [],
               },
@@ -653,6 +672,7 @@ describe('padBuckets', () => {
               key: 1601668062000,
               doc_count: 1,
               interval: {
+                doc_count_error_upper_bound: 0,
                 sum_other_doc_count: 0,
                 buckets: [],
               },
@@ -678,13 +698,13 @@ describe('padBuckets', () => {
               key_as_string: '2020-10-02T20:40:09.000Z',
               key: 1601671209000,
               doc_count: 1,
-              interval: { buckets: [] },
+              interval: { buckets: [], sum_other_doc_count: 0, doc_count_error_upper_bound: 0 },
             },
             {
               key_as_string: '2020-10-02T20:40:12.000Z',
               key: 1601671212000,
               doc_count: 1,
-              interval: { buckets: [] },
+              interval: { buckets: [], sum_other_doc_count: 0, doc_count_error_upper_bound: 0 },
             },
           ],
         },
@@ -707,13 +727,13 @@ describe('padBuckets', () => {
               key_as_string: '2020-10-02T20:40:09.000Z',
               key: 1601671209000,
               doc_count: 1,
-              interval: { buckets: [] },
+              interval: { buckets: [], sum_other_doc_count: 0, doc_count_error_upper_bound: 0 },
             },
             {
               key_as_string: '2020-10-02T20:40:12.000Z',
               key: 1601671212000,
               doc_count: 1,
-              interval: { buckets: [] },
+              interval: { buckets: [], sum_other_doc_count: 0, doc_count_error_upper_bound: 0 },
             },
           ],
         },
@@ -796,7 +816,7 @@ function mockHistogram(
               key_as_string: key.toISOString(),
               key: key.getTime(),
               doc_count: count,
-              interval: { buckets: [] },
+              interval: { buckets: [], doc_count_error_upper_bound: 0, sum_other_doc_count: 0 },
             });
           }
           return histogramBuckets;
@@ -806,6 +826,8 @@ function mockHistogram(
           key: number;
           doc_count: number;
           interval: {
+            doc_count_error_upper_bound: number;
+            sum_other_doc_count: number;
             buckets: Array<{
               key: string;
               doc_count: number;
