@@ -271,11 +271,12 @@ const delayOrResetRetryState = (state: State, resW: ResponseType<AllActionStates
 };
 
 export const model = (currentState: State, resW: ResponseType<AllActionStates>): State => {
-  // The action response `resW` is weakly typed, it includes all action
+  // The action response `resW` is weakly typed, the type includes all action
   // responses. Each control state only triggers one action so each control
   // state only has one action response type. This allows us to narrow the
-  // response type to only the action response associated with this control
-  // state.
+  // response type to only the action response associated with a specific
+  // control state using
+  // `const res = resW as ResponseType<typeof stateP.controlState>;`
 
   let stateP: State = { ...currentState, ...{ log: [] } };
   stateP = delayOrResetRetryState(stateP, resW);
@@ -285,9 +286,8 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
 
   if (stateP.controlState === 'INIT') {
     const res = resW as ResponseType<typeof stateP.controlState>;
-    const CURRENT_ALIAS = stateP.indexPrefix + '_current';
+    const CURRENT_ALIAS = stateP.indexPrefix;
     const VERSION_ALIAS = stateP.indexPrefix + '_' + stateP.kibanaVersion;
-    const V1_ALIAS = stateP.indexPrefix;
     const LEGACY_INDEX = stateP.indexPrefix;
 
     if (Either.isRight(res)) {
@@ -300,7 +300,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       }, {} as Record<string, string>);
 
       if (
-        // `.kibana_current` and the version specific aliases both exists and
+        // `.kibana` and the version specific aliases both exists and
         // are pointing to the same index. This version's migration has already
         // been completed.
         aliases[CURRENT_ALIAS] != null &&
@@ -309,6 +309,9 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       ) {
         stateP = {
           ...stateP,
+          // Skip to 'UPDATE_TARGET_MAPPINGS' to update the mappings and
+          // transform any outdated documents for in case a new plugin was
+          // installed / enabled.
           controlState: 'UPDATE_TARGET_MAPPINGS',
           targetMappings: mergeMappings(
             stateP.targetMappings,
@@ -316,7 +319,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           ),
         };
       } else if (
-        // `.kibana_current` is pointing to an index that belongs to a later
+        // `.kibana` is pointing to an index that belongs to a later
         // version of Kibana .e.g. a 7.11.0 node found `.kibana_7.12.0_001`
         aliases[CURRENT_ALIAS] != null &&
         gt(indexVersion(aliases[CURRENT_ALIAS]), stateP.kibanaVersion)
@@ -325,19 +328,17 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           ...stateP,
           controlState: 'FATAL',
           error: new Error(
-            'The .kibana_current alias is pointing to a newer version of Kibana: v' +
-              indexVersion(aliases[CURRENT_ALIAS])
+            `The ${CURRENT_ALIAS} alias is pointing to a newer version of Kibana: v${indexVersion(
+              aliases[CURRENT_ALIAS]
+            )}`
           ),
         };
       } else if (
-        // If the `.kibana_current` or the `.kibana` alias exists
-        aliases[CURRENT_ALIAS] != null ||
-        aliases[V1_ALIAS] != null
+        // If the `.kibana` alias exists
+        aliases[CURRENT_ALIAS] != null
       ) {
-        //  The source index is:
-        //  1. the index the `.kibana_current` alias points to, or if it doesn’t exist,
-        //  2. the index the `.kibana` alias points to
-        const source = aliases[CURRENT_ALIAS] || aliases[V1_ALIAS];
+        // The source index is the index the `.kibana` alias points to
+        const source = aliases[CURRENT_ALIAS];
         stateP = {
           ...stateP,
           controlState: 'SET_SOURCE_WRITE_BLOCK',
