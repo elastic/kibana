@@ -5,7 +5,7 @@
  */
 
 import { KibanaRequest, RequestHandlerContext } from 'src/core/server';
-import { PDF_JOB_TYPE } from '../../../../constants';
+import { PDF_JOB_TYPE } from '../../../../common/constants';
 import { cryptoFactory } from '../../../lib';
 import { CreateJobFn, CreateJobFnFactory } from '../../../types';
 import { validateUrls } from '../../common';
