@@ -51,6 +51,7 @@ const allowedList: CircularDepList = new Set([
   'src/plugins/vis_default_editor -> src/plugins/visualizations',
   'src/plugins/vis_default_editor -> src/plugins/visualize',
   'src/plugins/visualizations -> src/plugins/visualize',
+  'x-pack/plugins/actions -> x-pack/plugins/case',
   'x-pack/plugins/apm -> x-pack/plugins/infra',
   'x-pack/plugins/lists -> x-pack/plugins/security_solution',
   'x-pack/plugins/security -> x-pack/plugins/spaces',
