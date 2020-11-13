@@ -14,7 +14,6 @@ describe('AddNote', () => {
   const note = 'The contents of a new note';
   const props = {
     associateNote: jest.fn(),
-    getNewNoteId: jest.fn(),
     newNote: note,
     onCancelAddNote: jest.fn(),
     updateNewNote: jest.fn(),
@@ -93,19 +92,19 @@ describe('AddNote', () => {
     expect(associateNote).toBeCalled();
   });
 
-  test('it invokes getNewNoteId when the Add Note button is clicked', () => {
-    const getNewNoteId = jest.fn();
-    const testProps = {
-      ...props,
-      getNewNoteId,
-    };
+  // test('it invokes getNewNoteId when the Add Note button is clicked', () => {
+  //   const getNewNoteId = jest.fn();
+  //   const testProps = {
+  //     ...props,
+  //     getNewNoteId,
+  //   };
 
-    const wrapper = mount(<AddNote {...testProps} />);
+  //   const wrapper = mount(<AddNote {...testProps} />);
 
-    wrapper.find('[data-test-subj="add-note"]').first().simulate('click');
+  //   wrapper.find('[data-test-subj="add-note"]').first().simulate('click');
 
-    expect(getNewNoteId).toBeCalled();
-  });
+  //   expect(getNewNoteId).toBeCalled();
+  // });
 
   test('it invokes updateNewNote when the Add Note button is clicked', () => {
     const updateNewNote = jest.fn();

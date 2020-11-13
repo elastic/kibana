@@ -81,7 +81,6 @@ const eventsViewerDefaultProps = {
     sortDirection: 'none' as SortDirection,
   },
   scopeId: SourcererScopeName.timeline,
-  toggleColumn: jest.fn(),
   utilityBar,
 };
 

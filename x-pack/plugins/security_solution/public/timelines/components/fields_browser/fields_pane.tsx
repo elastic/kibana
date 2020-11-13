@@ -5,11 +5,13 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import React from 'react';
+import React, { useCallback } from 'react';
 import styled from 'styled-components';
+import { useDispatch } from 'react-redux';
 
 import { BrowserFields } from '../../../common/containers/source';
 import { ColumnHeaderOptions } from '../../../timelines/store/timeline/model';
+import { timelineActions } from '../../../timelines/store/timeline';
 
 import { Category } from './category';
 import { FieldBrowserProps } from './types';
@@ -53,10 +55,6 @@ type Props = Pick<FieldBrowserProps, 'onFieldSelected' | 'onUpdateColumns' | 'ti
   selectedCategoryId: string;
   /** The width field browser */
   width: number;
-  /**
-   * Invoked to add or remove a column from the timeline
-   */
-  toggleColumn: (column: ColumnHeaderOptions) => void;
 };
 export const FieldsPane = React.memo<Props>(
   ({
@@ -67,40 +65,68 @@ export const FieldsPane = React.memo<Props>(
     searchInput,
     selectedCategoryId,
     timelineId,
-    toggleColumn,
     width,
-  }) => (
-    <>
-      {Object.keys(filteredBrowserFields).length > 0 ? (
-        <Category
-          categoryId={selectedCategoryId}
-          data-test-subj="category"
-          filteredBrowserFields={filteredBrowserFields}
-          fieldItems={getFieldItems({
-            browserFields: filteredBrowserFields,
-            category: filteredBrowserFields[selectedCategoryId],
-            categoryId: selectedCategoryId,
-            columnHeaders,
-            highlight: searchInput,
-            onUpdateColumns,
-            timelineId,
-            toggleColumn,
-          })}
-          width={width}
-          onCategorySelected={onCategorySelected}
-          timelineId={timelineId}
-        />
-      ) : (
-        <NoFieldsPanel>
-          <NoFieldsFlexGroup alignItems="center" gutterSize="none" justifyContent="center">
-            <EuiFlexItem grow={false}>
-              <h3 data-test-subj="no-fields-match">{i18n.NO_FIELDS_MATCH_INPUT(searchInput)}</h3>
-            </EuiFlexItem>
-          </NoFieldsFlexGroup>
-        </NoFieldsPanel>
-      )}
-    </>
-  )
+  }) => {
+    const dispatch = useDispatch();
+
+    const toggleColumn = useCallback(
+      (column: ColumnHeaderOptions) => {
+        const exists = columnHeaders.findIndex((c) => c.id === column.id) !== -1;
+
+        if (!exists) {
+          dispatch(
+            timelineActions.upsertColumn({
+              column,
+              id: timelineId,
+              index: 1,
+            })
+          );
+        }
+
+        if (exists) {
+          dispatch(
+            timelineActions.removeColumn({
+              columnId: column.id,
+              id: timelineId,
+            })
+          );
+        }
+      },
+      [columnHeaders, dispatch, timelineId]
+    );
+    return (
+      <>
+        {Object.keys(filteredBrowserFields).length > 0 ? (
+          <Category
+            categoryId={selectedCategoryId}
+            data-test-subj="category"
+            filteredBrowserFields={filteredBrowserFields}
+            fieldItems={getFieldItems({
+              browserFields: filteredBrowserFields,
+              category: filteredBrowserFields[selectedCategoryId],
+              categoryId: selectedCategoryId,
+              columnHeaders,
+              highlight: searchInput,
+              onUpdateColumns,
+              timelineId,
+              toggleColumn,
+            })}
+            width={width}
+            onCategorySelected={onCategorySelected}
+            timelineId={timelineId}
+          />
+        ) : (
+          <NoFieldsPanel>
+            <NoFieldsFlexGroup alignItems="center" gutterSize="none" justifyContent="center">
+              <EuiFlexItem grow={false}>
+                <h3 data-test-subj="no-fields-match">{i18n.NO_FIELDS_MATCH_INPUT(searchInput)}</h3>
+              </EuiFlexItem>
+            </NoFieldsFlexGroup>
+          </NoFieldsPanel>
+        )}
+      </>
+    );
+  }
 );
 
 FieldsPane.displayName = 'FieldsPane';

@@ -29,7 +29,6 @@ describe('StatefulFieldsBrowser', () => {
           height={FIELD_BROWSER_HEIGHT}
           onUpdateColumns={jest.fn()}
           timelineId={timelineId}
-          toggleColumn={jest.fn()}
           width={FIELD_BROWSER_WIDTH}
         />
       </TestProviders>
@@ -48,7 +47,6 @@ describe('StatefulFieldsBrowser', () => {
             height={FIELD_BROWSER_HEIGHT}
             onUpdateColumns={jest.fn()}
             timelineId={timelineId}
-            toggleColumn={jest.fn()}
             width={FIELD_BROWSER_WIDTH}
           />
         </TestProviders>
@@ -66,7 +64,6 @@ describe('StatefulFieldsBrowser', () => {
             height={FIELD_BROWSER_HEIGHT}
             onUpdateColumns={jest.fn()}
             timelineId={timelineId}
-            toggleColumn={jest.fn()}
             width={FIELD_BROWSER_WIDTH}
           />
         </TestProviders>
@@ -91,7 +88,6 @@ describe('StatefulFieldsBrowser', () => {
             height={FIELD_BROWSER_HEIGHT}
             onUpdateColumns={jest.fn()}
             timelineId={timelineId}
-            toggleColumn={jest.fn()}
             width={FIELD_BROWSER_WIDTH}
           />
         </TestProviders>
@@ -117,7 +113,6 @@ describe('StatefulFieldsBrowser', () => {
             height={FIELD_BROWSER_HEIGHT}
             onUpdateColumns={jest.fn()}
             timelineId={timelineId}
-            toggleColumn={jest.fn()}
             width={FIELD_BROWSER_WIDTH}
           />
         </TestProviders>
@@ -154,7 +149,6 @@ describe('StatefulFieldsBrowser', () => {
           isEventViewer={isEventViewer}
           onUpdateColumns={jest.fn()}
           timelineId={timelineId}
-          toggleColumn={jest.fn()}
           width={FIELD_BROWSER_WIDTH}
         />
       </TestProviders>
@@ -175,7 +169,6 @@ describe('StatefulFieldsBrowser', () => {
           isEventViewer={isEventViewer}
           onUpdateColumns={jest.fn()}
           timelineId={timelineId}
-          toggleColumn={jest.fn()}
           width={FIELD_BROWSER_WIDTH}
         />
       </TestProviders>

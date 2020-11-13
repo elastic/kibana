@@ -5,17 +5,25 @@
  */
 
 import {
+  EuiIcon,
+  EuiSpacer,
+  EuiTitle,
+  EuiText,
+  EuiTabbedContent,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyoutHeader,
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiProgress,
+  EuiToolTip,
+  EuiButtonIcon,
 } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React, { useCallback, useState, useMemo, useEffect } from 'react';
 import styled from 'styled-components';
 
+import { ActionCreator } from 'typescript-fsa';
 import { FlyoutHeaderWithCloseButton } from '../flyout/header_with_close_button';
 import { BrowserFields, DocValueFields } from '../../../common/containers/source';
 import { Direction, TimelineItem } from '../../../../common/search_strategy';
@@ -32,7 +40,7 @@ import { Footer, footerHeight } from './footer';
 import { TimelineHeader } from './header';
 import { combineQueries } from './helpers';
 import { TimelineRefetch } from './refetch_timeline';
-import { TIMELINE_TEMPLATE } from './translations';
+import * as i18n from './translations';
 import {
   esQuery,
   Filter,
@@ -48,6 +56,9 @@ import {
   ActiveTimelineExpandedEvent,
 } from '../../containers/active_timeline_context';
 import { GraphOverlay } from '../graph_overlay';
+import { NotesTabContent } from '../notes';
+import { SuperDatePicker } from '../../../common/components/super_date_picker';
+import { InputsModelId } from '../../../common/store/inputs/constants';
 
 const TimelineContainer = styled.div`
   height: 100%;
@@ -109,6 +120,15 @@ const TimelineTemplateBadge = styled.div`
   font-size: 0.8em;
 `;
 
+export const DatePicker = styled(EuiFlexItem)`
+  .euiSuperDatePicker__flexWrapper {
+    max-width: none;
+    width: auto;
+  }
+`;
+
+DatePicker.displayName = 'DatePicker';
+
 export interface Props {
   browserFields: BrowserFields;
   columns: ColumnHeaderOptions[];
@@ -120,6 +140,7 @@ export interface Props {
   id: string;
   indexNames: string[];
   indexPattern: IIndexPattern;
+  isDatePickerLocked: boolean;
   isLive: boolean;
   isSaving: boolean;
   itemsPerPage: number;
@@ -127,6 +148,7 @@ export interface Props {
   kqlMode: KqlMode;
   kqlQueryExpression: string;
   loadingSourcerer: boolean;
+  noteIds: string[];
   onChangeItemsPerPage: OnChangeItemsPerPage;
   onClose: () => void;
   show: boolean;
@@ -136,7 +158,7 @@ export interface Props {
   status: TimelineStatusLiteral;
   timelineType: TimelineType;
   timerangeKind: 'absolute' | 'relative';
-  toggleColumn: (column: ColumnHeaderOptions) => void;
+  toggleLock: ActionCreator<{ linkToId: InputsModelId }>;
   usersViewing: string[];
 }
 
@@ -152,6 +174,7 @@ export const TimelineComponent: React.FC<Props> = ({
   id,
   indexPattern,
   indexNames,
+  isDatePickerLocked,
   isLive,
   loadingSourcerer,
   isSaving,
@@ -159,6 +182,7 @@ export const TimelineComponent: React.FC<Props> = ({
   itemsPerPageOptions,
   kqlMode,
   kqlQueryExpression,
+  noteIds,
   onChangeItemsPerPage,
   onClose,
   show,
@@ -168,12 +192,14 @@ export const TimelineComponent: React.FC<Props> = ({
   sort,
   timelineType,
   timerangeKind,
-  toggleColumn,
+  toggleLock,
   usersViewing,
 }) => {
   const [expanded, setExpanded] = useState<ActiveTimelineExpandedEvent>(
     activeTimeline.getExpandedEvent()
   );
+
+  const onToggleLock = useCallback(() => toggleLock({ linkToId: 'timeline' }), [toggleLock]);
 
   const onEventToggled = useCallback((event: TimelineItem) => {
     const eventId = event._id;
@@ -265,101 +291,182 @@ export const TimelineComponent: React.FC<Props> = ({
     setIsQueryLoading(loading);
   }, [loading]);
 
+  const tabs = [
+    {
+      id: 'cobalt--id',
+      name: 'Query',
+      content: (
+        <>
+          <TimelineKqlFetch id={id} indexPattern={indexPattern} inputId="timeline" />
+          {canQueryTimeline ? (
+            <>
+              <TimelineRefetch
+                id={id}
+                inputId="timeline"
+                inspect={inspect}
+                loading={loading}
+                refetch={refetch}
+              />
+              {graphEventId && (
+                <GraphOverlay
+                  graphEventId={graphEventId}
+                  isEventViewer={false}
+                  timelineId={id}
+                  timelineType={timelineType}
+                />
+              )}
+              <FullWidthFlexGroup $visible={!graphEventId}>
+                <ScrollableFlexItem grow={2}>
+                  <div>
+                    {/* <EuiFlexGroup
+                    grow={0}
+                    alignItems="center"
+                    gutterSize="none"
+                    data-test-subj="timeline-date-picker-container"
+                  >
+                    <EuiFlexItem> */}
+                    {/* </EuiFlexItem> */}
+                    <DatePicker grow={1}>
+                      <SuperDatePicker id="timeline" timelineId={id} />
+                    </DatePicker>
+                  </div>
+                  <div>
+                    <EuiToolTip
+                      data-test-subj="timeline-date-picker-lock-tooltip"
+                      position="top"
+                      content={
+                        isDatePickerLocked
+                          ? i18n.LOCK_SYNC_MAIN_DATE_PICKER_TOOL_TIP
+                          : i18n.UNLOCK_SYNC_MAIN_DATE_PICKER_TOOL_TIP
+                      }
+                    >
+                      <EuiButtonIcon
+                        data-test-subj={`timeline-date-picker-${
+                          isDatePickerLocked ? 'lock' : 'unlock'
+                        }-button`}
+                        color="primary"
+                        onClick={onToggleLock}
+                        iconType={isDatePickerLocked ? 'lock' : 'lockOpen'}
+                        aria-label={
+                          isDatePickerLocked
+                            ? i18n.UNLOCK_SYNC_MAIN_DATE_PICKER_ARIA
+                            : i18n.LOCK_SYNC_MAIN_DATE_PICKER_ARIA
+                        }
+                      />
+                    </EuiToolTip>
+                  </div>
+                  {/* </EuiFlexGroup> */}
+                  <StyledEuiFlyoutHeader data-test-subj="eui-flyout-header" hasBorder={false}>
+                    <TimelineHeaderContainer data-test-subj="timelineHeader">
+                      <TimelineHeader
+                        browserFields={browserFields}
+                        indexPattern={indexPattern}
+                        dataProviders={dataProviders}
+                        filterManager={filterManager}
+                        graphEventId={graphEventId}
+                        show={show}
+                        showCallOutUnauthorizedMsg={showCallOutUnauthorizedMsg}
+                        timelineId={id}
+                        status={status}
+                      />
+                    </TimelineHeaderContainer>
+                  </StyledEuiFlyoutHeader>
+                  <StyledEuiFlyoutBody
+                    data-test-subj="eui-flyout-body"
+                    className="timeline-flyout-body"
+                  >
+                    <StatefulBody
+                      browserFields={browserFields}
+                      data={events}
+                      docValueFields={docValueFields}
+                      expanded={expanded}
+                      id={id}
+                      onEventToggled={onEventToggled}
+                      refetch={refetch}
+                      sort={sort}
+                    />
+                  </StyledEuiFlyoutBody>
+                  <StyledEuiFlyoutFooter
+                    data-test-subj="eui-flyout-footer"
+                    className="timeline-flyout-footer"
+                  >
+                    <Footer
+                      activePage={pageInfo.activePage}
+                      data-test-subj="timeline-footer"
+                      updatedAt={updatedAt}
+                      height={footerHeight}
+                      id={id}
+                      isLive={isLive}
+                      isLoading={loading || loadingSourcerer}
+                      itemsCount={events.length}
+                      itemsPerPage={itemsPerPage}
+                      itemsPerPageOptions={itemsPerPageOptions}
+                      onChangeItemsPerPage={onChangeItemsPerPage}
+                      onChangePage={loadPage}
+                      totalCount={totalCount}
+                    />
+                  </StyledEuiFlyoutFooter>
+                </ScrollableFlexItem>
+                <ScrollableFlexItem grow={1}>
+                  <ExpandableEvent
+                    browserFields={browserFields}
+                    docValueFields={docValueFields}
+                    event={expanded}
+                    timelineId={id}
+                  />
+                </ScrollableFlexItem>
+              </FullWidthFlexGroup>
+            </>
+          ) : null}
+        </>
+      ),
+    },
+    {
+      id: 'dextrose--id',
+      name: 'Notes',
+      content: (
+        <>
+          <EuiSpacer />
+          <EuiTitle>
+            <h3>{'Notes'}</h3>
+          </EuiTitle>
+          <NotesTabContent timelineStatus={status} timelineId={id} noteIds={noteIds} />
+        </>
+      ),
+    },
+    {
+      id: 'hydrogen--id',
+      name: (
+        <span>
+          <EuiIcon type="heatmap" />
+          {' Hydrogen'}
+        </span>
+      ),
+      content: (
+        <>
+          <EuiSpacer />
+          <EuiTitle>
+            <h3>{'Hydrogen'}</h3>
+          </EuiTitle>
+          <EuiText>
+            {`Hydrogen is a chemical element with symbol H and atomic number 1. With a standard atomic
+            weight of 1.008, hydrogen is the lightest element on the periodic table`}
+          </EuiText>
+        </>
+      ),
+    },
+  ];
+
   return (
     <TimelineContainer data-test-subj="timeline">
       {isSaving && <EuiProgress size="s" color="primary" position="absolute" />}
       {timelineType === TimelineType.template && (
-        <TimelineTemplateBadge>{TIMELINE_TEMPLATE}</TimelineTemplateBadge>
+        <TimelineTemplateBadge>{i18n.TIMELINE_TEMPLATE}</TimelineTemplateBadge>
       )}
-      <StyledEuiFlyoutHeader data-test-subj="eui-flyout-header" hasBorder={false}>
-        <FlyoutHeaderWithCloseButton
-          onClose={onClose}
-          timelineId={id}
-          usersViewing={usersViewing}
-        />
-        <TimelineHeaderContainer data-test-subj="timelineHeader">
-          <TimelineHeader
-            browserFields={browserFields}
-            indexPattern={indexPattern}
-            dataProviders={dataProviders}
-            filterManager={filterManager}
-            graphEventId={graphEventId}
-            show={show}
-            showCallOutUnauthorizedMsg={showCallOutUnauthorizedMsg}
-            timelineId={id}
-            status={status}
-          />
-        </TimelineHeaderContainer>
-      </StyledEuiFlyoutHeader>
-      <TimelineKqlFetch id={id} indexPattern={indexPattern} inputId="timeline" />
-      {canQueryTimeline ? (
-        <>
-          <TimelineRefetch
-            id={id}
-            inputId="timeline"
-            inspect={inspect}
-            loading={loading}
-            refetch={refetch}
-          />
-          {graphEventId && (
-            <GraphOverlay
-              graphEventId={graphEventId}
-              isEventViewer={false}
-              timelineId={id}
-              timelineType={timelineType}
-            />
-          )}
-          <FullWidthFlexGroup $visible={!graphEventId}>
-            <ScrollableFlexItem grow={2}>
-              <StyledEuiFlyoutBody
-                data-test-subj="eui-flyout-body"
-                className="timeline-flyout-body"
-              >
-                <StatefulBody
-                  browserFields={browserFields}
-                  data={events}
-                  docValueFields={docValueFields}
-                  expanded={expanded}
-                  id={id}
-                  onEventToggled={onEventToggled}
-                  refetch={refetch}
-                  sort={sort}
-                  toggleColumn={toggleColumn}
-                />
-              </StyledEuiFlyoutBody>
-              <StyledEuiFlyoutFooter
-                data-test-subj="eui-flyout-footer"
-                className="timeline-flyout-footer"
-              >
-                <Footer
-                  activePage={pageInfo.activePage}
-                  data-test-subj="timeline-footer"
-                  updatedAt={updatedAt}
-                  height={footerHeight}
-                  id={id}
-                  isLive={isLive}
-                  isLoading={loading || loadingSourcerer}
-                  itemsCount={events.length}
-                  itemsPerPage={itemsPerPage}
-                  itemsPerPageOptions={itemsPerPageOptions}
-                  onChangeItemsPerPage={onChangeItemsPerPage}
-                  onChangePage={loadPage}
-                  totalCount={totalCount}
-                />
-              </StyledEuiFlyoutFooter>
-            </ScrollableFlexItem>
-            <ScrollableFlexItem grow={1}>
-              <ExpandableEvent
-                browserFields={browserFields}
-                docValueFields={docValueFields}
-                event={expanded}
-                timelineId={id}
-                toggleColumn={toggleColumn}
-              />
-            </ScrollableFlexItem>
-          </FullWidthFlexGroup>
-        </>
-      ) : null}
+
+      <FlyoutHeaderWithCloseButton onClose={onClose} timelineId={id} usersViewing={usersViewing} />
+
+      <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[0]} autoFocus="selected" />
     </TimelineContainer>
   );
 };

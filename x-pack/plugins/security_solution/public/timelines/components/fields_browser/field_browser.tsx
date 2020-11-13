@@ -86,10 +86,6 @@ type Props = Pick<
    * Invoked when the user types in the search input
    */
   onSearchInputChange: (newSearchInput: string) => void;
-  /**
-   * Invoked to add or remove a column from the timeline
-   */
-  toggleColumn: (column: ColumnHeaderOptions) => void;
 };
 
 /**
@@ -110,7 +106,6 @@ const FieldsBrowserComponent: React.FC<Props> = ({
   searchInput,
   selectedCategoryId,
   timelineId,
-  toggleColumn,
   width,
 }) => {
   /** Focuses the input that filters the field browser */
@@ -219,7 +214,6 @@ const FieldsBrowserComponent: React.FC<Props> = ({
               searchInput={searchInput}
               selectedCategoryId={selectedCategoryId}
               timelineId={timelineId}
-              toggleColumn={toggleColumn}
               width={FIELDS_PANE_WIDTH}
             />
           </EuiFlexItem>

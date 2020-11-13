@@ -41,7 +41,6 @@ describe('EventColumnView', () => {
     },
     eventIdToNoteIds: {},
     expanded: false,
-    getNotesByIds: jest.fn(),
     loading: false,
     loadingEventIds: [],
     onColumnResized: jest.fn(),

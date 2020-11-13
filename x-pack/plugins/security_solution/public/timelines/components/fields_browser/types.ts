@@ -30,8 +30,6 @@ export interface FieldBrowserProps {
   onUpdateColumns: OnUpdateColumns;
   /** The timeline associated with this field browser */
   timelineId: string;
-  /** Adds or removes a column to / from the timeline */
-  toggleColumn: (column: ColumnHeaderOptions) => void;
   /** The width of the field browser */
   width: number;
 }

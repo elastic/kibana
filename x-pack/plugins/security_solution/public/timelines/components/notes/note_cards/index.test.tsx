@@ -43,7 +43,6 @@ describe('NoteCards', () => {
   const props = {
     associateNote: jest.fn(),
     getNotesByIds,
-    getNewNoteId: jest.fn(),
     noteIds,
     showAddNote: true,
     status: TimelineStatus.active,

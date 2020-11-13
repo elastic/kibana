@@ -39,7 +39,6 @@ export const StatefulFieldsBrowserComponent: React.FC<FieldBrowserProps> = ({
   onFieldSelected,
   onUpdateColumns,
   timelineId,
-  toggleColumn,
   width,
 }) => {
   /** tracks the latest timeout id from `setTimeout`*/
@@ -173,7 +172,6 @@ export const StatefulFieldsBrowserComponent: React.FC<FieldBrowserProps> = ({
           searchInput={filterInput}
           selectedCategoryId={selectedCategoryId}
           timelineId={timelineId}
-          toggleColumn={toggleColumn}
           width={width}
         />
       )}

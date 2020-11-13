@@ -78,12 +78,6 @@ export const LabelText = styled.div`
 `;
 LabelText.displayName = 'LabelText';
 
-export const StyledStar = styled(EuiIcon)`
-  margin-right: 5px;
-  cursor: pointer;
-`;
-StyledStar.displayName = 'StyledStar';
-
 export const Facet = styled.div`
   align-items: center;
   display: inline-flex;

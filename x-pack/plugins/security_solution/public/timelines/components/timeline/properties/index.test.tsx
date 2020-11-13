@@ -90,7 +90,6 @@ const defaultProps = {
   title: '',
   timelineType: TimelineType.default,
   description: '',
-  getNotesByIds: jest.fn(),
   noteIds: [],
   saveTimeline: jest.fn(),
   status: TimelineStatus.active,

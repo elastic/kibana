@@ -11,7 +11,6 @@ import { useDispatch } from 'react-redux';
 
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { BrowserFields, DocValueFields } from '../../../../common/containers/source';
-import { ColumnHeaderOptions } from '../../../../timelines/store/timeline/model';
 import { StatefulEventDetails } from '../../../../common/components/event_details/stateful_event_details';
 import { LazyAccordion } from '../../lazy_accordion';
 import { useTimelineEventsDetails } from '../../../containers/details';
@@ -34,11 +33,10 @@ interface Props {
   docValueFields: DocValueFields[];
   event: ActiveTimelineExpandedEvent;
   timelineId: string;
-  toggleColumn: (column: ColumnHeaderOptions) => void;
 }
 
 export const ExpandableEvent = React.memo<Props>(
-  ({ browserFields, docValueFields, event, timelineId, toggleColumn }) => {
+  ({ browserFields, docValueFields, event, timelineId }) => {
     const dispatch = useDispatch();
     const getTimeline = timelineSelectors.getTimelineByIdSelector();
 
@@ -69,18 +67,9 @@ export const ExpandableEvent = React.memo<Props>(
           id={event.eventId!}
           onUpdateColumns={onUpdateColumns}
           timelineId={timelineId}
-          toggleColumn={toggleColumn}
         />
       ),
-      [
-        browserFields,
-        columnHeaders,
-        detailsData,
-        event.eventId,
-        onUpdateColumns,
-        timelineId,
-        toggleColumn,
-      ]
+      [browserFields, columnHeaders, detailsData, event.eventId, onUpdateColumns, timelineId]
     );
 
     if (!event.eventId) {

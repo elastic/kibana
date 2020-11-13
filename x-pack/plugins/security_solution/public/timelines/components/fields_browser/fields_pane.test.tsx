@@ -33,7 +33,6 @@ describe('FieldsPane', () => {
           searchInput=""
           selectedCategoryId={selectedCategory}
           timelineId={timelineId}
-          toggleColumn={jest.fn()}
           width={FIELDS_PANE_WIDTH}
         />
       </TestProviders>
@@ -58,7 +57,6 @@ describe('FieldsPane', () => {
           searchInput=""
           selectedCategoryId={selectedCategory}
           timelineId={timelineId}
-          toggleColumn={jest.fn()}
           width={FIELDS_PANE_WIDTH}
         />
       </TestProviders>
@@ -83,7 +81,6 @@ describe('FieldsPane', () => {
           searchInput={searchInput}
           selectedCategoryId=""
           timelineId={timelineId}
-          toggleColumn={jest.fn()}
           width={FIELDS_PANE_WIDTH}
         />
       </TestProviders>
@@ -108,7 +105,6 @@ describe('FieldsPane', () => {
           searchInput={searchInput}
           selectedCategoryId=""
           timelineId={timelineId}
-          toggleColumn={jest.fn()}
           width={FIELDS_PANE_WIDTH}
         />
       </TestProviders>

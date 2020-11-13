@@ -19,7 +19,6 @@ import {
   EuiTextArea,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
-import uuid from 'uuid';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
 
@@ -35,21 +34,13 @@ import { SecurityPageName } from '../../../../app/types';
 import { timelineSelectors } from '../../../../timelines/store/timeline';
 import { getCreateCaseUrl } from '../../../../common/components/link_to';
 import { useKibana } from '../../../../common/lib/kibana';
-import { Note } from '../../../../common/lib/note';
 import { useShallowEqualSelector } from '../../../../common/hooks/use_selector';
 
 import { Notes } from '../../notes';
-import { AssociateNote, UpdateNote } from '../../notes/helpers';
+import { AssociateNote } from '../../notes/helpers';
 
 import { NOTES_PANEL_WIDTH } from './notes_size';
-import {
-  ButtonContainer,
-  DescriptionContainer,
-  LabelText,
-  NameField,
-  NameWrapper,
-  StyledStar,
-} from './styles';
+import { ButtonContainer, DescriptionContainer, LabelText, NameField, NameWrapper } from './styles';
 import * as i18n from './translations';
 import { setInsertTimeline, showTimeline, TimelineInput } from '../../../store/timeline/actions';
 import { useCreateTimelineButton } from './use_create_timeline';
@@ -107,21 +98,14 @@ export const StarIcon = React.memo<{
   ]);
 
   return (
-    // TODO: 1 error is: Visible, non-interactive elements with click handlers must have at least one keyboard listener
-    // TODO: 2 error is: Elements with the 'button' interactive role must be focusable
-    // TODO: Investigate this error
-    // eslint-disable-next-line
-  <div role="button" onClick={handleClick}>
-      {isFavorite ? (
-        <EuiToolTip data-test-subj="timeline-favorite-filled-star-tool-tip" content={i18n.FAVORITE}>
-          <StyledStar data-test-subj="timeline-favorite-filled-star" type="starFilled" size="l" />
-        </EuiToolTip>
-      ) : (
-        <EuiToolTip content={i18n.NOT_A_FAVORITE}>
-          <StyledStar data-test-subj="timeline-favorite-empty-star" type="starEmpty" size="l" />
-        </EuiToolTip>
-      )}
-    </div>
+    <EuiButton
+      isSelected={isFavorite}
+      fill={isFavorite}
+      iconType={isFavorite ? 'starFilled' : 'starEmpty'}
+      onClick={handleClick}
+    >
+      {isFavorite ? i18n.NOT_A_FAVORITE : i18n.FAVORITE}
+    </EuiButton>
   );
 });
 StarIcon.displayName = 'StarIcon';
@@ -412,7 +396,6 @@ NewTimeline.displayName = 'NewTimeline';
 interface NotesButtonProps {
   animate?: boolean;
   associateNote: AssociateNote;
-  getNotesByIds: (noteIds: string[]) => Note[];
   noteIds: string[];
   size: 's' | 'l';
   status: TimelineStatusLiteral;
@@ -420,11 +403,8 @@ interface NotesButtonProps {
   toggleShowNotes: () => void;
   text?: string;
   toolTip?: string;
-  updateNote: UpdateNote;
   timelineType: TimelineTypeLiteral;
 }
-
-const getNewNoteId = (): string => uuid.v4();
 
 interface LargeNotesButtonProps {
   noteIds: string[];
@@ -433,11 +413,7 @@ interface LargeNotesButtonProps {
 }
 
 const LargeNotesButton = React.memo<LargeNotesButtonProps>(({ noteIds, text, toggleShowNotes }) => (
-  <EuiButton
-    data-test-subj="timeline-notes-button-large"
-    onClick={() => toggleShowNotes()}
-    size="m"
-  >
+  <EuiButton data-test-subj="timeline-notes-button-large" onClick={toggleShowNotes} size="m">
     <EuiFlexGroup alignItems="center" gutterSize="none" justifyContent="center">
       <EuiFlexItem grow={false}>
         <EuiIcon color="subdued" size="m" type="editorComment" />
@@ -468,7 +444,7 @@ const SmallNotesButton = React.memo<SmallNotesButtonProps>(({ toggleShowNotes, t
       aria-label={i18n.NOTES}
       data-test-subj="timeline-notes-button-small"
       iconType="editorComment"
-      onClick={() => toggleShowNotes()}
+      onClick={toggleShowNotes}
       isDisabled={isTemplate}
     />
   );
@@ -482,14 +458,12 @@ const NotesButtonComponent = React.memo<NotesButtonProps>(
   ({
     animate = true,
     associateNote,
-    getNotesByIds,
     noteIds,
     showNotes,
     size,
     status,
     toggleShowNotes,
     text,
-    updateNote,
     timelineType,
   }) => (
     <ButtonContainer animate={animate} data-test-subj="timeline-notes-button-container">
@@ -506,14 +480,7 @@ const NotesButtonComponent = React.memo<NotesButtonProps>(
               maxWidth={NOTES_PANEL_WIDTH}
               onClose={toggleShowNotes}
             >
-              <Notes
-                associateNote={associateNote}
-                getNewNoteId={getNewNoteId}
-                getNotesByIds={getNotesByIds}
-                status={status}
-                noteIds={noteIds}
-                updateNote={updateNote}
-              />
+              <Notes associateNote={associateNote} status={status} noteIds={noteIds} />
             </EuiModal>
           </EuiOverlayMask>
         ) : null}
@@ -527,7 +494,6 @@ export const NotesButton = React.memo<NotesButtonProps>(
   ({
     animate = true,
     associateNote,
-    getNotesByIds,
     noteIds,
     showNotes,
     size,
@@ -536,20 +502,17 @@ export const NotesButton = React.memo<NotesButtonProps>(
     toggleShowNotes,
     toolTip,
     text,
-    updateNote,
   }) =>
     showNotes ? (
       <NotesButtonComponent
         animate={animate}
         associateNote={associateNote}
-        getNotesByIds={getNotesByIds}
         noteIds={noteIds}
         showNotes={showNotes}
         size={size}
         status={status}
         toggleShowNotes={toggleShowNotes}
         text={text}
-        updateNote={updateNote}
         timelineType={timelineType}
       />
     ) : (
@@ -557,14 +520,12 @@ export const NotesButton = React.memo<NotesButtonProps>(
         <NotesButtonComponent
           animate={animate}
           associateNote={associateNote}
-          getNotesByIds={getNotesByIds}
           noteIds={noteIds}
           showNotes={showNotes}
           size={size}
           status={status}
           toggleShowNotes={toggleShowNotes}
           text={text}
-          updateNote={updateNote}
           timelineType={timelineType}
         />
       </EuiToolTip>

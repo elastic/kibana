@@ -416,8 +416,7 @@ export const dispatchUpdateTimeline = (dispatch: Dispatch): DispatchUpdateTimeli
   }
 
   if (duplicate && ruleNote != null && !isEmpty(ruleNote)) {
-    const getNewNoteId = (): string => uuid.v4();
-    const newNote = createNote({ newNote: ruleNote, getNewNoteId });
+    const newNote = createNote({ newNote: ruleNote });
     dispatch(dispatchUpdateNote({ note: newNote }));
     dispatch(dispatchAddGlobalTimelineNote({ noteId: newNote.id, id }));
   }

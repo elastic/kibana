@@ -44,7 +44,6 @@ describe('ColumnHeaders', () => {
             showSelectAllCheckbox={false}
             sort={sort}
             timelineId={'test'}
-            toggleColumn={jest.fn()}
           />
         </TestProviders>
       );
@@ -68,7 +67,6 @@ describe('ColumnHeaders', () => {
             showSelectAllCheckbox={false}
             sort={sort}
             timelineId={'test'}
-            toggleColumn={jest.fn()}
           />
         </TestProviders>
       );
@@ -93,7 +91,6 @@ describe('ColumnHeaders', () => {
             showSelectAllCheckbox={false}
             sort={sort}
             timelineId={'test'}
-            toggleColumn={jest.fn()}
           />
         </TestProviders>
       );

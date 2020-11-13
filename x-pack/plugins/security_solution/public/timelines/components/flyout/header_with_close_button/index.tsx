@@ -17,6 +17,7 @@ const FlyoutHeaderContainer = styled.div`
   flex-direction: row;
   justify-content: space-between;
   width: 100%;
+  padding: 16px;
 `;
 
 // manually wrap the close button because EuiButtonIcon can't be a wrapped `styled`

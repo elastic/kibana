@@ -12,22 +12,17 @@ import deepEqual from 'fast-deep-equal';
 import { RowRendererId, TimelineId } from '../../../../../common/types/timeline';
 import { BrowserFields, DocValueFields } from '../../../../common/containers/source';
 import { TimelineItem } from '../../../../../common/search_strategy/timeline';
-import { Note } from '../../../../common/lib/note';
-import { appSelectors, inputsModel, State } from '../../../../common/store';
-import { appActions } from '../../../../common/store/actions';
+import { inputsModel, State } from '../../../../common/store';
 import { useManageTimeline } from '../../manage_timeline';
 import { ColumnHeaderOptions, TimelineModel } from '../../../store/timeline/model';
 import { timelineDefaults } from '../../../store/timeline/defaults';
 import { timelineActions, timelineSelectors } from '../../../store/timeline';
-import { AddNoteToEvent, UpdateNote } from '../../notes/helpers';
 import {
   OnColumnRemoved,
   OnColumnResized,
   OnColumnSorted,
-  OnPinEvent,
   OnRowSelected,
   OnSelectAll,
-  OnUnPinEvent,
   OnUpdateColumns,
 } from '../events';
 import { getColumnHeaders } from './column_headers/helpers';
@@ -47,7 +42,6 @@ interface OwnProps {
   isEventViewer?: boolean;
   onEventToggled: (event: TimelineItem) => void;
   sort: Sort;
-  toggleColumn: (column: ColumnHeaderOptions) => void;
   refetch: inputsModel.Refetch;
   onRuleChange?: () => void;
 }
@@ -58,7 +52,6 @@ export const emptyColumnHeaders: ColumnHeaderOptions[] = [];
 
 const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
   ({
-    addNoteToEvent,
     applyDeltaToColumnWidth,
     browserFields,
     columnHeaders,
@@ -71,8 +64,6 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
     isEventViewer = false,
     isSelectAllChecked,
     loadingEventIds,
-    notesById,
-    pinEvent,
     pinnedEventIds,
     removeColumn,
     selectedEventIds,
@@ -85,10 +76,7 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
     graphEventId,
     refetch,
     sort,
-    toggleColumn,
-    unPinEvent,
     updateColumns,
-    updateNote,
     updateSort,
   }) => {
     const { getManageTimelineById } = useManageTimeline();
@@ -96,17 +84,6 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
       getManageTimelineById,
       id,
     ]);
-
-    const getNotesByIds = useCallback(
-      (noteIds: string[]): Note[] => appSelectors.getNotes(notesById, noteIds),
-      [notesById]
-    );
-
-    const onAddNoteToEvent: AddNoteToEvent = useCallback(
-      ({ eventId, noteId }: { eventId: string; noteId: string }) =>
-        addNoteToEvent!({ id, eventId, noteId }),
-      [id, addNoteToEvent]
-    );
 
     const onRowSelected: OnRowSelected = useCallback(
       ({ eventIds, isSelected }: { eventIds: string[]; isSelected: boolean }) => {
@@ -155,20 +132,6 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
       [applyDeltaToColumnWidth, id]
     );
 
-    const onPinEvent: OnPinEvent = useCallback((eventId) => pinEvent!({ id, eventId }), [
-      id,
-      pinEvent,
-    ]);
-
-    const onUnPinEvent: OnUnPinEvent = useCallback((eventId) => unPinEvent!({ id, eventId }), [
-      id,
-      unPinEvent,
-    ]);
-
-    const onUpdateNote: UpdateNote = useCallback((note: Note) => updateNote!({ note }), [
-      updateNote,
-    ]);
-
     const onUpdateColumns: OnUpdateColumns = useCallback(
       (columns) => updateColumns!({ id, columns }),
       [id, updateColumns]
@@ -195,7 +158,6 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
 
     return (
       <Body
-        addNoteToEvent={onAddNoteToEvent}
         browserFields={browserFields}
         columnHeaders={columnHeaders || emptyColumnHeaders}
         columnRenderers={columnRenderers}
@@ -203,7 +165,6 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
         docValueFields={docValueFields}
         eventIdToNoteIds={eventIdToNoteIds}
         expanded={expanded}
-        getNotesByIds={getNotesByIds}
         graphEventId={graphEventId}
         isEventViewer={isEventViewer}
         isSelectAllChecked={isSelectAllChecked}
@@ -214,8 +175,6 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
         onEventToggled={onEventToggled}
         onRowSelected={onRowSelected}
         onSelectAll={onSelectAll}
-        onPinEvent={onPinEvent}
-        onUnPinEvent={onUnPinEvent}
         onUpdateColumns={onUpdateColumns}
         pinnedEventIds={pinnedEventIds}
         refetch={refetch}
@@ -226,8 +185,6 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
         showCheckboxes={showCheckboxes}
         sort={sort}
         timelineId={id}
-        toggleColumn={toggleColumn}
-        updateNote={onUpdateNote}
       />
     );
   },
@@ -240,7 +197,6 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
     deepEqual(prevProps.docValueFields, nextProps.docValueFields) &&
     prevProps.eventIdToNoteIds === nextProps.eventIdToNoteIds &&
     prevProps.graphEventId === nextProps.graphEventId &&
-    deepEqual(prevProps.notesById, nextProps.notesById) &&
     prevProps.id === nextProps.id &&
     prevProps.isEventViewer === nextProps.isEventViewer &&
     prevProps.isSelectAllChecked === nextProps.isSelectAllChecked &&
@@ -262,7 +218,6 @@ const makeMapStateToProps = () => {
   ) => ColumnHeaderOptions[] = memoizeOne(getColumnHeaders);
 
   const getTimeline = timelineSelectors.getTimelineByIdSelector();
-  const getNotesByIds = appSelectors.notesByIdsSelector();
   const mapStateToProps = (state: State, { browserFields, id }: OwnProps) => {
     const timeline: TimelineModel = getTimeline(state, id) ?? timelineDefaults;
     const {
@@ -285,7 +240,6 @@ const makeMapStateToProps = () => {
       graphEventId,
       isSelectAllChecked,
       loadingEventIds,
-      notesById: getNotesByIds(state),
       id,
       pinnedEventIds,
       selectedEventIds,
@@ -297,16 +251,12 @@ const makeMapStateToProps = () => {
 };
 
 const mapDispatchToProps = {
-  addNoteToEvent: timelineActions.addNoteToEvent,
   applyDeltaToColumnWidth: timelineActions.applyDeltaToColumnWidth,
   clearSelected: timelineActions.clearSelected,
-  pinEvent: timelineActions.pinEvent,
   removeColumn: timelineActions.removeColumn,
   removeProvider: timelineActions.removeProvider,
   setSelected: timelineActions.setSelected,
-  unPinEvent: timelineActions.unPinEvent,
   updateColumns: timelineActions.updateColumns,
-  updateNote: appActions.updateNote,
   updateSort: timelineActions.updateSort,
 };
 

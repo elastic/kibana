@@ -32,7 +32,6 @@ describe('EventFieldsBrowser', () => {
               eventId={mockDetailItemDataId}
               onUpdateColumns={jest.fn()}
               timelineId="test"
-              toggleColumn={jest.fn()}
             />
           </TestProviders>
         );
@@ -53,7 +52,6 @@ describe('EventFieldsBrowser', () => {
             eventId={mockDetailItemDataId}
             onUpdateColumns={jest.fn()}
             timelineId="test"
-            toggleColumn={jest.fn()}
           />
         </TestProviders>
       );
@@ -79,7 +77,6 @@ describe('EventFieldsBrowser', () => {
             eventId={eventId}
             onUpdateColumns={jest.fn()}
             timelineId="test"
-            toggleColumn={jest.fn()}
           />
         </TestProviders>
       );
@@ -101,7 +98,6 @@ describe('EventFieldsBrowser', () => {
             eventId={eventId}
             onUpdateColumns={jest.fn()}
             timelineId="test"
-            toggleColumn={jest.fn()}
           />
         </TestProviders>
       );
@@ -124,7 +120,6 @@ describe('EventFieldsBrowser', () => {
             eventId={eventId}
             onUpdateColumns={jest.fn()}
             timelineId="test"
-            toggleColumn={toggleColumn}
           />
         </TestProviders>
       );
@@ -157,7 +152,6 @@ describe('EventFieldsBrowser', () => {
             eventId={mockDetailItemDataId}
             onUpdateColumns={jest.fn()}
             timelineId="test"
-            toggleColumn={jest.fn()}
           />
         </TestProviders>
       );
@@ -184,7 +178,6 @@ describe('EventFieldsBrowser', () => {
             eventId={mockDetailItemDataId}
             onUpdateColumns={jest.fn()}
             timelineId="test"
-            toggleColumn={jest.fn()}
           />
         </TestProviders>
       );
@@ -203,7 +196,6 @@ describe('EventFieldsBrowser', () => {
             eventId={mockDetailItemDataId}
             onUpdateColumns={jest.fn()}
             timelineId="test"
-            toggleColumn={jest.fn()}
           />
         </TestProviders>
       );
@@ -224,7 +216,6 @@ describe('EventFieldsBrowser', () => {
             eventId={mockDetailItemDataId}
             onUpdateColumns={jest.fn()}
             timelineId="test"
-            toggleColumn={jest.fn()}
           />
         </TestProviders>
       );

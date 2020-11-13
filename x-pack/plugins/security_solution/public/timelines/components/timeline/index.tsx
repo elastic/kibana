@@ -11,13 +11,14 @@ import deepEqual from 'fast-deep-equal';
 
 import { inputsModel, inputsSelectors, State } from '../../../common/store';
 import { timelineActions, timelineSelectors } from '../../store/timeline';
-import { ColumnHeaderOptions, TimelineModel } from '../../../timelines/store/timeline/model';
+import { TimelineModel } from '../../../timelines/store/timeline/model';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 import { defaultHeaders } from './body/column_headers/default_headers';
 import { OnChangeItemsPerPage } from './events';
 import { Timeline } from './timeline';
 import { useSourcererScope } from '../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
+import { inputsActions } from '../../../common/store/inputs';
 
 export interface OwnProps {
   id: string;
@@ -41,6 +42,7 @@ const StatefulTimelineComponent = React.memo<Props>(
     filters,
     graphEventId,
     id,
+    isDatePickerLocked,
     isLive,
     isSaving,
     isTimelineExists,
@@ -49,7 +51,7 @@ const StatefulTimelineComponent = React.memo<Props>(
     kqlMode,
     kqlQueryExpression,
     onClose,
-    removeColumn,
+    noteIds,
     show,
     showCallOutUnauthorizedMsg,
     sort,
@@ -57,8 +59,8 @@ const StatefulTimelineComponent = React.memo<Props>(
     status,
     timelineType,
     timerangeKind,
+    toggleLock,
     updateItemsPerPage,
-    upsertColumn,
     usersViewing,
   }) => {
     const {
@@ -72,28 +74,6 @@ const StatefulTimelineComponent = React.memo<Props>(
     const onChangeItemsPerPage: OnChangeItemsPerPage = useCallback(
       (itemsChangedPerPage) => updateItemsPerPage!({ id, itemsPerPage: itemsChangedPerPage }),
       [id, updateItemsPerPage]
-    );
-
-    const toggleColumn = useCallback(
-      (column: ColumnHeaderOptions) => {
-        const exists = columns.findIndex((c) => c.id === column.id) !== -1;
-
-        if (!exists && upsertColumn != null) {
-          upsertColumn({
-            column,
-            id,
-            index: 1,
-          });
-        }
-
-        if (exists && removeColumn != null) {
-          removeColumn({
-            columnId: column.id,
-            id,
-          });
-        }
-      },
-      [columns, id, removeColumn, upsertColumn]
     );
 
     useEffect(() => {
@@ -115,6 +95,7 @@ const StatefulTimelineComponent = React.memo<Props>(
         id={id}
         indexPattern={indexPattern}
         indexNames={selectedPatterns}
+        isDatePickerLocked={isDatePickerLocked}
         isLive={isLive}
         isSaving={isSaving}
         itemsPerPage={itemsPerPage!}
@@ -122,6 +103,7 @@ const StatefulTimelineComponent = React.memo<Props>(
         kqlMode={kqlMode}
         kqlQueryExpression={kqlQueryExpression}
         loadingSourcerer={loading}
+        noteIds={noteIds}
         onChangeItemsPerPage={onChangeItemsPerPage}
         onClose={onClose}
         show={show!}
@@ -129,36 +111,36 @@ const StatefulTimelineComponent = React.memo<Props>(
         sort={sort!}
         start={start}
         status={status}
-        toggleColumn={toggleColumn}
         timelineType={timelineType}
         timerangeKind={timerangeKind}
+        toggleLock={toggleLock}
         usersViewing={usersViewing}
       />
     );
   },
-  (prevProps, nextProps) => {
-    return (
-      isTimerangeSame(prevProps, nextProps) &&
-      prevProps.graphEventId === nextProps.graphEventId &&
-      prevProps.id === nextProps.id &&
-      prevProps.isLive === nextProps.isLive &&
-      prevProps.isSaving === nextProps.isSaving &&
-      prevProps.isTimelineExists === nextProps.isTimelineExists &&
-      prevProps.itemsPerPage === nextProps.itemsPerPage &&
-      prevProps.kqlMode === nextProps.kqlMode &&
-      prevProps.kqlQueryExpression === nextProps.kqlQueryExpression &&
-      prevProps.show === nextProps.show &&
-      prevProps.showCallOutUnauthorizedMsg === nextProps.showCallOutUnauthorizedMsg &&
-      prevProps.timelineType === nextProps.timelineType &&
-      prevProps.status === nextProps.status &&
-      deepEqual(prevProps.columns, nextProps.columns) &&
-      deepEqual(prevProps.dataProviders, nextProps.dataProviders) &&
-      deepEqual(prevProps.filters, nextProps.filters) &&
-      deepEqual(prevProps.itemsPerPageOptions, nextProps.itemsPerPageOptions) &&
-      deepEqual(prevProps.sort, nextProps.sort) &&
-      deepEqual(prevProps.usersViewing, nextProps.usersViewing)
-    );
-  }
+  // eslint-disable-next-line complexity
+  (prevProps, nextProps) =>
+    isTimerangeSame(prevProps, nextProps) &&
+    prevProps.graphEventId === nextProps.graphEventId &&
+    prevProps.id === nextProps.id &&
+    prevProps.isDatePickerLocked === nextProps.isDatePickerLocked &&
+    prevProps.isLive === nextProps.isLive &&
+    prevProps.isSaving === nextProps.isSaving &&
+    prevProps.isTimelineExists === nextProps.isTimelineExists &&
+    prevProps.itemsPerPage === nextProps.itemsPerPage &&
+    prevProps.kqlMode === nextProps.kqlMode &&
+    prevProps.kqlQueryExpression === nextProps.kqlQueryExpression &&
+    prevProps.show === nextProps.show &&
+    prevProps.showCallOutUnauthorizedMsg === nextProps.showCallOutUnauthorizedMsg &&
+    prevProps.timelineType === nextProps.timelineType &&
+    prevProps.status === nextProps.status &&
+    deepEqual(prevProps.noteIds, nextProps.noteIds) &&
+    deepEqual(prevProps.columns, nextProps.columns) &&
+    deepEqual(prevProps.dataProviders, nextProps.dataProviders) &&
+    deepEqual(prevProps.filters, nextProps.filters) &&
+    deepEqual(prevProps.itemsPerPageOptions, nextProps.itemsPerPageOptions) &&
+    deepEqual(prevProps.sort, nextProps.sort) &&
+    deepEqual(prevProps.usersViewing, nextProps.usersViewing)
 );
 
 StatefulTimelineComponent.displayName = 'StatefulTimelineComponent';
@@ -168,9 +150,11 @@ const makeMapStateToProps = () => {
   const getTimeline = timelineSelectors.getTimelineByIdSelector();
   const getKqlQueryTimeline = timelineSelectors.getKqlFilterQuerySelector();
   const getInputsTimeline = inputsSelectors.getTimelineSelector();
+  const getGlobalInput = inputsSelectors.globalSelector();
   const mapStateToProps = (state: State, { id }: OwnProps) => {
     const timeline: TimelineModel = getTimeline(state, id) ?? timelineDefaults;
     const input: inputsModel.InputsRange = getInputsTimeline(state);
+    const globalInput: inputsModel.InputsRange = getGlobalInput(state);
     const {
       columns,
       dataProviders,
@@ -181,6 +165,7 @@ const makeMapStateToProps = () => {
       itemsPerPageOptions,
       isSaving,
       kqlMode,
+      noteIds,
       show,
       sort,
       status,
@@ -202,6 +187,7 @@ const makeMapStateToProps = () => {
       filters: timelineFilter,
       graphEventId,
       id,
+      isDatePickerLocked: globalInput.linkTo.includes('timeline'),
       isLive: input.policy.kind === 'interval',
       isSaving,
       isTimelineExists: getTimeline(state, id) != null,
@@ -209,6 +195,7 @@ const makeMapStateToProps = () => {
       itemsPerPageOptions,
       kqlMode,
       kqlQueryExpression,
+      noteIds,
       show,
       showCallOutUnauthorizedMsg: getShowCallOutUnauthorizedMsg(state),
       sort,
@@ -222,15 +209,12 @@ const makeMapStateToProps = () => {
 };
 
 const mapDispatchToProps = {
-  addProvider: timelineActions.addProvider,
   createTimeline: timelineActions.createTimeline,
-  removeColumn: timelineActions.removeColumn,
+  toggleLock: inputsActions.toggleTimelineLinkTo,
   updateColumns: timelineActions.updateColumns,
-  updateHighlightedDropAndProviderId: timelineActions.updateHighlightedDropAndProviderId,
   updateItemsPerPage: timelineActions.updateItemsPerPage,
   updateItemsPerPageOptions: timelineActions.updateItemsPerPageOptions,
   updateSort: timelineActions.updateSort,
-  upsertColumn: timelineActions.upsertColumn,
 };
 
 const connector = connect(makeMapStateToProps, mapDispatchToProps);

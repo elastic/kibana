@@ -61,7 +61,6 @@ interface Props {
   showSelectAllCheckbox: boolean;
   sort: Sort;
   timelineId: string;
-  toggleColumn: (column: ColumnHeaderOptions) => void;
 }
 
 interface DraggableContainerProps {
@@ -112,7 +111,6 @@ export const ColumnHeadersComponent = ({
   showSelectAllCheckbox,
   sort,
   timelineId,
-  toggleColumn,
 }: Props) => {
   const [draggingIndex, setDraggingIndex] = useState<number | null>(null);
   const {
@@ -245,7 +243,6 @@ export const ColumnHeadersComponent = ({
               height={FIELD_BROWSER_HEIGHT}
               onUpdateColumns={onUpdateColumns}
               timelineId={timelineId}
-              toggleColumn={toggleColumn}
               width={FIELD_BROWSER_WIDTH}
             />
           </EventsTh>
@@ -313,7 +310,6 @@ export const ColumnHeaders = React.memo(
     prevProps.showSelectAllCheckbox === nextProps.showSelectAllCheckbox &&
     prevProps.sort === nextProps.sort &&
     prevProps.timelineId === nextProps.timelineId &&
-    prevProps.toggleColumn === nextProps.toggleColumn &&
     deepEqual(prevProps.columnHeaders, nextProps.columnHeaders) &&
     deepEqual(prevProps.browserFields, nextProps.browserFields)
 );

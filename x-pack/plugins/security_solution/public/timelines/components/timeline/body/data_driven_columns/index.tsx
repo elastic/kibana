@@ -10,7 +10,6 @@ import { getOr } from 'lodash/fp';
 import { Ecs } from '../../../../../../common/ecs';
 import { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
 import { ColumnHeaderOptions } from '../../../../../timelines/store/timeline/model';
-import { OnColumnResized } from '../../events';
 import { EventsTd, EventsTdContent, EventsTdGroupData } from '../../styles';
 import { ColumnRenderer } from '../renderers/column_renderer';
 import { getColumnRenderer } from '../renderers/get_column_renderer';
@@ -21,7 +20,6 @@ interface Props {
   columnRenderers: ColumnRenderer[];
   data: TimelineNonEcsData[];
   ecsData: Ecs;
-  onColumnResized: OnColumnResized;
   timelineId: string;
 }
 

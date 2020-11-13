@@ -132,7 +132,6 @@ interface Props {
   onRuleChange?: () => void;
   start: string;
   sort: Sort;
-  toggleColumn: (column: ColumnHeaderOptions) => void;
   utilityBar?: (refetch: inputsModel.Refetch, totalCount: number) => React.ReactNode;
   // If truthy, the graph viewer (Resolver) is showing
   graphEventId: string | undefined;
@@ -160,7 +159,6 @@ const EventsViewerComponent: React.FC<Props> = ({
   onRuleChange,
   start,
   sort,
-  toggleColumn,
   utilityBar,
   graphEventId,
 }) => {
@@ -342,7 +340,6 @@ const EventsViewerComponent: React.FC<Props> = ({
                       onRuleChange={onRuleChange}
                       refetch={refetch}
                       sort={sort}
-                      toggleColumn={toggleColumn}
                     />
                     <Footer
                       activePage={pageInfo.activePage}
@@ -379,7 +376,6 @@ const EventsViewerComponent: React.FC<Props> = ({
               docValueFields={docValueFields}
               event={expanded}
               timelineId={id}
-              toggleColumn={toggleColumn}
             />
           </EuiFlyoutBody>
         </EventDetailsFlyout>

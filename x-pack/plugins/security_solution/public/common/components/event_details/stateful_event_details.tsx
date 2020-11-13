@@ -20,11 +20,10 @@ interface Props {
   id: string;
   onUpdateColumns: OnUpdateColumns;
   timelineId: string;
-  toggleColumn: (column: ColumnHeaderOptions) => void;
 }
 
 export const StatefulEventDetails = React.memo<Props>(
-  ({ browserFields, columnHeaders, data, id, onUpdateColumns, timelineId, toggleColumn }) => {
+  ({ browserFields, columnHeaders, data, id, onUpdateColumns, timelineId }) => {
     // TODO: Move to the store
     const [view, setView] = useState<View>('table-view');
 
@@ -37,7 +36,6 @@ export const StatefulEventDetails = React.memo<Props>(
         onUpdateColumns={onUpdateColumns}
         onViewSelected={setView}
         timelineId={timelineId}
-        toggleColumn={toggleColumn}
         view={view}
       />
     );

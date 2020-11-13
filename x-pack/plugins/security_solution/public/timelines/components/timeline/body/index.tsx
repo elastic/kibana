@@ -9,17 +9,13 @@ import React, { useMemo } from 'react';
 import { inputsModel } from '../../../../common/store';
 import { BrowserFields, DocValueFields } from '../../../../common/containers/source';
 import { TimelineItem, TimelineNonEcsData } from '../../../../../common/search_strategy';
-import { Note } from '../../../../common/lib/note';
 import { ColumnHeaderOptions } from '../../../store/timeline/model';
-import { AddNoteToEvent, UpdateNote } from '../../notes/helpers';
 import {
   OnColumnRemoved,
   OnColumnResized,
   OnColumnSorted,
-  OnPinEvent,
   OnRowSelected,
   OnSelectAll,
-  OnUnPinEvent,
   OnUpdateColumns,
 } from '../events';
 import { EventsTable, TimelineBody, TimelineBodyGlobalStyle } from '../styles';
@@ -34,14 +30,12 @@ import { TimelineEventsType, TimelineId } from '../../../../../common/types/time
 import { ActiveTimelineExpandedEvent } from '../../../containers/active_timeline_context';
 
 export interface BodyProps {
-  addNoteToEvent: AddNoteToEvent;
   browserFields: BrowserFields;
   columnHeaders: ColumnHeaderOptions[];
   columnRenderers: ColumnRenderer[];
   data: TimelineItem[];
   docValueFields: DocValueFields[];
   expanded: ActiveTimelineExpandedEvent;
-  getNotesByIds: (noteIds: string[]) => Note[];
   graphEventId?: string;
   isEventViewer?: boolean;
   isSelectAllChecked: boolean;
@@ -54,9 +48,7 @@ export interface BodyProps {
   onEventToggled: (event: TimelineItem) => void;
   onRowSelected: OnRowSelected;
   onSelectAll: OnSelectAll;
-  onPinEvent: OnPinEvent;
   onUpdateColumns: OnUpdateColumns;
-  onUnPinEvent: OnUnPinEvent;
   pinnedEventIds: Readonly<Record<string, boolean>>;
   refetch: inputsModel.Refetch;
   onRuleChange?: () => void;
@@ -66,8 +58,6 @@ export interface BodyProps {
   showCheckboxes: boolean;
   sort: Sort;
   timelineId: string;
-  toggleColumn: (column: ColumnHeaderOptions) => void;
-  updateNote: UpdateNote;
 }
 
 export const hasAdditionalActions = (id: TimelineId): boolean =>
@@ -80,14 +70,12 @@ const EXTRA_WIDTH = 4; // px
 /** Renders the timeline body */
 export const Body = React.memo<BodyProps>(
   ({
-    addNoteToEvent,
     browserFields,
     columnHeaders,
     columnRenderers,
     data,
     eventIdToNoteIds,
     expanded,
-    getNotesByIds,
     graphEventId,
     isEventViewer = false,
     isSelectAllChecked,
@@ -98,9 +86,7 @@ export const Body = React.memo<BodyProps>(
     onEventToggled,
     onRowSelected,
     onSelectAll,
-    onPinEvent,
     onUpdateColumns,
-    onUnPinEvent,
     pinnedEventIds,
     rowRenderers,
     refetch,
@@ -109,9 +95,7 @@ export const Body = React.memo<BodyProps>(
     show,
     showCheckboxes,
     sort,
-    toggleColumn,
     timelineId,
-    updateNote,
   }) => {
     const actionsColumnWidth = useMemo(
       () =>
@@ -154,26 +138,20 @@ export const Body = React.memo<BodyProps>(
               showSelectAllCheckbox={showCheckboxes}
               sort={sort}
               timelineId={timelineId}
-              toggleColumn={toggleColumn}
             />
 
             <Events
               actionsColumnWidth={actionsColumnWidth}
-              addNoteToEvent={addNoteToEvent}
               browserFields={browserFields}
               columnHeaders={columnHeaders}
               columnRenderers={columnRenderers}
               data={data}
               expanded={expanded}
               eventIdToNoteIds={eventIdToNoteIds}
-              getNotesByIds={getNotesByIds}
               id={timelineId}
               isEventViewer={isEventViewer}
               loadingEventIds={loadingEventIds}
-              onColumnResized={onColumnResized}
-              onPinEvent={onPinEvent}
               onRowSelected={onRowSelected}
-              onUnPinEvent={onUnPinEvent}
               onEventToggled={onEventToggled}
               pinnedEventIds={pinnedEventIds}
               refetch={refetch}
@@ -181,8 +159,6 @@ export const Body = React.memo<BodyProps>(
               onRuleChange={onRuleChange}
               selectedEventIds={selectedEventIds}
               showCheckboxes={showCheckboxes}
-              toggleColumn={toggleColumn}
-              updateNote={updateNote}
             />
           </EventsTable>
         </TimelineBody>

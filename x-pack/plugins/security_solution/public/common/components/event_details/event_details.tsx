@@ -33,7 +33,6 @@ interface Props {
   onUpdateColumns: OnUpdateColumns;
   onViewSelected: (selected: View) => void;
   timelineId: string;
-  toggleColumn: (column: ColumnHeaderOptions) => void;
 }
 
 const Details = styled.div`
@@ -52,7 +51,6 @@ export const EventDetails = React.memo<Props>(
     onUpdateColumns,
     onViewSelected,
     timelineId,
-    toggleColumn,
   }) => {
     const handleTabClick = useCallback((e) => onViewSelected(e.id as View), [onViewSelected]);
 
@@ -69,7 +67,6 @@ export const EventDetails = React.memo<Props>(
               eventId={id}
               onUpdateColumns={onUpdateColumns}
               timelineId={timelineId}
-              toggleColumn={toggleColumn}
             />
           ),
         },
@@ -79,7 +76,7 @@ export const EventDetails = React.memo<Props>(
           content: <JsonView data={data} />,
         },
       ],
-      [browserFields, columnHeaders, data, id, onUpdateColumns, timelineId, toggleColumn]
+      [browserFields, columnHeaders, data, id, onUpdateColumns, timelineId]
     );
 
     return (

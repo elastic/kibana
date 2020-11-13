@@ -51,14 +51,12 @@ describe('Properties Right', () => {
     timelineId: 'timelineId',
     isDataInTimeline: false,
     showNotes: false,
-    showNotesFromWidth: false,
     showDescription: false,
     showUsersView: false,
     usersViewing: [],
     description: 'desc',
     updateDescription: jest.fn(),
     associateNote: jest.fn(),
-    getNotesByIds: jest.fn(),
     noteIds: [],
     onToggleShowNotes: jest.fn(),
     onCloseTimelineModal: jest.fn(),
@@ -112,64 +110,6 @@ describe('Properties Right', () => {
         expect(wrapper.find('[data-test-subj="Description"]').exists()).not.toBeTruthy();
       });
     });
-
-    describe('render with notes button', () => {
-      beforeAll(() => {
-        (useKibana as jest.Mock).mockReturnValue({
-          services: {
-            application: {
-              capabilities: {
-                siem: {
-                  crud: true,
-                },
-              },
-            },
-          },
-        });
-        const propsWithshowNotes = {
-          ...props,
-          showNotesFromWidth: true,
-        };
-        wrapper = mount(<PropertiesRight {...propsWithshowNotes} />);
-      });
-
-      afterAll(() => {
-        (useKibana as jest.Mock).mockReset();
-      });
-
-      test('it renders NotesButton', () => {
-        expect(wrapper.find('[data-test-subj="NotesButton"]').exists()).toBeTruthy();
-      });
-    });
-
-    describe('render with description', () => {
-      beforeAll(() => {
-        (useKibana as jest.Mock).mockReturnValue({
-          services: {
-            application: {
-              capabilities: {
-                siem: {
-                  crud: true,
-                },
-              },
-            },
-          },
-        });
-        const propsWithshowDescription = {
-          ...props,
-          showDescription: true,
-        };
-        wrapper = mount(<PropertiesRight {...propsWithshowDescription} />);
-      });
-
-      afterAll(() => {
-        (useKibana as jest.Mock).mockReset();
-      });
-
-      test('it renders Description', () => {
-        expect(wrapper.find('[data-test-subj="Description"]').exists()).toBeTruthy();
-      });
-    });
   });
 
   describe('with no crud', () => {
@@ -211,64 +151,6 @@ describe('Properties Right', () => {
 
       test('it renders no Description', () => {
         expect(wrapper.find('[data-test-subj="Description"]').exists()).not.toBeTruthy();
-      });
-    });
-
-    describe('render with notes button', () => {
-      beforeAll(() => {
-        (useKibana as jest.Mock).mockReturnValue({
-          services: {
-            application: {
-              capabilities: {
-                siem: {
-                  crud: false,
-                },
-              },
-            },
-          },
-        });
-        const propsWithshowNotes = {
-          ...props,
-          showNotesFromWidth: true,
-        };
-        wrapper = mount(<PropertiesRight {...propsWithshowNotes} />);
-      });
-
-      afterAll(() => {
-        (useKibana as jest.Mock).mockReset();
-      });
-
-      test('it renders NotesButton', () => {
-        expect(wrapper.find('[data-test-subj="NotesButton"]').exists()).toBeTruthy();
-      });
-    });
-
-    describe('render with description', () => {
-      beforeAll(() => {
-        (useKibana as jest.Mock).mockReturnValue({
-          services: {
-            application: {
-              capabilities: {
-                siem: {
-                  crud: false,
-                },
-              },
-            },
-          },
-        });
-        const propsWithshowDescription = {
-          ...props,
-          showDescription: true,
-        };
-        wrapper = mount(<PropertiesRight {...propsWithshowDescription} />);
-      });
-
-      afterAll(() => {
-        (useKibana as jest.Mock).mockReset();
-      });
-
-      test('it renders Description', () => {
-        expect(wrapper.find('[data-test-subj="Description"]').exists()).toBeTruthy();
       });
     });
   });

@@ -19,7 +19,6 @@ import { waitFor } from '@testing-library/react';
 import { useMountAppended } from '../../../../common/utils/use_mount_appended';
 import { SELECTOR_TIMELINE_BODY_CLASS_NAME, TimelineBody } from '../styles';
 
-const mockGetNotesByIds = (eventId: string[]) => [];
 const mockSort: Sort = {
   columnId: '@timestamp',
   sortDirection: Direction.desc,
@@ -51,7 +50,6 @@ jest.mock('../../../../common/lib/helpers/scheduler', () => ({
 describe('Body', () => {
   const mount = useMountAppended();
   const props: BodyProps = {
-    addNoteToEvent: jest.fn(),
     browserFields: mockBrowserFields,
     columnHeaders: defaultHeaders,
     columnRenderers,
@@ -60,16 +58,13 @@ describe('Body', () => {
     eventIdToNoteIds: {},
     expanded: {},
     isSelectAllChecked: false,
-    getNotesByIds: mockGetNotesByIds,
     loadingEventIds: [],
     onColumnRemoved: jest.fn(),
     onColumnResized: jest.fn(),
     onColumnSorted: jest.fn(),
     onEventToggled: jest.fn(),
-    onPinEvent: jest.fn(),
     onRowSelected: jest.fn(),
     onSelectAll: jest.fn(),
-    onUnPinEvent: jest.fn(),
     onUpdateColumns: jest.fn(),
     pinnedEventIds: {},
     refetch: jest.fn(),
@@ -79,8 +74,6 @@ describe('Body', () => {
     sort: mockSort,
     showCheckboxes: false,
     timelineId: 'timeline-test',
-    toggleColumn: jest.fn(),
-    updateNote: jest.fn(),
   };
 
   describe('rendering', () => {
