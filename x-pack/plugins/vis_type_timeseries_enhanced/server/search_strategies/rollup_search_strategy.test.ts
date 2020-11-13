@@ -4,12 +4,34 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { RollupSearchStrategy } from './rollup_search_strategy';
+import type { ReqFacade } from '../../../../../src/plugins/vis_type_timeseries/server';
+
+jest.mock('../../../../../src/plugins/vis_type_timeseries/server', () => {
+  const actual = jest.requireActual('../../../../../src/plugins/vis_type_timeseries/server');
+  class AbstractSearchStrategyMock {
+    getFieldsForWildcard() {
+      return [
+        {
+          name: 'day_of_week.terms.value',
+          type: 'object',
+          esTypes: ['object'],
+          searchable: false,
+          aggregatable: false,
+        },
+      ];
+    }
+  }
+
+  return {
+    ...actual,
+    AbstractSearchStrategy: AbstractSearchStrategyMock,
+  };
+});
 
 describe('Rollup Search Strategy', () => {
-  let callWithRequest;
-  let rollupResolvedData;
+  let rollupResolvedData: Promise<any>;
 
-  const request = {
+  const request = ({
     requestContext: {
       core: {
         elasticsearch: {
@@ -23,7 +45,7 @@ describe('Rollup Search Strategy', () => {
         },
       },
     },
-  };
+  } as unknown) as ReqFacade;
 
   const getRollupService = jest.fn().mockImplementation(() => {
     return {
@@ -35,19 +57,6 @@ describe('Rollup Search Strategy', () => {
 
   const indexPattern = 'indexPattern';
 
-  beforeEach(() => {
-    RollupSearchStrategy.prototype.getCallWithRequestInstance = jest.fn(() => callWithRequest);
-    RollupSearchStrategy.prototype.getFieldsForWildcard = jest.fn(() => [
-      {
-        name: 'day_of_week.terms.value',
-        type: 'object',
-        esTypes: ['object'],
-        searchable: false,
-        aggregatable: false,
-      },
-    ]);
-  });
-
   test('should create instance of RollupSearchRequest', () => {
     const rollupSearchStrategy = new RollupSearchStrategy(getRollupService);
 
@@ -55,37 +64,39 @@ describe('Rollup Search Strategy', () => {
   });
 
   describe('checkForViability', () => {
-    let rollupSearchStrategy;
+    let rollupSearchStrategy: RollupSearchStrategy;
     const rollupIndex = 'rollupIndex';
 
     beforeEach(() => {
       rollupSearchStrategy = new RollupSearchStrategy(getRollupService);
-      rollupSearchStrategy.getRollupData = jest.fn(() => ({
-        [rollupIndex]: {
-          rollup_jobs: [
-            {
-              job_id: 'test',
-              rollup_index: rollupIndex,
-              index_pattern: 'kibana*',
-              fields: {
-                order_date: [
-                  {
-                    agg: 'date_histogram',
-                    delay: '1m',
-                    interval: '1m',
-                    time_zone: 'UTC',
-                  },
-                ],
-                day_of_week: [
-                  {
-                    agg: 'terms',
-                  },
-                ],
+      rollupSearchStrategy.getRollupData = jest.fn(() =>
+        Promise.resolve({
+          [rollupIndex]: {
+            rollup_jobs: [
+              {
+                job_id: 'test',
+                rollup_index: rollupIndex,
+                index_pattern: 'kibana*',
+                fields: {
+                  order_date: [
+                    {
+                      agg: 'date_histogram',
+                      delay: '1m',
+                      interval: '1m',
+                      time_zone: 'UTC',
+                    },
+                  ],
+                  day_of_week: [
+                    {
+                      agg: 'terms',
+                    },
+                  ],
+                },
               },
-            },
-          ],
-        },
-      }));
+            ],
+          },
+        })
+      );
     });
 
     test('isViable should be false for invalid index', async () => {
@@ -99,7 +110,7 @@ describe('Rollup Search Strategy', () => {
   });
 
   describe('getRollupData', () => {
-    let rollupSearchStrategy;
+    let rollupSearchStrategy: RollupSearchStrategy;
 
     beforeEach(() => {
       rollupSearchStrategy = new RollupSearchStrategy(getRollupService);
@@ -124,8 +135,8 @@ describe('Rollup Search Strategy', () => {
   });
 
   describe('getFieldsForWildcard', () => {
-    let rollupSearchStrategy;
-    let fieldsCapabilities;
+    let rollupSearchStrategy: RollupSearchStrategy;
+    let fieldsCapabilities: Record<string, any>;
 
     const rollupIndex = 'rollupIndex';
 
