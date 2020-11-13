@@ -39,48 +39,48 @@ export const intervalOptions = [
     display: i18n.translate('data.search.aggs.buckets.intervalOptions.millisecondDisplayName', {
       defaultMessage: 'Millisecond',
     }),
-    val: '1ms',
+    val: 'ms',
   },
   {
     display: i18n.translate('data.search.aggs.buckets.intervalOptions.secondDisplayName', {
       defaultMessage: 'Second',
     }),
-    val: '1s',
+    val: 's',
   },
   {
     display: i18n.translate('data.search.aggs.buckets.intervalOptions.minuteDisplayName', {
       defaultMessage: 'Minute',
     }),
-    val: '1m',
+    val: 'm',
   },
   {
     display: i18n.translate('data.search.aggs.buckets.intervalOptions.hourlyDisplayName', {
       defaultMessage: 'Hour',
     }),
-    val: '1h',
+    val: 'h',
   },
   {
     display: i18n.translate('data.search.aggs.buckets.intervalOptions.dailyDisplayName', {
       defaultMessage: 'Day',
     }),
-    val: '1d',
+    val: 'd',
   },
   {
     display: i18n.translate('data.search.aggs.buckets.intervalOptions.weeklyDisplayName', {
       defaultMessage: 'Week',
     }),
-    val: '1w',
+    val: 'w',
   },
   {
     display: i18n.translate('data.search.aggs.buckets.intervalOptions.monthlyDisplayName', {
       defaultMessage: 'Month',
     }),
-    val: '1M',
+    val: 'M',
   },
   {
     display: i18n.translate('data.search.aggs.buckets.intervalOptions.yearlyDisplayName', {
       defaultMessage: 'Year',
     }),
-    val: '1y',
+    val: 'y',
   },
 ];

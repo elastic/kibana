@@ -50,7 +50,12 @@ const updateTimeBuckets = (
       : undefined;
   const buckets = customBuckets || agg.buckets;
   buckets.setBounds(bounds);
-  buckets.setInterval(agg.params.interval);
+  // for interval options we should add '1' so that we didn't get error in converter function (for example 'day' -> '1day')
+  if (find(intervalOptions, { val: agg.params.interval })) {
+    buckets.setInterval(1 + agg.params.interval);
+  } else {
+    buckets.setInterval(agg.params.interval);
+  }
 };
 
 export interface DateHistogramBucketAggDependencies {
