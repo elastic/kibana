@@ -17,9 +17,16 @@
  * under the License.
  */
 
-import { App, AppNavLinkStatus, AppStatus, PublicAppInfo } from '../types';
+import {
+  App,
+  AppNavLinkStatus,
+  AppStatus,
+  AppSubLink,
+  PublicAppInfo,
+  PublicAppSubLinkInfo,
+} from '../types';
 
-export function getAppInfo(app: App<unknown>): PublicAppInfo {
+export function getAppInfo(app: App): PublicAppInfo {
   const navLinkStatus =
     app.navLinkStatus === AppNavLinkStatus.default
       ? app.status === AppStatus.inaccessible
@@ -32,5 +39,21 @@ export function getAppInfo(app: App<unknown>): PublicAppInfo {
     status: app.status!,
     navLinkStatus,
     appRoute: app.appRoute!,
+    subLinks: getSubLinkInfos(app, app.subLinks),
   };
+}
+
+function getSubLinkInfos(app: App, subLinks?: AppSubLink[]): PublicAppSubLinkInfo[] {
+  if (!subLinks) {
+    return [];
+  }
+
+  return subLinks.map((rawSubLink) => {
+    return {
+      id: rawSubLink.id,
+      title: rawSubLink.title,
+      path: rawSubLink.path,
+      subLinks: getSubLinkInfos(app, rawSubLink.subLinks),
+    };
+  });
 }

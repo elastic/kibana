@@ -43,6 +43,42 @@ describe('getAppInfo', () => {
       status: AppStatus.accessible,
       navLinkStatus: AppNavLinkStatus.visible,
       appRoute: `/app/some-id`,
+      subLinks: [],
+    });
+  });
+
+  it('populates default values for nested subLinks', () => {
+    const app = createApp({
+      subLinks: [
+        {
+          id: 'sub-id',
+          title: 'sub-title',
+          subLinks: [{ id: 'sub-sub-id', title: 'sub-sub-title', path: '/sub-sub' }],
+        },
+      ],
+    });
+    const info = getAppInfo(app);
+
+    expect(info).toEqual({
+      id: 'some-id',
+      title: 'some-title',
+      status: AppStatus.accessible,
+      navLinkStatus: AppNavLinkStatus.visible,
+      appRoute: `/app/some-id`,
+      subLinks: [
+        {
+          id: 'sub-id',
+          title: 'sub-title',
+          subLinks: [
+            {
+              id: 'sub-sub-id',
+              title: 'sub-sub-title',
+              path: '/sub-sub',
+              subLinks: [], // default empty array added
+            },
+          ],
+        },
+      ],
     });
   });
 

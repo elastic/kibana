@@ -60,6 +60,7 @@ export interface App<HistoryLocationState = unknown> {
     navLinkStatus?: AppNavLinkStatus;
     order?: number;
     status?: AppStatus;
+    subLinks?: AppSubLink[];
     title: string;
     tooltip?: string;
     updater$?: Observable<AppUpdater>;
@@ -182,10 +183,22 @@ export enum AppStatus {
 }
 
 // @public
+export type AppSubLink = {
+    id: string;
+    title: string;
+} & ({
+    path: string;
+    subLinks?: AppSubLink[];
+} | {
+    path?: string;
+    subLinks: AppSubLink[];
+});
+
+// @public
 export type AppUnmount = () => void;
 
 // @public
-export type AppUpdatableFields = Pick<App, 'status' | 'navLinkStatus' | 'tooltip' | 'defaultPath'>;
+export type AppUpdatableFields = Pick<App, 'status' | 'navLinkStatus' | 'tooltip' | 'defaultPath' | 'subLinks'>;
 
 // @public
 export type AppUpdater = (app: App) => Partial<AppUpdatableFields> | undefined;
@@ -967,10 +980,16 @@ export interface PluginInitializerContext<ConfigSchema extends object = object> 
 export type PluginOpaqueId = symbol;
 
 // @public
-export type PublicAppInfo = Omit<App, 'mount' | 'updater$'> & {
+export type PublicAppInfo = Omit<App, 'mount' | 'updater$' | 'subLinks'> & {
     status: AppStatus;
     navLinkStatus: AppNavLinkStatus;
     appRoute: string;
+    subLinks: PublicAppSubLinkInfo[];
+};
+
+// @public
+export type PublicAppSubLinkInfo = Omit<AppSubLink, 'subLinks'> & {
+    subLinks: PublicAppSubLinkInfo[];
 };
 
 // @public

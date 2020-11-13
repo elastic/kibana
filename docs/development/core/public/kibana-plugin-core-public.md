@@ -138,6 +138,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [AppLeaveHandler](./kibana-plugin-core-public.appleavehandler.md) | A handler that will be executed before leaving the application, either when going to another application or when closing the browser tab or manually changing the url. Should return <code>confirm</code> to to prompt a message to the user before leaving the page, or <code>default</code> to keep the default behavior (doing nothing).<!-- -->See [AppMountParameters](./kibana-plugin-core-public.appmountparameters.md) for detailed usage examples. |
 |  [AppMount](./kibana-plugin-core-public.appmount.md) | A mount function called when the user navigates to this app's route. |
 |  [AppMountDeprecated](./kibana-plugin-core-public.appmountdeprecated.md) | A mount function called when the user navigates to this app's route. |
+|  [AppSubLink](./kibana-plugin-core-public.appsublink.md) | Input type for registering secondary in-app locations for an application.<!-- -->Sublinks must include at least one of <code>path</code> or <code>subLinks</code>. A sublink that does not have a <code>path</code> represents a topological level in the application's hierarchy, but does not have a destination URL that is user-accessible.<!-- -->Used to populate navigational search results (where available). |
 |  [AppUnmount](./kibana-plugin-core-public.appunmount.md) | A function called when an application should be unmounted from the page. This function should be synchronous. |
 |  [AppUpdatableFields](./kibana-plugin-core-public.appupdatablefields.md) | Defines the list of fields that can be updated via an [AppUpdater](./kibana-plugin-core-public.appupdater.md)<!-- -->. |
 |  [AppUpdater](./kibana-plugin-core-public.appupdater.md) | Updater for applications. see [ApplicationSetup](./kibana-plugin-core-public.applicationsetup.md) |
@@ -160,6 +161,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [PluginInitializer](./kibana-plugin-core-public.plugininitializer.md) | The <code>plugin</code> export at the root of a plugin's <code>public</code> directory should conform to this interface. |
 |  [PluginOpaqueId](./kibana-plugin-core-public.pluginopaqueid.md) |  |
 |  [PublicAppInfo](./kibana-plugin-core-public.publicappinfo.md) | Public information about a registered [application](./kibana-plugin-core-public.app.md) |
+|  [PublicAppSubLinkInfo](./kibana-plugin-core-public.publicappsublinkinfo.md) | Public information about a registered app's [subLinks](./kibana-plugin-core-public.appsublink.md) |
 |  [PublicUiSettingsParams](./kibana-plugin-core-public.publicuisettingsparams.md) | A sub-set of [UiSettingsParams](./kibana-plugin-core-public.uisettingsparams.md) exposed to the client-side. |
 |  [SavedObjectAttribute](./kibana-plugin-core-public.savedobjectattribute.md) | Type definition for a Saved Object attribute value |
 |  [SavedObjectAttributeSingle](./kibana-plugin-core-public.savedobjectattributesingle.md) | Don't use this type, it's simply a helper type for [SavedObjectAttribute](./kibana-plugin-core-public.savedobjectattribute.md) |

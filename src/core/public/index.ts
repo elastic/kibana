@@ -95,7 +95,6 @@ export {
   ApplicationSetup,
   ApplicationStart,
   App,
-  PublicAppInfo,
   AppMount,
   AppMountDeprecated,
   AppUnmount,
@@ -110,6 +109,9 @@ export {
   AppNavLinkStatus,
   AppUpdatableFields,
   AppUpdater,
+  AppSubLink,
+  PublicAppInfo,
+  PublicAppSubLinkInfo,
   ScopedHistory,
   NavigateToAppOptions,
 } from './application';
