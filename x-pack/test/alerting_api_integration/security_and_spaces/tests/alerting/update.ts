@@ -963,7 +963,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
                 error: 'Forbidden',
                 message: getConsumerUnauthorizedErrorMessage(
                   'update',
-                  'test.longRunning',
+                  'test.noop',
                   'alertsFixture'
                 ),
                 statusCode: 403,
