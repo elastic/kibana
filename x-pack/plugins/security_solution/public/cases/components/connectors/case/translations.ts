@@ -77,3 +77,10 @@ export const CASE_CONNECTOR_CALL_OUT_INFO = i18n.translate(
     defaultMessage: 'All alerts after rule creation will be appended to the selected case.',
   }
 );
+
+export const CASE_CONNECTOR_ADD_NEW_CASE = i18n.translate(
+  'xpack.securitySolution.case.components.connectors.case.addNewCaseOption',
+  {
+    defaultMessage: 'Add new case',
+  }
+);

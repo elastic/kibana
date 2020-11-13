@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFormRow, EuiSelect, EuiSelectOption } from '@elastic/eui';
+import { EuiFormRow, EuiSuperSelect, EuiSuperSelectOption } from '@elastic/eui';
 import React, { memo, useMemo, useCallback } from 'react';
 import { Case } from '../../../containers/types';
 
@@ -17,30 +17,46 @@ interface CaseDropdownProps {
   onCaseChanged: (id: string) => void;
 }
 
+const addNewCase = {
+  value: 'add-case',
+  inputDisplay: (
+    <span className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--flushLeft">
+      {i18n.CASE_CONNECTOR_ADD_NEW_CASE}
+    </span>
+  ),
+  'data-test-subj': 'dropdown-connector-add-connector',
+};
+
 const CasesDropdownComponent: React.FC<CaseDropdownProps> = ({
   isLoading,
   cases,
   selectedCase,
   onCaseChanged,
 }) => {
-  const options: EuiSelectOption[] = useMemo(
-    () => cases.map((theCase) => ({ value: theCase.id, text: theCase.title })),
+  const options: Array<EuiSuperSelectOption<string>> = useMemo(
+    () =>
+      cases.reduce(
+        (acc, theCase) => ({
+          ...acc,
+          value: theCase.id,
+          inputDisplay: <span>{theCase.title}</span>,
+        }),
+        [addNewCase]
+      ),
     [cases]
   );
 
-  const onChange = useCallback(
-    (e: React.ChangeEvent<HTMLSelectElement>) => onCaseChanged(e.target.value),
-    [onCaseChanged]
-  );
+  const onChange = useCallback((id: string) => onCaseChanged(id), [onCaseChanged]);
 
   return (
     <EuiFormRow label={i18n.CASE_CONNECTOR_CASES_DROPDOWN_ROW_LABEL} fullWidth={true}>
-      <EuiSelect
+      <EuiSuperSelect
         options={options}
         data-test-subj="case-connector-cases-dropdown"
-        fullWidth={true}
+        disabled={isLoading}
+        fullWidth
         isLoading={isLoading}
-        value={selectedCase}
+        valueOfSelected={selectedCase}
         onChange={onChange}
       />
     </EuiFormRow>
