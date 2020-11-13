@@ -117,7 +117,7 @@ describe('register()', () => {
 
     expect(() => registry.register(alertType)).toThrowError(
       new Error(
-        `Alert type by id ${alertType.id} cannot be registered. Action groups [resolved] is reserved by framework.`
+        `Alert type [id="${alertType.id}"] cannot be registered. Action groups [resolved] are reserved by the framework.`
       )
     );
   });
