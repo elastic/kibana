@@ -75,7 +75,7 @@ import {
   ViewMode,
 } from '../../../embeddable/public';
 import { DashboardPanelState, DASHBOARD_CONTAINER_TYPE } from '.';
-import { convertSavedDashboardPanelToPanelState } from './lib/embeddable_saved_object_converters';
+import { convertSavedDashboardPanelToPanelState } from '../../common/embeddable/embeddable_saved_object_converters';
 import { DashboardTopNav } from './top_nav/dashboard_top_nav';
 import {
   dashboardBreadcrumb,
@@ -785,7 +785,7 @@ export function DashboardApp({
   }, [state.dashboardStateManager, state.dashboardContainer, onAppLeave]);
 
   return (
-    <>
+    <div className="app-container dshAppContainer">
       {isActiveState(state) && (
         <DashboardTopNav
           createNew={createNew}
@@ -809,6 +809,6 @@ export function DashboardApp({
         />
       )}
       <div id="dashboardViewport" />
-    </>
+    </div>
   );
 }

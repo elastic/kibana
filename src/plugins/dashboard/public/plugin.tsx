@@ -297,6 +297,7 @@ export class DashboardPlugin
       category: DEFAULT_APP_CATEGORIES.kibana,
       mount: async (params: AppMountParameters) => {
         this.currentHistory = params.history;
+        params.element.classList.add('dshAppContainer');
         const { mountApp } = await import('./application/dashboard_router');
         appMounted();
         return mountApp({
