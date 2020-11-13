@@ -5,15 +5,12 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
 import { EuiLoadingSpinner } from '@elastic/eui';
 
-import { Loading } from './';
+import './loading.scss';
 
-describe('Loading', () => {
-  it('renders', () => {
-    const wrapper = shallow(<Loading />);
-
-    expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(1);
-  });
-});
+export const Loading: React.FC = () => (
+  <div className="enterpriseSearchLoading">
+    <EuiLoadingSpinner size="xl" />
+  </div>
+);
