@@ -4,48 +4,38 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getOr } from 'lodash/fp';
-import React from 'react';
-import { Query } from 'react-apollo';
-import { connect } from 'react-redux';
-import { compose } from 'redux';
+import { noop } from 'lodash/fp';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import deepEqual from 'fast-deep-equal';
 
-import { DocumentNode } from 'graphql';
-import { ScaleType } from '@elastic/charts';
-import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
-import {
-  GetNetworkDnsQuery,
-  NetworkDnsEdges,
-  NetworkDnsSortField,
-  PageInfoPaginated,
-  MatrixOverOrdinalHistogramData,
-} from '../../../graphql/types';
-import { inputsModel, State, inputsSelectors } from '../../../common/store';
-import { withKibana, WithKibanaProps } from '../../../common/lib/kibana';
+import { ESTermQuery } from '../../../../common/typed_json';
+import { inputsModel } from '../../../common/store';
+import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
+import { useKibana } from '../../../common/lib/kibana';
+import { createFilter } from '../../../common/containers/helpers';
+import { NetworkDnsEdges, PageInfoPaginated } from '../../../../common/search_strategy';
 import { generateTablePaginationOptions } from '../../../common/components/paginated_table/helpers';
-import { createFilter, getDefaultFetchPolicy } from '../../../common/containers/helpers';
-import {
-  QueryTemplatePaginated,
-  QueryTemplatePaginatedProps,
-} from '../../../common/containers/query_template_paginated';
-import { networkDnsQuery } from './index.gql_query';
-import { DEFAULT_TABLE_ACTIVE_PAGE, DEFAULT_TABLE_LIMIT } from '../../../common/store/constants';
-import { MatrixHistogram } from '../../../common/components/matrix_histogram';
-import {
-  MatrixHistogramOption,
-  GetSubTitle,
-} from '../../../common/components/matrix_histogram/types';
-import { UpdateDateRange } from '../../../common/components/charts/common';
-import { GlobalTimeArgs } from '../../../common/containers/use_global_time';
 import { networkModel, networkSelectors } from '../../store';
+import {
+  NetworkQueries,
+  NetworkDnsRequestOptions,
+  NetworkDnsStrategyResponse,
+  MatrixOverOrdinalHistogramData,
+} from '../../../../common/search_strategy/security_solution/network';
+import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/plugins/data/common';
+import { AbortError } from '../../../../../../../src/plugins/kibana_utils/common';
+import * as i18n from './translations';
+import { getInspectResponse } from '../../../helpers';
+import { InspectResponse } from '../../../types';
+
+export * from './histogram';
 
 const ID = 'networkDnsQuery';
-export const HISTOGRAM_ID = 'networkDnsHistogramQuery';
+
 export interface NetworkDnsArgs {
   id: string;
-  inspect: inputsModel.InspectQuery;
+  inspect: InspectResponse;
   isInspected: boolean;
-  loading: boolean;
   loadPage: (newActivePage: number) => void;
   networkDns: NetworkDnsEdges[];
   pageInfo: PageInfoPaginated;
@@ -55,162 +45,172 @@ export interface NetworkDnsArgs {
   histogram: MatrixOverOrdinalHistogramData[];
 }
 
-export interface OwnProps extends QueryTemplatePaginatedProps {
-  children: (args: NetworkDnsArgs) => React.ReactNode;
+interface UseNetworkDns {
+  id?: string;
+  indexNames: string[];
   type: networkModel.NetworkType;
+  filterQuery?: ESTermQuery | string;
+  endDate: string;
+  startDate: string;
+  skip: boolean;
 }
 
-interface DnsHistogramOwnProps extends QueryTemplatePaginatedProps {
-  dataKey: string | string[];
-  defaultStackByOption: MatrixHistogramOption;
-  errorMessage: string;
-  isDnsHistogram?: boolean;
-  query: DocumentNode;
-  scaleType: ScaleType;
-  setQuery: GlobalTimeArgs['setQuery'];
-  showLegend?: boolean;
-  stackByOptions: MatrixHistogramOption[];
-  subtitle?: string | GetSubTitle;
-  title: string;
-  type: networkModel.NetworkType;
-  updateDateRange: UpdateDateRange;
-  yTickFormatter?: (value: number) => string;
-}
+export const useNetworkDns = ({
+  endDate,
+  filterQuery,
+  indexNames,
+  skip,
+  startDate,
+  type,
+}: UseNetworkDns): [boolean, NetworkDnsArgs] => {
+  const getNetworkDnsSelector = networkSelectors.dnsSelector();
+  const { activePage, sort, isPtrIncluded, limit } = useShallowEqualSelector(getNetworkDnsSelector);
+  const { data, notifications } = useKibana().services;
+  const refetch = useRef<inputsModel.Refetch>(noop);
+  const abortCtrl = useRef(new AbortController());
+  const [loading, setLoading] = useState(false);
 
-export interface NetworkDnsComponentReduxProps {
-  activePage: number;
-  sort: NetworkDnsSortField;
-  isInspected: boolean;
-  isPtrIncluded: boolean;
-  limit: number;
-}
+  const [networkDnsRequest, setNetworkDnsRequest] = useState<NetworkDnsRequestOptions | null>(
+    !skip
+      ? {
+          defaultIndex: indexNames,
+          factoryQueryType: NetworkQueries.dns,
+          filterQuery: createFilter(filterQuery),
+          isPtrIncluded,
+          pagination: generateTablePaginationOptions(activePage, limit, true),
+          sort,
+          timerange: {
+            interval: '12h',
+            from: startDate ? startDate : '',
+            to: endDate ? endDate : new Date(Date.now()).toISOString(),
+          },
+        }
+      : null
+  );
 
-type NetworkDnsProps = OwnProps & NetworkDnsComponentReduxProps & WithKibanaProps;
+  const wrappedLoadMore = useCallback(
+    (newActivePage: number) => {
+      setNetworkDnsRequest((prevRequest) => {
+        if (!prevRequest) {
+          return prevRequest;
+        }
 
-export class NetworkDnsComponentQuery extends QueryTemplatePaginated<
-  NetworkDnsProps,
-  GetNetworkDnsQuery.Query,
-  GetNetworkDnsQuery.Variables
-> {
-  public render() {
-    const {
-      activePage,
-      children,
-      sort,
-      endDate,
-      filterQuery,
-      id = ID,
-      isInspected,
-      isPtrIncluded,
-      kibana,
-      limit,
-      skip,
-      sourceId,
-      startDate,
-    } = this.props;
-    const variables: GetNetworkDnsQuery.Variables = {
-      defaultIndex: kibana.services.uiSettings.get<string[]>(DEFAULT_INDEX_KEY),
-      filterQuery: createFilter(filterQuery),
-      inspect: isInspected,
-      isPtrIncluded,
-      pagination: generateTablePaginationOptions(activePage, limit),
-      sort,
-      sourceId,
-      timerange: {
-        interval: '12h',
-        from: startDate!,
-        to: endDate!,
-      },
-    };
+        return {
+          ...prevRequest,
+          pagination: generateTablePaginationOptions(newActivePage, limit),
+        };
+      });
+    },
+    [limit]
+  );
 
-    return (
-      <Query<GetNetworkDnsQuery.Query, GetNetworkDnsQuery.Variables>
-        fetchPolicy={getDefaultFetchPolicy()}
-        notifyOnNetworkStatusChange
-        query={networkDnsQuery}
-        skip={skip}
-        variables={variables}
-      >
-        {({ data, loading, fetchMore, networkStatus, refetch }) => {
-          const networkDns = getOr([], `source.NetworkDns.edges`, data);
-          this.setFetchMore(fetchMore);
-          this.setFetchMoreOptions((newActivePage: number) => ({
-            variables: {
-              pagination: generateTablePaginationOptions(newActivePage, limit),
-            },
-            updateQuery: (prev, { fetchMoreResult }) => {
-              if (!fetchMoreResult) {
-                return prev;
+  const [networkDnsResponse, setNetworkDnsResponse] = useState<NetworkDnsArgs>({
+    networkDns: [],
+    histogram: [],
+    id: ID,
+    inspect: {
+      dsl: [],
+      response: [],
+    },
+    isInspected: false,
+    loadPage: wrappedLoadMore,
+    pageInfo: {
+      activePage: 0,
+      fakeTotalCount: 0,
+      showMorePagesIndicator: false,
+    },
+    refetch: refetch.current,
+    totalCount: -1,
+  });
+
+  const networkDnsSearch = useCallback(
+    (request: NetworkDnsRequestOptions | null) => {
+      if (request == null) {
+        return;
+      }
+
+      let didCancel = false;
+      const asyncSearch = async () => {
+        abortCtrl.current = new AbortController();
+        setLoading(true);
+
+        const searchSubscription$ = data.search
+          .search<NetworkDnsRequestOptions, NetworkDnsStrategyResponse>(request, {
+            strategy: 'securitySolutionSearchStrategy',
+            abortSignal: abortCtrl.current.signal,
+          })
+          .subscribe({
+            next: (response) => {
+              if (isCompleteResponse(response)) {
+                if (!didCancel) {
+                  setLoading(false);
+                  setNetworkDnsResponse((prevResponse) => ({
+                    ...prevResponse,
+                    networkDns: response.edges,
+                    inspect: getInspectResponse(response, prevResponse.inspect),
+                    pageInfo: response.pageInfo,
+                    refetch: refetch.current,
+                    totalCount: response.totalCount,
+                    histogram: response.histogram ?? prevResponse.histogram,
+                  }));
+                }
+                searchSubscription$.unsubscribe();
+              } else if (isErrorResponse(response)) {
+                if (!didCancel) {
+                  setLoading(false);
+                }
+                // TODO: Make response error status clearer
+                notifications.toasts.addWarning(i18n.ERROR_NETWORK_DNS);
+                searchSubscription$.unsubscribe();
               }
-              return {
-                ...fetchMoreResult,
-                source: {
-                  ...fetchMoreResult.source,
-                  NetworkDns: {
-                    ...fetchMoreResult.source.NetworkDns,
-                    edges: [...fetchMoreResult.source.NetworkDns.edges],
-                  },
-                },
-              };
             },
-          }));
-          const isLoading = this.isItAValidLoading(loading, variables, networkStatus);
-          return children({
-            id,
-            inspect: getOr(null, 'source.NetworkDns.inspect', data),
-            isInspected,
-            loading: isLoading,
-            loadPage: this.wrappedLoadMore,
-            networkDns,
-            pageInfo: getOr({}, 'source.NetworkDns.pageInfo', data),
-            refetch: this.memoizedRefetchQuery(variables, limit, refetch),
-            totalCount: getOr(-1, 'source.NetworkDns.totalCount', data),
-            histogram: getOr(null, 'source.NetworkDns.histogram', data),
+            error: (msg) => {
+              if (!(msg instanceof AbortError)) {
+                notifications.toasts.addDanger({
+                  title: i18n.FAIL_NETWORK_DNS,
+                  text: msg.message,
+                });
+              }
+            },
           });
-        }}
-      </Query>
-    );
-  }
-}
+      };
+      abortCtrl.current.abort();
+      asyncSearch();
+      refetch.current = asyncSearch;
+      return () => {
+        didCancel = true;
+        abortCtrl.current.abort();
+      };
+    },
+    [data.search, notifications.toasts]
+  );
 
-const makeMapStateToProps = () => {
-  const getNetworkDnsSelector = networkSelectors.dnsSelector();
-  const getQuery = inputsSelectors.globalQueryByIdSelector();
-  const mapStateToProps = (state: State, { id = ID }: OwnProps) => {
-    const { isInspected } = getQuery(state, id);
-    return {
-      ...getNetworkDnsSelector(state),
-      isInspected,
-      id,
-    };
-  };
+  useEffect(() => {
+    setNetworkDnsRequest((prevRequest) => {
+      const myRequest = {
+        ...(prevRequest ?? {}),
+        defaultIndex: indexNames,
+        isPtrIncluded,
+        factoryQueryType: NetworkQueries.dns,
+        filterQuery: createFilter(filterQuery),
+        pagination: generateTablePaginationOptions(activePage, limit, true),
+        sort,
+        timerange: {
+          interval: '12h',
+          from: startDate,
+          to: endDate,
+        },
+      };
+      if (!skip && !deepEqual(prevRequest, myRequest)) {
+        return myRequest;
+      }
+      return prevRequest;
+    });
+  }, [activePage, indexNames, endDate, filterQuery, limit, startDate, sort, skip, isPtrIncluded]);
 
-  return mapStateToProps;
+  useEffect(() => {
+    networkDnsSearch(networkDnsRequest);
+  }, [networkDnsRequest, networkDnsSearch]);
+
+  return [loading, networkDnsResponse];
 };
-
-const makeMapHistogramStateToProps = () => {
-  const getNetworkDnsSelector = networkSelectors.dnsSelector();
-  const getQuery = inputsSelectors.globalQueryByIdSelector();
-  const mapStateToProps = (state: State, { id = HISTOGRAM_ID }: DnsHistogramOwnProps) => {
-    const { isInspected } = getQuery(state, id);
-    return {
-      ...getNetworkDnsSelector(state),
-      activePage: DEFAULT_TABLE_ACTIVE_PAGE,
-      limit: DEFAULT_TABLE_LIMIT,
-      isInspected,
-      id,
-    };
-  };
-
-  return mapStateToProps;
-};
-
-export const NetworkDnsQuery = compose<React.ComponentClass<OwnProps>>(
-  connect(makeMapStateToProps),
-  withKibana
-)(NetworkDnsComponentQuery);
-
-export const NetworkDnsHistogramQuery = compose<React.ComponentClass<DnsHistogramOwnProps>>(
-  connect(makeMapHistogramStateToProps),
-  withKibana
-)(MatrixHistogram);

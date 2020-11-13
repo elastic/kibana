@@ -8,83 +8,112 @@ import React, { FC } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import { EuiFieldText, EuiFormRow, EuiSelect } from '@elastic/eui';
+import { EuiAccordion, EuiFormRow, EuiSpacer } from '@elastic/eui';
 
 import { StepDetailsExposedState } from './step_details_form';
 
-export const StepDetailsSummary: FC<StepDetailsExposedState> = React.memo(
-  ({
+export const StepDetailsSummary: FC<StepDetailsExposedState> = React.memo((props) => {
+  const {
     continuousModeDateField,
     createIndexPattern,
     isContinuousModeEnabled,
     transformId,
     transformDescription,
+    transformFrequency,
+    transformSettingsMaxPageSearchSize,
     destinationIndex,
     touched,
-    indexPatternDateField,
-  }) => {
-    if (touched === false) {
-      return null;
-    }
+    indexPatternTimeField,
+  } = props;
 
-    const destinationIndexHelpText = createIndexPattern
-      ? i18n.translate('xpack.transform.stepDetailsSummary.createIndexPatternMessage', {
-          defaultMessage: 'A Kibana index pattern will be created for this transform.',
-        })
-      : '';
+  if (touched === false) {
+    return null;
+  }
 
-    return (
-      <div data-test-subj="transformStepDetailsSummary">
-        <EuiFormRow
-          label={i18n.translate('xpack.transform.stepDetailsSummary.transformIdLabel', {
-            defaultMessage: 'Transform ID',
-          })}
-        >
-          <EuiFieldText defaultValue={transformId} disabled={true} />
-        </EuiFormRow>
+  const destinationIndexHelpText = createIndexPattern
+    ? i18n.translate('xpack.transform.stepDetailsSummary.createIndexPatternMessage', {
+        defaultMessage: 'A Kibana index pattern will be created for this transform.',
+      })
+    : '';
+
+  return (
+    <div data-test-subj="transformStepDetailsSummary">
+      <EuiFormRow
+        label={i18n.translate('xpack.transform.stepDetailsSummary.transformIdLabel', {
+          defaultMessage: 'Transform ID',
+        })}
+      >
+        <span>{transformId}</span>
+      </EuiFormRow>
+
+      {transformDescription !== '' && (
         <EuiFormRow
           label={i18n.translate('xpack.transform.stepDetailsSummary.transformDescriptionLabel', {
             defaultMessage: 'Transform description',
           })}
         >
-          <EuiFieldText defaultValue={transformDescription} disabled={true} />
+          <span>{transformDescription}</span>
         </EuiFormRow>
+      )}
+
+      <EuiFormRow
+        helpText={destinationIndexHelpText}
+        label={i18n.translate('xpack.transform.stepDetailsSummary.destinationIndexLabel', {
+          defaultMessage: 'Destination index',
+        })}
+      >
+        <span>{destinationIndex}</span>
+      </EuiFormRow>
+      {createIndexPattern && indexPatternTimeField !== undefined && indexPatternTimeField !== '' && (
         <EuiFormRow
-          helpText={destinationIndexHelpText}
-          label={i18n.translate('xpack.transform.stepDetailsSummary.destinationIndexLabel', {
-            defaultMessage: 'Destination index',
+          label={i18n.translate('xpack.transform.stepDetailsSummary.indexPatternTimeFieldLabel', {
+            defaultMessage: 'Kibana index pattern time field',
           })}
         >
-          <EuiFieldText defaultValue={destinationIndex} disabled={true} />
+          <span>{indexPatternTimeField}</span>
+        </EuiFormRow>
+      )}
+
+      {isContinuousModeEnabled && (
+        <EuiFormRow
+          label={i18n.translate('xpack.transform.stepDetailsSummary.continuousModeDateFieldLabel', {
+            defaultMessage: 'Continuous mode date field',
+          })}
+        >
+          <span>{continuousModeDateField}</span>
+        </EuiFormRow>
+      )}
+
+      <EuiSpacer size="l" />
+
+      <EuiAccordion
+        data-test-subj="transformWizardAccordionAdvancedSettingsSummary"
+        id="transformWizardAccordionAdvancedSettingsSummary"
+        buttonContent={i18n.translate(
+          'xpack.transform.stepDetailsSummary.advancedSettingsAccordionButtonContent',
+          {
+            defaultMessage: 'Advanced settings',
+          }
+        )}
+        paddingSize="s"
+      >
+        <EuiFormRow
+          data-test-subj={'transformWizardAdvancedSettingsFrequencyLabel'}
+          label={i18n.translate('xpack.transform.stepDetailsSummary.frequencyLabel', {
+            defaultMessage: 'Frequency',
+          })}
+        >
+          <span>{transformFrequency}</span>
         </EuiFormRow>
         <EuiFormRow
-          helpText={i18n.translate(
-            'xpack.transform.stepDetailsSummary.indexPatternTimeFilterLabel',
-            {
-              defaultMessage: 'Time filter',
-            }
-          )}
+          data-test-subj={'transformWizardAdvancedSettingsMaxPageSearchSizeLabel'}
+          label={i18n.translate('xpack.transform.stepDetailsSummary.maxPageSearchSizeLabel', {
+            defaultMessage: 'Maximum page search size',
+          })}
         >
-          <EuiSelect
-            options={[{ text: indexPatternDateField }]}
-            value={indexPatternDateField}
-            disabled={true}
-          />
+          <span>{transformSettingsMaxPageSearchSize}</span>
         </EuiFormRow>
-
-        {isContinuousModeEnabled && (
-          <EuiFormRow
-            label={i18n.translate(
-              'xpack.transform.stepDetailsSummary.continuousModeDateFieldLabel',
-              {
-                defaultMessage: 'Continuous mode date field',
-              }
-            )}
-          >
-            <EuiFieldText defaultValue={continuousModeDateField} disabled={true} />
-          </EuiFormRow>
-        )}
-      </div>
-    );
-  }
-);
+      </EuiAccordion>
+    </div>
+  );
+});

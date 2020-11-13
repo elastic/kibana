@@ -6,14 +6,13 @@
 import { KibanaRequest } from 'kibana/server';
 import { alertTypeRegistryMock } from '../alert_type_registry.mock';
 import { securityMock } from '../../../../plugins/security/server/mocks';
-import { PluginStartContract as FeaturesStartContract, Feature } from '../../../features/server';
-import { featuresPluginMock } from '../../../features/server/mocks';
+import { esKuery } from '../../../../../src/plugins/data/server';
 import {
-  AlertsAuthorization,
-  ensureFieldIsSafeForQuery,
-  WriteOperations,
-  ReadOperations,
-} from './alerts_authorization';
+  PluginStartContract as FeaturesStartContract,
+  KibanaFeature,
+} from '../../../features/server';
+import { featuresPluginMock } from '../../../features/server/mocks';
+import { AlertsAuthorization, WriteOperations, ReadOperations } from './alerts_authorization';
 import { alertsAuthorizationAuditLoggerMock } from './audit_logger.mock';
 import { AlertsAuthorizationAuditLogger, AuthorizationResult } from './audit_logger';
 import uuid from 'uuid';
@@ -41,10 +40,11 @@ function mockSecurity() {
 }
 
 function mockFeature(appName: string, typeName?: string) {
-  return new Feature({
+  return new KibanaFeature({
     id: appName,
     name: appName,
     app: [],
+    category: { id: 'foo', label: 'foo' },
     ...(typeName
       ? {
           alerting: [typeName],
@@ -84,10 +84,11 @@ function mockFeature(appName: string, typeName?: string) {
 }
 
 function mockFeatureWithSubFeature(appName: string, typeName: string) {
-  return new Feature({
+  return new KibanaFeature({
     id: appName,
     name: appName,
     app: [],
+    category: { id: 'foo', label: 'foo' },
     ...(typeName
       ? {
           alerting: [typeName],
@@ -174,7 +175,7 @@ beforeEach(() => {
     async executor() {},
     producer: 'myApp',
   }));
-  features.getFeatures.mockReturnValue([
+  features.getKibanaFeatures.mockReturnValue([
     myAppFeature,
     myOtherAppFeature,
     myAppWithSubFeature,
@@ -255,7 +256,7 @@ describe('AlertsAuthorization', () => {
       checkPrivileges.mockResolvedValueOnce({
         username: 'some-user',
         hasAllRequested: true,
-        privileges: [],
+        privileges: { kibana: [] },
       });
 
       await alertAuthorization.ensureAuthorized('myType', 'myApp', WriteOperations.Create);
@@ -263,9 +264,9 @@ describe('AlertsAuthorization', () => {
       expect(alertTypeRegistry.get).toHaveBeenCalledWith('myType');
 
       expect(authorization.actions.alerting.get).toHaveBeenCalledWith('myType', 'myApp', 'create');
-      expect(checkPrivileges).toHaveBeenCalledWith([
-        mockAuthorizationAction('myType', 'myApp', 'create'),
-      ]);
+      expect(checkPrivileges).toHaveBeenCalledWith({
+        kibana: [mockAuthorizationAction('myType', 'myApp', 'create')],
+      });
 
       expect(auditLogger.alertsAuthorizationSuccess).toHaveBeenCalledTimes(1);
       expect(auditLogger.alertsAuthorizationFailure).not.toHaveBeenCalled();
@@ -298,7 +299,7 @@ describe('AlertsAuthorization', () => {
       checkPrivileges.mockResolvedValueOnce({
         username: 'some-user',
         hasAllRequested: true,
-        privileges: [],
+        privileges: { kibana: [] },
       });
 
       await alertAuthorization.ensureAuthorized('myType', 'alerts', WriteOperations.Create);
@@ -306,9 +307,9 @@ describe('AlertsAuthorization', () => {
       expect(alertTypeRegistry.get).toHaveBeenCalledWith('myType');
 
       expect(authorization.actions.alerting.get).toHaveBeenCalledWith('myType', 'myApp', 'create');
-      expect(checkPrivileges).toHaveBeenCalledWith([
-        mockAuthorizationAction('myType', 'myApp', 'create'),
-      ]);
+      expect(checkPrivileges).toHaveBeenCalledWith({
+        kibana: [mockAuthorizationAction('myType', 'myApp', 'create')],
+      });
 
       expect(auditLogger.alertsAuthorizationSuccess).toHaveBeenCalledTimes(1);
       expect(auditLogger.alertsAuthorizationFailure).not.toHaveBeenCalled();
@@ -332,7 +333,7 @@ describe('AlertsAuthorization', () => {
       checkPrivileges.mockResolvedValueOnce({
         username: 'some-user',
         hasAllRequested: true,
-        privileges: [],
+        privileges: { kibana: [] },
       });
 
       const alertAuthorization = new AlertsAuthorization({
@@ -354,10 +355,12 @@ describe('AlertsAuthorization', () => {
         'myOtherApp',
         'create'
       );
-      expect(checkPrivileges).toHaveBeenCalledWith([
-        mockAuthorizationAction('myType', 'myOtherApp', 'create'),
-        mockAuthorizationAction('myType', 'myApp', 'create'),
-      ]);
+      expect(checkPrivileges).toHaveBeenCalledWith({
+        kibana: [
+          mockAuthorizationAction('myType', 'myOtherApp', 'create'),
+          mockAuthorizationAction('myType', 'myApp', 'create'),
+        ],
+      });
 
       expect(auditLogger.alertsAuthorizationSuccess).toHaveBeenCalledTimes(1);
       expect(auditLogger.alertsAuthorizationFailure).not.toHaveBeenCalled();
@@ -390,16 +393,18 @@ describe('AlertsAuthorization', () => {
       checkPrivileges.mockResolvedValueOnce({
         username: 'some-user',
         hasAllRequested: false,
-        privileges: [
-          {
-            privilege: mockAuthorizationAction('myType', 'myOtherApp', 'create'),
-            authorized: false,
-          },
-          {
-            privilege: mockAuthorizationAction('myType', 'myApp', 'create'),
-            authorized: true,
-          },
-        ],
+        privileges: {
+          kibana: [
+            {
+              privilege: mockAuthorizationAction('myType', 'myOtherApp', 'create'),
+              authorized: false,
+            },
+            {
+              privilege: mockAuthorizationAction('myType', 'myApp', 'create'),
+              authorized: true,
+            },
+          ],
+        },
       });
 
       await expect(
@@ -439,16 +444,18 @@ describe('AlertsAuthorization', () => {
       checkPrivileges.mockResolvedValueOnce({
         username: 'some-user',
         hasAllRequested: false,
-        privileges: [
-          {
-            privilege: mockAuthorizationAction('myType', 'myOtherApp', 'create'),
-            authorized: true,
-          },
-          {
-            privilege: mockAuthorizationAction('myType', 'myApp', 'create'),
-            authorized: false,
-          },
-        ],
+        privileges: {
+          kibana: [
+            {
+              privilege: mockAuthorizationAction('myType', 'myOtherApp', 'create'),
+              authorized: true,
+            },
+            {
+              privilege: mockAuthorizationAction('myType', 'myApp', 'create'),
+              authorized: false,
+            },
+          ],
+        },
       });
 
       await expect(
@@ -488,16 +495,18 @@ describe('AlertsAuthorization', () => {
       checkPrivileges.mockResolvedValueOnce({
         username: 'some-user',
         hasAllRequested: false,
-        privileges: [
-          {
-            privilege: mockAuthorizationAction('myType', 'myOtherApp', 'create'),
-            authorized: false,
-          },
-          {
-            privilege: mockAuthorizationAction('myType', 'myApp', 'create'),
-            authorized: false,
-          },
-        ],
+        privileges: {
+          kibana: [
+            {
+              privilege: mockAuthorizationAction('myType', 'myOtherApp', 'create'),
+              authorized: false,
+            },
+            {
+              privilege: mockAuthorizationAction('myType', 'myApp', 'create'),
+              authorized: false,
+            },
+          ],
+        },
       });
 
       await expect(
@@ -592,7 +601,7 @@ describe('AlertsAuthorization', () => {
       checkPrivileges.mockResolvedValueOnce({
         username: 'some-user',
         hasAllRequested: true,
-        privileges: [],
+        privileges: { kibana: [] },
       });
 
       const alertAuthorization = new AlertsAuthorization({
@@ -605,8 +614,10 @@ describe('AlertsAuthorization', () => {
       });
       alertTypeRegistry.list.mockReturnValue(setOfAlertTypes);
 
-      expect((await alertAuthorization.getFindAuthorizationFilter()).filter).toMatchInlineSnapshot(
-        `"((alert.attributes.alertTypeId:myAppAlertType and alert.attributes.consumer:(alerts or myApp or myOtherApp or myAppWithSubFeature)) or (alert.attributes.alertTypeId:myOtherAppAlertType and alert.attributes.consumer:(alerts or myApp or myOtherApp or myAppWithSubFeature)) or (alert.attributes.alertTypeId:mySecondAppAlertType and alert.attributes.consumer:(alerts or myApp or myOtherApp or myAppWithSubFeature)))"`
+      expect((await alertAuthorization.getFindAuthorizationFilter()).filter).toEqual(
+        esKuery.fromKueryExpression(
+          `((alert.attributes.alertTypeId:myAppAlertType and alert.attributes.consumer:(alerts or myApp or myOtherApp or myAppWithSubFeature)) or (alert.attributes.alertTypeId:myOtherAppAlertType and alert.attributes.consumer:(alerts or myApp or myOtherApp or myAppWithSubFeature)) or (alert.attributes.alertTypeId:mySecondAppAlertType and alert.attributes.consumer:(alerts or myApp or myOtherApp or myAppWithSubFeature)))`
+        )
       );
 
       expect(auditLogger.alertsAuthorizationSuccess).not.toHaveBeenCalled();
@@ -621,24 +632,26 @@ describe('AlertsAuthorization', () => {
       checkPrivileges.mockResolvedValueOnce({
         username: 'some-user',
         hasAllRequested: false,
-        privileges: [
-          {
-            privilege: mockAuthorizationAction('myOtherAppAlertType', 'myApp', 'find'),
-            authorized: true,
-          },
-          {
-            privilege: mockAuthorizationAction('myOtherAppAlertType', 'myOtherApp', 'find'),
-            authorized: false,
-          },
-          {
-            privilege: mockAuthorizationAction('myAppAlertType', 'myApp', 'find'),
-            authorized: true,
-          },
-          {
-            privilege: mockAuthorizationAction('myAppAlertType', 'myOtherApp', 'find'),
-            authorized: false,
-          },
-        ],
+        privileges: {
+          kibana: [
+            {
+              privilege: mockAuthorizationAction('myOtherAppAlertType', 'myApp', 'find'),
+              authorized: true,
+            },
+            {
+              privilege: mockAuthorizationAction('myOtherAppAlertType', 'myOtherApp', 'find'),
+              authorized: false,
+            },
+            {
+              privilege: mockAuthorizationAction('myAppAlertType', 'myApp', 'find'),
+              authorized: true,
+            },
+            {
+              privilege: mockAuthorizationAction('myAppAlertType', 'myOtherApp', 'find'),
+              authorized: false,
+            },
+          ],
+        },
       });
 
       const alertAuthorization = new AlertsAuthorization({
@@ -680,24 +693,26 @@ describe('AlertsAuthorization', () => {
       checkPrivileges.mockResolvedValueOnce({
         username: 'some-user',
         hasAllRequested: false,
-        privileges: [
-          {
-            privilege: mockAuthorizationAction('myOtherAppAlertType', 'myApp', 'find'),
-            authorized: true,
-          },
-          {
-            privilege: mockAuthorizationAction('myOtherAppAlertType', 'myOtherApp', 'find'),
-            authorized: false,
-          },
-          {
-            privilege: mockAuthorizationAction('myAppAlertType', 'myApp', 'find'),
-            authorized: true,
-          },
-          {
-            privilege: mockAuthorizationAction('myAppAlertType', 'myOtherApp', 'find'),
-            authorized: true,
-          },
-        ],
+        privileges: {
+          kibana: [
+            {
+              privilege: mockAuthorizationAction('myOtherAppAlertType', 'myApp', 'find'),
+              authorized: true,
+            },
+            {
+              privilege: mockAuthorizationAction('myOtherAppAlertType', 'myOtherApp', 'find'),
+              authorized: false,
+            },
+            {
+              privilege: mockAuthorizationAction('myAppAlertType', 'myApp', 'find'),
+              authorized: true,
+            },
+            {
+              privilege: mockAuthorizationAction('myAppAlertType', 'myOtherApp', 'find'),
+              authorized: true,
+            },
+          ],
+        },
       });
 
       const alertAuthorization = new AlertsAuthorization({
@@ -728,32 +743,34 @@ describe('AlertsAuthorization', () => {
       checkPrivileges.mockResolvedValueOnce({
         username: 'some-user',
         hasAllRequested: false,
-        privileges: [
-          {
-            privilege: mockAuthorizationAction('myOtherAppAlertType', 'myApp', 'find'),
-            authorized: true,
-          },
-          {
-            privilege: mockAuthorizationAction('myOtherAppAlertType', 'myOtherApp', 'find'),
-            authorized: false,
-          },
-          {
-            privilege: mockAuthorizationAction('myAppAlertType', 'myApp', 'find'),
-            authorized: true,
-          },
-          {
-            privilege: mockAuthorizationAction('myAppAlertType', 'myOtherApp', 'find'),
-            authorized: true,
-          },
-          {
-            privilege: mockAuthorizationAction('mySecondAppAlertType', 'myApp', 'find'),
-            authorized: true,
-          },
-          {
-            privilege: mockAuthorizationAction('mySecondAppAlertType', 'myOtherApp', 'find'),
-            authorized: true,
-          },
-        ],
+        privileges: {
+          kibana: [
+            {
+              privilege: mockAuthorizationAction('myOtherAppAlertType', 'myApp', 'find'),
+              authorized: true,
+            },
+            {
+              privilege: mockAuthorizationAction('myOtherAppAlertType', 'myOtherApp', 'find'),
+              authorized: false,
+            },
+            {
+              privilege: mockAuthorizationAction('myAppAlertType', 'myApp', 'find'),
+              authorized: true,
+            },
+            {
+              privilege: mockAuthorizationAction('myAppAlertType', 'myOtherApp', 'find'),
+              authorized: true,
+            },
+            {
+              privilege: mockAuthorizationAction('mySecondAppAlertType', 'myApp', 'find'),
+              authorized: true,
+            },
+            {
+              privilege: mockAuthorizationAction('mySecondAppAlertType', 'myOtherApp', 'find'),
+              authorized: true,
+            },
+          ],
+        },
       });
 
       const alertAuthorization = new AlertsAuthorization({
@@ -903,24 +920,26 @@ describe('AlertsAuthorization', () => {
       checkPrivileges.mockResolvedValueOnce({
         username: 'some-user',
         hasAllRequested: false,
-        privileges: [
-          {
-            privilege: mockAuthorizationAction('myOtherAppAlertType', 'myApp', 'create'),
-            authorized: true,
-          },
-          {
-            privilege: mockAuthorizationAction('myOtherAppAlertType', 'myOtherApp', 'create'),
-            authorized: false,
-          },
-          {
-            privilege: mockAuthorizationAction('myAppAlertType', 'myApp', 'create'),
-            authorized: true,
-          },
-          {
-            privilege: mockAuthorizationAction('myAppAlertType', 'myOtherApp', 'create'),
-            authorized: true,
-          },
-        ],
+        privileges: {
+          kibana: [
+            {
+              privilege: mockAuthorizationAction('myOtherAppAlertType', 'myApp', 'create'),
+              authorized: true,
+            },
+            {
+              privilege: mockAuthorizationAction('myOtherAppAlertType', 'myOtherApp', 'create'),
+              authorized: false,
+            },
+            {
+              privilege: mockAuthorizationAction('myAppAlertType', 'myApp', 'create'),
+              authorized: true,
+            },
+            {
+              privilege: mockAuthorizationAction('myAppAlertType', 'myOtherApp', 'create'),
+              authorized: true,
+            },
+          ],
+        },
       });
 
       const alertAuthorization = new AlertsAuthorization({
@@ -989,16 +1008,18 @@ describe('AlertsAuthorization', () => {
       checkPrivileges.mockResolvedValueOnce({
         username: 'some-user',
         hasAllRequested: false,
-        privileges: [
-          {
-            privilege: mockAuthorizationAction('myAppAlertType', 'myApp', 'create'),
-            authorized: true,
-          },
-          {
-            privilege: mockAuthorizationAction('myAppAlertType', 'myOtherApp', 'create'),
-            authorized: false,
-          },
-        ],
+        privileges: {
+          kibana: [
+            {
+              privilege: mockAuthorizationAction('myAppAlertType', 'myApp', 'create'),
+              authorized: true,
+            },
+            {
+              privilege: mockAuthorizationAction('myAppAlertType', 'myOtherApp', 'create'),
+              authorized: false,
+            },
+          ],
+        },
       });
 
       const alertAuthorization = new AlertsAuthorization({
@@ -1048,40 +1069,42 @@ describe('AlertsAuthorization', () => {
       checkPrivileges.mockResolvedValueOnce({
         username: 'some-user',
         hasAllRequested: false,
-        privileges: [
-          {
-            privilege: mockAuthorizationAction('myOtherAppAlertType', 'myApp', 'create'),
-            authorized: true,
-          },
-          {
-            privilege: mockAuthorizationAction('myOtherAppAlertType', 'myOtherApp', 'create'),
-            authorized: false,
-          },
-          {
-            privilege: mockAuthorizationAction('myAppAlertType', 'myApp', 'create'),
-            authorized: false,
-          },
-          {
-            privilege: mockAuthorizationAction('myAppAlertType', 'myOtherApp', 'create'),
-            authorized: false,
-          },
-          {
-            privilege: mockAuthorizationAction('myOtherAppAlertType', 'myApp', 'get'),
-            authorized: true,
-          },
-          {
-            privilege: mockAuthorizationAction('myOtherAppAlertType', 'myOtherApp', 'get'),
-            authorized: true,
-          },
-          {
-            privilege: mockAuthorizationAction('myAppAlertType', 'myApp', 'get'),
-            authorized: true,
-          },
-          {
-            privilege: mockAuthorizationAction('myAppAlertType', 'myOtherApp', 'get'),
-            authorized: true,
-          },
-        ],
+        privileges: {
+          kibana: [
+            {
+              privilege: mockAuthorizationAction('myOtherAppAlertType', 'myApp', 'create'),
+              authorized: true,
+            },
+            {
+              privilege: mockAuthorizationAction('myOtherAppAlertType', 'myOtherApp', 'create'),
+              authorized: false,
+            },
+            {
+              privilege: mockAuthorizationAction('myAppAlertType', 'myApp', 'create'),
+              authorized: false,
+            },
+            {
+              privilege: mockAuthorizationAction('myAppAlertType', 'myOtherApp', 'create'),
+              authorized: false,
+            },
+            {
+              privilege: mockAuthorizationAction('myOtherAppAlertType', 'myApp', 'get'),
+              authorized: true,
+            },
+            {
+              privilege: mockAuthorizationAction('myOtherAppAlertType', 'myOtherApp', 'get'),
+              authorized: true,
+            },
+            {
+              privilege: mockAuthorizationAction('myAppAlertType', 'myApp', 'get'),
+              authorized: true,
+            },
+            {
+              privilege: mockAuthorizationAction('myAppAlertType', 'myOtherApp', 'get'),
+              authorized: true,
+            },
+          ],
+        },
       });
 
       const alertAuthorization = new AlertsAuthorization({
@@ -1158,24 +1181,26 @@ describe('AlertsAuthorization', () => {
       checkPrivileges.mockResolvedValueOnce({
         username: 'some-user',
         hasAllRequested: false,
-        privileges: [
-          {
-            privilege: mockAuthorizationAction('myOtherAppAlertType', 'myApp', 'create'),
-            authorized: true,
-          },
-          {
-            privilege: mockAuthorizationAction('myOtherAppAlertType', 'myOtherApp', 'create'),
-            authorized: true,
-          },
-          {
-            privilege: mockAuthorizationAction('myAppAlertType', 'myApp', 'create'),
-            authorized: false,
-          },
-          {
-            privilege: mockAuthorizationAction('myAppAlertType', 'myOtherApp', 'create'),
-            authorized: false,
-          },
-        ],
+        privileges: {
+          kibana: [
+            {
+              privilege: mockAuthorizationAction('myOtherAppAlertType', 'myApp', 'create'),
+              authorized: true,
+            },
+            {
+              privilege: mockAuthorizationAction('myOtherAppAlertType', 'myOtherApp', 'create'),
+              authorized: true,
+            },
+            {
+              privilege: mockAuthorizationAction('myAppAlertType', 'myApp', 'create'),
+              authorized: false,
+            },
+            {
+              privilege: mockAuthorizationAction('myAppAlertType', 'myOtherApp', 'create'),
+              authorized: false,
+            },
+          ],
+        },
       });
 
       const alertAuthorization = new AlertsAuthorization({
@@ -1219,38 +1244,6 @@ describe('AlertsAuthorization', () => {
                 },
               }
             `);
-    });
-  });
-
-  describe('ensureFieldIsSafeForQuery', () => {
-    test('throws if field contains character that isnt safe in a KQL query', () => {
-      expect(() => ensureFieldIsSafeForQuery('id', 'alert-*')).toThrowError(
-        `expected id not to include invalid character: *`
-      );
-
-      expect(() => ensureFieldIsSafeForQuery('id', '<=""')).toThrowError(
-        `expected id not to include invalid character: <=`
-      );
-
-      expect(() => ensureFieldIsSafeForQuery('id', '>=""')).toThrowError(
-        `expected id not to include invalid character: >=`
-      );
-
-      expect(() => ensureFieldIsSafeForQuery('id', '1 or alertid:123')).toThrowError(
-        `expected id not to include whitespace and invalid character: :`
-      );
-
-      expect(() => ensureFieldIsSafeForQuery('id', ') or alertid:123')).toThrowError(
-        `expected id not to include whitespace and invalid characters: ), :`
-      );
-
-      expect(() => ensureFieldIsSafeForQuery('id', 'some space')).toThrowError(
-        `expected id not to include whitespace`
-      );
-    });
-
-    test('doesnt throws if field is safe as part of a KQL query', () => {
-      expect(() => ensureFieldIsSafeForQuery('id', '123-0456-678')).not.toThrow();
     });
   });
 });

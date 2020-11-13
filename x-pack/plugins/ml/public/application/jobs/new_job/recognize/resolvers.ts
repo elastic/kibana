@@ -6,33 +6,40 @@
 
 import { i18n } from '@kbn/i18n';
 import { getToastNotifications, getSavedObjectsClient } from '../../../util/dependency_cache';
-import { mlJobService } from '../../../services/job_service';
 import { ml } from '../../../services/ml_api_service';
 import { KibanaObjects } from './page';
+import { NavigateToPath } from '../../../contexts/kibana';
+import { CreateLinkWithUserDefaults } from '../../../components/custom_hooks/use_create_ad_links';
 
 /**
  * Checks whether the jobs in a data recognizer module have been created.
  * Redirects to the Anomaly Explorer to view the jobs if they have been created,
  * or the recognizer job wizard for the module if not.
  */
-export function checkViewOrCreateJobs(moduleId: string, indexPatternId: string): Promise<any> {
+export function checkViewOrCreateJobs(
+  moduleId: string,
+  indexPatternId: string,
+  createLinkWithUserDefaults: CreateLinkWithUserDefaults,
+  navigateToPath: NavigateToPath
+): Promise<any> {
   return new Promise((resolve, reject) => {
     // Load the module, and check if the job(s) in the module have been created.
     // If so, load the jobs in the Anomaly Explorer.
     // Otherwise open the data recognizer wizard for the module.
     // Always want to call reject() so as not to load original page.
     ml.dataRecognizerModuleJobsExist({ moduleId })
-      .then((resp: any) => {
+      .then(async (resp: any) => {
         if (resp.jobsExist === true) {
-          const resultsPageUrl = mlJobService.createResultsUrlForJobs(resp.jobs, 'explorer');
-          window.location.href = resultsPageUrl;
+          // also honor user's time filter setting in Advanced Settings
+          const url = createLinkWithUserDefaults('explorer', resp.jobs);
+          await navigateToPath(url);
           reject();
         } else {
-          window.location.href = `#/jobs/new_job/recognize?id=${moduleId}&index=${indexPatternId}`;
+          await navigateToPath(`/jobs/new_job/recognize?id=${moduleId}&index=${indexPatternId}`);
           reject();
         }
       })
-      .catch((err: Error) => {
+      .catch(async (err: Error) => {
         // eslint-disable-next-line no-console
         console.error(`Error checking whether jobs in module ${moduleId} exists`, err);
         const toastNotifications = getToastNotifications();
@@ -46,8 +53,7 @@ export function checkViewOrCreateJobs(moduleId: string, indexPatternId: string):
               'An error occurred trying to check whether the jobs in the module have been created.',
           }),
         });
-
-        window.location.href = '#/jobs';
+        await navigateToPath(`/jobs`);
         reject();
       });
   });

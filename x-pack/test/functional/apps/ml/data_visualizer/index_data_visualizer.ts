@@ -11,7 +11,6 @@ import { FieldVisConfig } from '../../../../../plugins/ml/public/application/dat
 interface TestData {
   suiteTitle: string;
   sourceIndexOrSavedSearch: string;
-  advancedJobWizardDatafeedQuery: string;
   metricFieldsFilter: string;
   nonMetricFieldsFilter: string;
   nonMetricFieldsTypeFilter: string;
@@ -38,7 +37,6 @@ function getFieldTypes(cards: FieldVisConfig[]) {
   return fieldTypes.sort();
 }
 
-// eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
@@ -46,15 +44,6 @@ export default function ({ getService }: FtrProviderContext) {
   const farequoteIndexPatternTestData: TestData = {
     suiteTitle: 'index pattern',
     sourceIndexOrSavedSearch: 'ft_farequote',
-    advancedJobWizardDatafeedQuery: `{
-  "bool": {
-    "must": [
-      {
-        "match_all": {}
-      }
-    ]
-  }
-}`,
     metricFieldsFilter: 'document',
     nonMetricFieldsFilter: 'airline',
     nonMetricFieldsTypeFilter: 'keyword',
@@ -129,15 +118,6 @@ export default function ({ getService }: FtrProviderContext) {
   const farequoteKQLSearchTestData: TestData = {
     suiteTitle: 'KQL saved search',
     sourceIndexOrSavedSearch: 'ft_farequote_kuery',
-    advancedJobWizardDatafeedQuery: `{
-  "bool": {
-    "must": [
-      {
-        "match_all": {}
-      }
-    ]
-  }
-}`, // Note query is not currently passed to the wizard
     metricFieldsFilter: 'responsetime',
     nonMetricFieldsFilter: 'airline',
     nonMetricFieldsTypeFilter: 'keyword',
@@ -212,15 +192,6 @@ export default function ({ getService }: FtrProviderContext) {
   const farequoteLuceneSearchTestData: TestData = {
     suiteTitle: 'lucene saved search',
     sourceIndexOrSavedSearch: 'ft_farequote_lucene',
-    advancedJobWizardDatafeedQuery: `{
-  "bool": {
-    "must": [
-      {
-        "match_all": {}
-      }
-    ]
-  }
-}`, // Note query is not currently passed to the wizard
     metricFieldsFilter: 'responsetime',
     nonMetricFieldsFilter: 'version',
     nonMetricFieldsTypeFilter: 'keyword',
@@ -293,67 +264,74 @@ export default function ({ getService }: FtrProviderContext) {
   };
 
   function runTests(testData: TestData) {
-    it(`${testData.suiteTitle} loads the saved search selection page`, async () => {
+    it(`${testData.suiteTitle} loads the source data in the data visualizer`, async () => {
+      await ml.testExecution.logTestStep(
+        `${testData.suiteTitle} loads the saved search selection page`
+      );
       await ml.dataVisualizer.navigateToIndexPatternSelection();
-    });
 
-    it(`${testData.suiteTitle} loads the index data visualizer page`, async () => {
+      await ml.testExecution.logTestStep(
+        `${testData.suiteTitle} loads the index data visualizer page`
+      );
       await ml.jobSourceSelection.selectSourceForIndexBasedDataVisualizer(
         testData.sourceIndexOrSavedSearch
       );
     });
 
-    it(`${testData.suiteTitle} displays the time range step`, async () => {
+    it(`${testData.suiteTitle} displays index details`, async () => {
+      await ml.testExecution.logTestStep(`${testData.suiteTitle} displays the time range step`);
       await ml.dataVisualizerIndexBased.assertTimeRangeSelectorSectionExists();
-    });
 
-    it(`${testData.suiteTitle} loads data for full time range`, async () => {
+      await ml.testExecution.logTestStep(`${testData.suiteTitle} loads data for full time range`);
       await ml.dataVisualizerIndexBased.clickUseFullDataButton(testData.expected.totalDocCount);
-    });
 
-    it(`${testData.suiteTitle} displays the panels of fields`, async () => {
+      await ml.testExecution.logTestStep(`${testData.suiteTitle} displays the panels of fields`);
       await ml.dataVisualizerIndexBased.assertFieldsPanelsExist(testData.expected.fieldsPanelCount);
-    });
 
-    if (testData.expected.metricCards !== undefined && testData.expected.metricCards.length > 0) {
-      it(`${testData.suiteTitle} displays the Metrics panel`, async () => {
+      if (testData.expected.metricCards !== undefined && testData.expected.metricCards.length > 0) {
+        await ml.testExecution.logTestStep(`${testData.suiteTitle} displays the Metrics panel`);
         await ml.dataVisualizerIndexBased.assertFieldsPanelForTypesExist([
           ML_JOB_FIELD_TYPES.NUMBER,
         ]); // document_count not exposed as a type in the panel
-      });
 
-      it(`${testData.suiteTitle} displays the expected metric field cards`, async () => {
+        await ml.testExecution.logTestStep(
+          `${testData.suiteTitle} displays the expected metric field cards`
+        );
         for (const fieldCard of testData.expected.metricCards as FieldVisConfig[]) {
           await ml.dataVisualizerIndexBased.assertCardExists(fieldCard.type, fieldCard.fieldName);
         }
-      });
 
-      it(`${testData.suiteTitle} filters metric fields cards with search`, async () => {
+        await ml.testExecution.logTestStep(
+          `${testData.suiteTitle} filters metric fields cards with search`
+        );
         await ml.dataVisualizerIndexBased.filterFieldsPanelWithSearchString(
           ['number'],
           testData.metricFieldsFilter,
           testData.expected.metricFieldsFilterCardCount
         );
-      });
-    }
+      }
 
-    if (
-      testData.expected.nonMetricCards !== undefined &&
-      testData.expected.nonMetricCards.length > 0
-    ) {
-      it(`${testData.suiteTitle} displays the non-metric Fields panel`, async () => {
+      if (
+        testData.expected.nonMetricCards !== undefined &&
+        testData.expected.nonMetricCards.length > 0
+      ) {
+        await ml.testExecution.logTestStep(
+          `${testData.suiteTitle} displays the non-metric Fields panel`
+        );
         await ml.dataVisualizerIndexBased.assertFieldsPanelForTypesExist(
           getFieldTypes(testData.expected.nonMetricCards as FieldVisConfig[])
         );
-      });
 
-      it(`${testData.suiteTitle} displays the expected non-metric field cards`, async () => {
+        await ml.testExecution.logTestStep(
+          `${testData.suiteTitle} displays the expected non-metric field cards`
+        );
         for (const fieldCard of testData.expected.nonMetricCards!) {
           await ml.dataVisualizerIndexBased.assertCardExists(fieldCard.type, fieldCard.fieldName);
         }
-      });
 
-      it(`${testData.suiteTitle} sets the non metric field types input`, async () => {
+        await ml.testExecution.logTestStep(
+          `${testData.suiteTitle} sets the non metric field types input`
+        );
         const fieldTypes: ML_JOB_FIELD_TYPES[] = getFieldTypes(
           testData.expected.nonMetricCards as FieldVisConfig[]
         );
@@ -363,16 +341,17 @@ export default function ({ getService }: FtrProviderContext) {
           testData.nonMetricFieldsTypeFilter,
           testData.expected.nonMetricFieldsTypeFilterCardCount
         );
-      });
 
-      it(`${testData.suiteTitle} filters non-metric fields cards with search`, async () => {
+        await ml.testExecution.logTestStep(
+          `${testData.suiteTitle} filters non-metric fields cards with search`
+        );
         await ml.dataVisualizerIndexBased.filterFieldsPanelWithSearchString(
           getFieldTypes(testData.expected.nonMetricCards as FieldVisConfig[]),
           testData.nonMetricFieldsFilter,
           testData.expected.nonMetricFieldsFilterCardCount
         );
-      });
-    }
+      }
+    });
   }
 
   describe('index based', function () {
@@ -418,17 +397,6 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       runTests(farequoteLuceneSearchTestData);
-
-      // Test the Create advanced job button.
-      // Note the search is not currently passed to the wizard, just the index.
-      it(`${farequoteLuceneSearchTestData.suiteTitle} opens the advanced job wizard`, async () => {
-        await ml.dataVisualizerIndexBased.clickCreateAdvancedJobButton();
-        await ml.jobTypeSelection.assertAdvancedJobWizardOpen();
-        await ml.jobWizardAdvanced.assertDatafeedQueryEditorExists();
-        await ml.jobWizardAdvanced.assertDatafeedQueryEditorValue(
-          farequoteLuceneSearchTestData.advancedJobWizardDatafeedQuery
-        );
-      });
     });
   });
 }

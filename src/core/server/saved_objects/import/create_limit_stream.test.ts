@@ -21,7 +21,7 @@ import {
   createConcatStream,
   createListStream,
   createPromiseFromStreams,
-} from '../../../../legacy/utils/streams';
+} from '../../utils/streams';
 import { createLimitStream } from './create_limit_stream';
 
 describe('createLimitStream()', () => {

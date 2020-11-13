@@ -10,29 +10,28 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiPageBody,
   EuiPageContent,
-  EuiPageContentHeader,
-  EuiPageContentHeaderSection,
   EuiSpacer,
   EuiTab,
   EuiTabs,
   EuiTitle,
-  EuiBetaBadge,
   EuiText,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 
-import { i18n } from '@kbn/i18n';
 import { Section, routeToConnectors, routeToAlerts } from './constants';
-import { getCurrentBreadcrumb } from './lib/breadcrumb';
+import { getAlertingSectionBreadcrumb } from './lib/breadcrumb';
 import { getCurrentDocTitle } from './lib/doc_title';
 import { useAppDependencies } from './app_context';
 import { hasShowActionsCapability } from './lib/capabilities';
 
 import { ActionsConnectorsList } from './sections/actions_connectors_list/components/actions_connectors_list';
 import { AlertsList } from './sections/alerts_list/components/alerts_list';
-import { PLUGIN } from './constants/plugin';
 import { HealthCheck } from './components/health_check';
+import { HealthContextProvider } from './context/health_context';
 
-interface MatchParams {
+export interface MatchParams {
   section: Section;
 }
 
@@ -75,48 +74,47 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
 
   // Set breadcrumb and page title
   useEffect(() => {
-    setBreadcrumbs([getCurrentBreadcrumb(section || 'home')]);
+    setBreadcrumbs([getAlertingSectionBreadcrumb(section || 'home')]);
     chrome.docTitle.change(getCurrentDocTitle(section || 'home'));
   }, [section, chrome, setBreadcrumbs]);
 
   return (
     <EuiPageBody>
       <EuiPageContent>
-        <EuiPageContentHeader>
-          <EuiPageContentHeaderSection>
-            <EuiTitle size="m">
+        <EuiTitle size="m">
+          <EuiFlexGroup>
+            <EuiFlexItem>
               <h1 data-test-subj="appTitle">
                 <FormattedMessage
                   id="xpack.triggersActionsUI.home.appTitle"
                   defaultMessage="Alerts and Actions"
                 />
-                &emsp;
-                <EuiBetaBadge
-                  label="Beta"
-                  tooltipContent={i18n.translate(
-                    'xpack.triggersActionsUI.home.betaBadgeTooltipContent',
-                    {
-                      defaultMessage:
-                        '{pluginName} is in beta and is subject to change. The design and code is less mature than official GA features and is being provided as-is with no warranties. Beta features are not subject to the support SLA of official GA features.',
-                      values: {
-                        pluginName: PLUGIN.getI18nName(i18n),
-                      },
-                    }
-                  )}
-                />
               </h1>
-            </EuiTitle>
-            <EuiSpacer size="s" />
-            <EuiText>
-              <p>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                href={`${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/managing-alerts-and-actions.html`}
+                target="_blank"
+                iconType="help"
+                data-test-subj="documentationLink"
+              >
                 <FormattedMessage
-                  id="xpack.triggersActionsUI.home.sectionDescription"
-                  defaultMessage="Detect conditions using alerts, and take actions using connectors."
+                  id="xpack.triggersActionsUI.home.alertsAndActionsDocsLinkText"
+                  defaultMessage="Documentation"
                 />
-              </p>
-            </EuiText>
-          </EuiPageContentHeaderSection>
-        </EuiPageContentHeader>
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiTitle>
+        <EuiSpacer size="s" />
+        <EuiText>
+          <p>
+            <FormattedMessage
+              id="xpack.triggersActionsUI.home.sectionDescription"
+              defaultMessage="Detect conditions using alerts, and take actions using connectors."
+            />
+          </p>
+        </EuiText>
 
         <EuiTabs>
           {tabs.map((tab) => (
@@ -139,9 +137,11 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
               exact
               path={routeToConnectors}
               component={() => (
-                <HealthCheck docLinks={docLinks} http={http}>
-                  <ActionsConnectorsList />
-                </HealthCheck>
+                <HealthContextProvider>
+                  <HealthCheck docLinks={docLinks} http={http} waitForCheck={true}>
+                    <ActionsConnectorsList />
+                  </HealthCheck>
+                </HealthContextProvider>
               )}
             />
           )}
@@ -149,9 +149,11 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
             exact
             path={routeToAlerts}
             component={() => (
-              <HealthCheck docLinks={docLinks} http={http}>
-                <AlertsList />
-              </HealthCheck>
+              <HealthContextProvider>
+                <HealthCheck docLinks={docLinks} http={http} inFlyout={true} waitForCheck={true}>
+                  <AlertsList />
+                </HealthCheck>
+              </HealthContextProvider>
             )}
           />
         </Switch>

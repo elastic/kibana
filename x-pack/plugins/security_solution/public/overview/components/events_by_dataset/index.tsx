@@ -12,9 +12,9 @@ import uuid from 'uuid';
 import { DEFAULT_NUMBER_FORMAT, APP_ID } from '../../../../common/constants';
 import { SHOWING, UNIT } from '../../../common/components/events_viewer/translations';
 import { getTabsOnHostsUrl } from '../../../common/components/link_to/redirect_to_hosts';
-import { MatrixHistogramContainer } from '../../../common/components/matrix_histogram';
+import { MatrixHistogram } from '../../../common/components/matrix_histogram';
 import {
-  MatrixHisrogramConfigs,
+  MatrixHistogramConfigs,
   MatrixHistogramOption,
 } from '../../../common/components/matrix_histogram/types';
 import { eventsStackByOptions } from '../../../hosts/pages/navigation';
@@ -27,7 +27,7 @@ import {
   IIndexPattern,
   Query,
 } from '../../../../../../../src/plugins/data/public';
-import { HostsTableType, HostsType } from '../../../hosts/store/model';
+import { HostsTableType } from '../../../hosts/store/model';
 import { InputsModelId } from '../../../common/store/inputs/constants';
 import { GlobalTimeArgs } from '../../../common/containers/use_global_time';
 
@@ -47,7 +47,7 @@ interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery' | 'se
   filters?: Filter[];
   headerChildren?: React.ReactNode;
   indexPattern: IIndexPattern;
-  indexToAdd?: string[] | null;
+  indexNames: string[];
   onlyField?: string;
   query?: Query;
   setAbsoluteRangeDatePickerTarget?: InputsModelId;
@@ -67,7 +67,7 @@ const EventsByDatasetComponent: React.FC<Props> = ({
   from,
   headerChildren,
   indexPattern,
-  indexToAdd,
+  indexNames,
   onlyField,
   query = DEFAULT_QUERY,
   setAbsoluteRangeDatePickerTarget,
@@ -127,7 +127,7 @@ const EventsByDatasetComponent: React.FC<Props> = ({
     [combinedQueries, kibana, indexPattern, query, filters]
   );
 
-  const eventsByDatasetHistogramConfigs: MatrixHisrogramConfigs = useMemo(
+  const eventsByDatasetHistogramConfigs: MatrixHistogramConfigs = useMemo(
     () => ({
       ...histogramConfigs,
       stackByOptions:
@@ -159,19 +159,17 @@ const EventsByDatasetComponent: React.FC<Props> = ({
   }, [onlyField, headerChildren, eventsCountViewEventsButton]);
 
   return (
-    <MatrixHistogramContainer
+    <MatrixHistogram
       endDate={to}
       filterQuery={filterQuery}
       headerChildren={headerContent}
       id={uniqueQueryId}
-      indexToAdd={indexToAdd}
+      indexNames={indexNames}
       setAbsoluteRangeDatePickerTarget={setAbsoluteRangeDatePickerTarget}
       setQuery={setQuery}
       showSpacer={showSpacer}
-      sourceId="default"
       startDate={from}
       timelineId={timelineId}
-      type={HostsType.page}
       {...eventsByDatasetHistogramConfigs}
       title={onlyField != null ? i18n.TOP(onlyField) : eventsByDatasetHistogramConfigs.title}
     />

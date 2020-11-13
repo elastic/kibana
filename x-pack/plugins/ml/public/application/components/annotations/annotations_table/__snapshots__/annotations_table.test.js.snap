@@ -1,170 +1,527 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`AnnotationsTable Initialization with annotations prop. 1`] = `
-<Fragment>
-  <EuiInMemoryTable
-    className="eui-textOverflowWrap"
-    columns={
-      Array [
-        Object {
-          "field": "annotation",
-          "name": "Annotation",
-          "scope": "row",
-          "sortable": true,
-          "width": "40%",
-        },
-        Object {
-          "dataType": "date",
-          "field": "timestamp",
-          "name": "From",
-          "render": [Function],
-          "sortable": true,
-        },
-        Object {
-          "dataType": "date",
-          "field": "end_timestamp",
-          "name": "To",
-          "render": [Function],
-          "sortable": true,
-        },
-        Object {
-          "dataType": "date",
-          "field": "modified_time",
-          "name": "Last modified date",
-          "render": [Function],
-          "sortable": true,
-        },
-        Object {
-          "field": "modified_username",
-          "name": "Last modified by",
-          "sortable": true,
-        },
-        Object {
-          "field": "event",
-          "name": "Event",
-          "sortable": true,
-          "width": "10%",
-        },
-        Object {
-          "field": "partition_field_value",
-          "name": "Partition",
-          "sortable": true,
-        },
-        Object {
-          "field": "over_field_value",
-          "name": "Over",
-          "sortable": true,
-        },
-        Object {
-          "field": "by_field_value",
-          "name": "By",
-          "sortable": true,
-        },
-        Object {
-          "actions": Array [
-            Object {
-              "render": [Function],
-            },
-            Object {
-              "render": [Function],
-            },
-          ],
-          "align": "right",
-          "name": "Actions",
-          "width": "60px",
-        },
-        Object {
-          "dataType": "boolean",
-          "field": "current_series",
-          "name": "current_series",
-          "render": [Function],
-          "width": "0px",
-        },
-      ]
-    }
-    compressed={true}
-    items={
-      Array [
-        Object {
-          "_id": "KCCkDWgB_ZdQ1MFDSYPi",
-          "annotation": "Major spike.",
-          "create_time": 1546417097181,
-          "create_username": "<user unknown>",
-          "end_timestamp": 1455041968976,
-          "job_id": "farequote",
-          "modified_time": 1546417097181,
-          "modified_username": "<user unknown>",
-          "timestamp": 1455026177994,
-          "type": "annotation",
-        },
-      ]
-    }
-    pagination={
+<AnnotationsTableUI
+  annotations={
+    Array [
       Object {
-        "pageSizeOptions": Array [
-          5,
-          10,
-          25,
-        ],
-      }
-    }
-    responsive={true}
-    rowProps={[Function]}
-    search={
-      Object {
-        "box": Object {
-          "incremental": true,
-          "schema": true,
-        },
-        "defaultQuery": "event:(user or delayed_data)",
-        "filters": Array [
-          Object {
-            "field": "event",
-            "multiSelect": "or",
-            "name": "Event",
-            "options": Array [],
-            "type": "field_value_selection",
+        "_id": "KCCkDWgB_ZdQ1MFDSYPi",
+        "annotation": "Major spike.",
+        "create_time": 1546417097181,
+        "create_username": "<user unknown>",
+        "end_timestamp": 1455041968976,
+        "job_id": "farequote",
+        "modified_time": 1546417097181,
+        "modified_username": "<user unknown>",
+        "timestamp": 1455026177994,
+        "type": "annotation",
+      },
+    ]
+  }
+  intl={
+    Object {
+      "defaultFormats": Object {},
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {
+        "date": Object {
+          "full": Object {
+            "day": "numeric",
+            "month": "long",
+            "weekday": "long",
+            "year": "numeric",
           },
-        ],
-      }
-    }
-    sorting={
-      Object {
-        "sort": Object {
-          "direction": "asc",
-          "field": "timestamp",
+          "long": Object {
+            "day": "numeric",
+            "month": "long",
+            "year": "numeric",
+          },
+          "medium": Object {
+            "day": "numeric",
+            "month": "short",
+            "year": "numeric",
+          },
+          "short": Object {
+            "day": "numeric",
+            "month": "numeric",
+            "year": "2-digit",
+          },
         },
-      }
+        "number": Object {
+          "currency": Object {
+            "style": "currency",
+          },
+          "percent": Object {
+            "style": "percent",
+          },
+        },
+        "relative": Object {
+          "days": Object {
+            "units": "day",
+          },
+          "hours": Object {
+            "units": "hour",
+          },
+          "minutes": Object {
+            "units": "minute",
+          },
+          "months": Object {
+            "units": "month",
+          },
+          "seconds": Object {
+            "units": "second",
+          },
+          "years": Object {
+            "units": "year",
+          },
+        },
+        "time": Object {
+          "full": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "long": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "medium": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+          },
+          "short": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+          },
+        },
+      },
+      "formatters": Object {
+        "getDateTimeFormat": [Function],
+        "getMessageFormat": [Function],
+        "getNumberFormat": [Function],
+        "getPluralFormat": [Function],
+        "getRelativeFormat": [Function],
+      },
+      "locale": "en",
+      "messages": Object {},
+      "now": [Function],
+      "onError": [Function],
+      "textComponent": Symbol(react.fragment),
+      "timeZone": null,
     }
-    tableLayout="fixed"
-  />
-</Fragment>
+  }
+  kibana={
+    Object {
+      "notifications": Object {
+        "toasts": Object {
+          "danger": [Function],
+          "show": [Function],
+          "success": [Function],
+          "warning": [Function],
+        },
+      },
+      "overlays": Object {
+        "openFlyout": [Function],
+        "openModal": [Function],
+      },
+      "services": Object {},
+    }
+  }
+/>
 `;
 
 exports[`AnnotationsTable Initialization with job config prop. 1`] = `
-<EuiFlexGroup
-  justifyContent="spaceAround"
->
-  <EuiFlexItem
-    grow={false}
-  >
-    <EuiLoadingSpinner
-      size="l"
-    />
-  </EuiFlexItem>
-</EuiFlexGroup>
+<AnnotationsTableUI
+  intl={
+    Object {
+      "defaultFormats": Object {},
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {
+        "date": Object {
+          "full": Object {
+            "day": "numeric",
+            "month": "long",
+            "weekday": "long",
+            "year": "numeric",
+          },
+          "long": Object {
+            "day": "numeric",
+            "month": "long",
+            "year": "numeric",
+          },
+          "medium": Object {
+            "day": "numeric",
+            "month": "short",
+            "year": "numeric",
+          },
+          "short": Object {
+            "day": "numeric",
+            "month": "numeric",
+            "year": "2-digit",
+          },
+        },
+        "number": Object {
+          "currency": Object {
+            "style": "currency",
+          },
+          "percent": Object {
+            "style": "percent",
+          },
+        },
+        "relative": Object {
+          "days": Object {
+            "units": "day",
+          },
+          "hours": Object {
+            "units": "hour",
+          },
+          "minutes": Object {
+            "units": "minute",
+          },
+          "months": Object {
+            "units": "month",
+          },
+          "seconds": Object {
+            "units": "second",
+          },
+          "years": Object {
+            "units": "year",
+          },
+        },
+        "time": Object {
+          "full": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "long": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "medium": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+          },
+          "short": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+          },
+        },
+      },
+      "formatters": Object {
+        "getDateTimeFormat": [Function],
+        "getMessageFormat": [Function],
+        "getNumberFormat": [Function],
+        "getPluralFormat": [Function],
+        "getRelativeFormat": [Function],
+      },
+      "locale": "en",
+      "messages": Object {},
+      "now": [Function],
+      "onError": [Function],
+      "textComponent": Symbol(react.fragment),
+      "timeZone": null,
+    }
+  }
+  jobs={
+    Array [
+      Object {
+        "analysis_config": Object {
+          "bucket_span": "15m",
+          "detectors": Array [
+            Object {
+              "detector_description": "count",
+              "detector_index": 0,
+              "function": "count",
+            },
+          ],
+          "influencers": Array [],
+          "summary_count_field_name": "doc_count",
+        },
+        "analysis_limits": Object {
+          "categorization_examples_limit": 4,
+          "model_memory_limit": "10mb",
+        },
+        "create_time": 1546418356716,
+        "custom_settings": Object {
+          "created_by": "single-metric-wizard",
+        },
+        "data_counts": Object {
+          "bucket_count": 478,
+          "earliest_record_timestamp": 1454804096000,
+          "empty_bucket_count": 0,
+          "input_bytes": 21554,
+          "input_field_count": 479,
+          "input_record_count": 479,
+          "invalid_date_count": 0,
+          "job_id": "farequote",
+          "last_data_time": 1546418357578,
+          "latest_record_timestamp": 1455234298000,
+          "missing_field_count": 0,
+          "out_of_order_timestamp_count": 0,
+          "processed_field_count": 479,
+          "processed_record_count": 479,
+          "sparse_bucket_count": 0,
+        },
+        "data_description": Object {
+          "time_field": "@timestamp",
+          "time_format": "epoch_ms",
+        },
+        "datafeed_config": Object {
+          "aggregations": Object {
+            "buckets": Object {
+              "aggregations": Object {
+                "@timestamp": Object {
+                  "max": Object {
+                    "field": "@timestamp",
+                  },
+                },
+              },
+              "date_histogram": Object {
+                "field": "@timestamp",
+                "fixed_interval": "15m",
+                "keyed": false,
+                "min_doc_count": 0,
+                "offset": 0,
+                "order": Object {
+                  "_key": "asc",
+                },
+              },
+            },
+          },
+          "chunking_config": Object {
+            "mode": "manual",
+            "time_span": "900000000ms",
+          },
+          "datafeed_id": "datafeed-farequote",
+          "delayed_data_check_config": Object {
+            "enabled": true,
+          },
+          "indices": Array [
+            "farequote",
+          ],
+          "job_id": "farequote",
+          "query": Object {
+            "bool": Object {
+              "adjust_pure_negative": true,
+              "boost": 1,
+              "must": Array [
+                Object {
+                  "query_string": Object {
+                    "analyze_wildcard": true,
+                    "auto_generate_synonyms_phrase_query": true,
+                    "boost": 1,
+                    "default_operator": "or",
+                    "enable_position_increments": true,
+                    "escape": false,
+                    "fields": Array [],
+                    "fuzziness": "AUTO",
+                    "fuzzy_max_expansions": 50,
+                    "fuzzy_prefix_length": 0,
+                    "fuzzy_transpositions": true,
+                    "max_determinized_states": 10000,
+                    "phrase_slop": 0,
+                    "query": "*",
+                    "type": "best_fields",
+                  },
+                },
+              ],
+            },
+          },
+          "query_delay": "115823ms",
+          "scroll_size": 1000,
+          "state": "stopped",
+        },
+        "description": "",
+        "established_model_memory": 42102,
+        "finished_time": 1546418359427,
+        "job_id": "farequote",
+        "job_type": "anomaly_detector",
+        "job_version": "7.0.0",
+        "model_plot_config": Object {
+          "enabled": true,
+        },
+        "model_size_stats": Object {
+          "bucket_allocation_failures_count": 0,
+          "job_id": "farequote",
+          "log_time": 1546418359000,
+          "memory_status": "ok",
+          "model_bytes": 42102,
+          "result_type": "model_size_stats",
+          "timestamp": 1455232500000,
+          "total_by_field_count": 3,
+          "total_over_field_count": 0,
+          "total_partition_field_count": 2,
+        },
+        "model_snapshot_id": "1546418359",
+        "model_snapshot_min_version": "6.4.0",
+        "model_snapshot_retention_days": 1,
+        "results_index_name": "shared",
+        "state": "closed",
+      },
+    ]
+  }
+  kibana={
+    Object {
+      "notifications": Object {
+        "toasts": Object {
+          "danger": [Function],
+          "show": [Function],
+          "success": [Function],
+          "warning": [Function],
+        },
+      },
+      "overlays": Object {
+        "openFlyout": [Function],
+        "openModal": [Function],
+      },
+      "services": Object {},
+    }
+  }
+/>
 `;
 
 exports[`AnnotationsTable Minimal initialization without props. 1`] = `
-<EuiCallOut
-  iconType="iInCircle"
-  role="alert"
-  title={
-    <FormattedMessage
-      defaultMessage="No annotations created for this job"
-      id="xpack.ml.annotationsTable.annotationsNotCreatedTitle"
-      values={Object {}}
-    />
+<AnnotationsTableUI
+  intl={
+    Object {
+      "defaultFormats": Object {},
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {
+        "date": Object {
+          "full": Object {
+            "day": "numeric",
+            "month": "long",
+            "weekday": "long",
+            "year": "numeric",
+          },
+          "long": Object {
+            "day": "numeric",
+            "month": "long",
+            "year": "numeric",
+          },
+          "medium": Object {
+            "day": "numeric",
+            "month": "short",
+            "year": "numeric",
+          },
+          "short": Object {
+            "day": "numeric",
+            "month": "numeric",
+            "year": "2-digit",
+          },
+        },
+        "number": Object {
+          "currency": Object {
+            "style": "currency",
+          },
+          "percent": Object {
+            "style": "percent",
+          },
+        },
+        "relative": Object {
+          "days": Object {
+            "units": "day",
+          },
+          "hours": Object {
+            "units": "hour",
+          },
+          "minutes": Object {
+            "units": "minute",
+          },
+          "months": Object {
+            "units": "month",
+          },
+          "seconds": Object {
+            "units": "second",
+          },
+          "years": Object {
+            "units": "year",
+          },
+        },
+        "time": Object {
+          "full": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "long": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "medium": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+          },
+          "short": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+          },
+        },
+      },
+      "formatters": Object {
+        "getDateTimeFormat": [Function],
+        "getMessageFormat": [Function],
+        "getNumberFormat": [Function],
+        "getPluralFormat": [Function],
+        "getRelativeFormat": [Function],
+      },
+      "locale": "en",
+      "messages": Object {},
+      "now": [Function],
+      "onError": [Function],
+      "textComponent": Symbol(react.fragment),
+      "timeZone": null,
+    }
+  }
+  kibana={
+    Object {
+      "notifications": Object {
+        "toasts": Object {
+          "danger": [Function],
+          "show": [Function],
+          "success": [Function],
+          "warning": [Function],
+        },
+      },
+      "overlays": Object {
+        "openFlyout": [Function],
+        "openModal": [Function],
+      },
+      "services": Object {},
+    }
   }
 />
 `;

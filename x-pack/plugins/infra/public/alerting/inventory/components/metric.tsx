@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { debounce } from 'lodash';
 import {
   EuiExpression,
   EuiPopover,
@@ -14,17 +15,33 @@ import {
   EuiFlexItem,
   EuiFormRow,
   EuiComboBox,
+  EuiButtonGroup,
+  EuiSpacer,
+  EuiSelect,
+  EuiText,
+  EuiFieldText,
 } from '@elastic/eui';
+import { IFieldType } from 'src/plugins/data/public';
 import { EuiPopoverTitle, EuiButtonIcon } from '@elastic/eui';
+import { getCustomMetricLabel } from '../../../../common/formatters/get_custom_metric_label';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { IErrorObject } from '../../../../../triggers_actions_ui/public/types';
-import { SnapshotMetricType } from '../../../../common/inventory_models/types';
+import {
+  SnapshotCustomMetricInput,
+  SnapshotCustomMetricInputRT,
+  SnapshotCustomAggregation,
+  SNAPSHOT_CUSTOM_AGGREGATIONS,
+  SnapshotCustomAggregationRT,
+} from '../../../../common/http_api/snapshot_api';
 
 interface Props {
-  metric?: { value: SnapshotMetricType; text: string };
+  metric?: { value: string; text: string };
   metrics: Array<{ value: string; text: string }>;
   errors: IErrorObject;
-  onChange: (metric?: SnapshotMetricType) => void;
+  onChange: (metric?: string) => void;
+  onChangeCustom: (customMetric?: SnapshotCustomMetricInput) => void;
+  customMetric?: SnapshotCustomMetricInput;
+  fields: IFieldType[];
   popupPosition?:
     | 'upCenter'
     | 'upLeft'
@@ -40,8 +57,40 @@ interface Props {
     | 'rightDown';
 }
 
-export const MetricExpression = ({ metric, metrics, errors, onChange, popupPosition }: Props) => {
-  const [aggFieldPopoverOpen, setAggFieldPopoverOpen] = useState(false);
+const AGGREGATION_LABELS = {
+  ['avg']: i18n.translate('xpack.infra.waffle.customMetrics.aggregationLables.avg', {
+    defaultMessage: 'Average',
+  }),
+  ['max']: i18n.translate('xpack.infra.waffle.customMetrics.aggregationLables.max', {
+    defaultMessage: 'Max',
+  }),
+  ['min']: i18n.translate('xpack.infra.waffle.customMetrics.aggregationLables.min', {
+    defaultMessage: 'Min',
+  }),
+  ['rate']: i18n.translate('xpack.infra.waffle.customMetrics.aggregationLables.rate', {
+    defaultMessage: 'Rate',
+  }),
+};
+const aggregationOptions = SNAPSHOT_CUSTOM_AGGREGATIONS.map((k) => ({
+  text: AGGREGATION_LABELS[k as SnapshotCustomAggregation],
+  value: k,
+}));
+
+export const MetricExpression = ({
+  metric,
+  metrics,
+  customMetric,
+  fields,
+  errors,
+  onChange,
+  onChangeCustom,
+  popupPosition,
+}: Props) => {
+  const [popoverOpen, setPopoverOpen] = useState(false);
+  const [customMetricTabOpen, setCustomMetricTabOpen] = useState(metric?.value === 'custom');
+  const [selectedOption, setSelectedOption] = useState(metric?.value);
+  const [fieldDisplayedCustomLabel, setFieldDisplayedCustomLabel] = useState(customMetric?.label);
+
   const firstFieldOption = {
     text: i18n.translate('xpack.infra.metrics.alertFlyout.expression.metric.selectFieldLabel', {
       defaultMessage: 'Select a metric',
@@ -49,13 +98,84 @@ export const MetricExpression = ({ metric, metrics, errors, onChange, popupPosit
     value: '',
   };
 
+  const fieldOptions = useMemo(
+    () =>
+      fields
+        .filter((f) => f.aggregatable && f.type === 'number' && !(customMetric?.field === f.name))
+        .map((f) => ({ label: f.name })),
+    [fields, customMetric?.field]
+  );
+
+  const expressionDisplayValue = useMemo(
+    () => {
+      return customMetricTabOpen
+        ? customMetric?.field && getCustomMetricLabel(customMetric)
+        : metric?.text || firstFieldOption.text;
+    },
+    // The ?s are confusing eslint here, so...
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [customMetricTabOpen, metric, customMetric, firstFieldOption]
+  );
+
+  const onChangeTab = useCallback(
+    (id) => {
+      if (id === 'metric-popover-custom') {
+        setCustomMetricTabOpen(true);
+        onChange('custom');
+      } else {
+        setCustomMetricTabOpen(false);
+        onChange(selectedOption);
+      }
+    },
+    [setCustomMetricTabOpen, onChange, selectedOption]
+  );
+
+  const onAggregationChange = useCallback(
+    (e) => {
+      const value = e.target.value;
+      const aggValue: SnapshotCustomAggregation = SnapshotCustomAggregationRT.is(value)
+        ? value
+        : 'avg';
+      const newCustomMetric = {
+        ...customMetric,
+        aggregation: aggValue,
+      };
+      if (SnapshotCustomMetricInputRT.is(newCustomMetric)) onChangeCustom(newCustomMetric);
+    },
+    [customMetric, onChangeCustom]
+  );
+
+  const onFieldChange = useCallback(
+    (selectedOptions: Array<{ label: string }>) => {
+      const newCustomMetric = {
+        ...customMetric,
+        field: selectedOptions[0].label,
+      };
+      if (SnapshotCustomMetricInputRT.is(newCustomMetric)) onChangeCustom(newCustomMetric);
+    },
+    [customMetric, onChangeCustom]
+  );
+
+  const debouncedOnChangeCustom = debounce(onChangeCustom, 500);
+  const onLabelChange = useCallback(
+    (e) => {
+      setFieldDisplayedCustomLabel(e.target.value);
+      const newCustomMetric = {
+        ...customMetric,
+        label: e.target.value,
+      };
+      if (SnapshotCustomMetricInputRT.is(newCustomMetric)) debouncedOnChangeCustom(newCustomMetric);
+    },
+    [customMetric, debouncedOnChangeCustom]
+  );
+
   const availablefieldsOptions = metrics.map((m) => {
     return { label: m.text, value: m.value };
   }, []);
 
   return (
     <EuiPopover
-      id="aggFieldPopover"
+      id="metricPopover"
       button={
         <EuiExpression
           description={i18n.translate(
@@ -64,56 +184,137 @@ export const MetricExpression = ({ metric, metrics, errors, onChange, popupPosit
               defaultMessage: 'When',
             }
           )}
-          value={metric?.text || firstFieldOption.text}
-          isActive={Boolean(aggFieldPopoverOpen || (errors.metric && errors.metric.length > 0))}
+          value={expressionDisplayValue}
+          isActive={Boolean(popoverOpen || (errors.metric && errors.metric.length > 0))}
           onClick={() => {
-            setAggFieldPopoverOpen(true);
+            setPopoverOpen(true);
           }}
           color={errors.metric?.length ? 'danger' : 'secondary'}
         />
       }
-      isOpen={aggFieldPopoverOpen}
+      isOpen={popoverOpen}
       closePopover={() => {
-        setAggFieldPopoverOpen(false);
+        setPopoverOpen(false);
       }}
-      withTitle
       anchorPosition={popupPosition ?? 'downRight'}
       zIndex={8000}
     >
-      <div>
-        <ClosablePopoverTitle onClose={() => setAggFieldPopoverOpen(false)}>
+      <div style={{ width: 620 }}>
+        <ClosablePopoverTitle onClose={() => setPopoverOpen(false)}>
           <FormattedMessage
             id="xpack.infra.metrics.alertFlyout.expression.metric.popoverTitle"
             defaultMessage="Metric"
           />
         </ClosablePopoverTitle>
-        <EuiFlexGroup>
-          <EuiFlexItem grow={false} className="actOf__aggFieldContainer">
-            <EuiFormRow fullWidth isInvalid={errors.metric.length > 0} error={errors.metric}>
-              <EuiComboBox
+        <EuiButtonGroup
+          isFullWidth
+          buttonSize="compressed"
+          legend="Metric type"
+          options={[
+            {
+              id: 'metric-popover-default',
+              label: 'Default metric',
+            },
+            {
+              id: 'metric-popover-custom',
+              label: 'Custom metric',
+            },
+          ]}
+          idSelected={customMetricTabOpen ? 'metric-popover-custom' : 'metric-popover-default'}
+          onChange={onChangeTab}
+        />
+        <EuiSpacer size="m" />
+        {customMetricTabOpen ? (
+          <>
+            <EuiFormRow fullWidth>
+              <EuiFlexGroup alignItems="center" gutterSize="s">
+                <EuiFlexItem grow={false}>
+                  <EuiSelect
+                    onChange={onAggregationChange}
+                    value={customMetric?.aggregation || 'avg'}
+                    options={aggregationOptions}
+                    fullWidth
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiText color="subdued">
+                    <span>
+                      {i18n.translate('xpack.infra.waffle.customMetrics.of', {
+                        defaultMessage: 'of',
+                      })}
+                    </span>
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiComboBox
+                    fullWidth
+                    placeholder={i18n.translate(
+                      'xpack.infra.waffle.customMetrics.fieldPlaceholder',
+                      {
+                        defaultMessage: 'Select a field',
+                      }
+                    )}
+                    singleSelection={{ asPlainText: true }}
+                    selectedOptions={customMetric?.field ? [{ label: customMetric.field }] : []}
+                    options={fieldOptions}
+                    onChange={onFieldChange}
+                    isClearable={false}
+                    isInvalid={errors.metric.length > 0}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFormRow>
+            <EuiFormRow
+              label={i18n.translate('xpack.infra.waffle.alerting.customMetrics.labelLabel', {
+                defaultMessage: 'Metric name (optional)',
+              })}
+              display="rowCompressed"
+              fullWidth
+              helpText={i18n.translate('xpack.infra.waffle.alerting.customMetrics.helpText', {
+                defaultMessage:
+                  'Choose a name to help identify your custom metric. Defaults to "<function> of <field name>".',
+              })}
+            >
+              <EuiFieldText
+                name="label"
+                placeholder={i18n.translate('xpack.infra.waffle.customMetrics.labelPlaceholder', {
+                  defaultMessage: 'Choose a name to appear in the "Metric" dropdown',
+                })}
+                value={fieldDisplayedCustomLabel}
                 fullWidth
-                singleSelection={{ asPlainText: true }}
-                data-test-subj="availablefieldsOptionsComboBox"
-                isInvalid={errors.metric.length > 0}
-                placeholder={firstFieldOption.text}
-                options={availablefieldsOptions}
-                noSuggestions={!availablefieldsOptions.length}
-                selectedOptions={
-                  metric ? availablefieldsOptions.filter((a) => a.value === metric.value) : []
-                }
-                renderOption={(o: any) => o.label}
-                onChange={(selectedOptions) => {
-                  if (selectedOptions.length > 0) {
-                    onChange(selectedOptions[0].value as SnapshotMetricType);
-                    setAggFieldPopoverOpen(false);
-                  } else {
-                    onChange();
-                  }
-                }}
+                onChange={onLabelChange}
               />
             </EuiFormRow>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+          </>
+        ) : (
+          <EuiFormRow fullWidth>
+            <EuiFlexGroup>
+              <EuiFlexItem className="actOf__metricContainer">
+                <EuiComboBox
+                  fullWidth
+                  singleSelection={{ asPlainText: true }}
+                  data-test-subj="availablefieldsOptionsComboBox"
+                  isInvalid={errors.metric.length > 0}
+                  placeholder={firstFieldOption.text}
+                  options={availablefieldsOptions}
+                  noSuggestions={!availablefieldsOptions.length}
+                  selectedOptions={
+                    metric ? availablefieldsOptions.filter((a) => a.value === metric.value) : []
+                  }
+                  renderOption={(o: any) => o.label}
+                  onChange={(selectedOptions) => {
+                    if (selectedOptions.length > 0) {
+                      onChange(selectedOptions[0].value);
+                      setSelectedOption(selectedOptions[0].value);
+                    } else {
+                      onChange();
+                    }
+                  }}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFormRow>
+        )}
       </div>
     </EuiPopover>
   );

@@ -70,3 +70,38 @@ export const ENABLE_ML_JOB_WARNING = i18n.translate(
       'This ML job is not currently running. Please set this job to run via "ML job settings" before activating this rule.',
   }
 );
+
+export const QUERY_BAR_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fieldQuerBarLabel',
+  {
+    defaultMessage: 'Custom query',
+  }
+);
+
+export const EQL_QUERY_BAR_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.EqlQueryBarLabel',
+  {
+    defaultMessage: 'EQL query',
+  }
+);
+
+export const THREAT_MATCH_INDEX_HELPER_TEXT = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.threatMatchingIcesHelperDescription',
+  {
+    defaultMessage: 'Select threat indices',
+  }
+);
+
+export const THREAT_MATCH_REQUIRED = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.customThreatQueryFieldRequiredError',
+  {
+    defaultMessage: 'At least one indicator match is required.',
+  }
+);
+
+export const THREAT_MATCH_EMPTIES = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.customThreatQueryFieldRequiredEmptyError',
+  {
+    defaultMessage: 'All matches require both a field and threat index field.',
+  }
+);

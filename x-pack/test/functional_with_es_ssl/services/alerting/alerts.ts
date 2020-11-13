@@ -8,6 +8,21 @@ import axios, { AxiosInstance } from 'axios';
 import util from 'util';
 import { ToolingLog } from '@kbn/dev-utils';
 
+export interface AlertInstanceSummary {
+  status: string;
+  muted: boolean;
+  enabled: boolean;
+  lastRun?: string;
+  errorMessage?: string;
+  instances: Record<string, AlertInstanceStatus>;
+}
+
+export interface AlertInstanceStatus {
+  status: string;
+  muted: boolean;
+  activeStartDate?: string;
+}
+
 export class Alerts {
   private log: ToolingLog;
   private axios: AxiosInstance;
@@ -141,10 +156,10 @@ export class Alerts {
     this.log.debug(`deleted alert ${alert.id}`);
   }
 
-  public async getAlertState(id: string) {
+  public async getAlertInstanceSummary(id: string): Promise<AlertInstanceSummary> {
     this.log.debug(`getting alert ${id} state`);
 
-    const { data } = await this.axios.get(`/api/alerts/alert/${id}/state`);
+    const { data } = await this.axios.get(`/api/alerts/alert/${id}/_instance_summary`);
     return data;
   }
 

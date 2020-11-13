@@ -5,11 +5,17 @@
  */
 
 import { AuthenticationProvider } from '../../common/types';
-import { AuditLogger } from './audit_service';
+import { LegacyAuditLogger } from './audit_service';
 
+/**
+ * @deprecated
+ */
 export class SecurityAuditLogger {
-  constructor(private readonly logger: AuditLogger) {}
+  constructor(private readonly logger: LegacyAuditLogger) {}
 
+  /**
+   * @deprecated
+   */
   savedObjectsAuthorizationFailure(
     username: string,
     action: string,
@@ -37,6 +43,9 @@ export class SecurityAuditLogger {
     );
   }
 
+  /**
+   * @deprecated
+   */
   savedObjectsAuthorizationSuccess(
     username: string,
     action: string,
@@ -59,6 +68,9 @@ export class SecurityAuditLogger {
     );
   }
 
+  /**
+   * @deprecated
+   */
   accessAgreementAcknowledged(username: string, provider: AuthenticationProvider) {
     this.logger.log(
       'access_agreement_acknowledged',

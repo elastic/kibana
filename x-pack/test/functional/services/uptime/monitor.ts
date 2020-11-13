@@ -7,10 +7,12 @@
 import expect from '@kbn/expect/expect.js';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export function UptimeMonitorProvider({ getService }: FtrProviderContext) {
+export function UptimeMonitorProvider({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const find = getService('find');
+
+  const PageObjects = getPageObjects(['header']);
 
   return {
     async locationMissingExists() {
@@ -55,6 +57,30 @@ export function UptimeMonitorProvider({ getService }: FtrProviderContext) {
     },
     async toggleToMapView() {
       await testSubjects.click('uptimeMonitorToggleMapBtn');
+    },
+    async hasRedirectInfo() {
+      return retry.tryForTime(30000, async () => {
+        await testSubjects.existOrFail('uptimeMonitorRedirectInfo');
+      });
+    },
+    async expandPingRow() {
+      return retry.tryForTime(
+        60 * 3000,
+        async () => {
+          await testSubjects.existOrFail('uptimePingListExpandBtn', { timeout: 5000 });
+          await testSubjects.click('uptimePingListExpandBtn');
+        },
+        async () => {
+          await testSubjects.click('superDatePickerApplyTimeButton');
+          await PageObjects.header.waitUntilLoadingHasFinished();
+        }
+      );
+    },
+    async hasRedirectInfoInPingList() {
+      await this.expandPingRow();
+      return retry.tryForTime(60 * 1000, async () => {
+        await testSubjects.existOrFail('uptimeMonitorPingListRedirectInfo');
+      });
     },
   };
 }

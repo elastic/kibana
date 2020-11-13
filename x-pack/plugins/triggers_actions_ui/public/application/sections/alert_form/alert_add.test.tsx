@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import * as React from 'react';
-import { mountWithIntl, nextTick } from 'test_utils/enzyme_helpers';
+import { mountWithIntl, nextTick } from '@kbn/test/jest';
 import { act } from 'react-dom/test-utils';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFormLabel } from '@elastic/eui';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 import AlertAdd from './alert_add';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
-import { ValidationResult } from '../../../types';
+import { Alert, ValidationResult } from '../../../types';
 import { AlertsContextProvider, useAlertsContext } from '../../context/alerts_context';
 import { alertTypeRegistryMock } from '../../alert_type_registry.mock';
 import { chartPluginMock } from '../../../../../../../src/plugins/charts/public/mocks';
@@ -46,7 +46,7 @@ describe('alert_add', () => {
   let deps: any;
   let wrapper: ReactWrapper<any>;
 
-  async function setup() {
+  async function setup(initialValues?: Partial<Alert>) {
     const mocks = coreMock.createSetup();
     const { loadAlertTypes } = jest.requireMock('../../lib/alert_api');
     const alertTypes = [
@@ -84,8 +84,8 @@ describe('alert_add', () => {
       uiSettings: mocks.uiSettings,
       dataPlugin: dataPluginMock.createStartContract(),
       charts: chartPluginMock.createStartContract(),
-      actionTypeRegistry: actionTypeRegistry as any,
-      alertTypeRegistry: alertTypeRegistry as any,
+      actionTypeRegistry,
+      alertTypeRegistry,
       docLinks: { ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' },
     };
 
@@ -98,6 +98,8 @@ describe('alert_add', () => {
       id: 'my-alert-type',
       iconClass: 'test',
       name: 'test-alert',
+      description: 'test',
+      documentationUrl: null,
       validate: (): ValidationResult => {
         return { errors: {} };
       },
@@ -155,6 +157,7 @@ describe('alert_add', () => {
             consumer={ALERTS_FEATURE_ID}
             addFlyoutVisible={true}
             setAddFlyoutVisibility={() => {}}
+            initialValues={initialValues}
           />
         </AlertsContextProvider>
       </AppContextProvider>
@@ -179,6 +182,30 @@ describe('alert_add', () => {
 
     wrapper.find('[data-test-subj="my-alert-type-SelectOption"]').first().simulate('click');
 
-    expect(wrapper.contains('Metadata: some value. Fields: test.')).toBeTruthy();
+    expect(wrapper.find('input#alertName').props().value).toBe('');
+
+    expect(wrapper.find('[data-test-subj="tagsComboBox"]').first().text()).toBe('');
+
+    expect(wrapper.find('.euiSelect').first().props().value).toBe('m');
+  });
+
+  it('renders alert add flyout with initial values', async () => {
+    await setup({
+      name: 'Simple status alert',
+      tags: ['uptime', 'logs'],
+      schedule: {
+        interval: '1h',
+      },
+    });
+
+    await new Promise((resolve) => {
+      setTimeout(resolve, 1000);
+    });
+
+    expect(wrapper.find('input#alertName').props().value).toBe('Simple status alert');
+
+    expect(wrapper.find('[data-test-subj="tagsComboBox"]').first().text()).toBe('uptimelogs');
+
+    expect(wrapper.find('.euiSelect').first().props().value).toBe('h');
   });
 });

@@ -28,11 +28,12 @@ export const setSignalsStatusRoute = (router: IRouter) => {
       },
     },
     async (context, request, response) => {
-      const { signal_ids: signalIds, query, status } = request.body;
+      const { conflicts, signal_ids: signalIds, query, status } = request.body;
       const clusterClient = context.core.elasticsearch.legacy.client;
       const siemClient = context.securitySolution?.getAppClient();
       const siemResponse = buildSiemResponse(response);
       const validationErrors = setSignalStatusValidateTypeDependents(request.body);
+
       if (validationErrors.length) {
         return siemResponse.error({ statusCode: 400, body: validationErrors });
       }
@@ -55,6 +56,7 @@ export const setSignalsStatusRoute = (router: IRouter) => {
       try {
         const result = await clusterClient.callAsCurrentUser('updateByQuery', {
           index: siemClient.getSignalsIndex(),
+          conflicts: conflicts ?? 'abort',
           refresh: 'wait_for',
           body: {
             script: {

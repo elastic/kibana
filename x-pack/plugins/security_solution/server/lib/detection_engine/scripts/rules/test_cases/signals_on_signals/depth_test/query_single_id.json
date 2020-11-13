@@ -7,6 +7,6 @@
   "from": "now-1d",
   "interval": "30s",
   "to": "now",
-  "query": "_id: o8G7vm8BvLT8jmu5B1-M",
+  "query": "event.id: 08cde4aa-d249-4e6b-8300-06f3d56c7fe7",
   "enabled": true
 }

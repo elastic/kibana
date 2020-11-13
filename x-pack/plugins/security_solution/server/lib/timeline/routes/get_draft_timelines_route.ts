@@ -10,7 +10,7 @@ import { transformError, buildSiemResponse } from '../../detection_engine/routes
 import { TIMELINE_DRAFT_URL } from '../../../../common/constants';
 import { buildFrameworkRequest } from './utils/common';
 import { SetupPlugins } from '../../../plugin';
-import { buildRouteValidation } from '../../../utils/build_validation/route_validation';
+import { buildRouteValidationWithExcess } from '../../../utils/build_validation/route_validation';
 import { getDraftTimeline, persistTimeline } from '../saved_object';
 import { draftTimelineDefaults } from '../default_timeline';
 import { getDraftTimelineSchema } from './schemas/get_draft_timelines_schema';
@@ -24,7 +24,7 @@ export const getDraftTimelinesRoute = (
     {
       path: TIMELINE_DRAFT_URL,
       validate: {
-        query: buildRouteValidation(getDraftTimelineSchema),
+        query: buildRouteValidationWithExcess(getDraftTimelineSchema),
       },
       options: {
         tags: ['access:securitySolution'],

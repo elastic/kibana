@@ -6,13 +6,17 @@
 
 import { ILegacyScopedClusterClient, SavedObjectsClientContract } from 'kibana/server';
 import { loggingSystemMock, savedObjectsServiceMock } from 'src/core/server/mocks';
+import { securityMock } from '../../../security/server/mocks';
+import { alertsMock } from '../../../alerts/server/mocks';
 import { xpackMocks } from '../../../../mocks';
 import {
   AgentService,
   IngestManagerStartContract,
   ExternalCallback,
-} from '../../../ingest_manager/server';
-import { createPackageConfigServiceMock } from '../../../ingest_manager/server/mocks';
+  PackageService,
+} from '../../../fleet/server';
+import { createPackagePolicyServiceMock } from '../../../fleet/server/mocks';
+import { AppClientFactory } from '../client';
 import { createMockConfig } from '../lib/detection_engine/routes/__mocks__';
 import {
   EndpointAppContextService,
@@ -56,15 +60,33 @@ export const createMockEndpointAppContextService = (
 export const createMockEndpointAppContextServiceStartContract = (): jest.Mocked<
   EndpointAppContextServiceStartContract
 > => {
+  const factory = new AppClientFactory();
+  const config = createMockConfig();
+  factory.setup({ getSpaceId: () => 'mockSpace', config });
   return {
     agentService: createMockAgentService(),
+    packageService: createMockPackageService(),
     logger: loggingSystemMock.create().get('mock_endpoint_app_context'),
     savedObjectsStart: savedObjectsServiceMock.createStartContract(),
     manifestManager: getManifestManagerMock(),
+    appClientFactory: factory,
+    security: securityMock.createSetup(),
+    alerts: alertsMock.createStart(),
+    config,
     registerIngestCallback: jest.fn<
       ReturnType<IngestManagerStartContract['registerExternalCallback']>,
       Parameters<IngestManagerStartContract['registerExternalCallback']>
     >(),
+  };
+};
+
+/**
+ * Create mock PackageService
+ */
+
+export const createMockPackageService = (): jest.Mocked<PackageService> => {
+  return {
+    getInstalledEsAssetReferences: jest.fn(),
   };
 };
 
@@ -95,8 +117,9 @@ export const createMockIngestManagerStartContract = (
       getESIndexPattern: jest.fn().mockResolvedValue(indexPattern),
     },
     agentService: createMockAgentService(),
+    packageService: createMockPackageService(),
     registerExternalCallback: jest.fn((...args: ExternalCallback) => {}),
-    packageConfigService: createPackageConfigServiceMock(),
+    packagePolicyService: createPackagePolicyServiceMock(),
   };
 };
 

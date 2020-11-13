@@ -1,0 +1,113 @@
+.lnsLayerPanel {
+  margin-bottom: $euiSizeS;
+}
+
+.lnsLayerPanel__sourceFlexItem {
+  max-width: calc(100% - #{$euiSize * 3.625});
+}
+
+.lnsLayerPanel__settingsFlexItem:empty + .lnsLayerPanel__sourceFlexItem {
+  max-width: calc(100% - #{$euiSizeS});
+}
+
+.lnsLayerPanel__settingsFlexItem:empty {
+  margin: 0;
+}
+
+.lnsLayerPanel__row {
+  background: $euiColorLightestShade;
+  padding: $euiSizeS 0;
+  border-radius: $euiBorderRadius;
+
+  // Add margin to the top of the next same panel
+  & + & {
+    margin-top: $euiSize;
+  }
+}
+
+.lnsLayerPanel__row--notSupportsMoreColumns {
+  padding-bottom: 0;
+}
+
+.lnsLayerPanel__group {
+  padding: $euiSizeS 0;
+}
+
+.lnsLayerPanel__group:empty {
+  padding: 0;
+}
+
+.lnsLayerPanel__groupLabel {
+  padding: 0 $euiSizeS;
+}
+
+.lnsLayerPanel__error {
+  padding: 0 $euiSizeS;
+}
+
+.lnsLayerPanel__dimension {
+  @include euiFontSizeS;
+  border-radius: $euiBorderRadius;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  min-height: $euiSizeXXL;
+
+  // NativeRenderer is messing this up
+  > div {
+    flex-grow: 1;
+  }
+}
+
+.lnsLayerPanel__dimension--empty {
+  margin-top: $euiSizeS;
+
+  &:focus,
+  &:focus-within {
+    @include euiFocusRing;
+  }
+}
+
+.lnsLayerPanel__dimensionContainer {
+  margin: 0 $euiSizeS $euiSizeS;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.lnsLayerPanel__dimensionRemove {
+  margin-right: $euiSizeS;
+}
+
+.lnsLayerPanel__triggerLink {
+  width: 100%;
+  padding: $euiSizeS;
+  min-height: $euiSizeXXL - 2;
+  word-break: break-word;
+
+  &:focus {
+    background-color: transparent !important; // sass-lint:disable-line no-important
+    outline: none !important; // sass-lint:disable-line no-important
+  }
+
+  &:focus .lnsLayerPanel__triggerLinkLabel,
+  &:focus-within .lnsLayerPanel__triggerLinkLabel {
+    background-color: transparentize($euiColorVis1, .9);
+  }
+}
+
+.lnsLayerPanel__triggerLinkLabel {
+  transition: background-color $euiAnimSpeedFast ease-in-out;
+}
+
+.lnsLayerPanel__triggerLinkContent {
+  // Make EUI button content not centered
+  justify-content: flex-start;
+  padding: 0 !important; // sass-lint:disable-line no-important
+  color: $euiTextSubduedColor;
+}
+
+.lnsLayerPanel__styleEditor {
+  padding: 0 $euiSizeS $euiSizeS;
+}

@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { cleanup, fireEvent, render } from '@testing-library/react/pure';
+import { fireEvent, render } from '@testing-library/react';
 import { TEST_SUBJ_ACTION_FACTORY_ITEM, TEST_SUBJ_SELECTED_ACTION_FACTORY } from './action_wizard';
 import {
   dashboardFactory,
@@ -15,11 +15,7 @@ import {
   urlDrilldownActionFactory,
 } from './test_data';
 import { ActionFactory } from '../../dynamic_actions';
-import { licenseMock } from '../../../../licensing/common/licensing.mock';
-
-// TODO: afterEach is not available for it globally during setup
-// https://github.com/elastic/kibana/issues/59469
-afterEach(cleanup);
+import { licensingMock } from '../../../../licensing/public/mocks';
 
 test('Pick and configure action', () => {
   const screen = render(<Demo actionFactories={[dashboardFactory, urlFactory]} />);
@@ -68,13 +64,32 @@ test('If not enough license, button is disabled', () => {
     {
       ...urlDrilldownActionFactory,
       minimalLicense: 'gold',
+      licenseFeatureName: 'Url Drilldown',
     },
-    () => licenseMock.createLicense()
+    {
+      getLicense: () => licensingMock.createLicense(),
+      getFeatureUsageStart: () => licensingMock.createStart().featureUsage,
+    }
   );
   const screen = render(<Demo actionFactories={[dashboardFactory, urlWithGoldLicense]} />);
 
   // check that all factories are displayed to pick
   expect(screen.getAllByTestId(new RegExp(TEST_SUBJ_ACTION_FACTORY_ITEM))).toHaveLength(2);
 
-  expect(screen.getByText(/Go to URL/i)).toBeDisabled();
+  expect(screen.getByTestId(/actionFactoryItem-Url/i)).toBeDisabled();
+});
+
+test('if action is beta, beta badge is shown', () => {
+  const betaUrl = new ActionFactory(
+    {
+      ...urlDrilldownActionFactory,
+      isBeta: true,
+    },
+    {
+      getLicense: () => licensingMock.createLicense(),
+      getFeatureUsageStart: () => licensingMock.createStart().featureUsage,
+    }
+  );
+  const screen = render(<Demo actionFactories={[dashboardFactory, betaUrl]} />);
+  expect(screen.getByText(/Beta/i)).toBeVisible();
 });

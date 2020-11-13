@@ -4,27 +4,47 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { ReactNode } from 'react';
-import { i18n } from '@kbn/i18n';
 import {
   EuiButtonEmpty,
   EuiPage,
-  EuiSideNav,
-  EuiPageSideBar,
   EuiPageBody,
+  EuiPageSideBar,
+  EuiSideNav,
 } from '@elastic/eui';
-import { HomeLink } from '../../shared/Links/apm/HomeLink';
-import { useLocation } from '../../../hooks/useLocation';
+import { i18n } from '@kbn/i18n';
+import React, { ReactNode } from 'react';
+import { RouteComponentProps } from 'react-router-dom';
+import { HeaderMenuPortal } from '../../../../../observability/public';
+import { ActionMenu } from '../../../application/action_menu';
+import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
 import { getAPMHref } from '../../shared/Links/apm/APMLink';
+import { HomeLink } from '../../shared/Links/apm/HomeLink';
 
-export function Settings(props: { children: ReactNode }) {
-  const { search, pathname } = useLocation();
+interface SettingsProps extends RouteComponentProps<{}> {
+  children: ReactNode;
+}
+
+export function Settings({ children, location }: SettingsProps) {
+  const { appMountParameters, core } = useApmPluginContext();
+  const { basePath } = core.http;
+  const canAccessML = !!core.application.capabilities.ml?.canAccessML;
+  const { search, pathname } = location;
+
+  function getSettingsHref(path: string) {
+    return getAPMHref({ basePath, path: `/settings${path}`, search });
+  }
+
   return (
     <>
+      <HeaderMenuPortal
+        setHeaderActionMenu={appMountParameters.setHeaderActionMenu}
+      >
+        <ActionMenu />
+      </HeaderMenuPortal>
       <HomeLink>
         <EuiButtonEmpty size="s" color="primary" iconType="arrowLeft">
-          {i18n.translate('xpack.apm.settings.returnToOverviewLinkLabel', {
-            defaultMessage: 'Return to overview',
+          {i18n.translate('xpack.apm.settings.returnLinkLabel', {
+            defaultMessage: 'Return to inventory',
           })}
         </EuiButtonEmpty>
       </HomeLink>
@@ -43,28 +63,33 @@ export function Settings(props: { children: ReactNode }) {
                       defaultMessage: 'Agent Configuration',
                     }),
                     id: '1',
-                    href: getAPMHref('/settings/agent-configuration', search),
+                    href: getSettingsHref('/agent-configuration'),
                     isSelected: pathname.startsWith(
                       '/settings/agent-configuration'
                     ),
                   },
-                  {
-                    name: i18n.translate(
-                      'xpack.apm.settings.anomalyDetection',
-                      {
-                        defaultMessage: 'Anomaly detection',
-                      }
-                    ),
-                    id: '4',
-                    href: getAPMHref('/settings/anomaly-detection', search),
-                    isSelected: pathname === '/settings/anomaly-detection',
-                  },
+                  ...(canAccessML
+                    ? [
+                        {
+                          name: i18n.translate(
+                            'xpack.apm.settings.anomalyDetection',
+                            {
+                              defaultMessage: 'Anomaly detection',
+                            }
+                          ),
+                          id: '4',
+                          href: getSettingsHref('/anomaly-detection'),
+                          isSelected:
+                            pathname === '/settings/anomaly-detection',
+                        },
+                      ]
+                    : []),
                   {
                     name: i18n.translate('xpack.apm.settings.customizeApp', {
                       defaultMessage: 'Customize app',
                     }),
                     id: '3',
-                    href: getAPMHref('/settings/customize-ui', search),
+                    href: getSettingsHref('/customize-ui'),
                     isSelected: pathname === '/settings/customize-ui',
                   },
                   {
@@ -72,7 +97,7 @@ export function Settings(props: { children: ReactNode }) {
                       defaultMessage: 'Indices',
                     }),
                     id: '2',
-                    href: getAPMHref('/settings/apm-indices', search),
+                    href: getSettingsHref('/apm-indices'),
                     isSelected: pathname === '/settings/apm-indices',
                   },
                 ],
@@ -80,7 +105,7 @@ export function Settings(props: { children: ReactNode }) {
             ]}
           />
         </EuiPageSideBar>
-        <EuiPageBody>{props.children}</EuiPageBody>
+        <EuiPageBody>{children}</EuiPageBody>
       </EuiPage>
     </>
   );

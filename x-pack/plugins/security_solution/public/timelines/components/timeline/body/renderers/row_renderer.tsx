@@ -8,7 +8,7 @@ import React from 'react';
 
 import { BrowserFields } from '../../../../../common/containers/source';
 import type { RowRendererId } from '../../../../../../common/types/timeline';
-import { Ecs } from '../../../../../graphql/types';
+import { Ecs } from '../../../../../../common/ecs';
 import { EventsTrSupplement } from '../../styles';
 
 interface RowRendererContainerProps {

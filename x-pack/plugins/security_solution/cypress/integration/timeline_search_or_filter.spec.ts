@@ -7,7 +7,7 @@
 import { SERVER_SIDE_EVENT_COUNT } from '../screens/timeline';
 
 import { loginAndWaitForPage } from '../tasks/login';
-import { openTimeline } from '../tasks/security_main';
+import { openTimelineUsingToggle } from '../tasks/security_main';
 import { executeTimelineKQL } from '../tasks/timeline';
 
 import { HOSTS_URL } from '../urls/navigation';
@@ -19,7 +19,7 @@ describe('timeline search or filter KQL bar', () => {
 
   it('executes a KQL query', () => {
     const hostExistsQuery = 'host.name: *';
-    openTimeline();
+    openTimelineUsingToggle();
     executeTimelineKQL(hostExistsQuery);
 
     cy.get(SERVER_SIDE_EVENT_COUNT)

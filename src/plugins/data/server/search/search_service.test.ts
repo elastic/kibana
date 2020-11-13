@@ -16,36 +16,52 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import type { MockedKeys } from '@kbn/utility-types/jest';
+import { CoreSetup, CoreStart } from '../../../../core/server';
 import { coreMock } from '../../../../core/server/mocks';
 
-import { SearchService } from './search_service';
-import { CoreSetup } from '../../../../core/server';
 import { DataPluginStart } from '../plugin';
+import { createFieldFormatsStartMock } from '../field_formats/mocks';
+import { createIndexPatternsStartMock } from '../index_patterns/mocks';
+
+import { SearchService, SearchServiceSetupDependencies } from './search_service';
 
 describe('Search service', () => {
   let plugin: SearchService;
   let mockCoreSetup: MockedKeys<CoreSetup<object, DataPluginStart>>;
+  let mockCoreStart: MockedKeys<CoreStart>;
 
   beforeEach(() => {
     const mockLogger: any = {
-      info: () => {},
+      debug: () => {},
     };
     plugin = new SearchService(coreMock.createPluginInitializerContext({}), mockLogger);
     mockCoreSetup = coreMock.createSetup();
+    mockCoreStart = coreMock.createStart();
   });
 
   describe('setup()', () => {
     it('exposes proper contract', async () => {
-      const setup = plugin.setup(mockCoreSetup, {});
+      const setup = plugin.setup(mockCoreSetup, ({
+        packageInfo: { version: '8' },
+        expressions: {
+          registerFunction: jest.fn(),
+          registerType: jest.fn(),
+        },
+      } as unknown) as SearchServiceSetupDependencies);
+      expect(setup).toHaveProperty('aggs');
       expect(setup).toHaveProperty('registerSearchStrategy');
     });
   });
 
   describe('start()', () => {
     it('exposes proper contract', async () => {
-      const setup = plugin.start();
-      expect(setup).toHaveProperty('getSearchStrategy');
+      const start = plugin.start(mockCoreStart, {
+        fieldFormats: createFieldFormatsStartMock(),
+        indexPatterns: createIndexPatternsStartMock(),
+      });
+      expect(start).toHaveProperty('aggs');
+      expect(start).toHaveProperty('getSearchStrategy');
     });
   });
 });

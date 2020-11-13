@@ -10,8 +10,15 @@ import { i18n } from '@kbn/i18n';
 import { EuiBasicTable, EuiHealth, EuiSpacer, EuiSwitch } from '@elastic/eui';
 // @ts-ignore
 import { RIGHT_ALIGNMENT, CENTER_ALIGNMENT } from '@elastic/eui/lib/services';
-import { padStart, difference, chunk } from 'lodash';
-import { Alert, AlertTaskState, RawAlertInstance, Pagination } from '../../../../types';
+import { padStart, chunk } from 'lodash';
+import { ActionGroup, AlertInstanceStatusValues } from '../../../../../../alerts/common';
+import {
+  Alert,
+  AlertInstanceSummary,
+  AlertInstanceStatus,
+  AlertType,
+  Pagination,
+} from '../../../../types';
 import {
   ComponentOpts as AlertApis,
   withBulkAlertOperations,
@@ -20,8 +27,9 @@ import { DEFAULT_SEARCH_PAGE_SIZE } from '../../../constants';
 
 type AlertInstancesProps = {
   alert: Alert;
+  alertType: AlertType;
   readOnly: boolean;
-  alertState: AlertTaskState;
+  alertInstanceSummary: AlertInstanceSummary;
   requestRefresh: () => Promise<void>;
   durationEpoch?: number;
 } & Pick<AlertApis, 'muteAlertInstance' | 'unmuteAlertInstance'>;
@@ -47,7 +55,12 @@ export const alertInstancesTableColumns = (
       { defaultMessage: 'Status' }
     ),
     render: (value: AlertInstanceListItemStatus, instance: AlertInstanceListItem) => {
-      return <EuiHealth color={value.healthColor}>{value.label}</EuiHealth>;
+      return (
+        <EuiHealth color={value.healthColor}>
+          {value.label}
+          {value.actionGroup ? ` (${value.actionGroup})` : ``}
+        </EuiHealth>
+      );
     },
     sortable: false,
     'data-test-subj': 'alertInstancesTableCell-status',
@@ -112,8 +125,9 @@ function durationAsString(duration: Duration): string {
 
 export function AlertInstances({
   alert,
+  alertType,
   readOnly,
-  alertState: { alertInstances = {} },
+  alertInstanceSummary,
   muteAlertInstance,
   unmuteAlertInstance,
   requestRefresh,
@@ -124,15 +138,13 @@ export function AlertInstances({
     size: DEFAULT_SEARCH_PAGE_SIZE,
   });
 
-  const mergedAlertInstances = [
-    ...Object.entries(alertInstances).map(([instanceId, instance]) =>
-      alertInstanceToListItem(durationEpoch, alert, instanceId, instance)
-    ),
-    ...difference(alert.mutedInstanceIds, Object.keys(alertInstances)).map((instanceId) =>
-      alertInstanceToListItem(durationEpoch, alert, instanceId)
-    ),
-  ];
-  const pageOfAlertInstances = getPage(mergedAlertInstances, pagination);
+  const alertInstances = Object.entries(alertInstanceSummary.instances)
+    .map(([instanceId, instance]) =>
+      alertInstanceToListItem(durationEpoch, alertType, instanceId, instance)
+    )
+    .sort((leftInstance, rightInstance) => leftInstance.sortPriority - rightInstance.sortPriority);
+
+  const pageOfAlertInstances = getPage(alertInstances, pagination);
 
   const onMuteAction = async (instance: AlertInstanceListItem) => {
     await (instance.isMuted
@@ -155,7 +167,7 @@ export function AlertInstances({
         pagination={{
           pageIndex: pagination.index,
           pageSize: pagination.size,
-          totalItemCount: mergedAlertInstances.length,
+          totalItemCount: alertInstances.length,
         }}
         onChange={({ page: changedPage }: { page: Pagination }) => {
           setPagination(changedPage);
@@ -181,6 +193,7 @@ function getPage(items: any[], pagination: Pagination) {
 interface AlertInstanceListItemStatus {
   label: string;
   healthColor: string;
+  actionGroup?: string;
 }
 export interface AlertInstanceListItem {
   instance: string;
@@ -188,6 +201,7 @@ export interface AlertInstanceListItem {
   start?: Date;
   duration: number;
   isMuted: boolean;
+  sortPriority: number;
 }
 
 const ACTIVE_LABEL = i18n.translate(
@@ -197,29 +211,51 @@ const ACTIVE_LABEL = i18n.translate(
 
 const INACTIVE_LABEL = i18n.translate(
   'xpack.triggersActionsUI.sections.alertDetails.alertInstancesList.status.inactive',
-  { defaultMessage: 'Inactive' }
+  { defaultMessage: 'OK' }
 );
 
-const durationSince = (durationEpoch: number, startTime?: number) =>
-  startTime ? durationEpoch - startTime : 0;
+function getActionGroupName(alertType: AlertType, actionGroupId?: string): string | undefined {
+  actionGroupId = actionGroupId || alertType.defaultActionGroupId;
+  const actionGroup = alertType?.actionGroups?.find(
+    (group: ActionGroup) => group.id === actionGroupId
+  );
+  return actionGroup?.name;
+}
 
 export function alertInstanceToListItem(
   durationEpoch: number,
-  alert: Alert,
+  alertType: AlertType,
   instanceId: string,
-  instance?: RawAlertInstance
+  instance: AlertInstanceStatus
 ): AlertInstanceListItem {
-  const isMuted = alert.mutedInstanceIds.findIndex((muted) => muted === instanceId) >= 0;
+  const isMuted = !!instance?.muted;
+  const status =
+    instance?.status === 'Active'
+      ? {
+          label: ACTIVE_LABEL,
+          actionGroup: getActionGroupName(alertType, instance?.actionGroupId),
+          healthColor: 'primary',
+        }
+      : { label: INACTIVE_LABEL, healthColor: 'subdued' };
+  const start = instance?.activeStartDate ? new Date(instance.activeStartDate) : undefined;
+  const duration = start ? durationEpoch - start.valueOf() : 0;
+  const sortPriority = getSortPriorityByStatus(instance?.status);
   return {
     instance: instanceId,
-    status: instance
-      ? { label: ACTIVE_LABEL, healthColor: 'primary' }
-      : { label: INACTIVE_LABEL, healthColor: 'subdued' },
-    start: instance?.meta?.lastScheduledActions?.date,
-    duration: durationSince(
-      durationEpoch,
-      instance?.meta?.lastScheduledActions?.date?.getTime() ?? 0
-    ),
+    status,
+    start,
+    duration,
     isMuted,
+    sortPriority,
   };
+}
+
+function getSortPriorityByStatus(status?: AlertInstanceStatusValues): number {
+  switch (status) {
+    case 'Active':
+      return 0;
+    case 'OK':
+      return 1;
+  }
+  return 2;
 }

@@ -4,15 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ESFilter } from '../../../../typings/elasticsearch';
-import { ENVIRONMENT_NOT_DEFINED } from '../../../../common/environment_filter_values';
+import { ESFilter } from '../../../../../../typings/elasticsearch';
+import {
+  ENVIRONMENT_NOT_DEFINED,
+  ENVIRONMENT_ALL,
+} from '../../../../common/environment_filter_values';
 import { SERVICE_ENVIRONMENT } from '../../../../common/elasticsearch_fieldnames';
 
 export function getEnvironmentUiFilterES(environment?: string): ESFilter[] {
-  if (!environment) {
+  if (!environment || environment === ENVIRONMENT_ALL.value) {
     return [];
   }
-  if (environment === ENVIRONMENT_NOT_DEFINED) {
+  if (environment === ENVIRONMENT_NOT_DEFINED.value) {
     return [{ bool: { must_not: { exists: { field: SERVICE_ENVIRONMENT } } } }];
   }
   return [{ term: { [SERVICE_ENVIRONMENT]: environment } }];

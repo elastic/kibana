@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Component, Fragment, ReactNode } from 'react';
 import { ApplicationStart } from 'kibana/public';
-import { FeatureConfig } from '../../../../../../plugins/features/public';
+import { KibanaFeatureConfig } from '../../../../../../plugins/features/public';
 import { Space } from '../../../../common/model/space';
 import { getEnabledFeatures } from '../../lib/feature_utils';
 import { SectionPanel } from '../section_panel';
@@ -17,7 +17,7 @@ import { FeatureTable } from './feature_table';
 
 interface Props {
   space: Partial<Space>;
-  features: FeatureConfig[];
+  features: KibanaFeatureConfig[];
   securityEnabled: boolean;
   onChange: (space: Partial<Space>) => void;
   getUrlForApp: ApplicationStart['getUrlForApp'];
@@ -34,8 +34,6 @@ export class EnabledFeatures extends Component<Props, {}> {
 
     return (
       <SectionPanel
-        collapsible
-        initiallyCollapsed
         title={this.getPanelTitle()}
         description={description}
         data-test-subj="enabled-features-panel"
@@ -46,7 +44,7 @@ export class EnabledFeatures extends Component<Props, {}> {
               <h3>
                 <FormattedMessage
                   id="xpack.spaces.management.enabledSpaceFeatures.enableFeaturesInSpaceMessage"
-                  defaultMessage="Control which features are visible in this space."
+                  defaultMessage="Set feature visibility for this space"
                 />
               </h3>
             </EuiTitle>
@@ -114,7 +112,7 @@ export class EnabledFeatures extends Component<Props, {}> {
       <span>
         <FormattedMessage
           id="xpack.spaces.management.enabledSpaceFeatures.enabledFeaturesSectionMessage"
-          defaultMessage="Customize feature display"
+          defaultMessage="Features"
         />{' '}
         {details}
       </span>
@@ -135,15 +133,16 @@ export class EnabledFeatures extends Component<Props, {}> {
             <p>
               <FormattedMessage
                 id="xpack.spaces.management.enabledSpaceFeatures.goToRolesLink"
-                defaultMessage="Want to secure access? Go to {rolesLink}."
+                defaultMessage="If you wish to secure access to features, please {manageSecurityRoles}."
                 values={{
-                  rolesLink: (
+                  manageSecurityRoles: (
                     <EuiLink
+                      data-test-subj="goToRoles"
                       href={this.props.getUrlForApp('management', { path: 'security/roles' })}
                     >
                       <FormattedMessage
                         id="xpack.spaces.management.enabledSpaceFeatures.rolesLinkText"
-                        defaultMessage="Roles"
+                        defaultMessage="manage security roles"
                       />
                     </EuiLink>
                   ),

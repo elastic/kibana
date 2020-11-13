@@ -20,17 +20,9 @@
 export enum SEARCH_EVENT_TYPE {
   QUERY_TIMED_OUT = 'queryTimedOut',
   QUERIES_CANCELLED = 'queriesCancelled',
-  LONG_QUERY_POPUP_SHOWN = 'longQueryPopupShown',
-  LONG_QUERY_DIALOG_DISMISSED = 'longQueryDialogDismissed',
-  LONG_QUERY_RUN_BEYOND_TIMEOUT = 'longQueryRunBeyondTimeout',
 }
 
 export interface SearchUsageCollector {
   trackQueryTimedOut: () => Promise<void>;
   trackQueriesCancelled: () => Promise<void>;
-  trackLongQueryPopupShown: () => Promise<void>;
-  trackLongQueryDialogDismissed: () => Promise<void>;
-  trackLongQueryRunBeyondTimeout: () => Promise<void>;
-  trackError: (duration: number) => Promise<void>;
-  trackSuccess: (duration: number) => Promise<void>;
 }

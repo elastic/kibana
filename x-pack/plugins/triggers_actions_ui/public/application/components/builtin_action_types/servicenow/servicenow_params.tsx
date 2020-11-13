@@ -5,23 +5,34 @@
  */
 
 import React, { Fragment, useEffect } from 'react';
-import { EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EuiSelect } from '@elastic/eui';
-import { EuiFlexGroup } from '@elastic/eui';
-import { EuiFlexItem } from '@elastic/eui';
-import { EuiSpacer } from '@elastic/eui';
-import { EuiTitle } from '@elastic/eui';
+import {
+  EuiFormRow,
+  EuiSelect,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiTitle,
+  EuiFormControlLayout,
+  EuiIconTip,
+} from '@elastic/eui';
+import { isSome } from 'fp-ts/lib/Option';
 import { ActionParamsProps } from '../../../../types';
 import { ServiceNowActionParams } from './types';
 import { TextAreaWithMessageVariables } from '../../text_area_with_message_variables';
 import { TextFieldWithMessageVariables } from '../../text_field_with_message_variables';
+import { extractActionVariable } from '../extract_action_variable';
 
 const ServiceNowParamsFields: React.FunctionComponent<ActionParamsProps<
   ServiceNowActionParams
 >> = ({ actionParams, editAction, index, errors, messageVariables }) => {
   const { title, description, comment, severity, urgency, impact, savedObjectId } =
     actionParams.subActionParams || {};
+
+  const isActionBeingConfiguredByAnAlert = messageVariables
+    ? isSome(extractActionVariable(messageVariables, 'alertId'))
+    : false;
+
   const selectOptions = [
     {
       value: '1',
@@ -61,7 +72,7 @@ const ServiceNowParamsFields: React.FunctionComponent<ActionParamsProps<
     if (!actionParams.subAction) {
       editAction('subAction', 'pushToService', index);
     }
-    if (!savedObjectId && messageVariables?.find((variable) => variable.name === 'alertId')) {
+    if (!savedObjectId && isActionBeingConfiguredByAnAlert) {
       editSubActionProperty('savedObjectId', '{{alertId}}');
     }
     if (!urgency) {
@@ -79,7 +90,14 @@ const ServiceNowParamsFields: React.FunctionComponent<ActionParamsProps<
   return (
     <Fragment>
       <EuiTitle size="s">
-        <h3>Incident</h3>
+        <h3>
+          {i18n.translate(
+            'xpack.triggersActionsUI.components.builtinActionTypes.serviceNow.title',
+            {
+              defaultMessage: 'Incident',
+            }
+          )}
+        </h3>
       </EuiTitle>
       <EuiSpacer size="m" />
       <EuiFormRow
@@ -167,6 +185,43 @@ const ServiceNowParamsFields: React.FunctionComponent<ActionParamsProps<
           errors={errors.title as string[]}
         />
       </EuiFormRow>
+      {!isActionBeingConfiguredByAnAlert && (
+        <Fragment>
+          <EuiFormRow
+            fullWidth
+            label={i18n.translate(
+              'xpack.triggersActionsUI.components.builtinActionTypes.serviceNow.savedObjectIdFieldLabel',
+              {
+                defaultMessage: 'Object ID (optional)',
+              }
+            )}
+          >
+            <EuiFormControlLayout
+              fullWidth
+              append={
+                <EuiIconTip
+                  content={i18n.translate(
+                    'xpack.triggersActionsUI.components.builtinActionTypes.serviceNow.savedObjectIdFieldHelp',
+                    {
+                      defaultMessage:
+                        'ServiceNow will associate this action with the ID of a Kibana saved object.',
+                    }
+                  )}
+                />
+              }
+            >
+              <TextFieldWithMessageVariables
+                index={index}
+                editAction={editSubActionProperty}
+                messageVariables={messageVariables}
+                paramsProperty={'savedObjectId'}
+                inputTargetValue={savedObjectId}
+              />
+            </EuiFormControlLayout>
+          </EuiFormRow>
+          <EuiSpacer size="m" />
+        </Fragment>
+      )}
       <TextAreaWithMessageVariables
         index={index}
         editAction={editSubActionProperty}

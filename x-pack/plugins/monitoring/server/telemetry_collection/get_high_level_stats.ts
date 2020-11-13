@@ -249,8 +249,8 @@ function getIndexPatternForStackProduct(product: string) {
 export async function getHighLevelStats(
   callCluster: StatsCollectionConfig['callCluster'],
   clusterUuids: string[],
-  start: StatsCollectionConfig['start'],
-  end: StatsCollectionConfig['end'],
+  start: string,
+  end: string,
   product: string,
   maxBucketSize: number
 ) {
@@ -270,8 +270,8 @@ export async function fetchHighLevelStats<
 >(
   callCluster: StatsCollectionConfig['callCluster'],
   clusterUuids: string[],
-  start: StatsCollectionConfig['start'] | undefined,
-  end: StatsCollectionConfig['end'] | undefined,
+  start: string,
+  end: string,
   product: string,
   maxBucketSize: number
 ): Promise<SearchResponse<T>> {
@@ -329,7 +329,7 @@ export async function fetchHighLevelStats<
         // a more ideal field would be the concatenation of the uuid + transport address for duped UUIDs (copied installations)
         field: `${product}_stats.${product}.uuid`,
       },
-      sort: [{ timestamp: 'desc' }],
+      sort: [{ timestamp: { order: 'desc', unmapped_type: 'long' } }],
     },
   };
 
@@ -347,7 +347,7 @@ export async function fetchHighLevelStats<
 export function handleHighLevelStatsResponse(
   response: SearchResponse<{ cluster_uuid?: string }>,
   product: string
-) {
+): ClustersHighLevelStats {
   const instances = response.hits?.hits || [];
   const clusterMap = groupInstancesByCluster(instances, product);
 

@@ -5,7 +5,7 @@
  */
 
 import * as t from 'io-ts';
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { uniq } from 'lodash';
 import { setupRequest } from '../lib/helpers/setup_request';
 import { getServiceAgentName } from '../lib/services/get_service_agent_name';
@@ -16,6 +16,9 @@ import { createRoute } from './create_route';
 import { uiFiltersRt, rangeRt } from './default_api_types';
 import { getServiceAnnotations } from '../lib/services/annotations';
 import { dateAsStringRt } from '../../common/runtime_types/date_as_string_rt';
+import { getSearchAggregatedTransactions } from '../lib/helpers/aggregated_transactions';
+import { getServiceErrorGroups } from '../lib/services/get_service_error_groups';
+import { toNumberRt } from '../../common/runtime_types/to_number_rt';
 
 export const servicesRoute = createRoute(() => ({
   path: '/api/apm/services',
@@ -24,7 +27,16 @@ export const servicesRoute = createRoute(() => ({
   },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
-    const services = await getServices(setup);
+
+    const searchAggregatedTransactions = await getSearchAggregatedTransactions(
+      setup
+    );
+
+    const services = await getServices({
+      setup,
+      searchAggregatedTransactions,
+      logger: context.logger,
+    });
 
     return services;
   },
@@ -41,7 +53,15 @@ export const serviceAgentNameRoute = createRoute(() => ({
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     const { serviceName } = context.params.path;
-    return getServiceAgentName(serviceName, setup);
+    const searchAggregatedTransactions = await getSearchAggregatedTransactions(
+      setup
+    );
+
+    return getServiceAgentName({
+      serviceName,
+      setup,
+      searchAggregatedTransactions,
+    });
   },
 }));
 
@@ -56,7 +76,13 @@ export const serviceTransactionTypesRoute = createRoute(() => ({
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     const { serviceName } = context.params.path;
-    return getServiceTransactionTypes(serviceName, setup);
+    return getServiceTransactionTypes({
+      serviceName,
+      setup,
+      searchAggregatedTransactions: await getSearchAggregatedTransactions(
+        setup
+      ),
+    });
   },
 }));
 
@@ -94,13 +120,20 @@ export const serviceAnnotationsRoute = createRoute(() => ({
     const { serviceName } = context.params.path;
     const { environment } = context.params.query;
 
-    const annotationsClient = await context.plugins.observability?.getScopedAnnotationsClient(
-      context,
-      request
-    );
+    const [
+      annotationsClient,
+      searchAggregatedTransactions,
+    ] = await Promise.all([
+      context.plugins.observability?.getScopedAnnotationsClient(
+        context,
+        request
+      ),
+      getSearchAggregatedTransactions(setup),
+    ]);
 
     return getServiceAnnotations({
       setup,
+      searchAggregatedTransactions,
       serviceName,
       environment,
       annotationsClient,
@@ -161,6 +194,48 @@ export const serviceAnnotationsCreateRoute = createRoute(() => ({
         name: path.serviceName,
       },
       tags: uniq(['apm'].concat(body.tags ?? [])),
+    });
+  },
+}));
+
+export const serviceErrorGroupsRoute = createRoute(() => ({
+  path: '/api/apm/services/{serviceName}/error_groups',
+  params: {
+    path: t.type({
+      serviceName: t.string,
+    }),
+    query: t.intersection([
+      rangeRt,
+      uiFiltersRt,
+      t.type({
+        size: toNumberRt,
+        numBuckets: toNumberRt,
+        pageIndex: toNumberRt,
+        sortDirection: t.union([t.literal('asc'), t.literal('desc')]),
+        sortField: t.union([
+          t.literal('last_seen'),
+          t.literal('occurrences'),
+          t.literal('name'),
+        ]),
+      }),
+    ]),
+  },
+  handler: async ({ context, request }) => {
+    const setup = await setupRequest(context, request);
+
+    const {
+      path: { serviceName },
+      query: { size, numBuckets, pageIndex, sortDirection, sortField },
+    } = context.params;
+
+    return getServiceErrorGroups({
+      serviceName,
+      setup,
+      size,
+      numBuckets,
+      pageIndex,
+      sortDirection,
+      sortField,
     });
   },
 }));

@@ -1,0 +1,193 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`convertHistogramBucketsToTimeseies(keys, options, buckets) should drop the last bucket 1`] = `
+Object {
+  "columns": Array [
+    Object {
+      "name": "timestamp",
+      "type": "date",
+    },
+    Object {
+      "name": "metric_0",
+      "type": "number",
+    },
+  ],
+  "id": "example-0",
+  "keys": Array [
+    "example-0",
+  ],
+  "rows": Array [
+    Object {
+      "metric_0": 1,
+      "timestamp": 1577836800000,
+    },
+    Object {
+      "metric_0": 1,
+      "timestamp": 1577836860000,
+    },
+    Object {
+      "metric_0": 1,
+      "timestamp": 1577836920000,
+    },
+  ],
+}
+`;
+
+exports[`convertHistogramBucketsToTimeseies(keys, options, buckets) should just work 1`] = `
+Object {
+  "columns": Array [
+    Object {
+      "name": "timestamp",
+      "type": "date",
+    },
+    Object {
+      "name": "metric_0",
+      "type": "number",
+    },
+  ],
+  "id": "example-0",
+  "keys": Array [
+    "example-0",
+  ],
+  "rows": Array [
+    Object {
+      "metric_0": 1,
+      "timestamp": 1577836800000,
+    },
+    Object {
+      "metric_0": 1,
+      "timestamp": 1577836860000,
+    },
+    Object {
+      "metric_0": 1,
+      "timestamp": 1577836920000,
+    },
+    Object {
+      "metric_0": null,
+      "timestamp": 1577836920000,
+    },
+  ],
+}
+`;
+
+exports[`convertHistogramBucketsToTimeseies(keys, options, buckets) should return empty timeseries for empty metrics 1`] = `
+Object {
+  "columns": Array [],
+  "id": "example-0",
+  "keys": Array [
+    "example-0",
+  ],
+  "rows": Array [],
+}
+`;
+
+exports[`convertHistogramBucketsToTimeseies(keys, options, buckets) should work with keyed percentiles 1`] = `
+Object {
+  "columns": Array [
+    Object {
+      "name": "timestamp",
+      "type": "date",
+    },
+    Object {
+      "name": "metric_0",
+      "type": "number",
+    },
+  ],
+  "id": "example-0",
+  "keys": Array [
+    "example-0",
+  ],
+  "rows": Array [
+    Object {
+      "metric_0": 4,
+      "timestamp": 1577836800000,
+    },
+    Object {
+      "metric_0": 4,
+      "timestamp": 1577836860000,
+    },
+    Object {
+      "metric_0": 4,
+      "timestamp": 1577836920000,
+    },
+    Object {
+      "metric_0": 4,
+      "timestamp": 1577836920000,
+    },
+  ],
+}
+`;
+
+exports[`convertHistogramBucketsToTimeseies(keys, options, buckets) should work with normalized_values 1`] = `
+Object {
+  "columns": Array [
+    Object {
+      "name": "timestamp",
+      "type": "date",
+    },
+    Object {
+      "name": "metric_0",
+      "type": "number",
+    },
+  ],
+  "id": "example-0",
+  "keys": Array [
+    "example-0",
+  ],
+  "rows": Array [
+    Object {
+      "metric_0": 2,
+      "timestamp": 1577836800000,
+    },
+    Object {
+      "metric_0": 2,
+      "timestamp": 1577836860000,
+    },
+    Object {
+      "metric_0": 2,
+      "timestamp": 1577836920000,
+    },
+    Object {
+      "metric_0": null,
+      "timestamp": 1577836920000,
+    },
+  ],
+}
+`;
+
+exports[`convertHistogramBucketsToTimeseies(keys, options, buckets) should work with percentiles 1`] = `
+Object {
+  "columns": Array [
+    Object {
+      "name": "timestamp",
+      "type": "date",
+    },
+    Object {
+      "name": "metric_0",
+      "type": "number",
+    },
+  ],
+  "id": "example-0",
+  "keys": Array [
+    "example-0",
+  ],
+  "rows": Array [
+    Object {
+      "metric_0": 3,
+      "timestamp": 1577836800000,
+    },
+    Object {
+      "metric_0": 3,
+      "timestamp": 1577836860000,
+    },
+    Object {
+      "metric_0": 3,
+      "timestamp": 1577836920000,
+    },
+    Object {
+      "metric_0": 3,
+      "timestamp": 1577836920000,
+    },
+  ],
+}
+`;

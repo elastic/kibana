@@ -16,8 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { esKuery } from '../../../../../plugins/data/server';
+// @ts-expect-error no ts
+import { esKuery } from '../../es_query';
 
 import { validateFilterKueryNode, validateConvertFilterToKueryNode } from './filter_utils';
 
@@ -83,7 +83,19 @@ const mockMappings = {
 
 describe('Filter Utils', () => {
   describe('#validateConvertFilterToKueryNode', () => {
-    test('Validate a simple filter', () => {
+    test('Empty string filters are ignored', () => {
+      expect(validateConvertFilterToKueryNode(['foo'], '', mockMappings)).toBeUndefined();
+    });
+    test('Validate a simple KQL KueryNode filter', () => {
+      expect(
+        validateConvertFilterToKueryNode(
+          ['foo'],
+          esKuery.nodeTypes.function.buildNode('is', `foo.attributes.title`, 'best', true),
+          mockMappings
+        )
+      ).toEqual(esKuery.fromKueryExpression('foo.title: "best"'));
+    });
+    test('Validate a simple KQL expression filter', () => {
       expect(
         validateConvertFilterToKueryNode(['foo'], 'foo.attributes.title: "best"', mockMappings)
       ).toEqual(esKuery.fromKueryExpression('foo.title: "best"'));

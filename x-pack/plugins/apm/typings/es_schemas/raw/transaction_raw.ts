@@ -12,10 +12,10 @@ import { Kubernetes } from './fields/kubernetes';
 import { Page } from './fields/page';
 import { Process } from './fields/process';
 import { Service } from './fields/service';
+import { TimestampUs } from './fields/timestamp_us';
 import { Url } from './fields/url';
 import { User } from './fields/user';
 import { UserAgent } from './fields/user_agent';
-import { Observer } from './fields/observer';
 
 interface Processor {
   name: 'transaction';
@@ -24,6 +24,7 @@ interface Processor {
 
 export interface TransactionRaw extends APMBaseDoc {
   processor: Processor;
+  timestamp: TimestampUs;
   trace: { id: string }; // trace is required
   transaction: {
     duration: { us: number };
@@ -54,6 +55,7 @@ export interface TransactionRaw extends APMBaseDoc {
 
   // Shared by errors and transactions
   container?: Container;
+  ecs?: { version?: string };
   host?: Host;
   http?: Http;
   kubernetes?: Kubernetes;
@@ -62,5 +64,4 @@ export interface TransactionRaw extends APMBaseDoc {
   url?: Url;
   user?: User;
   user_agent?: UserAgent;
-  observer?: Observer;
 }

@@ -6,7 +6,7 @@
 
 import { getAppResultsMock } from './application.test.mocks';
 
-import { of, EMPTY } from 'rxjs';
+import { EMPTY, of } from 'rxjs';
 import { TestScheduler } from 'rxjs/testing';
 import { ApplicationStart, AppNavLinkStatus, AppStatus, PublicAppInfo } from 'src/core/public';
 import {
@@ -25,7 +25,6 @@ const createApp = (props: Partial<PublicAppInfo> = {}): PublicAppInfo => ({
   id: 'app1',
   title: 'App 1',
   appRoute: '/app/app1',
-  legacy: false,
   status: AppStatus.accessible,
   navLinkStatus: AppNavLinkStatus.visible,
   chromeless: false,
@@ -92,6 +91,20 @@ describe('applicationResultProvider', () => {
       createAppMap([
         createApp({ id: 'app1', title: 'App 1' }),
         createApp({ id: 'disabled', title: 'disabled', status: AppStatus.inaccessible }),
+      ])
+    );
+    const provider = createApplicationResultProvider(Promise.resolve(application));
+    await provider.find('term', defaultOption).toPromise();
+
+    expect(getAppResultsMock).toHaveBeenCalledWith('term', [expectApp('app1')]);
+  });
+
+  it('ignores apps with non-visible navlink', async () => {
+    application.applications$ = of(
+      createAppMap([
+        createApp({ id: 'app1', title: 'App 1', navLinkStatus: AppNavLinkStatus.visible }),
+        createApp({ id: 'disabled', title: 'disabled', navLinkStatus: AppNavLinkStatus.disabled }),
+        createApp({ id: 'hidden', title: 'hidden', navLinkStatus: AppNavLinkStatus.hidden }),
       ])
     );
     const provider = createApplicationResultProvider(Promise.resolve(application));

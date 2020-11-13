@@ -18,13 +18,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { AppCategory } from '../types';
 
 /** @internal */
-export const DEFAULT_APP_CATEGORIES = Object.freeze({
+export const DEFAULT_APP_CATEGORIES: Record<string, AppCategory> = Object.freeze({
   kibana: {
     id: 'kibana',
     label: i18n.translate('core.ui.kibanaNavList.label', {
-      defaultMessage: 'Kibana',
+      defaultMessage: 'Analytics',
     }),
     euiIconType: 'logoKibana',
     order: 1000,
@@ -46,7 +47,7 @@ export const DEFAULT_APP_CATEGORIES = Object.freeze({
     order: 3000,
   },
   security: {
-    id: 'security',
+    id: 'securitySolution',
     label: i18n.translate('core.ui.securityNavList.label', {
       defaultMessage: 'Security',
     }),
@@ -59,5 +60,6 @@ export const DEFAULT_APP_CATEGORIES = Object.freeze({
       defaultMessage: 'Management',
     }),
     order: 5000,
+    euiIconType: 'managementApp',
   },
 });

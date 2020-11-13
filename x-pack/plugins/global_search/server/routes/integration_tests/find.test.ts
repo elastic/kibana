@@ -13,7 +13,7 @@ import { GlobalSearchFindError } from '../../../common/errors';
 import { globalSearchPluginMock } from '../../mocks';
 import { registerInternalFindRoute } from '../find';
 
-type setupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
+type SetupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
 const pluginId = Symbol('globalSearch');
 
 const createResult = (id: string): GlobalSearchResult => ({
@@ -31,8 +31,8 @@ const createBatch = (...ids: string[]): GlobalSearchBatchedResults => ({
 const expectedResults = (...ids: string[]) => ids.map((id) => expect.objectContaining({ id }));
 
 describe('POST /internal/global_search/find', () => {
-  let server: setupServerReturn['server'];
-  let httpSetup: setupServerReturn['httpSetup'];
+  let server: SetupServerReturn['server'];
+  let httpSetup: SetupServerReturn['httpSetup'];
   let globalSearchHandlerContext: ReturnType<typeof globalSearchPluginMock.createRouteHandlerContext>;
 
   beforeEach(async () => {

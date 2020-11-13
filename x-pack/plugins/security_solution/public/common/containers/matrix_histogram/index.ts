@@ -4,117 +4,195 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isEmpty } from 'lodash/fp';
-import { useEffect, useMemo, useState, useRef } from 'react';
+import deepEqual from 'fast-deep-equal';
+import { getOr, noop } from 'lodash/fp';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
 import { MatrixHistogramQueryProps } from '../../components/matrix_histogram/types';
-import { errorToToaster, useStateToaster } from '../../components/toasters';
-import { useUiSetting$ } from '../../lib/kibana';
-import { createFilter } from '../helpers';
-import { useApolloClient } from '../../utils/apollo_context';
-import { inputsModel } from '../../store';
-import { MatrixHistogramGqlQuery } from './index.gql_query';
-import { GetMatrixHistogramQuery, MatrixOverTimeHistogramData } from '../../../graphql/types';
+import { inputsModel } from '../../../common/store';
+import { createFilter } from '../../../common/containers/helpers';
+import { useKibana } from '../../../common/lib/kibana';
+import {
+  MatrixHistogramQuery,
+  MatrixHistogramRequestOptions,
+  MatrixHistogramStrategyResponse,
+  MatrixHistogramData,
+} from '../../../../common/search_strategy/security_solution';
+import { isErrorResponse, isCompleteResponse } from '../../../../../../../src/plugins/data/common';
+import { AbortError } from '../../../../../../../src/plugins/kibana_utils/common';
+import { getInspectResponse } from '../../../helpers';
+import { InspectResponse } from '../../../types';
+import * as i18n from './translations';
 
-export const useQuery = ({
+export type Buckets = Array<{
+  key: string;
+  doc_count: number;
+}>;
+
+const bucketEmpty: Buckets = [];
+
+export interface UseMatrixHistogramArgs {
+  data: MatrixHistogramData[];
+  inspect: InspectResponse;
+  refetch: inputsModel.Refetch;
+  totalCount: number;
+  buckets: Array<{
+    key: string;
+    doc_count: number;
+  }>;
+}
+
+export const useMatrixHistogram = ({
   endDate,
   errorMessage,
   filterQuery,
   histogramType,
-  indexToAdd,
-  isInspected,
+  indexNames,
   stackByField,
   startDate,
-}: MatrixHistogramQueryProps) => {
-  const [configIndex] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
-  const defaultIndex = useMemo<string[]>(() => {
-    if (indexToAdd != null && !isEmpty(indexToAdd)) {
-      return [...configIndex, ...indexToAdd];
-    }
-    return configIndex;
-  }, [configIndex, indexToAdd]);
+  threshold,
+  skip = false,
+}: MatrixHistogramQueryProps): [
+  boolean,
+  UseMatrixHistogramArgs,
+  (to: string, from: string) => void
+] => {
+  const { data, notifications } = useKibana().services;
+  const refetch = useRef<inputsModel.Refetch>(noop);
+  const abortCtrl = useRef(new AbortController());
+  const [loading, setLoading] = useState(false);
+  const [matrixHistogramRequest, setMatrixHistogramRequest] = useState<
+    MatrixHistogramRequestOptions
+  >({
+    defaultIndex: indexNames,
+    factoryQueryType: MatrixHistogramQuery,
+    filterQuery: createFilter(filterQuery),
+    histogramType,
+    timerange: {
+      interval: '12h',
+      from: startDate,
+      to: endDate,
+    },
+    stackByField,
+    threshold,
+  });
 
-  const [, dispatchToaster] = useStateToaster();
-  const refetch = useRef<inputsModel.Refetch>();
-  const [loading, setLoading] = useState<boolean>(false);
-  const [data, setData] = useState<MatrixOverTimeHistogramData[] | null>(null);
-  const [inspect, setInspect] = useState<inputsModel.InspectQuery | null>(null);
-  const [totalCount, setTotalCount] = useState<number>(-1);
-  const apolloClient = useApolloClient();
+  const [matrixHistogramResponse, setMatrixHistogramResponse] = useState<UseMatrixHistogramArgs>({
+    data: [],
+    inspect: {
+      dsl: [],
+      response: [],
+    },
+    refetch: refetch.current,
+    totalCount: -1,
+    buckets: [],
+  });
+
+  const hostsSearch = useCallback(
+    (request: MatrixHistogramRequestOptions) => {
+      let didCancel = false;
+      const asyncSearch = async () => {
+        abortCtrl.current = new AbortController();
+        setLoading(true);
+
+        const searchSubscription$ = data.search
+          .search<MatrixHistogramRequestOptions, MatrixHistogramStrategyResponse>(request, {
+            strategy: 'securitySolutionSearchStrategy',
+            abortSignal: abortCtrl.current.signal,
+          })
+          .subscribe({
+            next: (response) => {
+              if (isCompleteResponse(response)) {
+                if (!didCancel) {
+                  const histogramBuckets: Buckets = getOr(
+                    bucketEmpty,
+                    'rawResponse.aggregations.eventActionGroup.buckets',
+                    response
+                  );
+                  setLoading(false);
+                  setMatrixHistogramResponse((prevResponse) => ({
+                    ...prevResponse,
+                    data: response.matrixHistogramData,
+                    inspect: getInspectResponse(response, prevResponse.inspect),
+                    refetch: refetch.current,
+                    totalCount: response.totalCount,
+                    buckets: histogramBuckets,
+                  }));
+                }
+                searchSubscription$.unsubscribe();
+              } else if (isErrorResponse(response)) {
+                if (!didCancel) {
+                  setLoading(false);
+                }
+                // TODO: Make response error status clearer
+                notifications.toasts.addWarning(i18n.ERROR_MATRIX_HISTOGRAM);
+                searchSubscription$.unsubscribe();
+              }
+            },
+            error: (msg) => {
+              if (!didCancel) {
+                setLoading(false);
+              }
+              if (!(msg instanceof AbortError)) {
+                notifications.toasts.addError(msg, {
+                  title: errorMessage ?? i18n.FAIL_MATRIX_HISTOGRAM,
+                });
+              }
+            },
+          });
+      };
+      abortCtrl.current.abort();
+      asyncSearch();
+      refetch.current = asyncSearch;
+      return () => {
+        didCancel = true;
+        abortCtrl.current.abort();
+      };
+    },
+    [data.search, errorMessage, notifications.toasts]
+  );
 
   useEffect(() => {
-    const matrixHistogramVariables: GetMatrixHistogramQuery.Variables = {
-      filterQuery: createFilter(filterQuery),
-      sourceId: 'default',
-      timerange: {
-        interval: '12h',
-        from: startDate!,
-        to: endDate!,
-      },
-      defaultIndex,
-      inspect: isInspected,
-      stackByField,
-      histogramType,
-    };
-    let isSubscribed = true;
-    const abortCtrl = new AbortController();
-    const abortSignal = abortCtrl.signal;
+    setMatrixHistogramRequest((prevRequest) => {
+      const myRequest = {
+        ...prevRequest,
+        defaultIndex: indexNames,
+        filterQuery: createFilter(filterQuery),
+        histogramType,
+        timerange: {
+          interval: '12h',
+          from: startDate,
+          to: endDate,
+        },
+        stackByField,
+        threshold,
+      };
+      if (!deepEqual(prevRequest, myRequest)) {
+        return myRequest;
+      }
+      return prevRequest;
+    });
+  }, [indexNames, endDate, filterQuery, startDate, stackByField, histogramType, threshold]);
 
-    async function fetchData() {
-      if (!apolloClient) return null;
-      setLoading(true);
-      return apolloClient
-        .query<GetMatrixHistogramQuery.Query, GetMatrixHistogramQuery.Variables>({
-          query: MatrixHistogramGqlQuery,
-          fetchPolicy: 'network-only',
-          variables: matrixHistogramVariables,
-          context: {
-            fetchOptions: {
-              abortSignal,
-            },
-          },
-        })
-        .then(
-          (result) => {
-            if (isSubscribed) {
-              const source = result?.data?.source?.MatrixHistogram ?? {};
-              setData(source?.matrixHistogramData ?? []);
-              setTotalCount(source?.totalCount ?? -1);
-              setInspect(source?.inspect ?? null);
-              setLoading(false);
-            }
-          },
-          (error) => {
-            if (isSubscribed) {
-              setData(null);
-              setTotalCount(-1);
-              setInspect(null);
-              setLoading(false);
-              errorToToaster({ title: errorMessage, error, dispatchToaster });
-            }
-          }
-        );
+  useEffect(() => {
+    if (!skip) {
+      hostsSearch(matrixHistogramRequest);
     }
-    refetch.current = fetchData;
-    fetchData();
-    return () => {
-      isSubscribed = false;
-      abortCtrl.abort();
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    defaultIndex,
-    errorMessage,
-    filterQuery,
-    histogramType,
-    indexToAdd,
-    isInspected,
-    stackByField,
-    startDate,
-    endDate,
-    data,
-  ]);
+  }, [matrixHistogramRequest, hostsSearch, skip]);
 
-  return { data, loading, inspect, totalCount, refetch: refetch.current };
+  const runMatrixHistogramSearch = useCallback(
+    (to: string, from: string) => {
+      hostsSearch({
+        ...matrixHistogramRequest,
+        timerange: {
+          interval: '12h',
+          from,
+          to,
+        },
+      });
+    },
+    [matrixHistogramRequest, hostsSearch]
+  );
+
+  return [loading, matrixHistogramResponse, runMatrixHistogramSearch];
 };

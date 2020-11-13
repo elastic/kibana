@@ -5,8 +5,7 @@
  */
 
 import { isEqual } from 'lodash';
-import React, { memo, useEffect, FC } from 'react';
-
+import React, { memo, useEffect, FC, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import {
@@ -24,13 +23,27 @@ import {
 } from '@elastic/eui';
 
 import { CoreSetup } from 'src/core/public';
-
 import { DEFAULT_SAMPLER_SHARD_SIZE } from '../../../../common/constants/field_histograms';
 
-import { INDEX_STATUS } from '../../data_frame_analytics/common';
+import { ANALYSIS_CONFIG_TYPE, INDEX_STATUS } from '../../data_frame_analytics/common';
 
-import { euiDataGridStyle, euiDataGridToolbarSettings } from './common';
+import {
+  euiDataGridStyle,
+  euiDataGridToolbarSettings,
+  getFeatureImportance,
+  getTopClasses,
+} from './common';
 import { UseIndexDataReturnType } from './types';
+import { DecisionPathPopover } from './feature_importance/decision_path_popover';
+import {
+  FeatureImportanceBaseline,
+  FeatureImportance,
+  TopClasses,
+} from '../../../../common/types/feature_importance';
+import { DEFAULT_RESULTS_FIELD } from '../../../../common/constants/data_frame_analytics';
+import { DataFrameAnalysisConfigType } from '../../../../common/types/data_frame_analytics';
+
+import './data_grid.scss';
 // TODO Fix row hovering + bar highlighting
 // import { hoveredRow$ } from './column_chart';
 
@@ -41,6 +54,9 @@ export const DataGridTitle: FC<{ title: string }> = ({ title }) => (
 );
 
 interface PropsWithoutHeader extends UseIndexDataReturnType {
+  baseline?: FeatureImportanceBaseline;
+  analysisType?: DataFrameAnalysisConfigType | 'unknown';
+  resultsField?: string;
   dataTestSubj: string;
   toastNotifications: CoreSetup['notifications']['toasts'];
 }
@@ -60,6 +76,7 @@ type Props = PropsWithHeader | PropsWithoutHeader;
 export const DataGrid: FC<Props> = memo(
   (props) => {
     const {
+      baseline,
       chartsVisible,
       chartsButtonVisible,
       columnsWithCharts,
@@ -80,8 +97,10 @@ export const DataGrid: FC<Props> = memo(
       toastNotifications,
       toggleChartVisibility,
       visibleColumns,
+      predictionFieldName,
+      resultsField,
+      analysisType,
     } = props;
-
     // TODO Fix row hovering + bar highlighting
     // const getRowProps = (item: any) => {
     //   return {
@@ -89,6 +108,66 @@ export const DataGrid: FC<Props> = memo(
     //     onMouseLeave: () => hoveredRow$.next(null),
     //   };
     // };
+
+    // If the charts are visible, hide the column actions icon.
+    const columnsWithChartsActionized = columnsWithCharts.map((d) => {
+      if (chartsVisible === true) {
+        d.actions = false;
+      }
+      return d;
+    });
+
+    const popOverContent = useMemo(() => {
+      return analysisType === ANALYSIS_CONFIG_TYPE.REGRESSION ||
+        analysisType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION
+        ? {
+            featureImportance: ({ children }: { cellContentsElement: any; children: any }) => {
+              const rowIndex = children?.props?.visibleRowIndex;
+              const row = data[rowIndex];
+              if (!row) return <div />;
+              // if resultsField for some reason is not available then use ml
+              const mlResultsField = resultsField ?? DEFAULT_RESULTS_FIELD;
+              let predictedValue: string | number | undefined;
+              let predictedProbability: number | undefined;
+              let topClasses: TopClasses = [];
+              if (
+                predictionFieldName !== undefined &&
+                row &&
+                row[`${mlResultsField}.${predictionFieldName}`] !== undefined
+              ) {
+                predictedValue = row[`${mlResultsField}.${predictionFieldName}`];
+                topClasses = getTopClasses(row, mlResultsField);
+                predictedProbability = row[`${mlResultsField}.prediction_probability`];
+              }
+
+              const isClassTypeBoolean = topClasses.reduce(
+                (p, c) => typeof c.class_name === 'boolean' || p,
+                false
+              );
+
+              const parsedFIArray: FeatureImportance[] = getFeatureImportance(
+                row,
+                mlResultsField,
+                isClassTypeBoolean
+              );
+
+              return (
+                <DecisionPathPopover
+                  analysisType={analysisType}
+                  predictedValue={predictedValue}
+                  predictedProbability={predictedProbability}
+                  baseline={baseline}
+                  featureImportance={parsedFIArray}
+                  topClasses={topClasses}
+                  predictionFieldName={
+                    predictionFieldName ? predictionFieldName.replace('_prediction', '') : undefined
+                  }
+                />
+              );
+            },
+          }
+        : undefined;
+    }, [baseline, data]);
 
     useEffect(() => {
       if (invalidSortingColumnns.length > 0) {
@@ -140,6 +219,40 @@ export const DataGrid: FC<Props> = memo(
       );
     }
 
+    let errorCallout;
+
+    if (status === INDEX_STATUS.ERROR) {
+      // if it's a searchBar syntax error leave the table visible so they can try again
+      if (errorMessage && !errorMessage.includes('failed to create query')) {
+        errorCallout = (
+          <EuiCallOut
+            title={i18n.translate('xpack.ml.dataframe.analytics.exploration.querySyntaxError', {
+              defaultMessage:
+                'An error occurred loading the index data. Please ensure your query syntax is valid.',
+            })}
+            color="danger"
+            iconType="cross"
+          >
+            <p>{errorMessage}</p>
+          </EuiCallOut>
+        );
+      } else {
+        errorCallout = (
+          <EuiCallOut
+            title={i18n.translate('xpack.ml.dataGrid.indexDataError', {
+              defaultMessage: 'An error occurred loading the index data.',
+            })}
+            color="danger"
+            iconType="cross"
+          >
+            <EuiCodeBlock language="json" fontSize="s" paddingSize="s" isCopyable>
+              {errorMessage}
+            </EuiCodeBlock>
+          </EuiCallOut>
+        );
+      }
+    }
+
     return (
       <div data-test-subj={`${dataTestSubj} ${status === INDEX_STATUS.ERROR ? 'error' : 'loaded'}`}>
         {isWithHeader(props) && (
@@ -163,26 +276,16 @@ export const DataGrid: FC<Props> = memo(
             </EuiFlexItem>
           </EuiFlexGroup>
         )}
-        {status === INDEX_STATUS.ERROR && (
+        {errorCallout !== undefined && (
           <div data-test-subj={`${dataTestSubj} error`}>
-            <EuiCallOut
-              title={i18n.translate('xpack.ml.dataGrid.indexDataError', {
-                defaultMessage: 'An error occurred loading the index data.',
-              })}
-              color="danger"
-              iconType="cross"
-            >
-              <EuiCodeBlock language="json" fontSize="s" paddingSize="s" isCopyable>
-                {errorMessage}
-              </EuiCodeBlock>
-            </EuiCallOut>
+            {errorCallout}
             <EuiSpacer size="m" />
           </div>
         )}
         <div className="mlDataGrid">
           <EuiDataGrid
             aria-label={isWithHeader(props) ? props.title : ''}
-            columns={columnsWithCharts.map((c) => {
+            columns={columnsWithChartsActionized.map((c) => {
               c.initialWidth = 165;
               return c;
             })}
@@ -225,6 +328,7 @@ export const DataGrid: FC<Props> = memo(
                   }
                 : {}),
             }}
+            popoverContents={popOverContent}
             pagination={{
               ...pagination,
               pageSizeOptions: [5, 10, 25],

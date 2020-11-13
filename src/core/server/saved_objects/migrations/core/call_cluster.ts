@@ -25,7 +25,6 @@
 
 import { IndexMapping } from '../../mappings';
 
-/* eslint-disable  @typescript-eslint/unified-signatures */
 export interface CallCluster {
   (path: 'bulk', opts: { body: object[] }): Promise<BulkResult>;
   (path: 'count', opts: CountOpts): Promise<{ count: number; _shards: ShardsInfo }>;
@@ -49,7 +48,6 @@ export interface CallCluster {
     error?: ErrorResponse;
   }>;
 }
-/* eslint-enable  @typescript-eslint/unified-signatures */
 
 ///////////////////////////////////////////////////////////////////
 // callCluster argument type definitions

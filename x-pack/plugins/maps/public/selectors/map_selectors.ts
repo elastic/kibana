@@ -25,16 +25,16 @@ import { InnerJoin } from '../classes/joins/inner_join';
 import { getSourceByType } from '../classes/sources/source_registry';
 import { GeojsonFileSource } from '../classes/sources/geojson_file_source';
 import {
-  LAYER_TYPE,
   SOURCE_DATA_REQUEST_ID,
   STYLE_TYPE,
   VECTOR_STYLES,
   SPATIAL_FILTERS_LAYER_ID,
 } from '../../common/constants';
 // @ts-ignore
-import { extractFeaturesFromFilters } from '../elasticsearch_geo_utils';
+import { extractFeaturesFromFilters } from '../../common/elasticsearch_util';
 import { MapStoreState } from '../reducers/store';
 import {
+  AbstractSourceDescriptor,
   DataRequestDescriptor,
   DrawState,
   Goto,
@@ -52,11 +52,10 @@ import { ISource } from '../classes/sources/source';
 import { ITMSSource } from '../classes/sources/tms_source';
 import { IVectorSource } from '../classes/sources/vector_source';
 import { ILayer } from '../classes/layers/layer';
-import { ISavedGisMap } from '../routing/bootstrap/services/saved_gis_map';
 
-function createLayerInstance(
+export function createLayerInstance(
   layerDescriptor: LayerDescriptor,
-  inspectorAdapters: Adapters
+  inspectorAdapters?: Adapters
 ): ILayer {
   const source: ISource = createSourceInstance(layerDescriptor.sourceDescriptor, inspectorAdapters);
 
@@ -96,7 +95,13 @@ function createLayerInstance(
   }
 }
 
-function createSourceInstance(sourceDescriptor: any, inspectorAdapters: Adapters): ISource {
+function createSourceInstance(
+  sourceDescriptor: AbstractSourceDescriptor | null,
+  inspectorAdapters?: Adapters
+): ISource {
+  if (sourceDescriptor === null) {
+    throw new Error('Source-descriptor should be initialized');
+  }
   const source = getSourceByType(sourceDescriptor.type);
   if (!source) {
     throw new Error(`Unrecognized sourceType ${sourceDescriptor.type}`);
@@ -298,24 +303,15 @@ export const getLayerList = createSelector(
   }
 );
 
+export const getLayerListConfigOnly = createSelector(getLayerListRaw, (layerDescriptorList) => {
+  return copyPersistentState(layerDescriptorList);
+});
+
 export function getLayerById(layerId: string | null, state: MapStoreState): ILayer | undefined {
   return getLayerList(state).find((layer) => {
     return layerId === layer.getId();
   });
 }
-
-export const getFittableLayers = createSelector(getLayerList, (layerList) => {
-  return layerList.filter((layer) => {
-    // These are the only layer-types that implement bounding-box retrieval reliably
-    // This will _not_ work if Maps will allow register custom layer types
-    const isFittable =
-      layer.getType() === LAYER_TYPE.VECTOR ||
-      layer.getType() === LAYER_TYPE.BLENDED_VECTOR ||
-      layer.getType() === LAYER_TYPE.HEATMAP;
-
-    return isFittable && layer.isVisible();
-  });
-});
 
 export const getHiddenLayerIds = createSelector(getLayerListRaw, (layers) =>
   layers.filter((layer) => !layer.visible).map((layer) => layer.id)
@@ -376,13 +372,25 @@ export const getUniqueIndexPatternIds = createSelector(getLayerList, (layerList)
 });
 
 // Get list of unique index patterns, excluding index patterns from layers that disable applyGlobalQuery
-export const getQueryableUniqueIndexPatternIds = createSelector(getLayerList, (layerList) => {
-  const indexPatternIds: string[] = [];
-  layerList.forEach((layer) => {
-    indexPatternIds.push(...layer.getQueryableIndexPatternIds());
-  });
-  return _.uniq(indexPatternIds);
-});
+export const getQueryableUniqueIndexPatternIds = createSelector(
+  getLayerList,
+  getWaitingForMapReadyLayerListRaw,
+  (layerList, waitingForMapReadyLayerList) => {
+    const indexPatternIds: string[] = [];
+
+    if (waitingForMapReadyLayerList.length) {
+      waitingForMapReadyLayerList.forEach((layerDescriptor) => {
+        const layer = createLayerInstance(layerDescriptor);
+        indexPatternIds.push(...layer.getQueryableIndexPatternIds());
+      });
+    } else {
+      layerList.forEach((layer) => {
+        indexPatternIds.push(...layer.getQueryableIndexPatternIds());
+      });
+    }
+    return _.uniq(indexPatternIds);
+  }
+);
 
 export const hasDirtyState = createSelector(getLayerListRaw, (layerListRaw) => {
   return layerListRaw.some((layerDescriptor) => {
@@ -417,22 +425,3 @@ export const areLayersLoaded = createSelector(
     return true;
   }
 );
-
-export function hasUnsavedChanges(
-  state: MapStoreState,
-  savedMap: ISavedGisMap,
-  initialLayerListConfig: LayerDescriptor[]
-) {
-  const layerListConfigOnly = copyPersistentState(getLayerListRaw(state));
-
-  const savedLayerList = savedMap.getLayerList();
-
-  return !savedLayerList
-    ? !_.isEqual(layerListConfigOnly, initialLayerListConfig)
-    : // savedMap stores layerList as a JSON string using JSON.stringify.
-      // JSON.stringify removes undefined properties from objects.
-      // savedMap.getLayerList converts the JSON string back into Javascript array of objects.
-      // Need to perform the same process for layerListConfigOnly to compare apples to apples
-      // and avoid undefined properties in layerListConfigOnly triggering unsaved changes.
-      !_.isEqual(JSON.parse(JSON.stringify(layerListConfigOnly)), savedLayerList);
-}

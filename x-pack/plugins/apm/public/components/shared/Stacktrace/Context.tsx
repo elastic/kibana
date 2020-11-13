@@ -8,20 +8,20 @@ import { size } from 'lodash';
 import { tint } from 'polished';
 import React from 'react';
 // TODO add dependency for @types/react-syntax-highlighter
-// @ts-ignore
+// @ts-expect-error
 import javascript from 'react-syntax-highlighter/dist/languages/javascript';
-// @ts-ignore
+// @ts-expect-error
 import python from 'react-syntax-highlighter/dist/languages/python';
-// @ts-ignore
+// @ts-expect-error
 import ruby from 'react-syntax-highlighter/dist/languages/ruby';
-// @ts-ignore
+// @ts-expect-error
 import SyntaxHighlighter from 'react-syntax-highlighter/dist/light';
-// @ts-ignore
+// @ts-expect-error
 import { registerLanguage } from 'react-syntax-highlighter/dist/light';
-// @ts-ignore
+// @ts-expect-error
 import { xcode } from 'react-syntax-highlighter/dist/styles';
 import styled from 'styled-components';
-import { IStackframeWithLineContext } from '../../../../typings/es_schemas/raw/fields/stackframe';
+import { StackframeWithLineContext } from '../../../../typings/es_schemas/raw/fields/stackframe';
 import { borderRadius, px, unit, units } from '../../../style/variables';
 
 registerLanguage('javascript', javascript);
@@ -102,20 +102,20 @@ const Code = styled.code`
   z-index: 2;
 `;
 
-function getStackframeLines(stackframe: IStackframeWithLineContext) {
+function getStackframeLines(stackframe: StackframeWithLineContext) {
   const line = stackframe.line.context;
   const preLines = stackframe.context?.pre || [];
   const postLines = stackframe.context?.post || [];
   return [...preLines, line, ...postLines];
 }
 
-function getStartLineNumber(stackframe: IStackframeWithLineContext) {
+function getStartLineNumber(stackframe: StackframeWithLineContext) {
   const preLines = size(stackframe.context?.pre || []);
   return stackframe.line.number - preLines;
 }
 
 interface Props {
-  stackframe: IStackframeWithLineContext;
+  stackframe: StackframeWithLineContext;
   codeLanguage?: string;
   isLibraryFrame: boolean;
 }

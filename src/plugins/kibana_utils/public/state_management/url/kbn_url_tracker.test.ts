@@ -17,11 +17,11 @@
  * under the License.
  */
 
-import { StubBrowserStorage } from 'test_utils/stub_browser_storage';
+import { StubBrowserStorage } from '@kbn/test/jest';
 import { createMemoryHistory, History } from 'history';
 import { createKbnUrlTracker, KbnUrlTracker } from './kbn_url_tracker';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { AppBase, AppUpdater, ToastsSetup } from 'kibana/public';
+import { App, AppUpdater, ToastsSetup } from 'kibana/public';
 import { coreMock } from '../../../../../core/public/mocks';
 import { unhashUrl } from './hash_unhash_url';
 
@@ -62,7 +62,7 @@ describe('kbnUrlTracker', () => {
   }
 
   function getActiveNavLinkUrl() {
-    return navLinkUpdaterSubject.getValue()({} as AppBase)?.defaultPath;
+    return navLinkUpdaterSubject.getValue()({} as App)?.defaultPath;
   }
 
   beforeEach(() => {

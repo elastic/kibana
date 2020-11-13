@@ -30,6 +30,7 @@ import {
   Name,
   NameOrUndefined,
   NamespaceType,
+  OsTypeArray,
   PageOrUndefined,
   PerPageOrUndefined,
   SortFieldOrUndefined,
@@ -39,8 +40,6 @@ import {
   UpdateCommentsArray,
   Version,
   VersionOrUndefined,
-  _Tags,
-  _TagsOrUndefined,
   _VersionOrUndefined,
 } from '../../../common/schemas';
 
@@ -56,7 +55,6 @@ export interface GetExceptionListOptions {
 }
 
 export interface CreateExceptionListOptions {
-  _tags: _Tags;
   listId: ListId;
   namespaceType: NamespaceType;
   name: Name;
@@ -69,12 +67,12 @@ export interface CreateExceptionListOptions {
 }
 
 export interface UpdateExceptionListOptions {
-  _tags: _TagsOrUndefined;
   _version: _VersionOrUndefined;
   id: IdOrUndefined;
   listId: ListIdOrUndefined;
   namespaceType: NamespaceType;
   name: NameOrUndefined;
+  osTypes: OsTypeArray;
   description: DescriptionOrUndefined;
   meta: MetaOrUndefined;
   tags: TagsOrUndefined;
@@ -116,13 +114,13 @@ export interface GetEndpointListItemOptions {
 }
 
 export interface CreateExceptionListItemOptions {
-  _tags: _Tags;
   comments: CreateCommentsArray;
   entries: EntriesArray;
   itemId: ItemId;
   listId: ListId;
   namespaceType: NamespaceType;
   name: Name;
+  osTypes: OsTypeArray;
   description: Description;
   meta: MetaOrUndefined;
   tags: Tags;
@@ -130,19 +128,18 @@ export interface CreateExceptionListItemOptions {
 }
 
 export interface CreateEndpointListItemOptions {
-  _tags: _Tags;
   comments: CreateCommentsArray;
   entries: EntriesArray;
   itemId: ItemId;
   name: Name;
   description: Description;
   meta: MetaOrUndefined;
+  osTypes: OsTypeArray;
   tags: Tags;
   type: ExceptionListItemType;
 }
 
 export interface UpdateExceptionListItemOptions {
-  _tags: _TagsOrUndefined;
   _version: _VersionOrUndefined;
   comments: UpdateCommentsArray;
   entries: EntriesArray;
@@ -150,6 +147,7 @@ export interface UpdateExceptionListItemOptions {
   itemId: ItemIdOrUndefined;
   namespaceType: NamespaceType;
   name: NameOrUndefined;
+  osTypes: OsTypeArray;
   description: DescriptionOrUndefined;
   meta: MetaOrUndefined;
   tags: TagsOrUndefined;
@@ -157,13 +155,13 @@ export interface UpdateExceptionListItemOptions {
 }
 
 export interface UpdateEndpointListItemOptions {
-  _tags: _TagsOrUndefined;
   _version: _VersionOrUndefined;
   comments: UpdateCommentsArray;
   entries: EntriesArray;
   id: IdOrUndefined;
   itemId: ItemIdOrUndefined;
   name: NameOrUndefined;
+  osTypes: OsTypeArray;
   description: DescriptionOrUndefined;
   meta: MetaOrUndefined;
   tags: TagsOrUndefined;

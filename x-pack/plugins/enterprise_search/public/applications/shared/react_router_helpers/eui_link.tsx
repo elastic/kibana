@@ -5,53 +5,92 @@
  */
 
 import React from 'react';
-import { useHistory } from 'react-router-dom';
-import { EuiLink, EuiButton, EuiButtonProps, EuiLinkAnchorProps } from '@elastic/eui';
+import { useValues } from 'kea';
+import { EuiLink, EuiButton, EuiButtonProps, EuiLinkAnchorProps, EuiPanel } from '@elastic/eui';
+import { EuiPanelProps } from '@elastic/eui/src/components/panel/panel';
 
-import { letBrowserHandleEvent } from './link_events';
+import { KibanaLogic } from '../kibana';
+import { HttpLogic } from '../http';
+import { letBrowserHandleEvent, createHref } from './';
 
 /**
- * Generates either an EuiLink or EuiButton with a React-Router-ified link
+ * Generates EUI components with React-Router-ified links
  *
  * Based off of EUI's recommendations for handling React Router:
  * https://github.com/elastic/eui/blob/master/wiki/react-router.md#react-router-51
  */
 
-interface IEuiReactRouterProps {
+interface EuiReactRouterProps {
   to: string;
+  onClick?(): void;
+  // Used to navigate outside of the React Router plugin basename but still within Kibana,
+  // e.g. if we need to go from Enterprise Search to App Search
+  shouldNotCreateHref?: boolean;
 }
 
-export const EuiReactRouterHelper: React.FC<IEuiReactRouterProps> = ({ to, children }) => {
-  const history = useHistory();
+export const EuiReactRouterHelper: React.FC<EuiReactRouterProps> = ({
+  to,
+  onClick,
+  shouldNotCreateHref,
+  children,
+}) => {
+  const { navigateToUrl, history } = useValues(KibanaLogic);
+  const { http } = useValues(HttpLogic);
 
-  const onClick = (event: React.MouseEvent) => {
-    if (letBrowserHandleEvent(event)) return;
+  // Generate the correct link href (with basename etc. accounted for)
+  const href = createHref(to, { history, http }, { shouldNotCreateHref });
+
+  const reactRouterLinkClick = (event: React.MouseEvent) => {
+    if (onClick) onClick(); // Run any passed click events (e.g. telemetry)
+    if (letBrowserHandleEvent(event)) return; // Return early if the link behavior shouldn't be handled by React Router
 
     // Prevent regular link behavior, which causes a browser refresh.
     event.preventDefault();
 
-    // Push the route to the history.
-    history.push(to);
+    // Perform SPA navigation.
+    navigateToUrl(to, { shouldNotCreateHref });
   };
 
-  // Generate the correct link href (with basename etc. accounted for)
-  const href = history.createHref({ pathname: to });
-
-  const reactRouterProps = { href, onClick };
+  const reactRouterProps = { href, onClick: reactRouterLinkClick };
   return React.cloneElement(children as React.ReactElement, reactRouterProps);
 };
 
-type TEuiReactRouterLinkProps = EuiLinkAnchorProps & IEuiReactRouterProps;
-type TEuiReactRouterButtonProps = EuiButtonProps & IEuiReactRouterProps;
+/**
+ * Component helpers
+ */
 
-export const EuiReactRouterLink: React.FC<TEuiReactRouterLinkProps> = ({ to, ...rest }) => (
-  <EuiReactRouterHelper to={to}>
+type EuiReactRouterLinkProps = EuiLinkAnchorProps & EuiReactRouterProps;
+export const EuiReactRouterLink: React.FC<EuiReactRouterLinkProps> = ({
+  to,
+  onClick,
+  shouldNotCreateHref,
+  ...rest
+}) => (
+  <EuiReactRouterHelper {...{ to, onClick, shouldNotCreateHref }}>
     <EuiLink {...rest} />
   </EuiReactRouterHelper>
 );
 
-export const EuiReactRouterButton: React.FC<TEuiReactRouterButtonProps> = ({ to, ...rest }) => (
-  <EuiReactRouterHelper to={to}>
+type EuiReactRouterButtonProps = EuiButtonProps & EuiReactRouterProps;
+export const EuiReactRouterButton: React.FC<EuiReactRouterButtonProps> = ({
+  to,
+  onClick,
+  shouldNotCreateHref,
+  ...rest
+}) => (
+  <EuiReactRouterHelper {...{ to, onClick, shouldNotCreateHref }}>
     <EuiButton {...rest} />
+  </EuiReactRouterHelper>
+);
+
+type EuiReactRouterPanelProps = EuiPanelProps & EuiReactRouterProps;
+export const EuiReactRouterPanel: React.FC<EuiReactRouterPanelProps> = ({
+  to,
+  onClick,
+  shouldNotCreateHref,
+  ...rest
+}) => (
+  <EuiReactRouterHelper {...{ to, onClick, shouldNotCreateHref }}>
+    <EuiPanel {...rest} />
   </EuiReactRouterHelper>
 );

@@ -4,6 +4,11 @@
 
 ## SavedObjectsImportError.title property
 
+> Warning: This API is now obsolete.
+> 
+> Use `meta.title` instead
+> 
+
 <b>Signature:</b>
 
 ```typescript

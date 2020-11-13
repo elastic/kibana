@@ -7,6 +7,6 @@ import { schema } from '@kbn/config-schema';
 
 export const GetPolicyResponseSchema = {
   query: schema.object({
-    hostId: schema.string(),
+    agentId: schema.string(),
   }),
 };

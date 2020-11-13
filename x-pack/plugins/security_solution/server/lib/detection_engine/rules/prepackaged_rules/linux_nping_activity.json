@@ -6,8 +6,10 @@
   "false_positives": [
     "Some normal use of this command may originate from security engineers and network or server administrators, but this is usually not routine or unannounced. Use of `Nping` by non-engineers or ordinary users is uncommon."
   ],
+  "from": "now-9m",
   "index": [
-    "auditbeat-*"
+    "auditbeat-*",
+    "logs-endpoint.events.*"
   ],
   "language": "kuery",
   "license": "Elastic License",
@@ -21,8 +23,10 @@
   "severity": "medium",
   "tags": [
     "Elastic",
-    "Linux"
+    "Host",
+    "Linux",
+    "Threat Detection"
   ],
   "type": "query",
-  "version": 3
+  "version": 5
 }

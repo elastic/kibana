@@ -19,6 +19,7 @@ export interface FlyoutListManageDrilldownsProps {
   onDelete?: (drilldownIds: string[]) => void;
   showWelcomeMessage?: boolean;
   onWelcomeHideClick?: () => void;
+  showTriggerColumn?: boolean;
 }
 
 export function FlyoutListManageDrilldowns({
@@ -30,6 +31,7 @@ export function FlyoutListManageDrilldowns({
   onEdit,
   showWelcomeMessage = true,
   onWelcomeHideClick,
+  showTriggerColumn,
 }: FlyoutListManageDrilldownsProps) {
   return (
     <FlyoutFrame
@@ -46,6 +48,7 @@ export function FlyoutListManageDrilldowns({
         onCreate={onCreate}
         onEdit={onEdit}
         onDelete={onDelete}
+        showTriggerColumn={showTriggerColumn}
       />
     </FlyoutFrame>
   );

@@ -10,7 +10,7 @@ The ServiceNow action type uses the https://developer.servicenow.com/app.do#!/re
 
 ServiceNow connectors have the following configuration properties:
 
-Name::      The name of the connector. The name is used to identify a  connector in the management UI connector listing, or in the connector list when configuring an action.
+Name::      The name of the connector. The name is used to identify a  connector in the **Stack Management** UI connector listing, and in the connector list when configuring an action.
 URL::       ServiceNow instance URL.
 Username::  Username for HTTP Basic authentication.
 Password::  Password for HTTP Basic authentication.
@@ -37,7 +37,7 @@ Password::  Password for HTTP Basic authentication.
 |===
 
 | `apiUrl`
-| An address that corresponds to *Sender*.
+| An address that corresponds to *URL*.
 
 |===
 
@@ -47,7 +47,7 @@ Password::  Password for HTTP Basic authentication.
 |===
 
 | `username`
-| A string that corresponds to *User*.
+| A string that corresponds to *Username*.
 
 | `password`
 | A string that corresponds to *Password*. Should be stored in the <<creating-keystore, {kib} keystore>>.
@@ -62,7 +62,7 @@ ServiceNow actions have the following configuration properties:
 Urgency::              The extent to which the incident resolution can delay.
 Severity::             The severity of the incident.
 Impact::               The effect an incident has on business. Can be measured by the number of affected users or by how critical it is to the business in question.
-Short description::    A short description of the incident, used for searching the contents of the knowledge base. 
+Short description::    A short description for the incident, used for searching the contents of the knowledge base. 
 Description::          The details about the incident.
 Additional comments::  Additional information for the client, such as how to troubleshoot the issue.
 

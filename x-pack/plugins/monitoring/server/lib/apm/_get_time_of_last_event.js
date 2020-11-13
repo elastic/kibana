@@ -26,6 +26,7 @@ export async function getTimeOfLastEvent({
         {
           timestamp: {
             order: 'desc',
+            unmapped_type: 'long',
           },
         },
       ],

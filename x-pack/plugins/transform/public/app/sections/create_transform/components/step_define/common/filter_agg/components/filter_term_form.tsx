@@ -8,8 +8,9 @@ import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { EuiComboBox, EuiFormRow } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { debounce } from 'lodash';
-import { useUpdateEffect } from 'react-use';
+import useUpdateEffect from 'react-use/lib/useUpdateEffect';
 import { i18n } from '@kbn/i18n';
+import { isEsSearchResponse } from '../../../../../../../../../common/api_schemas/type_guards';
 import { useApi } from '../../../../../../../hooks';
 import { CreateTransformWizardContext } from '../../../../wizard/wizard';
 import { FilterAggConfigTerm } from '../types';
@@ -55,22 +56,24 @@ export const FilterTermForm: FilterAggConfigTerm['aggTypeConfig']['FilterAggForm
         },
       };
 
-      try {
-        const response = await api.esSearch(esSearchRequest);
-        setOptions(
-          response.aggregations.field_values.buckets.map(
-            (value: { key: string; doc_count: number }) => ({ label: value.key })
-          )
-        );
-      } catch (e) {
+      const response = await api.esSearch(esSearchRequest);
+
+      setIsLoading(false);
+
+      if (!isEsSearchResponse(response)) {
         toastNotifications.addWarning(
           i18n.translate('xpack.transform.agg.popoverForm.filerAgg.term.errorFetchSuggestions', {
             defaultMessage: 'Unable to fetch suggestions',
           })
         );
+        return;
       }
 
-      setIsLoading(false);
+      setOptions(
+        response.aggregations.field_values.buckets.map(
+          (value: { key: string; doc_count: number }) => ({ label: value.key })
+        )
+      );
     }, 600),
     [selectedField]
   );

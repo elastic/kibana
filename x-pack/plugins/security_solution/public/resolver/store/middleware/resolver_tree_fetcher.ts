@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint-disable no-duplicate-imports */
-
 import { Dispatch, MiddlewareAPI } from 'redux';
 import { ResolverTree, ResolverEntityIndex } from '../../../../common/endpoint/types';
 
@@ -30,32 +28,31 @@ export function ResolverTreeFetcher(
   // if the entityID changes while
   return async () => {
     const state = api.getState();
-    const databaseDocumentIDToFetch = selectors.databaseDocumentIDToFetch(state);
+    const databaseParameters = selectors.treeParametersToFetch(state);
 
-    if (selectors.databaseDocumentIDToAbort(state) && lastRequestAbortController) {
+    if (selectors.treeRequestParametersToAbort(state) && lastRequestAbortController) {
       lastRequestAbortController.abort();
       // calling abort will cause an action to be fired
-    } else if (databaseDocumentIDToFetch !== null) {
+    } else if (databaseParameters !== null) {
       lastRequestAbortController = new AbortController();
       let result: ResolverTree | undefined;
       // Inform the state that we've made the request. Without this, the middleware will try to make the request again
       // immediately.
       api.dispatch({
         type: 'appRequestedResolverData',
-        payload: databaseDocumentIDToFetch,
+        payload: databaseParameters,
       });
       try {
-        const indices: string[] = dataAccessLayer.indexPatterns();
         const matchingEntities: ResolverEntityIndex = await dataAccessLayer.entities({
-          _id: databaseDocumentIDToFetch,
-          indices,
+          _id: databaseParameters.databaseDocumentID,
+          indices: databaseParameters.indices ?? [],
           signal: lastRequestAbortController.signal,
         });
         if (matchingEntities.length < 1) {
           // If no entity_id could be found for the _id, bail out with a failure.
           api.dispatch({
             type: 'serverFailedToReturnResolverData',
-            payload: databaseDocumentIDToFetch,
+            payload: databaseParameters,
           });
           return;
         }
@@ -69,12 +66,12 @@ export function ResolverTreeFetcher(
         if (error instanceof DOMException && error.name === 'AbortError') {
           api.dispatch({
             type: 'appAbortedResolverDataRequest',
-            payload: databaseDocumentIDToFetch,
+            payload: databaseParameters,
           });
         } else {
           api.dispatch({
             type: 'serverFailedToReturnResolverData',
-            payload: databaseDocumentIDToFetch,
+            payload: databaseParameters,
           });
         }
       }
@@ -83,7 +80,7 @@ export function ResolverTreeFetcher(
           type: 'serverReturnedResolverData',
           payload: {
             result,
-            databaseDocumentID: databaseDocumentIDToFetch,
+            parameters: databaseParameters,
           },
         });
       }

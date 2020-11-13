@@ -4,11 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SubFeaturePrivilegeConfig } from '../../../../../features/common';
-import { Feature } from '../../../../../features/server';
+import { KibanaFeature, SubFeaturePrivilegeConfig } from '../../../../../features/common';
 
 export function* subFeaturePrivilegeIterator(
-  feature: Feature
+  feature: KibanaFeature
 ): IterableIterator<SubFeaturePrivilegeConfig> {
   for (const subFeature of feature.subFeatures) {
     for (const group of subFeature.privilegeGroups) {

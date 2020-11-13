@@ -31,13 +31,6 @@ Array [
     },
   ],
   Array [
-    "plugin_1.id_5",
-    Object {
-      "description": undefined,
-      "message": "Message 5",
-    },
-  ],
-  Array [
     "plugin_1.id_7",
     Object {
       "description": undefined,

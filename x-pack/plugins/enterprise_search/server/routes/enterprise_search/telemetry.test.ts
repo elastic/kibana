@@ -5,7 +5,7 @@
  */
 
 import { loggingSystemMock, savedObjectsServiceMock } from 'src/core/server/mocks';
-import { MockRouter, mockConfig, mockLogger } from '../__mocks__';
+import { MockRouter, mockLogger, mockDependencies } from '../../__mocks__';
 
 jest.mock('../../collectors/lib/telemetry', () => ({
   incrementUICounter: jest.fn(),
@@ -25,17 +25,21 @@ describe('Enterprise Search Telemetry API', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockRouter = new MockRouter({ method: 'put', payload: 'body' });
+    mockRouter = new MockRouter({
+      method: 'put',
+      path: '/api/enterprise_search/stats',
+      payload: 'body',
+    });
 
     registerTelemetryRoute({
+      ...mockDependencies,
       router: mockRouter.router,
       getSavedObjectsService: () => savedObjectsServiceMock.createStartContract(),
       log: mockLogger,
-      config: mockConfig,
     });
   });
 
-  describe('PUT /api/enterprise_search/telemetry', () => {
+  describe('PUT /api/enterprise_search/stats', () => {
     it('increments the saved objects counter for App Search', async () => {
       (incrementUICounter as jest.Mock).mockImplementation(jest.fn(() => successResponse));
 

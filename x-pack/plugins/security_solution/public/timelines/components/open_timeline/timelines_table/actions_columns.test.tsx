@@ -7,11 +7,12 @@
 import { EuiButtonIconProps } from '@elastic/eui';
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { cloneDeep, omit } from 'lodash/fp';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
 
 import '../../../../common/mock/match_media';
+
 import { mockTimelineResults } from '../../../../common/mock/timeline_results';
 import { OpenTimelineResult } from '../types';
 import { TimelinesTableProps } from '.';
@@ -232,5 +233,33 @@ describe('#getActionsColumns', () => {
     wrapper.find('[data-test-subj="export-timeline"]').first().simulate('click');
 
     expect(enableExportTimelineDownloader).toBeCalledWith(mockResults[0]);
+  });
+
+  test('it should not render "export timeline" if it is not included', () => {
+    const testProps: TimelinesTableProps = {
+      ...getMockTimelinesTableProps(mockResults),
+      actionTimelineToShow: ['createFrom', 'duplicate'],
+    };
+    const wrapper = mountWithIntl(
+      <ThemeProvider theme={theme}>
+        <TimelinesTable {...testProps} />
+      </ThemeProvider>
+    );
+
+    expect(wrapper.find('[data-test-subj="export-timeline"]').exists()).toEqual(false);
+  });
+
+  test('it should not render "delete timeline" if it is not included', () => {
+    const testProps: TimelinesTableProps = {
+      ...getMockTimelinesTableProps(mockResults),
+      actionTimelineToShow: ['createFrom', 'duplicate'],
+    };
+    const wrapper = mountWithIntl(
+      <ThemeProvider theme={theme}>
+        <TimelinesTable {...testProps} />
+      </ThemeProvider>
+    );
+
+    expect(wrapper.find('[data-test-subj="delete-timeline"]').exists()).toEqual(false);
   });
 });

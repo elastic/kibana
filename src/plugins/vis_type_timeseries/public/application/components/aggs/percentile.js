@@ -24,10 +24,11 @@ import { FieldSelect } from './field_select';
 import { AggRow } from './agg_row';
 import { createChangeHandler } from '../lib/create_change_handler';
 import { createSelectHandler } from '../lib/create_select_handler';
+import { createNumberHandler } from '../lib/create_number_handler';
 import {
   htmlIdGenerator,
   EuiSpacer,
-  EuiFlexGroup,
+  EuiFlexGrid,
   EuiFlexItem,
   EuiFormLabel,
   EuiFormRow,
@@ -35,6 +36,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { KBN_FIELD_TYPES } from '../../../../../../plugins/data/public';
 import { Percentiles, newPercentile } from './percentile_ui';
+import { PercentileHdr } from './percentile_hdr';
 
 const RESTRICT_FIELDS = [KBN_FIELD_TYPES.NUMBER, KBN_FIELD_TYPES.HISTOGRAM];
 
@@ -46,6 +48,8 @@ export function PercentileAgg(props) {
 
   const handleChange = createChangeHandler(props.onChange, model);
   const handleSelectChange = createSelectHandler(handleChange);
+  const handleNumberChange = createNumberHandler(handleChange);
+
   const indexPattern =
     (series.override_index_pattern && series.series_index_pattern) || panel.index_pattern;
 
@@ -66,7 +70,7 @@ export function PercentileAgg(props) {
       siblings={props.siblings}
       dragHandleProps={props.dragHandleProps}
     >
-      <EuiFlexGroup gutterSize="s">
+      <EuiFlexGrid gutterSize="s" columns={2}>
         <EuiFlexItem>
           <EuiFormLabel htmlFor={htmlId('aggregation')}>
             <FormattedMessage
@@ -103,11 +107,25 @@ export function PercentileAgg(props) {
             />
           </EuiFormRow>
         </EuiFlexItem>
-      </EuiFlexGroup>
-
-      <EuiSpacer size="m" />
-
-      <Percentiles onChange={handleChange} name="percentiles" model={model} panel={panel} />
+        <EuiFlexItem>
+          <EuiFormRow
+            label={
+              <FormattedMessage
+                id="visTypeTimeseries.percentile.percents"
+                defaultMessage="Percents"
+              />
+            }
+          >
+            <Percentiles onChange={handleChange} name="percentiles" model={model} panel={panel} />
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <PercentileHdr
+            value={model.numberOfSignificantValueDigits}
+            onChange={handleNumberChange('numberOfSignificantValueDigits')}
+          />
+        </EuiFlexItem>
+      </EuiFlexGrid>
     </AggRow>
   );
 }

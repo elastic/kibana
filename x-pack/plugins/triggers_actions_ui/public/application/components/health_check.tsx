@@ -18,33 +18,39 @@ import { EuiEmptyPrompt, EuiCode } from '@elastic/eui';
 import { AlertingFrameworkHealth } from '../../types';
 import { health } from '../lib/alert_api';
 import './health_check.scss';
+import { useHealthContext } from '../context/health_context';
 
 interface Props {
   docLinks: Pick<DocLinksStart, 'ELASTIC_WEBSITE_URL' | 'DOC_LINK_VERSION'>;
   http: HttpSetup;
   inFlyout?: boolean;
+  waitForCheck: boolean;
 }
 
 export const HealthCheck: React.FunctionComponent<Props> = ({
   docLinks,
   http,
   children,
+  waitForCheck,
   inFlyout = false,
 }) => {
+  const { setLoadingHealthCheck } = useHealthContext();
   const [alertingHealth, setAlertingHealth] = React.useState<Option<AlertingFrameworkHealth>>(none);
 
   React.useEffect(() => {
     (async function () {
+      setLoadingHealthCheck(true);
       setAlertingHealth(some(await health({ http })));
+      setLoadingHealthCheck(false);
     })();
-  }, [http]);
+  }, [http, setLoadingHealthCheck]);
 
   const className = inFlyout ? 'alertingFlyoutHealthCheck' : 'alertingHealthCheck';
 
   return pipe(
     alertingHealth,
     fold(
-      () => <EuiLoadingSpinner size="m" />,
+      () => (waitForCheck ? <EuiLoadingSpinner size="m" /> : <Fragment>{children}</Fragment>),
       (healthCheck) => {
         return healthCheck?.isSufficientlySecure && healthCheck?.hasPermanentEncryptionKey ? (
           <Fragment>{children}</Fragment>
@@ -65,6 +71,7 @@ type PromptErrorProps = Pick<Props, 'docLinks'> & {
 };
 
 const TlsAndEncryptionError = ({
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   docLinks: { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION },
   className,
 }: PromptErrorProps) => (
@@ -107,6 +114,7 @@ const TlsAndEncryptionError = ({
 );
 
 const EncryptionError = ({
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   docLinks: { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION },
   className,
 }: PromptErrorProps) => (
@@ -158,6 +166,7 @@ const EncryptionError = ({
 );
 
 const TlsError = ({
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   docLinks: { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION },
   className,
 }: PromptErrorProps) => (

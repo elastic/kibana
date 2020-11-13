@@ -20,11 +20,11 @@ exports[`FilterPopover component does not show item list when loading 1`] = `
   isOpen={false}
   ownFocus={true}
   panelPaddingSize="m"
-  withTitle={true}
   zIndex={10000}
 >
   <EuiPopoverTitle>
     <EuiFieldSearch
+      aria-label="Search for bar"
       compressed={false}
       disabled={true}
       fullWidth={false}
@@ -58,11 +58,11 @@ exports[`FilterPopover component renders without errors for valid props 1`] = `
   isOpen={false}
   ownFocus={true}
   panelPaddingSize="m"
-  withTitle={true}
   zIndex={10000}
 >
   <EuiPopoverTitle>
     <EuiFieldSearch
+      aria-label="Search for bar"
       compressed={false}
       disabled={true}
       fullWidth={false}
@@ -86,7 +86,7 @@ exports[`FilterPopover component returns selected items on popover close 1`] = `
     Some text
   </div>
   <div
-    class="euiPopover euiPopover--anchorDownCenter euiPopover--withTitle"
+    class="euiPopover euiPopover--anchorDownCenter"
     data-test-subj="filter-popover_test"
     id="test"
   >
@@ -94,15 +94,14 @@ exports[`FilterPopover component returns selected items on popover close 1`] = `
       class="euiPopover__anchor"
     >
       <button
-        class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--iconRight euiFilterButton euiFilterButton-isSelected euiFilterButton-hasActiveFilters euiFilterButton-hasNotification euiFilterButton--hasIcon"
+        class="euiButtonEmpty euiButtonEmpty--text euiFilterButton euiFilterButton-isSelected euiFilterButton-hasActiveFilters euiFilterButton-hasNotification euiFilterButton--hasIcon"
         type="button"
       >
         <span
-          class="euiButtonEmpty__content"
+          class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
         >
-          <div
-            aria-hidden="true"
-            class="euiButtonEmpty__icon"
+          <span
+            class="euiButtonContent__icon"
             data-euiicon-type="arrowDown"
           />
           <span

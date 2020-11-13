@@ -18,51 +18,52 @@
  */
 import React from 'react';
 import { mount } from 'enzyme';
-// @ts-ignore
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { DocViewTable } from './table';
 import { indexPatterns, IndexPattern } from '../../../../../data/public';
 
-const indexPattern = {
-  fields: [
-    {
-      name: '_index',
-      type: 'string',
-      scripted: false,
-      filterable: true,
-    },
-    {
-      name: 'message',
-      type: 'string',
-      scripted: false,
-      filterable: false,
-    },
-    {
-      name: 'extension',
-      type: 'string',
-      scripted: false,
-      filterable: true,
-    },
-    {
-      name: 'bytes',
-      type: 'number',
-      scripted: false,
-      filterable: true,
-    },
-    {
-      name: 'scripted',
-      type: 'number',
-      scripted: true,
-      filterable: false,
-    },
-  ],
+const indexPattern = ({
+  fields: {
+    getAll: () => [
+      {
+        name: '_index',
+        type: 'string',
+        scripted: false,
+        filterable: true,
+      },
+      {
+        name: 'message',
+        type: 'string',
+        scripted: false,
+        filterable: false,
+      },
+      {
+        name: 'extension',
+        type: 'string',
+        scripted: false,
+        filterable: true,
+      },
+      {
+        name: 'bytes',
+        type: 'number',
+        scripted: false,
+        filterable: true,
+      },
+      {
+        name: 'scripted',
+        type: 'number',
+        scripted: true,
+        filterable: false,
+      },
+    ],
+  },
   metaFields: ['_index', '_score'],
   flattenHit: undefined,
   formatHit: jest.fn((hit) => hit._source),
-} as IndexPattern;
+} as unknown) as IndexPattern;
 
 indexPattern.fields.getByName = (name: string) => {
-  return indexPattern.fields.find((field) => field.name === name);
+  return indexPattern.fields.getAll().find((field) => field.name === name);
 };
 
 indexPattern.flattenHit = indexPatterns.flattenHitWrapper(indexPattern, indexPattern.metaFields);
@@ -73,6 +74,8 @@ describe('DocViewTable at Discover', () => {
 
   const hit = {
     _index: 'logstash-2014.09.09',
+    _type: 'doc',
+    _id: 'id123',
     _score: 1,
     _source: {
       message:
@@ -190,6 +193,8 @@ describe('DocViewTable at Discover Doc', () => {
   const hit = {
     _index: 'logstash-2014.09.09',
     _score: 1,
+    _type: 'doc',
+    _id: 'id123',
     _source: {
       extension: 'html',
       not_mapped: 'yes',
@@ -212,6 +217,9 @@ describe('DocViewTable at Discover Context', () => {
   // here no toggleColumnButtons  are rendered
   const hit = {
     _index: 'logstash-2014.09.09',
+    _type: 'doc',
+    _id: 'id123',
+    _score: 1,
     _source: {
       message:
         'Lorem ipsum dolor sit amet, consectetuer adipiscing elit. \

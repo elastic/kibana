@@ -4,11 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { flatten, omit, isEmpty } from 'lodash';
+import { useHistory, useParams } from 'react-router-dom';
 import { IUrlParams } from '../context/UrlParamsContext/types';
 import { useFetcher } from './useFetcher';
 import { useUiFilters } from '../context/UrlParamsContext';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { TransactionDistributionAPIResponse } from '../../server/lib/transactions/distribution';
+import type { TransactionDistributionAPIResponse } from '../../server/lib/transactions/distribution';
+import { toQuery, fromQuery } from '../components/shared/Links/url_helpers';
+import { maybe } from '../../common/utils/maybe';
 
 const INITIAL_DATA = {
   buckets: [] as TransactionDistributionAPIResponse['buckets'],
@@ -17,8 +21,8 @@ const INITIAL_DATA = {
 };
 
 export function useTransactionDistribution(urlParams: IUrlParams) {
+  const { serviceName } = useParams<{ serviceName?: string }>();
   const {
-    serviceName,
     start,
     end,
     transactionType,
@@ -28,10 +32,12 @@ export function useTransactionDistribution(urlParams: IUrlParams) {
   } = urlParams;
   const uiFilters = useUiFilters(urlParams);
 
+  const history = useHistory();
+
   const { data = INITIAL_DATA, status, error } = useFetcher(
-    (callApmApi) => {
+    async (callApmApi) => {
       if (serviceName && start && end && transactionType && transactionName) {
-        return callApmApi({
+        const response = await callApmApi({
           pathname:
             '/api/apm/services/{serviceName}/transaction_groups/distribution',
           params: {
@@ -49,6 +55,39 @@ export function useTransactionDistribution(urlParams: IUrlParams) {
             },
           },
         });
+
+        const selectedSample =
+          transactionId && traceId
+            ? flatten(response.buckets.map((bucket) => bucket.samples)).find(
+                (sample) =>
+                  sample.transactionId === transactionId &&
+                  sample.traceId === traceId
+              )
+            : undefined;
+
+        if (!selectedSample) {
+          // selected sample was not found. select a new one:
+          // sorted by total number of requests, but only pick
+          // from buckets that have samples
+          const bucketsSortedByCount = response.buckets
+            .filter((bucket) => !isEmpty(bucket.samples))
+            .sort((bucket) => bucket.count);
+
+          const preferredSample = maybe(bucketsSortedByCount[0]?.samples[0]);
+
+          history.replace({
+            ...history.location,
+            search: fromQuery({
+              ...omit(toQuery(history.location.search), [
+                'traceId',
+                'transactionId',
+              ]),
+              ...preferredSample,
+            }),
+          });
+        }
+
+        return response;
       }
     },
     // the histogram should not be refetched if the transactionId or traceId changes

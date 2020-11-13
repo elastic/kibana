@@ -40,7 +40,6 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('can create job successfully', async () => {
       await uptime.ml.createMLJob();
-      // await uptime.navigation.refreshApp();
     });
 
     it('can open ML Manage Menu', async () => {

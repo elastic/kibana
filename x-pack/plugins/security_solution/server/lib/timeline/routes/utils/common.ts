@@ -10,7 +10,7 @@ import { Readable } from 'stream';
 
 import { KibanaRequest, RequestHandlerContext } from 'src/core/server';
 
-import { createListStream } from '../../../../../../../../src/legacy/utils';
+import { createListStream } from '../../../../../../../../src/core/server/utils';
 
 import { SetupPlugins } from '../../../../plugin';
 

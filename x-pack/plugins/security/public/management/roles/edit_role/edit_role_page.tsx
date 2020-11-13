@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _, { get } from 'lodash';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -31,6 +30,7 @@ import React, {
   useRef,
   useState,
 } from 'react';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import {
   Capabilities,
   FatalErrorsSetup,
@@ -40,7 +40,7 @@ import {
 } from 'src/core/public';
 import { ScopedHistory } from 'kibana/public';
 import { FeaturesPluginStart } from '../../../../../features/public';
-import { Feature } from '../../../../../features/common';
+import { KibanaFeature } from '../../../../../features/common';
 import { IndexPatternsContract } from '../../../../../../../src/plugins/data/public';
 import { Space } from '../../../../../spaces/public';
 import {
@@ -247,7 +247,7 @@ function useFeatures(
   getFeatures: FeaturesPluginStart['getFeatures'],
   fatalErrors: FatalErrorsSetup
 ) {
-  const [features, setFeatures] = useState<Feature[] | null>(null);
+  const [features, setFeatures] = useState<KibanaFeature[] | null>(null);
   useEffect(() => {
     getFeatures()
       .catch((err: IHttpFetchError) => {
@@ -260,7 +260,7 @@ function useFeatures(
         // 404 here, and respond in a way that still allows the UI to render itself.
         const unauthorizedForFeatures = err.response?.status === 404;
         if (unauthorizedForFeatures) {
-          return [] as Feature[];
+          return [] as KibanaFeature[];
         }
 
         fatalErrors.add(err);
@@ -526,7 +526,12 @@ export const EditRolePage: FunctionComponent<Props> = ({
       try {
         await rolesAPIClient.saveRole({ role, spacesEnabled: spaces.enabled });
       } catch (error) {
-        notifications.toasts.addDanger(get(error, 'data.message'));
+        notifications.toasts.addDanger(
+          error?.body?.message ??
+            i18n.translate('xpack.security.management.editRole.errorSavingRoleError', {
+              defaultMessage: 'Error saving role',
+            })
+        );
         return;
       }
 
@@ -545,7 +550,12 @@ export const EditRolePage: FunctionComponent<Props> = ({
     try {
       await rolesAPIClient.deleteRole(role.name);
     } catch (error) {
-      notifications.toasts.addDanger(get(error, 'data.message'));
+      notifications.toasts.addDanger(
+        error?.data?.message ??
+          i18n.translate('xpack.security.management.editRole.errorDeletingRoleError', {
+            defaultMessage: 'Error deleting role',
+          })
+      );
       return;
     }
 

@@ -1,0 +1,6 @@
+- name: logs_test_name
+  title: logs_test_title
+  type: text
+- name: new_field_name
+  title: new_field_title
+  type: keyword

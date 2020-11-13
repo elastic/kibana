@@ -52,6 +52,9 @@ export default function enterpriseSearchSetupEnginesTests({
         await retry.try(async function () {
           const currentUrl = await browser.getCurrentUrl();
           expect(currentUrl).to.contain('/app_search');
+
+          const documentTitle = await browser.getTitle();
+          expect(documentTitle).to.contain('App Search - Elastic');
         });
       });
 

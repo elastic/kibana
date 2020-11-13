@@ -54,6 +54,10 @@ function clearNowTimeStub() {
   delete global.nowTime;
 }
 
+test('isTimeTouched is initially set to false', () => {
+  expect(timefilter.isTimeTouched()).toBe(false);
+});
+
 describe('setTime', () => {
   let update: sinon.SinonSpy;
   let fetch: sinon.SinonSpy;
@@ -82,6 +86,10 @@ describe('setTime', () => {
       from: '5',
       to: '10',
     });
+  });
+
+  test('should update isTimeTouched', () => {
+    expect(timefilter.isTimeTouched()).toBe(true);
   });
 
   test('should not add unexpected object keys to time state', () => {

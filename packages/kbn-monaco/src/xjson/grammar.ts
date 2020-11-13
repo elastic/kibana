@@ -22,6 +22,19 @@ export enum AnnoTypes {
   warning = 'warning',
 }
 
+export type Parser = ReturnType<typeof createParser>;
+
+export interface Annotation {
+  name?: string;
+  type: AnnoTypes;
+  text: string;
+  at: number;
+}
+
+export interface ParseResult {
+  annotations: Annotation[];
+}
+
 /* eslint-disable */
 
 export const createParser = () => {

@@ -14,7 +14,6 @@ interface CreateTestConfigOptions {
   disabledPlugins?: string[];
 }
 
-// eslint-disable-next-line import/no-default-export
 export function createTestConfig(name: string, options: CreateTestConfigOptions) {
   const { license = 'trial', disabledPlugins = [] } = options;
 

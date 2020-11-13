@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ILegacyScopedClusterClient } from 'kibana/server';
 import { CalendarManager } from '../calendar';
 import { GLOBAL_CALENDAR } from '../../../common/constants/calendars';
 import { Job } from '../../../common/types/anomaly_detection_jobs';
 import { MlJobsResponse } from './jobs';
+import type { MlClient } from '../../lib/ml_client';
 
 interface Group {
   id: string;
@@ -23,18 +23,18 @@ interface Results {
   };
 }
 
-export function groupsProvider(mlClusterClient: ILegacyScopedClusterClient) {
-  const calMngr = new CalendarManager(mlClusterClient);
-  const { callAsInternalUser } = mlClusterClient;
+export function groupsProvider(mlClient: MlClient) {
+  const calMngr = new CalendarManager(mlClient);
 
   async function getAllGroups() {
     const groups: { [id: string]: Group } = {};
     const jobIds: { [id: string]: undefined | null } = {};
-    const [{ jobs }, calendars] = await Promise.all([
-      callAsInternalUser('ml.jobs') as Promise<MlJobsResponse>,
+    const [{ body }, calendars] = await Promise.all([
+      mlClient.getJobs<MlJobsResponse>(),
       calMngr.getAllCalendars(),
     ]);
 
+    const { jobs } = body;
     if (jobs) {
       jobs.forEach((job) => {
         jobIds[job.job_id] = null;
@@ -80,10 +80,10 @@ export function groupsProvider(mlClusterClient: ILegacyScopedClusterClient) {
     for (const job of jobs) {
       const { job_id: jobId, groups } = job;
       try {
-        await callAsInternalUser('ml.updateJob', { jobId, body: { groups } });
+        await mlClient.updateJob({ job_id: jobId, body: { groups } });
         results[jobId] = { success: true };
-      } catch (error) {
-        results[jobId] = { success: false, error };
+      } catch ({ body }) {
+        results[jobId] = { success: false, error: body };
       }
     }
     return results;

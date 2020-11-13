@@ -31,7 +31,7 @@ async function findSupportedBasicLicenseCluster(
     ignoreUnavailable: true,
     filterPath: 'hits.hits._source.cluster_uuid',
     body: {
-      sort: { timestamp: { order: 'desc' } },
+      sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
       query: {
         bool: {
           filter: [

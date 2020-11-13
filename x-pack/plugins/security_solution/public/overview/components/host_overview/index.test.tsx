@@ -20,8 +20,10 @@ describe('Host Summary Component', () => {
           <HostOverview
             anomaliesData={mockAnomalies}
             data={mockData.Hosts.edges[0].node}
+            docValueFields={[]}
             endDate="2019-06-18T06:00:00.000Z"
             id="hostOverview"
+            indexNames={[]}
             isLoadingAnomaliesData={false}
             loading={false}
             narrowDateRange={jest.fn()}

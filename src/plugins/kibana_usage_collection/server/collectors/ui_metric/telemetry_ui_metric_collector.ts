@@ -23,11 +23,18 @@ import {
   SavedObjectsServiceSetup,
 } from 'kibana/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { findAll } from '../find_all';
+import { uiMetricSchema } from './schema';
 
 interface UIMetricsSavedObjects extends SavedObjectAttributes {
   count: number;
 }
+
+interface UIMetricElement {
+  key: string;
+  value: number;
+}
+
+export type UIMetricUsage = Record<string, UIMetricElement[]>;
 
 export function registerUiMetricUsageCollector(
   usageCollection: UsageCollectionSetup,
@@ -47,17 +54,19 @@ export function registerUiMetricUsageCollector(
     },
   });
 
-  const collector = usageCollection.makeUsageCollector({
+  const collector = usageCollection.makeUsageCollector<UIMetricUsage | undefined>({
     type: 'ui_metric',
+    schema: uiMetricSchema,
     fetch: async () => {
       const savedObjectsClient = getSavedObjectsClient();
       if (typeof savedObjectsClient === 'undefined') {
         return;
       }
 
-      const rawUiMetrics = await findAll<UIMetricsSavedObjects>(savedObjectsClient, {
+      const { saved_objects: rawUiMetrics } = await savedObjectsClient.find<UIMetricsSavedObjects>({
         type: 'ui-metric',
         fields: ['count'],
+        perPage: 10000,
       });
 
       const uiMetricsByAppName = rawUiMetrics.reduce((accum, rawUiMetric) => {
@@ -66,14 +75,14 @@ export function registerUiMetricUsageCollector(
           attributes: { count },
         } = rawUiMetric;
 
-        const [appName, metricType] = id.split(':');
+        const [appName, ...metricType] = id.split(':');
 
-        const pair = { key: metricType, value: count };
+        const pair = { key: metricType.join(':'), value: count };
         return {
           ...accum,
           [appName]: [...(accum[appName] || []), pair],
         };
-      }, {} as Record<string, Array<{ key: string; value: number }>>);
+      }, {} as UIMetricUsage);
 
       return uiMetricsByAppName;
     },

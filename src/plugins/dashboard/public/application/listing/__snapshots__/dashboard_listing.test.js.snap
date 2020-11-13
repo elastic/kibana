@@ -11,6 +11,7 @@ exports[`after fetch hideWriteControls 1`] = `
     findItems={[Function]}
     headingId="dashboardListingHeading"
     initialFilter=""
+    initialPageSize={10}
     listingLimit={1}
     noItemsFragment={
       <div>
@@ -30,6 +31,9 @@ exports[`after fetch hideWriteControls 1`] = `
         />
       </div>
     }
+    rowHeader="title"
+    searchFilters={Array []}
+    tableCaption="Dashboards"
     tableColumns={
       Array [
         Object {
@@ -68,6 +72,7 @@ exports[`after fetch initialFilter 1`] = `
     findItems={[Function]}
     headingId="dashboardListingHeading"
     initialFilter="my dashboard"
+    initialPageSize={10}
     listingLimit={1000}
     noItemsFragment={
       <div>
@@ -131,6 +136,9 @@ exports[`after fetch initialFilter 1`] = `
         />
       </div>
     }
+    rowHeader="title"
+    searchFilters={Array []}
+    tableCaption="Dashboards"
     tableColumns={
       Array [
         Object {
@@ -169,6 +177,7 @@ exports[`after fetch renders call to action when no dashboards exist 1`] = `
     findItems={[Function]}
     headingId="dashboardListingHeading"
     initialFilter=""
+    initialPageSize={10}
     listingLimit={1}
     noItemsFragment={
       <div>
@@ -232,6 +241,9 @@ exports[`after fetch renders call to action when no dashboards exist 1`] = `
         />
       </div>
     }
+    rowHeader="title"
+    searchFilters={Array []}
+    tableCaption="Dashboards"
     tableColumns={
       Array [
         Object {
@@ -270,6 +282,7 @@ exports[`after fetch renders table rows 1`] = `
     findItems={[Function]}
     headingId="dashboardListingHeading"
     initialFilter=""
+    initialPageSize={10}
     listingLimit={1000}
     noItemsFragment={
       <div>
@@ -333,6 +346,9 @@ exports[`after fetch renders table rows 1`] = `
         />
       </div>
     }
+    rowHeader="title"
+    searchFilters={Array []}
+    tableCaption="Dashboards"
     tableColumns={
       Array [
         Object {
@@ -371,6 +387,7 @@ exports[`after fetch renders warning when listingLimit is exceeded 1`] = `
     findItems={[Function]}
     headingId="dashboardListingHeading"
     initialFilter=""
+    initialPageSize={10}
     listingLimit={1}
     noItemsFragment={
       <div>
@@ -434,6 +451,9 @@ exports[`after fetch renders warning when listingLimit is exceeded 1`] = `
         />
       </div>
     }
+    rowHeader="title"
+    searchFilters={Array []}
+    tableCaption="Dashboards"
     tableColumns={
       Array [
         Object {
@@ -535,6 +555,9 @@ exports[`renders empty page in before initial fetch to avoid flickering 1`] = `
         />
       </div>
     }
+    rowHeader="title"
+    searchFilters={Array []}
+    tableCaption="Dashboards"
     tableColumns={
       Array [
         Object {

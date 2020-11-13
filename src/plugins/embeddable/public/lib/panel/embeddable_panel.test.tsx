@@ -19,9 +19,8 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
-import { nextTick } from 'test_utils/enzyme_helpers';
+import { mountWithIntl, nextTick } from '@kbn/test/jest';
 
-// @ts-ignore
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { I18nProvider } from '@kbn/i18n/react';
 import { CONTEXT_MENU_TRIGGER } from '../triggers';
@@ -40,7 +39,6 @@ import {
   ContactCardEmbeddableInput,
   ContactCardEmbeddableOutput,
 } from '../test_samples/embeddables/contact_card/contact_card_embeddable';
-// eslint-disable-next-line
 import { inspectorPluginMock } from '../../../../inspector/public/mocks';
 import { EuiBadge } from '@elastic/eui';
 import { embeddablePluginMock } from '../../mocks';
@@ -343,6 +341,88 @@ test('HelloWorldContainer in edit mode shows edit mode actions', async () => {
   // TODO: Fix this.
   // const action = findTestSubject(component, `embeddablePanelAction-${editModeAction.id}`);
   // expect(action.length).toBe(1);
+});
+
+test('Panel title customize link does not exist in view mode', async () => {
+  const inspector = inspectorPluginMock.createStartContract();
+
+  const container = new HelloWorldContainer(
+    { id: '123', panels: {}, viewMode: ViewMode.VIEW, hidePanelTitles: false },
+    { getEmbeddableFactory } as any
+  );
+
+  const embeddable = await container.addNewEmbeddable<
+    ContactCardEmbeddableInput,
+    ContactCardEmbeddableOutput,
+    ContactCardEmbeddable
+  >(CONTACT_CARD_EMBEDDABLE, {
+    firstName: 'Vayon',
+    lastName: 'Poole',
+  });
+
+  const component = mountWithIntl(
+    <EmbeddablePanel
+      embeddable={embeddable}
+      getActions={() => Promise.resolve([])}
+      getAllEmbeddableFactories={start.getEmbeddableFactories}
+      getEmbeddableFactory={start.getEmbeddableFactory}
+      notifications={{} as any}
+      overlays={{} as any}
+      application={applicationMock}
+      inspector={inspector}
+      SavedObjectFinder={() => null}
+    />
+  );
+
+  const titleLink = findTestSubject(component, 'embeddablePanelTitleLink');
+  expect(titleLink.length).toBe(0);
+});
+
+test('Runs customize panel action on title click when in edit mode', async () => {
+  const inspector = inspectorPluginMock.createStartContract();
+
+  const container = new HelloWorldContainer(
+    { id: '123', panels: {}, viewMode: ViewMode.EDIT, hidePanelTitles: false },
+    { getEmbeddableFactory } as any
+  );
+
+  const embeddable = await container.addNewEmbeddable<
+    ContactCardEmbeddableInput,
+    ContactCardEmbeddableOutput,
+    ContactCardEmbeddable
+  >(CONTACT_CARD_EMBEDDABLE, {
+    firstName: 'Vayon',
+    lastName: 'Poole',
+  });
+
+  const component = mountWithIntl(
+    <EmbeddablePanel
+      embeddable={embeddable}
+      getActions={() => Promise.resolve([])}
+      getAllEmbeddableFactories={start.getEmbeddableFactories}
+      getEmbeddableFactory={start.getEmbeddableFactory}
+      notifications={{} as any}
+      overlays={{} as any}
+      application={applicationMock}
+      inspector={inspector}
+      SavedObjectFinder={() => null}
+    />
+  );
+
+  const titleExecute = jest.fn();
+  component.setState((s: any) => ({
+    ...s,
+    universalActions: {
+      ...s.universalActions,
+      customizePanelTitle: { execute: titleExecute, isCompatible: jest.fn() },
+    },
+  }));
+
+  const titleLink = findTestSubject(component, 'embeddablePanelTitleLink');
+  expect(titleLink.length).toBe(1);
+  titleLink.simulate('click');
+  await nextTick();
+  expect(titleExecute).toHaveBeenCalledTimes(1);
 });
 
 test('Updates when hidePanelTitles is toggled', async () => {

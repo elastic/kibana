@@ -18,11 +18,6 @@ const { setup: setupPolicyAdd } = pageHelpers.policyAdd;
 const EXPIRE_AFTER_VALUE = '5';
 const EXPIRE_AFTER_UNIT = TIME_UNITS.MINUTE;
 
-jest.mock('ui/i18n', () => {
-  const I18nContext = ({ children }: any) => children;
-  return { I18nContext };
-});
-
 describe('<PolicyEdit />', () => {
   let testBed: PolicyFormTestBed;
   let testBedPolicyAdd: PolicyFormTestBed;
@@ -55,6 +50,44 @@ describe('<PolicyEdit />', () => {
       const { exists, find } = testBed;
       expect(exists('pageTitle')).toBe(true);
       expect(find('pageTitle').text()).toEqual('Edit policy');
+    });
+
+    describe('policy with pre-existing repository that was deleted', () => {
+      beforeEach(async () => {
+        httpRequestsMockHelpers.setGetPolicyResponse({ policy: POLICY_EDIT });
+        httpRequestsMockHelpers.setLoadIndicesResponse({
+          indices: ['my_index'],
+          dataStreams: ['my_data_stream'],
+        });
+        httpRequestsMockHelpers.setLoadRepositoriesResponse({
+          repositories: [{ name: 'this-is-a-new-repository' }],
+        });
+
+        testBed = await setup();
+
+        await act(async () => {
+          await nextTick();
+          testBed.component.update();
+        });
+      });
+
+      test('should show repository-not-found warning', () => {
+        const { exists, find } = testBed;
+        expect(exists('repositoryNotFoundWarning')).toBe(true);
+        // The select should be an empty string to allow users to select a new repository
+        expect(find('repositorySelect').props().value).toBe('');
+      });
+
+      describe('validation', () => {
+        test('should block navigating to next step', () => {
+          const { exists, find, actions } = testBed;
+          actions.clickNextButton();
+          // Assert that we are still on the repository configuration step
+          expect(exists('repositoryNotFoundWarning')).toBe(true);
+          // The select should be an empty string to allow users to select a new repository
+          expect(find('repositorySelect').props().value).toBe('');
+        });
+      });
     });
 
     /**

@@ -5,21 +5,31 @@
  */
 
 import { Ast } from '@kbn/interpreter/common';
-import { FramePublicAPI, Operation } from '../types';
+import { PaletteRegistry } from 'src/plugins/charts/public';
+import { Operation, DatasourcePublicAPI } from '../types';
 import { DEFAULT_PERCENT_DECIMALS } from './constants';
 import { PieVisualizationState } from './types';
 
-export function toExpression(state: PieVisualizationState, frame: FramePublicAPI) {
-  return expressionHelper(state, frame, false);
+export function toExpression(
+  state: PieVisualizationState,
+  datasourceLayers: Record<string, DatasourcePublicAPI>,
+  paletteService: PaletteRegistry,
+  attributes: Partial<{ title: string; description: string }> = {}
+) {
+  return expressionHelper(state, datasourceLayers, paletteService, {
+    ...attributes,
+    isPreview: false,
+  });
 }
 
 function expressionHelper(
   state: PieVisualizationState,
-  frame: FramePublicAPI,
-  isPreview: boolean
+  datasourceLayers: Record<string, DatasourcePublicAPI>,
+  paletteService: PaletteRegistry,
+  attributes: { isPreview: boolean; title?: string; description?: string } = { isPreview: false }
 ): Ast | null {
   const layer = state.layers[0];
-  const datasource = frame.datasourceLayers[layer.layerId];
+  const datasource = datasourceLayers[layer.layerId];
   const operations = layer.groups
     .map((columnId) => ({ columnId, operation: datasource.getOperationForColumnId(columnId) }))
     .filter((o): o is { columnId: string; operation: Operation } => !!o.operation);
@@ -34,8 +44,10 @@ function expressionHelper(
         type: 'function',
         function: 'lens_pie',
         arguments: {
+          title: [attributes.title || ''],
+          description: [attributes.description || ''],
           shape: [state.shape],
-          hideLabels: [isPreview],
+          hideLabels: [attributes.isPreview],
           groups: operations.map((o) => o.columnId),
           metric: [layer.metric],
           numberDisplay: [layer.numberDisplay],
@@ -44,12 +56,39 @@ function expressionHelper(
           legendPosition: [layer.legendPosition || 'right'],
           percentDecimals: [layer.percentDecimals ?? DEFAULT_PERCENT_DECIMALS],
           nestedLegend: [!!layer.nestedLegend],
+          ...(state.palette
+            ? {
+                palette: [
+                  {
+                    type: 'expression',
+                    chain: [
+                      {
+                        type: 'function',
+                        function: 'theme',
+                        arguments: {
+                          variable: ['palette'],
+                          default: [
+                            paletteService
+                              .get(state.palette.name)
+                              .toExpression(state.palette.params),
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                ],
+              }
+            : {}),
         },
       },
     ],
   };
 }
 
-export function toPreviewExpression(state: PieVisualizationState, frame: FramePublicAPI) {
-  return expressionHelper(state, frame, true);
+export function toPreviewExpression(
+  state: PieVisualizationState,
+  datasourceLayers: Record<string, DatasourcePublicAPI>,
+  paletteService: PaletteRegistry
+) {
+  return expressionHelper(state, datasourceLayers, paletteService, { isPreview: true });
 }

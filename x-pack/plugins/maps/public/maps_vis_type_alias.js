@@ -6,25 +6,15 @@
 
 import { i18n } from '@kbn/i18n';
 import { APP_ID, APP_ICON, MAP_PATH } from '../common/constants';
-import { getShowMapVisualizationTypes, getVisualizations } from './kibana_services';
 
-export function getMapsVisTypeAlias() {
-  const showMapVisualizationTypes = getShowMapVisualizationTypes();
+export function getMapsVisTypeAlias(visualizations, showMapVisualizationTypes) {
   if (!showMapVisualizationTypes) {
-    getVisualizations().hideTypes(['region_map', 'tile_map']);
+    visualizations.hideTypes(['region_map', 'tile_map']);
   }
 
   const description = i18n.translate('xpack.maps.visTypeAlias.description', {
     defaultMessage: 'Create and style maps with multiple layers and indices.',
   });
-
-  const legacyMapVisualizationWarning = i18n.translate(
-    'xpack.maps.visTypeAlias.legacyMapVizWarning',
-    {
-      defaultMessage: `Use the Maps app instead of Coordinate Map and Region Map.
-The Maps app offers more functionality and is easier to use.`,
-    }
-  );
 
   return {
     aliasApp: APP_ID,
@@ -33,9 +23,7 @@ The Maps app offers more functionality and is easier to use.`,
     title: i18n.translate('xpack.maps.visTypeAlias.title', {
       defaultMessage: 'Maps',
     }),
-    description: showMapVisualizationTypes
-      ? `${description} ${legacyMapVisualizationWarning}`
-      : description,
+    description: description,
     icon: APP_ICON,
     stage: 'production',
   };

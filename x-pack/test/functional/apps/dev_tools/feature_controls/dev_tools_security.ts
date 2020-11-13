@@ -63,7 +63,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows Dev Tools navlink', async () => {
         const navLinks = await appsMenu.readLinks();
-        expect(navLinks.map((link) => link.text)).to.eql(['Dev Tools', 'Stack Management']);
+        expect(navLinks.map((link) => link.text)).to.eql(['Dev Tools']);
       });
 
       describe('console', () => {
@@ -144,7 +144,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it(`shows 'Dev Tools' navlink`, async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.eql(['Dev Tools', 'Stack Management']);
+        expect(navLinks).to.eql(['Dev Tools']);
       });
 
       describe('console', () => {
@@ -228,31 +228,31 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(navLinks.map((navLink: any) => navLink.text)).to.not.contain(['Dev Tools']);
       });
 
-      it(`navigating to console shows 404`, async () => {
+      it(`navigating to console shows 403`, async () => {
         await PageObjects.common.navigateToUrl('console', '', {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
           useActualUrl: true,
         });
-        await PageObjects.error.expectNotFound();
+        await PageObjects.error.expectForbidden();
       });
 
-      it(`navigating to search profiler shows 404`, async () => {
+      it(`navigating to search profiler shows 403`, async () => {
         await PageObjects.common.navigateToUrl('searchProfiler', '', {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
           useActualUrl: true,
         });
-        await PageObjects.error.expectNotFound();
+        await PageObjects.error.expectForbidden();
       });
 
-      it(`navigating to grok debugger shows 404`, async () => {
+      it(`navigating to grok debugger shows 403`, async () => {
         await PageObjects.common.navigateToUrl('grokDebugger', '', {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
           useActualUrl: true,
         });
-        await PageObjects.error.expectNotFound();
+        await PageObjects.error.expectForbidden();
       });
     });
   });

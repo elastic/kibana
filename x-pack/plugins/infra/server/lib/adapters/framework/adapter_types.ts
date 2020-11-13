@@ -5,7 +5,7 @@
  */
 
 import { GenericParams, SearchResponse } from 'elasticsearch';
-import { Lifecycle } from 'hapi';
+import { Lifecycle } from '@hapi/hapi';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { RouteConfig, RouteMethod } from '../../../../../../../src/core/server';
 import { HomeServerPluginSetup } from '../../../../../../../src/plugins/home/server';
@@ -15,6 +15,7 @@ import { PluginSetupContract as FeaturesPluginSetup } from '../../../../../../pl
 import { SpacesPluginSetup } from '../../../../../../plugins/spaces/server';
 import { PluginSetupContract as AlertingPluginContract } from '../../../../../alerts/server';
 import { MlPluginSetup } from '../../../../../ml/server';
+import { JsonArray, JsonValue } from '../../../../common/typed_json';
 
 export interface InfraServerPluginDeps {
   home: HomeServerPluginSetup;
@@ -111,7 +112,10 @@ export type SearchHit = SearchResponse<object>['hits']['hits'][0];
 export interface SortedSearchHit extends SearchHit {
   sort: any[];
   _source: {
-    [field: string]: any;
+    [field: string]: JsonValue;
+  };
+  fields: {
+    [field: string]: JsonArray;
   };
 }
 
@@ -171,6 +175,6 @@ export interface InfraTSVBSeries {
 
 export type InfraTSVBDataPoint = [number, number];
 
-export type InfraRouteConfig<params, query, body, method extends RouteMethod> = {
+export type InfraRouteConfig<Params, Query, Body, Method extends RouteMethod> = {
   method: RouteMethod;
-} & RouteConfig<params, query, body, method>;
+} & RouteConfig<Params, Query, Body, Method>;

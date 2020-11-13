@@ -25,6 +25,9 @@ import {
   EmbeddableStateTransfer,
   IEmbeddable,
   EmbeddablePanel,
+  EmbeddableInput,
+  SavedObjectEmbeddableInput,
+  ReferenceOrValueEmbeddable,
 } from '.';
 import { EmbeddablePublicPlugin } from './plugin';
 import { coreMock } from '../../../core/public/mocks';
@@ -33,11 +36,10 @@ import { CoreStart } from '../../../core/public';
 import { Start as InspectorStart } from '../../inspector/public';
 import { dataPluginMock } from '../../data/public/mocks';
 
-// eslint-disable-next-line
 import { inspectorPluginMock } from '../../inspector/public/mocks';
-// eslint-disable-next-line
 import { uiActionsPluginMock } from '../../ui_actions/public/mocks';
 
+export { mockAttributeService } from './lib/attribute_service/attribute_service.mock';
 export type Setup = jest.Mocked<EmbeddableSetup>;
 export type Start = jest.Mocked<EmbeddableStart>;
 
@@ -86,9 +88,29 @@ export const createEmbeddableStateTransferMock = (): Partial<EmbeddableStateTran
   };
 };
 
+export const mockRefOrValEmbeddable = <
+  OriginalEmbeddableType,
+  ValTypeInput extends EmbeddableInput = EmbeddableInput,
+  RefTypeInput extends SavedObjectEmbeddableInput = SavedObjectEmbeddableInput
+>(
+  embeddable: IEmbeddable,
+  options: {
+    mockedByReferenceInput: RefTypeInput;
+    mockedByValueInput: ValTypeInput;
+  }
+): OriginalEmbeddableType & ReferenceOrValueEmbeddable => {
+  const newEmbeddable: ReferenceOrValueEmbeddable = (embeddable as unknown) as ReferenceOrValueEmbeddable;
+  newEmbeddable.inputIsRefType = (input: unknown): input is RefTypeInput =>
+    !!(input as RefTypeInput).savedObjectId;
+  newEmbeddable.getInputAsRefType = () => Promise.resolve(options.mockedByReferenceInput);
+  newEmbeddable.getInputAsValueType = () => Promise.resolve(options.mockedByValueInput);
+  return newEmbeddable as OriginalEmbeddableType & ReferenceOrValueEmbeddable;
+};
+
 const createSetupContract = (): Setup => {
   const setupContract: Setup = {
     registerEmbeddableFactory: jest.fn(),
+    registerEnhancement: jest.fn(),
     setCustomEmbeddableFactoryProvider: jest.fn(),
   };
   return setupContract;
@@ -98,12 +120,14 @@ const createStartContract = (): Start => {
   const startContract: Start = {
     getEmbeddableFactories: jest.fn(),
     getEmbeddableFactory: jest.fn(),
+    telemetry: jest.fn(),
+    extract: jest.fn(),
+    inject: jest.fn(),
+    migrate: jest.fn(),
     EmbeddablePanel: jest.fn(),
-    getAttributeService: jest.fn(),
     getEmbeddablePanel: jest.fn(),
     getStateTransfer: jest.fn(() => createEmbeddableStateTransferMock() as EmbeddableStateTransfer),
-    filtersAndTimeRangeFromContext: jest.fn(),
-    filtersFromContext: jest.fn(),
+    getAttributeService: jest.fn(),
   };
   return startContract;
 };
@@ -131,4 +155,5 @@ export const embeddablePluginMock = {
   createSetupContract,
   createStartContract,
   createInstance,
+  mockRefOrValEmbeddable,
 };

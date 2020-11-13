@@ -23,17 +23,12 @@ import $ from 'jquery';
 
 import sinon from 'sinon';
 
-import { PrivateProvider, initAngularBootstrap } from '../../../../../kibana_legacy/public';
+import { initAngularBootstrap } from '../../../../../kibana_legacy/public';
 import { FixedScrollProvider } from './fixed_scroll';
-import { DebounceProviderTimeout } from './debounce/debounce';
 
 const testModuleName = 'fixedScroll';
 
-angular
-  .module(testModuleName, [])
-  .provider('Private', PrivateProvider)
-  .service('debounce', ['$timeout', DebounceProviderTimeout])
-  .directive('fixedScroll', FixedScrollProvider);
+angular.module(testModuleName, []).directive('fixedScroll', FixedScrollProvider);
 
 describe('FixedScroll directive', function () {
   const sandbox = sinon.createSandbox();
@@ -127,7 +122,7 @@ describe('FixedScroll directive', function () {
         return {
           $container: $el,
           $content: $content,
-          $scroller: $parent.find('.fixed-scroll-scroller'),
+          $scroller: $parent.find('.dscTableFixedScroll__scroller'),
         };
       };
     });

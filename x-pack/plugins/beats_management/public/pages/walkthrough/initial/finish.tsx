@@ -6,7 +6,7 @@
 import { EuiButton, EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiPageContent } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React from 'react';
-import { CMBeat } from '../../../../../../legacy/plugins/beats_management/common/domain_types';
+import { CMBeat } from '../../../../common/domain_types';
 import { AppPageProps } from '../../../frontend_types';
 
 interface PageState {

@@ -11,7 +11,7 @@ const customRulesSchema = schema.maybe(
     schema.maybe(
       schema.object({
         actions: schema.arrayOf(schema.string()),
-        conditions: schema.arrayOf(schema.any()),
+        conditions: schema.maybe(schema.arrayOf(schema.any())),
         scope: schema.maybe(schema.any()),
       })
     )
@@ -26,8 +26,11 @@ const detectorSchema = schema.object({
   over_field_name: schema.maybe(schema.string()),
   partition_field_name: schema.maybe(schema.string()),
   detector_description: schema.maybe(schema.string()),
+  exclude_frequent: schema.maybe(schema.string()),
+  use_null: schema.maybe(schema.boolean()),
   /** Custom rules */
   custom_rules: customRulesSchema,
+  detector_index: schema.maybe(schema.number()),
 });
 
 const customUrlSchema = {
@@ -79,6 +82,10 @@ export const analysisConfigSchema = schema.object({
   detectors: schema.arrayOf(detectorSchema),
   influencers: schema.arrayOf(schema.maybe(schema.string())),
   categorization_field_name: schema.maybe(schema.string()),
+  categorization_analyzer: schema.maybe(schema.any()),
+  categorization_filters: schema.maybe(schema.arrayOf(schema.string())),
+  latency: schema.maybe(schema.number()),
+  multivariate_by_fields: schema.maybe(schema.boolean()),
   per_partition_categorization: schema.maybe(
     schema.object({
       enabled: schema.boolean(),

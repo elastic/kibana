@@ -12,7 +12,7 @@ import { JS } from '../../constants';
 
 export const help: FunctionHelp<FunctionFactory<typeof replace>> = {
   help: i18n.translate('xpack.canvas.functions.replaceImageHelpText', {
-    defaultMessage: 'Use a regular expression to replace parts of a string.',
+    defaultMessage: 'Uses a regular expression to replace parts of a string.',
   }),
   args: {
     pattern: i18n.translate('xpack.canvas.functions.replace.args.patternHelpText', {

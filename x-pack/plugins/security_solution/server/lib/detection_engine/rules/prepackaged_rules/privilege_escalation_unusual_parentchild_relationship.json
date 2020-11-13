@@ -3,19 +3,24 @@
     "Elastic"
   ],
   "description": "Identifies Windows programs run from unexpected parent processes. This could indicate masquerading or other strange activity on a system.",
+  "from": "now-9m",
   "index": [
-    "winlogbeat-*"
+    "winlogbeat-*",
+    "logs-endpoint.events.*"
   ],
   "language": "kuery",
   "license": "Elastic License",
   "name": "Unusual Parent-Child Relationship",
-  "query": "event.category:process and event.type:(start or process_started) and process.parent.executable:* and (process.name:smss.exe and not process.parent.name:(System or smss.exe) or process.name:csrss.exe and not process.parent.name:(smss.exe or svchost.exe) or process.name:wininit.exe and not process.parent.name:smss.exe or process.name:winlogon.exe and not process.parent.name:smss.exe or process.name:lsass.exe and not process.parent.name:wininit.exe or process.name:LogonUI.exe and not process.parent.name:(wininit.exe or winlogon.exe) or process.name:services.exe and not process.parent.name:wininit.exe or process.name:svchost.exe and not process.parent.name:(MsMpEng.exe or services.exe) or process.name:spoolsv.exe and not process.parent.name:services.exe or process.name:taskhost.exe and not process.parent.name:(services.exe or svchost.exe) or process.name:taskhostw.exe and not process.parent.name:(services.exe or svchost.exe) or process.name:userinit.exe and not process.parent.name:(dwm.exe or winlogon.exe))",
+  "query": "event.category:process and event.type:(start or process_started) and process.parent.executable:* and (process.parent.name:autochk.exe and not process.name:(chkdsk.exe or doskey.exe or WerFault.exe) or process.parent.name:smss.exe and not process.name:(autochk.exe or smss.exe or csrss.exe or wininit.exe or winlogon.exe or WerFault.exe) or process.name:autochk.exe and not process.parent.name:smss.exe or process.name:(fontdrvhost.exe or dwm.exe) and not process.parent.name:(wininit.exe or winlogon.exe) or process.name:(consent.exe or RuntimeBroker.exe or TiWorker.exe) and not process.parent.name:svchost.exe or process.name:wermgr.exe and not process.parent.name:(svchost.exe or TiWorker.exe) or process.name:SearchIndexer.exe and not process.parent.name:services.exe or process.name:SearchProtocolHost.exe and not process.parent.name:(SearchIndexer.exe or dllhost.exe) or process.name:dllhost.exe and not process.parent.name:(services.exe or svchost.exe) or process.name:smss.exe and not process.parent.name:(System or smss.exe) or process.name:csrss.exe and not process.parent.name:(smss.exe or svchost.exe) or process.name:wininit.exe and not process.parent.name:smss.exe or process.name:winlogon.exe and not process.parent.name:smss.exe or process.name:(lsass.exe or LsaIso.exe) and not process.parent.name:wininit.exe or process.name:LogonUI.exe and not process.parent.name:(wininit.exe or winlogon.exe) or process.name:services.exe and not process.parent.name:wininit.exe or process.name:svchost.exe and not process.parent.name:(MsMpEng.exe or services.exe) or process.name:spoolsv.exe and not process.parent.name:services.exe or process.name:taskhost.exe and not process.parent.name:(services.exe or svchost.exe) or process.name:taskhostw.exe and not process.parent.name:(services.exe or svchost.exe) or process.name:userinit.exe and not process.parent.name:(dwm.exe or winlogon.exe))",
   "risk_score": 47,
   "rule_id": "35df0dd8-092d-4a83-88c1-5151a804f31b",
   "severity": "medium",
   "tags": [
     "Elastic",
-    "Windows"
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Privilege Escalation"
   ],
   "threat": [
     {
@@ -35,5 +40,5 @@
     }
   ],
   "type": "query",
-  "version": 3
+  "version": 5
 }

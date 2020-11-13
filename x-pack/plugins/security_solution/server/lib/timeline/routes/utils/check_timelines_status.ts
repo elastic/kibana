@@ -35,7 +35,7 @@ export const checkTimelinesStatus = async (
 
   try {
     readStream = await getReadables(dataPath);
-    timeline = await getExistingPrepackagedTimelines(frameworkRequest, false);
+    timeline = await getExistingPrepackagedTimelines(frameworkRequest);
   } catch (err) {
     return {
       timelinesToInstall: [],

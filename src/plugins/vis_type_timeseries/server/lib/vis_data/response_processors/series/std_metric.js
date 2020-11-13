@@ -40,6 +40,7 @@ export function stdMetric(resp, panel, series, meta) {
       results.push({
         id: `${split.id}`,
         label: split.label,
+        labelFormatted: split.labelFormatted,
         color: split.color,
         data,
         ...decoration,

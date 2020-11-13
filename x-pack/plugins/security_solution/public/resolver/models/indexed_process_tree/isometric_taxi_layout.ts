@@ -14,12 +14,11 @@ import {
   Matrix3,
   IsometricTaxiLayout,
 } from '../../types';
-import * as event from '../../../../common/endpoint/models/event';
-import { ResolverEvent } from '../../../../common/endpoint/types';
+import * as eventModel from '../../../../common/endpoint/models/event';
+import { SafeResolverEvent } from '../../../../common/endpoint/types';
 import * as vector2 from '../vector2';
 import * as indexedProcessTreeModel from './index';
 import { getFriendlyElapsedTime as elapsedTime } from '../../lib/date';
-import { uniquePidForProcess } from '../process_event';
 
 /**
  * Graph the process tree
@@ -30,25 +29,29 @@ export function isometricTaxiLayoutFactory(
   /**
    * Walk the tree in reverse level order, calculating the 'width' of subtrees.
    */
-  const widths = widthsOfProcessSubtrees(indexedProcessTree);
+  const widths: Map<SafeResolverEvent, number> = widthsOfProcessSubtrees(indexedProcessTree);
 
   /**
    * Walk the tree in level order. Using the precalculated widths, calculate the position of nodes.
    * Nodes are positioned relative to their parents and preceding siblings.
    */
-  const positions = processPositions(indexedProcessTree, widths);
+  const positions: Map<SafeResolverEvent, Vector2> = processPositions(indexedProcessTree, widths);
 
   /**
    * With the widths and positions precalculated, we calculate edge line segments (arrays of vector2s)
    * which connect them in a 'pitchfork' design.
    */
-  const edgeLineSegments = processEdgeLineSegments(indexedProcessTree, widths, positions);
+  const edgeLineSegments: EdgeLineSegment[] = processEdgeLineSegments(
+    indexedProcessTree,
+    widths,
+    positions
+  );
 
   /**
    * Transform the positions of nodes and edges so they seem like they are on an isometric grid.
    */
   const transformedEdgeLineSegments: EdgeLineSegment[] = [];
-  const transformedPositions = new Map<ResolverEvent, Vector2>();
+  const transformedPositions = new Map<SafeResolverEvent, Vector2>();
 
   for (const [processEvent, position] of positions) {
     transformedPositions.set(
@@ -83,8 +86,8 @@ export function isometricTaxiLayoutFactory(
 /**
  * Calculate a level (starting at 1) for each node.
  */
-function ariaLevels(indexedProcessTree: IndexedProcessTree): Map<ResolverEvent, number> {
-  const map: Map<ResolverEvent, number> = new Map();
+function ariaLevels(indexedProcessTree: IndexedProcessTree): Map<SafeResolverEvent, number> {
+  const map: Map<SafeResolverEvent, number> = new Map();
   for (const node of indexedProcessTreeModel.levelOrder(indexedProcessTree)) {
     const parentNode = indexedProcessTreeModel.parent(indexedProcessTree, node);
     if (parentNode === undefined) {
@@ -143,20 +146,20 @@ function ariaLevels(indexedProcessTree: IndexedProcessTree): Map<ResolverEvent, 
  *
  */
 function widthsOfProcessSubtrees(indexedProcessTree: IndexedProcessTree): ProcessWidths {
-  const widths = new Map<ResolverEvent, number>();
+  const widths = new Map<SafeResolverEvent, number>();
 
   if (indexedProcessTreeModel.size(indexedProcessTree) === 0) {
     return widths;
   }
 
-  const processesInReverseLevelOrder: ResolverEvent[] = [
+  const processesInReverseLevelOrder: SafeResolverEvent[] = [
     ...indexedProcessTreeModel.levelOrder(indexedProcessTree),
   ].reverse();
 
   for (const process of processesInReverseLevelOrder) {
     const children = indexedProcessTreeModel.children(
       indexedProcessTree,
-      uniquePidForProcess(process)
+      eventModel.entityIDSafeVersion(process)
     );
 
     const sumOfWidthOfChildren = function sumOfWidthOfChildren() {
@@ -167,7 +170,7 @@ function widthsOfProcessSubtrees(indexedProcessTree: IndexedProcessTree): Proces
          * Therefore a parent can always find a width for its children, since all of its children
          * will have been handled already.
          */
-        return currentValue + widths.get(child)!;
+        return currentValue + (widths.get(child) ?? 0);
       }, 0);
     };
 
@@ -178,6 +181,9 @@ function widthsOfProcessSubtrees(indexedProcessTree: IndexedProcessTree): Proces
   return widths;
 }
 
+/**
+ * Layout the graph. Note: if any process events are missing the `entity_id`, this will throw an Error.
+ */
 function processEdgeLineSegments(
   indexedProcessTree: IndexedProcessTree,
   widths: ProcessWidths,
@@ -185,7 +191,6 @@ function processEdgeLineSegments(
 ): EdgeLineSegment[] {
   const edgeLineSegments: EdgeLineSegment[] = [];
   for (const metadata of levelOrderWithWidths(indexedProcessTree, widths)) {
-    const edgeLineMetadata: EdgeLineMetadata = { uniqueId: '' };
     /**
      * We only handle children, drawing lines back to their parents. The root has no parent, so we skip it
      */
@@ -196,9 +201,13 @@ function processEdgeLineSegments(
     const { process, parent, parentWidth } = metadata;
     const position = positions.get(process);
     const parentPosition = positions.get(parent);
-    const parentId = event.entityId(parent);
-    const processEntityId = event.entityId(process);
-    const edgeLineId = parentId ? parentId + processEntityId : parentId;
+    const parentID = eventModel.entityIDSafeVersion(parent);
+    const processEntityID = eventModel.entityIDSafeVersion(process);
+
+    if (processEntityID === undefined) {
+      throw new Error('tried to graph a Resolver that had a process with no `process.entity_id`');
+    }
+    const edgeLineID = `edge:${parentID ?? 'undefined'}:${processEntityID}`;
 
     if (position === undefined || parentPosition === undefined) {
       /**
@@ -207,12 +216,18 @@ function processEdgeLineSegments(
       throw new Error();
     }
 
-    const parentTime = event.eventTimestamp(parent);
-    const processTime = event.eventTimestamp(process);
-    if (parentTime && processTime) {
-      edgeLineMetadata.elapsedTime = elapsedTime(parentTime, processTime) ?? undefined;
-    }
-    edgeLineMetadata.uniqueId = edgeLineId;
+    const parentTime = eventModel.timestampSafeVersion(parent);
+    const processTime = eventModel.timestampSafeVersion(process);
+
+    const timeBetweenParentAndNode =
+      parentTime !== undefined && processTime !== undefined
+        ? elapsedTime(parentTime, processTime)
+        : undefined;
+
+    const edgeLineMetadata: EdgeLineMetadata = {
+      elapsedTime: timeBetweenParentAndNode,
+      reactKey: edgeLineID,
+    };
 
     /**
      * The point halfway between the parent and child on the y axis, we sometimes have a hard angle here in the edge line
@@ -236,7 +251,7 @@ function processEdgeLineSegments(
 
     const siblings = indexedProcessTreeModel.children(
       indexedProcessTree,
-      uniquePidForProcess(parent)
+      eventModel.entityIDSafeVersion(parent)
     );
     const isFirstChild = process === siblings[0];
 
@@ -260,7 +275,7 @@ function processEdgeLineSegments(
 
       const lineFromParentToMidwayLine: EdgeLineSegment = {
         points: [parentPosition, [parentPosition[0], midwayY]],
-        metadata: { uniqueId: `parentToMid${edgeLineId}` },
+        metadata: { reactKey: `parentToMid${edgeLineID}` },
       };
 
       const widthOfMidline = parentWidth - firstChildWidth / 2 - lastChildWidth / 2;
@@ -281,7 +296,7 @@ function processEdgeLineSegments(
             midwayY,
           ],
         ],
-        metadata: { uniqueId: `midway${edgeLineId}` },
+        metadata: { reactKey: `midway${edgeLineID}` },
       };
 
       edgeLineSegments.push(
@@ -303,13 +318,13 @@ function processPositions(
   indexedProcessTree: IndexedProcessTree,
   widths: ProcessWidths
 ): ProcessPositions {
-  const positions = new Map<ResolverEvent, Vector2>();
+  const positions = new Map<SafeResolverEvent, Vector2>();
   /**
    * This algorithm iterates the tree in level order. It keeps counters that are reset for each parent.
    * By keeping track of the last parent node, we can know when we are dealing with a new set of siblings and
    * reset the counters.
    */
-  let lastProcessedParentNode: ResolverEvent | undefined;
+  let lastProcessedParentNode: SafeResolverEvent | undefined;
   /**
    * Nodes are positioned relative to their siblings. We walk this in level order, so we handle
    * children left -> right.
@@ -431,7 +446,10 @@ function* levelOrderWithWidths(
         parentWidth,
       };
 
-      const siblings = indexedProcessTreeModel.children(tree, uniquePidForProcess(parent));
+      const siblings = indexedProcessTreeModel.children(
+        tree,
+        eventModel.entityIDSafeVersion(parent)
+      );
       if (siblings.length === 1) {
         metadata.isOnlyChild = true;
         metadata.lastChildWidth = width;
@@ -488,8 +506,24 @@ const distanceBetweenNodesInUnits = 2;
  */
 const distanceBetweenNodes = distanceBetweenNodesInUnits * unit;
 
-export function nodePosition(model: IsometricTaxiLayout, node: ResolverEvent): Vector2 | undefined {
+/**
+ * @deprecated use `nodePosition`
+ */
+export function processPosition(
+  model: IsometricTaxiLayout,
+  node: SafeResolverEvent
+): Vector2 | undefined {
   return model.processNodePositions.get(node);
+}
+
+export function nodePosition(model: IsometricTaxiLayout, nodeID: string): Vector2 | undefined {
+  // Find the indexed object matching the nodeID
+  // NB: this is O(n) now, but we will be indexing the nodeIDs in the future.
+  for (const candidate of model.processNodePositions.keys()) {
+    if (eventModel.entityIDSafeVersion(candidate) === nodeID) {
+      return processPosition(model, candidate);
+    }
+  }
 }
 
 /**
@@ -509,7 +543,7 @@ export function translated(model: IsometricTaxiLayout, translation: Vector2): Is
       ])
     ),
     edgeLineSegments: model.edgeLineSegments.map(({ points, metadata }) => ({
-      points: points.map((point) => vector2.add(point, translation)),
+      points: [vector2.add(points[0], translation), vector2.add(points[1], translation)],
       metadata,
     })),
     // these are unchanged

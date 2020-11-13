@@ -8,15 +8,15 @@ import { act } from 'react-dom/test-utils';
 import { componentHelpers, MappingsEditorTestBed } from './helpers';
 
 const { setup, getMappingsEditorDataFactory } = componentHelpers.mappingsEditor;
-const onChangeHandler = jest.fn();
-const getMappingsEditorData = getMappingsEditorDataFactory(onChangeHandler);
 
-// FLAKY: https://github.com/elastic/kibana/issues/66457
-describe.skip('Mappings editor: core', () => {
+describe('Mappings editor: core', () => {
   /**
    * Variable to store the mappings data forwarded to the consumer component
    */
   let data: any;
+  let onChangeHandler: jest.Mock = jest.fn();
+  let getMappingsEditorData = getMappingsEditorDataFactory(onChangeHandler);
+  let testBed: MappingsEditorTestBed;
 
   beforeAll(() => {
     jest.useFakeTimers();
@@ -26,8 +26,9 @@ describe.skip('Mappings editor: core', () => {
     jest.useRealTimers();
   });
 
-  afterEach(() => {
-    onChangeHandler.mockReset();
+  beforeEach(() => {
+    onChangeHandler = jest.fn();
+    getMappingsEditorData = getMappingsEditorDataFactory(onChangeHandler);
   });
 
   test('default behaviour', async () => {
@@ -42,11 +43,14 @@ describe.skip('Mappings editor: core', () => {
       },
     };
 
-    const { component } = setup({ value: defaultMappings, onChange: onChangeHandler });
+    await act(async () => {
+      testBed = setup({ value: defaultMappings, onChange: onChangeHandler });
+    });
+
+    const { component } = testBed;
+    component.update();
 
     const expectedMappings = {
-      _meta: {}, // Was not defined so an empty object is returned
-      _source: {}, // Was not defined so an empty object is returned
       ...defaultMappings,
       properties: {
         user: {
@@ -78,8 +82,13 @@ describe.skip('Mappings editor: core', () => {
           },
         },
       };
-      const testBed = setup({ onChange: onChangeHandler, value });
-      const { exists } = testBed;
+
+      await act(async () => {
+        testBed = setup({ onChange: onChangeHandler, value });
+      });
+
+      const { component, exists } = testBed;
+      component.update();
 
       expect(exists('mappingsEditor')).toBe(true);
       expect(exists('mappingTypesDetectedCallout')).toBe(true);
@@ -94,8 +103,12 @@ describe.skip('Mappings editor: core', () => {
           },
         },
       };
-      const testBed = setup({ onChange: onChangeHandler, value });
-      const { exists } = testBed;
+      await act(async () => {
+        testBed = setup({ onChange: onChangeHandler, value });
+      });
+
+      const { component, exists } = testBed;
+      component.update();
 
       expect(exists('mappingsEditor')).toBe(true);
       expect(exists('mappingTypesDetectedCallout')).toBe(false);
@@ -108,10 +121,12 @@ describe.skip('Mappings editor: core', () => {
       properties: {},
       dynamic_templates: [{ before: 'foo' }],
     };
-    let testBed: MappingsEditorTestBed;
 
     beforeEach(async () => {
-      testBed = setup({ value: defaultMappings, onChange: onChangeHandler });
+      await act(async () => {
+        testBed = setup({ value: defaultMappings, onChange: onChangeHandler });
+      });
+      testBed.component.update();
     });
 
     test('should keep the changes when switching tabs', async () => {
@@ -129,10 +144,7 @@ describe.skip('Mappings editor: core', () => {
       expect(find('fieldsListItem').length).toEqual(0); // Check that we start with an empty  list
 
       const newField = { name: 'John', type: 'text' };
-      await act(async () => {
-        addField(newField.name, newField.type);
-      });
-      component.update();
+      await addField(newField.name, newField.type);
 
       expect(find('fieldsListItem').length).toEqual(1);
 
@@ -142,10 +154,7 @@ describe.skip('Mappings editor: core', () => {
       // -------------------------------------
       // Navigate to dynamic templates tab
       // -------------------------------------
-      await act(async () => {
-        selectTab('templates');
-      });
-      component.update();
+      await selectTab('templates');
 
       let templatesValue = getJsonEditorValue('dynamicTemplatesEditor');
       expect(templatesValue).toEqual(defaultMappings.dynamic_templates);
@@ -163,10 +172,7 @@ describe.skip('Mappings editor: core', () => {
       // ------------------------------------------------------
       // Switch to advanced settings tab and make some changes
       // ------------------------------------------------------
-      await act(async () => {
-        selectTab('advanced');
-      });
-      component.update();
+      await selectTab('advanced');
 
       let isDynamicMappingsEnabled = getToggleValue(
         'advancedConfiguration.dynamicMappingsToggle.input'
@@ -194,10 +200,7 @@ describe.skip('Mappings editor: core', () => {
       // ----------------------------------------------------------------------------
       // Go back to dynamic templates tab and make sure our changes are still there
       // ----------------------------------------------------------------------------
-      await act(async () => {
-        selectTab('templates');
-      });
-      component.update();
+      await selectTab('templates');
 
       templatesValue = getJsonEditorValue('dynamicTemplatesEditor');
       expect(templatesValue).toEqual(updatedValueTemplates);
@@ -205,18 +208,13 @@ describe.skip('Mappings editor: core', () => {
       // -----------------------------------------------------------
       // Go back to fields and make sure our created field is there
       // -----------------------------------------------------------
-      await act(async () => {
-        selectTab('fields');
-      });
-      component.update();
+      await selectTab('fields');
+
       field = find('fieldsListItem').at(0);
       expect(find('fieldName', field).text()).toEqual(newField.name);
 
       // Go back to advanced settings tab make sure dynamic mappings is disabled
-      await act(async () => {
-        selectTab('advanced');
-      });
-      component.update();
+      await selectTab('advanced');
 
       isDynamicMappingsEnabled = getToggleValue(
         'advancedConfiguration.dynamicMappingsToggle.input'
@@ -225,52 +223,80 @@ describe.skip('Mappings editor: core', () => {
       isNumericDetectionVisible = exists('advancedConfiguration.numericDetection');
       expect(isNumericDetectionVisible).toBe(false);
     });
+
+    test('should keep default dynamic templates value when switching tabs', async () => {
+      await act(async () => {
+        testBed = setup({
+          value: { ...defaultMappings, dynamic_templates: [] }, // by default, the UI will provide an empty array for dynamic templates
+          onChange: onChangeHandler,
+        });
+      });
+      testBed.component.update();
+
+      const {
+        actions: { selectTab, getJsonEditorValue },
+      } = testBed;
+
+      // Navigate to dynamic templates tab and verify empty array
+      await selectTab('templates');
+      let templatesValue = getJsonEditorValue('dynamicTemplatesEditor');
+      expect(templatesValue).toEqual([]);
+
+      // Navigate to advanced tab
+      await selectTab('advanced');
+
+      // Navigate back to dynamic templates tab and verify empty array persists
+      await selectTab('templates');
+      templatesValue = getJsonEditorValue('dynamicTemplatesEditor');
+      expect(templatesValue).toEqual([]);
+    });
   });
 
   describe('component props', () => {
     /**
      * Note: the "indexSettings" prop will be tested along with the "analyzer" parameter on a text datatype field,
      * as it is the only place where it is consumed by the mappings editor.
-     *
-     * The test that covers it is text_datatype.test.tsx: "analyzer parameter: custom analyzer (from index settings)"
+     * The test that covers it is in the "text_datatype.test.tsx": "analyzer parameter: custom analyzer (from index settings)"
      */
-    const defaultMappings: any = {
-      dynamic: true,
-      numeric_detection: false,
-      date_detection: true,
-      properties: {
-        title: { type: 'text' },
-        address: {
-          type: 'object',
-          properties: {
-            street: { type: 'text' },
-            city: { type: 'text' },
-          },
-        },
-      },
-      dynamic_templates: [{ initial: 'value' }],
-      _source: {
-        enabled: true,
-        includes: ['field1', 'field2'],
-        excludes: ['field3'],
-      },
-      _meta: {
-        some: 'metaData',
-      },
-      _routing: {
-        required: false,
-      },
-    };
-
-    let testBed: MappingsEditorTestBed;
+    let defaultMappings: any;
 
     beforeEach(async () => {
-      testBed = setup({ value: defaultMappings, onChange: onChangeHandler });
+      defaultMappings = {
+        dynamic: true,
+        numeric_detection: false,
+        date_detection: true,
+        properties: {
+          title: { type: 'text' },
+          address: {
+            type: 'object',
+            properties: {
+              street: { type: 'text' },
+              city: { type: 'text' },
+            },
+          },
+        },
+        dynamic_templates: [{ initial: 'value' }],
+        _source: {
+          enabled: true,
+          includes: ['field1', 'field2'],
+          excludes: ['field3'],
+        },
+        _meta: {
+          some: 'metaData',
+        },
+        _routing: {
+          required: false,
+        },
+      };
+
+      await act(async () => {
+        testBed = setup({ value: defaultMappings, onChange: onChangeHandler });
+      });
+      testBed.component.update();
     });
 
     test('props.value => should prepopulate the editor data', async () => {
       const {
-        component,
         actions: { selectTab, getJsonEditorValue, getComboBoxValue, getToggleValue },
         find,
       } = testBed;
@@ -285,10 +311,7 @@ describe.skip('Mappings editor: core', () => {
       /**
        * Dynamic templates
        */
-      await act(async () => {
-        selectTab('templates');
-      });
-      component.update();
+      await selectTab('templates');
 
       // Test that dynamic templates JSON is rendered in the templates editor
       const templatesValue = getJsonEditorValue('dynamicTemplatesEditor');
@@ -297,10 +320,7 @@ describe.skip('Mappings editor: core', () => {
       /**
        * Advanced settings
        */
-      await act(async () => {
-        selectTab('advanced');
-      });
-      component.update();
+      await selectTab('advanced');
 
       const isDynamicMappingsEnabled = getToggleValue(
         'advancedConfiguration.dynamicMappingsToggle.input'
@@ -339,7 +359,14 @@ describe.skip('Mappings editor: core', () => {
       /**
        * Mapped fields
        */
+      await act(async () => {
+        find('addFieldButton').simulate('click');
+      });
+      component.update();
+
       const newField = { name: 'someNewField', type: 'text' };
+      await addField(newField.name, newField.type);
+
       updatedMappings = {
         ...updatedMappings,
         properties: {
@@ -348,26 +375,14 @@ describe.skip('Mappings editor: core', () => {
         },
       };
 
-      await act(async () => {
-        find('addFieldButton').simulate('click');
-      });
-      component.update();
-
-      await act(async () => {
-        addField(newField.name, newField.type);
-      });
-      component.update();
-
       ({ data } = await getMappingsEditorData(component));
+
       expect(data).toEqual(updatedMappings);
 
       /**
        * Dynamic templates
        */
-      await act(async () => {
-        await selectTab('templates');
-      });
-      component.update();
+      await selectTab('templates');
 
       const updatedTemplatesValue = [{ someTemplateProp: 'updated' }];
       updatedMappings = {
@@ -385,10 +400,7 @@ describe.skip('Mappings editor: core', () => {
       /**
        * Advanced settings
        */
-      await act(async () => {
-        selectTab('advanced');
-      });
-      component.update();
+      await selectTab('advanced');
 
       // Disbable dynamic mappings
       await act(async () => {

@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 
 import React, { useCallback, useState } from 'react';
 import { IFieldType } from 'src/plugins/data/public';
-import { colorTransformer, MetricsExplorerColor } from '../../../../../common/color_palette';
+import { colorTransformer, Color } from '../../../../../common/color_palette';
 import { MetricsExplorerMetric } from '../../../../../common/http_api/metrics_explorer';
 import { MetricsExplorerOptions } from '../hooks/use_metrics_explorer_options';
 
@@ -26,7 +26,7 @@ interface SelectedOption {
 }
 
 export const MetricsExplorerMetrics = ({ options, onChange, fields, autoFocus = false }: Props) => {
-  const colors = Object.keys(MetricsExplorerColor) as MetricsExplorerColor[];
+  const colors = Object.keys(Color) as Array<keyof typeof Color>;
   const [shouldFocus, setShouldFocus] = useState(autoFocus);
 
   // the EuiCombobox forwards the ref to an input element
@@ -59,7 +59,7 @@ export const MetricsExplorerMetrics = ({ options, onChange, fields, autoFocus = 
     .map((metric) => ({
       label: metric.field || '',
       value: metric.field || '',
-      color: colorTransformer(metric.color || MetricsExplorerColor.color0),
+      color: colorTransformer(metric.color || Color.color0),
     }));
 
   const placeholderText = i18n.translate('xpack.infra.metricsExplorer.metricComboBoxPlaceholder', {

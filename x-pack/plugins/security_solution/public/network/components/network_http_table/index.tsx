@@ -5,17 +5,17 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { connect, ConnectedProps } from 'react-redux';
+import { useDispatch } from 'react-redux';
 
 import { networkActions, networkModel, networkSelectors } from '../../store';
-import { Direction, NetworkHttpEdges, NetworkHttpFields } from '../../../graphql/types';
-import { State } from '../../../common/store';
+import { NetworkHttpEdges, NetworkHttpFields } from '../../../../common/search_strategy';
+import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { Criteria, ItemsPerRow, PaginatedTable } from '../../../common/components/paginated_table';
 
 import { getNetworkHttpColumns } from './columns';
 import * as i18n from './translations';
 
-interface OwnProps {
+interface NetworkHttpTableProps {
   data: NetworkHttpEdges[];
   fakeTotalCount: number;
   id: string;
@@ -26,8 +26,6 @@ interface OwnProps {
   totalCount: number;
   type: networkModel.NetworkType;
 }
-
-type NetworkHttpTableProps = OwnProps & PropsFromRedux;
 
 const rowItems: ItemsPerRow[] = [
   {
@@ -41,60 +39,67 @@ const rowItems: ItemsPerRow[] = [
 ];
 
 const NetworkHttpTableComponent: React.FC<NetworkHttpTableProps> = ({
-  activePage,
   data,
   fakeTotalCount,
   id,
   isInspect,
-  limit,
   loading,
   loadPage,
   showMorePagesIndicator,
-  sort,
   totalCount,
   type,
-  updateNetworkTable,
 }) => {
+  const dispatch = useDispatch();
+  const getNetworkHttpSelector = networkSelectors.httpSelector();
+  const { activePage, limit, sort } = useShallowEqualSelector((state) =>
+    getNetworkHttpSelector(state, type)
+  );
   const tableType =
     type === networkModel.NetworkType.page
       ? networkModel.NetworkTableType.http
-      : networkModel.IpDetailsTableType.http;
+      : networkModel.NetworkDetailsTableType.http;
 
   const updateLimitPagination = useCallback(
     (newLimit) =>
-      updateNetworkTable({
-        networkType: type,
-        tableType,
-        updates: { limit: newLimit },
-      }),
-    [type, updateNetworkTable, tableType]
+      dispatch(
+        networkActions.updateNetworkTable({
+          networkType: type,
+          tableType,
+          updates: { limit: newLimit },
+        })
+      ),
+    [dispatch, type, tableType]
   );
 
   const updateActivePage = useCallback(
     (newPage) =>
-      updateNetworkTable({
-        networkType: type,
-        tableType,
-        updates: { activePage: newPage },
-      }),
-    [type, updateNetworkTable, tableType]
+      dispatch(
+        networkActions.updateNetworkTable({
+          networkType: type,
+          tableType,
+          updates: { activePage: newPage },
+        })
+      ),
+    [dispatch, type, tableType]
   );
 
   const onChange = useCallback(
     (criteria: Criteria) => {
       if (criteria.sort != null && criteria.sort.direction !== sort.direction) {
-        updateNetworkTable({
-          networkType: type,
-          tableType,
-          updates: {
-            sort: {
-              direction: criteria.sort.direction as Direction,
+        dispatch(
+          networkActions.updateNetworkTable({
+            networkType: type,
+            tableType,
+            updates: {
+              sort: {
+                direction: criteria.sort.direction,
+              },
             },
-          },
-        });
+          })
+        );
       }
     },
-    [tableType, sort.direction, type, updateNetworkTable]
+    [sort.direction, dispatch, type, tableType]
   );
 
   const sorting = { field: `node.${NetworkHttpFields.requestCount}`, direction: sort.direction };
@@ -128,18 +133,4 @@ const NetworkHttpTableComponent: React.FC<NetworkHttpTableProps> = ({
 
 NetworkHttpTableComponent.displayName = 'NetworkHttpTableComponent';
 
-const makeMapStateToProps = () => {
-  const getNetworkHttpSelector = networkSelectors.httpSelector();
-  const mapStateToProps = (state: State, { type }: OwnProps) => getNetworkHttpSelector(state, type);
-  return mapStateToProps;
-};
-
-const mapDispatchToProps = {
-  updateNetworkTable: networkActions.updateNetworkTable,
-};
-
-const connector = connect(makeMapStateToProps, mapDispatchToProps);
-
-type PropsFromRedux = ConnectedProps<typeof connector>;
-
-export const NetworkHttpTable = connector(React.memo(NetworkHttpTableComponent));
+export const NetworkHttpTable = React.memo(NetworkHttpTableComponent);

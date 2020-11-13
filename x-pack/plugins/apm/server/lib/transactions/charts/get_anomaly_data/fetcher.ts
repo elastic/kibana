@@ -5,6 +5,7 @@
  */
 
 import { Logger } from 'kibana/server';
+import { ESSearchResponse } from '../../../../../../../typings/elasticsearch';
 import { PromiseReturnType } from '../../../../../../observability/typings/common';
 import { Setup, SetupTimeRange } from '../../../helpers/setup_request';
 
@@ -47,7 +48,7 @@ export async function anomalySeriesFetcher({
           filter: [
             { term: { job_id: jobId } },
             { exists: { field: 'bucket_span' } },
-            { term: { result_type: 'model_plot' } },
+            { terms: { result_type: ['model_plot', 'record'] } },
             { term: { partition_field_value: serviceName } },
             { term: { by_field_value: transactionType } },
             {
@@ -67,7 +68,7 @@ export async function anomalySeriesFetcher({
             extended_bounds: { min: newStart, max: end },
           },
           aggs: {
-            anomaly_score: { max: { field: 'anomaly_score' } },
+            anomaly_score: { max: { field: 'record_score' } },
             lower: { min: { field: 'model_lower' } },
             upper: { max: { field: 'model_upper' } },
           },
@@ -77,7 +78,11 @@ export async function anomalySeriesFetcher({
   };
 
   try {
-    const response = await ml.mlSystem.mlAnomalySearch(params);
+    const response: ESSearchResponse<
+      unknown,
+      typeof params
+    > = (await ml.mlSystem.mlAnomalySearch(params, [jobId])) as any;
+
     return response;
   } catch (err) {
     const isHttpError = 'statusCode' in err;

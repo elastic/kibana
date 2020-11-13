@@ -5,30 +5,31 @@
  */
 
 import {
+  EuiCallOut,
+  EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiTitle,
   EuiHorizontalRule,
-  EuiFlexGrid,
   EuiPanel,
   EuiSpacer,
   EuiStat,
+  EuiTitle,
   EuiToolTip,
-  EuiCallOut,
 } from '@elastic/eui';
-import React from 'react';
 import { i18n } from '@kbn/i18n';
-import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n/react';
+import React from 'react';
+import { RouteComponentProps } from 'react-router-dom';
+import styled from 'styled-components';
 import { SERVICE_NODE_NAME_MISSING } from '../../../../common/service_nodes';
-import { ApmHeader } from '../../shared/ApmHeader';
-import { useUrlParams } from '../../../hooks/useUrlParams';
+import { LegacyChartsSyncContextProvider as ChartsSyncContextProvider } from '../../../context/charts_sync_context';
 import { useAgentName } from '../../../hooks/useAgentName';
+import { FETCH_STATUS, useFetcher } from '../../../hooks/useFetcher';
 import { useServiceMetricCharts } from '../../../hooks/useServiceMetricCharts';
-import { ChartsSyncContextProvider } from '../../../context/ChartsSyncContext';
+import { useUrlParams } from '../../../hooks/useUrlParams';
+import { px, truncate, unit } from '../../../style/variables';
+import { ApmHeader } from '../../shared/ApmHeader';
 import { MetricsChart } from '../../shared/charts/MetricsChart';
-import { useFetcher, FETCH_STATUS } from '../../../hooks/useFetcher';
-import { truncate, px, unit } from '../../../style/variables';
 import { ElasticDocsLink } from '../../shared/Links/ElasticDocsLink';
 
 const INITIAL_DATA = {
@@ -41,17 +42,21 @@ const Truncate = styled.span`
   ${truncate(px(unit * 12))}
 `;
 
-export function ServiceNodeMetrics() {
-  const { urlParams, uiFilters } = useUrlParams();
-  const { serviceName, serviceNodeName } = urlParams;
+type ServiceNodeMetricsProps = RouteComponentProps<{
+  serviceName: string;
+  serviceNodeName: string;
+}>;
 
+export function ServiceNodeMetrics({ match }: ServiceNodeMetricsProps) {
+  const { urlParams, uiFilters } = useUrlParams();
+  const { serviceName, serviceNodeName } = match.params;
   const { agentName } = useAgentName();
   const { data } = useServiceMetricCharts(urlParams, agentName);
   const { start, end } = urlParams;
 
   const { data: { host, containerId } = INITIAL_DATA, status } = useFetcher(
     (callApmApi) => {
-      if (serviceName && serviceNodeName && start && end) {
+      if (start && end) {
         return callApmApi({
           pathname:
             '/api/apm/services/{serviceName}/node/{serviceNodeName}/metadata',
@@ -78,7 +83,7 @@ export function ServiceNodeMetrics() {
       <ApmHeader>
         <EuiFlexGroup alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiTitle size="l">
+            <EuiTitle>
               <h1>{serviceName}</h1>
             </EuiTitle>
           </EuiFlexItem>
@@ -167,7 +172,7 @@ export function ServiceNodeMetrics() {
         </EuiFlexGroup>
       )}
       <EuiHorizontalRule margin="m" />
-      {agentName && serviceNodeName && (
+      {agentName && (
         <ChartsSyncContextProvider>
           <EuiFlexGrid columns={2} gutterSize="s">
             {data.charts.map((chart) => (

@@ -19,22 +19,21 @@ exports[`UptimeDatePicker component renders properly with mock data 1`] = `
         >
           <button
             aria-label="Date quick select"
-            class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--iconRight euiFormControlLayout__prepend"
+            class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiFormControlLayout__prepend"
             data-test-subj="superDatePickerToggleQuickMenuButton"
             type="button"
           >
             <span
-              class="euiButtonEmpty__content"
+              class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
             >
-              <div
-                aria-hidden="true"
-                class="euiButtonEmpty__icon"
+              <span
+                class="euiButtonContent__icon"
                 data-euiicon-type="arrowDown"
               />
               <span
                 class="euiButtonEmpty__text euiQuickSelectPopover__buttonText"
               >
-                <div
+                <span
                   data-euiicon-type="clock"
                 />
               </span>
@@ -70,16 +69,15 @@ exports[`UptimeDatePicker component renders properly with mock data 1`] = `
       class="euiToolTipAnchor"
     >
       <button
-        class="euiButton euiButton--primary euiSuperUpdateButton euiButton--fill"
+        class="euiButton euiButton--primary euiButton--fill euiSuperUpdateButton"
         data-test-subj="superDatePickerApplyTimeButton"
         type="button"
       >
         <span
-          class="euiButton__content"
+          class="euiButtonContent euiButton__content"
         >
-          <div
-            aria-hidden="true"
-            class="euiButton__icon"
+          <span
+            class="euiButtonContent__icon"
             data-euiicon-type="refresh"
           />
           <span

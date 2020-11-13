@@ -213,7 +213,7 @@ exports[`EmptyState component does not render empty state with appropriate base 
                         <EuiFlexItem>
                           <EuiButton
                             color="primary"
-                            href="/app/uptime#/settings"
+                            href="/app/uptime/settings"
                           >
                             <FormattedMessage
                               defaultMessage="Update index pattern settings"
@@ -269,7 +269,7 @@ exports[`EmptyState component does not render empty state with appropriate base 
                         size="xxl"
                         type="logoUptime"
                       >
-                        <div
+                        <span
                           color="subdued"
                           data-euiicon-type="logoUptime"
                           size="xxl"
@@ -373,27 +373,52 @@ exports[`EmptyState component does not render empty state with appropriate base 
                                 fill={true}
                                 href="/app/home#/tutorial/uptimeMonitors"
                               >
-                                <a
-                                  className="euiButton euiButton--primary euiButton--fill"
+                                <EuiButtonDisplay
+                                  baseClassName="euiButton"
+                                  color="primary"
+                                  element="a"
+                                  fill={true}
                                   href="/app/home#/tutorial/uptimeMonitors"
                                   rel="noreferrer"
                                 >
-                                  <span
-                                    className="euiButton__content"
+                                  <a
+                                    className="euiButton euiButton--primary euiButton--fill"
+                                    disabled={false}
+                                    href="/app/home#/tutorial/uptimeMonitors"
+                                    rel="noreferrer"
+                                    style={
+                                      Object {
+                                        "minWidth": undefined,
+                                      }
+                                    }
                                   >
-                                    <span
-                                      className="euiButton__text"
+                                    <EuiButtonContent
+                                      className="euiButton__content"
+                                      iconSide="left"
+                                      textProps={
+                                        Object {
+                                          "className": "euiButton__text",
+                                        }
+                                      }
                                     >
-                                      <FormattedMessage
-                                        defaultMessage="View setup instructions"
-                                        id="xpack.uptime.emptyState.viewSetupInstructions"
-                                        values={Object {}}
+                                      <span
+                                        className="euiButtonContent euiButton__content"
                                       >
-                                        View setup instructions
-                                      </FormattedMessage>
-                                    </span>
-                                  </span>
-                                </a>
+                                        <span
+                                          className="euiButton__text"
+                                        >
+                                          <FormattedMessage
+                                            defaultMessage="View setup instructions"
+                                            id="xpack.uptime.emptyState.viewSetupInstructions"
+                                            values={Object {}}
+                                          >
+                                            View setup instructions
+                                          </FormattedMessage>
+                                        </span>
+                                      </span>
+                                    </EuiButtonContent>
+                                  </a>
+                                </EuiButtonDisplay>
                               </EuiButton>
                             </div>
                           </EuiFlexItem>
@@ -403,29 +428,53 @@ exports[`EmptyState component does not render empty state with appropriate base 
                             >
                               <EuiButton
                                 color="primary"
-                                href="/app/uptime#/settings"
+                                href="/app/uptime/settings"
                               >
-                                <a
-                                  className="euiButton euiButton--primary"
-                                  href="/app/uptime#/settings"
+                                <EuiButtonDisplay
+                                  baseClassName="euiButton"
+                                  color="primary"
+                                  element="a"
+                                  href="/app/uptime/settings"
                                   rel="noreferrer"
                                 >
-                                  <span
-                                    className="euiButton__content"
+                                  <a
+                                    className="euiButton euiButton--primary"
+                                    disabled={false}
+                                    href="/app/uptime/settings"
+                                    rel="noreferrer"
+                                    style={
+                                      Object {
+                                        "minWidth": undefined,
+                                      }
+                                    }
                                   >
-                                    <span
-                                      className="euiButton__text"
+                                    <EuiButtonContent
+                                      className="euiButton__content"
+                                      iconSide="left"
+                                      textProps={
+                                        Object {
+                                          "className": "euiButton__text",
+                                        }
+                                      }
                                     >
-                                      <FormattedMessage
-                                        defaultMessage="Update index pattern settings"
-                                        id="xpack.uptime.emptyState.updateIndexPattern"
-                                        values={Object {}}
+                                      <span
+                                        className="euiButtonContent euiButton__content"
                                       >
-                                        Update index pattern settings
-                                      </FormattedMessage>
-                                    </span>
-                                  </span>
-                                </a>
+                                        <span
+                                          className="euiButton__text"
+                                        >
+                                          <FormattedMessage
+                                            defaultMessage="Update index pattern settings"
+                                            id="xpack.uptime.emptyState.updateIndexPattern"
+                                            values={Object {}}
+                                          >
+                                            Update index pattern settings
+                                          </FormattedMessage>
+                                        </span>
+                                      </span>
+                                    </EuiButtonContent>
+                                  </a>
+                                </EuiButtonDisplay>
                               </EuiButton>
                             </div>
                           </EuiFlexItem>
@@ -652,7 +701,7 @@ exports[`EmptyState component doesn't render child components when count is fals
                         <EuiFlexItem>
                           <EuiButton
                             color="primary"
-                            href="/app/uptime#/settings"
+                            href="/app/uptime/settings"
                           >
                             <FormattedMessage
                               defaultMessage="Update index pattern settings"
@@ -708,7 +757,7 @@ exports[`EmptyState component doesn't render child components when count is fals
                         size="xxl"
                         type="logoUptime"
                       >
-                        <div
+                        <span
                           color="subdued"
                           data-euiicon-type="logoUptime"
                           size="xxl"
@@ -812,27 +861,52 @@ exports[`EmptyState component doesn't render child components when count is fals
                                 fill={true}
                                 href="/app/home#/tutorial/uptimeMonitors"
                               >
-                                <a
-                                  className="euiButton euiButton--primary euiButton--fill"
+                                <EuiButtonDisplay
+                                  baseClassName="euiButton"
+                                  color="primary"
+                                  element="a"
+                                  fill={true}
                                   href="/app/home#/tutorial/uptimeMonitors"
                                   rel="noreferrer"
                                 >
-                                  <span
-                                    className="euiButton__content"
+                                  <a
+                                    className="euiButton euiButton--primary euiButton--fill"
+                                    disabled={false}
+                                    href="/app/home#/tutorial/uptimeMonitors"
+                                    rel="noreferrer"
+                                    style={
+                                      Object {
+                                        "minWidth": undefined,
+                                      }
+                                    }
                                   >
-                                    <span
-                                      className="euiButton__text"
+                                    <EuiButtonContent
+                                      className="euiButton__content"
+                                      iconSide="left"
+                                      textProps={
+                                        Object {
+                                          "className": "euiButton__text",
+                                        }
+                                      }
                                     >
-                                      <FormattedMessage
-                                        defaultMessage="View setup instructions"
-                                        id="xpack.uptime.emptyState.viewSetupInstructions"
-                                        values={Object {}}
+                                      <span
+                                        className="euiButtonContent euiButton__content"
                                       >
-                                        View setup instructions
-                                      </FormattedMessage>
-                                    </span>
-                                  </span>
-                                </a>
+                                        <span
+                                          className="euiButton__text"
+                                        >
+                                          <FormattedMessage
+                                            defaultMessage="View setup instructions"
+                                            id="xpack.uptime.emptyState.viewSetupInstructions"
+                                            values={Object {}}
+                                          >
+                                            View setup instructions
+                                          </FormattedMessage>
+                                        </span>
+                                      </span>
+                                    </EuiButtonContent>
+                                  </a>
+                                </EuiButtonDisplay>
                               </EuiButton>
                             </div>
                           </EuiFlexItem>
@@ -842,29 +916,53 @@ exports[`EmptyState component doesn't render child components when count is fals
                             >
                               <EuiButton
                                 color="primary"
-                                href="/app/uptime#/settings"
+                                href="/app/uptime/settings"
                               >
-                                <a
-                                  className="euiButton euiButton--primary"
-                                  href="/app/uptime#/settings"
+                                <EuiButtonDisplay
+                                  baseClassName="euiButton"
+                                  color="primary"
+                                  element="a"
+                                  href="/app/uptime/settings"
                                   rel="noreferrer"
                                 >
-                                  <span
-                                    className="euiButton__content"
+                                  <a
+                                    className="euiButton euiButton--primary"
+                                    disabled={false}
+                                    href="/app/uptime/settings"
+                                    rel="noreferrer"
+                                    style={
+                                      Object {
+                                        "minWidth": undefined,
+                                      }
+                                    }
                                   >
-                                    <span
-                                      className="euiButton__text"
+                                    <EuiButtonContent
+                                      className="euiButton__content"
+                                      iconSide="left"
+                                      textProps={
+                                        Object {
+                                          "className": "euiButton__text",
+                                        }
+                                      }
                                     >
-                                      <FormattedMessage
-                                        defaultMessage="Update index pattern settings"
-                                        id="xpack.uptime.emptyState.updateIndexPattern"
-                                        values={Object {}}
+                                      <span
+                                        className="euiButtonContent euiButton__content"
                                       >
-                                        Update index pattern settings
-                                      </FormattedMessage>
-                                    </span>
-                                  </span>
-                                </a>
+                                        <span
+                                          className="euiButton__text"
+                                        >
+                                          <FormattedMessage
+                                            defaultMessage="Update index pattern settings"
+                                            id="xpack.uptime.emptyState.updateIndexPattern"
+                                            values={Object {}}
+                                          >
+                                            Update index pattern settings
+                                          </FormattedMessage>
+                                        </span>
+                                      </span>
+                                    </EuiButtonContent>
+                                  </a>
+                                </EuiButtonDisplay>
                               </EuiButton>
                             </div>
                           </EuiFlexItem>
@@ -1096,7 +1194,7 @@ exports[`EmptyState component notifies when index does not exist 1`] = `
                         <EuiFlexItem>
                           <EuiButton
                             color="primary"
-                            href="/app/uptime#/settings"
+                            href="/app/uptime/settings"
                           >
                             <FormattedMessage
                               defaultMessage="Update index pattern settings"
@@ -1152,7 +1250,7 @@ exports[`EmptyState component notifies when index does not exist 1`] = `
                         size="xxl"
                         type="logoUptime"
                       >
-                        <div
+                        <span
                           color="subdued"
                           data-euiicon-type="logoUptime"
                           size="xxl"
@@ -1256,27 +1354,52 @@ exports[`EmptyState component notifies when index does not exist 1`] = `
                                 fill={true}
                                 href="/app/home#/tutorial/uptimeMonitors"
                               >
-                                <a
-                                  className="euiButton euiButton--primary euiButton--fill"
+                                <EuiButtonDisplay
+                                  baseClassName="euiButton"
+                                  color="primary"
+                                  element="a"
+                                  fill={true}
                                   href="/app/home#/tutorial/uptimeMonitors"
                                   rel="noreferrer"
                                 >
-                                  <span
-                                    className="euiButton__content"
+                                  <a
+                                    className="euiButton euiButton--primary euiButton--fill"
+                                    disabled={false}
+                                    href="/app/home#/tutorial/uptimeMonitors"
+                                    rel="noreferrer"
+                                    style={
+                                      Object {
+                                        "minWidth": undefined,
+                                      }
+                                    }
                                   >
-                                    <span
-                                      className="euiButton__text"
+                                    <EuiButtonContent
+                                      className="euiButton__content"
+                                      iconSide="left"
+                                      textProps={
+                                        Object {
+                                          "className": "euiButton__text",
+                                        }
+                                      }
                                     >
-                                      <FormattedMessage
-                                        defaultMessage="View setup instructions"
-                                        id="xpack.uptime.emptyState.viewSetupInstructions"
-                                        values={Object {}}
+                                      <span
+                                        className="euiButtonContent euiButton__content"
                                       >
-                                        View setup instructions
-                                      </FormattedMessage>
-                                    </span>
-                                  </span>
-                                </a>
+                                        <span
+                                          className="euiButton__text"
+                                        >
+                                          <FormattedMessage
+                                            defaultMessage="View setup instructions"
+                                            id="xpack.uptime.emptyState.viewSetupInstructions"
+                                            values={Object {}}
+                                          >
+                                            View setup instructions
+                                          </FormattedMessage>
+                                        </span>
+                                      </span>
+                                    </EuiButtonContent>
+                                  </a>
+                                </EuiButtonDisplay>
                               </EuiButton>
                             </div>
                           </EuiFlexItem>
@@ -1286,29 +1409,53 @@ exports[`EmptyState component notifies when index does not exist 1`] = `
                             >
                               <EuiButton
                                 color="primary"
-                                href="/app/uptime#/settings"
+                                href="/app/uptime/settings"
                               >
-                                <a
-                                  className="euiButton euiButton--primary"
-                                  href="/app/uptime#/settings"
+                                <EuiButtonDisplay
+                                  baseClassName="euiButton"
+                                  color="primary"
+                                  element="a"
+                                  href="/app/uptime/settings"
                                   rel="noreferrer"
                                 >
-                                  <span
-                                    className="euiButton__content"
+                                  <a
+                                    className="euiButton euiButton--primary"
+                                    disabled={false}
+                                    href="/app/uptime/settings"
+                                    rel="noreferrer"
+                                    style={
+                                      Object {
+                                        "minWidth": undefined,
+                                      }
+                                    }
                                   >
-                                    <span
-                                      className="euiButton__text"
+                                    <EuiButtonContent
+                                      className="euiButton__content"
+                                      iconSide="left"
+                                      textProps={
+                                        Object {
+                                          "className": "euiButton__text",
+                                        }
+                                      }
                                     >
-                                      <FormattedMessage
-                                        defaultMessage="Update index pattern settings"
-                                        id="xpack.uptime.emptyState.updateIndexPattern"
-                                        values={Object {}}
+                                      <span
+                                        className="euiButtonContent euiButton__content"
                                       >
-                                        Update index pattern settings
-                                      </FormattedMessage>
-                                    </span>
-                                  </span>
-                                </a>
+                                        <span
+                                          className="euiButton__text"
+                                        >
+                                          <FormattedMessage
+                                            defaultMessage="Update index pattern settings"
+                                            id="xpack.uptime.emptyState.updateIndexPattern"
+                                            values={Object {}}
+                                          >
+                                            Update index pattern settings
+                                          </FormattedMessage>
+                                        </span>
+                                      </span>
+                                    </EuiButtonContent>
+                                  </a>
+                                </EuiButtonDisplay>
                               </EuiButton>
                             </div>
                           </EuiFlexItem>
@@ -1632,7 +1779,7 @@ exports[`EmptyState component renders error message when an error occurs 1`] = `
                         size="xxl"
                         type="securityApp"
                       >
-                        <div
+                        <span
                           color="subdued"
                           data-euiicon-type="securityApp"
                           size="xxl"
@@ -1676,9 +1823,7 @@ exports[`EmptyState component renders error message when an error occurs 1`] = `
                             <div
                               className="euiText euiText--medium"
                             >
-                              <p
-                                key="There was an error fetching your data."
-                              >
+                              <p>
                                 There was an error fetching your data.
                               </p>
                             </div>

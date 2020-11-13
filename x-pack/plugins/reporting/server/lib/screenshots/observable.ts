@@ -17,13 +17,14 @@ import {
   toArray,
 } from 'rxjs/operators';
 import { HeadlessChromiumDriverFactory } from '../../browsers';
+import { CaptureConfig } from '../../types';
 import {
-  CaptureConfig,
   ElementsPositionAndAttribute,
   ScreenshotObservableOpts,
   ScreenshotResults,
   ScreenshotsObservableFn,
-} from '../../types';
+} from './';
+import { checkPageIsOpen } from './check_browser_open';
 import { DEFAULT_PAGELOAD_SELECTOR } from './constants';
 import { getElementPositionAndAttributes } from './get_element_position_data';
 import { getNumberOfItems } from './get_number_of_items';
@@ -68,7 +69,6 @@ export function screenshotsObservableFactory(
         return Rx.from(urls).pipe(
           concatMap((url, index) => {
             const setup$: Rx.Observable<ScreenSetupData> = Rx.of(1).pipe(
-              takeUntil(exit$),
               mergeMap(() => {
                 // If we're moving to another page in the app, we'll want to wait for the app to tell us
                 // it's loaded the next page.
@@ -117,14 +117,19 @@ export function screenshotsObservableFactory(
                 }));
               }),
               catchError((err) => {
+                checkPageIsOpen(driver); // if browser has closed, throw a relevant error about it
+
                 logger.error(err);
                 return Rx.of({ elementsPositionAndAttributes: null, timeRange: null, error: err });
               })
             );
 
             return setup$.pipe(
+              takeUntil(exit$),
               mergeMap(
                 async (data: ScreenSetupData): Promise<ScreenshotResults> => {
+                  checkPageIsOpen(driver); // re-check that the browser has not closed
+
                   const elements = data.elementsPositionAndAttributes
                     ? data.elementsPositionAndAttributes
                     : getDefaultElementPosition(layout.getViewport(1));

@@ -14,6 +14,7 @@ import {
   TimelineStatus,
   TemplateTimelineTypeLiteral,
   RowRendererId,
+  TimelineStatusLiteralWithNull,
 } from '../../../../common/types/timeline';
 
 /** The users who added a timeline to favorites */
@@ -174,6 +175,8 @@ export interface OpenTimelineProps {
   sortField: string;
   /** this affects timeline's behaviour like editable / duplicatible */
   timelineType: TimelineTypeLiteralWithNull;
+  /* active or immutable */
+  timelineStatus: TimelineStatusLiteralWithNull;
   /** when timelineType === template, templatetimelineFilter is a JSX.Element */
   templateTimelineFilter: JSX.Element[] | null;
   /** timeline / timeline template */
@@ -189,6 +192,7 @@ export interface OpenTimelineProps {
 export interface UpdateTimeline {
   duplicate: boolean;
   id: string;
+  forceNotes?: boolean;
   from: string;
   notes: NoteResult[] | null | undefined;
   timeline: TimelineModel;

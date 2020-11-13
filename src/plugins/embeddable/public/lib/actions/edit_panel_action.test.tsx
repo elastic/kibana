@@ -18,7 +18,7 @@
  */
 
 import { EditPanelAction } from './edit_panel_action';
-import { Embeddable, EmbeddableInput } from '../embeddables';
+import { Embeddable, EmbeddableInput, SavedObjectEmbeddableInput } from '../embeddables';
 import { ViewMode } from '../types';
 import { ContactCardEmbeddable } from '../test_samples';
 import { embeddablePluginMock } from '../../mocks';
@@ -53,15 +53,51 @@ test('is compatible when edit url is available, in edit mode and editable', asyn
   ).toBe(true);
 });
 
-test('redirects to app using state transfer', async () => {
+test('redirects to app using state transfer with by value mode', async () => {
   applicationMock.currentAppId$ = of('superCoolCurrentApp');
   const action = new EditPanelAction(getFactory, applicationMock, stateTransferMock);
-  const embeddable = new EditableEmbeddable({ id: '123', viewMode: ViewMode.EDIT }, true);
+  const embeddable = new EditableEmbeddable(
+    ({
+      id: '123',
+      viewMode: ViewMode.EDIT,
+      coolInput1: 1,
+      coolInput2: 2,
+    } as unknown) as EmbeddableInput,
+    true
+  );
   embeddable.getOutput = jest.fn(() => ({ editApp: 'ultraVisualize', editPath: '/123' }));
   await action.execute({ embeddable });
   expect(stateTransferMock.navigateToEditor).toHaveBeenCalledWith('ultraVisualize', {
     path: '/123',
-    state: { originatingApp: 'superCoolCurrentApp' },
+    state: {
+      originatingApp: 'superCoolCurrentApp',
+      embeddableId: '123',
+      valueInput: {
+        id: '123',
+        viewMode: ViewMode.EDIT,
+        coolInput1: 1,
+        coolInput2: 2,
+      },
+    },
+  });
+});
+
+test('redirects to app using state transfer without by value mode', async () => {
+  applicationMock.currentAppId$ = of('superCoolCurrentApp');
+  const action = new EditPanelAction(getFactory, applicationMock, stateTransferMock);
+  const embeddable = new EditableEmbeddable(
+    { id: '123', viewMode: ViewMode.EDIT, savedObjectId: '1234' } as SavedObjectEmbeddableInput,
+    true
+  );
+  embeddable.getOutput = jest.fn(() => ({ editApp: 'ultraVisualize', editPath: '/123' }));
+  await action.execute({ embeddable });
+  expect(stateTransferMock.navigateToEditor).toHaveBeenCalledWith('ultraVisualize', {
+    path: '/123',
+    state: {
+      originatingApp: 'superCoolCurrentApp',
+      embeddableId: '123',
+      valueInput: undefined,
+    },
   });
 });
 

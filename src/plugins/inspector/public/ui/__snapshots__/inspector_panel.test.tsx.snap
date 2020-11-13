@@ -10,6 +10,11 @@ exports[`InspectorPanel should render as expected 1`] = `
       },
     }
   }
+  dependencies={
+    Object {
+      "uiSettings": Object {},
+    }
+  }
   intl={
     Object {
       "defaultFormats": Object {},
@@ -135,207 +140,228 @@ exports[`InspectorPanel should render as expected 1`] = `
     ]
   }
 >
-  <EuiFlyoutHeader
-    hasBorder={true}
+  <Provider
+    services={
+      Object {
+        "uiSettings": Object {},
+      }
+    }
   >
-    <div
-      className="euiFlyoutHeader euiFlyoutHeader--hasBorder"
+    <EuiFlyoutHeader
+      hasBorder={true}
     >
-      <EuiFlexGroup
-        alignItems="center"
-        justifyContent="spaceBetween"
+      <div
+        className="euiFlyoutHeader euiFlyoutHeader--hasBorder"
       >
-        <div
-          className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
+        <EuiFlexGroup
+          alignItems="center"
+          justifyContent="spaceBetween"
         >
-          <EuiFlexItem
-            grow={true}
+          <div
+            className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
           >
-            <div
-              className="euiFlexItem"
+            <EuiFlexItem
+              grow={true}
             >
-              <EuiTitle
-                size="s"
+              <div
+                className="euiFlexItem"
               >
-                <h1
-                  className="euiTitle euiTitle--small"
+                <EuiTitle
+                  size="s"
                 >
-                  Inspector
-                </h1>
-              </EuiTitle>
-            </div>
-          </EuiFlexItem>
-          <EuiFlexItem
-            grow={false}
-          >
-            <div
-              className="euiFlexItem euiFlexItem--flexGrowZero"
+                  <h1
+                    className="euiTitle euiTitle--small"
+                  >
+                    Inspector
+                  </h1>
+                </EuiTitle>
+              </div>
+            </EuiFlexItem>
+            <EuiFlexItem
+              grow={false}
             >
-              <InspectorViewChooser
-                onViewSelected={[Function]}
-                selectedView={
-                  Object {
-                    "component": [Function],
-                    "order": 200,
-                    "title": "View 1",
-                  }
-                }
-                views={
-                  Array [
+              <div
+                className="euiFlexItem euiFlexItem--flexGrowZero"
+              >
+                <InspectorViewChooser
+                  onViewSelected={[Function]}
+                  selectedView={
                     Object {
                       "component": [Function],
                       "order": 200,
                       "title": "View 1",
-                    },
-                    Object {
-                      "component": [Function],
-                      "order": 100,
-                      "shouldShow": [Function],
-                      "title": "Foo View",
-                    },
-                    Object {
-                      "component": [Function],
-                      "order": 200,
-                      "shouldShow": [Function],
-                      "title": "Never",
-                    },
-                  ]
-                }
-              >
-                <EuiPopover
-                  anchorPosition="downRight"
-                  button={
-                    <EuiButtonEmpty
-                      data-test-subj="inspectorViewChooser"
-                      iconSide="right"
-                      iconType="arrowDown"
-                      onClick={[Function]}
-                      size="s"
-                    >
-                      <FormattedMessage
-                        defaultMessage="View: {viewName}"
-                        id="inspector.view"
-                        values={
-                          Object {
-                            "viewName": "View 1",
-                          }
-                        }
-                      />
-                    </EuiButtonEmpty>
+                    }
                   }
-                  closePopover={[Function]}
-                  display="inlineBlock"
-                  hasArrow={true}
-                  id="inspectorViewChooser"
-                  isOpen={false}
-                  ownFocus={true}
-                  panelPaddingSize="none"
-                  repositionOnScroll={true}
+                  views={
+                    Array [
+                      Object {
+                        "component": [Function],
+                        "order": 200,
+                        "title": "View 1",
+                      },
+                      Object {
+                        "component": [Function],
+                        "order": 100,
+                        "shouldShow": [Function],
+                        "title": "Foo View",
+                      },
+                      Object {
+                        "component": [Function],
+                        "order": 200,
+                        "shouldShow": [Function],
+                        "title": "Never",
+                      },
+                    ]
+                  }
                 >
-                  <EuiOutsideClickDetector
-                    isDisabled={true}
-                    onOutsideClick={[Function]}
+                  <EuiPopover
+                    anchorPosition="downRight"
+                    button={
+                      <EuiButtonEmpty
+                        data-test-subj="inspectorViewChooser"
+                        iconSide="right"
+                        iconType="arrowDown"
+                        onClick={[Function]}
+                        size="s"
+                      >
+                        <FormattedMessage
+                          defaultMessage="View: {viewName}"
+                          id="inspector.view"
+                          values={
+                            Object {
+                              "viewName": "View 1",
+                            }
+                          }
+                        />
+                      </EuiButtonEmpty>
+                    }
+                    closePopover={[Function]}
+                    display="inlineBlock"
+                    hasArrow={true}
+                    id="inspectorViewChooser"
+                    isOpen={false}
+                    ownFocus={true}
+                    panelPaddingSize="none"
+                    repositionOnScroll={true}
                   >
-                    <div
-                      className="euiPopover euiPopover--anchorDownRight"
-                      id="inspectorViewChooser"
-                      onKeyDown={[Function]}
-                      onMouseDown={[Function]}
-                      onMouseUp={[Function]}
-                      onTouchEnd={[Function]}
-                      onTouchStart={[Function]}
+                    <EuiOutsideClickDetector
+                      isDisabled={true}
+                      onOutsideClick={[Function]}
                     >
                       <div
-                        className="euiPopover__anchor"
+                        className="euiPopover euiPopover--anchorDownRight"
+                        id="inspectorViewChooser"
+                        onKeyDown={[Function]}
+                        onMouseDown={[Function]}
+                        onMouseUp={[Function]}
+                        onTouchEnd={[Function]}
+                        onTouchStart={[Function]}
                       >
-                        <EuiButtonEmpty
-                          data-test-subj="inspectorViewChooser"
-                          iconSide="right"
-                          iconType="arrowDown"
-                          onClick={[Function]}
-                          size="s"
+                        <div
+                          className="euiPopover__anchor"
                         >
-                          <button
-                            className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small euiButtonEmpty--iconRight"
+                          <EuiButtonEmpty
                             data-test-subj="inspectorViewChooser"
+                            iconSide="right"
+                            iconType="arrowDown"
                             onClick={[Function]}
-                            type="button"
+                            size="s"
                           >
-                            <span
-                              className="euiButtonEmpty__content"
+                            <button
+                              className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small"
+                              data-test-subj="inspectorViewChooser"
+                              onClick={[Function]}
+                              type="button"
                             >
-                              <EuiIcon
-                                aria-hidden="true"
-                                className="euiButtonEmpty__icon"
-                                size="m"
-                                type="arrowDown"
-                              >
-                                <div
-                                  aria-hidden="true"
-                                  className="euiButtonEmpty__icon"
-                                  data-euiicon-type="arrowDown"
-                                  size="m"
-                                />
-                              </EuiIcon>
-                              <span
-                                className="euiButtonEmpty__text"
-                              >
-                                <FormattedMessage
-                                  defaultMessage="View: {viewName}"
-                                  id="inspector.view"
-                                  values={
-                                    Object {
-                                      "viewName": "View 1",
-                                    }
+                              <EuiButtonContent
+                                className="euiButtonEmpty__content"
+                                iconSide="right"
+                                iconType="arrowDown"
+                                textProps={
+                                  Object {
+                                    "className": "euiButtonEmpty__text",
                                   }
+                                }
+                              >
+                                <span
+                                  className="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
                                 >
-                                  View: View 1
-                                </FormattedMessage>
-                              </span>
-                            </span>
-                          </button>
-                        </EuiButtonEmpty>
+                                  <EuiIcon
+                                    className="euiButtonContent__icon"
+                                    size="m"
+                                    type="arrowDown"
+                                  >
+                                    <span
+                                      className="euiButtonContent__icon"
+                                      data-euiicon-type="arrowDown"
+                                      size="m"
+                                    />
+                                  </EuiIcon>
+                                  <span
+                                    className="euiButtonEmpty__text"
+                                  >
+                                    <FormattedMessage
+                                      defaultMessage="View: {viewName}"
+                                      id="inspector.view"
+                                      values={
+                                        Object {
+                                          "viewName": "View 1",
+                                        }
+                                      }
+                                    >
+                                      View: View 1
+                                    </FormattedMessage>
+                                  </span>
+                                </span>
+                              </EuiButtonContent>
+                            </button>
+                          </EuiButtonEmpty>
+                        </div>
                       </div>
-                    </div>
-                  </EuiOutsideClickDetector>
-                </EuiPopover>
-              </InspectorViewChooser>
-            </div>
-          </EuiFlexItem>
-        </div>
-      </EuiFlexGroup>
-    </div>
-  </EuiFlyoutHeader>
-  <EuiFlyoutBody
-    className="insInspectorPanel__flyoutBody"
-  >
-    <div
-      className="euiFlyoutBody insInspectorPanel__flyoutBody"
+                    </EuiOutsideClickDetector>
+                  </EuiPopover>
+                </InspectorViewChooser>
+              </div>
+            </EuiFlexItem>
+          </div>
+        </EuiFlexGroup>
+      </div>
+    </EuiFlyoutHeader>
+    <EuiFlyoutBody
+      className="insInspectorPanel__flyoutBody"
     >
       <div
-        className="euiFlyoutBody__overflow"
+        className="euiFlyoutBody insInspectorPanel__flyoutBody"
       >
         <div
-          className="euiFlyoutBody__overflowContent"
+          className="euiFlyoutBody__overflow"
         >
-          <component
-            adapters={
-              Object {
-                "bardapter": Object {},
-                "foodapter": Object {
-                  "foo": [Function],
-                },
-              }
-            }
-            title="Inspector"
+          <div
+            className="euiFlyoutBody__overflowContent"
           >
-            <h1>
-              View 1
-            </h1>
-          </component>
+            <Suspense
+              fallback={<EuiLoadingSpinner />}
+            >
+              <component
+                adapters={
+                  Object {
+                    "bardapter": Object {},
+                    "foodapter": Object {
+                      "foo": [Function],
+                    },
+                  }
+                }
+                title="Inspector"
+              >
+                <h1>
+                  View 1
+                </h1>
+              </component>
+            </Suspense>
+          </div>
         </div>
       </div>
-    </div>
-  </EuiFlyoutBody>
+    </EuiFlyoutBody>
+  </Provider>
 </InspectorPanel>
 `;

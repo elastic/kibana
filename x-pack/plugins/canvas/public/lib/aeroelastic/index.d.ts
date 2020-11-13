@@ -7,15 +7,15 @@
 /* eslint-disable @typescript-eslint/no-empty-interface */
 
 // linear algebra
-type f64 = number; // eventual AssemblyScript compatibility; doesn't hurt with vanilla TS either
-type f = f64; // shorthand
+type F64 = number; // eventual AssemblyScript compatibility; doesn't hurt with vanilla TS either
+type F = F64; // shorthand
 
-export type Vector2d = Readonly<[f, f, f]>;
-export type Vector3d = Readonly<[f, f, f, f]>;
+export type Vector2d = Readonly<[F, F, F]>;
+export type Vector3d = Readonly<[F, F, F, F]>;
 
-export type Matrix2d = [f, f, f, f, f, f, f, f, f];
+export type Matrix2d = [F, F, F, F, F, F, F, F, F];
 export type TransformMatrix2d = Readonly<Matrix2d>;
-export type Matrix3d = [f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f];
+export type Matrix3d = [F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F];
 export type TransformMatrix3d = Readonly<Matrix3d>;
 
 // plain, JSON-bijective value

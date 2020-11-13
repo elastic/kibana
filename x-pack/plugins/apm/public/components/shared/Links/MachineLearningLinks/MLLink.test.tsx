@@ -11,9 +11,7 @@ import { MLLink } from './MLLink';
 
 test('MLLink produces the correct URL', async () => {
   const href = await getRenderedHref(
-    () => (
-      <MLLink path="/some/path" query={{ ml: { jobIds: ['something'] } }} />
-    ),
+    () => <MLLink query={{ ml: { jobIds: ['something'] } }} />,
     {
       search:
         '?rangeFrom=now-5h&rangeTo=now-2h&refreshPaused=true&refreshInterval=0',
@@ -21,6 +19,6 @@ test('MLLink produces the correct URL', async () => {
   );
 
   expect(href).toMatchInlineSnapshot(
-    `"/basepath/app/ml#/some/path?_g=(ml:(jobIds:!(something)),refreshInterval:(pause:true,value:'0'),time:(from:now-5h,to:now-2h))"`
+    `"/app/ml/jobs?_a=(queryText:'id:(something)%20groups:(apm)')&_g=(refreshInterval:(pause:!t,value:0),time:(from:now-5h,to:now-2h))"`
   );
 });

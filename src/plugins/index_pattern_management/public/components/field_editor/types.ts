@@ -28,7 +28,6 @@ export interface Sample {
 
 export interface ExecuteScriptParams {
   name: string;
-  lang: string;
   script: string;
   indexPatternTitle: string;
   query?: Query['query'];
@@ -38,7 +37,7 @@ export interface ExecuteScriptParams {
 
 export interface ExecuteScriptResult {
   status: number;
-  hits: { hits: any[] };
+  hits?: { hits: any[] };
   error?: any;
 }
 

@@ -8,7 +8,8 @@
   "requiredPlugins": [
     "licensing",
     "management",
-    "indexManagement"
+    "indexManagement",
+    "features"
   ],
   "optionalPlugins": [
     "usageCollection",

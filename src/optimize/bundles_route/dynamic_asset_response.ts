@@ -22,13 +22,11 @@ import { resolve } from 'path';
 import { promisify } from 'util';
 
 import Accept from 'accept';
-import Boom from 'boom';
-import Hapi from 'hapi';
+import Boom from '@hapi/boom';
+import Hapi from '@hapi/hapi';
 
 import { FileHashCache } from './file_hash_cache';
 import { getFileHash } from './file_hash';
-// @ts-ignore
-import { replacePlaceholder } from '../public_path_placeholder';
 
 const MINUTE = 60;
 const HOUR = 60 * MINUTE;
@@ -86,8 +84,6 @@ async function selectCompressedFile(acceptEncodingHeader: string | undefined, pa
  *   - stream file to response
  *
  *  It differs from Inert in some important ways:
- *   - the PUBLIC_PATH_PLACEHOLDER is replaced with the correct
- *     public path as the response is streamed
  *   - cached hash/etag is based on the file on disk, but modified
  *     by the public path so that individual public paths have
  *     different etags, but can share a cache
@@ -98,7 +94,6 @@ export async function createDynamicAssetResponse({
   bundlesPath,
   publicPath,
   fileHashCache,
-  replacePublicPath,
   isDist,
 }: {
   request: Hapi.Request;
@@ -106,7 +101,6 @@ export async function createDynamicAssetResponse({
   bundlesPath: string;
   publicPath: string;
   fileHashCache: FileHashCache;
-  replacePublicPath: boolean;
   isDist: boolean;
 }) {
   let fd: number | undefined;
@@ -128,14 +122,12 @@ export async function createDynamicAssetResponse({
     const stat = await asyncFstat(fd);
     const hash = isDist ? undefined : await getFileHash(fileHashCache, path, stat, fd);
 
-    const read = Fs.createReadStream(null as any, {
+    const content = Fs.createReadStream(null as any, {
       fd,
       start: 0,
       autoClose: true,
     });
     fd = undefined; // read stream is now responsible for fd
-
-    const content = replacePublicPath ? replacePlaceholder(read, publicPath) : read;
 
     const response = h
       .response(content)

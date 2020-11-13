@@ -5,19 +5,14 @@
  */
 
 import React, { useState } from 'react';
-import {
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { useUrlParams } from '../../../../hooks/useUrlParams';
 import { useFetcher } from '../../../../hooks/useFetcher';
 import { I18LABELS } from '../translations';
 import { BreakdownFilter } from '../Breakdowns/BreakdownFilter';
 import { PageLoadDistChart } from '../Charts/PageLoadDistChart';
 import { BreakdownItem } from '../../../../../typings/ui_filters';
+import { ResetPercentileZoom } from './ResetPercentileZoom';
 
 export interface PercentileRange {
   min?: number | null;
@@ -27,17 +22,19 @@ export interface PercentileRange {
 export function PageLoadDistribution() {
   const { urlParams, uiFilters } = useUrlParams();
 
-  const { start, end, serviceName } = urlParams;
+  const { start, end, searchTerm } = urlParams;
 
   const [percentileRange, setPercentileRange] = useState<PercentileRange>({
     min: null,
     max: null,
   });
 
-  const [breakdowns, setBreakdowns] = useState<BreakdownItem[]>([]);
+  const [breakdown, setBreakdown] = useState<BreakdownItem | null>(null);
 
   const { data, status } = useFetcher(
     (callApmApi) => {
+      const { serviceName } = uiFilters;
+
       if (start && end && serviceName) {
         return callApmApi({
           pathname: '/api/apm/rum-client/page-load-distribution',
@@ -46,6 +43,7 @@ export function PageLoadDistribution() {
               start,
               end,
               uiFilters: JSON.stringify(uiFilters),
+              urlQuery: searchTerm,
               ...(percentileRange.min && percentileRange.max
                 ? {
                     minPercentile: String(percentileRange.min),
@@ -61,10 +59,10 @@ export function PageLoadDistribution() {
     [
       end,
       start,
-      serviceName,
       uiFilters,
       percentileRange.min,
       percentileRange.max,
+      searchTerm,
     ]
   );
 
@@ -81,33 +79,25 @@ export function PageLoadDistribution() {
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            iconType="inspect"
-            size="s"
-            onClick={() => {
-              setPercentileRange({ min: null, max: null });
-            }}
-            disabled={
-              percentileRange.min === null && percentileRange.max === null
-            }
-          >
-            {I18LABELS.resetZoom}
-          </EuiButtonEmpty>
+          <ResetPercentileZoom
+            percentileRange={percentileRange}
+            setPercentileRange={setPercentileRange}
+          />
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem grow={false} style={{ width: 170 }}>
           <BreakdownFilter
-            id={'pageLoad'}
-            selectedBreakdowns={breakdowns}
-            onBreakdownChange={setBreakdowns}
+            selectedBreakdown={breakdown}
+            onBreakdownChange={setBreakdown}
+            dataTestSubj={'pldBreakdownFilter'}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer size="s" />
+      <EuiSpacer size="m" />
       <PageLoadDistChart
         data={data}
         onPercentileChange={onPercentileChange}
         loading={status !== 'success'}
-        breakdowns={breakdowns}
+        breakdown={breakdown}
         percentileRange={{
           max: percentileRange.max || data?.maxDuration,
           min: percentileRange.min || data?.minDuration,

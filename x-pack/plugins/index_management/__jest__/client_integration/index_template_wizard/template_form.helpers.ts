@@ -3,10 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { act } from 'react-dom/test-utils';
 
-import { TestBed, SetupFunc, UnwrapPromise } from '../../../../../test_utils';
+import { TestBed, SetupFunc, UnwrapPromise } from '@kbn/test/jest';
 import { TemplateDeserialized } from '../../../common';
-import { nextTick } from '../helpers';
 
 interface MappingField {
   name: string;
@@ -30,10 +30,6 @@ export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
     testBed.find('backButton').simulate('click');
   };
 
-  const clickSubmitButton = () => {
-    testBed.find('submitButton').simulate('click');
-  };
-
   const clickEditButtonAtField = (index: number) => {
     testBed.find('editFieldButton').at(index).simulate('click');
   };
@@ -52,16 +48,100 @@ export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
     testBed.find('createFieldForm.cancelButton').simulate('click');
   };
 
+  // Step component templates actions
+  const componentTemplates = {
+    getComponentTemplatesInList() {
+      const { find } = testBed;
+      return find('componentTemplatesList.item.name').map((wrapper) => wrapper.text());
+    },
+    getComponentTemplatesSelected() {
+      const { find } = testBed;
+      return find('componentTemplatesSelection.item.name').map((wrapper) => wrapper.text());
+    },
+    showFilters() {
+      const { find, component } = testBed;
+      act(() => {
+        find('componentTemplates.filterButton').simulate('click');
+      });
+      component.update();
+    },
+    async selectFilter(filter: 'settings' | 'mappings' | 'aliases') {
+      const { find, component } = testBed;
+      const filters = ['settings', 'mappings', 'aliases'];
+      const index = filters.indexOf(filter);
+
+      await act(async () => {
+        find('filterList.filterItem').at(index).simulate('click');
+      });
+      component.update();
+    },
+    async selectComponentAt(index: number) {
+      const { find, component } = testBed;
+
+      await act(async () => {
+        find('componentTemplatesList.item.action-plusInCircle').at(index).simulate('click');
+      });
+      component.update();
+    },
+    async unSelectComponentAt(index: number) {
+      const { find, component } = testBed;
+
+      await act(async () => {
+        find('componentTemplatesSelection.item.action-minusInCircle').at(index).simulate('click');
+      });
+      component.update();
+    },
+  };
+
+  // Step Mappings actions
+  const mappings = {
+    async addField(name: string, type: string) {
+      const { find, form, component } = testBed;
+
+      await act(async () => {
+        form.setInputValue('nameParameterInput', name);
+        find('createFieldForm.mockComboBox').simulate('change', [
+          {
+            label: type,
+            value: type,
+          },
+        ]);
+      });
+
+      await act(async () => {
+        find('createFieldForm.addButton').simulate('click');
+      });
+
+      component.update();
+    },
+  };
+
+  // Step Review actions
+  const review = {
+    async selectTab(tab: 'summary' | 'preview' | 'request') {
+      const tabs = ['summary', 'preview', 'request'];
+
+      await act(async () => {
+        testBed.find('summaryTabContent').find('.euiTab').at(tabs.indexOf(tab)).simulate('click');
+      });
+
+      testBed.component.update();
+    },
+  };
+
   const completeStepOne = async ({
     name,
     indexPatterns,
     order,
+    priority,
     version,
   }: Partial<TemplateDeserialized> = {}) => {
-    const { form, find, waitFor } = testBed;
+    const { component, form, find } = testBed;
 
     if (name) {
-      form.setInputValue('nameField.input', name);
+      act(() => {
+        form.setInputValue('nameField.input', name);
+      });
     }
 
     if (indexPatterns) {
@@ -70,94 +150,106 @@ export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
         value: pattern,
       }));
 
-      find('mockComboBox').simulate('change', indexPatternsFormatted); // Using mocked EuiComboBox
-      await nextTick();
+      act(() => {
+        find('mockComboBox').simulate('change', indexPatternsFormatted); // Using mocked EuiComboBox
+      });
     }
 
-    if (order) {
-      form.setInputValue('orderField.input', JSON.stringify(order));
-    }
+    await act(async () => {
+      if (order) {
+        form.setInputValue('orderField.input', JSON.stringify(order));
+      }
 
-    if (version) {
-      form.setInputValue('versionField.input', JSON.stringify(version));
-    }
+      if (priority) {
+        form.setInputValue('priorityField.input', JSON.stringify(priority));
+      }
 
-    clickNextButton();
-    await waitFor('stepSettings');
+      if (version) {
+        form.setInputValue('versionField.input', JSON.stringify(version));
+      }
+
+      clickNextButton();
+    });
+
+    component.update();
   };
 
-  const completeStepTwo = async (settings?: string) => {
-    const { find, component, waitFor } = testBed;
+  const completeStepTwo = async (componentName?: string) => {
+    const { find, component } = testBed;
 
-    if (settings) {
-      find('mockCodeEditor').simulate('change', {
-        jsonString: settings,
-      }); // Using mocked EuiCodeEditor
-      await nextTick();
-      component.update();
+    if (componentName) {
+      // Find the index of the template in the list
+      const allComponents = find('componentTemplatesList.item.name').map((wrapper) =>
+        wrapper.text()
+      );
+      const index = allComponents.indexOf(componentName);
+      if (index < 0) {
+        throw new Error(
+          `Could not find component "${componentName}" in the list ${JSON.stringify(allComponents)}`
+        );
+      }
+
+      await componentTemplates.selectComponentAt(index);
     }
 
-    clickNextButton();
-    await waitFor('stepMappings');
+    await act(async () => {
+      clickNextButton();
+    });
+
+    component.update();
   };
 
-  const completeStepThree = async (mappingFields?: MappingField[]) => {
-    const { waitFor } = testBed;
+  const completeStepThree = async (settings?: string) => {
+    const { find, component } = testBed;
+
+    await act(async () => {
+      if (settings) {
+        find('mockCodeEditor').simulate('change', {
+          jsonString: settings,
+        }); // Using mocked EuiCodeEditor
+      }
+    });
+
+    await act(async () => {
+      clickNextButton();
+    });
+
+    component.update();
+  };
+
+  const completeStepFour = async (mappingFields?: MappingField[]) => {
+    const { component } = testBed;
 
     if (mappingFields) {
       for (const field of mappingFields) {
         const { name, type } = field;
-        await addMappingField(name, type);
+        await mappings.addField(name, type);
       }
     }
 
-    clickNextButton();
-    await waitFor('stepAliases');
+    await act(async () => {
+      clickNextButton();
+    });
+
+    component.update();
   };
 
-  const completeStepFour = async (aliases?: string, waitForNextStep = true) => {
-    const { find, component, waitFor } = testBed;
+  const completeStepFive = async (aliases?: string) => {
+    const { find, component } = testBed;
 
     if (aliases) {
-      find('mockCodeEditor').simulate('change', {
-        jsonString: aliases,
-      }); // Using mocked EuiCodeEditor
-      await nextTick();
+      await act(async () => {
+        find('mockCodeEditor').simulate('change', {
+          jsonString: aliases,
+        }); // Using mocked EuiCodeEditor
+      });
       component.update();
     }
 
-    clickNextButton();
+    await act(async () => {
+      clickNextButton();
+    });
 
-    if (waitForNextStep) {
-      await waitFor('summaryTab');
-    } else {
-      component.update();
-    }
-  };
-
-  const selectSummaryTab = (tab: 'summary' | 'request') => {
-    const tabs = ['summary', 'request'];
-
-    testBed.find('summaryTabContent').find('.euiTab').at(tabs.indexOf(tab)).simulate('click');
-  };
-
-  const addMappingField = async (name: string, type: string) => {
-    const { find, form, component } = testBed;
-
-    form.setInputValue('nameParameterInput', name);
-    find('createFieldForm.mockComboBox').simulate('change', [
-      {
-        label: type,
-        value: type,
-      },
-    ]);
-
-    await nextTick(50);
-    component.update();
-
-    find('createFieldForm.addButton').simulate('click');
-
-    await nextTick();
     component.update();
   };
 
@@ -166,7 +258,6 @@ export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
     actions: {
       clickNextButton,
       clickBackButton,
-      clickSubmitButton,
       clickEditButtonAtField,
       clickEditFieldUpdateButton,
       deleteMappingsFieldAt,
@@ -175,8 +266,10 @@ export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
       completeStepTwo,
       completeStepThree,
       completeStepFour,
-      selectSummaryTab,
-      addMappingField,
+      completeStepFive,
+      componentTemplates,
+      mappings,
+      review,
     },
   };
 };
@@ -187,6 +280,17 @@ export type TestSubjects =
   | 'backButton'
   | 'codeEditorContainer'
   | 'confirmModalConfirmButton'
+  | 'componentTemplates.filterButton'
+  | 'componentTemplates.emptySearchResult'
+  | 'filterList.filterItem'
+  | 'componentTemplatesList'
+  | 'componentTemplatesList.item.name'
+  | 'componentTemplatesList.item.action-plusInCircle'
+  | 'componentTemplatesSelection'
+  | 'componentTemplatesSelection.item.name'
+  | 'componentTemplatesSelection.item.action-minusInCircle'
+  | 'componentTemplatesSelection.emptyPrompt'
+  | 'componentTemplateSearchBox'
   | 'createFieldForm.addPropertyButton'
   | 'createFieldForm.addButton'
   | 'createFieldForm.addFieldButton'
@@ -209,12 +313,15 @@ export type TestSubjects =
   | 'nextButton'
   | 'orderField'
   | 'orderField.input'
+  | 'priorityField.input'
   | 'pageTitle'
+  | 'previewTab'
   | 'removeFieldButton'
   | 'requestTab'
   | 'saveTemplateError'
   | 'settingsEditor'
   | 'systemTemplateEditCallout'
+  | 'stepComponents'
   | 'stepAliases'
   | 'stepMappings'
   | 'stepSettings'

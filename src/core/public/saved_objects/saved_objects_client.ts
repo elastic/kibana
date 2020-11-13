@@ -17,8 +17,9 @@
  * under the License.
  */
 
-import { cloneDeep, pick, throttle } from 'lodash';
+import { pick, throttle, cloneDeep } from 'lodash';
 import { resolve as resolveUrl } from 'url';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import {
   SavedObject,
@@ -31,7 +32,10 @@ import {
 import { SimpleSavedObject } from './simple_saved_object';
 import { HttpFetchOptions, HttpSetup } from '../http';
 
-type SavedObjectsFindOptions = Omit<SavedObjectFindOptionsServer, 'namespace' | 'sortOrder'>;
+type SavedObjectsFindOptions = Omit<
+  SavedObjectFindOptionsServer,
+  'sortOrder' | 'rootSearchFields' | 'typeToNamespacesMap'
+>;
 
 type PromiseType<T extends Promise<any>> = T extends Promise<infer U> ? U : never;
 
@@ -92,6 +96,12 @@ export interface SavedObjectsBatchResponse<T = unknown> {
   savedObjects: Array<SimpleSavedObject<T>>;
 }
 
+/** @public */
+export interface SavedObjectsDeleteOptions {
+  /** Force deletion of an object that exists in multiple namespaces */
+  force?: boolean;
+}
+
 /**
  * Return type of the Saved Objects `find()` method.
  *
@@ -134,6 +144,23 @@ const API_BASE_URL = '/api/saved_objects/';
  */
 export type SavedObjectsClientContract = PublicMethodsOf<SavedObjectsClient>;
 
+interface ObjectTypeAndId {
+  id: string;
+  type: string;
+}
+
+const getObjectsToFetch = (queue: BatchQueueEntry[]): ObjectTypeAndId[] => {
+  const objects: ObjectTypeAndId[] = [];
+  const inserted = new Set<string>();
+  queue.forEach(({ id, type }) => {
+    if (!inserted.has(`${type}|${id}`)) {
+      objects.push({ id, type });
+      inserted.add(`${type}|${id}`);
+    }
+  });
+  return objects;
+};
+
 /**
  * Saved Objects is Kibana's data persisentence mechanism allowing plugins to
  * use Elasticsearch for storing plugin state. The client-side
@@ -150,31 +177,34 @@ export class SavedObjectsClient {
    * Throttled processing of get requests into bulk requests at 100ms interval
    */
   private processBatchQueue = throttle(
-    () => {
-      const queue = cloneDeep(this.batchQueue);
+    async () => {
+      const queue = [...this.batchQueue];
       this.batchQueue = [];
 
-      this.bulkGet(queue)
-        .then(({ savedObjects }) => {
-          queue.forEach((queueItem) => {
-            const foundObject = savedObjects.find((savedObject) => {
-              return savedObject.id === queueItem.id && savedObject.type === queueItem.type;
-            });
+      try {
+        const objectsToFetch = getObjectsToFetch(queue);
+        const { saved_objects: savedObjects } = await this.performBulkGet(objectsToFetch);
 
-            if (!foundObject) {
-              return queueItem.resolve(
-                this.createSavedObject(pick(queueItem, ['id', 'type']) as SavedObject)
-              );
-            }
+        queue.forEach((queueItem) => {
+          const foundObject = savedObjects.find((savedObject) => {
+            return savedObject.id === queueItem.id && savedObject.type === queueItem.type;
+          });
 
-            queueItem.resolve(foundObject);
-          });
-        })
-        .catch((err) => {
-          queue.forEach((queueItem) => {
-            queueItem.reject(err);
-          });
+          if (foundObject) {
+            // multiple calls may have been requested the same object.
+            // we need to clone to avoid sharing references between the instances
+            queueItem.resolve(this.createSavedObject(cloneDeep(foundObject)));
+          } else {
+            queueItem.resolve(
+              this.createSavedObject(pick(queueItem, ['id', 'type']) as SavedObject)
+            );
+          }
         });
+      } catch (err) {
+        queue.forEach((queueItem) => {
+          queueItem.reject(err);
+        });
+      }
     },
     BATCH_INTERVAL,
     { leading: false }
@@ -257,12 +287,20 @@ export class SavedObjectsClient {
    * @param id
    * @returns
    */
-  public delete = (type: string, id: string): ReturnType<SavedObjectsApi['delete']> => {
+  public delete = (
+    type: string,
+    id: string,
+    options?: SavedObjectsDeleteOptions
+  ): ReturnType<SavedObjectsApi['delete']> => {
     if (!type || !id) {
       return Promise.reject(new Error('requires type and id'));
     }
 
-    return this.savedObjectsFetch(this.getPath([type, id]), { method: 'DELETE' });
+    const query = {
+      force: !!options?.force,
+    };
+
+    return this.savedObjectsFetch(this.getPath([type, id]), { method: 'DELETE', query });
   };
 
   /**
@@ -287,6 +325,7 @@ export class SavedObjectsClient {
       defaultSearchOperator: 'default_search_operator',
       fields: 'fields',
       hasReference: 'has_reference',
+      hasReferenceOperator: 'has_reference_operator',
       page: 'page',
       perPage: 'per_page',
       search: 'search',
@@ -299,7 +338,16 @@ export class SavedObjectsClient {
     };
 
     const renamedQuery = renameKeys<SavedObjectsFindOptions, any>(renameMap, options);
-    const query = pick.apply(null, [renamedQuery, ...Object.values<string>(renameMap)]);
+    const query = pick.apply(null, [renamedQuery, ...Object.values<string>(renameMap)]) as Record<
+      string,
+      any
+    >;
+
+    // `has_references` is a structured object. we need to stringify it before sending it, as `fetch`
+    // is not doing it implicitly.
+    if (query.has_reference) {
+      query.has_reference = JSON.stringify(query.has_reference);
+    }
 
     const request: ReturnType<SavedObjectsApi['find']> = this.savedObjectsFetch(path, {
       method: 'GET',
@@ -355,14 +403,8 @@ export class SavedObjectsClient {
    * ])
    */
   public bulkGet = (objects: Array<{ id: string; type: string }> = []) => {
-    const path = this.getPath(['_bulk_get']);
     const filteredObjects = objects.map((obj) => pick(obj, ['id', 'type']));
-
-    const request: ReturnType<SavedObjectsApi['bulkGet']> = this.savedObjectsFetch(path, {
-      method: 'POST',
-      body: JSON.stringify(filteredObjects),
-    });
-    return request.then((resp) => {
+    return this.performBulkGet(filteredObjects).then((resp) => {
       resp.saved_objects = resp.saved_objects.map((d) => this.createSavedObject(d));
       return renameKeys<
         PromiseType<ReturnType<SavedObjectsApi['bulkGet']>>,
@@ -370,6 +412,15 @@ export class SavedObjectsClient {
       >({ saved_objects: 'savedObjects' }, resp) as SavedObjectsBatchResponse;
     });
   };
+
+  private async performBulkGet(objects: ObjectTypeAndId[]) {
+    const path = this.getPath(['_bulk_get']);
+    const request: ReturnType<SavedObjectsApi['bulkGet']> = this.savedObjectsFetch(path, {
+      method: 'POST',
+      body: JSON.stringify(objects),
+    });
+    return request;
+  }
 
   /**
    * Updates an object

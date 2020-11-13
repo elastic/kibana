@@ -28,7 +28,7 @@ test('renders enabled control', () => {
       <div>My Control</div>
     </FormRow>
   );
-  expect(component).toMatchSnapshot(); // eslint-disable-line
+  expect(component).toMatchSnapshot();
 });
 
 test('renders control with warning', () => {
@@ -37,7 +37,7 @@ test('renders control with warning', () => {
       <div>My Control</div>
     </FormRow>
   );
-  expect(component).toMatchSnapshot(); // eslint-disable-line
+  expect(component).toMatchSnapshot();
 });
 
 test('renders disabled control with tooltip', () => {
@@ -51,5 +51,5 @@ test('renders disabled control with tooltip', () => {
       <div>My Control</div>
     </FormRow>
   );
-  expect(component).toMatchSnapshot(); // eslint-disable-line
+  expect(component).toMatchSnapshot();
 });

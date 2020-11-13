@@ -68,13 +68,21 @@ export const getMonitorStates: UMElasticsearchQueryFn<
   const iterator = new MonitorSummaryIterator(queryContext);
   const page = await iterator.nextPage(size);
 
+  const minInterval = getHistogramInterval(
+    queryContext.dateRangeStart,
+    queryContext.dateRangeEnd,
+    12
+  );
+
   const histograms = await getHistogramForMonitors(
     queryContext,
-    page.monitorSummaries.map((s) => s.monitor_id)
+    page.monitorSummaries.map((s) => s.monitor_id),
+    minInterval
   );
 
   page.monitorSummaries.forEach((s) => {
     s.histogram = histograms[s.monitor_id];
+    s.minInterval = minInterval;
   });
 
   return {
@@ -86,7 +94,8 @@ export const getMonitorStates: UMElasticsearchQueryFn<
 
 export const getHistogramForMonitors = async (
   queryContext: QueryContext,
-  monitorIds: string[]
+  monitorIds: string[],
+  minInterval: number
 ): Promise<{ [key: string]: Histogram }> => {
   const params = {
     index: queryContext.heartbeatIndices,
@@ -122,9 +131,7 @@ export const getHistogramForMonitors = async (
             field: '@timestamp',
             // 12 seems to be a good size for performance given
             // long monitor lists of up to 100 on the overview page
-            fixed_interval:
-              getHistogramInterval(queryContext.dateRangeStart, queryContext.dateRangeEnd, 12) +
-              'ms',
+            fixed_interval: minInterval + 'ms',
             missing: 0,
           },
           aggs: {
@@ -146,7 +153,7 @@ export const getHistogramForMonitors = async (
   };
   const result = await queryContext.search(params);
 
-  const histoBuckets: any[] = result.aggregations.histogram.buckets;
+  const histoBuckets: any[] = result.aggregations?.histogram.buckets ?? [];
   const simplified = histoBuckets.map((histoBucket: any): { timestamp: number; byId: any } => {
     const byId: { [key: string]: number } = {};
     histoBucket.by_id.buckets.forEach((idBucket: any) => {

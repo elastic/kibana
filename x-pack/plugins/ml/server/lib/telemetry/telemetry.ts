@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
+import { isEmpty } from 'lodash';
 import { ISavedObjectsRepository } from 'kibana/server';
 
 import { getInternalRepository } from './internal_repository';
@@ -58,7 +58,7 @@ export async function updateTelemetry(internalRepo?: ISavedObjectsRepository) {
 
   let telemetry = await getTelemetry(internalRepository);
   // Create if doesn't exist
-  if (telemetry === null || _.isEmpty(telemetry)) {
+  if (telemetry === null || isEmpty(telemetry)) {
     const newTelemetrySavedObject = await internalRepository.create(
       TELEMETRY_DOC_ID,
       initTelemetry(),

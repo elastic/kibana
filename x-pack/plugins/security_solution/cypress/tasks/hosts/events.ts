@@ -8,6 +8,7 @@ import { drag, drop } from '../common';
 import {
   CLOSE_MODAL,
   EVENTS_VIEWER_FIELDS_BUTTON,
+  EVENTS_VIEWER_PAGINATION,
   FIELDS_BROWSER_CONTAINER,
   HOST_GEO_CITY_NAME_CHECKBOX,
   HOST_GEO_COUNTRY_NAME_CHECKBOX,
@@ -16,6 +17,7 @@ import {
   SERVER_SIDE_EVENT_COUNT,
 } from '../../screens/hosts/events';
 import { DRAGGABLE_HEADER } from '../../screens/timeline';
+import { REFRESH_BUTTON } from '../../screens/security_header';
 
 export const addsHostGeoCityNameToHeader = () => {
   cy.get(HOST_GEO_CITY_NAME_CHECKBOX).check({
@@ -53,7 +55,9 @@ export const opensInspectQueryModal = () => {
 };
 
 export const waitsForEventsToBeLoaded = () => {
-  cy.get(SERVER_SIDE_EVENT_COUNT).should('exist').invoke('text').should('not.equal', '0');
+  cy.get(SERVER_SIDE_EVENT_COUNT).should('not.have.text', '0');
+  cy.get(REFRESH_BUTTON).should('not.have.text', 'Updating');
+  cy.get(EVENTS_VIEWER_PAGINATION).should('exist');
 };
 
 export const dragAndDropColumn = ({
@@ -67,8 +71,6 @@ export const dragAndDropColumn = ({
   cy.get(DRAGGABLE_HEADER)
     .eq(column)
     .then((header) => drag(header));
-
-  cy.wait(5000); // wait for DOM updates before moving
 
   cy.get(DRAGGABLE_HEADER)
     .eq(newPosition)

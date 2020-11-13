@@ -41,7 +41,7 @@ interface Options {
  * into the repository.
  */
 export async function generateNoticeFromSource({ productName, directory, log }: Options) {
-  const globs = ['**/*.{js,less,css,ts}'];
+  const globs = ['**/*.{js,less,css,ts,tsx}'];
 
   const options = {
     cwd: directory,
@@ -49,8 +49,10 @@ export async function generateNoticeFromSource({ productName, directory, log }: 
     ignore: [
       '{node_modules,build,dist,data,built_assets}/**',
       'packages/*/{node_modules,build,dist}/**',
+      'src/plugins/*/{node_modules,build,dist}/**',
       'x-pack/{node_modules,build,dist,data}/**',
       'x-pack/packages/*/{node_modules,build,dist}/**',
+      'x-pack/plugins/**/{node_modules,build,dist}/**',
       '**/target/**',
     ],
   };

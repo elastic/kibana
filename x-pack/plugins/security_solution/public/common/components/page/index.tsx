@@ -8,27 +8,36 @@ import { EuiBadge, EuiDescriptionList, EuiFlexGroup, EuiIcon, EuiPage } from '@e
 import styled, { createGlobalStyle } from 'styled-components';
 
 import {
+  GLOBAL_HEADER_HEIGHT,
   FULL_SCREEN_TOGGLED_CLASS_NAME,
   SCROLLING_DISABLED_CLASS_NAME,
 } from '../../../../common/constants';
+
+export const SecuritySolutionAppWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  width: 100%;
+`;
+SecuritySolutionAppWrapper.displayName = 'SecuritySolutionAppWrapper';
 
 /*
   SIDE EFFECT: the following `createGlobalStyle` overrides default styling in angular code that was not theme-friendly
   and `EuiPopover`, `EuiToolTip` global styles
 */
 export const AppGlobalStyle = createGlobalStyle<{ theme: { eui: { euiColorPrimary: string } } }>`
-  /* dirty hack to fix draggables with tooltip on FF */
-  body#siem-app {
-    position: static;
-  }
-  /* end of dirty hack to fix draggables with tooltip on FF */
-
   div.app-wrapper {
     background-color: rgba(0,0,0,0);
   }
 
   div.application {
     background-color: rgba(0,0,0,0);
+
+    // Security App wrapper
+    > div {
+      display: flex;
+      flex: 1 1 auto;
+    }
   }
 
   .euiPopover__panel.euiPopover__panel-isOpen {
@@ -62,17 +71,13 @@ export const AppGlobalStyle = createGlobalStyle<{ theme: { eui: { euiColorPrimar
     z-index: 9950;
   }
 
-  /** applies a "toggled" button style to the Full Screen button */
+  /* applies a "toggled" button style to the Full Screen button */
   .${FULL_SCREEN_TOGGLED_CLASS_NAME} {
     ${({ theme }) => `background-color: ${theme.eui.euiColorPrimary} !important`};
   }
 
-  .${SCROLLING_DISABLED_CLASS_NAME} body {
-    overflow-y: hidden;
-  }
-
-  .${SCROLLING_DISABLED_CLASS_NAME} #kibana-body {
-    overflow-y: hidden;
+  .${SCROLLING_DISABLED_CLASS_NAME} ${SecuritySolutionAppWrapper} {
+    max-height: calc(100vh - ${GLOBAL_HEADER_HEIGHT}px);
   }
 `;
 

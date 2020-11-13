@@ -4,148 +4,220 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getOr } from 'lodash/fp';
-import React from 'react';
-import { Query } from 'react-apollo';
-import { connect, ConnectedProps } from 'react-redux';
-import { compose } from 'redux';
+import deepEqual from 'fast-deep-equal';
+import { noop } from 'lodash/fp';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { useSelector } from 'react-redux';
 
-import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
-import {
-  GetUncommonProcessesQuery,
-  PageInfoPaginated,
-  UncommonProcessesEdges,
-} from '../../../graphql/types';
-import { inputsModel, State, inputsSelectors } from '../../../common/store';
-import { withKibana, WithKibanaProps } from '../../../common/lib/kibana';
+import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/plugins/data/common';
+import { AbortError } from '../../../../../../../src/plugins/kibana_utils/common';
+
+import { inputsModel, State } from '../../../common/store';
+import { useKibana } from '../../../common/lib/kibana';
 import { generateTablePaginationOptions } from '../../../common/components/paginated_table/helpers';
-import { createFilter, getDefaultFetchPolicy } from '../../../common/containers/helpers';
-import {
-  QueryTemplatePaginated,
-  QueryTemplatePaginatedProps,
-} from '../../../common/containers/query_template_paginated';
+import { createFilter } from '../../../common/containers/helpers';
 import { hostsModel, hostsSelectors } from '../../store';
-import { uncommonProcessesQuery } from './index.gql_query';
+import {
+  DocValueFields,
+  SortField,
+  PageInfoPaginated,
+  HostsUncommonProcessesEdges,
+  HostsQueries,
+  HostsUncommonProcessesRequestOptions,
+  HostsUncommonProcessesStrategyResponse,
+} from '../../../../common/search_strategy';
 
-const ID = 'uncommonProcessesQuery';
+import * as i18n from './translations';
+import { ESTermQuery } from '../../../../common/typed_json';
+import { getInspectResponse } from '../../../helpers';
+import { InspectResponse } from '../../../types';
+
+const ID = 'hostsUncommonProcessesQuery';
 
 export interface UncommonProcessesArgs {
   id: string;
-  inspect: inputsModel.InspectQuery;
+  inspect: InspectResponse;
   isInspected: boolean;
-  loading: boolean;
   loadPage: (newActivePage: number) => void;
   pageInfo: PageInfoPaginated;
   refetch: inputsModel.Refetch;
   totalCount: number;
-  uncommonProcesses: UncommonProcessesEdges[];
+  uncommonProcesses: HostsUncommonProcessesEdges[];
 }
 
-export interface OwnProps extends QueryTemplatePaginatedProps {
-  children: (args: UncommonProcessesArgs) => React.ReactNode;
+interface UseUncommonProcesses {
+  docValueFields?: DocValueFields[];
+  filterQuery?: ESTermQuery | string;
+  endDate: string;
+  indexNames: string[];
+  skip?: boolean;
+  startDate: string;
   type: hostsModel.HostsType;
 }
 
-type UncommonProcessesProps = OwnProps & PropsFromRedux & WithKibanaProps;
-
-class UncommonProcessesComponentQuery extends QueryTemplatePaginated<
-  UncommonProcessesProps,
-  GetUncommonProcessesQuery.Query,
-  GetUncommonProcessesQuery.Variables
-> {
-  public render() {
-    const {
-      activePage,
-      children,
-      endDate,
-      filterQuery,
-      id = ID,
-      isInspected,
-      kibana,
-      limit,
-      skip,
-      sourceId,
-      startDate,
-    } = this.props;
-    const variables: GetUncommonProcessesQuery.Variables = {
-      defaultIndex: kibana.services.uiSettings.get<string[]>(DEFAULT_INDEX_KEY),
-      filterQuery: createFilter(filterQuery),
-      inspect: isInspected,
-      pagination: generateTablePaginationOptions(activePage, limit),
-      sourceId,
-      timerange: {
-        interval: '12h',
-        from: startDate!,
-        to: endDate!,
-      },
-    };
-    return (
-      <Query<GetUncommonProcessesQuery.Query, GetUncommonProcessesQuery.Variables>
-        query={uncommonProcessesQuery}
-        fetchPolicy={getDefaultFetchPolicy()}
-        notifyOnNetworkStatusChange
-        skip={skip}
-        variables={variables}
-      >
-        {({ data, loading, fetchMore, networkStatus, refetch }) => {
-          const uncommonProcesses = getOr([], 'source.UncommonProcesses.edges', data);
-          this.setFetchMore(fetchMore);
-          this.setFetchMoreOptions((newActivePage: number) => ({
-            variables: {
-              pagination: generateTablePaginationOptions(newActivePage, limit),
-            },
-            updateQuery: (prev, { fetchMoreResult }) => {
-              if (!fetchMoreResult) {
-                return prev;
-              }
-              return {
-                ...fetchMoreResult,
-                source: {
-                  ...fetchMoreResult.source,
-                  UncommonProcesses: {
-                    ...fetchMoreResult.source.UncommonProcesses,
-                    edges: [...fetchMoreResult.source.UncommonProcesses.edges],
-                  },
-                },
-              };
-            },
-          }));
-          const isLoading = this.isItAValidLoading(loading, variables, networkStatus);
-          return children({
-            id,
-            inspect: getOr(null, 'source.UncommonProcesses.inspect', data),
-            isInspected,
-            loading: isLoading,
-            loadPage: this.wrappedLoadMore,
-            pageInfo: getOr({}, 'source.UncommonProcesses.pageInfo', data),
-            refetch: this.memoizedRefetchQuery(variables, limit, refetch),
-            totalCount: getOr(-1, 'source.UncommonProcesses.totalCount', data),
-            uncommonProcesses,
-          });
-        }}
-      </Query>
-    );
-  }
-}
-
-const makeMapStateToProps = () => {
+export const useUncommonProcesses = ({
+  docValueFields,
+  filterQuery,
+  endDate,
+  indexNames,
+  skip = false,
+  startDate,
+  type,
+}: UseUncommonProcesses): [boolean, UncommonProcessesArgs] => {
   const getUncommonProcessesSelector = hostsSelectors.uncommonProcessesSelector();
-  const getQuery = inputsSelectors.globalQueryByIdSelector();
-  const mapStateToProps = (state: State, { type, id = ID }: OwnProps) => {
-    const { isInspected } = getQuery(state, id);
-    return {
-      ...getUncommonProcessesSelector(state, type),
-      isInspected,
-    };
-  };
-  return mapStateToProps;
+  const { activePage, limit } = useSelector((state: State) =>
+    getUncommonProcessesSelector(state, type)
+  );
+  const { data, notifications } = useKibana().services;
+  const refetch = useRef<inputsModel.Refetch>(noop);
+  const abortCtrl = useRef(new AbortController());
+  const [loading, setLoading] = useState(false);
+  const [
+    uncommonProcessesRequest,
+    setUncommonProcessesRequest,
+  ] = useState<HostsUncommonProcessesRequestOptions | null>(
+    !skip
+      ? {
+          defaultIndex: indexNames,
+          docValueFields: docValueFields ?? [],
+          factoryQueryType: HostsQueries.uncommonProcesses,
+          filterQuery: createFilter(filterQuery),
+          pagination: generateTablePaginationOptions(activePage, limit),
+          timerange: {
+            interval: '12h',
+            from: startDate!,
+            to: endDate!,
+          },
+          sort: {} as SortField,
+        }
+      : null
+  );
+
+  const wrappedLoadMore = useCallback(
+    (newActivePage: number) => {
+      setUncommonProcessesRequest((prevRequest) => {
+        if (!prevRequest) {
+          return prevRequest;
+        }
+
+        return {
+          ...prevRequest,
+          pagination: generateTablePaginationOptions(newActivePage, limit),
+        };
+      });
+    },
+    [limit]
+  );
+
+  const [uncommonProcessesResponse, setUncommonProcessesResponse] = useState<UncommonProcessesArgs>(
+    {
+      uncommonProcesses: [],
+      id: ID,
+      inspect: {
+        dsl: [],
+        response: [],
+      },
+      isInspected: false,
+      loadPage: wrappedLoadMore,
+      pageInfo: {
+        activePage: 0,
+        fakeTotalCount: 0,
+        showMorePagesIndicator: false,
+      },
+      refetch: refetch.current,
+      totalCount: -1,
+    }
+  );
+
+  const uncommonProcessesSearch = useCallback(
+    (request: HostsUncommonProcessesRequestOptions | null) => {
+      if (request == null) {
+        return;
+      }
+
+      let didCancel = false;
+      const asyncSearch = async () => {
+        abortCtrl.current = new AbortController();
+        setLoading(true);
+
+        const searchSubscription$ = data.search
+          .search<HostsUncommonProcessesRequestOptions, HostsUncommonProcessesStrategyResponse>(
+            request,
+            {
+              strategy: 'securitySolutionSearchStrategy',
+              abortSignal: abortCtrl.current.signal,
+            }
+          )
+          .subscribe({
+            next: (response) => {
+              if (isCompleteResponse(response)) {
+                if (!didCancel) {
+                  setLoading(false);
+                  setUncommonProcessesResponse((prevResponse) => ({
+                    ...prevResponse,
+                    uncommonProcesses: response.edges,
+                    inspect: getInspectResponse(response, prevResponse.inspect),
+                    pageInfo: response.pageInfo,
+                    refetch: refetch.current,
+                    totalCount: response.totalCount,
+                  }));
+                }
+                searchSubscription$.unsubscribe();
+              } else if (isErrorResponse(response)) {
+                if (!didCancel) {
+                  setLoading(false);
+                }
+                notifications.toasts.addWarning(i18n.ERROR_UNCOMMON_PROCESSES);
+                searchSubscription$.unsubscribe();
+              }
+            },
+            error: (msg) => {
+              if (!(msg instanceof AbortError)) {
+                notifications.toasts.addDanger({
+                  title: i18n.FAIL_UNCOMMON_PROCESSES,
+                  text: msg.message,
+                });
+              }
+            },
+          });
+      };
+      abortCtrl.current.abort();
+      asyncSearch();
+      refetch.current = asyncSearch;
+      return () => {
+        didCancel = true;
+        abortCtrl.current.abort();
+      };
+    },
+    [data.search, notifications.toasts]
+  );
+
+  useEffect(() => {
+    setUncommonProcessesRequest((prevRequest) => {
+      const myRequest = {
+        ...(prevRequest ?? {}),
+        defaultIndex: indexNames,
+        docValueFields: docValueFields ?? [],
+        factoryQueryType: HostsQueries.uncommonProcesses,
+        filterQuery: createFilter(filterQuery),
+        pagination: generateTablePaginationOptions(activePage, limit),
+        timerange: {
+          interval: '12h',
+          from: startDate,
+          to: endDate,
+        },
+        sort: {} as SortField,
+      };
+      if (!skip && !deepEqual(prevRequest, myRequest)) {
+        return myRequest;
+      }
+      return prevRequest;
+    });
+  }, [activePage, indexNames, docValueFields, endDate, filterQuery, limit, skip, startDate]);
+
+  useEffect(() => {
+    uncommonProcessesSearch(uncommonProcessesRequest);
+  }, [uncommonProcessesRequest, uncommonProcessesSearch]);
+
+  return [loading, uncommonProcessesResponse];
 };
-
-const connector = connect(makeMapStateToProps);
-
-type PropsFromRedux = ConnectedProps<typeof connector>;
-
-export const UncommonProcessesQuery = compose<React.ComponentClass<OwnProps>>(
-  connector,
-  withKibana
-)(UncommonProcessesComponentQuery);

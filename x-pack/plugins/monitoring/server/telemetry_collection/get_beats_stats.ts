@@ -320,8 +320,8 @@ export function processResults(
 async function fetchBeatsByType(
   callCluster: StatsCollectionConfig['callCluster'],
   clusterUuids: string[],
-  start: StatsCollectionConfig['start'],
-  end: StatsCollectionConfig['end'],
+  start: string,
+  end: string,
   { page = 0, ...options }: { page?: number } & BeatsProcessOptions,
   type: string
 ): Promise<void> {
@@ -355,7 +355,7 @@ async function fetchBeatsByType(
       }),
       from: page * HITS_SIZE,
       collapse: { field: `${type}.beat.uuid` },
-      sort: [{ [`${type}.timestamp`]: 'desc' }],
+      sort: [{ [`${type}.timestamp`]: { order: 'desc', unmapped_type: 'long' } }],
       size: HITS_SIZE,
     },
   };
@@ -384,8 +384,8 @@ async function fetchBeatsByType(
 export async function fetchBeatsStats(
   callCluster: StatsCollectionConfig['callCluster'],
   clusterUuids: string[],
-  start: StatsCollectionConfig['start'],
-  end: StatsCollectionConfig['end'],
+  start: string,
+  end: string,
   options: { page?: number } & BeatsProcessOptions
 ) {
   return fetchBeatsByType(callCluster, clusterUuids, start, end, options, 'beats_stats');
@@ -394,11 +394,15 @@ export async function fetchBeatsStats(
 export async function fetchBeatsStates(
   callCluster: StatsCollectionConfig['callCluster'],
   clusterUuids: string[],
-  start: StatsCollectionConfig['start'],
-  end: StatsCollectionConfig['end'],
+  start: string,
+  end: string,
   options: { page?: number } & BeatsProcessOptions
 ) {
   return fetchBeatsByType(callCluster, clusterUuids, start, end, options, 'beats_state');
+}
+
+export interface BeatsStatsByClusterUuid {
+  [clusterUuid: string]: BeatsBaseStats;
 }
 
 /*
@@ -408,9 +412,9 @@ export async function fetchBeatsStates(
 export async function getBeatsStats(
   callCluster: StatsCollectionConfig['callCluster'],
   clusterUuids: string[],
-  start: StatsCollectionConfig['start'],
-  end: StatsCollectionConfig['end']
-) {
+  start: string,
+  end: string
+): Promise<BeatsStatsByClusterUuid> {
   const options: BeatsProcessOptions = {
     clusters: {}, // the result object to be built up
     clusterHostSets: {}, // passed to processResults for tracking state in the results generation

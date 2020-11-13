@@ -23,7 +23,6 @@ import { fatalErrorsServiceMock } from './fatal_errors/fatal_errors_service.mock
 import { httpServiceMock } from './http/http_service.mock';
 import { i18nServiceMock } from './i18n/i18n_service.mock';
 import { injectedMetadataServiceMock } from './injected_metadata/injected_metadata_service.mock';
-import { legacyPlatformServiceMock } from './legacy/legacy_service.mock';
 import { notificationServiceMock } from './notifications/notifications_service.mock';
 import { overlayServiceMock } from './overlays/overlay_service.mock';
 import { pluginsServiceMock } from './plugins/plugins_service.mock';
@@ -33,14 +32,6 @@ import { renderingServiceMock } from './rendering/rendering_service.mock';
 import { contextServiceMock } from './context/context_service.mock';
 import { integrationsServiceMock } from './integrations/integrations_service.mock';
 import { coreAppMock } from './core_app/core_app.mock';
-
-export const MockLegacyPlatformService = legacyPlatformServiceMock.create();
-export const LegacyPlatformServiceConstructor = jest
-  .fn()
-  .mockImplementation(() => MockLegacyPlatformService);
-jest.doMock('./legacy', () => ({
-  LegacyPlatformService: LegacyPlatformServiceConstructor,
-}));
 
 export const MockInjectedMetadataService = injectedMetadataServiceMock.create();
 export const InjectedMetadataServiceConstructor = jest

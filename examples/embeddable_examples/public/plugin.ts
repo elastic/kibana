@@ -22,7 +22,7 @@ import {
   EmbeddableStart,
   CONTEXT_MENU_TRIGGER,
 } from '../../../src/plugins/embeddable/public';
-import { Plugin, CoreSetup, CoreStart } from '../../../src/core/public';
+import { Plugin, CoreSetup, CoreStart, SavedObjectsClient } from '../../../src/core/public';
 import {
   HelloWorldEmbeddableFactory,
   HELLO_WORLD_EMBEDDABLE,
@@ -58,6 +58,14 @@ import {
   BookEmbeddableFactoryDefinition,
 } from './book/book_embeddable_factory';
 import { UiActionsStart } from '../../../src/plugins/ui_actions/public';
+import {
+  ACTION_ADD_BOOK_TO_LIBRARY,
+  createAddBookToLibraryAction,
+} from './book/add_book_to_library_action';
+import {
+  ACTION_UNLINK_BOOK_FROM_LIBRARY,
+  createUnlinkBookFromLibraryAction,
+} from './book/unlink_book_from_library_action';
 
 export interface EmbeddableExamplesSetupDependencies {
   embeddable: EmbeddableSetup;
@@ -66,6 +74,7 @@ export interface EmbeddableExamplesSetupDependencies {
 
 export interface EmbeddableExamplesStartDependencies {
   embeddable: EmbeddableStart;
+  savedObjectsClient: SavedObjectsClient;
 }
 
 interface ExampleEmbeddableFactories {
@@ -86,6 +95,8 @@ export interface EmbeddableExamplesStart {
 declare module '../../../src/plugins/ui_actions/public' {
   export interface ActionContextMapping {
     [ACTION_EDIT_BOOK]: { embeddable: BookEmbeddable };
+    [ACTION_ADD_BOOK_TO_LIBRARY]: { embeddable: BookEmbeddable };
+    [ACTION_UNLINK_BOOK_FROM_LIBRARY]: { embeddable: BookEmbeddable };
   }
 }
 
@@ -146,15 +157,26 @@ export class EmbeddableExamplesPlugin
       new BookEmbeddableFactoryDefinition(async () => ({
         getAttributeService: (await core.getStartServices())[1].embeddable.getAttributeService,
         openModal: (await core.getStartServices())[0].overlays.openModal,
+        savedObjectsClient: (await core.getStartServices())[0].savedObjects.client,
+        overlays: (await core.getStartServices())[0].overlays,
       }))
     );
 
     const editBookAction = createEditBookAction(async () => ({
       getAttributeService: (await core.getStartServices())[1].embeddable.getAttributeService,
       openModal: (await core.getStartServices())[0].overlays.openModal,
+      savedObjectsClient: (await core.getStartServices())[0].savedObjects.client,
     }));
     deps.uiActions.registerAction(editBookAction);
     deps.uiActions.attachAction(CONTEXT_MENU_TRIGGER, editBookAction.id);
+
+    const addBookToLibraryAction = createAddBookToLibraryAction();
+    deps.uiActions.registerAction(addBookToLibraryAction);
+    deps.uiActions.attachAction(CONTEXT_MENU_TRIGGER, addBookToLibraryAction.id);
+
+    const unlinkBookFromLibraryAction = createUnlinkBookFromLibraryAction();
+    deps.uiActions.registerAction(unlinkBookFromLibraryAction);
+    deps.uiActions.attachAction(CONTEXT_MENU_TRIGGER, unlinkBookFromLibraryAction.id);
   }
 
   public start(

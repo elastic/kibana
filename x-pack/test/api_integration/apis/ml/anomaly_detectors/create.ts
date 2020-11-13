@@ -8,9 +8,8 @@ import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../../functional/services/ml/security_common';
-import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common';
+import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
 
-// eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertestWithoutAuth');
@@ -88,11 +87,11 @@ export default ({ getService }: FtrProviderContext) => {
         model_plot_config: { enabled: true },
       },
       expected: {
-        responseCode: 404,
+        responseCode: 403,
         responseBody: {
-          statusCode: 404,
-          error: 'Not Found',
-          message: 'Not Found',
+          statusCode: 403,
+          error: 'Forbidden',
+          message: 'Forbidden',
         },
       },
     },

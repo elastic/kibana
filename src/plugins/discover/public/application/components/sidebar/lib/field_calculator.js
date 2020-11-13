@@ -20,9 +20,9 @@
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 
-function getFieldValues(hits, field) {
+function getFieldValues(hits, field, indexPattern) {
   const name = field.name;
-  const flattenHit = field.indexPattern.flattenHit;
+  const flattenHit = indexPattern.flattenHit;
   return _.map(hits, function (hit) {
     return flattenHit(hit)[name];
   });
@@ -49,7 +49,7 @@ function getFieldValueCounts(params) {
     };
   }
 
-  const allValues = getFieldValues(params.hits, params.field);
+  const allValues = getFieldValues(params.hits, params.field, params.indexPattern);
   let counts;
   const missing = _countMissing(allValues);
 

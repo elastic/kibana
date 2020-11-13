@@ -6,7 +6,9 @@
   "requiredPlugins": [
     "home",
     "licensing",
-    "management"
+    "management",
+    "features",
+    "share"
   ],
   "optionalPlugins": [
     "security",

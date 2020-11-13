@@ -4,160 +4,224 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getOr } from 'lodash/fp';
-import React from 'react';
-import { Query } from 'react-apollo';
-import { connect } from 'react-redux';
-import { compose } from 'redux';
+import { noop } from 'lodash/fp';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import deepEqual from 'fast-deep-equal';
 
-import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
-import {
-  PageInfoPaginated,
-  TlsEdges,
-  TlsSortField,
-  GetTlsQuery,
-  FlowTargetSourceDest,
-} from '../../../graphql/types';
-import { inputsModel, State, inputsSelectors } from '../../../common/store';
-import { withKibana, WithKibanaProps } from '../../../common/lib/kibana';
-import { createFilter, getDefaultFetchPolicy } from '../../../common/containers/helpers';
+import { ESTermQuery } from '../../../../common/typed_json';
+import { inputsModel } from '../../../common/store';
+import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
+import { useKibana } from '../../../common/lib/kibana';
+import { createFilter } from '../../../common/containers/helpers';
+import { PageInfoPaginated, FlowTargetSourceDest } from '../../../graphql/types';
 import { generateTablePaginationOptions } from '../../../common/components/paginated_table/helpers';
-import {
-  QueryTemplatePaginated,
-  QueryTemplatePaginatedProps,
-} from '../../../common/containers/query_template_paginated';
 import { networkModel, networkSelectors } from '../../store';
-import { tlsQuery } from './index.gql_query';
+import {
+  NetworkQueries,
+  NetworkTlsRequestOptions,
+  NetworkTlsStrategyResponse,
+} from '../../../../common/search_strategy/security_solution/network';
+import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/plugins/data/common';
+import { AbortError } from '../../../../../../../src/plugins/kibana_utils/common';
 
-const ID = 'tlsQuery';
+import * as i18n from './translations';
+import { getInspectResponse } from '../../../helpers';
 
-export interface TlsArgs {
+const ID = 'networkTlsQuery';
+
+export interface NetworkTlsArgs {
   id: string;
   inspect: inputsModel.InspectQuery;
   isInspected: boolean;
-  loading: boolean;
   loadPage: (newActivePage: number) => void;
   pageInfo: PageInfoPaginated;
   refetch: inputsModel.Refetch;
-  tls: TlsEdges[];
+  tls: NetworkTlsStrategyResponse['edges'];
   totalCount: number;
 }
 
-export interface OwnProps extends QueryTemplatePaginatedProps {
-  children: (args: TlsArgs) => React.ReactNode;
+interface UseNetworkTls {
   flowTarget: FlowTargetSourceDest;
+  indexNames: string[];
   ip: string;
   type: networkModel.NetworkType;
+  filterQuery?: ESTermQuery | string;
+  endDate: string;
+  startDate: string;
+  skip: boolean;
+  id?: string;
 }
 
-export interface TlsComponentReduxProps {
-  activePage: number;
-  isInspected: boolean;
-  limit: number;
-  sort: TlsSortField;
-}
-
-type TlsProps = OwnProps & TlsComponentReduxProps & WithKibanaProps;
-
-class TlsComponentQuery extends QueryTemplatePaginated<
-  TlsProps,
-  GetTlsQuery.Query,
-  GetTlsQuery.Variables
-> {
-  public render() {
-    const {
-      activePage,
-      children,
-      endDate,
-      filterQuery,
-      flowTarget,
-      id = ID,
-      ip,
-      isInspected,
-      kibana,
-      limit,
-      skip,
-      sourceId,
-      startDate,
-      sort,
-    } = this.props;
-    const variables: GetTlsQuery.Variables = {
-      defaultIndex: kibana.services.uiSettings.get<string[]>(DEFAULT_INDEX_KEY),
-      filterQuery: createFilter(filterQuery),
-      flowTarget,
-      inspect: isInspected,
-      ip,
-      pagination: generateTablePaginationOptions(activePage, limit),
-      sort,
-      sourceId,
-      timerange: {
-        interval: '12h',
-        from: startDate ? startDate : '',
-        to: endDate ? endDate : new Date(Date.now()).toISOString(),
-      },
-    };
-    return (
-      <Query<GetTlsQuery.Query, GetTlsQuery.Variables>
-        query={tlsQuery}
-        fetchPolicy={getDefaultFetchPolicy()}
-        notifyOnNetworkStatusChange
-        skip={skip}
-        variables={variables}
-      >
-        {({ data, loading, fetchMore, networkStatus, refetch }) => {
-          const tls = getOr([], 'source.Tls.edges', data);
-          this.setFetchMore(fetchMore);
-          this.setFetchMoreOptions((newActivePage: number) => ({
-            variables: {
-              pagination: generateTablePaginationOptions(newActivePage, limit),
-            },
-            updateQuery: (prev, { fetchMoreResult }) => {
-              if (!fetchMoreResult) {
-                return prev;
-              }
-              return {
-                ...fetchMoreResult,
-                source: {
-                  ...fetchMoreResult.source,
-                  Tls: {
-                    ...fetchMoreResult.source.Tls,
-                    edges: [...fetchMoreResult.source.Tls.edges],
-                  },
-                },
-              };
-            },
-          }));
-          const isLoading = this.isItAValidLoading(loading, variables, networkStatus);
-          return children({
-            id,
-            inspect: getOr(null, 'source.Tls.inspect', data),
-            isInspected,
-            loading: isLoading,
-            loadPage: this.wrappedLoadMore,
-            pageInfo: getOr({}, 'source.Tls.pageInfo', data),
-            refetch: this.memoizedRefetchQuery(variables, limit, refetch),
-            tls,
-            totalCount: getOr(-1, 'source.Tls.totalCount', data),
-          });
-        }}
-      </Query>
-    );
-  }
-}
-
-const makeMapStateToProps = () => {
+export const useNetworkTls = ({
+  endDate,
+  filterQuery,
+  flowTarget,
+  id = ID,
+  indexNames,
+  ip,
+  skip,
+  startDate,
+  type,
+}: UseNetworkTls): [boolean, NetworkTlsArgs] => {
   const getTlsSelector = networkSelectors.tlsSelector();
-  const getQuery = inputsSelectors.globalQueryByIdSelector();
-  return (state: State, { flowTarget, id = ID, type }: OwnProps) => {
-    const { isInspected } = getQuery(state, id);
-    return {
-      ...getTlsSelector(state, type, flowTarget),
-      isInspected,
-    };
-  };
-};
+  const { activePage, limit, sort } = useShallowEqualSelector((state) =>
+    getTlsSelector(state, type, flowTarget)
+  );
+  const { data, notifications } = useKibana().services;
+  const refetch = useRef<inputsModel.Refetch>(noop);
+  const abortCtrl = useRef(new AbortController());
+  const [loading, setLoading] = useState(false);
 
-export const TlsQuery = compose<React.ComponentClass<OwnProps>>(
-  connect(makeMapStateToProps),
-  withKibana
-)(TlsComponentQuery);
+  const [networkTlsRequest, setHostRequest] = useState<NetworkTlsRequestOptions | null>(
+    !skip
+      ? {
+          defaultIndex: indexNames,
+          factoryQueryType: NetworkQueries.tls,
+          filterQuery: createFilter(filterQuery),
+          flowTarget,
+          ip,
+          pagination: generateTablePaginationOptions(activePage, limit),
+          sort,
+          timerange: {
+            interval: '12h',
+            from: startDate ? startDate : '',
+            to: endDate ? endDate : new Date(Date.now()).toISOString(),
+          },
+        }
+      : null
+  );
+
+  const wrappedLoadMore = useCallback(
+    (newActivePage: number) => {
+      setHostRequest((prevRequest) => {
+        if (!prevRequest) {
+          return prevRequest;
+        }
+
+        return {
+          ...prevRequest,
+          pagination: generateTablePaginationOptions(newActivePage, limit),
+        };
+      });
+    },
+    [limit]
+  );
+
+  const [networkTlsResponse, setNetworkTlsResponse] = useState<NetworkTlsArgs>({
+    tls: [],
+    id: ID,
+    inspect: {
+      dsl: [],
+      response: [],
+    },
+    isInspected: false,
+    loadPage: wrappedLoadMore,
+    pageInfo: {
+      activePage: 0,
+      fakeTotalCount: 0,
+      showMorePagesIndicator: false,
+    },
+    refetch: refetch.current,
+    totalCount: -1,
+  });
+
+  const networkTlsSearch = useCallback(
+    (request: NetworkTlsRequestOptions | null) => {
+      if (request == null) {
+        return;
+      }
+
+      let didCancel = false;
+      const asyncSearch = async () => {
+        abortCtrl.current = new AbortController();
+        setLoading(true);
+
+        const searchSubscription$ = data.search
+          .search<NetworkTlsRequestOptions, NetworkTlsStrategyResponse>(request, {
+            strategy: 'securitySolutionSearchStrategy',
+            abortSignal: abortCtrl.current.signal,
+          })
+          .subscribe({
+            next: (response) => {
+              if (isCompleteResponse(response)) {
+                if (!didCancel) {
+                  setLoading(false);
+                  setNetworkTlsResponse((prevResponse) => ({
+                    ...prevResponse,
+                    tls: response.edges,
+                    inspect: getInspectResponse(response, prevResponse.inspect),
+                    pageInfo: response.pageInfo,
+                    refetch: refetch.current,
+                    totalCount: response.totalCount,
+                  }));
+                }
+                searchSubscription$.unsubscribe();
+              } else if (isErrorResponse(response)) {
+                if (!didCancel) {
+                  setLoading(false);
+                }
+                // TODO: Make response error status clearer
+                notifications.toasts.addWarning(i18n.ERROR_NETWORK_TLS);
+                searchSubscription$.unsubscribe();
+              }
+            },
+            error: (msg) => {
+              if (!(msg instanceof AbortError)) {
+                notifications.toasts.addDanger({ title: i18n.FAIL_NETWORK_TLS, text: msg.message });
+              }
+            },
+          });
+      };
+      abortCtrl.current.abort();
+      asyncSearch();
+      refetch.current = asyncSearch;
+      return () => {
+        didCancel = true;
+        abortCtrl.current.abort();
+      };
+    },
+    [data.search, notifications.toasts]
+  );
+
+  useEffect(() => {
+    setHostRequest((prevRequest) => {
+      const myRequest = {
+        ...(prevRequest ?? {}),
+        defaultIndex: indexNames,
+        factoryQueryType: NetworkQueries.tls,
+        filterQuery: createFilter(filterQuery),
+        flowTarget,
+        ip,
+        pagination: generateTablePaginationOptions(activePage, limit),
+        timerange: {
+          interval: '12h',
+          from: startDate,
+          to: endDate,
+        },
+        sort,
+      };
+      if (!skip && !deepEqual(prevRequest, myRequest)) {
+        return myRequest;
+      }
+      return prevRequest;
+    });
+  }, [
+    activePage,
+    indexNames,
+    endDate,
+    filterQuery,
+    limit,
+    startDate,
+    sort,
+    skip,
+    flowTarget,
+    ip,
+    id,
+  ]);
+
+  useEffect(() => {
+    networkTlsSearch(networkTlsRequest);
+  }, [networkTlsRequest, networkTlsSearch]);
+
+  return [loading, networkTlsResponse];
+};

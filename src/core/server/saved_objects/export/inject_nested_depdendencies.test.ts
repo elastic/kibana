@@ -20,6 +20,7 @@
 import { SavedObject } from '../types';
 import { savedObjectsClientMock } from '../../mocks';
 import { getObjectReferencesToFetch, fetchNestedDependencies } from './inject_nested_depdendencies';
+import { SavedObjectsErrorHelpers } from '..';
 
 describe('getObjectReferencesToFetch()', () => {
   test('works with no saved objects', () => {
@@ -77,7 +78,7 @@ describe('getObjectReferencesToFetch()', () => {
     `);
   });
 
-  test(`doesn't deal with circular dependencies`, () => {
+  test('does not fail on circular dependencies', () => {
     const map = new Map<string, SavedObject>();
     map.set('index-pattern:1', {
       id: '1',
@@ -475,10 +476,8 @@ describe('injectNestedDependencies', () => {
         {
           id: '1',
           type: 'index-pattern',
-          error: {
-            statusCode: 404,
-            message: 'Not found',
-          },
+          error: SavedObjectsErrorHelpers.createGenericNotFoundError('index-pattern', '1').output
+            .payload,
           attributes: {},
           references: [],
         },
@@ -528,7 +527,7 @@ describe('injectNestedDependencies', () => {
     `);
   });
 
-  test(`doesn't deal with circular dependencies`, async () => {
+  test('does not fail on circular dependencies', async () => {
     const savedObjects = [
       {
         id: '2',

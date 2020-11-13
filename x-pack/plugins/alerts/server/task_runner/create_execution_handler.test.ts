@@ -10,6 +10,7 @@ import { loggingSystemMock } from '../../../../../src/core/server/mocks';
 import { actionsMock, actionsClientMock } from '../../../actions/server/mocks';
 import { eventLoggerMock } from '../../../event_log/server/event_logger.mock';
 import { KibanaRequest } from 'kibana/server';
+import { asSavedObjectExecutionSource } from '../../../actions/server';
 
 const alertType: AlertType = {
   id: 'test',
@@ -79,20 +80,27 @@ test('enqueues execution per selected action', async () => {
   ).toHaveBeenCalledWith(createExecutionHandlerParams.request);
   expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(1);
   expect(actionsClient.enqueueExecution.mock.calls[0]).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "apiKey": "MTIzOmFiYw==",
+    Array [
+      Object {
+        "apiKey": "MTIzOmFiYw==",
+        "id": "1",
+        "params": Object {
+          "alertVal": "My 1 name-of-alert default tag-A,tag-B 2 goes here",
+          "contextVal": "My  goes here",
+          "foo": true,
+          "stateVal": "My  goes here",
+        },
+        "source": Object {
+          "source": Object {
             "id": "1",
-            "params": Object {
-              "alertVal": "My 1 name-of-alert default tag-A,tag-B 2 goes here",
-              "contextVal": "My  goes here",
-              "foo": true,
-              "stateVal": "My  goes here",
-            },
-            "spaceId": "default",
+            "type": "alert",
           },
-        ]
-    `);
+          "type": "SAVED_OBJECT",
+        },
+        "spaceId": "default",
+      },
+    ]
+  `);
 
   const eventLogger = createExecutionHandlerParams.eventLogger;
   expect(eventLogger.logEvent).toHaveBeenCalledTimes(1);
@@ -105,6 +113,7 @@ test('enqueues execution per selected action', async () => {
           },
           "kibana": Object {
             "alerting": Object {
+              "action_group_id": "default",
               "instance_id": "2",
             },
             "saved_objects": Array [
@@ -161,6 +170,10 @@ test(`doesn't call actionsPlugin.execute for disabled actionTypes`, async () => 
       contextVal: 'My other  goes here',
       stateVal: 'My other  goes here',
     },
+    source: asSavedObjectExecutionSource({
+      id: '1',
+      type: 'alert',
+    }),
     spaceId: 'default',
     apiKey: createExecutionHandlerParams.apiKey,
   });
@@ -231,20 +244,27 @@ test('context attribute gets parameterized', async () => {
   });
   expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(1);
   expect(actionsClient.enqueueExecution.mock.calls[0]).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "apiKey": "MTIzOmFiYw==",
+    Array [
+      Object {
+        "apiKey": "MTIzOmFiYw==",
+        "id": "1",
+        "params": Object {
+          "alertVal": "My 1 name-of-alert default tag-A,tag-B 2 goes here",
+          "contextVal": "My context-val goes here",
+          "foo": true,
+          "stateVal": "My  goes here",
+        },
+        "source": Object {
+          "source": Object {
             "id": "1",
-            "params": Object {
-              "alertVal": "My 1 name-of-alert default tag-A,tag-B 2 goes here",
-              "contextVal": "My context-val goes here",
-              "foo": true,
-              "stateVal": "My  goes here",
-            },
-            "spaceId": "default",
+            "type": "alert",
           },
-        ]
-    `);
+          "type": "SAVED_OBJECT",
+        },
+        "spaceId": "default",
+      },
+    ]
+  `);
 });
 
 test('state attribute gets parameterized', async () => {
@@ -257,20 +277,27 @@ test('state attribute gets parameterized', async () => {
   });
   expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(1);
   expect(actionsClient.enqueueExecution.mock.calls[0]).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "apiKey": "MTIzOmFiYw==",
+    Array [
+      Object {
+        "apiKey": "MTIzOmFiYw==",
+        "id": "1",
+        "params": Object {
+          "alertVal": "My 1 name-of-alert default tag-A,tag-B 2 goes here",
+          "contextVal": "My  goes here",
+          "foo": true,
+          "stateVal": "My state-val goes here",
+        },
+        "source": Object {
+          "source": Object {
             "id": "1",
-            "params": Object {
-              "alertVal": "My 1 name-of-alert default tag-A,tag-B 2 goes here",
-              "contextVal": "My  goes here",
-              "foo": true,
-              "stateVal": "My state-val goes here",
-            },
-            "spaceId": "default",
+            "type": "alert",
           },
-        ]
-    `);
+          "type": "SAVED_OBJECT",
+        },
+        "spaceId": "default",
+      },
+    ]
+  `);
 });
 
 test(`logs an error when action group isn't part of actionGroups available for the alertType`, async () => {

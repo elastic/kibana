@@ -3,9 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-/* eslint-disable @kbn/eslint/no-restricted-paths */
 
-import { getRandomString, getRandomNumber } from '../../../../test_utils';
+import { getRandomString, getRandomNumber } from '@kbn/test/jest';
 import { SlmPolicy } from '../../common/types';
 import { DEFAULT_POLICY_SCHEDULE } from '../../public/application/constants';
 

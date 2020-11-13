@@ -17,6 +17,12 @@
  * under the License.
  */
 
+const realFs = jest.requireActual('fs');
+
 export const mockReadFile = jest.fn();
 const mockStat = jest.fn();
-jest.mock('fs', () => ({ readFile: mockReadFile, stat: mockStat }));
+jest.doMock('fs', () => ({
+  ...realFs,
+  readFile: mockReadFile,
+  stat: mockStat,
+}));

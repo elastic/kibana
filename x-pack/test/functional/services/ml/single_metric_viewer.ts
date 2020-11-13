@@ -6,8 +6,13 @@
 import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { MlCommonUI } from './common_ui';
 
-export function MachineLearningSingleMetricViewerProvider({ getService }: FtrProviderContext) {
+export function MachineLearningSingleMetricViewerProvider(
+  { getService }: FtrProviderContext,
+  mlCommonUI: MlCommonUI
+) {
+  const comboBox = getService('comboBox');
   const testSubjects = getService('testSubjects');
 
   return {
@@ -15,13 +20,25 @@ export function MachineLearningSingleMetricViewerProvider({ getService }: FtrPro
       await testSubjects.existOrFail('mlNoSingleMetricJobsFound');
     },
 
-    async assertForecastButtonExistsExsist() {
+    async assertForecastButtonExists() {
       await testSubjects.existOrFail(
         'mlSingleMetricViewerSeriesControls > mlSingleMetricViewerButtonForecast'
       );
     },
 
-    async assertDetectorInputExsist() {
+    async assertForecastButtonEnabled(expectedValue: boolean) {
+      const isEnabled = await testSubjects.isEnabled(
+        'mlSingleMetricViewerSeriesControls > mlSingleMetricViewerButtonForecast'
+      );
+      expect(isEnabled).to.eql(
+        expectedValue,
+        `Expected "forecast" button to be '${expectedValue ? 'enabled' : 'disabled'}' (got '${
+          isEnabled ? 'enabled' : 'disabled'
+        }')`
+      );
+    },
+
+    async assertDetectorInputExist() {
       await testSubjects.existOrFail(
         'mlSingleMetricViewerSeriesControls > mlSingleMetricViewerDetectorSelect'
       );
@@ -46,8 +63,129 @@ export function MachineLearningSingleMetricViewerProvider({ getService }: FtrPro
       await this.assertDetectorInputValue(detectorOptionValue);
     },
 
-    async assertChartExsist() {
+    async assertEntityInputExist(entityFieldName: string) {
+      await testSubjects.existOrFail(`mlSingleMetricViewerEntitySelection ${entityFieldName}`);
+    },
+
+    async assertEntityInputSelection(entityFieldName: string, expectedIdentifier: string[]) {
+      const comboBoxSelectedOptions = await comboBox.getComboBoxSelectedOptions(
+        `mlSingleMetricViewerEntitySelection ${entityFieldName}  > comboBoxInput`
+      );
+      expect(comboBoxSelectedOptions).to.eql(
+        expectedIdentifier,
+        `Expected entity field selection for '${entityFieldName}' to be '${expectedIdentifier}' (got '${comboBoxSelectedOptions}')`
+      );
+    },
+
+    async selectEntityValue(entityFieldName: string, entityFieldValue: string) {
+      await comboBox.set(
+        `mlSingleMetricViewerEntitySelection ${entityFieldName}  > comboBoxInput`,
+        entityFieldValue
+      );
+      await this.assertEntityInputSelection(entityFieldName, [entityFieldValue]);
+    },
+
+    async assertChartExist() {
       await testSubjects.existOrFail('mlSingleMetricViewerChart');
+    },
+
+    async assertAnnotationsExists(state: string) {
+      await testSubjects.existOrFail(`mlAnomalyExplorerAnnotations ${state}`, {
+        timeout: 30 * 1000,
+      });
+    },
+
+    async openForecastModal() {
+      await testSubjects.click(
+        'mlSingleMetricViewerSeriesControls > mlSingleMetricViewerButtonForecast'
+      );
+      await testSubjects.existOrFail('mlModalForecast');
+    },
+
+    async closeForecastModal() {
+      await testSubjects.click('mlModalForecast > mlModalForecastButtonClose');
+      await testSubjects.missingOrFail('mlModalForecast');
+    },
+
+    async assertForecastModalRunButtonEnabled(expectedValue: boolean) {
+      const isEnabled = await testSubjects.isEnabled('mlModalForecast > mlModalForecastButtonRun');
+      expect(isEnabled).to.eql(
+        expectedValue,
+        `Expected forecast "run" button to be '${expectedValue ? 'enabled' : 'disabled'}' (got '${
+          isEnabled ? 'enabled' : 'disabled'
+        }')`
+      );
+    },
+
+    async openAnomalyExplorer() {
+      await testSubjects.click('mlAnomalyResultsViewSelectorExplorer');
+      await testSubjects.existOrFail('mlPageAnomalyExplorer');
+    },
+
+    async openConfigForControl(entityFieldName: string) {
+      const isPopoverOpened = await testSubjects.exists(
+        `mlSingleMetricViewerEntitySelectionConfigPopover_${entityFieldName}`
+      );
+
+      if (isPopoverOpened) {
+        return;
+      }
+
+      await testSubjects.click(
+        `mlSingleMetricViewerEntitySelectionConfigButton_${entityFieldName}`
+      );
+      await testSubjects.existOrFail(
+        `mlSingleMetricViewerEntitySelectionConfigPopover_${entityFieldName}`
+      );
+    },
+
+    async assertEntityConfig(
+      entityFieldName: string,
+      anomalousOnly: boolean,
+      sortBy: 'anomaly_score' | 'name',
+      order: 'asc' | 'desc'
+    ) {
+      await this.openConfigForControl(entityFieldName);
+      expect(
+        await testSubjects.isEuiSwitchChecked(
+          `mlSingleMetricViewerEntitySelectionConfigAnomalousOnly_${entityFieldName}`
+        )
+      ).to.eql(
+        anomalousOnly,
+        `Expected the "Anomalous only" control for "${entityFieldName}" to be ${
+          anomalousOnly ? 'enabled' : 'disabled'
+        }`
+      );
+      await mlCommonUI.assertRadioGroupValue(
+        `mlSingleMetricViewerEntitySelectionConfigSortBy_${entityFieldName}`,
+        sortBy
+      );
+      await mlCommonUI.assertRadioGroupValue(
+        `mlSingleMetricViewerEntitySelectionConfigOrder_${entityFieldName}`,
+        order
+      );
+    },
+
+    async setEntityConfig(
+      entityFieldName: string,
+      anomalousOnly: boolean,
+      sortBy: 'anomaly_score' | 'name',
+      order: 'asc' | 'desc'
+    ) {
+      await this.openConfigForControl(entityFieldName);
+      await testSubjects.setEuiSwitch(
+        `mlSingleMetricViewerEntitySelectionConfigAnomalousOnly_${entityFieldName}`,
+        anomalousOnly ? 'check' : 'uncheck'
+      );
+      await mlCommonUI.selectRadioGroupValue(
+        `mlSingleMetricViewerEntitySelectionConfigSortBy_${entityFieldName}`,
+        sortBy
+      );
+      await mlCommonUI.selectRadioGroupValue(
+        `mlSingleMetricViewerEntitySelectionConfigOrder_${entityFieldName}`,
+        order
+      );
+      await this.assertEntityConfig(entityFieldName, anomalousOnly, sortBy, order);
     },
   };
 }

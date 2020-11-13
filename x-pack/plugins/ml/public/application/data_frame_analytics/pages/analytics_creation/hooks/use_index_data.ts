@@ -22,10 +22,11 @@ import {
   useDataGrid,
   useRenderCellValue,
   EsSorting,
-  SearchResponse7,
   UseIndexDataReturnType,
+  getProcessedFields,
 } from '../../../../components/data_grid';
-import { getErrorMessage } from '../../../../../../common/util/errors';
+import type { SearchResponse7 } from '../../../../../../common/types/es_client';
+import { extractErrorMessage } from '../../../../../../common/util/errors';
 import { INDEX_STATUS } from '../../../common/analytics';
 import { ml } from '../../../../services/ml_api_service';
 
@@ -63,7 +64,6 @@ export const useIndexData = (
   useEffect(() => {
     resetPagination();
     // custom comparison
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(query)]);
 
   const getIndexData = async function () {
@@ -82,6 +82,8 @@ export const useIndexData = (
         query, // isDefaultQuery(query) ? matchAllQuery : query,
         from: pagination.pageIndex * pagination.pageSize,
         size: pagination.pageSize,
+        fields: ['*'],
+        _source: false,
         ...(Object.keys(sort).length > 0 ? { sort } : {}),
       },
     };
@@ -89,13 +91,12 @@ export const useIndexData = (
     try {
       const resp: IndexSearchResponse = await ml.esSearch(esSearchRequest);
 
-      const docs = resp.hits.hits.map((d) => d._source);
-
+      const docs = resp.hits.hits.map((d) => getProcessedFields(d.fields));
       setRowCount(resp.hits.total.value);
       setTableItems(docs);
       setStatus(INDEX_STATUS.LOADED);
     } catch (e) {
-      setErrorMessage(getErrorMessage(e));
+      setErrorMessage(extractErrorMessage(e));
       setStatus(INDEX_STATUS.ERROR);
     }
   };
@@ -103,7 +104,6 @@ export const useIndexData = (
   useEffect(() => {
     getIndexData();
     // custom comparison
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [indexPattern.title, JSON.stringify([query, pagination, sortingColumns])]);
 
   const dataLoader = useMemo(() => new DataLoader(indexPattern, toastNotifications), [
@@ -132,7 +132,6 @@ export const useIndexData = (
       fetchColumnChartsData();
     }
     // custom comparison
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     dataGrid.chartsVisible,
     indexPattern.title,

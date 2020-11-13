@@ -29,10 +29,12 @@ The constructor for this class is marked as internal. Third-party code should no
 |  [bulkCreate(objects, options)](./kibana-plugin-core-server.savedobjectsclient.bulkcreate.md) |  | Persists multiple documents batched together as a single request |
 |  [bulkGet(objects, options)](./kibana-plugin-core-server.savedobjectsclient.bulkget.md) |  | Returns an array of objects by id |
 |  [bulkUpdate(objects, options)](./kibana-plugin-core-server.savedobjectsclient.bulkupdate.md) |  | Bulk Updates multiple SavedObject at once |
+|  [checkConflicts(objects, options)](./kibana-plugin-core-server.savedobjectsclient.checkconflicts.md) |  | Check what conflicts will result when creating a given array of saved objects. This includes "unresolvable conflicts", which are multi-namespace objects that exist in a different namespace; such conflicts cannot be resolved/overwritten. |
 |  [create(type, attributes, options)](./kibana-plugin-core-server.savedobjectsclient.create.md) |  | Persists a SavedObject |
 |  [delete(type, id, options)](./kibana-plugin-core-server.savedobjectsclient.delete.md) |  | Deletes a SavedObject |
 |  [deleteFromNamespaces(type, id, namespaces, options)](./kibana-plugin-core-server.savedobjectsclient.deletefromnamespaces.md) |  | Removes namespaces from a SavedObject |
 |  [find(options)](./kibana-plugin-core-server.savedobjectsclient.find.md) |  | Find all SavedObjects matching the search query |
 |  [get(type, id, options)](./kibana-plugin-core-server.savedobjectsclient.get.md) |  | Retrieves a single object |
+|  [removeReferencesTo(type, id, options)](./kibana-plugin-core-server.savedobjectsclient.removereferencesto.md) |  | Updates all objects containing a reference to the given {<!-- -->type, id<!-- -->} tuple to remove the said reference. |
 |  [update(type, id, attributes, options)](./kibana-plugin-core-server.savedobjectsclient.update.md) |  | Updates an SavedObject |
 

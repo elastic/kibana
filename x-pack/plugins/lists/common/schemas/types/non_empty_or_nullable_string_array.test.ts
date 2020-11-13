@@ -7,12 +7,12 @@
 import { pipe } from 'fp-ts/lib/pipeable';
 import { left } from 'fp-ts/lib/Either';
 
-import { foldLeftRight, getPaths } from '../../siem_common_deps';
+import { foldLeftRight, getPaths } from '../../shared_imports';
 
 import { nonEmptyOrNullableStringArray } from './non_empty_or_nullable_string_array';
 
 describe('nonEmptyOrNullableStringArray', () => {
-  test('it should NOT validate an empty array', () => {
+  test('it should FAIL validation when given an empty array', () => {
     const payload: string[] = [];
     const decoded = nonEmptyOrNullableStringArray.decode(payload);
     const message = pipe(decoded, foldLeftRight);
@@ -23,7 +23,7 @@ describe('nonEmptyOrNullableStringArray', () => {
     expect(message.schema).toEqual({});
   });
 
-  test('it should NOT validate "undefined"', () => {
+  test('it should FAIL validation when given "undefined"', () => {
     const payload = undefined;
     const decoded = nonEmptyOrNullableStringArray.decode(payload);
     const message = pipe(decoded, foldLeftRight);
@@ -34,7 +34,7 @@ describe('nonEmptyOrNullableStringArray', () => {
     expect(message.schema).toEqual({});
   });
 
-  test('it should NOT validate "null"', () => {
+  test('it should FAIL validation when given "null"', () => {
     const payload = null;
     const decoded = nonEmptyOrNullableStringArray.decode(payload);
     const message = pipe(decoded, foldLeftRight);
@@ -45,7 +45,7 @@ describe('nonEmptyOrNullableStringArray', () => {
     expect(message.schema).toEqual({});
   });
 
-  test('it should NOT validate an array of with an empty string', () => {
+  test('it should FAIL validation when given an array of with an empty string', () => {
     const payload: string[] = ['im good', ''];
     const decoded = nonEmptyOrNullableStringArray.decode(payload);
     const message = pipe(decoded, foldLeftRight);
@@ -56,7 +56,7 @@ describe('nonEmptyOrNullableStringArray', () => {
     expect(message.schema).toEqual({});
   });
 
-  test('it should NOT validate an array of non strings', () => {
+  test('it should FAIL validation when given an array of non strings', () => {
     const payload = [1];
     const decoded = nonEmptyOrNullableStringArray.decode(payload);
     const message = pipe(decoded, foldLeftRight);

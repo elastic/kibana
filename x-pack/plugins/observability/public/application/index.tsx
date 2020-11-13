@@ -4,16 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { i18n } from '@kbn/i18n';
-import { createHashHistory } from 'history';
 import React, { useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import { Route, Router, Switch } from 'react-router-dom';
 import { AppMountParameters, CoreStart } from '../../../../../src/core/public';
-import { RedirectAppLinks } from '../../../../../src/plugins/kibana_react/public';
-import { EuiThemeProvider } from '../../../../legacy/common/eui_styled_components';
+import {
+  KibanaContextProvider,
+  RedirectAppLinks,
+} from '../../../../../src/plugins/kibana_react/public';
+import { EuiThemeProvider } from '../../../xpack_legacy/common';
 import { PluginContext } from '../context/plugin_context';
 import { usePluginContext } from '../hooks/use_plugin_context';
 import { useRouteParams } from '../hooks/use_route_params';
+import { ObservabilityPluginSetupDeps } from '../plugin';
 import { Breadcrumbs, routes } from '../routes';
 
 const observabilityLabelBreadcrumb = {
@@ -52,22 +55,36 @@ function App() {
   );
 }
 
-export const renderApp = (core: CoreStart, { element }: AppMountParameters) => {
+export const renderApp = (
+  core: CoreStart,
+  plugins: ObservabilityPluginSetupDeps,
+  appMountParameters: AppMountParameters
+) => {
+  const { element, history } = appMountParameters;
   const i18nCore = core.i18n;
   const isDarkMode = core.uiSettings.get('theme:darkMode');
-  const history = createHashHistory();
+
+  core.chrome.setHelpExtension({
+    appName: i18n.translate('xpack.observability.feedbackMenu.appName', {
+      defaultMessage: 'Observability',
+    }),
+    links: [{ linkType: 'discuss', href: 'https://ela.st/observability-discuss' }],
+  });
+
   ReactDOM.render(
-    <PluginContext.Provider value={{ core }}>
-      <Router history={history}>
-        <EuiThemeProvider darkMode={isDarkMode}>
-          <i18nCore.Context>
-            <RedirectAppLinks application={core.application}>
-              <App />
-            </RedirectAppLinks>
-          </i18nCore.Context>
-        </EuiThemeProvider>
-      </Router>
-    </PluginContext.Provider>,
+    <KibanaContextProvider services={{ ...core, ...plugins }}>
+      <PluginContext.Provider value={{ appMountParameters, core, plugins }}>
+        <Router history={history}>
+          <EuiThemeProvider darkMode={isDarkMode}>
+            <i18nCore.Context>
+              <RedirectAppLinks application={core.application}>
+                <App />
+              </RedirectAppLinks>
+            </i18nCore.Context>
+          </EuiThemeProvider>
+        </Router>
+      </PluginContext.Provider>
+    </KibanaContextProvider>,
     element
   );
   return () => {

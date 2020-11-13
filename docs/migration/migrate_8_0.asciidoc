@@ -115,7 +115,7 @@ URL that it derived from the actual server address and `xpack.security.public` s
 
 *Impact:* Any workflow that involved manually clearing generated bundles will have to be updated with the new path.
 
-[float]]
+[float]
 === kibana.keystore has moved from the `data` folder to the `config` folder
 *Details:* By default, kibana.keystore has moved from the configured `path.data` folder to `<root>/config` for archive distributions
 and `/etc/kibana` for package distributions.  If a pre-existing keystore exists in the data directory that path will continue to be used.
@@ -137,6 +137,18 @@ instead be assigned the `kibana_admin` role to maintain their current
 access level.
 
 [float]
+=== `kibana_dashboard_only_user` role has been removed.
+
+*Details:* The `kibana_dashboard_only_user` role has been removed.
+If you wish to restrict access to just the Dashboard feature, create
+custom roles with {kibana-ref}/kibana-privileges.html[{kib} privileges].
+
+*Impact:* Any users currently assigned the `kibana_dashboard_only_user` role will need to be assigned a custom role which only grants access to the Dashboard feature.
+
+Granting additional cluster or index privileges may enable certain
+**Stack Monitoring** features.
+
+[float]
 [[breaking_80_reporting_changes]]
 === Reporting changes
 
@@ -154,5 +166,15 @@ The `xpack.` prefix has been removed for all telemetry configurations.
 
 *Impact:*
 For any configurations beginning with `xpack.telemetry`, remove the `xpack` prefix. Use {kibana-ref}/telemetry-settings-kbn.html#telemetry-general-settings[`telemetry.enabled`] instead.
+
+[float]
+=== SysV init support has been removed
+
+*Details:*
+All supported operating systems support using systemd service files.  Any system that doesn't already have service aliased to use kibana.service should use `systemctl start kibana.service` instead of the `service start kibana`.
+
+*Impact:*
+Any installations using `.deb` or `.rpm` packages using SysV will need to migrate to systemd.
+
 
 // end::notable-breaking-changes[]

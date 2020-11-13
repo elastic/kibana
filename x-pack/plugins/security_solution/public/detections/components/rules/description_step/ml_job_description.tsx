@@ -8,9 +8,10 @@ import React from 'react';
 import styled from 'styled-components';
 import { EuiBadge, EuiIcon, EuiLink, EuiToolTip } from '@elastic/eui';
 
+import { ML_PAGES, MlSummaryJob, useMlHref } from '../../../../../../ml/public';
 import { isJobStarted } from '../../../../../common/machine_learning/helpers';
+import { useSecurityJobs } from '../../../../common/components/ml_popover/hooks/use_security_jobs';
 import { useKibana } from '../../../../common/lib/kibana';
-import { SiemJob } from '../../../../common/components/ml_popover/types';
 import { ListItems } from './types';
 import { ML_JOB_STARTED, ML_JOB_STOPPED } from './translations';
 
@@ -21,7 +22,7 @@ enum MessageLevels {
 }
 
 const AuditIconComponent: React.FC<{
-  message: SiemJob['auditMessage'];
+  message: MlSummaryJob['auditMessage'];
 }> = ({ message }) => {
   if (!message) {
     return null;
@@ -47,7 +48,7 @@ const AuditIconComponent: React.FC<{
 
 export const AuditIcon = React.memo(AuditIconComponent);
 
-const JobStatusBadgeComponent: React.FC<{ job: SiemJob }> = ({ job }) => {
+const JobStatusBadgeComponent: React.FC<{ job: MlSummaryJob }> = ({ job }) => {
   const isStarted = isJobStarted(job.jobState, job.datafeedState);
   const color = isStarted ? 'secondary' : 'danger';
   const text = isStarted ? ML_JOB_STARTED : ML_JOB_STOPPED;
@@ -69,35 +70,40 @@ const Wrapper = styled.div`
   overflow: hidden;
 `;
 
-const MlJobDescriptionComponent: React.FC<{ job: SiemJob }> = ({ job }) => {
-  const jobUrl = useKibana().services.application.getUrlForApp(
-    `ml#/jobs?mlManagement=(jobId:${encodeURI(job.id)})`
-  );
+const MlJobDescriptionComponent: React.FC<{ jobId: string }> = ({ jobId }) => {
+  const { jobs } = useSecurityJobs(false);
+  const {
+    services: { http, ml },
+  } = useKibana();
+  const jobUrl = useMlHref(ml, http.basePath.get(), {
+    page: ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE,
+    pageState: {
+      jobId: [jobId],
+    },
+  });
 
-  return (
+  const job = jobs.find(({ id }) => id === jobId);
+
+  const jobIdSpan = <span data-test-subj="machineLearningJobId">{jobId}</span>;
+
+  return job != null ? (
     <Wrapper>
       <div>
-        <JobLink data-test-subj="machineLearningJobId" href={jobUrl} target="_blank">
-          {job.id}
+        <JobLink href={jobUrl} target="_blank">
+          {jobIdSpan}
         </JobLink>
         <AuditIcon message={job.auditMessage} />
       </div>
       <JobStatusBadge job={job} />
     </Wrapper>
+  ) : (
+    jobIdSpan
   );
 };
 
 export const MlJobDescription = React.memo(MlJobDescriptionComponent);
 
-export const buildMlJobDescription = (
-  jobId: string,
-  label: string,
-  siemJobs: SiemJob[]
-): ListItems => {
-  const siemJob = siemJobs.find((job) => job.id === jobId);
-
-  return {
-    title: label,
-    description: siemJob ? <MlJobDescription job={siemJob} /> : jobId,
-  };
-};
+export const buildMlJobDescription = (jobId: string, label: string): ListItems => ({
+  title: label,
+  description: <MlJobDescription jobId={jobId} />,
+});

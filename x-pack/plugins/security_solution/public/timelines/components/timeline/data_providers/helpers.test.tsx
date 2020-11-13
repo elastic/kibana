@@ -112,7 +112,7 @@ describe('helpers', () => {
           })
         ).toEqual({
           updatedDestinationGroup: [sourceGroup[moveProviderFromSourceIndex]],
-          updatedSourceGroup: sourceGroup.filter((_, i) => i !== moveProviderFromSourceIndex),
+          updatedSourcererScope: sourceGroup.filter((_, i) => i !== moveProviderFromSourceIndex),
         });
       })
     );
@@ -138,7 +138,7 @@ describe('helpers', () => {
                   : [...acc, sourceGroup[moveProviderFromSourceIndex], p],
               []
             ),
-            updatedSourceGroup: sourceGroup.filter((_, i) => i !== moveProviderFromSourceIndex),
+            updatedSourcererScope: sourceGroup.filter((_, i) => i !== moveProviderFromSourceIndex),
           });
         })
       )
@@ -171,7 +171,7 @@ describe('helpers', () => {
                   p.id !== sourceGroup[moveProviderFromSourceIndex].id ||
                   i === moveProviderToDestinationIndex
               ),
-            updatedSourceGroup: sourceGroup.filter((_, i) => i !== moveProviderFromSourceIndex),
+            updatedSourcererScope: sourceGroup.filter((_, i) => i !== moveProviderFromSourceIndex),
           });
         })
       )

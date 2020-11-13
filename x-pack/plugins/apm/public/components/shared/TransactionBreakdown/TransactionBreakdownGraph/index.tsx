@@ -4,51 +4,113 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useMemo } from 'react';
-import { throttle } from 'lodash';
-import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
-import { Coordinate, TimeSeries } from '../../../../../typings/timeseries';
-import { Maybe } from '../../../../../typings/common';
-import { TransactionLineChart } from '../../charts/TransactionCharts/TransactionLineChart';
-import { asPercent } from '../../../../utils/formatters';
+import {
+  AreaSeries,
+  Axis,
+  Chart,
+  niceTimeFormatter,
+  Placement,
+  Position,
+  ScaleType,
+  Settings,
+} from '@elastic/charts';
+import moment from 'moment';
+import React, { useEffect } from 'react';
+import { useHistory } from 'react-router-dom';
+import { asPercent } from '../../../../../common/utils/formatters';
+import { TimeSeries } from '../../../../../typings/timeseries';
+import { FETCH_STATUS } from '../../../../hooks/useFetcher';
+import { useUrlParams } from '../../../../hooks/useUrlParams';
+import { useChartsSync as useChartsSync2 } from '../../../../hooks/use_charts_sync';
 import { unit } from '../../../../style/variables';
-import { isValidCoordinateValue } from '../../../../utils/isValidCoordinateValue';
-import { useUiTracker } from '../../../../../../observability/public';
+import { Annotations } from '../../charts/annotations';
+import { ChartContainer } from '../../charts/chart_container';
+import { onBrushEnd } from '../../charts/helper/helper';
+
+const XY_HEIGHT = unit * 16;
 
 interface Props {
-  timeseries: TimeSeries[];
+  fetchStatus: FETCH_STATUS;
+  timeseries?: TimeSeries[];
 }
 
-const tickFormatY = (y: Maybe<number>) => {
-  return asPercent(y ?? 0, 1);
-};
+export function TransactionBreakdownGraph({ fetchStatus, timeseries }: Props) {
+  const history = useHistory();
+  const chartRef = React.createRef<Chart>();
+  const { event, setEvent } = useChartsSync2();
+  const { urlParams } = useUrlParams();
+  const { start, end } = urlParams;
 
-const formatTooltipValue = (coordinate: Coordinate) => {
-  return isValidCoordinateValue(coordinate.y)
-    ? asPercent(coordinate.y, 1)
-    : NOT_AVAILABLE_LABEL;
-};
+  useEffect(() => {
+    if (event.chartId !== 'timeSpentBySpan' && chartRef.current) {
+      chartRef.current.dispatchExternalPointerEvent(event);
+    }
+  }, [chartRef, event]);
 
-function TransactionBreakdownGraph(props: Props) {
-  const { timeseries } = props;
-  const trackApmEvent = useUiTracker({ app: 'apm' });
-  const handleHover = useMemo(
-    () =>
-      throttle(() => trackApmEvent({ metric: 'hover_breakdown_chart' }), 60000),
-    [trackApmEvent]
-  );
+  const min = moment.utc(start).valueOf();
+  const max = moment.utc(end).valueOf();
+
+  const xFormatter = niceTimeFormatter([min, max]);
 
   return (
-    <TransactionLineChart
-      series={timeseries}
-      tickFormatY={tickFormatY}
-      formatTooltipValue={formatTooltipValue}
-      yMax={1}
-      height={unit * 12}
-      stacked={true}
-      onHover={handleHover}
-    />
+    <ChartContainer
+      height={XY_HEIGHT}
+      hasData={!!timeseries}
+      status={fetchStatus}
+    >
+      <Chart ref={chartRef} id="timeSpentBySpan">
+        <Settings
+          onBrushEnd={({ x }) => onBrushEnd({ x, history })}
+          showLegend
+          showLegendExtra
+          legendPosition={Position.Bottom}
+          xDomain={{ min, max }}
+          flatLegend
+          onPointerUpdate={(currEvent: any) => {
+            setEvent(currEvent);
+          }}
+          externalPointerEvents={{
+            tooltip: { visible: true, placement: Placement.Bottom },
+          }}
+        />
+        <Axis
+          id="x-axis"
+          position={Position.Bottom}
+          showOverlappingTicks
+          tickFormat={xFormatter}
+        />
+        <Axis
+          id="y-axis"
+          ticks={3}
+          position={Position.Left}
+          tickFormat={(y: number) => asPercent(y ?? 0, 1)}
+        />
+
+        <Annotations />
+
+        {timeseries?.length ? (
+          timeseries.map((serie) => {
+            return (
+              <AreaSeries
+                key={serie.title}
+                id={serie.title}
+                name={serie.title}
+                xScaleType={ScaleType.Linear}
+                yScaleType={ScaleType.Linear}
+                xAccessor="x"
+                yAccessors={['y']}
+                data={serie.data}
+                stackAccessors={['x']}
+                stackMode={'percentage'}
+                color={serie.areaColor}
+              />
+            );
+          })
+        ) : (
+          // When timeseries is empty, loads an AreaSeries chart to show the default empty message.
+          <AreaSeries id="empty_chart" data={[]} />
+        )}
+      </Chart>
+    </ChartContainer>
   );
 }
-
-export { TransactionBreakdownGraph };

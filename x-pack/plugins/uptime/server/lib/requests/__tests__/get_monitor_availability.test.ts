@@ -12,16 +12,9 @@ import {
 } from '../get_monitor_availability';
 import { setupMockEsCompositeQuery } from './helper';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../common/constants';
-import { GetMonitorAvailabilityParams } from '../../../../common/runtime_types';
+import { GetMonitorAvailabilityParams, makePing, Ping } from '../../../../common/runtime_types';
 interface AvailabilityTopHit {
-  _source: {
-    monitor: {
-      name: string;
-    };
-    url: {
-      full: string;
-    };
-  };
+  _source: Ping;
 }
 
 interface AvailabilityDoc {
@@ -46,11 +39,10 @@ interface AvailabilityDoc {
 const genBucketItem = ({
   monitorId,
   location,
-  name,
-  url,
   up,
   down,
   availabilityRatio,
+  monitorInfo,
 }: GetMonitorAvailabilityResult): AvailabilityDoc => ({
   key: {
     monitorId,
@@ -61,14 +53,7 @@ const genBucketItem = ({
     hits: {
       hits: [
         {
-          _source: {
-            monitor: {
-              name,
-            },
-            url: {
-              full: url,
-            },
-          },
+          _source: monitorInfo,
         },
       ],
     },
@@ -87,7 +72,7 @@ const genBucketItem = ({
 describe('monitor availability', () => {
   describe('getMonitorAvailability', () => {
     it('applies bool filters to params', async () => {
-      const [callES, esMock] = setupMockEsCompositeQuery<
+      const esMock = setupMockEsCompositeQuery<
         AvailabilityKey,
         GetMonitorAvailabilityResult,
         AvailabilityDoc
@@ -124,16 +109,15 @@ describe('monitor availability', () => {
       }
     }`;
       await getMonitorAvailability({
-        callES,
+        callES: esMock,
         dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
         filters: exampleFilter,
         range: 2,
         rangeUnit: 'w',
         threshold: '54',
       });
-      expect(esMock.callAsCurrentUser).toHaveBeenCalledTimes(1);
-      const [method, params] = esMock.callAsCurrentUser.mock.calls[0];
-      expect(method).toEqual('search');
+      expect(esMock.search).toHaveBeenCalledTimes(1);
+      const [params] = esMock.search.mock.calls[0];
       expect(params).toMatchInlineSnapshot(`
         Object {
           "body": Object {
@@ -148,10 +132,6 @@ describe('monitor availability', () => {
                   },
                   "fields": Object {
                     "top_hits": Object {
-                      "_source": Array [
-                        "monitor.name",
-                        "url.full",
-                      ],
                       "size": 1,
                       "sort": Array [
                         Object {
@@ -222,28 +202,32 @@ describe('monitor availability', () => {
                       },
                     },
                   },
-                ],
-                "minimum_should_match": 1,
-                "should": Array [
                   Object {
                     "bool": Object {
                       "minimum_should_match": 1,
                       "should": Array [
                         Object {
-                          "match_phrase": Object {
-                            "monitor.id": "apm-dev",
+                          "bool": Object {
+                            "minimum_should_match": 1,
+                            "should": Array [
+                              Object {
+                                "match_phrase": Object {
+                                  "monitor.id": "apm-dev",
+                                },
+                              },
+                            ],
                           },
                         },
-                      ],
-                    },
-                  },
-                  Object {
-                    "bool": Object {
-                      "minimum_should_match": 1,
-                      "should": Array [
                         Object {
-                          "match_phrase": Object {
-                            "monitor.id": "auto-http-0X8D6082B94BBE3B8A",
+                          "bool": Object {
+                            "minimum_should_match": 1,
+                            "should": Array [
+                              Object {
+                                "match_phrase": Object {
+                                  "monitor.id": "auto-http-0X8D6082B94BBE3B8A",
+                                },
+                              },
+                            ],
                           },
                         },
                       ],
@@ -260,7 +244,7 @@ describe('monitor availability', () => {
     });
 
     it('fetches a single page of results', async () => {
-      const [callES, esMock] = setupMockEsCompositeQuery<
+      const esMock = setupMockEsCompositeQuery<
         AvailabilityKey,
         GetMonitorAvailabilityResult,
         AvailabilityDoc
@@ -271,29 +255,26 @@ describe('monitor availability', () => {
               {
                 monitorId: 'foo',
                 location: 'harrisburg',
-                name: 'Foo',
-                url: 'http://foo.com',
                 up: 456,
                 down: 234,
                 availabilityRatio: 0.660869565217391,
+                monitorInfo: makePing({}),
               },
               {
                 monitorId: 'foo',
                 location: 'faribanks',
-                name: 'Foo',
-                url: 'http://foo.com',
                 up: 450,
                 down: 240,
                 availabilityRatio: 0.652173913043478,
+                monitorInfo: makePing({}),
               },
               {
                 monitorId: 'bar',
                 location: 'fairbanks',
-                name: 'Bar',
-                url: 'http://bar.com',
                 up: 468,
                 down: 212,
                 availabilityRatio: 0.688235294117647,
+                monitorInfo: makePing({}),
               },
             ],
           },
@@ -306,13 +287,12 @@ describe('monitor availability', () => {
         threshold: '69',
       };
       const result = await getMonitorAvailability({
-        callES,
+        callES: esMock,
         dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
         ...clientParameters,
       });
-      expect(esMock.callAsCurrentUser).toHaveBeenCalledTimes(1);
-      const [method, params] = esMock.callAsCurrentUser.mock.calls[0];
-      expect(method).toEqual('search');
+      expect(esMock.search).toHaveBeenCalledTimes(1);
+      const [params] = esMock.search.mock.calls[0];
       expect(params).toMatchInlineSnapshot(`
         Object {
           "body": Object {
@@ -327,10 +307,6 @@ describe('monitor availability', () => {
                   },
                   "fields": Object {
                     "top_hits": Object {
-                      "_source": Array [
-                        "monitor.name",
-                        "url.full",
-                      ],
                       "size": 1,
                       "sort": Array [
                         Object {
@@ -417,34 +393,70 @@ describe('monitor availability', () => {
             "down": 234,
             "location": "harrisburg",
             "monitorId": "foo",
-            "name": "Foo",
+            "monitorInfo": Object {
+              "docId": "myDocId",
+              "monitor": Object {
+                "duration": Object {
+                  "us": 100000,
+                },
+                "id": "myId",
+                "ip": "127.0.0.1",
+                "name": undefined,
+                "status": "up",
+                "type": "myType",
+              },
+              "timestamp": "2020-07-07T01:14:08Z",
+            },
             "up": 456,
-            "url": "http://foo.com",
           },
           Object {
             "availabilityRatio": 0.652173913043478,
             "down": 240,
             "location": "faribanks",
             "monitorId": "foo",
-            "name": "Foo",
+            "monitorInfo": Object {
+              "docId": "myDocId",
+              "monitor": Object {
+                "duration": Object {
+                  "us": 100000,
+                },
+                "id": "myId",
+                "ip": "127.0.0.1",
+                "name": undefined,
+                "status": "up",
+                "type": "myType",
+              },
+              "timestamp": "2020-07-07T01:14:08Z",
+            },
             "up": 450,
-            "url": "http://foo.com",
           },
           Object {
             "availabilityRatio": 0.688235294117647,
             "down": 212,
             "location": "fairbanks",
             "monitorId": "bar",
-            "name": "Bar",
+            "monitorInfo": Object {
+              "docId": "myDocId",
+              "monitor": Object {
+                "duration": Object {
+                  "us": 100000,
+                },
+                "id": "myId",
+                "ip": "127.0.0.1",
+                "name": undefined,
+                "status": "up",
+                "type": "myType",
+              },
+              "timestamp": "2020-07-07T01:14:08Z",
+            },
             "up": 468,
-            "url": "http://bar.com",
           },
         ]
       `);
     });
 
     it('fetches multiple pages', async () => {
-      const [callES, esMock] = setupMockEsCompositeQuery<
+      const esMock = setupMockEsCompositeQuery<
         AvailabilityKey,
         GetMonitorAvailabilityResult,
         AvailabilityDoc
@@ -459,20 +471,18 @@ describe('monitor availability', () => {
               {
                 monitorId: 'foo',
                 location: 'harrisburg',
-                name: 'Foo',
-                url: 'http://foo.com',
                 up: 243,
                 down: 11,
                 availabilityRatio: 0.956692913385827,
+                monitorInfo: makePing({}),
               },
               {
                 monitorId: 'foo',
                 location: 'fairbanks',
-                name: 'Foo',
-                url: 'http://foo.com',
                 up: 251,
                 down: 13,
                 availabilityRatio: 0.950757575757576,
+                monitorInfo: makePing({}),
               },
             ],
           },
@@ -481,20 +491,18 @@ describe('monitor availability', () => {
               {
                 monitorId: 'baz',
                 location: 'harrisburg',
-                name: 'Baz',
-                url: 'http://baz.com',
                 up: 341,
                 down: 3,
                 availabilityRatio: 0.991279069767442,
+                monitorInfo: makePing({}),
               },
               {
                 monitorId: 'baz',
                 location: 'fairbanks',
-                name: 'Baz',
-                url: 'http://baz.com',
                 up: 365,
                 down: 5,
                 availabilityRatio: 0.986486486486486,
+                monitorInfo: makePing({}),
               },
             ],
           },
@@ -502,7 +510,7 @@ describe('monitor availability', () => {
         genBucketItem
       );
       const result = await getMonitorAvailability({
-        callES,
+        callES: esMock,
         dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
         range: 3,
         rangeUnit: 'M',
@@ -515,42 +523,89 @@ describe('monitor availability', () => {
             "down": 11,
             "location": "harrisburg",
             "monitorId": "foo",
-            "name": "Foo",
+            "monitorInfo": Object {
+              "docId": "myDocId",
+              "monitor": Object {
+                "duration": Object {
+                  "us": 100000,
+                },
+                "id": "myId",
+                "ip": "127.0.0.1",
+                "name": undefined,
+                "status": "up",
+                "type": "myType",
+              },
+              "timestamp": "2020-07-07T01:14:08Z",
+            },
             "up": 243,
-            "url": "http://foo.com",
           },
           Object {
             "availabilityRatio": 0.950757575757576,
             "down": 13,
             "location": "fairbanks",
             "monitorId": "foo",
-            "name": "Foo",
+            "monitorInfo": Object {
+              "docId": "myDocId",
+              "monitor": Object {
+                "duration": Object {
+                  "us": 100000,
+                },
+                "id": "myId",
+                "ip": "127.0.0.1",
+                "name": undefined,
+                "status": "up",
+                "type": "myType",
+              },
+              "timestamp": "2020-07-07T01:14:08Z",
+            },
             "up": 251,
-            "url": "http://foo.com",
           },
           Object {
             "availabilityRatio": 0.991279069767442,
             "down": 3,
             "location": "harrisburg",
             "monitorId": "baz",
-            "name": "Baz",
+            "monitorInfo": Object {
+              "docId": "myDocId",
+              "monitor": Object {
+                "duration": Object {
+                  "us": 100000,
+                },
+                "id": "myId",
+                "ip": "127.0.0.1",
+                "name": undefined,
+                "status": "up",
+                "type": "myType",
+              },
+              "timestamp": "2020-07-07T01:14:08Z",
+            },
             "up": 341,
-            "url": "http://baz.com",
           },
           Object {
             "availabilityRatio": 0.986486486486486,
             "down": 5,
             "location": "fairbanks",
             "monitorId": "baz",
-            "name": "Baz",
+            "monitorInfo": Object {
+              "docId": "myDocId",
+              "monitor": Object {
+                "duration": Object {
+                  "us": 100000,
+                },
+                "id": "myId",
+                "ip": "127.0.0.1",
+                "name": undefined,
+                "status": "up",
+                "type": "myType",
+              },
+              "timestamp": "2020-07-07T01:14:08Z",
+            },
             "up": 365,
-            "url": "http://baz.com",
           },
         ]
       `);
-      const [method, params] = esMock.callAsCurrentUser.mock.calls[0];
-      expect(esMock.callAsCurrentUser).toHaveBeenCalledTimes(2);
-      expect(method).toEqual('search');
+      const [params] = esMock.search.mock.calls[0];
+      expect(esMock.search).toHaveBeenCalledTimes(2);
       expect(params).toMatchInlineSnapshot(`
         Object {
           "body": Object {
@@ -565,10 +620,6 @@ describe('monitor availability', () => {
                   },
                   "fields": Object {
                     "top_hits": Object {
-                      "_source": Array [
-                        "monitor.name",
-                        "url.full",
-                      ],
                       "size": 1,
                       "sort": Array [
                         Object {
@@ -647,9 +698,9 @@ describe('monitor availability', () => {
           "index": "heartbeat-8*",
         }
       `);
-      expect(esMock.callAsCurrentUser.mock.calls[1]).toMatchInlineSnapshot(`
+
+      expect(esMock.search.mock.calls[1]).toMatchInlineSnapshot(`
         Array [
-          "search",
           Object {
             "body": Object {
               "aggs": Object {
@@ -663,10 +714,6 @@ describe('monitor availability', () => {
                     },
                     "fields": Object {
                       "top_hits": Object {
-                        "_source": Array [
-                          "monitor.name",
-                          "url.full",
-                        ],
                         "size": 1,
                         "sort": Array [
                           Object {
@@ -751,6 +798,133 @@ describe('monitor availability', () => {
         ]
       `);
     });
+
+    it('does not overwrite filters', async () => {
+      const esMock = setupMockEsCompositeQuery<
+        AvailabilityKey,
+        GetMonitorAvailabilityResult,
+        AvailabilityDoc
+      >(
+        [
+          {
+            bucketCriteria: [],
+          },
+        ],
+        genBucketItem
+      );
+      await getMonitorAvailability({
+        callES: esMock,
+        dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
+        range: 3,
+        rangeUnit: 's',
+        threshold: '99',
+        filters: JSON.stringify({ bool: { filter: [{ term: { 'monitor.id': 'foo' } }] } }),
+      });
+      const [params] = esMock.search.mock.calls[0];
+      expect(params).toMatchInlineSnapshot(`
+        Object {
+          "body": Object {
+            "aggs": Object {
+              "monitors": Object {
+                "aggs": Object {
+                  "down_sum": Object {
+                    "sum": Object {
+                      "field": "summary.down",
+                      "missing": 0,
+                    },
+                  },
+                  "fields": Object {
+                    "top_hits": Object {
+                      "size": 1,
+                      "sort": Array [
+                        Object {
+                          "@timestamp": Object {
+                            "order": "desc",
+                          },
+                        },
+                      ],
+                    },
+                  },
+                  "filtered": Object {
+                    "bucket_selector": Object {
+                      "buckets_path": Object {
+                        "threshold": "ratio.value",
+                      },
+                      "script": "params.threshold < 0.99",
+                    },
+                  },
+                  "ratio": Object {
+                    "bucket_script": Object {
+                      "buckets_path": Object {
+                        "downTotal": "down_sum",
+                        "upTotal": "up_sum",
+                      },
+                      "script": "
+                        if (params.upTotal + params.downTotal > 0) {
+                          return params.upTotal / (params.upTotal + params.downTotal);
+                        } return null;",
+                    },
+                  },
+                  "up_sum": Object {
+                    "sum": Object {
+                      "field": "summary.up",
+                      "missing": 0,
+                    },
+                  },
+                },
+                "composite": Object {
+                  "size": 2000,
+                  "sources": Array [
+                    Object {
+                      "monitorId": Object {
+                        "terms": Object {
+                          "field": "monitor.id",
+                        },
+                      },
+                    },
+                    Object {
+                      "location": Object {
+                        "terms": Object {
+                          "field": "observer.geo.name",
+                          "missing_bucket": true,
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            "query": Object {
+              "bool": Object {
+                "filter": Array [
+                  Object {
+                    "range": Object {
+                      "@timestamp": Object {
+                        "gte": "now-3s",
+                        "lte": "now",
+                      },
+                    },
+                  },
+                  Object {
+                    "bool": Object {
+                      "filter": Array [
+                        Object {
+                          "term": Object {
+                            "monitor.id": "foo",
+                          },
+                        },
+                      ],
+                    },
+                  },
+                ],
+              },
+            },
+            "size": 0,
+          },
+          "index": "heartbeat-8*",
+        }
+      `);
+    });
   });
 
   describe('formatBuckets', () => {
@@ -833,18 +1007,30 @@ describe('monitor availability', () => {
             "down": 2450,
             "location": "fairbanks",
             "monitorId": "test-node-service",
-            "name": "Test Node Service",
+            "monitorInfo": Object {
+              "monitor": Object {
+                "name": "Test Node Service",
+              },
+              "url": Object {
+                "full": "http://localhost:12349",
+              },
+            },
             "up": 821,
-            "url": "http://localhost:12349",
           },
           Object {
             "availabilityRatio": 0.5804076040417879,
             "down": 2450,
             "location": "harrisburg",
             "monitorId": "test-node-service",
-            "name": "Test Node Service",
+            "monitorInfo": Object {
+              "monitor": Object {
+                "name": "Test Node Service",
+              },
+              "url": Object {
+                "full": "http://localhost:12349",
+              },
+            },
             "up": 3389,
-            "url": "http://localhost:12349",
           },
         ]
       `);

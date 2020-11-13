@@ -18,17 +18,14 @@
  */
 
 import React from 'react';
-// @ts-ignore
 import { findTestSubject } from '@elastic/eui/lib/test';
 // @ts-ignore
-import StubIndexPattern from 'test_utils/stub_index_pattern';
-// @ts-ignore
 import stubbedLogstashFields from 'fixtures/logstash_fields';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 import { DiscoverField } from './discover_field';
 import { coreMock } from '../../../../../../core/public/mocks';
 import { IndexPatternField } from '../../../../../data/public';
-import { FieldSpecExportFmt } from '../../../../../data/common';
+import { getStubIndexPattern } from '../../../../../data/public/test_utils';
 
 jest.mock('../../../kibana_services', () => ({
   getServices: () => ({
@@ -54,38 +51,48 @@ jest.mock('../../../kibana_services', () => ({
   }),
 }));
 
-function getComponent(selected = false, showDetails = false, useShortDots = false) {
-  const indexPattern = new StubIndexPattern(
+function getComponent({
+  selected = false,
+  showDetails = false,
+  useShortDots = false,
+  field,
+}: {
+  selected?: boolean;
+  showDetails?: boolean;
+  useShortDots?: boolean;
+  field?: IndexPatternField;
+}) {
+  const indexPattern = getStubIndexPattern(
     'logstash-*',
     (cfg: any) => cfg,
     'time',
     stubbedLogstashFields(),
-    coreMock.createStart()
+    coreMock.createSetup()
   );
 
-  const field = {
-    name: 'bytes',
-    type: 'number',
-    esTypes: ['long'],
-    count: 10,
-    scripted: false,
-    searchable: true,
-    aggregatable: true,
-    readFromDocValues: true,
-    format: null,
-    routes: {},
-    $$spec: {},
-    toSpec: () => (({} as unknown) as FieldSpecExportFmt),
-  } as IndexPatternField;
+  const finalField =
+    field ??
+    new IndexPatternField(
+      {
+        name: 'bytes',
+        type: 'number',
+        esTypes: ['long'],
+        count: 10,
+        scripted: false,
+        searchable: true,
+        aggregatable: true,
+        readFromDocValues: true,
+      },
+      'bytes'
+    );
 
   const props = {
     indexPattern,
-    field,
-    getDetails: jest.fn(),
+    field: finalField,
+    getDetails: jest.fn(() => ({ buckets: [], error: '', exists: 1, total: true, columns: [] })),
     onAddFilter: jest.fn(),
     onAddField: jest.fn(),
     onRemoveField: jest.fn(),
-    onShowDetails: jest.fn(),
     showDetails,
     selected,
     useShortDots,
@@ -96,18 +103,37 @@ function getComponent(selected = false, showDetails = false, useShortDots = fals
 
 describe('discover sidebar field', function () {
   it('should allow selecting fields', function () {
-    const { comp, props } = getComponent();
+    const { comp, props } = getComponent({});
     findTestSubject(comp, 'fieldToggle-bytes').simulate('click');
     expect(props.onAddField).toHaveBeenCalledWith('bytes');
   });
   it('should allow deselecting fields', function () {
-    const { comp, props } = getComponent(true);
+    const { comp, props } = getComponent({ selected: true });
     findTestSubject(comp, 'fieldToggle-bytes').simulate('click');
     expect(props.onRemoveField).toHaveBeenCalledWith('bytes');
   });
-  it('should trigger onShowDetails', function () {
-    const { comp, props } = getComponent();
+  it('should trigger getDetails', function () {
+    const { comp, props } = getComponent({ selected: true });
     findTestSubject(comp, 'field-bytes-showDetails').simulate('click');
-    expect(props.onShowDetails).toHaveBeenCalledWith(true, props.field);
+    expect(props.getDetails).toHaveBeenCalledWith(props.field);
+  });
+  it('should not allow clicking on _source', function () {
+    const field = new IndexPatternField(
+      {
+        name: '_source',
+        type: '_source',
+        esTypes: ['_source'],
+        searchable: true,
+        aggregatable: true,
+        readFromDocValues: true,
+      },
+      '_source'
+    );
+    const { comp, props } = getComponent({
+      selected: true,
+      field,
+    });
+    findTestSubject(comp, 'field-_source-showDetails').simulate('click');
+    expect(props.getDetails).not.toHaveBeenCalled();
   });
 });

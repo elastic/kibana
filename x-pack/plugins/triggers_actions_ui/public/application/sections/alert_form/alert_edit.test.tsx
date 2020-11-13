@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import * as React from 'react';
-import { mountWithIntl, nextTick } from 'test_utils/enzyme_helpers';
+import { mountWithIntl, nextTick } from '@kbn/test/jest';
 import { act } from 'react-dom/test-utils';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
-import { ValidationResult } from '../../../types';
+import { ValidationResult, Alert } from '../../../types';
 import { AlertsContextProvider } from '../../context/alerts_context';
 import { alertTypeRegistryMock } from '../../alert_type_registry.mock';
 import { ReactWrapper } from 'enzyme';
@@ -36,8 +36,8 @@ describe('alert_edit', () => {
       toastNotifications: mockedCoreSetup.notifications.toasts,
       http: mockedCoreSetup.http,
       uiSettings: mockedCoreSetup.uiSettings,
-      actionTypeRegistry: actionTypeRegistry as any,
-      alertTypeRegistry: alertTypeRegistry as any,
+      actionTypeRegistry,
+      alertTypeRegistry,
       docLinks: { ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' },
       capabilities,
     };
@@ -51,6 +51,8 @@ describe('alert_edit', () => {
       id: 'my-alert-type',
       iconClass: 'test',
       name: 'test-alert',
+      description: 'test',
+      documentationUrl: null,
       validate: (): ValidationResult => {
         return { errors: {} };
       },
@@ -73,7 +75,7 @@ describe('alert_edit', () => {
       actionParamsFields: null,
     };
 
-    const alert = {
+    const alert: Alert = {
       id: 'ab5661e0-197e-45ee-b477-302d89193b5e',
       params: {
         aggType: 'average',
@@ -93,7 +95,6 @@ describe('alert_edit', () => {
           actionTypeId: 'my-action-type',
           group: 'threshold met',
           params: { message: 'Alert [{{ctx.metadata.name}}] has exceeded the threshold' },
-          message: 'Alert [{{ctx.metadata.name}}] has exceeded the threshold',
           id: '917f5d41-fbc4-4056-a8ad-ac592f7dcee2',
         },
       ],
@@ -107,6 +108,10 @@ describe('alert_edit', () => {
       muteAll: false,
       mutedInstanceIds: [],
       updatedAt: new Date(),
+      executionStatus: {
+        status: 'unknown',
+        lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
+      },
     };
     actionTypeRegistry.get.mockReturnValueOnce(actionTypeModel);
     actionTypeRegistry.has.mockReturnValue(true);

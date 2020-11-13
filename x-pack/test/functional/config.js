@@ -88,6 +88,7 @@ export default async function ({ readConfigFile }) {
         '--xpack.security.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"', // server restarts should not invalidate active sessions
         '--xpack.encryptedSavedObjects.encryptionKey="DkdXazszSCYexXqz4YktBGHCRkV6hyNK"',
         '--timelion.ui.enabled=true',
+        '--savedObjects.maxImportPayloadBytes=10485760', // for OSS test management/_import_objects
       ],
     },
     uiSettings: {
@@ -127,6 +128,10 @@ export default async function ({ readConfigFile }) {
       searchProfiler: {
         pathname: '/app/dev_tools',
         hash: '/searchprofiler',
+      },
+      painlessLab: {
+        pathname: '/app/dev_tools',
+        hash: '/painless_lab',
       },
       spaceSelector: {
         pathname: '/',
@@ -221,6 +226,39 @@ export default async function ({ readConfigFile }) {
           kibana: [],
         },
 
+        global_canvas_all: {
+          kibana: [
+            {
+              feature: {
+                canvas: ['all'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        },
+
+        global_discover_all: {
+          kibana: [
+            {
+              feature: {
+                discover: ['all'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        },
+
+        global_dashboard_read: {
+          kibana: [
+            {
+              feature: {
+                dashboard: ['read'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        },
+
         global_discover_read: {
           kibana: [
             {
@@ -251,6 +289,16 @@ export default async function ({ readConfigFile }) {
             },
           ],
         },
+        global_dashboard_all: {
+          kibana: [
+            {
+              feature: {
+                dashboard: ['all'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        },
         global_maps_all: {
           kibana: [
             {
@@ -262,11 +310,64 @@ export default async function ({ readConfigFile }) {
           ],
         },
 
+        global_maps_read: {
+          kibana: [
+            {
+              feature: {
+                maps: ['read'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        },
+
         geoshape_data_reader: {
           elasticsearch: {
             indices: [
               {
                 names: ['geo_shapes*'],
+                privileges: ['read', 'view_index_metadata'],
+              },
+            ],
+          },
+        },
+        antimeridian_points_reader: {
+          elasticsearch: {
+            indices: [
+              {
+                names: ['antimeridian_points*'],
+                privileges: ['read', 'view_index_metadata'],
+              },
+            ],
+          },
+        },
+        antimeridian_shapes_reader: {
+          elasticsearch: {
+            indices: [
+              {
+                names: ['antimeridian_shapes*'],
+                privileges: ['read', 'view_index_metadata'],
+              },
+            ],
+          },
+        },
+
+        meta_for_geoshape_data_reader: {
+          elasticsearch: {
+            indices: [
+              {
+                names: ['meta_for_geo_shapes*'],
+                privileges: ['read', 'view_index_metadata'],
+              },
+            ],
+          },
+        },
+
+        geoconnections_data_reader: {
+          elasticsearch: {
+            indices: [
+              {
+                names: ['connections*'],
                 privileges: ['read', 'view_index_metadata'],
               },
             ],
@@ -298,6 +399,7 @@ export default async function ({ readConfigFile }) {
           ],
         },
 
+        // using this role even for remote clusters
         global_ccr_role: {
           elasticsearch: {
             cluster: ['manage', 'manage_ccr'],
@@ -325,6 +427,60 @@ export default async function ({ readConfigFile }) {
               spaces: ['default'],
             },
           ],
+        },
+
+        manage_security: {
+          elasticsearch: {
+            cluster: ['manage_security'],
+          },
+        },
+
+        ccr_user: {
+          elasticsearch: {
+            cluster: ['manage', 'manage_ccr'],
+          },
+        },
+
+        manage_ilm: {
+          elasticsearch: {
+            cluster: ['manage_ilm'],
+          },
+        },
+
+        index_management_user: {
+          elasticsearch: {
+            cluster: ['monitor', 'manage_index_templates'],
+            indices: [
+              {
+                names: ['geo_shapes*'],
+                privileges: ['all'],
+              },
+            ],
+          },
+        },
+
+        ingest_pipelines_user: {
+          elasticsearch: {
+            cluster: ['manage_pipeline', 'cluster:monitor/nodes/info'],
+          },
+        },
+
+        license_management_user: {
+          elasticsearch: {
+            cluster: ['manage'],
+          },
+        },
+
+        logstash_read_user: {
+          elasticsearch: {
+            cluster: ['manage_logstash_pipelines'],
+          },
+        },
+
+        remote_clusters_user: {
+          elasticsearch: {
+            cluster: ['manage'],
+          },
         },
       },
       defaultRoles: ['superuser'],

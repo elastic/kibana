@@ -8,8 +8,8 @@ Watches are helpful for analyzing mission-critical and business-critical
 streaming data. For example, you might watch application logs for performance
 outages or audit access logs for security threats.
 
-To get started with the Watcher UI, open then menu,
-then go to *Stack Management > Alerts and Insights > Watcher*.
+To get started, open then main menu,
+then click *Stack Management > Watcher*.
 With this UI, you can:
 
 * <<watcher-create-threshold-alert, Create a simple threshold watch>>
@@ -41,12 +41,12 @@ and either of these watcher roles:
 * `watcher_admin`. You can perform all Watcher actions, including create and edit watches.
 * `watcher_user`. You can view watches, but not create or edit them.
 
-To manage roles, open then menu, then go to *Stack Management > Security > Roles*, or use the
+To manage roles, open then main menu, then click *Stack Management > Roles*, or use the
 <<role-management-api, Kibana Role Management API>>. Watches are shared between
 all users with the same role.
 
 NOTE: If you are creating a threshold watch, you must also have the `view_index_metadata` index privilege. See
-<<managing-indices, Managing Indices>> for detailed information.
+{ref}/index-mgmt.html[Index management] for detailed information.
 
 [float]
 [[watcher-create-threshold-alert]]
@@ -60,7 +60,7 @@ The following example walks you through creating a threshold alert. The alert
 is triggered when the maximum total CPU usage on a machine goes above a
 certain percentage. The example uses https://www.elastic.co/products/beats/metricbeat[Metricbeat]
 to collect metrics from your systems and services.
-{metricbeat-ref}/metricbeat-installation.html[Learn more] on how to install
+{metricbeat-ref}/metricbeat-installation-configuration.html[Learn more] on how to install
 and get started with Metricbeat.
 
 [float]

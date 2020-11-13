@@ -4,123 +4,76 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiTabs,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiTab, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { ComponentType } from 'react';
 import { $ElementType } from 'utility-types';
-import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
 import { ApmHeader } from '../../shared/ApmHeader';
-import { EuiTabLink } from '../../shared/EuiTabLink';
-import { ServiceMapLink } from '../../shared/Links/apm/ServiceMapLink';
-import { ServiceOverviewLink } from '../../shared/Links/apm/ServiceOverviewLink';
-import { SettingsLink } from '../../shared/Links/apm/SettingsLink';
-import { AnomalyDetectionSetupLink } from '../../shared/Links/apm/AnomalyDetectionSetupLink';
-import { TraceOverviewLink } from '../../shared/Links/apm/TraceOverviewLink';
-import { SetupInstructionsLink } from '../../shared/Links/SetupInstructionsLink';
+import { useServiceMapHref } from '../../shared/Links/apm/ServiceMapLink';
+import { useServiceInventoryHref } from '../../shared/Links/apm/service_inventory_link';
+import { useTraceOverviewHref } from '../../shared/Links/apm/TraceOverviewLink';
+import { MainTabs } from '../../shared/main_tabs';
 import { ServiceMap } from '../ServiceMap';
-import { ServiceOverview } from '../ServiceOverview';
+import { ServiceInventory } from '../service_inventory';
 import { TraceOverview } from '../TraceOverview';
 
-function getHomeTabs({
-  serviceMapEnabled = true,
-}: {
-  serviceMapEnabled: boolean;
-}) {
-  const homeTabs = [
-    {
-      link: (
-        <ServiceOverviewLink>
-          {i18n.translate('xpack.apm.home.servicesTabLabel', {
-            defaultMessage: 'Services',
-          })}
-        </ServiceOverviewLink>
-      ),
-      render: () => <ServiceOverview />,
-      name: 'services',
-    },
-    {
-      link: (
-        <TraceOverviewLink>
-          {i18n.translate('xpack.apm.home.tracesTabLabel', {
-            defaultMessage: 'Traces',
-          })}
-        </TraceOverviewLink>
-      ),
-      render: () => <TraceOverview />,
-      name: 'traces',
-    },
-  ];
-
-  if (serviceMapEnabled) {
-    homeTabs.push({
-      link: (
-        <ServiceMapLink>
-          {i18n.translate('xpack.apm.home.serviceMapTabLabel', {
-            defaultMessage: 'Service Map',
-          })}
-        </ServiceMapLink>
-      ),
-      render: () => <ServiceMap />,
-      name: 'service-map',
-    });
-  }
-
-  return homeTabs;
+interface Tab {
+  key: string;
+  href: string;
+  text: string;
+  Component: ComponentType;
 }
-
-const SETTINGS_LINK_LABEL = i18n.translate('xpack.apm.settingsLinkLabel', {
-  defaultMessage: 'Settings',
-});
 
 interface Props {
   tab: 'traces' | 'services' | 'service-map';
 }
 
 export function Home({ tab }: Props) {
-  const { config } = useApmPluginContext();
-  const homeTabs = getHomeTabs(config);
+  const homeTabs: Tab[] = [
+    {
+      key: 'services',
+      href: useServiceInventoryHref(),
+      text: i18n.translate('xpack.apm.home.servicesTabLabel', {
+        defaultMessage: 'Services',
+      }),
+      Component: ServiceInventory,
+    },
+    {
+      key: 'traces',
+      href: useTraceOverviewHref(),
+      text: i18n.translate('xpack.apm.home.tracesTabLabel', {
+        defaultMessage: 'Traces',
+      }),
+      Component: TraceOverview,
+    },
+    {
+      key: 'service-map',
+      href: useServiceMapHref(),
+      text: i18n.translate('xpack.apm.home.serviceMapTabLabel', {
+        defaultMessage: 'Service Map',
+      }),
+      Component: ServiceMap,
+    },
+  ];
   const selectedTab = homeTabs.find(
-    (homeTab) => homeTab.name === tab
+    (homeTab) => homeTab.key === tab
   ) as $ElementType<typeof homeTabs, number>;
 
   return (
-    <div>
+    <>
       <ApmHeader>
-        <EuiFlexGroup alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiTitle size="l">
-              <h1>APM</h1>
-            </EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <SettingsLink>
-              <EuiButtonEmpty size="s" color="primary" iconType="gear">
-                {SETTINGS_LINK_LABEL}
-              </EuiButtonEmpty>
-            </SettingsLink>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <AnomalyDetectionSetupLink />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <SetupInstructionsLink />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <EuiTitle>
+          <h1>APM</h1>
+        </EuiTitle>
       </ApmHeader>
-      <EuiTabs>
-        {homeTabs.map((homeTab) => (
-          <EuiTabLink isSelected={homeTab === selectedTab} key={homeTab.name}>
-            {homeTab.link}
-          </EuiTabLink>
+      <MainTabs>
+        {homeTabs.map(({ href, key, text }) => (
+          <EuiTab href={href} isSelected={key === selectedTab.key} key={key}>
+            {text}
+          </EuiTab>
         ))}
-      </EuiTabs>
-      {selectedTab.render()}
-    </div>
+      </MainTabs>
+      <selectedTab.Component />
+    </>
   );
 }

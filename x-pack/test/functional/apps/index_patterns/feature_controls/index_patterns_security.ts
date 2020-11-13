@@ -10,7 +10,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const security = getService('security');
-  const config = getService('config');
   const PageObjects = getPageObjects(['common', 'settings', 'security']);
   const appsMenu = getService('appsMenu');
   const testSubjects = getService('testSubjects');
@@ -130,7 +129,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it(`index pattern listing doesn't show create button`, async () => {
         await PageObjects.settings.clickKibanaIndexPatterns();
-        await testSubjects.existOrFail('indexPatternTable');
+        await testSubjects.existOrFail('emptyIndexPatternPrompt');
         await testSubjects.missingOrFail('createIndexPatternButton');
       });
 
@@ -175,28 +174,17 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await security.user.delete('no_index_patterns_privileges_user');
       });
 
-      it('shows Management navlink', async () => {
+      it('does not show Management navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.eql(['Discover', 'Stack Management']);
+        expect(navLinks).to.eql(['Overview', 'Discover']);
       });
 
       it(`doesn't show Index Patterns in management side-nav`, async () => {
-        await PageObjects.settings.navigateTo();
-        await testSubjects.existOrFail('managementHome', {
-          timeout: config.get('timeouts.waitFor'),
-        });
-        await testSubjects.missingOrFail('indexPatterns');
-      });
-
-      it(`does not allow navigation to Index Patterns; redirects to management home`, async () => {
-        await PageObjects.common.navigateToUrl('management', 'kibana/indexPatterns', {
+        await PageObjects.common.navigateToActualUrl('management', '', {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
-          shouldUseHashForSubUrl: false,
         });
-        await testSubjects.existOrFail('managementHome', {
-          timeout: config.get('timeouts.waitFor'),
-        });
+        await testSubjects.existOrFail('~appNotFoundPageContent');
       });
     });
   });

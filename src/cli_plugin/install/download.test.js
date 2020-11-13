@@ -17,16 +17,18 @@
  * under the License.
  */
 
+import Fs from 'fs';
+import { join } from 'path';
+import http from 'http';
+
 import sinon from 'sinon';
 import nock from 'nock';
 import glob from 'glob-all';
 import del from 'del';
-import Fs from 'fs';
-import Logger from '../lib/logger';
+
+import { Logger } from '../lib/logger';
 import { UnsupportedProtocolError } from '../lib/errors';
 import { download, _downloadSingle, _getFilePath, _checkFilePathDeprecation } from './download';
-import { join } from 'path';
-import http from 'http';
 
 describe('kibana cli', function () {
   describe('plugin downloader', function () {

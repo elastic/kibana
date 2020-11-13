@@ -31,6 +31,7 @@ import {
   SavedObjectsClientContract,
   PluginInitializerContext,
   ScopedHistory,
+  AppMountParameters,
 } from 'kibana/public';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
 import { Storage } from '../../../kibana_utils/public';
@@ -41,7 +42,9 @@ import { NavigationPublicPluginStart as NavigationStart } from '../../../navigat
 import { DataPublicPluginStart } from '../../../data/public';
 import { SharePluginStart } from '../../../share/public';
 import { KibanaLegacyStart, configureAppAngularModule } from '../../../kibana_legacy/public';
+import { UrlForwardingStart } from '../../../url_forwarding/public';
 import { SavedObjectLoader, SavedObjectsStart } from '../../../saved_objects/public';
+import type { SavedObjectsTaggingApi } from '../../../saved_objects_tagging_oss/public';
 
 // required for i18nIdDirective
 import 'angular-sanitize';
@@ -69,10 +72,12 @@ export interface RenderDeps {
   localStorage: Storage;
   share?: SharePluginStart;
   usageCollection?: UsageCollectionSetup;
-  navigateToDefaultApp: KibanaLegacyStart['navigateToDefaultApp'];
-  navigateToLegacyKibanaUrl: KibanaLegacyStart['navigateToLegacyKibanaUrl'];
+  navigateToDefaultApp: UrlForwardingStart['navigateToDefaultApp'];
+  navigateToLegacyKibanaUrl: UrlForwardingStart['navigateToLegacyKibanaUrl'];
   scopedHistory: () => ScopedHistory;
+  setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   savedObjects: SavedObjectsStart;
+  savedObjectsTagging?: SavedObjectsTaggingApi;
   restorePreviousUrl: () => void;
 }
 
@@ -110,7 +115,7 @@ const thirdPartyAngularDependencies = ['ngSanitize', 'ngRoute', 'react'];
 function mountDashboardApp(appBasePath: string, element: HTMLElement) {
   const mountpoint = document.createElement('div');
   mountpoint.setAttribute('class', 'dshAppContainer');
-  // eslint-disable-next-line
+  // eslint-disable-next-line no-unsanitized/property
   mountpoint.innerHTML = mainTemplate(appBasePath);
   // bootstrap angular into detached element and attach it later to
   // make angular-within-angular possible

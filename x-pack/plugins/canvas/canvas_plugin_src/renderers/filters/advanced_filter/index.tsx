@@ -12,7 +12,7 @@ import { RendererStrings } from '../../../../i18n';
 
 const { advancedFilter: strings } = RendererStrings;
 
-export const advancedFilter: RendererFactory = () => ({
+export const advancedFilter: RendererFactory<{}> = () => ({
   name: 'advanced_filter',
   displayName: strings.getDisplayName(),
   help: strings.getHelpDescription(),

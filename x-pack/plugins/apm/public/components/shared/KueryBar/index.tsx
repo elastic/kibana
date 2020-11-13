@@ -4,24 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState } from 'react';
-import { uniqueId, startsWith } from 'lodash';
-import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
-import { fromQuery, toQuery } from '../Links/url_helpers';
-// @ts-ignore
-import { Typeahead } from './Typeahead';
-import { getBoolFilter } from './get_bool_filter';
-import { useLocation } from '../../../hooks/useLocation';
-import { useUrlParams } from '../../../hooks/useUrlParams';
-import { history } from '../../../utils/history';
-import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
-import { useDynamicIndexPattern } from '../../../hooks/useDynamicIndexPattern';
+import { startsWith, uniqueId } from 'lodash';
+import React, { useState } from 'react';
+import { useHistory, useLocation, useParams } from 'react-router-dom';
+import styled from 'styled-components';
 import {
-  QuerySuggestion,
   esKuery,
   IIndexPattern,
+  QuerySuggestion,
 } from '../../../../../../../src/plugins/data/public';
+import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
+import { useDynamicIndexPattern } from '../../../hooks/useDynamicIndexPattern';
+import { useUrlParams } from '../../../hooks/useUrlParams';
+import { fromQuery, toQuery } from '../Links/url_helpers';
+import { getBoolFilter } from './get_bool_filter';
+// @ts-expect-error
+import { Typeahead } from './Typeahead';
+import { useProcessorEvent } from './use_processor_event';
 
 const Container = styled.div`
   margin-bottom: 10px;
@@ -38,6 +38,11 @@ function convertKueryToEsQuery(kuery: string, indexPattern: IIndexPattern) {
 }
 
 export function KueryBar() {
+  const { groupId, serviceName } = useParams<{
+    groupId?: string;
+    serviceName?: string;
+  }>();
+  const history = useHistory();
   const [state, setState] = useState<State>({
     suggestions: [],
     isLoadingSuggestions: false,
@@ -48,7 +53,7 @@ export function KueryBar() {
 
   let currentRequestCheck;
 
-  const { processorEvent } = urlParams;
+  const processorEvent = useProcessorEvent();
 
   const examples = {
     transaction: 'transaction.duration.us > 300000',
@@ -75,13 +80,6 @@ export function KueryBar() {
     },
   });
 
-  // The bar should be disabled when viewing the service map
-  const disabled = /\/(service-map)$/.test(location.pathname);
-  const disabledPlaceholder = i18n.translate(
-    'xpack.apm.kueryBar.disabledPlaceholder',
-    { defaultMessage: 'Search is not available here' }
-  );
-
   async function onChange(inputValue: string, selectionStart: number) {
     if (indexPattern == null) {
       return;
@@ -97,10 +95,16 @@ export function KueryBar() {
         (await data.autocomplete.getQuerySuggestions({
           language: 'kuery',
           indexPatterns: [indexPattern],
-          boolFilter: getBoolFilter(urlParams),
+          boolFilter: getBoolFilter({
+            groupId,
+            processorEvent,
+            serviceName,
+            urlParams,
+          }),
           query: inputValue,
           selectionStart,
           selectionEnd: selectionStart,
+          useTimeRange: true,
         })) || []
       )
         .filter((suggestion) => !startsWith(suggestion.text, 'span.'))
@@ -142,13 +146,12 @@ export function KueryBar() {
   return (
     <Container>
       <Typeahead
-        disabled={disabled}
         isLoading={state.isLoadingSuggestions}
         initialValue={urlParams.kuery}
         onChange={onChange}
         onSubmit={onSubmit}
         suggestions={state.suggestions}
-        placeholder={disabled ? disabledPlaceholder : placeholder}
+        placeholder={placeholder}
       />
     </Container>
   );

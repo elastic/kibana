@@ -10,11 +10,14 @@ import { InfraDatabaseSearchResponse } from '../lib/adapters/framework';
 export const createAfterKeyHandler = (
   optionsAfterKeyPath: string | string[],
   afterKeySelector: (input: InfraDatabaseSearchResponse<any, any>) => any
-) => <Options>(options: Options, response: InfraDatabaseSearchResponse<any, any>): Options => {
+) => <Options extends object>(
+  options: Options,
+  response: InfraDatabaseSearchResponse<any, any>
+): Options => {
   if (!response.aggregations) {
     return options;
   }
-  const newOptions = { ...options } as any;
+  const newOptions = { ...options };
   const afterKey = afterKeySelector(response);
   set(newOptions, optionsAfterKeyPath, afterKey);
   return newOptions;

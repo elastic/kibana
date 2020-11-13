@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IIndexPattern } from 'src/plugins/data/public';
 import { ActionCreator } from 'typescript-fsa';
 
 import { hostsModel } from '../store';
@@ -19,8 +18,8 @@ export type HostsTabsProps = HostsComponentProps &
   GlobalTimeArgs & {
     docValueFields: DocValueFields[];
     filterQuery: string;
+    indexNames: string[];
     type: hostsModel.HostsType;
-    indexPattern: IIndexPattern;
     setAbsoluteRangeDatePicker: ActionCreator<{
       id: InputsModelId;
       from: string;

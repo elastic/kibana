@@ -17,35 +17,10 @@
  * under the License.
  */
 
-import { IconType } from '@elastic/eui';
 import { visTypeAliasRegistry, VisTypeAlias } from './vis_type_alias_registry';
-// @ts-ignore
-import { BaseVisType } from './base_vis_type';
-// @ts-ignore
-import { ReactVisType } from './react_vis_type';
-import { TriggerContextMapping } from '../../../ui_actions/public';
-
-export interface VisType {
-  name: string;
-  title: string;
-  description?: string;
-  getSupportedTriggers?: () => Array<keyof TriggerContextMapping>;
-  visualization: any;
-  isAccessible?: boolean;
-  requestHandler: string | unknown;
-  responseHandler: string | unknown;
-  icon?: IconType;
-  image?: string;
-  stage: 'experimental' | 'beta' | 'production';
-  requiresSearch: boolean;
-  hidden: boolean;
-
-  // Since we haven't typed everything here yet, we basically "any" the rest
-  // of that interface. This should be removed as soon as this type definition
-  // has been completed. But that way we at least have typing for a couple of
-  // properties on that type.
-  [key: string]: any;
-}
+import { BaseVisType, BaseVisTypeOptions } from './base_vis_type';
+import { ReactVisType, ReactVisTypeOptions } from './react_vis_type';
+import { VisType, VisGroups } from './types';
 
 /**
  * Vis Types Service
@@ -53,37 +28,37 @@ export interface VisType {
  * @internal
  */
 export class TypesService {
-  private types: Record<string, VisType> = {};
+  private types: Record<string, VisType<any>> = {};
   private unregisteredHiddenTypes: string[] = [];
 
-  public setup() {
-    const registerVisualization = (registerFn: () => VisType) => {
-      const visDefinition = registerFn();
-      if (this.unregisteredHiddenTypes.includes(visDefinition.name)) {
-        visDefinition.hidden = true;
-      }
+  private registerVisualization<TVisParam>(visDefinition: VisType<TVisParam>) {
+    if (this.unregisteredHiddenTypes.includes(visDefinition.name)) {
+      visDefinition.hidden = true;
+    }
 
-      if (this.types[visDefinition.name]) {
-        throw new Error('type already exists!');
-      }
-      this.types[visDefinition.name] = visDefinition;
-    };
+    if (this.types[visDefinition.name]) {
+      throw new Error('type already exists!');
+    }
+    this.types[visDefinition.name] = visDefinition;
+  }
+
+  public setup() {
     return {
       /**
        * registers a visualization type
-       * @param {VisType} config - visualization type definition
+       * @param config - visualization type definition
        */
-      createBaseVisualization: (config: any) => {
+      createBaseVisualization: <TVisParams>(config: BaseVisTypeOptions<TVisParams>): void => {
         const vis = new BaseVisType(config);
-        registerVisualization(() => vis);
+        this.registerVisualization(vis);
       },
       /**
        * registers a visualization which uses react for rendering
-       * @param {VisType} config - visualization type definition
+       * @param config - visualization type definition
        */
-      createReactVisualization: (config: any) => {
+      createReactVisualization: <TVisParams>(config: ReactVisTypeOptions<TVisParams>): void => {
         const vis = new ReactVisType(config);
-        registerVisualization(() => vis);
+        this.registerVisualization(vis);
       },
       /**
        * registers a visualization alias
@@ -95,7 +70,7 @@ export class TypesService {
        * allows to hide specific visualization types from create visualization dialog
        * @param {string[]} typeNames - list of type ids to hide
        */
-      hideTypes: (typeNames: string[]) => {
+      hideTypes: (typeNames: string[]): void => {
         typeNames.forEach((name: string) => {
           if (this.types[name]) {
             this.types[name].hidden = true;
@@ -113,19 +88,34 @@ export class TypesService {
        * returns specific visualization or undefined if not found
        * @param {string} visualization - id of visualization to return
        */
-      get: (visualization: string) => {
+      get: <TVisParams>(visualization: string): VisType<TVisParams> => {
         return this.types[visualization];
       },
       /**
        * returns all registered visualization types
        */
-      all: () => {
+      all: (): VisType[] => {
         return [...Object.values(this.types)];
       },
       /**
        * returns all registered aliases
        */
       getAliases: visTypeAliasRegistry.get,
+      /**
+       * unregisters a visualization alias by its name
+       * alias is a visualization type without implementation, it just redirects somewhere in kibana
+       * @param {string} visTypeAliasName - visualization alias name
+       */
+      unRegisterAlias: visTypeAliasRegistry.remove,
+      /**
+       * returns all visualizations of specific group
+       * @param {VisGroups} group - group type (aggbased | other | tools)
+       */
+      getByGroup: (group: VisGroups) => {
+        return Object.values(this.types).filter((type) => {
+          return type.group === group;
+        });
+      },
     };
   }
 

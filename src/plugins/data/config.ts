@@ -28,6 +28,16 @@ export const configSchema = schema.object({
       enabled: schema.boolean({ defaultValue: true }),
     }),
   }),
+  search: schema.object({
+    aggs: schema.object({
+      shardDelay: schema.object({
+        // Whether or not to register the shard_delay (which is only available in snapshot versions
+        // of Elasticsearch) agg type/expression function to make it available in the UI for either
+        // functional or manual testing
+        enabled: schema.boolean({ defaultValue: false }),
+      }),
+    }),
+  }),
 });
 
 export type ConfigSchema = TypeOf<typeof configSchema>;

@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { PluginInitializerContext } from '../../../../src/core/server';
+import { DiscoverEnhancedPlugin } from './plugin';
+
 export { config } from './config';
 
-export const plugin = () => ({
-  setup() {},
-  start() {},
-});
+export const plugin = (context: PluginInitializerContext) => new DiscoverEnhancedPlugin(context);

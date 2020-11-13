@@ -5,7 +5,8 @@
  */
 import { i18n } from '@kbn/i18n';
 import { Location } from 'history';
-import { pickBy, isEmpty } from 'lodash';
+import { IBasePath } from 'kibana/public';
+import { isEmpty, pickBy } from 'lodash';
 import moment from 'moment';
 import url from 'url';
 import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
@@ -14,7 +15,6 @@ import { getDiscoverHref } from '../Links/DiscoverLinks/DiscoverLink';
 import { getDiscoverQuery } from '../Links/DiscoverLinks/DiscoverTransactionLink';
 import { getInfraHref } from '../Links/InfraLink';
 import { fromQuery } from '../Links/url_helpers';
-import { AppMountContextBasePath } from '../../../context/ApmPluginContext';
 
 function getInfraMetricsQuery(transaction: Transaction) {
   const timestamp = new Date(transaction['@timestamp']).getTime();
@@ -49,7 +49,7 @@ export const getSections = ({
   urlParams,
 }: {
   transaction: Transaction;
-  basePath: AppMountContextBasePath;
+  basePath: IBasePath;
   location: Location;
   urlParams: IUrlParams;
 }) => {

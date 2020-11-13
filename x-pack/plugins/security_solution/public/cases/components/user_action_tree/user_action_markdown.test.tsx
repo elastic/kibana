@@ -17,8 +17,9 @@ const onChangeEditable = jest.fn();
 const onSaveContent = jest.fn();
 
 const timelineId = '1e10f150-949b-11ea-b63c-2bc51864784c';
+const timelineMarkdown = `[timeline](http://localhost:5601/app/security/timelines?timeline=(id:'${timelineId}',isOpen:!t))`;
 const defaultProps = {
-  content: `A link to a timeline [timeline](http://localhost:5601/app/security/timelines?timeline=(id:'${timelineId}',isOpen:!t))`,
+  content: `A link to a timeline ${timelineMarkdown}`,
   id: 'markdown-id',
   isEditable: false,
   onChangeEditable,
@@ -40,7 +41,11 @@ describe('UserActionMarkdown ', () => {
         </Router>
       </TestProviders>
     );
-    wrapper.find(`[data-test-subj="markdown-timeline-link"]`).first().simulate('click');
+
+    wrapper
+      .find(`[data-test-subj="markdown-timeline-link-${timelineId}"]`)
+      .first()
+      .simulate('click');
 
     expect(queryTimelineByIdSpy).toBeCalledWith({
       apolloClient: mockUseApolloClient(),
@@ -59,8 +64,19 @@ describe('UserActionMarkdown ', () => {
         </Router>
       </TestProviders>
     );
-    wrapper.find(`[data-test-subj="preview-tab"]`).first().simulate('click');
-    wrapper.find(`[data-test-subj="markdown-timeline-link"]`).first().simulate('click');
+
+    // Preview button of Markdown editor
+    wrapper
+      .find(
+        `[data-test-subj="user-action-markdown-form"] .euiMarkdownEditorToolbar .euiButtonEmpty`
+      )
+      .first()
+      .simulate('click');
+
+    wrapper
+      .find(`[data-test-subj="markdown-timeline-link-${timelineId}"]`)
+      .first()
+      .simulate('click');
     expect(queryTimelineByIdSpy).toBeCalledWith({
       apolloClient: mockUseApolloClient(),
       graphEventId: '',

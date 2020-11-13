@@ -7,25 +7,40 @@
 /*
  * React component for rendering EuiEmptyPrompt when no jobs were found.
  */
-
+import { Link } from 'react-router-dom';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-
 import { EuiEmptyPrompt, EuiButton } from '@elastic/eui';
+import { ML_PAGES } from '../../../../../common/constants/ml_url_generator';
+import { useMlLink } from '../../../contexts/kibana/use_create_url';
 
-export const ExplorerNoJobsFound = () => (
-  <EuiEmptyPrompt
-    iconType="alert"
-    title={
-      <h2>
-        <FormattedMessage id="xpack.ml.explorer.noJobsFoundLabel" defaultMessage="No jobs found" />
-      </h2>
-    }
-    actions={
-      <EuiButton color="primary" fill href="ml#/jobs">
-        <FormattedMessage id="xpack.ml.explorer.createNewJobLinkText" defaultMessage="Create job" />
-      </EuiButton>
-    }
-    data-test-subj="mlNoJobsFound"
-  />
-);
+export const ExplorerNoJobsFound = () => {
+  const ADJobsManagementUrl = useMlLink({
+    page: ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE,
+    excludeBasePath: true,
+  });
+  return (
+    <EuiEmptyPrompt
+      iconType="alert"
+      title={
+        <h2>
+          <FormattedMessage
+            id="xpack.ml.explorer.noJobsFoundLabel"
+            defaultMessage="No jobs found"
+          />
+        </h2>
+      }
+      actions={
+        <Link to={ADJobsManagementUrl}>
+          <EuiButton color="primary" fill>
+            <FormattedMessage
+              id="xpack.ml.explorer.createNewJobLinkText"
+              defaultMessage="Create job"
+            />
+          </EuiButton>
+        </Link>
+      }
+      data-test-subj="mlNoJobsFound"
+    />
+  );
+};

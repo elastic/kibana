@@ -8,12 +8,14 @@ export {
   SendRequestConfig,
   SendRequestResponse,
   UseRequestConfig,
+  UseRequestResponse,
   sendRequest,
   useRequest,
   Forms,
   extractQueryParams,
   GlobalFlyout,
-} from '../../../../src/plugins/es_ui_shared/public/';
+  attemptToURIDecode,
+} from '../../../../src/plugins/es_ui_shared/public';
 
 export {
   FormSchema,
@@ -21,6 +23,7 @@ export {
   VALIDATION_TYPES,
   FieldConfig,
   useForm,
+  useFormData,
   Form,
   getUseField,
   UseField,
@@ -42,4 +45,7 @@ export {
 
 export { isJSON } from '../../../../src/plugins/es_ui_shared/static/validators/string';
 
-export { reactRouterNavigate } from '../../../../src/plugins/kibana_react/public';
+export {
+  createKibanaReactContext,
+  reactRouterNavigate,
+} from '../../../../src/plugins/kibana_react/public';

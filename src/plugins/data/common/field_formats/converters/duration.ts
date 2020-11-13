@@ -190,6 +190,7 @@ export class DurationFormat extends FieldFormat {
     const inputFormat = this.param('inputFormat');
     const outputFormat = this.param('outputFormat') as keyof Duration;
     const outputPrecision = this.param('outputPrecision');
+    const showSuffix = Boolean(this.param('showSuffix'));
     const human = this.isHuman();
     const prefix =
       val < 0 && human
@@ -200,6 +201,9 @@ export class DurationFormat extends FieldFormat {
     const duration = parseInputAsDuration(val, inputFormat) as Record<keyof Duration, Function>;
     const formatted = duration[outputFormat]();
     const precise = human ? formatted : formatted.toFixed(outputPrecision);
-    return prefix + precise;
+    const type = outputFormats.find(({ method }) => method === outputFormat);
+    const suffix = showSuffix && type ? ` ${type.text}` : '';
+
+    return prefix + precise + suffix;
   };
 }

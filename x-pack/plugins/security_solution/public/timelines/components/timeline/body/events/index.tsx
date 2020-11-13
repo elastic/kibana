@@ -6,8 +6,12 @@
 
 import React from 'react';
 
+import { inputsModel } from '../../../../../common/store';
 import { BrowserFields, DocValueFields } from '../../../../../common/containers/source';
-import { TimelineItem, TimelineNonEcsData } from '../../../../../graphql/types';
+import {
+  TimelineItem,
+  TimelineNonEcsData,
+} from '../../../../../../common/search_strategy/timeline';
 import { ColumnHeaderOptions } from '../../../../../timelines/store/timeline/model';
 import { Note } from '../../../../../common/lib/note';
 import { AddNoteToEvent, UpdateNote } from '../../../notes/helpers';
@@ -44,6 +48,8 @@ interface Props {
   onUpdateColumns: OnUpdateColumns;
   onUnPinEvent: OnUnPinEvent;
   pinnedEventIds: Readonly<Record<string, boolean>>;
+  refetch: inputsModel.Refetch;
+  onRuleChange?: () => void;
   rowRenderers: RowRenderer[];
   selectedEventIds: Readonly<Record<string, TimelineNonEcsData[]>>;
   showCheckboxes: boolean;
@@ -71,6 +77,8 @@ const EventsComponent: React.FC<Props> = ({
   onUpdateColumns,
   onUnPinEvent,
   pinnedEventIds,
+  refetch,
+  onRuleChange,
   rowRenderers,
   selectedEventIds,
   showCheckboxes,
@@ -78,7 +86,7 @@ const EventsComponent: React.FC<Props> = ({
   updateNote,
 }) => (
   <EventsTbody data-test-subj="events">
-    {data.map((event, i) => (
+    {data.map((event) => (
       <StatefulEvent
         actionsColumnWidth={actionsColumnWidth}
         addNoteToEvent={addNoteToEvent}
@@ -86,7 +94,6 @@ const EventsComponent: React.FC<Props> = ({
         columnHeaders={columnHeaders}
         columnRenderers={columnRenderers}
         containerElementRef={containerElementRef}
-        disableSensorVisibility={data != null && data.length < 101}
         docValueFields={docValueFields}
         event={event}
         eventIdToNoteIds={eventIdToNoteIds}
@@ -100,7 +107,9 @@ const EventsComponent: React.FC<Props> = ({
         onRowSelected={onRowSelected}
         onUnPinEvent={onUnPinEvent}
         onUpdateColumns={onUpdateColumns}
+        refetch={refetch}
         rowRenderers={rowRenderers}
+        onRuleChange={onRuleChange}
         selectedEventIds={selectedEventIds}
         showCheckboxes={showCheckboxes}
         timelineId={id}

@@ -4,14 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { LocalUIFilterName } from '../../../server/lib/ui_filters/local_ui_filters/config';
-import { ProcessorEvent } from '../../../common/processor_event';
+import { LocalUIFilterName } from '../../../common/ui_filter';
 
 export type IUrlParams = {
   detailTab?: string;
   end?: string;
-  errorGroupId?: string;
   flyoutDetailTab?: string;
   kuery?: string;
   environment?: string;
@@ -19,7 +16,6 @@ export type IUrlParams = {
   rangeTo?: string;
   refreshInterval?: number;
   refreshPaused?: boolean;
-  serviceName?: string;
   sortDirection?: string;
   sortField?: string;
   start?: string;
@@ -30,8 +26,6 @@ export type IUrlParams = {
   waterfallItemId?: string;
   page?: number;
   pageSize?: number;
-  serviceNodeName?: string;
   searchTerm?: string;
-  processorEvent?: ProcessorEvent;
-  traceIdLink?: string;
+  percentile?: number;
 } & Partial<Record<LocalUIFilterName, string>>;

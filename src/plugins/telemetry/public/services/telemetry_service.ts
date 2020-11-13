@@ -26,6 +26,7 @@ interface TelemetryServiceConstructor {
   config: TelemetryPluginConfig;
   http: CoreStart['http'];
   notifications: CoreStart['notifications'];
+  currentKibanaVersion: string;
   reportOptInStatusChange?: boolean;
 }
 
@@ -36,15 +37,19 @@ export class TelemetryService {
   private readonly defaultConfig: TelemetryPluginConfig;
   private updatedConfig?: TelemetryPluginConfig;
 
+  public readonly currentKibanaVersion: string;
+
   constructor({
     config,
     http,
     notifications,
+    currentKibanaVersion,
     reportOptInStatusChange = true,
   }: TelemetryServiceConstructor) {
     this.defaultConfig = config;
     this.reportOptInStatusChange = reportOptInStatusChange;
     this.notifications = notifications;
+    this.currentKibanaVersion = currentKibanaVersion;
     this.http = http;
   }
 
@@ -87,9 +92,25 @@ export class TelemetryService {
     return telemetryUrl;
   };
 
-  public getUserHasSeenOptedInNotice = () => {
-    return this.config.telemetryNotifyUserAboutOptInDefault || false;
-  };
+  /**
+   * Returns if an user should be shown the notice about Opt-In/Out telemetry.
+   * The decision is made based on whether any user has already dismissed the message or
+   * the user can't actually change the settings (in which case, there's no point on bothering them)
+   */
+  public getUserShouldSeeOptInNotice(): boolean {
+    return (
+      (this.config.telemetryNotifyUserAboutOptInDefault && this.config.userCanChangeSettings) ??
+      false
+    );
+  }
+
+  public get userCanChangeSettings() {
+    return this.config.userCanChangeSettings ?? false;
+  }
+
+  public set userCanChangeSettings(userCanChangeSettings: boolean) {
+    this.config = { ...this.config, userCanChangeSettings };
+  }
 
   public getIsOptedIn = () => {
     return this.isOptedIn;
@@ -100,17 +121,10 @@ export class TelemetryService {
   };
 
   public fetchTelemetry = async ({ unencrypted = false } = {}) => {
-    const now = moment();
     return this.http.post('/api/telemetry/v2/clusters/_stats', {
       body: JSON.stringify({
         unencrypted,
-        timeRange: {
-          min: now
-            .clone() // Need to clone it to avoid mutation (and max being the same value)
-            .subtract(20, 'minutes')
-            .toISOString(),
-          max: now.toISOString(),
-        },
+        timestamp: moment().valueOf(),
       }),
     });
   };
@@ -178,6 +192,7 @@ export class TelemetryService {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'X-Elastic-Stack-Version': this.currentKibanaVersion,
         },
         body: JSON.stringify(optInPayload),
       });

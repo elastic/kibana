@@ -13,7 +13,7 @@ import {
   createConcatStream,
   createSplitStream,
   createMapStream,
-} from '../../../../../../src/legacy/utils';
+} from '../../../../../../src/core/server/utils';
 import {
   parseNdjsonStrings,
   filterExportedCounts,

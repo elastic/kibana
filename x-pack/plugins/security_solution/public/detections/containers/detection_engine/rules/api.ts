@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import { FullResponseSchema } from '../../../../../common/detection_engine/schemas/request';
 import { HttpStart } from '../../../../../../../../src/core/public';
 import {
   DETECTION_ENGINE_RULES_URL,
@@ -13,13 +13,13 @@ import {
   DETECTION_ENGINE_TAGS_URL,
 } from '../../../../../common/constants';
 import {
-  AddRulesProps,
+  UpdateRulesProps,
+  CreateRulesProps,
   DeleteRulesProps,
   DuplicateRulesProps,
   EnableRulesProps,
   FetchRulesProps,
   FetchRulesResponse,
-  NewRule,
   Rule,
   FetchRuleProps,
   BasicFetchProps,
@@ -33,32 +33,51 @@ import {
 } from './types';
 import { KibanaServices } from '../../../../common/lib/kibana';
 import * as i18n from '../../../pages/detection_engine/rules/translations';
+import { RulesSchema } from '../../../../../common/detection_engine/schemas/response';
 
 /**
- * Add provided Rule
+ * Create provided Rule
  *
- * @param rule to add
+ * @param rule CreateRulesSchema to add
  * @param signal to cancel request
  *
  * @throws An error if response is not OK
  */
-export const addRule = async ({ rule, signal }: AddRulesProps): Promise<NewRule> =>
-  KibanaServices.get().http.fetch<NewRule>(DETECTION_ENGINE_RULES_URL, {
-    method: rule.id != null ? 'PUT' : 'POST',
+export const createRule = async ({ rule, signal }: CreateRulesProps): Promise<FullResponseSchema> =>
+  KibanaServices.get().http.fetch<FullResponseSchema>(DETECTION_ENGINE_RULES_URL, {
+    method: 'POST',
     body: JSON.stringify(rule),
     signal,
   });
 
 /**
- * Patch provided Rule
+ * Update provided Rule using PUT
+ *
+ * @param rule UpdateRulesSchema to be updated
+ * @param signal to cancel request
+ *
+ * @throws An error if response is not OK
+ */
+export const updateRule = async ({ rule, signal }: UpdateRulesProps): Promise<RulesSchema> =>
+  KibanaServices.get().http.fetch<RulesSchema>(DETECTION_ENGINE_RULES_URL, {
+    method: 'PUT',
+    body: JSON.stringify(rule),
+    signal,
+  });
+
+/**
+ * Patch provided rule
+ * NOTE: The rule edit flow does NOT use patch as it relies on the
+ * functionality of PUT to delete field values when not provided, if
+ * just expecting changes, use this `patchRule`
  *
  * @param ruleProperties to patch
  * @param signal to cancel request
  *
  * @throws An error if response is not OK
  */
-export const patchRule = async ({ ruleProperties, signal }: PatchRuleProps): Promise<NewRule> =>
-  KibanaServices.get().http.fetch<NewRule>(DETECTION_ENGINE_RULES_URL, {
+export const patchRule = async ({ ruleProperties, signal }: PatchRuleProps): Promise<RulesSchema> =>
+  KibanaServices.get().http.fetch<RulesSchema>(DETECTION_ENGINE_RULES_URL, {
     method: 'PATCH',
     body: JSON.stringify(ruleProperties),
     signal,
@@ -89,7 +108,7 @@ export const fetchRules = async ({
   },
   signal,
 }: FetchRulesProps): Promise<FetchRulesResponse> => {
-  const filters = [
+  const filtersWithoutTags = [
     ...(filterOptions.filter.length ? [`alert.attributes.name: ${filterOptions.filter}`] : []),
     ...(filterOptions.showCustomRules
       ? [`alert.attributes.tags: "__internal_immutable:false"`]
@@ -97,15 +116,27 @@ export const fetchRules = async ({
     ...(filterOptions.showElasticRules
       ? [`alert.attributes.tags: "__internal_immutable:true"`]
       : []),
-    ...(filterOptions.tags?.map((t) => `alert.attributes.tags: ${t}`) ?? []),
-  ];
+  ].join(' AND ');
+
+  const tags = [
+    ...(filterOptions.tags?.map((t) => `alert.attributes.tags: "${t.replace(/"/g, '\\"')}"`) ?? []),
+  ].join(' AND ');
+
+  const filterString =
+    filtersWithoutTags !== '' && tags !== ''
+      ? `${filtersWithoutTags} AND (${tags})`
+      : filtersWithoutTags + tags;
+
+  const getFieldNameForSortField = (field: string) => {
+    return field === 'name' ? `${field}.keyword` : field;
+  };
 
   const query = {
     page: pagination.page,
     per_page: pagination.perPage,
-    sort_field: filterOptions.sortField,
+    sort_field: getFieldNameForSortField(filterOptions.sortField),
     sort_order: filterOptions.sortOrder,
-    ...(filters.length ? { filter: filters.join(' AND ') } : {}),
+    ...(filterString !== '' ? { filter: filterString } : {}),
   };
 
   return KibanaServices.get().http.fetch<FetchRulesResponse>(
@@ -215,13 +246,25 @@ export const duplicateRules = async ({ rules }: DuplicateRulesProps): Promise<Bu
  *
  * @throws An error if response is not OK
  */
-export const createPrepackagedRules = async ({ signal }: BasicFetchProps): Promise<boolean> => {
-  await KibanaServices.get().http.fetch<unknown>(DETECTION_ENGINE_PREPACKAGED_URL, {
+export const createPrepackagedRules = async ({
+  signal,
+}: BasicFetchProps): Promise<{
+  rules_installed: number;
+  rules_updated: number;
+  timelines_installed: number;
+  timelines_updated: number;
+}> => {
+  const result = await KibanaServices.get().http.fetch<{
+    rules_installed: number;
+    rules_updated: number;
+    timelines_installed: number;
+    timelines_updated: number;
+  }>(DETECTION_ENGINE_PREPACKAGED_URL, {
     method: 'PUT',
     signal,
   });
 
-  return true;
+  return result;
 };
 
 /**

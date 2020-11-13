@@ -13,13 +13,19 @@ At a minimum, you must have monitoring data for the {es} production cluster.
 Once that data exists, {kib} can display monitoring data for other products in
 the cluster.
 
+TIP: If you use a separate monitoring cluster to store the monitoring data, it
+is strongly recommended that you use a separate {kib} instance to view it. If
+you log in to {kib} using SAML, Kerberos, PKI, OpenID Connect, or token
+authentication providers, a dedicated {kib} instance is *required*. The security
+tokens that are used in these contexts are cluster-specific, therefore you
+cannot use a single {kib} instance to connect to both production and monitoring
+clusters. For more information about the recommended configuration, see
+{ref}/monitoring-overview.html[Monitoring overview].
+
 . Identify where to retrieve monitoring data from.
 +
 --
-The cluster that contains the monitoring data is referred to
-as the _monitoring cluster_.
-
-TIP: If the monitoring data is stored on a *dedicated* monitoring cluster, it is
+If the monitoring data is stored on a dedicated monitoring cluster, it is
 accessible even when the cluster you're monitoring is not. If you have at least
 a gold license, you can send data from multiple clusters to the same monitoring
 cluster and view them all through the same instance of {kib}.
@@ -74,7 +80,7 @@ By default, if you are running {kib} locally, go to `http://localhost:5601/`.
 If the Elastic {security-features} are enabled, log in.
 --
 
-. Open *Stack Monitoring*. 
+. Open the main menu, then click *Stack Monitoring*. 
 +
 --
 If data collection is disabled, you are prompted to turn on data collection.

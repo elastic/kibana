@@ -6,8 +6,8 @@
 
 import { i18n } from '@kbn/i18n';
 import {
-  HomePublicPluginSetup,
   FeatureCatalogueCategory,
+  HomePublicPluginSetup,
 } from '../../../../src/plugins/home/public';
 import { PLUGIN_ID } from '../common/constants/app';
 
@@ -22,13 +22,33 @@ export const registerFeature = (home: HomePublicPluginSetup) => {
     title: i18n.translate('xpack.ml.machineLearningTitle', {
       defaultMessage: 'Machine Learning',
     }),
+    subtitle: i18n.translate('xpack.ml.machineLearningSubtitle', {
+      defaultMessage: 'Model, predict, and detect.',
+    }),
     description: i18n.translate('xpack.ml.machineLearningDescription', {
       defaultMessage:
         'Automatically model the normal behavior of your time series data to detect anomalies.',
     }),
     icon: 'machineLearningApp',
     path: '/app/ml',
+    showOnHomePage: false,
+    category: FeatureCatalogueCategory.DATA,
+    solutionId: 'kibana',
+    order: 500,
+  });
+
+  home.featureCatalogue.register({
+    id: `${PLUGIN_ID}_file_data_visualizer`,
+    title: i18n.translate('xpack.ml.fileDataVisualizerTitle', {
+      defaultMessage: 'Upload a file',
+    }),
+    description: i18n.translate('xpack.ml.fileDataVisualizerDescription', {
+      defaultMessage: 'Import your own CSV, NDJSON, or log file.',
+    }),
+    icon: 'document',
+    path: '/app/ml/filedatavisualizer',
     showOnHomePage: true,
     category: FeatureCatalogueCategory.DATA,
+    order: 520,
   });
 };

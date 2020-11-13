@@ -31,15 +31,16 @@ interface Props {
 
 export const RangeField = ({ field, euiFieldProps = {}, ...rest }: Props) => {
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
+  const { onChange: onFieldChange } = field;
 
   const onChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement> | React.MouseEvent<HTMLButtonElement>) => {
       const event = ({ ...e, value: `${e.currentTarget.value}` } as unknown) as React.ChangeEvent<{
         value: string;
       }>;
-      field.onChange(event);
+      onFieldChange(event);
     },
-    [field.onChange]
+    [onFieldChange]
   );
 
   return (
@@ -49,8 +50,8 @@ export const RangeField = ({ field, euiFieldProps = {}, ...rest }: Props) => {
       error={errorMessage}
       isInvalid={isInvalid}
       fullWidth
-      data-test-subj={rest['data-test-subj']}
       describedByIds={rest.idAria ? [rest.idAria] : undefined}
+      {...rest}
     >
       <EuiRange
         value={field.value as number}

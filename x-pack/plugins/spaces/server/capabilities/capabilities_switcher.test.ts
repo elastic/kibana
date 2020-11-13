@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Feature } from '../../../../plugins/features/server';
+import { KibanaFeature } from '../../../../plugins/features/server';
 import { Space } from '../../common/model/space';
 import { setupCapabilitiesSwitcher } from './capabilities_switcher';
 import { Capabilities, CoreSetup } from 'src/core/server';
@@ -22,7 +22,6 @@ const features = ([
   {
     id: 'feature_2',
     name: 'Feature 2',
-    navLinkId: 'feature2',
     app: ['feature2'],
     catalogue: ['feature2Entry'],
     management: {
@@ -42,7 +41,6 @@ const features = ([
   {
     id: 'feature_3',
     name: 'Feature 3',
-    navLinkId: 'feature3',
     app: ['feature3_app'],
     catalogue: ['feature3Entry'],
     management: {
@@ -63,7 +61,6 @@ const features = ([
     // feature 4 intentionally delcares the same items as feature 3
     id: 'feature_4',
     name: 'Feature 4',
-    navLinkId: 'feature3',
     app: ['feature3', 'feature3_app'],
     catalogue: ['feature3Entry'],
     management: {
@@ -80,7 +77,7 @@ const features = ([
       },
     },
   },
-] as unknown) as Feature[];
+] as unknown) as KibanaFeature[];
 
 const buildCapabilities = () =>
   Object.freeze({
@@ -121,7 +118,7 @@ const setup = (space: Space) => {
   const coreSetup = coreMock.createSetup();
 
   const featuresStart = featuresPluginMock.createStart();
-  featuresStart.getFeatures.mockReturnValue(features);
+  featuresStart.getKibanaFeatures.mockReturnValue(features);
 
   coreSetup.getStartServices.mockResolvedValue([
     coreMock.createStart(),

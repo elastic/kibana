@@ -7,7 +7,7 @@
 import { left } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 
-import { exactCheck, foldLeftRight, getPaths } from '../../siem_common_deps';
+import { exactCheck, foldLeftRight, getPaths } from '../../shared_imports';
 
 import {
   ExportListItemQuerySchema,
@@ -28,6 +28,7 @@ describe('export_list_item_schema', () => {
 
   test('it should NOT accept an undefined for an id', () => {
     const payload = getExportListItemQuerySchemaMock();
+    // @ts-expect-error
     delete payload.list_id;
     const decoded = exportListItemQuerySchema.decode(payload);
     const checked = exactCheck(payload, decoded);

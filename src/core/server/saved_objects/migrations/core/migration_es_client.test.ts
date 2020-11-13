@@ -24,11 +24,11 @@ import { loggerMock } from '../../../logging/logger.mock';
 import { SavedObjectsErrorHelpers } from '../../service/lib/errors';
 
 describe('MigrationEsClient', () => {
-  let client: ReturnType<typeof elasticsearchClientMock.createElasticSearchClient>;
+  let client: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
   let migrationEsClient: MigrationEsClient;
 
   beforeEach(() => {
-    client = elasticsearchClientMock.createElasticSearchClient();
+    client = elasticsearchClientMock.createElasticsearchClient();
     migrationEsClient = createMigrationEsClient(client, loggerMock.create());
     migrationRetryCallClusterMock.mockClear();
   });

@@ -24,6 +24,7 @@ export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
   const kibanaServer = getService('kibanaServer');
   const browser = getService('browser');
+  const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects([
     'visualize',
     'header',
@@ -35,7 +36,7 @@ export default function ({ getService, getPageObjects }) {
 
   async function initChart() {
     log.debug('navigateToApp visualize');
-    await PageObjects.visualize.navigateToNewVisualization();
+    await PageObjects.visualize.navigateToNewAggBasedVisualization();
     log.debug('clickLineChart');
     await PageObjects.visualize.clickLineChart();
     await PageObjects.visualize.clickNewSearch();
@@ -148,6 +149,10 @@ export default function ({ getService, getPageObjects }) {
         });
       });
 
+      it('should not show advanced json for count agg', async function () {
+        await testSubjects.missingOrFail('advancedParams-1');
+      });
+
       it('should put secondary axis on the right', async function () {
         const length = await PageObjects.visChart.getRightValueAxes();
         expect(length).to.be(1);
@@ -192,7 +197,7 @@ export default function ({ getService, getPageObjects }) {
 
     describe('show values on chart', () => {
       before(async () => {
-        await PageObjects.visualize.navigateToNewVisualization();
+        await PageObjects.visualize.navigateToNewAggBasedVisualization();
         await PageObjects.visualize.clickVerticalBarChart();
         await PageObjects.visualize.clickNewSearch();
         await PageObjects.timePicker.setDefaultAbsoluteRange();
@@ -227,7 +232,7 @@ export default function ({ getService, getPageObjects }) {
       const customLabel = 'myLabel';
       const axisTitle = 'myTitle';
       before(async function () {
-        await PageObjects.visualize.navigateToNewVisualization();
+        await PageObjects.visualize.navigateToNewAggBasedVisualization();
         await PageObjects.visualize.clickLineChart();
         await PageObjects.visualize.clickNewSearch();
         await PageObjects.visEditor.selectYAxisAggregation('Average', 'bytes', customLabel, 1);

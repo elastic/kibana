@@ -1,0 +1,21 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`timelion vis toExpressionAst function should match basic snapshot 1`] = `
+Object {
+  "chain": Array [
+    Object {
+      "arguments": Object {
+        "expression": Array [
+          ".es(*)",
+        ],
+        "interval": Array [
+          "auto",
+        ],
+      },
+      "function": "timelion_vis",
+      "type": "function",
+    },
+  ],
+  "type": "expression",
+}
+`;

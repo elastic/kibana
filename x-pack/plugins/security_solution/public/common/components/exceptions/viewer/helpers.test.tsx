@@ -106,13 +106,13 @@ describe('Exception viewer helpers', () => {
           value: undefined,
         },
         {
-          fieldName: 'host.name.host.name',
+          fieldName: 'host.name',
           isNested: true,
           operator: 'is',
           value: 'some host name',
         },
         {
-          fieldName: 'host.name.host.name',
+          fieldName: 'host.name',
           isNested: true,
           operator: 'is one of',
           value: ['some host name'],
@@ -138,9 +138,9 @@ describe('Exception viewer helpers', () => {
 
     test('it formats as expected when "isNested" is "true"', () => {
       const payload = getEntryMatchMock();
-      const formattedEntry = formatEntry({ isNested: true, parent: 'parent', item: payload });
+      const formattedEntry = formatEntry({ isNested: true, item: payload });
       const expected: FormattedEntry = {
-        fieldName: 'parent.host.name',
+        fieldName: 'host.name',
         isNested: true,
         operator: 'is',
         value: 'some host name',
@@ -175,10 +175,13 @@ describe('Exception viewer helpers', () => {
 
     test('it returns formatted description list with a description if one specified', () => {
       const payload = getExceptionListItemSchemaMock();
-      payload._tags = [];
       payload.description = 'Im a description';
       const result = getDescriptionListContent(payload);
       const expected: DescriptionListItem[] = [
+        {
+          description: 'Linux',
+          title: 'OS',
+        },
         {
           description: 'April 20th 2020 @ 15:25:31',
           title: 'Date created',
@@ -198,10 +201,13 @@ describe('Exception viewer helpers', () => {
 
     test('it returns just user and date created if no other fields specified', () => {
       const payload = getExceptionListItemSchemaMock();
-      payload._tags = [];
       payload.description = '';
       const result = getDescriptionListContent(payload);
       const expected: DescriptionListItem[] = [
+        {
+          description: 'Linux',
+          title: 'OS',
+        },
         {
           description: 'April 20th 2020 @ 15:25:31',
           title: 'Date created',

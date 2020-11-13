@@ -130,6 +130,29 @@ export function populateValidationMessages(
     basicValidations.duplicateDetectors.message = msg;
   }
 
+  if (validationResults.contains('categorizer_detector_missing_per_partition_field')) {
+    basicValidations.categorizerMissingPerPartition.valid = false;
+    const msg = i18n.translate(
+      'xpack.ml.newJob.wizard.validateJob.categorizerMissingPerPartitionFieldMessage',
+      {
+        defaultMessage:
+          'Partition field must be set for detectors that reference "mlcategory" when per-partition categorization is enabled.',
+      }
+    );
+    basicValidations.categorizerMissingPerPartition.message = msg;
+  }
+  if (validationResults.contains('categorizer_varying_per_partition_fields')) {
+    basicValidations.categorizerVaryingPerPartitionField.valid = false;
+    const msg = i18n.translate(
+      'xpack.ml.newJob.wizard.validateJob.categorizerVaryingPerPartitionFieldNamesMessage',
+      {
+        defaultMessage:
+          'Detectors with keyword "mlcategory" cannot have different partition_field_name when per-partition categorization is enabled.',
+      }
+    );
+    basicValidations.categorizerVaryingPerPartitionField.message = msg;
+  }
+
   if (validationResults.contains('bucket_span_empty')) {
     basicValidations.bucketSpan.valid = false;
     const msg = i18n.translate(

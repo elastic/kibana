@@ -23,6 +23,8 @@ export type DataEnhancedStart = ReturnType<DataEnhancedPlugin['start']>;
 
 export class DataEnhancedPlugin
   implements Plugin<void, void, DataEnhancedSetupDependencies, DataEnhancedStartDependencies> {
+  private enhancedSearchInterceptor!: EnhancedSearchInterceptor;
+
   public setup(
     core: CoreSetup<DataEnhancedStartDependencies>,
     { data }: DataEnhancedSetupDependencies
@@ -31,20 +33,28 @@ export class DataEnhancedPlugin
       KUERY_LANGUAGE_NAME,
       setupKqlQuerySuggestionProvider(core)
     );
+
+    this.enhancedSearchInterceptor = new EnhancedSearchInterceptor({
+      toasts: core.notifications.toasts,
+      http: core.http,
+      uiSettings: core.uiSettings,
+      startServices: core.getStartServices(),
+      usageCollector: data.search.usageCollector,
+      session: data.search.session,
+    });
+
+    data.__enhance({
+      search: {
+        searchInterceptor: this.enhancedSearchInterceptor,
+      },
+    });
   }
 
   public start(core: CoreStart, plugins: DataEnhancedStartDependencies) {
     setAutocompleteService(plugins.data.autocomplete);
-    const enhancedSearchInterceptor = new EnhancedSearchInterceptor(
-      {
-        toasts: core.notifications.toasts,
-        application: core.application,
-        http: core.http,
-        uiSettings: core.uiSettings,
-        usageCollector: plugins.data.search.usageCollector,
-      },
-      core.injectedMetadata.getInjectedVar('esRequestTimeout') as number
-    );
-    plugins.data.search.setInterceptor(enhancedSearchInterceptor);
+  }
+
+  public stop() {
+    this.enhancedSearchInterceptor.stop();
   }
 }

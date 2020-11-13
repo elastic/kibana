@@ -34,7 +34,7 @@ export const VisualizeNoMatch = () => {
   useEffect(() => {
     services.restorePreviousUrl();
 
-    const { navigated } = services.kibanaLegacy.navigateToLegacyKibanaUrl(
+    const { navigated } = services.urlForwarding.navigateToLegacyKibanaUrl(
       services.history.location.pathname
     );
 

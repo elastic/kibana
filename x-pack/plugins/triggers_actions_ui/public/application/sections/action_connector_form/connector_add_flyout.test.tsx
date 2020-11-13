@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import * as React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 import ConnectorAddFlyout from './connector_add_flyout';
 import { ActionsConnectorsContextProvider } from '../../context/actions_connectors_context';
@@ -34,7 +34,7 @@ describe('connector_add_flyout', () => {
           show: true,
         },
       },
-      actionTypeRegistry: actionTypeRegistry as any,
+      actionTypeRegistry,
       docLinks: { ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' },
     };
   });
@@ -58,8 +58,7 @@ describe('connector_add_flyout', () => {
         }}
       >
         <ConnectorAddFlyout
-          addFlyoutVisible={true}
-          setAddFlyoutVisibility={() => {}}
+          onClose={() => {}}
           actionTypes={[
             {
               id: actionType.id,
@@ -75,6 +74,8 @@ describe('connector_add_flyout', () => {
     );
     expect(wrapper.find('ActionTypeMenu')).toHaveLength(1);
     expect(wrapper.find(`[data-test-subj="${actionType.id}-card"]`).exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="cancelButton"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="backButton"]').exists()).toBeFalsy();
   });
 
   it('renders banner with subscription links when gold features are disabled due to licensing ', () => {
@@ -98,8 +99,7 @@ describe('connector_add_flyout', () => {
         }}
       >
         <ConnectorAddFlyout
-          addFlyoutVisible={true}
-          setAddFlyoutVisibility={() => {}}
+          onClose={() => {}}
           actionTypes={[
             {
               id: actionType.id,
@@ -158,8 +158,7 @@ describe('connector_add_flyout', () => {
         }}
       >
         <ConnectorAddFlyout
-          addFlyoutVisible={true}
-          setAddFlyoutVisibility={() => {}}
+          onClose={() => {}}
           actionTypes={[
             {
               id: actionType.id,
@@ -206,8 +205,7 @@ describe('connector_add_flyout', () => {
         }}
       >
         <ConnectorAddFlyout
-          addFlyoutVisible={true}
-          setAddFlyoutVisibility={() => {}}
+          onClose={() => {}}
           actionTypes={[
             {
               id: actionType.id,

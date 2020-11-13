@@ -306,7 +306,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    describe('Alert Instances', function () {
+    // FLAKY: https://github.com/elastic/kibana/issues/57426
+    describe.skip('Alert Instances', function () {
       const testRunUuid = uuid.v4();
       let alert: any;
 
@@ -361,7 +362,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         // await first run to complete so we have an initial state
         await retry.try(async () => {
-          const { alertInstances } = await alerting.alerts.getAlertState(alert.id);
+          const { instances: alertInstances } = await alerting.alerts.getAlertInstanceSummary(
+            alert.id
+          );
           expect(Object.keys(alertInstances).length).to.eql(instances.length);
         });
       });
@@ -373,15 +376,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         // Verify content
         await testSubjects.existOrFail('alertInstancesList');
 
-        const { alertInstances } = await alerting.alerts.getAlertState(alert.id);
+        const summary = await alerting.alerts.getAlertInstanceSummary(alert.id);
 
         const dateOnAllInstancesFromApiResponse = mapValues(
-          alertInstances,
-          ({
-            meta: {
-              lastScheduledActions: { date },
-            },
-          }) => date
+          summary.instances,
+          (instance) => instance.activeStartDate
         );
 
         log.debug(
@@ -394,21 +393,21 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         expect(instancesList.map((instance) => omit(instance, 'duration'))).to.eql([
           {
             instance: 'us-central',
-            status: 'Active',
+            status: 'Active (Default)',
             start: moment(dateOnAllInstancesFromApiResponse['us-central'])
               .utc()
               .format('D MMM YYYY @ HH:mm:ss'),
           },
           {
             instance: 'us-east',
-            status: 'Active',
+            status: 'Active (Default)',
             start: moment(dateOnAllInstancesFromApiResponse['us-east'])
               .utc()
               .format('D MMM YYYY @ HH:mm:ss'),
           },
           {
             instance: 'us-west',
-            status: 'Active',
+            status: 'Active (Default)',
             start: moment(dateOnAllInstancesFromApiResponse['us-west'])
               .utc()
               .format('D MMM YYYY @ HH:mm:ss'),
@@ -471,7 +470,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         ).to.eql([
           {
             instance: 'eu-east',
-            status: 'Inactive',
+            status: 'OK',
             start: '',
             duration: '',
           },
@@ -574,7 +573,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         // await first run to complete so we have an initial state
         await retry.try(async () => {
-          const { alertInstances } = await alerting.alerts.getAlertState(alert.id);
+          const { instances: alertInstances } = await alerting.alerts.getAlertInstanceSummary(
+            alert.id
+          );
           expect(Object.keys(alertInstances).length).to.eql(instances.length);
         });
 
@@ -595,7 +596,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         // Verify content
         await testSubjects.existOrFail('alertInstancesList');
 
-        const { alertInstances } = await alerting.alerts.getAlertState(alert.id);
+        const { instances: alertInstances } = await alerting.alerts.getAlertInstanceSummary(
+          alert.id
+        );
 
         const items = await pageObjects.alertDetailsUI.getAlertInstancesList();
         expect(items.length).to.eql(PAGE_SIZE);
@@ -608,7 +611,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         // Verify content
         await testSubjects.existOrFail('alertInstancesList');
 
-        const { alertInstances } = await alerting.alerts.getAlertState(alert.id);
+        const { instances: alertInstances } = await alerting.alerts.getAlertInstanceSummary(
+          alert.id
+        );
 
         await pageObjects.alertDetailsUI.clickPaginationNextPage();
 

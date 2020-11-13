@@ -17,13 +17,14 @@
  * under the License.
  */
 
-import { Url } from 'url';
-import { Request, ApplicationState } from 'hapi';
+import { URL } from 'url';
+import uuid from 'uuid';
+import { Request, RouteOptionsApp, RequestApplicationState, RouteOptions } from '@hapi/hapi';
 import { Observable, fromEvent, merge } from 'rxjs';
 import { shareReplay, first, takeUntil } from 'rxjs/operators';
 import { RecursiveReadonly } from '@kbn/utility-types';
+import { deepFreeze } from '@kbn/std';
 
-import { deepFreeze } from '../../../utils';
 import { Headers } from './headers';
 import { RouteMethod, RouteConfigOptions, validBodyOutput, isSafeMethod } from './route';
 import { KibanaSocket, IKibanaSocket } from './socket';
@@ -34,9 +35,19 @@ const requestSymbol = Symbol('request');
 /**
  * @internal
  */
-export interface KibanaRouteState extends ApplicationState {
+export interface KibanaRouteOptions extends RouteOptionsApp {
   xsrfRequired: boolean;
 }
+
+/**
+ * @internal
+ */
+export interface KibanaRequestState extends RequestApplicationState {
+  requestId: string;
+  requestUuid: string;
+  rewrittenUrl?: URL;
+}
+
 /**
  * Route options: If 'GET' or 'OPTIONS' method, body options won't be returned.
  * @public
@@ -64,6 +75,16 @@ export interface KibanaRequestEvents {
    * Observable that emits once if and when the request has been aborted.
    */
   aborted$: Observable<void>;
+
+  /**
+   * Observable that emits once if and when the request has been completely handled.
+   *
+   * @remarks
+   * The request may be considered completed if:
+   * - A response has been sent to the client; or
+   * - The request was aborted.
+   */
+  completed$: Observable<void>;
 }
 
 /**
@@ -124,8 +145,25 @@ export class KibanaRequest<
 
     return { query, params, body };
   }
+  /**
+   * A identifier to identify this request.
+   *
+   * @remarks
+   * Depending on the user's configuration, this value may be sourced from the
+   * incoming request's `X-Opaque-Id` header which is not guaranteed to be unique
+   * per request.
+   */
+  public readonly id: string;
+  /**
+   * A UUID to identify this request.
+   *
+   * @remarks
+   * This value is NOT sourced from the incoming request's `X-Opaque-Id` header. it
+   * is always a UUID uniquely identifying the request.
+   */
+  public readonly uuid: string;
   /** a WHATWG URL standard object. */
-  public readonly url: Url;
+  public readonly url: URL;
   /** matched route details */
   public readonly route: RecursiveReadonly<KibanaRequestRoute<Method>>;
   /**
@@ -149,6 +187,11 @@ export class KibanaRequest<
     isAuthenticated: boolean;
   };
 
+  /**
+   * URL rewritten in onPreRouting request interceptor.
+   */
+  public readonly rewrittenUrl?: URL;
+
   /** @internal */
   protected readonly [requestSymbol]: Request;
 
@@ -161,6 +204,14 @@ export class KibanaRequest<
     // until that time we have to expose all the headers
     private readonly withoutSecretHeaders: boolean
   ) {
+    // The `requestId` and `requestUuid` properties will not be populated for requests that are 'faked' by internal systems that leverage
+    // KibanaRequest in conjunction with scoped Elasticsearch and SavedObjectsClient in order to pass credentials.
+    // In these cases, the ids default to a newly generated UUID.
+    const appState = request.app as KibanaRequestState | undefined;
+    this.id = appState?.requestId ?? uuid.v4();
+    this.uuid = appState?.requestUuid ?? uuid.v4();
+    this.rewrittenUrl = appState?.rewrittenUrl;
+
     this.url = request.url;
     this.headers = deepFreeze({ ...request.headers });
     this.isSystemRequest =
@@ -186,25 +237,44 @@ export class KibanaRequest<
 
   private getEvents(request: Request): KibanaRequestEvents {
     const finish$ = merge(
-      fromEvent(request.raw.req, 'end'), // all data consumed
+      fromEvent(request.raw.res, 'finish'), // Response has been sent
       fromEvent(request.raw.req, 'close') // connection was closed
     ).pipe(shareReplay(1), first());
+
+    const aborted$ = fromEvent<void>(request.raw.req, 'aborted').pipe(first(), takeUntil(finish$));
+    const completed$ = merge<void, void>(finish$, aborted$).pipe(shareReplay(1), first());
+
     return {
-      aborted$: fromEvent<void>(request.raw.req, 'aborted').pipe(first(), takeUntil(finish$)),
+      aborted$,
+      completed$,
     } as const;
   }
 
   private getRouteInfo(request: Request): KibanaRequestRoute<Method> {
     const method = request.method as Method;
-    const { parse, maxBytes, allow, output } = request.route.settings.payload || {};
-    const timeout = request.route.settings.timeout?.socket;
+    const { parse, maxBytes, allow, output, timeout: payloadTimeout } =
+      request.route.settings.payload || {};
 
+    // net.Socket#timeout isn't documented, yet, and isn't part of the types... https://github.com/nodejs/node/pull/34543
+    // the socket is also undefined when using @hapi/shot, or when a "fake request" is used
+    const socketTimeout = (request.raw.req.socket as any)?.timeout;
     const options = ({
       authRequired: this.getAuthRequired(request),
-      // some places in LP call KibanaRequest.from(request) manually. remove fallback to true before v8
-      xsrfRequired: (request.route.settings.app as KibanaRouteState)?.xsrfRequired ?? true,
+      // TypeScript note: Casting to `RouterOptions` to fix the following error:
+      //
+      //     Property 'app' does not exist on type 'RouteSettings'
+      //
+      // In @types/hapi__hapi v18, `request.route.settings` is of type
+      // `RouteSettings`, which doesn't have an `app` property. I think this is
+      // a mistake. In v19, the `RouteSettings` interface does have an `app`
+      // property.
+      xsrfRequired:
+        ((request.route.settings as RouteOptions).app as KibanaRouteOptions)?.xsrfRequired ?? true, // some places in LP call KibanaRequest.from(request) manually. remove fallback to true before v8
       tags: request.route.settings.tags || [],
-      timeout: typeof timeout === 'number' ? timeout - 1 : undefined, // We are forced to have the timeout be 1 millisecond greater than the server and payload so we subtract one here to give the user consist settings
+      timeout: {
+        payload: payloadTimeout,
+        idleSocket: socketTimeout === 0 ? undefined : socketTimeout,
+      },
       body: isSafeMethod(method)
         ? undefined
         : {
@@ -239,11 +309,12 @@ export class KibanaRequest<
       return true;
     }
 
+    // @ts-expect-error According to @types/hapi__hapi, `route.settings` should be of type `RouteSettings`, but it seems that it's actually `RouteOptions` (https://github.com/hapijs/hapi/blob/v18.4.2/lib/route.js#L139)
     if (authOptions === false) return false;
     throw new Error(
       `unexpected authentication options: ${JSON.stringify(authOptions)} for route: ${
-        this.url.href
-      }`
+        this.url.pathname
+      }${this.url.search}`
     );
   }
 }
@@ -255,7 +326,11 @@ export class KibanaRequest<
 export const ensureRawRequest = (request: KibanaRequest | LegacyRequest) =>
   isKibanaRequest(request) ? request[requestSymbol] : request;
 
-function isKibanaRequest(request: unknown): request is KibanaRequest {
+/**
+ * Checks if an incoming request is a {@link KibanaRequest}
+ * @internal
+ */
+export function isKibanaRequest(request: unknown): request is KibanaRequest {
   return request instanceof KibanaRequest;
 }
 

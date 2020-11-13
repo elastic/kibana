@@ -51,7 +51,7 @@ export const ColumnChart: FC<Props> = ({ chartData, columnType, dataTestSubj }) 
               name="count"
               xScaleType={xScaleType}
               yScaleType="linear"
-              xAccessor="key"
+              xAccessor={'key_as_string'}
               yAccessors={['doc_count']}
               styleAccessor={(d) => d.datum.color}
               data={data}
@@ -61,6 +61,7 @@ export const ColumnChart: FC<Props> = ({ chartData, columnType, dataTestSubj }) 
       )}
       <div
         className={classNames('mlDataGridChart__legend', {
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           'mlDataGridChart__legend--numeric': columnType.schema === 'number',
         })}
         data-test-subj={`${dataTestSubj}-legend`}

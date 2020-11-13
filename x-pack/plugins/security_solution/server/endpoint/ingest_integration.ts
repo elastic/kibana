@@ -4,8 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Logger } from '../../../../../src/core/server';
-import { NewPackageConfig } from '../../../ingest_manager/common/types/models';
+import { PluginStartContract as AlertsStartContract } from '../../../alerts/server';
+import { SecurityPluginSetup } from '../../../security/server';
+import { ExternalCallback } from '../../../fleet/server';
+import { KibanaRequest, Logger, RequestHandlerContext } from '../../../../../src/core/server';
+import { NewPackagePolicy } from '../../../fleet/common/types/models';
 import { factory as policyConfigFactory } from '../../common/endpoint/models/policy_config';
 import { NewPolicyData } from '../../common/endpoint/types';
 import { ManifestManager } from './services/artifacts';
@@ -13,6 +16,10 @@ import { Manifest } from './lib/artifacts';
 import { reportErrors } from './lib/artifacts/common';
 import { InternalArtifactCompleteSchema } from './schemas/artifacts';
 import { manifestDispatchSchema } from '../../common/endpoint/schema/manifest';
+import { AppClientFactory } from '../client';
+import { createDetectionIndex } from '../lib/detection_engine/routes/index/create_index_route';
+import { createPrepackagedRules } from '../lib/detection_engine/routes/rules/add_prepackaged_rules_route';
+import { buildFrameworkRequest } from '../lib/timeline/routes/utils/common';
 
 const getManifest = async (logger: Logger, manifestManager: ManifestManager): Promise<Manifest> => {
   let manifest: Manifest | null = null;
@@ -67,23 +74,56 @@ const getManifest = async (logger: Logger, manifestManager: ManifestManager): Pr
 };
 
 /**
- * Callback to handle creation of PackageConfigs in Ingest Manager
+ * Callback to handle creation of PackagePolicies in Ingest Manager
  */
-export const getPackageConfigCreateCallback = (
+export const getPackagePolicyCreateCallback = (
   logger: Logger,
-  manifestManager: ManifestManager
-): ((newPackageConfig: NewPackageConfig) => Promise<NewPackageConfig>) => {
-  const handlePackageConfigCreate = async (
-    newPackageConfig: NewPackageConfig
-  ): Promise<NewPackageConfig> => {
-    // We only care about Endpoint package configs
-    if (newPackageConfig.package?.name !== 'endpoint') {
-      return newPackageConfig;
+  manifestManager: ManifestManager,
+  appClientFactory: AppClientFactory,
+  maxTimelineImportExportSize: number,
+  securitySetup: SecurityPluginSetup,
+  alerts: AlertsStartContract
+): ExternalCallback[1] => {
+  const handlePackagePolicyCreate = async (
+    newPackagePolicy: NewPackagePolicy,
+    context: RequestHandlerContext,
+    request: KibanaRequest
+  ): Promise<NewPackagePolicy> => {
+    // We only care about Endpoint package policies
+    if (newPackagePolicy.package?.name !== 'endpoint') {
+      return newPackagePolicy;
     }
 
-    // We cast the type here so that any changes to the Endpoint specific data
-    // follow the types/schema expected
-    let updatedPackageConfig = newPackageConfig as NewPolicyData;
+    // prep for detection rules creation
+    const appClient = appClientFactory.create(request);
+    const frameworkRequest = await buildFrameworkRequest(context, securitySetup, request);
+
+    // Create detection index & rules (if necessary). move past any failure, this is just a convenience
+    try {
+      await createDetectionIndex(context, appClient);
+    } catch (err) {
+      if (err.statusCode !== 409) {
+        // 409 -> detection index already exists, which is fine
+        logger.warn(
+          `Possible problem creating detection signals index (${err.statusCode}): ${err.message}`
+        );
+      }
+    }
+    try {
+      // this checks to make sure index exists first, safe to try in case of failure above
+      // may be able to recover from minor errors
+      await createPrepackagedRules(
+        context,
+        appClient,
+        alerts.getAlertsClientWithRequest(request),
+        frameworkRequest,
+        maxTimelineImportExportSize
+      );
+    } catch (err) {
+      logger.error(
+        `Unable to create detection rules automatically (${err.statusCode}): ${err.message}`
+      );
+    }
 
     // Get most recent manifest
     const manifest = await getManifest(logger, manifestManager);
@@ -94,10 +134,14 @@ export const getPackageConfigCreateCallback = (
       logger.error('Invalid manifest');
     }
 
+    // We cast the type here so that any changes to the Endpoint specific data
+    // follow the types/schema expected
+    let updatedPackagePolicy = newPackagePolicy as NewPolicyData;
+
     // Until we get the Default Policy Configuration in the Endpoint package,
     // we will add it here manually at creation time.
-    updatedPackageConfig = {
-      ...newPackageConfig,
+    updatedPackagePolicy = {
+      ...newPackagePolicy,
       inputs: [
         {
           type: 'endpoint',
@@ -115,8 +159,8 @@ export const getPackageConfigCreateCallback = (
       ],
     };
 
-    return updatedPackageConfig;
+    return updatedPackagePolicy;
   };
 
-  return handlePackageConfigCreate;
+  return handlePackagePolicyCreate;
 };

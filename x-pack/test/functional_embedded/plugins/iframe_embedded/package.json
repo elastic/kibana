@@ -6,9 +6,6 @@
   },
   "scripts": {
     "kbn": "node ../../../../../scripts/kbn.js",
-    "build": "rm -rf './target' && tsc"
-  },
-  "devDependencies": {
-    "typescript": "3.9.5"
+    "build": "rm -rf './target' && ../../../../../node_modules/.bin/tsc"
   }
 }

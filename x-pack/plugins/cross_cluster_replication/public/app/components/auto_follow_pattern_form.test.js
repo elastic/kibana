@@ -11,8 +11,6 @@ jest.mock('../services/auto_follow_pattern_validators', () => ({
   validateLeaderIndexPattern: jest.fn(),
 }));
 
-jest.mock('ui/new_platform');
-
 describe('<AutoFollowPatternForm state update', () => {
   describe('updateFormErrors()', () => {
     it('should merge errors with existing fieldsErrors', () => {

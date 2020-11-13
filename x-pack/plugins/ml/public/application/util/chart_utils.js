@@ -8,15 +8,14 @@ import d3 from 'd3';
 import { calculateTextWidth } from './string_utils';
 import { MULTI_BUCKET_IMPACT } from '../../../common/constants/multi_bucket_impact';
 import moment from 'moment';
-import rison from 'rison-node';
-
 import { getTimefilter } from './dependency_cache';
-
 import { CHART_TYPE } from '../explorer/explorer_constants';
+import { ML_PAGES } from '../../../common/constants/ml_url_generator';
 
 export const LINE_CHART_ANOMALY_RADIUS = 7;
 export const MULTI_BUCKET_SYMBOL_SIZE = 100; // In square pixels for use with d3 symbol.size
 export const SCHEDULED_EVENT_SYMBOL_HEIGHT = 5;
+export const ANNOTATION_SYMBOL_HEIGHT = 10;
 
 const MAX_LABEL_WIDTH = 100;
 
@@ -212,7 +211,7 @@ export function getChartType(config) {
   return chartType;
 }
 
-export function getExploreSeriesLink(series) {
+export async function getExploreSeriesLink(mlUrlGenerator, series) {
   // Open the Single Metric dashboard over the same overall bounds and
   // zoomed in to the same time as the current chart.
   const timefilter = getTimefilter();
@@ -227,46 +226,44 @@ export function getExploreSeriesLink(series) {
   // to identify the particular series to view.
   // Initially pass them in the mlTimeSeriesExplorer part of the AppState.
   // TODO - do we want to pass the entities via the filter?
-  const entityCondition = {};
-  series.entityFields.forEach((entity) => {
-    entityCondition[entity.fieldName] = entity.fieldValue;
-  });
+  let entityCondition;
+  if (series.entityFields.length > 0) {
+    entityCondition = {};
+    series.entityFields.forEach((entity) => {
+      entityCondition[entity.fieldName] = entity.fieldValue;
+    });
+  }
 
-  // Use rison to build the URL .
-  const _g = rison.encode({
-    ml: {
+  const url = await mlUrlGenerator.createUrl({
+    page: ML_PAGES.SINGLE_METRIC_VIEWER,
+    pageState: {
       jobIds: [series.jobId],
-    },
-    refreshInterval: {
-      display: 'Off',
-      pause: false,
-      value: 0,
-    },
-    time: {
-      from: from,
-      to: to,
-      mode: 'absolute',
-    },
-  });
-
-  const _a = rison.encode({
-    mlTimeSeriesExplorer: {
+      refreshInterval: {
+        display: 'Off',
+        pause: true,
+        value: 0,
+      },
+      timeRange: {
+        from: from,
+        to: to,
+        mode: 'absolute',
+      },
       zoom: {
         from: zoomFrom,
         to: zoomTo,
       },
       detectorIndex: series.detectorIndex,
       entities: entityCondition,
-    },
-    query: {
-      query_string: {
-        analyze_wildcard: true,
-        query: '*',
+      query: {
+        query_string: {
+          analyze_wildcard: true,
+          query: '*',
+        },
       },
     },
+    excludeBasePath: false,
   });
-
-  return `#/timeseriesexplorer?_g=${_g}&_a=${encodeURIComponent(_a)}`;
+  return url;
 }
 
 export function showMultiBucketAnomalyMarker(point) {

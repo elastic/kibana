@@ -50,14 +50,6 @@ describe('ExpressionsPublicPlugin', () => {
         const bar = await setup.run('var_set name="foo" value="bar" | var name="foo"', null);
         expect(bar).toBe('bar');
       });
-
-      test('kibana_context function is available', async () => {
-        const { setup } = await expressionsPluginMock.createPlugin();
-        const result = await setup.run('kibana_context', null);
-        expect(result).toMatchObject({
-          type: 'kibana_context',
-        });
-      });
     });
   });
 
@@ -67,7 +59,7 @@ describe('ExpressionsPublicPlugin', () => {
         const { doStart } = await expressionsPluginMock.createPlugin();
         const start = await doStart();
 
-        const handler = start.execute('clog');
+        const handler = start.execute('clog', null);
         expect(handler.getAst()).toMatchInlineSnapshot(`
           Object {
             "chain": Array [
@@ -80,15 +72,6 @@ describe('ExpressionsPublicPlugin', () => {
             "type": "expression",
           }
         `);
-      });
-
-      test('"kibana" function return value of type "kibana_context"', async () => {
-        const { doStart } = await expressionsPluginMock.createPlugin();
-        const start = await doStart();
-        const execution = start.execute('kibana');
-        const result = await execution.getData();
-
-        expect((result as any).type).toBe('kibana_context');
       });
     });
   });

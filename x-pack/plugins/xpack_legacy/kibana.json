@@ -1,0 +1,10 @@
+{
+  "id": "xpackLegacy",
+  "version": "8.0.0",
+  "kibanaVersion": "kibana",
+  "server": true,
+  "ui": false,
+  "requiredPlugins": [
+    "usageCollection"
+  ]
+}

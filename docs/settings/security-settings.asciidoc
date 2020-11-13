@@ -73,42 +73,60 @@ The valid settings in the `xpack.security.authc.providers` namespace vary depend
 [cols="2*<"]
 |===
 | `xpack.security.authc.providers.`
-`<provider-type>.<provider-name>.enabled`
+`<provider-type>.<provider-name>.enabled` {ess-icon}
 | Determines if the authentication provider should be enabled. By default, {kib} enables the provider as soon as you configure any of its properties.
 
 | `xpack.security.authc.providers.`
-`<provider-type>.<provider-name>.order`
+`<provider-type>.<provider-name>.order` {ess-icon}
 | Order of the provider in the authentication chain and on the Login Selector UI.
 
 | `xpack.security.authc.providers.`
-`<provider-type>.<provider-name>.description`
+`<provider-type>.<provider-name>.description` {ess-icon}
 | Custom description of the provider entry displayed on the Login Selector UI.
 
 | `xpack.security.authc.providers.`
-`<provider-type>.<provider-name>.hint`
+`<provider-type>.<provider-name>.hint` {ess-icon}
 | Custom hint for the provider entry displayed on the Login Selector UI.
 
 | `xpack.security.authc.providers.`
-`<provider-type>.<provider-name>.icon`
+`<provider-type>.<provider-name>.icon` {ess-icon}
 | Custom icon for the provider entry displayed on the Login Selector UI.
 
-| `xpack.security.authc.providers.`
-`<provider-type>.<provider-name>.showInSelector`
+| `xpack.security.authc.providers.<provider-type>.`
+`<provider-name>.showInSelector` {ess-icon}
 | Flag that indicates if the provider should have an entry on the Login Selector UI. Setting this to `false` doesn't remove the provider from the authentication chain.
 
-|===
-
+2+a|
+[TIP]
 [NOTE]
 ============
 You are unable to set this setting to `false` for `basic` and `token` authentication providers.
 ============
 
-[cols="2*<"]
-|===
-
-| `xpack.security.authc.providers.`
-`<provider-type>.<provider-name>.accessAgreement.message`
+| `xpack.security.authc.providers.<provider-type>.`
+`<provider-name>.accessAgreement.message` {ess-icon}
 | Access agreement text in Markdown format. For more information, refer to <<xpack-security-access-agreement>>.
+
+| [[xpack-security-provider-session-idleTimeout]] `xpack.security.authc.providers.<provider-type>.`
+`<provider-name>.session.idleTimeout` {ess-icon}
+| Ensures that user sessions will expire after a period of inactivity. Setting this to `0` will prevent sessions from expiring because of inactivity. By default, this setting is equal to <<xpack-session-idleTimeout, `xpack.security.session.idleTimeout`>>.
+
+2+a|
+[TIP]
+============
+Use a string of `<count>[ms\|s\|m\|h\|d\|w\|M\|Y]` (e.g. '20m', '24h', '7d', '1w').
+============
+
+| [[xpack-security-provider-session-lifespan]] `xpack.security.authc.providers.<provider-type>.`
+`<provider-name>.session.lifespan` {ess-icon}
+| Ensures that user sessions will expire after the defined time period. This behavior is also known as an "absolute timeout". If
+this is set to `0`, user sessions could stay active indefinitely. By default, this setting is equal to <<xpack-session-lifespan, `xpack.security.session.lifespan`>>.
+
+2+a|
+[TIP]
+============
+Use a string of `<count>[ms\|s\|m\|h\|d\|w\|M\|Y]` (e.g. '20m', '24h', '7d', '1w').
+============
 
 |===
 
@@ -121,12 +139,12 @@ In addition to <<authentication-provider-settings,the settings that are valid fo
 [cols="2*<"]
 |===
 | `xpack.security.authc.providers.`
-`saml.<provider-name>.realm`
+`saml.<provider-name>.realm` {ess-icon}
 | SAML realm in {es} that provider should use.
 
 | `xpack.security.authc.providers.`
-`saml.<provider-name>.maxRedirectURLSize`
-| The maximum size of the URL that {kib} is allowed to store during the authentication SAML handshake. For more information, refer to <<security-saml-and-long-urls>>.
+`saml.<provider-name>.useRelayStateDeepLink` {ess-icon}
+| Determines if the provider should treat the `RelayState` parameter as a deep link in {kib} during Identity Provider initiated log in. By default, this setting is set to `false`. The link specified in `RelayState` should be a relative, URL-encoded {kib} URL. For example, the `/app/dashboards#/list` link in `RelayState` parameter would look like this: `RelayState=%2Fapp%2Fdashboards%23%2Flist`.
 
 |===
 
@@ -139,7 +157,7 @@ In addition to <<authentication-provider-settings,the settings that are valid fo
 [cols="2*<"]
 |===
 | `xpack.security.authc.providers.`
-`oidc.<provider-name>.realm`
+`oidc.<provider-name>.realm` {ess-icon}
 | OpenID Connect realm in {es} that the provider should use.
 
 |===
@@ -158,25 +176,33 @@ There is a very limited set of cases when you'd want to change these settings. F
 | `xpack.security.authc.http.autoSchemesEnabled`
 | Determines if HTTP authentication schemes used by the enabled authentication providers should be automatically supported during HTTP authentication. By default, this setting is set to `true`.
 
-| `xpack.security.authc.http.schemes`
+| `xpack.security.authc.http.schemes[]`
 | List of HTTP authentication schemes that {kib} HTTP authentication should support. By default, this setting is set to `['apikey']` to support HTTP authentication with <<api-keys, `ApiKey`>> scheme.
 
 |===
 
 [float]
-[[login-selector-settings]]
-===== Login Selector UI settings
+[[login-ui-settings]]
+===== Login user interface settings
+
+You can configure the following settings in the `kibana.yml` file.
 
 [cols="2*<"]
 |===
-| `xpack.security.authc.selector.enabled`
-| Determines if the Login Selector UI should be enabled. By default, this setting is set to `true` if more than one authentication provider is configured.
+| `xpack.security.loginAssistanceMessage` {ess-icon}
+| Adds a message to the login UI. Useful for displaying information about maintenance windows, links to corporate sign up pages, and so on.
+
+| `xpack.security.loginHelp` {ess-icon}
+| Adds a message accessible at the login UI with additional help information for the login process.
+
+| `xpack.security.authc.selector.enabled` {ess-icon}
+| Determines if the login selector UI should be enabled. By default, this setting is set to `true` if more than one authentication provider is configured.
 
 |===
 
 [float]
-[[security-ui-settings]]
-==== User interface security settings
+[[security-session-and-cookie-settings]]
+==== Session and cookie security settings
 
 You can configure the following settings in the `kibana.yml` file.
 
@@ -185,62 +211,182 @@ You can configure the following settings in the `kibana.yml` file.
 | `xpack.security.cookieName`
   | Sets the name of the cookie used for the session. The default value is `"sid"`.
 
-| `xpack.security.encryptionKey`
-  | An arbitrary string of 32 characters or more that is used to encrypt credentials
-  in a cookie. It is crucial that this key is not exposed to users of {kib}. By
+|[[xpack-security-encryptionKey]] `xpack.security.encryptionKey`
+  | An arbitrary string of 32 characters or more that is used to encrypt session information. Do **not** expose this key to users of {kib}. By
   default, a value is automatically generated in memory. If you use that default
   behavior, all sessions are invalidated when {kib} restarts.
   In addition, high-availability deployments of {kib} will behave unexpectedly
   if this setting isn't the same for all instances of {kib}.
 
-| `xpack.security.secureCookies`
+|[[xpack-security-secureCookies]] `xpack.security.secureCookies`
   | Sets the `secure` flag of the session cookie. The default value is `false`. It
-  is automatically set to `true` if `server.ssl.enabled` is set to `true`. Set
+  is automatically set to `true` if <<server-ssl-enabled, `server.ssl.enabled`>> is set to `true`. Set
   this to `true` if SSL is configured outside of {kib} (for example, you are
   routing requests through a load balancer or proxy).
 
-| `xpack.security.sameSiteCookies`
+| `xpack.security.sameSiteCookies` {ess-icon}
   | Sets the `SameSite` attribute of the session cookie. This allows you to declare whether your cookie should be restricted to a first-party or same-site context.
   Valid values are `Strict`, `Lax`, `None`.
-  This is *not set* by default, which modern browsers will treat as `Lax`. If you use Kibana embedded in an iframe in modern browsers, you might need to set it to `None`. Setting this value to `None` requires cookies to be sent over a secure connection by setting `xpack.security.secureCookies: true`.
+  This is *not set* by default, which modern browsers will treat as `Lax`. If you use Kibana embedded in an iframe in modern browsers, you might need to set it to `None`. Setting this value to `None` requires cookies to be sent over a secure connection by setting <<xpack-security-secureCookies, `xpack.security.secureCookies`>>: `true`.
 
-| `xpack.security.session.idleTimeout`
-  | Sets the session duration. By default, sessions stay active until the
-  browser is closed. When this is set to an explicit idle timeout, closing the
-  browser still requires the user to log back in to {kib}.
+|[[xpack-session-idleTimeout]] `xpack.security.session.idleTimeout` {ess-icon}
+  | Ensures that user sessions will expire after a period of inactivity. This and <<xpack-session-lifespan,`xpack.security.session.lifespan`>> are both
+highly recommended. You can also specify this setting for <<xpack-security-provider-session-idleTimeout, every provider separately>>. If this is _not_ set or set to `0`, then sessions will never expire due to inactivity. By default, this setting is not set.
+
+2+a|
+[TIP]
+============
+Use a string of `<count>[ms\|s\|m\|h\|d\|w\|M\|Y]` (e.g. '20m', '24h', '7d', '1w').
+============
+
+|[[xpack-session-lifespan]] `xpack.security.session.lifespan` {ess-icon}
+  | Ensures that user sessions will expire after the defined time period. This behavior is also known as an "absolute timeout". If
+this is _not_ set or set to `0`, user sessions could stay active indefinitely. This and <<xpack-session-idleTimeout, `xpack.security.session.idleTimeout`>> are both highly
+recommended. You can also specify this setting for <<xpack-security-provider-session-lifespan, every provider separately>>. By default, this setting is not set.
+
+2+a|
+[TIP]
+============
+Use a string of `<count>[ms\|s\|m\|h\|d\|w\|M\|Y]` (e.g. '20m', '24h', '7d', '1w').
+============
+
+| `xpack.security.session.cleanupInterval` {ess-icon}
+| Sets the interval at which {kib} tries to remove expired and invalid sessions from the session index. By default, this value is 1 hour. The minimum value is 10 seconds.
+
+2+a|
+[TIP]
+============
+Use a string of `<count>[ms\|s\|m\|h\|d\|w\|M\|Y]` (e.g. '20m', '24h', '7d', '1w').
+============
 
 |===
 
-[TIP]
+[[security-encrypted-saved-objects-settings]]
+==== Encrypted saved objects settings
+
+These settings control the encryption of saved objects with sensitive data. For more details, refer to <<xpack-security-secure-saved-objects>>.
+
+[IMPORTANT]
 ============
-The format is a string of `<count>[ms|s|m|h|d|w|M|Y]`
-(e.g. '70ms', '5s', '3d', '1Y').
+In high-availability deployments, make sure you use the same encryption and decryption keys for all instances of {kib}. Although the keys can be specified in clear text in `kibana.yml`, it's recommended to store them securely in the <<secure-settings,{kib} Keystore>>.
 ============
 
 [cols="2*<"]
 |===
+| [[xpack-encryptedSavedObjects-encryptionKey]] `xpack.encryptedSavedObjects.`
+`encryptionKey`
+| An arbitrary string of at least 32 characters that is used to encrypt sensitive properties of saved objects before they're stored in {es}. If not set, {kib} will generate a random key on startup, but certain features won't be available until you set the encryption key explicitly.
 
-| `xpack.security.session.lifespan`
-  | Sets the maximum duration, also known as "absolute timeout". By default,
-  a session can be renewed indefinitely. When this value is set, a session will end
-  once its lifespan is exceeded, even if the user is not idle. NOTE: if `idleTimeout`
-  is not set, this setting will still cause sessions to expire.
+| [[xpack-encryptedSavedObjects-keyRotation-decryptionOnlyKeys]] `xpack.encryptedSavedObjects.`
+`keyRotation.decryptionOnlyKeys`
+| An optional list of previously used encryption keys. Like <<xpack-encryptedSavedObjects-encryptionKey, `xpack.encryptedSavedObjects.encryptionKey`>>, these must be at least 32 characters in length. {kib} doesn't use these keys for encryption, but may still require them to decrypt some existing saved objects. Use this setting if you wish to change your encryption key, but don't want to lose access to saved objects that were previously encrypted with a different key.
 
 |===
 
-[TIP]
-============
-The format is a
-string of `<count>[ms|s|m|h|d|w|M|Y]` (e.g. '70ms', '5s', '3d', '1Y').
-============
+[float]
+[[audit-logging-settings]]
+===== Audit logging settings
+
+You can enable audit logging to support compliance, accountability, and security. When enabled, {kib} will capture:
+
+- Who performed an action
+- What action was performed
+- When the action occurred
+
+For more details and a reference of audit events, refer to <<xpack-security-audit-logging>>.
 
 [cols="2*<"]
 |===
+| `xpack.security.audit.enabled`
+| Set to `true` to enable audit logging for security events. *Default:* `false`
+|===
 
-| `xpack.security.loginAssistanceMessage`
-  | Adds a message to the login screen. Useful for displaying information about maintenance windows, links to corporate sign up pages etc.
+[float]
+[[ecs-audit-logging-settings]]
+===== ECS audit logging settings
 
-| `xpack.security.loginHelp`
-  | Adds a message accessible at the Login Selector UI with additional help information for the login process.
+To enable the <<xpack-security-ecs-audit-logging, ECS audit logger>>, specify where you want to write the audit events using `xpack.security.audit.appender`.
 
+[cols="2*<"]
+|===
+| `xpack.security.audit.appender`
+| Optional. Specifies where audit logs should be written to and how they should be formatted.
+
+2+a| For example:
+
+[source,yaml]
+----------------------------------------
+xpack.security.audit.appender:
+  kind: file
+  path: /path/to/audit.log
+  layout:
+    kind: json
+----------------------------------------
+
+| `xpack.security.audit.appender.kind`
+| Required. Specifies where audit logs should be written to. Allowed values are `console` or `file`.
+|===
+
+[float]
+[[audit-logging-file-appender]]
+===== File appender
+
+The file appender can be configured using the following settings:
+
+[cols="2*<"]
+|===
+| `xpack.security.audit.appender.path`
+| Required. Full file path the log file should be written to.
+
+| `xpack.security.audit.appender.layout.kind`
+| Required. Specifies how audit logs should be formatted. Allowed values are `json` or `pattern`.
+|===
+
+[float]
+[[audit-logging-pattern-layout]]
+===== Pattern layout
+
+The pattern layout can be configured using the following settings:
+
+[cols="2*<"]
+|===
+| `xpack.security.audit.appender.layout.highlight`
+| Optional. Set to `true` to enable highlighting log messages with colors.
+
+| `xpack.security.audit.appender.layout.pattern`
+| Optional. Specifies how the log line should be formatted. *Default:* `[%date][%level][%logger]%meta %message`
+|===
+
+[float]
+[[audit-logging-ignore-filters]]
+===== Ignore filters
+
+[cols="2*<"]
+|===
+| `xpack.security.audit.ignore_filters[]`
+| List of filters that determine which events should be excluded from the audit log. An event will get filtered out if at least one of the provided filters matches.
+
+2+a| For example:
+
+[source,yaml]
+----------------------------------------
+xpack.security.audit.ignore_filters:
+- actions: [http_request] <1>
+- categories: [database]
+  types: [creation, change, deletion] <2>
+----------------------------------------
+<1> Filters out HTTP request events
+<2> Filters out any data write events
+
+| `xpack.security.audit.ignore_filters[].actions[]`
+| List of values matched against the `event.action` field of an audit event. Refer to <<xpack-security-audit-logging>> for a list of available events.
+
+| `xpack.security.audit.ignore_filters[].categories[]`
+| List of values matched against the `event.category` field of an audit event. Refer to https://www.elastic.co/guide/en/ecs/1.5/ecs-allowed-values-event-category.html[ECS categorization field] for allowed values.
+
+| `xpack.security.audit.ignore_filters[].types[]`
+| List of values matched against the `event.type` field of an audit event. Refer to https://www.elastic.co/guide/en/ecs/1.5/ecs-allowed-values-event-type.html[ECS type field] for allowed values.
+
+| `xpack.security.audit.ignore_filters[].outcomes[]`
+| List of values matched against the `event.outcome` field of an audit event. Refer to https://www.elastic.co/guide/en/ecs/1.5/ecs-allowed-values-event-outcome.html[ECS outcome field] for allowed values.
 |===

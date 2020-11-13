@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`should disable clusters option when clustering is not supported 1`] = `
+exports[`scaling form should disable clusters option when clustering is not supported 1`] = `
 <Fragment>
   <EuiTitle
     size="xs"
@@ -50,6 +50,28 @@ exports[`should disable clusters option when clustering is not supported 1`] = `
           onChange={[Function]}
         />
       </EuiToolTip>
+      <EuiToolTip
+        content={
+          <React.Fragment>
+            <EuiBetaBadge
+              label="beta"
+            />
+            <EuiHorizontalRule
+              margin="xs"
+            />
+            Use vector tiles for faster display of large datasets.
+          </React.Fragment>
+        }
+        delay="regular"
+        position="left"
+      >
+        <EuiRadio
+          checked={false}
+          id="MVT"
+          label="Use vector tiles"
+          onChange={[Function]}
+        />
+      </EuiToolTip>
     </div>
   </EuiFormRow>
   <EuiFormRow
@@ -70,7 +92,7 @@ exports[`should disable clusters option when clustering is not supported 1`] = `
 </Fragment>
 `;
 
-exports[`should render 1`] = `
+exports[`scaling form should render 1`] = `
 <Fragment>
   <EuiTitle
     size="xs"
@@ -114,6 +136,28 @@ exports[`should render 1`] = `
         label="Show clusters when results exceed 10000."
         onChange={[Function]}
       />
+      <EuiToolTip
+        content={
+          <React.Fragment>
+            <EuiBetaBadge
+              label="beta"
+            />
+            <EuiHorizontalRule
+              margin="xs"
+            />
+            Use vector tiles for faster display of large datasets.
+          </React.Fragment>
+        }
+        delay="regular"
+        position="left"
+      >
+        <EuiRadio
+          checked={false}
+          id="MVT"
+          label="Use vector tiles"
+          onChange={[Function]}
+        />
+      </EuiToolTip>
     </div>
   </EuiFormRow>
   <EuiFormRow
@@ -134,7 +178,7 @@ exports[`should render 1`] = `
 </Fragment>
 `;
 
-exports[`should render top hits form when scaling type is TOP_HITS 1`] = `
+exports[`scaling form should render top hits form when scaling type is TOP_HITS 1`] = `
 <Fragment>
   <EuiTitle
     size="xs"
@@ -178,6 +222,28 @@ exports[`should render top hits form when scaling type is TOP_HITS 1`] = `
         label="Show clusters when results exceed 10000."
         onChange={[Function]}
       />
+      <EuiToolTip
+        content={
+          <React.Fragment>
+            <EuiBetaBadge
+              label="beta"
+            />
+            <EuiHorizontalRule
+              margin="xs"
+            />
+            Use vector tiles for faster display of large datasets.
+          </React.Fragment>
+        }
+        delay="regular"
+        position="left"
+      >
+        <EuiRadio
+          checked={false}
+          id="MVT"
+          label="Use vector tiles"
+          onChange={[Function]}
+        />
+      </EuiToolTip>
     </div>
   </EuiFormRow>
   <EuiFormRow

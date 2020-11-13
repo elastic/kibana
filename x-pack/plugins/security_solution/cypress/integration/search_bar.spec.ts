@@ -12,7 +12,7 @@ import { hostIpFilter } from '../objects/filter';
 import { HOSTS_URL } from '../urls/navigation';
 import { waitForAllHostsToBeLoaded } from '../tasks/hosts/all_hosts';
 
-describe.skip('SearchBar', () => {
+describe('SearchBar', () => {
   before(() => {
     loginAndWaitForPage(HOSTS_URL);
     waitForAllHostsToBeLoaded();
@@ -21,6 +21,10 @@ describe.skip('SearchBar', () => {
   it('adds correctly a filter to the global search bar', () => {
     openAddFilterPopover();
     fillAddFilterForm(hostIpFilter);
-    cy.get(GLOBAL_SEARCH_BAR_FILTER_ITEM(hostIpFilter)).should('be.visible');
+
+    cy.get(GLOBAL_SEARCH_BAR_FILTER_ITEM).should(
+      'have.text',
+      `${hostIpFilter.key}: ${hostIpFilter.value}`
+    );
   });
 });

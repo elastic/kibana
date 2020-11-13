@@ -97,8 +97,9 @@ export default function ({ getService }) {
         .expect(400);
 
       expect(apiResponse).to.eql({
-        success: false,
-        error: { code: 400, message: 'Invalid enrollment token' },
+        statusCode: 400,
+        error: 'Bad Request',
+        message: 'Invalid enrollment token',
       });
     });
 
@@ -128,8 +129,9 @@ export default function ({ getService }) {
         .expect(400);
 
       expect(apiResponse).to.eql({
-        success: false,
-        error: { code: 400, message: 'Expired enrollment token' },
+        statusCode: 400,
+        error: 'Bad Request',
+        message: 'Expired enrollment token',
       });
     });
 

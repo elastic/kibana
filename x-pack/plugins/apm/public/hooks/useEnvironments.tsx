@@ -5,30 +5,22 @@
  */
 
 import { useMemo } from 'react';
-import { i18n } from '@kbn/i18n';
 import { useFetcher } from './useFetcher';
 import {
-  ENVIRONMENT_NOT_DEFINED,
   ENVIRONMENT_ALL,
+  ENVIRONMENT_NOT_DEFINED,
 } from '../../common/environment_filter_values';
 import { callApmApi } from '../services/rest/createCallApmApi';
 
-export const ALL_OPTION = {
-  value: ENVIRONMENT_ALL,
-  text: i18n.translate('xpack.apm.environment.allLabel', {
-    defaultMessage: 'All',
-  }),
-};
-
 function getEnvironmentOptions(environments: string[]) {
   const environmentOptions = environments
-    .filter((env) => env !== ENVIRONMENT_NOT_DEFINED)
+    .filter((env) => env !== ENVIRONMENT_NOT_DEFINED.value)
     .map((environment) => ({
       value: environment,
       text: environment,
     }));
 
-  return [ALL_OPTION, ...environmentOptions];
+  return [ENVIRONMENT_ALL, ...environmentOptions];
 }
 
 export function useEnvironments({

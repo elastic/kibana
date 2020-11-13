@@ -23,11 +23,11 @@ import { registerLogLegacyImportRoute } from '../log_legacy_import';
 import { loggingSystemMock } from '../../../logging/logging_system.mock';
 import { setupServer } from '../test_utils';
 
-type setupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
+type SetupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
 
 describe('POST /api/saved_objects/_log_legacy_import', () => {
-  let server: setupServerReturn['server'];
-  let httpSetup: setupServerReturn['httpSetup'];
+  let server: SetupServerReturn['server'];
+  let httpSetup: SetupServerReturn['httpSetup'];
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
 
   beforeEach(async () => {

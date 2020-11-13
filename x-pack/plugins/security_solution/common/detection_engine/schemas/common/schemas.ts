@@ -4,14 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint-disable @typescript-eslint/camelcase */
+/* eslint-disable @typescript-eslint/naming-convention */
 
 import * as t from 'io-ts';
+import { Either } from 'fp-ts/lib/Either';
+
+import {
+  SavedObjectAttributes,
+  SavedObjectAttribute,
+  SavedObjectAttributeSingle,
+} from 'src/core/types';
 import { RiskScore } from '../types/risk_score';
 import { UUID } from '../types/uuid';
 import { IsoDateString } from '../types/iso_date_string';
 import { PositiveIntegerGreaterThanZero } from '../types/positive_integer_greater_than_zero';
 import { PositiveInteger } from '../types/positive_integer';
+import { NonEmptyString } from '../types/non_empty_string';
+import { parseScheduleDates } from '../../parse_schedule_dates';
 
 export const author = t.array(t.string);
 export type Author = t.TypeOf<typeof author>;
@@ -25,7 +34,7 @@ export type BuildingBlockType = t.TypeOf<typeof building_block_type>;
 export const buildingBlockTypeOrUndefined = t.union([building_block_type, t.undefined]);
 export type BuildingBlockTypeOrUndefined = t.TypeOf<typeof buildingBlockTypeOrUndefined>;
 
-export const description = t.string;
+export const description = NonEmptyString;
 export type Description = t.TypeOf<typeof description>;
 
 export const descriptionOrUndefined = t.union([description, t.undefined]);
@@ -36,6 +45,12 @@ export type Enabled = t.TypeOf<typeof enabled>;
 
 export const enabledOrUndefined = t.union([enabled, t.undefined]);
 export type EnabledOrUndefined = t.TypeOf<typeof enabledOrUndefined>;
+
+export const event_category_override = t.string;
+export type EventCategoryOverride = t.TypeOf<typeof event_category_override>;
+
+export const eventCategoryOverrideOrUndefined = t.union([event_category_override, t.undefined]);
+export type EventCategoryOverrideOrUndefined = t.TypeOf<typeof eventCategoryOverrideOrUndefined>;
 
 export const false_positives = t.array(t.string);
 export type FalsePositives = t.TypeOf<typeof false_positives>;
@@ -56,6 +71,22 @@ export type ExcludeExportDetails = t.TypeOf<typeof exclude_export_details>;
 export const filters = t.array(t.unknown); // Filters are not easily type-able yet
 export type Filters = t.TypeOf<typeof filters>; // Filters are not easily type-able yet
 
+export const filtersOrUndefined = t.union([filters, t.undefined]);
+export type FiltersOrUndefined = t.TypeOf<typeof filtersOrUndefined>;
+
+export const saved_object_attribute_single: t.Type<SavedObjectAttributeSingle> = t.recursion(
+  'saved_object_attribute_single',
+  () => t.union([t.string, t.number, t.boolean, t.null, t.undefined, saved_object_attributes])
+);
+export const saved_object_attribute: t.Type<SavedObjectAttribute> = t.recursion(
+  'saved_object_attribute',
+  () => t.union([saved_object_attribute_single, t.array(saved_object_attribute_single)])
+);
+export const saved_object_attributes: t.Type<SavedObjectAttributes> = t.recursion(
+  'saved_object_attributes',
+  () => t.record(t.string, saved_object_attribute)
+);
+
 /**
  * Params is an "object", since it is a type of AlertActionParams which is action templates.
  * @see x-pack/plugins/alerts/common/alert.ts
@@ -63,7 +94,7 @@ export type Filters = t.TypeOf<typeof filters>; // Filters are not easily type-a
 export const action_group = t.string;
 export const action_id = t.string;
 export const action_action_type_id = t.string;
-export const action_params = t.object;
+export const action_params = saved_object_attributes;
 export const action = t.exact(
   t.type({
     group: action_group,
@@ -76,8 +107,30 @@ export const action = t.exact(
 export const actions = t.array(action);
 export type Actions = t.TypeOf<typeof actions>;
 
-// TODO: Create a regular expression type or custom date math part type here
-export const from = t.string;
+export const actionsCamel = t.array(
+  t.exact(
+    t.type({
+      group: action_group,
+      id: action_id,
+      actionTypeId: action_action_type_id,
+      params: action_params,
+    })
+  )
+);
+export type ActionsCamel = t.TypeOf<typeof actions>;
+
+const stringValidator = (input: unknown): input is string => typeof input === 'string';
+export const from = new t.Type<string, string, unknown>(
+  'From',
+  t.string.is,
+  (input, context): Either<t.Errors, string> => {
+    if (stringValidator(input) && parseScheduleDates(input) == null) {
+      return t.failure(input, context, 'Failed to parse "from" on rule param');
+    }
+    return t.string.validate(input, context);
+  },
+  t.identity
+);
 export type From = t.TypeOf<typeof from>;
 
 export const fromOrUndefined = t.union([from, t.undefined]);
@@ -117,7 +170,7 @@ export type Query = t.TypeOf<typeof query>;
 export const queryOrUndefined = t.union([query, t.undefined]);
 export type QueryOrUndefined = t.TypeOf<typeof queryOrUndefined>;
 
-export const language = t.keyof({ kuery: null, lucene: null });
+export const language = t.keyof({ eql: null, kuery: null, lucene: null });
 export type Language = t.TypeOf<typeof language>;
 
 export const languageOrUndefined = t.union([language, t.undefined]);
@@ -197,7 +250,7 @@ export type MaxSignals = t.TypeOf<typeof max_signals>;
 export const maxSignalsOrUndefined = t.union([max_signals, t.undefined]);
 export type MaxSignalsOrUndefined = t.TypeOf<typeof maxSignalsOrUndefined>;
 
-export const name = t.string;
+export const name = NonEmptyString;
 export type Name = t.TypeOf<typeof name>;
 
 export const nameOrUndefined = t.union([name, t.undefined]);
@@ -270,6 +323,9 @@ export type Status = t.TypeOf<typeof status>;
 export const job_status = t.keyof({ succeeded: null, failed: null, 'going to run': null });
 export type JobStatus = t.TypeOf<typeof job_status>;
 
+export const conflicts = t.keyof({ abort: null, proceed: null });
+export type Conflicts = t.TypeOf<typeof conflicts>;
+
 // TODO: Create a regular expression type or custom date math part type here
 export const to = t.string;
 export type To = t.TypeOf<typeof to>;
@@ -278,10 +334,12 @@ export const toOrUndefined = t.union([to, t.undefined]);
 export type ToOrUndefined = t.TypeOf<typeof toOrUndefined>;
 
 export const type = t.keyof({
+  eql: null,
   machine_learning: null,
   query: null,
   saved_query: null,
   threshold: null,
+  threat_match: null,
 });
 export type Type = t.TypeOf<typeof type>;
 
@@ -325,7 +383,7 @@ export const sortFieldOrUndefined = t.union([sort_field, t.undefined]);
 export type SortFieldOrUndefined = t.TypeOf<typeof sortFieldOrUndefined>;
 
 export const sort_order = t.keyof({ asc: null, desc: null });
-export type sortOrder = t.TypeOf<typeof sort_order>;
+export type SortOrder = t.TypeOf<typeof sort_order>;
 
 export const sortOrderOrUndefined = t.union([sort_order, t.undefined]);
 export type SortOrderOrUndefined = t.TypeOf<typeof sortOrderOrUndefined>;
@@ -391,6 +449,10 @@ export const created_at = IsoDateString;
 export const updated_at = IsoDateString;
 export const updated_by = t.string;
 export const created_by = t.string;
+export const updatedByOrNull = t.union([updated_by, t.null]);
+export type UpdatedByOrNull = t.TypeOf<typeof updatedByOrNull>;
+export const createdByOrNull = t.union([created_by, t.null]);
+export type CreatedByOrNull = t.TypeOf<typeof createdByOrNull>;
 
 export const version = PositiveIntegerGreaterThanZero;
 export type Version = t.TypeOf<typeof version>;

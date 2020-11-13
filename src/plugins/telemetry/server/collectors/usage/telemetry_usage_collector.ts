@@ -29,6 +29,7 @@ import { TelemetryConfigType } from '../../config';
 
 // look for telemetry.yml in the same places we expect kibana.yml
 import { ensureDeepObject } from './ensure_deep_object';
+import { staticTelemetrySchema } from './schema';
 
 /**
  * The maximum file size before we ignore it (note: this limit is arbitrary).
@@ -60,10 +61,12 @@ export function isFileReadable(path: string): boolean {
  * @param configPath The config file path.
  * @returns The unmodified JSON object if the file exists and is a valid YAML file.
  */
-export async function readTelemetryFile(path: string): Promise<object | undefined> {
+export async function readTelemetryFile<T extends object>(
+  configPath: string
+): Promise<T | undefined> {
   try {
-    if (isFileReadable(path)) {
-      const yaml = readFileSync(path);
+    if (isFileReadable(configPath)) {
+      const yaml = readFileSync(configPath);
       const data = safeLoad(yaml.toString());
 
       // don't bother returning empty objects
@@ -79,11 +82,48 @@ export async function readTelemetryFile(path: string): Promise<object | undefine
   return undefined;
 }
 
+export interface LicenseUsage {
+  uuid: string;
+  type: string;
+  issued_to: string;
+  issuer: string;
+  issue_date_in_millis: number;
+  start_date_in_millis: number;
+  expiry_date_in_millis: number;
+  max_resource_units: number;
+}
+
+export interface StaticTelemetryUsage {
+  ece?: {
+    kb_uuid: string;
+    es_uuid: string;
+    account_id: string;
+    license: LicenseUsage;
+  };
+  ess?: {
+    kb_uuid: string;
+    es_uuid: string;
+    account_id: string;
+    license: LicenseUsage;
+  };
+  eck?: {
+    operator_uuid: string;
+    operator_roles: string;
+    custom_operator_namespace: boolean;
+    distribution: string;
+    build: {
+      hash: string;
+      date: string;
+      version: string;
+    };
+  };
+}
+
 export function createTelemetryUsageCollector(
   usageCollection: UsageCollectionSetup,
   getConfigPathFn: () => Promise<string>
 ) {
-  return usageCollection.makeUsageCollector({
+  return usageCollection.makeUsageCollector<StaticTelemetryUsage | undefined>({
     type: 'static_telemetry',
     isReady: () => true,
     fetch: async () => {
@@ -91,6 +131,7 @@ export function createTelemetryUsageCollector(
       const telemetryPath = join(dirname(configPath), 'telemetry.yml');
       return await readTelemetryFile(telemetryPath);
     },
+    schema: staticTelemetrySchema,
   });
 }
 

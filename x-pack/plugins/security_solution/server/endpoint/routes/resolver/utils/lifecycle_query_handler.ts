@@ -6,7 +6,7 @@
 
 import { SearchResponse } from 'elasticsearch';
 import { ILegacyScopedClusterClient } from 'kibana/server';
-import { ResolverEvent, ResolverLifecycleNode } from '../../../../../common/endpoint/types';
+import { SafeResolverEvent, SafeResolverLifecycleNode } from '../../../../../common/endpoint/types';
 import { LifecycleQuery } from '../queries/lifecycle';
 import { QueryInfo } from '../queries/multi_searcher';
 import { SingleQueryHandler } from './fetch';
@@ -15,8 +15,8 @@ import { createLifecycle } from './node';
 /**
  * Retrieve the lifecycle events for a node.
  */
-export class LifecycleQueryHandler implements SingleQueryHandler<ResolverLifecycleNode> {
-  private lifecycle: ResolverLifecycleNode | undefined;
+export class LifecycleQueryHandler implements SingleQueryHandler<SafeResolverLifecycleNode> {
+  private lifecycle: SafeResolverLifecycleNode | undefined;
   private readonly query: LifecycleQuery;
   constructor(
     private readonly entityID: string,
@@ -26,7 +26,7 @@ export class LifecycleQueryHandler implements SingleQueryHandler<ResolverLifecyc
     this.query = new LifecycleQuery(indexPattern, legacyEndpointID);
   }
 
-  private handleResponse = (response: SearchResponse<ResolverEvent>) => {
+  private handleResponse = (response: SearchResponse<SafeResolverEvent>) => {
     const results = this.query.formatResponse(response);
     if (results.length !== 0) {
       this.lifecycle = createLifecycle(this.entityID, results);
@@ -51,7 +51,7 @@ export class LifecycleQueryHandler implements SingleQueryHandler<ResolverLifecyc
   /**
    * Get the results from the msearch.
    */
-  getResults(): ResolverLifecycleNode | undefined {
+  getResults(): SafeResolverLifecycleNode | undefined {
     return this.lifecycle;
   }
 

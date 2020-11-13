@@ -28,7 +28,7 @@
           "application_usage_transactional": "965839e75f809fefe04f92dc4d99722a",
           "action_task_params": "a9d49f184ee89641044be0ca2950fa3a",
           "fleet-agent-events": "3231653fafe4ef3196fe3b32ab774bf2",
-          "ingest-package-configs": "2346514df03316001d56ed4c8d46fa94",
+          "ingest-package-policies": "2346514df03316001d56ed4c8d46fa94",
           "apm-indices": "9bb9b2bf1fa636ed8619cbab5ce6a1dd",
           "inventory-view": "5299b67717e96502c77babf1c16fd4d3",
           "upgrade-assistant-reindex-operation": "296a89039fc4260292be36b1b005d8f2",
@@ -58,7 +58,7 @@
           "siem-ui-timeline": "f2d929253ecd06ffbac78b4047f45a86",
           "kql-telemetry": "d12a98a6f19a2d273696597547e064ee",
           "ui-metric": "0d409297dc5ebe1e3a1da691c6ee32e3",
-          "ingest-agent-configs": "f4bdc17427437537ca1754d5d5057ad5",
+          "ingest-agent-policies": "f4bdc17427437537ca1754d5d5057ad5",
           "url": "b675c3be8d76ecf029294d51dc7ec65d",
           "migrationVersion": "4a1746014a75ade3a714e1db5763276f",
           "index-pattern": "66eccb05066c5a89924f48a9e9736499",
@@ -1561,7 +1561,7 @@
             "agent_id": {
               "type": "keyword"
             },
-            "config_id": {
+            "policy_id": {
               "type": "keyword"
             },
             "data": {
@@ -1595,13 +1595,10 @@
             "active": {
               "type": "boolean"
             },
-            "config_id": {
+            "policy_id": {
               "type": "keyword"
             },
-            "config_newest_revision": {
-              "type": "integer"
-            },
-            "config_revision": {
+            "policy_revision": {
               "type": "integer"
             },
             "current_error_events": {
@@ -1653,7 +1650,7 @@
             "api_key_id": {
               "type": "keyword"
             },
-            "config_id": {
+            "policy_id": {
               "type": "keyword"
             },
             "created_at": {
@@ -1797,9 +1794,9 @@
             }
           }
         },
-        "ingest-agent-configs": {
+        "ingest-agent-policies": {
           "properties": {
-            "package_configs": {
+            "package_policies": {
               "type": "keyword"
             },
             "description": {
@@ -1834,9 +1831,9 @@
             }
           }
         },
-        "ingest-package-configs": {
+        "ingest-package-policies": {
           "properties": {
-            "config_id": {
+            "policy_id": {
               "type": "keyword"
             },
             "created_at": {
@@ -1870,9 +1867,9 @@
                     "config": {
                       "type": "flattened"
                     },
-                    "dataset": {
+                    "data_stream": {
                       "properties": {
-                        "name": {
+                        "dataset": {
                           "type": "keyword"
                         },
                         "type": {

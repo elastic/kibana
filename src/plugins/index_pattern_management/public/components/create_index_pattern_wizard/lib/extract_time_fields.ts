@@ -45,7 +45,7 @@ export function extractTimeFields(fields: IFieldType[]) {
   const noTimeFieldLabel = i18n.translate(
     'indexPatternManagement.createIndexPattern.stepTime.noTimeFieldOptionLabel',
     {
-      defaultMessage: "I don't want to use the Time Filter",
+      defaultMessage: "I don't want to use the time filter",
     }
   );
   const noTimeFieldOption = {

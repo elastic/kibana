@@ -5,22 +5,12 @@
  */
 
 import { ReportingConfig } from '../../';
-import { ScheduledTaskParamsPNG } from '../png/types';
-import { ScheduledTaskParamsPDF } from '../printable_pdf/types';
+import { createMockConfig } from '../../test_helpers';
+import { TaskPayloadPNG } from '../png/types';
+import { TaskPayloadPDF } from '../printable_pdf/types';
 import { getFullUrls } from './get_full_urls';
 
-interface FullUrlsOpts {
-  job: ScheduledTaskParamsPNG & ScheduledTaskParamsPDF;
-  config: ReportingConfig;
-}
-
 let mockConfig: ReportingConfig;
-const getMockConfig = (mockConfigGet: jest.Mock<any, any>) => {
-  return {
-    get: mockConfigGet,
-    kbnConfig: { get: mockConfigGet },
-  };
-};
 
 beforeEach(() => {
   const reportingConfig: Record<string, any> = {
@@ -29,16 +19,13 @@ beforeEach(() => {
     'kibanaServer.protocol': 'http',
     'server.basePath': '/sbp',
   };
-  const mockConfigGet = jest.fn().mockImplementation((...keys: string[]) => {
-    return reportingConfig[keys.join('.') as string];
-  });
-  mockConfig = getMockConfig(mockConfigGet);
+  mockConfig = createMockConfig(reportingConfig);
 });
 
-const getMockJob = (base: object) => base as ScheduledTaskParamsPNG & ScheduledTaskParamsPDF;
+const getMockJob = (base: object) => base as TaskPayloadPNG & TaskPayloadPDF;
 
 test(`fails if no URL is passed`, async () => {
-  const fn = () => getFullUrls({ job: getMockJob({}), config: mockConfig } as FullUrlsOpts);
+  const fn = () => getFullUrls(mockConfig, getMockJob({}));
   expect(fn).toThrowErrorMatchingInlineSnapshot(
     `"No valid URL fields found in Job Params! Expected \`job.relativeUrl: string\` or \`job.relativeUrls: string[]\`"`
   );
@@ -47,11 +34,7 @@ test(`fails if no URL is passed`, async () => {
 test(`fails if URLs are file-protocols for PNGs`, async () => {
   const forceNow = '2000-01-01T00:00:00.000Z';
   const relativeUrl = 'file://etc/passwd/#/something';
-  const fn = () =>
-    getFullUrls({
-      job: getMockJob({ relativeUrl, forceNow }),
-      config: mockConfig,
-    } as FullUrlsOpts);
+  const fn = () => getFullUrls(mockConfig, getMockJob({ relativeUrl, forceNow }));
   expect(fn).toThrowErrorMatchingInlineSnapshot(
     `"Found invalid URL(s), all URLs must be relative: file://etc/passwd/#/something"`
   );
@@ -61,11 +44,7 @@ test(`fails if URLs are absolute for PNGs`, async () => {
   const forceNow = '2000-01-01T00:00:00.000Z';
   const relativeUrl =
     'http://169.254.169.254/latest/meta-data/iam/security-credentials/profileName/#/something';
-  const fn = () =>
-    getFullUrls({
-      job: getMockJob({ relativeUrl, forceNow }),
-      config: mockConfig,
-    } as FullUrlsOpts);
+  const fn = () => getFullUrls(mockConfig, getMockJob({ relativeUrl, forceNow }));
   expect(fn).toThrowErrorMatchingInlineSnapshot(
     `"Found invalid URL(s), all URLs must be relative: http://169.254.169.254/latest/meta-data/iam/security-credentials/profileName/#/something"`
   );
@@ -75,13 +54,13 @@ test(`fails if URLs are file-protocols for PDF`, async () => {
   const forceNow = '2000-01-01T00:00:00.000Z';
   const relativeUrl = 'file://etc/passwd/#/something';
   const fn = () =>
-    getFullUrls({
-      job: getMockJob({
+    getFullUrls(
+      mockConfig,
+      getMockJob({
         relativeUrls: [relativeUrl],
         forceNow,
-      }),
-      config: mockConfig,
-    } as FullUrlsOpts);
+      })
+    );
   expect(fn).toThrowErrorMatchingInlineSnapshot(
     `"Found invalid URL(s), all URLs must be relative: file://etc/passwd/#/something"`
   );
@@ -92,13 +71,13 @@ test(`fails if URLs are absolute for PDF`, async () => {
   const relativeUrl =
     'http://169.254.169.254/latest/meta-data/iam/security-credentials/profileName/#/something';
   const fn = () =>
-    getFullUrls({
-      job: getMockJob({
+    getFullUrls(
+      mockConfig,
+      getMockJob({
         relativeUrls: [relativeUrl],
         forceNow,
-      }),
-      config: mockConfig,
-    } as FullUrlsOpts);
+      })
+    );
   expect(fn).toThrowErrorMatchingInlineSnapshot(
     `"Found invalid URL(s), all URLs must be relative: http://169.254.169.254/latest/meta-data/iam/security-credentials/profileName/#/something"`
   );
@@ -112,22 +91,14 @@ test(`fails if any URLs are absolute or file's for PDF`, async () => {
     'file://etc/passwd/#/something',
   ];
 
-  const fn = () =>
-    getFullUrls({
-      job: getMockJob({ relativeUrls, forceNow }),
-      config: mockConfig,
-    } as FullUrlsOpts);
+  const fn = () => getFullUrls(mockConfig, getMockJob({ relativeUrls, forceNow }));
   expect(fn).toThrowErrorMatchingInlineSnapshot(
     `"Found invalid URL(s), all URLs must be relative: http://169.254.169.254/latest/meta-data/iam/security-credentials/profileName/#/something file://etc/passwd/#/something"`
   );
 });
 
 test(`fails if URL does not route to a visualization`, async () => {
-  const fn = () =>
-    getFullUrls({
-      job: getMockJob({ relativeUrl: '/app/phoney' }),
-      config: mockConfig,
-    } as FullUrlsOpts);
+  const fn = () => getFullUrls(mockConfig, getMockJob({ relativeUrl: '/app/phoney' }));
   expect(fn).toThrowErrorMatchingInlineSnapshot(
     `"No valid hash in the URL! A hash is expected for the application to route to the intended visualization."`
   );
@@ -135,10 +106,10 @@ test(`fails if URL does not route to a visualization`, async () => {
 
 test(`adds forceNow to hash's query, if it exists`, async () => {
   const forceNow = '2000-01-01T00:00:00.000Z';
-  const urls = await getFullUrls({
-    job: getMockJob({ relativeUrl: '/app/kibana#/something', forceNow }),
-    config: mockConfig,
-  } as FullUrlsOpts);
+  const urls = await getFullUrls(
+    mockConfig,
+    getMockJob({ relativeUrl: '/app/kibana#/something', forceNow })
+  );
 
   expect(urls[0]).toEqual(
     'http://localhost:5601/sbp/app/kibana#/something?forceNow=2000-01-01T00%3A00%3A00.000Z'
@@ -148,10 +119,10 @@ test(`adds forceNow to hash's query, if it exists`, async () => {
 test(`appends forceNow to hash's query, if it exists`, async () => {
   const forceNow = '2000-01-01T00:00:00.000Z';
 
-  const urls = await getFullUrls({
-    job: getMockJob({ relativeUrl: '/app/kibana#/something?_g=something', forceNow }),
-    config: mockConfig,
-  } as FullUrlsOpts);
+  const urls = await getFullUrls(
+    mockConfig,
+    getMockJob({ relativeUrl: '/app/kibana#/something?_g=something', forceNow })
+  );
 
   expect(urls[0]).toEqual(
     'http://localhost:5601/sbp/app/kibana#/something?_g=something&forceNow=2000-01-01T00%3A00%3A00.000Z'
@@ -159,18 +130,16 @@ test(`appends forceNow to hash's query, if it exists`, async () => {
 });
 
 test(`doesn't append forceNow query to url, if it doesn't exists`, async () => {
-  const urls = await getFullUrls({
-    job: getMockJob({ relativeUrl: '/app/kibana#/something' }),
-    config: mockConfig,
-  } as FullUrlsOpts);
+  const urls = await getFullUrls(mockConfig, getMockJob({ relativeUrl: '/app/kibana#/something' }));
 
   expect(urls[0]).toEqual('http://localhost:5601/sbp/app/kibana#/something');
 });
 
 test(`adds forceNow to each of multiple urls`, async () => {
   const forceNow = '2000-01-01T00:00:00.000Z';
-  const urls = await getFullUrls({
-    job: getMockJob({
+  const urls = await getFullUrls(
+    mockConfig,
+    getMockJob({
       relativeUrls: [
         '/app/kibana#/something_aaa',
         '/app/kibana#/something_bbb',
@@ -178,9 +147,8 @@ test(`adds forceNow to each of multiple urls`, async () => {
         '/app/kibana#/something_ddd',
       ],
       forceNow,
-    }),
-    config: mockConfig,
-  } as FullUrlsOpts);
+    })
+  );
 
   expect(urls).toEqual([
     'http://localhost:5601/sbp/app/kibana#/something_aaa?forceNow=2000-01-01T00%3A00%3A00.000Z',

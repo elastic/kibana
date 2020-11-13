@@ -6,10 +6,10 @@
 
 // info on nodemailer: https://nodemailer.com/about/
 import nodemailer from 'nodemailer';
-
 import { default as MarkdownIt } from 'markdown-it';
 
 import { Logger } from '../../../../../../src/core/server';
+import { ProxySettings } from '../../types';
 
 // an email "service" which doesn't actually send, just returns what it would send
 export const JSON_TRANSPORT_SERVICE = '__json';
@@ -18,6 +18,9 @@ export interface SendEmailOptions {
   transport: Transport;
   routing: Routing;
   content: Content;
+  proxySettings?: ProxySettings;
+  rejectUnauthorized?: boolean;
+  hasAuth: boolean;
 }
 
 // config validation ensures either service is set or host/port are set
@@ -44,14 +47,14 @@ export interface Content {
 
 // send an email
 export async function sendEmail(logger: Logger, options: SendEmailOptions): Promise<unknown> {
-  const { transport, routing, content } = options;
+  const { transport, routing, content, proxySettings, rejectUnauthorized, hasAuth } = options;
   const { service, host, port, secure, user, password } = transport;
   const { from, to, cc, bcc } = routing;
   const { subject, message } = content;
 
   const transportConfig: Record<string, unknown> = {};
 
-  if (user != null && password != null) {
+  if (hasAuth && user != null && password != null) {
     transportConfig.auth = {
       user,
       pass: password,
@@ -67,9 +70,17 @@ export async function sendEmail(logger: Logger, options: SendEmailOptions): Prom
     transportConfig.host = host;
     transportConfig.port = port;
     transportConfig.secure = !!secure;
-    if (!transportConfig.secure) {
+
+    if (proxySettings) {
       transportConfig.tls = {
-        rejectUnauthorized: false,
+        // do not fail on invalid certs if value is false
+        rejectUnauthorized: proxySettings?.proxyRejectUnauthorizedCertificates,
+      };
+      transportConfig.proxy = proxySettings.proxyUrl;
+      transportConfig.headers = proxySettings.proxyHeaders;
+    } else if (!transportConfig.secure) {
+      transportConfig.tls = {
+        rejectUnauthorized,
       };
     }
   }

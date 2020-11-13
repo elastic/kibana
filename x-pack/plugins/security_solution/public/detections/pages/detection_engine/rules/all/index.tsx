@@ -6,15 +6,19 @@
 
 import {
   EuiBasicTable,
-  EuiContextMenuPanel,
   EuiLoadingContent,
   EuiSpacer,
   EuiTab,
   EuiTabs,
+  EuiProgress,
+  EuiOverlayMask,
+  EuiConfirmModal,
+  EuiWindowEvent,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import uuid from 'uuid';
+import { debounce } from 'lodash/fp';
 
 import {
   useRules,
@@ -24,15 +28,10 @@ import {
   Rule,
   PaginationOptions,
   exportRules,
+  RulesSortingFields,
 } from '../../../../containers/detection_engine/rules';
 import { HeaderSection } from '../../../../../common/components/header_section';
-import {
-  UtilityBar,
-  UtilityBarAction,
-  UtilityBarGroup,
-  UtilityBarSection,
-  UtilityBarText,
-} from '../../../../../common/components/utility_bar';
+import { useKibana, useUiSetting$ } from '../../../../../common/lib/kibana';
 import { useStateToaster } from '../../../../../common/components/toasters';
 import { Loader } from '../../../../../common/components/loader';
 import { Panel } from '../../../../../common/components/panel';
@@ -47,17 +46,22 @@ import { getColumns, getMonitoringColumns } from './columns';
 import { showRulesTable } from './helpers';
 import { allRulesReducer, State } from './reducer';
 import { RulesTableFilters } from './rules_table_filters/rules_table_filters';
-import { useMlCapabilities } from '../../../../../common/components/ml_popover/hooks/use_ml_capabilities';
+import { useMlCapabilities } from '../../../../../common/components/ml/hooks/use_ml_capabilities';
 import { hasMlAdminPermissions } from '../../../../../../common/machine_learning/has_ml_admin_permissions';
+import { hasMlLicense } from '../../../../../../common/machine_learning/has_ml_license';
 import { SecurityPageName } from '../../../../../app/types';
 import { useFormatUrl } from '../../../../../common/components/link_to';
+import { isBoolean } from '../../../../../common/utils/privileges';
+import { AllRulesUtilityBar } from './utility_bar';
+import { LastUpdatedAt } from '../../../../../common/components/last_updated';
+import { DEFAULT_RULES_TABLE_REFRESH_SETTING } from '../../../../../../common/constants';
 
-const SORT_FIELD = 'enabled';
+const INITIAL_SORT_FIELD = 'enabled';
 const initialState: State = {
   exportRuleIds: [],
   filterOptions: {
     filter: '',
-    sortField: SORT_FIELD,
+    sortField: INITIAL_SORT_FIELD,
     sortOrder: 'desc',
   },
   loadingRuleIds: [],
@@ -69,6 +73,9 @@ const initialState: State = {
   },
   rules: [],
   selectedRuleIds: [],
+  lastUpdated: 0,
+  showIdleModal: false,
+  isRefreshOn: true,
 };
 
 interface AllRulesProps {
@@ -125,6 +132,18 @@ export const AllRules = React.memo<AllRulesProps>(
   }) => {
     const [initLoading, setInitLoading] = useState(true);
     const tableRef = useRef<EuiBasicTable>();
+    const {
+      services: {
+        application: {
+          capabilities: { actions },
+        },
+      },
+    } = useKibana();
+    const [defaultAutoRefreshSetting] = useUiSetting$<{
+      on: boolean;
+      value: number;
+      idleTimeout: number;
+    }>(DEFAULT_RULES_TABLE_REFRESH_SETTING);
     const [
       {
         exportRuleIds,
@@ -134,9 +153,16 @@ export const AllRules = React.memo<AllRulesProps>(
         pagination,
         rules,
         selectedRuleIds,
+        lastUpdated,
+        showIdleModal,
+        isRefreshOn,
       },
       dispatch,
-    ] = useReducer(allRulesReducer(tableRef), initialState);
+    ] = useReducer(allRulesReducer(tableRef), {
+      ...initialState,
+      lastUpdated: Date.now(),
+      isRefreshOn: defaultAutoRefreshSetting.on,
+    });
     const { loading: isLoadingRulesStatuses, rulesStatuses } = useRulesStatuses(rules);
     const history = useHistory();
     const [, dispatchToaster] = useStateToaster();
@@ -145,14 +171,33 @@ export const AllRules = React.memo<AllRulesProps>(
     const { formatUrl } = useFormatUrl(SecurityPageName.detections);
 
     // TODO: Refactor license check + hasMlAdminPermissions to common check
-    const hasMlPermissions =
-      mlCapabilities.isPlatinumOrTrialLicense && hasMlAdminPermissions(mlCapabilities);
+    const hasMlPermissions = hasMlLicense(mlCapabilities) && hasMlAdminPermissions(mlCapabilities);
 
     const setRules = useCallback((newRules: Rule[], newPagination: Partial<PaginationOptions>) => {
       dispatch({
         type: 'setRules',
         rules: newRules,
         pagination: newPagination,
+      });
+    }, []);
+
+    const setShowIdleModal = useCallback((show: boolean) => {
+      dispatch({
+        type: 'setShowIdleModal',
+        show,
+      });
+    }, []);
+
+    const setLastRefreshDate = useCallback(() => {
+      dispatch({
+        type: 'setLastRefreshDate',
+      });
+    }, []);
+
+    const setAutoRefreshOn = useCallback((on: boolean) => {
+      dispatch({
+        type: 'setAutoRefreshOn',
+        on,
       });
     }, []);
 
@@ -164,8 +209,13 @@ export const AllRules = React.memo<AllRulesProps>(
     });
 
     const sorting = useMemo(
-      (): SortingType => ({ sort: { field: 'enabled', direction: filterOptions.sortOrder } }),
-      [filterOptions.sortOrder]
+      (): SortingType => ({
+        sort: {
+          field: filterOptions.sortField,
+          direction: filterOptions.sortOrder,
+        },
+      }),
+      [filterOptions]
     );
 
     const prePackagedRuleStatus = getPrePackagedRuleStatus(
@@ -174,21 +224,24 @@ export const AllRules = React.memo<AllRulesProps>(
       rulesNotUpdated
     );
 
+    const hasActionsPrivileges = useMemo(() => (isBoolean(actions.show) ? actions.show : true), [
+      actions,
+    ]);
+
     const getBatchItemsPopoverContent = useCallback(
-      (closePopover: () => void) => (
-        <EuiContextMenuPanel
-          items={getBatchItems({
-            closePopover,
-            dispatch,
-            dispatchToaster,
-            hasMlPermissions,
-            loadingRuleIds,
-            selectedRuleIds,
-            reFetchRules: reFetchRulesData,
-            rules,
-          })}
-        />
-      ),
+      (closePopover: () => void): JSX.Element[] => {
+        return getBatchItems({
+          closePopover,
+          dispatch,
+          dispatchToaster,
+          hasMlPermissions,
+          hasActionsPrivileges,
+          loadingRuleIds,
+          selectedRuleIds,
+          reFetchRules: reFetchRulesData,
+          rules,
+        });
+      },
       [
         dispatch,
         dispatchToaster,
@@ -197,6 +250,7 @@ export const AllRules = React.memo<AllRulesProps>(
         reFetchRulesData,
         rules,
         selectedRuleIds,
+        hasActionsPrivileges,
       ]
     );
 
@@ -215,7 +269,7 @@ export const AllRules = React.memo<AllRulesProps>(
         dispatch({
           type: 'updateFilterOptions',
           filterOptions: {
-            sortField: SORT_FIELD, // Only enabled is supported for sorting currently
+            sortField: (sort?.field as RulesSortingFields) ?? INITIAL_SORT_FIELD, // Narrowing EuiBasicTable sorting types
             sortOrder: sort?.direction ?? 'desc',
           },
           pagination: { page: page.index + 1, perPage: page.size },
@@ -238,6 +292,7 @@ export const AllRules = React.memo<AllRulesProps>(
             ? loadingRuleIds
             : [],
         reFetchRules: reFetchRulesData,
+        hasReadActionsPrivileges: hasActionsPrivileges,
       });
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [
@@ -306,6 +361,82 @@ export const AllRules = React.memo<AllRulesProps>(
       return false;
     }, [loadingRuleIds, loadingRulesAction]);
 
+    const handleRefreshData = useCallback((): void => {
+      if (reFetchRulesData != null && !isLoadingAnActionOnRule) {
+        reFetchRulesData(true);
+        setLastRefreshDate();
+      }
+    }, [reFetchRulesData, isLoadingAnActionOnRule, setLastRefreshDate]);
+
+    const handleResetIdleTimer = useCallback((): void => {
+      if (isRefreshOn) {
+        setShowIdleModal(true);
+        setAutoRefreshOn(false);
+      }
+    }, [setShowIdleModal, setAutoRefreshOn, isRefreshOn]);
+
+    const debounceResetIdleTimer = useMemo(() => {
+      return debounce(defaultAutoRefreshSetting.idleTimeout, handleResetIdleTimer);
+    }, [handleResetIdleTimer, defaultAutoRefreshSetting.idleTimeout]);
+
+    useEffect(() => {
+      const interval = setInterval(() => {
+        if (isRefreshOn) {
+          handleRefreshData();
+        }
+      }, defaultAutoRefreshSetting.value);
+
+      return () => {
+        clearInterval(interval);
+      };
+    }, [isRefreshOn, handleRefreshData, defaultAutoRefreshSetting.value]);
+
+    const handleIdleModalContinue = useCallback((): void => {
+      setShowIdleModal(false);
+      handleRefreshData();
+      setAutoRefreshOn(true);
+    }, [setShowIdleModal, setAutoRefreshOn, handleRefreshData]);
+
+    const handleAutoRefreshSwitch = useCallback(
+      (refreshOn: boolean) => {
+        if (refreshOn) {
+          handleRefreshData();
+        }
+        setAutoRefreshOn(refreshOn);
+      },
+      [setAutoRefreshOn, handleRefreshData]
+    );
+
+    const shouldShowRulesTable = useMemo(
+      (): boolean => showRulesTable({ rulesCustomInstalled, rulesInstalled }) && !initLoading,
+      [initLoading, rulesCustomInstalled, rulesInstalled]
+    );
+
+    const shouldShowPrepackagedRulesPrompt = useMemo(
+      (): boolean =>
+        rulesCustomInstalled != null &&
+        rulesCustomInstalled === 0 &&
+        prePackagedRuleStatus === 'ruleNotInstalled' &&
+        !initLoading,
+      [initLoading, prePackagedRuleStatus, rulesCustomInstalled]
+    );
+
+    const handleGenericDownloaderSuccess = useCallback(
+      (exportCount) => {
+        dispatch({ type: 'loadingRuleIds', ids: [], actionType: null });
+        dispatchToaster({
+          type: 'addToaster',
+          toast: {
+            id: uuid.v4(),
+            title: i18n.SUCCESSFULLY_EXPORTED_RULES(exportCount),
+            color: 'success',
+            iconType: 'check',
+          },
+        });
+      },
+      [dispatchToaster]
+    );
+
     const tabs = useMemo(
       () => (
         <EuiTabs>
@@ -328,30 +459,46 @@ export const AllRules = React.memo<AllRulesProps>(
 
     return (
       <>
+        <EuiWindowEvent event="mousemove" handler={debounceResetIdleTimer} />
+        <EuiWindowEvent event="mousedown" handler={debounceResetIdleTimer} />
+        <EuiWindowEvent event="click" handler={debounceResetIdleTimer} />
+        <EuiWindowEvent event="keydown" handler={debounceResetIdleTimer} />
+        <EuiWindowEvent event="scroll" handler={debounceResetIdleTimer} />
+        <EuiWindowEvent event="load" handler={debounceResetIdleTimer} />
         <GenericDownloader
           filename={`${i18n.EXPORT_FILENAME}.ndjson`}
           ids={exportRuleIds}
-          onExportSuccess={(exportCount) => {
-            dispatch({ type: 'loadingRuleIds', ids: [], actionType: null });
-            dispatchToaster({
-              type: 'addToaster',
-              toast: {
-                id: uuid.v4(),
-                title: i18n.SUCCESSFULLY_EXPORTED_RULES(exportCount),
-                color: 'success',
-                iconType: 'check',
-              },
-            });
-          }}
+          onExportSuccess={handleGenericDownloaderSuccess}
           exportSelectedData={exportRules}
         />
         <EuiSpacer />
         {tabs}
         <EuiSpacer />
 
-        <Panel loading={loading || isLoadingRules || isLoadingRulesStatuses}>
+        <Panel
+          loading={loading || isLoadingRules || isLoadingRulesStatuses}
+          data-test-subj="allRulesPanel"
+        >
           <>
-            <HeaderSection split title={i18n.ALL_RULES}>
+            {(isLoadingRules || isLoadingRulesStatuses) && (
+              <EuiProgress
+                data-test-subj="loadingRulesInfoProgress"
+                size="xs"
+                position="absolute"
+                color="accent"
+              />
+            )}
+            <HeaderSection
+              split
+              growLeftSplit={false}
+              title={i18n.ALL_RULES}
+              subtitle={
+                <LastUpdatedAt
+                  showUpdating={loading || isLoadingRules || isLoadingRulesStatuses}
+                  updatedAt={lastUpdated}
+                />
+              }
+            >
               <RulesTableFilters
                 onFilterChanged={onFilterChangedCallback}
                 rulesCustomInstalled={rulesCustomInstalled}
@@ -359,55 +506,44 @@ export const AllRules = React.memo<AllRulesProps>(
               />
             </HeaderSection>
 
-            {(loading || isLoadingRules || isLoadingAnActionOnRule || isLoadingRulesStatuses) &&
-              !initLoading && (
-                <Loader data-test-subj="loadingPanelAllRulesTable" overlay size="xl" />
-              )}
-            {rulesCustomInstalled != null &&
-              rulesCustomInstalled === 0 &&
-              prePackagedRuleStatus === 'ruleNotInstalled' &&
-              !initLoading && (
-                <PrePackagedRulesPrompt
-                  createPrePackagedRules={handleCreatePrePackagedRules}
-                  loading={loadingCreatePrePackagedRules}
-                  userHasNoPermissions={hasNoPermissions}
-                />
-              )}
+            {isLoadingAnActionOnRule && !initLoading && (
+              <Loader data-test-subj="loadingPanelAllRulesTable" overlay size="xl" />
+            )}
+            {shouldShowPrepackagedRulesPrompt && (
+              <PrePackagedRulesPrompt
+                createPrePackagedRules={handleCreatePrePackagedRules}
+                loading={loadingCreatePrePackagedRules}
+                userHasNoPermissions={hasNoPermissions}
+              />
+            )}
             {initLoading && (
               <EuiLoadingContent data-test-subj="initialLoadingPanelAllRulesTable" lines={10} />
             )}
-            {showRulesTable({ rulesCustomInstalled, rulesInstalled }) && !initLoading && (
+            {showIdleModal && (
+              <EuiOverlayMask>
+                <EuiConfirmModal
+                  title={i18n.REFRESH_PROMPT_TITLE}
+                  onCancel={handleIdleModalContinue}
+                  onConfirm={handleIdleModalContinue}
+                  confirmButtonText={i18n.REFRESH_PROMPT_CONFIRM}
+                  defaultFocusedButton="confirm"
+                  data-test-subj="allRulesIdleModal"
+                >
+                  <p>{i18n.REFRESH_PROMPT_BODY}</p>
+                </EuiConfirmModal>
+              </EuiOverlayMask>
+            )}
+            {shouldShowRulesTable && (
               <>
-                <UtilityBar>
-                  <UtilityBarSection>
-                    <UtilityBarGroup>
-                      <UtilityBarText dataTestSubj="showingRules">
-                        {i18n.SHOWING_RULES(pagination.total ?? 0)}
-                      </UtilityBarText>
-                    </UtilityBarGroup>
-
-                    <UtilityBarGroup>
-                      <UtilityBarText>{i18n.SELECTED_RULES(selectedRuleIds.length)}</UtilityBarText>
-                      {!hasNoPermissions && (
-                        <UtilityBarAction
-                          dataTestSubj="bulkActions"
-                          iconSide="right"
-                          iconType="arrowDown"
-                          popoverContent={getBatchItemsPopoverContent}
-                        >
-                          {i18n.BATCH_ACTIONS}
-                        </UtilityBarAction>
-                      )}
-                      <UtilityBarAction
-                        iconSide="left"
-                        iconType="refresh"
-                        onClick={() => reFetchRulesData(true)}
-                      >
-                        {i18n.REFRESH}
-                      </UtilityBarAction>
-                    </UtilityBarGroup>
-                  </UtilityBarSection>
-                </UtilityBar>
+                <AllRulesUtilityBar
+                  userHasNoPermissions={hasNoPermissions}
+                  paginationTotal={pagination.total ?? 0}
+                  numberSelectedRules={selectedRuleIds.length}
+                  onGetBatchItemsPopoverContent={getBatchItemsPopoverContent}
+                  onRefresh={handleRefreshData}
+                  isAutoRefreshOn={isRefreshOn}
+                  onRefreshSwitch={handleAutoRefreshSwitch}
+                />
                 <AllRulesTables
                   selectedTab={allRulesTab}
                   euiBasicTableSelectionProps={euiBasicTableSelectionProps}

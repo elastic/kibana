@@ -8,17 +8,18 @@ import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
 import moment from 'moment-timezone';
 import { CoreSetup } from 'src/core/public';
-import { Action, IncompatibleActionError } from '../../../../../src/plugins/ui_actions/public';
-import { LicensingPluginSetup } from '../../../licensing/public';
-import { checkLicense } from '../lib/license_check';
-
-import { ViewMode, IEmbeddable } from '../../../../../src/plugins/embeddable/public';
 import {
   ISearchEmbeddable,
   SEARCH_EMBEDDABLE_TYPE,
 } from '../../../../../src/plugins/discover/public';
-
-import { API_GENERATE_IMMEDIATE, CSV_REPORTING_ACTION } from '../../constants';
+import { IEmbeddable, ViewMode } from '../../../../../src/plugins/embeddable/public';
+import {
+  IncompatibleActionError,
+  UiActionsActionDefinition as ActionDefinition,
+} from '../../../../../src/plugins/ui_actions/public';
+import { LicensingPluginSetup } from '../../../licensing/public';
+import { API_GENERATE_IMMEDIATE, CSV_REPORTING_ACTION } from '../../common/constants';
+import { checkLicense } from '../lib/license_check';
 
 function isSavedSearchEmbeddable(
   embeddable: IEmbeddable | ISearchEmbeddable
@@ -30,7 +31,7 @@ interface ActionContext {
   embeddable: ISearchEmbeddable;
 }
 
-export class GetCsvReportPanelAction implements Action<ActionContext> {
+export class GetCsvReportPanelAction implements ActionDefinition<ActionContext> {
   private isDownloading: boolean;
   public readonly type = '';
   public readonly id = CSV_REPORTING_ACTION;
@@ -102,10 +103,10 @@ export class GetCsvReportPanelAction implements Action<ActionContext> {
     const kibanaTimezone = this.core.uiSettings.get('dateFormat:tz');
 
     const id = `search:${embeddable.getSavedSearch().id}`;
-    const filename = embeddable.getTitle();
+    const filename = embeddable.getSavedSearch().title;
     const timezone = kibanaTimezone === 'Browser' ? moment.tz.guess() : kibanaTimezone;
     const fromTime = dateMath.parse(from);
-    const toTime = dateMath.parse(to);
+    const toTime = dateMath.parse(to, { roundUp: true });
 
     if (!fromTime || !toTime) {
       return this.onGenerationFail(

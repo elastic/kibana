@@ -7,6 +7,7 @@
 import { debounce, pick } from 'lodash';
 import { Unit } from '@elastic/datemath';
 import React, { useCallback, useMemo, useEffect, useState, ChangeEvent } from 'react';
+import { IFieldType } from 'src/plugins/data/public';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -39,7 +40,6 @@ import {
 import { IErrorObject } from '../../../../../triggers_actions_ui/public/types';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { AlertsContextValue } from '../../../../../triggers_actions_ui/public/application/context/alerts_context';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { MetricsExplorerKueryBar } from '../../../pages/metrics/metrics_explorer/components/kuery_bar';
 import { useSourceViaHttp } from '../../../containers/source/use_source_via_http';
 import { sqsMetricTypes } from '../../../../common/inventory_models/aws_sqs/toolbar_items';
@@ -50,22 +50,31 @@ import { hostMetricTypes } from '../../../../common/inventory_models/host/toolba
 import { containerMetricTypes } from '../../../../common/inventory_models/container/toolbar_items';
 import { podMetricTypes } from '../../../../common/inventory_models/pod/toolbar_items';
 import { findInventoryModel } from '../../../../common/inventory_models';
-import { InventoryItemType, SnapshotMetricType } from '../../../../common/inventory_models/types';
+import {
+  InventoryItemType,
+  SnapshotMetricType,
+  SnapshotMetricTypeRT,
+} from '../../../../common/inventory_models/types';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { InventoryMetricConditions } from '../../../../server/lib/alerting/inventory_metric_threshold/types';
 import { MetricExpression } from './metric';
 import { NodeTypeExpression } from './node_type';
 import { InfraWaffleMapOptions } from '../../../lib/lib';
 import { convertKueryToElasticSearchQuery } from '../../../utils/kuery';
+import {
+  SnapshotCustomMetricInput,
+  SnapshotCustomMetricInputRT,
+} from '../../../../common/http_api/snapshot_api';
 
 import { validateMetricThreshold } from './validation';
 
 const FILTER_TYPING_DEBOUNCE_MS = 500;
 
-interface AlertContextMeta {
+export interface AlertContextMeta {
   options?: Partial<InfraWaffleMapOptions>;
   nodeType?: InventoryItemType;
   filter?: string;
+  customMetrics?: SnapshotCustomMetricInput[];
 }
 
 interface Props {
@@ -75,25 +84,39 @@ interface Props {
     nodeType: InventoryItemType;
     filterQuery?: string;
     filterQueryText?: string;
-    sourceId?: string;
+    sourceId: string;
     alertOnNoData?: boolean;
   };
   alertInterval: string;
+  alertThrottle: string;
   alertsContext: AlertsContextValue<AlertContextMeta>;
   setAlertParams(key: string, value: any): void;
   setAlertProperty(key: string, value: any): void;
 }
 
-const defaultExpression = {
+export const defaultExpression = {
   metric: 'cpu' as SnapshotMetricType,
   comparator: Comparator.GT,
   threshold: [],
   timeSize: 1,
   timeUnit: 'm',
+  customMetric: {
+    type: 'custom',
+    id: 'alert-custom-metric',
+    field: '',
+    aggregation: 'avg',
+  },
 } as InventoryMetricConditions;
 
 export const Expressions: React.FC<Props> = (props) => {
-  const { setAlertParams, alertParams, errors, alertsContext, alertInterval } = props;
+  const {
+    setAlertParams,
+    alertParams,
+    errors,
+    alertsContext,
+    alertInterval,
+    alertThrottle,
+  } = props;
   const { source, createDerivedIndexPattern } = useSourceViaHttp({
     sourceId: 'default',
     type: 'metrics',
@@ -205,6 +228,9 @@ export const Expressions: React.FC<Props> = (props) => {
         {
           ...defaultExpression,
           metric: md.options.metric!.type,
+          customMetric: SnapshotCustomMetricInputRT.is(md.options.metric)
+            ? md.options.metric
+            : defaultExpression.customMetric,
         } as InventoryMetricConditions,
       ]);
     } else {
@@ -283,6 +309,8 @@ export const Expressions: React.FC<Props> = (props) => {
               setAlertParams={updateParams}
               errors={errors[idx] || emptyError}
               expression={e || {}}
+              alertsContextMetadata={alertsContext.metadata}
+              fields={derivedIndexPattern.fields}
             />
           );
         })}
@@ -342,7 +370,7 @@ export const Expressions: React.FC<Props> = (props) => {
           defaultMessage: 'Use a KQL expression to limit the scope of your alert trigger.',
         })}
         fullWidth
-        compressed
+        display="rowCompressed"
       >
         {(alertsContext.metadata && (
           <MetricsExplorerKueryBar
@@ -363,11 +391,13 @@ export const Expressions: React.FC<Props> = (props) => {
       <EuiSpacer size={'m'} />
       <AlertPreview
         alertInterval={alertInterval}
+        alertThrottle={alertThrottle}
         alertType={METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID}
-        alertParams={pick(alertParams as any, 'criteria', 'nodeType', 'sourceId', 'filterQuery')}
+        alertParams={pick(alertParams, 'criteria', 'nodeType', 'sourceId', 'filterQuery')}
         validate={validateMetricThreshold}
         fetch={alertsContext.http.fetch}
         groupByDisplayName={alertParams.nodeType}
+        showNoDataResults={alertParams.alertOnNoData}
       />
       <EuiSpacer size={'m'} />
     </>
@@ -389,6 +419,8 @@ interface ExpressionRowProps {
   addExpression(): void;
   remove(id: number): void;
   setAlertParams(id: number, params: Partial<InventoryMetricConditions>): void;
+  alertsContextMetadata: AlertsContextValue<AlertContextMeta>['metadata'];
+  fields: IFieldType[];
 }
 
 const StyledExpressionRow = euiStyled(EuiFlexGroup)`
@@ -402,12 +434,23 @@ const StyledExpression = euiStyled.div`
 `;
 
 export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
-  const { setAlertParams, expression, errors, expressionId, remove, canDelete } = props;
-  const { metric, comparator = Comparator.GT, threshold = [] } = expression;
+  const { setAlertParams, expression, errors, expressionId, remove, canDelete, fields } = props;
+  const { metric, comparator = Comparator.GT, threshold = [], customMetric } = expression;
 
   const updateMetric = useCallback(
-    (m?: SnapshotMetricType) => {
-      setAlertParams(expressionId, { ...expression, metric: m });
+    (m?: SnapshotMetricType | string) => {
+      const newMetric = SnapshotMetricTypeRT.is(m) ? m : Boolean(m) ? 'custom' : undefined;
+      const newAlertParams = { ...expression, metric: newMetric };
+      setAlertParams(expressionId, newAlertParams);
+    },
+    [expressionId, expression, setAlertParams]
+  );
+
+  const updateCustomMetric = useCallback(
+    (cm?: SnapshotCustomMetricInput) => {
+      if (SnapshotCustomMetricInputRT.is(cm)) {
+        setAlertParams(expressionId, { ...expression, customMetric: cm });
+      }
     },
     [expressionId, expression, setAlertParams]
   );
@@ -446,6 +489,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
         break;
       case 'host':
         myMetrics = hostMetricTypes;
+
         break;
       case 'pod':
         myMetrics = podMetricTypes;
@@ -475,7 +519,10 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
                   }>
                 }
                 onChange={updateMetric}
+                onChangeCustom={updateCustomMetric}
                 errors={errors}
+                customMetric={customMetric}
+                fields={fields}
               />
             </StyledExpression>
             <StyledExpression>
@@ -568,4 +615,5 @@ const metricUnit: Record<string, { label: string }> = {
   s3DownloadBytes: { label: 'bytes' },
   sqsOldestMessage: { label: 'seconds' },
   rdsLatency: { label: 'ms' },
+  custom: { label: '' },
 };

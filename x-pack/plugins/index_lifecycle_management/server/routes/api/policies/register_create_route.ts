@@ -5,29 +5,22 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { LegacyAPICaller } from 'src/core/server';
+import { ElasticsearchClient } from 'kibana/server';
 
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../../../services';
 
-async function createPolicy(
-  callAsCurrentUser: LegacyAPICaller,
-  name: string,
-  phases: any
-): Promise<any> {
+async function createPolicy(client: ElasticsearchClient, name: string, phases: any): Promise<any> {
   const body = {
     policy: {
       phases,
     },
   };
-  const params = {
-    method: 'PUT',
-    path: `/_ilm/policy/${encodeURIComponent(name)}`,
+  const options = {
     ignore: [404],
-    body,
   };
 
-  return await callAsCurrentUser('transport.request', params);
+  return client.ilm.putLifecycle({ policy: name, body }, options);
 }
 
 const minAgeSchema = schema.maybe(schema.string());
@@ -40,6 +33,8 @@ const setPrioritySchema = schema.maybe(
 
 const unfollowSchema = schema.maybe(schema.object({})); // Unfollow has no options
 
+const migrateSchema = schema.maybe(schema.object({ enabled: schema.literal(false) }));
+
 const allocateNodeSchema = schema.maybe(schema.recordOf(schema.string(), schema.string()));
 const allocateSchema = schema.maybe(
   schema.object({
@@ -47,6 +42,13 @@ const allocateSchema = schema.maybe(
     include: allocateNodeSchema,
     exclude: allocateNodeSchema,
     require: allocateNodeSchema,
+  })
+);
+
+const forcemergeSchema = schema.maybe(
+  schema.object({
+    max_num_segments: schema.number(),
+    index_codec: schema.maybe(schema.literal('best_compression')),
   })
 );
 
@@ -62,6 +64,7 @@ const hotPhaseSchema = schema.object({
         max_docs: schema.maybe(schema.number()),
       })
     ),
+    forcemerge: forcemergeSchema,
   }),
 });
 
@@ -69,6 +72,7 @@ const warmPhaseSchema = schema.maybe(
   schema.object({
     min_age: minAgeSchema,
     actions: schema.object({
+      migrate: migrateSchema,
       set_priority: setPrioritySchema,
       unfollow: unfollowSchema,
       readonly: schema.maybe(schema.object({})), // Readonly has no options
@@ -78,11 +82,7 @@ const warmPhaseSchema = schema.maybe(
           number_of_shards: schema.number(),
         })
       ),
-      forcemerge: schema.maybe(
-        schema.object({
-          max_num_segments: schema.number(),
-        })
-      ),
+      forcemerge: forcemergeSchema,
     }),
   })
 );
@@ -91,6 +91,7 @@ const coldPhaseSchema = schema.maybe(
   schema.object({
     min_age: minAgeSchema,
     actions: schema.object({
+      migrate: migrateSchema,
       set_priority: setPrioritySchema,
       unfollow: unfollowSchema,
       allocate: allocateSchema,
@@ -133,7 +134,11 @@ const bodySchema = schema.object({
   }),
 });
 
-export function registerCreateRoute({ router, license, lib }: RouteDependencies) {
+export function registerCreateRoute({
+  router,
+  license,
+  lib: { handleEsError },
+}: RouteDependencies) {
   router.post(
     { path: addBasePath('/policies'), validate: { body: bodySchema } },
     license.guardApiRoute(async (context, request, response) => {
@@ -141,21 +146,10 @@ export function registerCreateRoute({ router, license, lib }: RouteDependencies)
       const { name, phases } = body;
 
       try {
-        await createPolicy(
-          context.core.elasticsearch.legacy.client.callAsCurrentUser,
-          name,
-          phases
-        );
+        await createPolicy(context.core.elasticsearch.client.asCurrentUser, name, phases);
         return response.ok();
-      } catch (e) {
-        if (lib.isEsError(e)) {
-          return response.customError({
-            statusCode: e.statusCode,
-            body: e,
-          });
-        }
-        // Case: default
-        return response.internalError({ body: e });
+      } catch (error) {
+        return handleEsError({ error, response });
       }
     })
   );

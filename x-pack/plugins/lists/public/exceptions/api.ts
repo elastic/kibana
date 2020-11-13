@@ -29,7 +29,7 @@ import {
   updateExceptionListItemSchema,
   updateExceptionListSchema,
 } from '../../common/schemas';
-import { validate } from '../../common/siem_common_deps';
+import { validate } from '../../common/shared_imports';
 
 import {
   AddEndpointExceptionListProps,
@@ -288,6 +288,8 @@ export const fetchExceptionListsItemsByListIds = async ({
     namespace_type: namespaceTypes.join(','),
     page: pagination.page ? `${pagination.page}` : '1',
     per_page: pagination.perPage ? `${pagination.perPage}` : '20',
+    sort_field: 'exception-list.created_at',
+    sort_order: 'desc',
     ...(filters.trim() !== '' ? { filter: filters } : {}),
   };
   const [validatedRequest, errorsRequest] = validate(query, findExceptionListItemSchema);

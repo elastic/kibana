@@ -94,10 +94,17 @@ export const TabNavigationComponent = (props: TabNavigationProps) => {
     () =>
       Object.values(navTabs).map((tab) => {
         const isSelected = selectedTabId === tab.id;
-        const { query, filters, savedQuery, timerange, timeline } = props;
-        const search = getSearch(tab, { query, filters, savedQuery, timerange, timeline });
+        const { filters, query, savedQuery, sourcerer, timeline, timerange } = props;
+        const search = getSearch(tab, {
+          filters,
+          query,
+          savedQuery,
+          sourcerer,
+          timeline,
+          timerange,
+        });
         const hrefWithSearch =
-          tab.href + getSearch(tab, { query, filters, savedQuery, timerange, timeline });
+          tab.href + getSearch(tab, { filters, query, savedQuery, sourcerer, timeline, timerange });
 
         return (
           <TabNavigationItem

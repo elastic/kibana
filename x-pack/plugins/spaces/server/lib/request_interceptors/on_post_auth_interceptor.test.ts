@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import * as Rx from 'rxjs';
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { Legacy } from 'kibana';
 // @ts-ignore
 import { kibanaTestUser } from '@kbn/test';
@@ -20,12 +20,12 @@ import {
   loggingSystemMock,
   coreMock,
 } from '../../../../../../src/core/server/mocks';
-import * as kbnTestServer from '../../../../../../src/test_utils/kbn_server';
+import * as kbnTestServer from '../../../../../../src/core/test_helpers/kbn_server';
 import { SpacesService } from '../../spaces_service';
 import { SpacesAuditLogger } from '../audit_logger';
 import { convertSavedObjectToSpace } from '../../routes/lib';
 import { initSpacesOnPostAuthRequestInterceptor } from './on_post_auth_interceptor';
-import { Feature } from '../../../../features/server';
+import { KibanaFeature } from '../../../../features/server';
 import { spacesConfig } from '../__fixtures__';
 import { securityMock } from '../../../../security/server/mocks';
 import { featuresPluginMock } from '../../../../features/server/mocks';
@@ -124,7 +124,7 @@ describe.skip('onPostAuthInterceptor', () => {
     const loggingMock = loggingSystemMock.create().asLoggerFactory().get('xpack', 'spaces');
 
     const featuresPlugin = featuresPluginMock.createSetup();
-    featuresPlugin.getFeatures.mockReturnValue(([
+    featuresPlugin.getKibanaFeatures.mockReturnValue(([
       {
         id: 'feature-1',
         name: 'feature 1',
@@ -145,7 +145,7 @@ describe.skip('onPostAuthInterceptor', () => {
         name: 'feature 4',
         app: ['kibana'],
       },
-    ] as unknown) as Feature[]);
+    ] as unknown) as KibanaFeature[]);
 
     const mockRepository = jest.fn().mockImplementation(() => {
       return {

@@ -81,7 +81,7 @@ export function filtersFunctionFactory(initialize: InitializeArguments): () => F
           const filterAST = fromExpression(filterExpression);
           return interpretAst(filterAST, getWorkpadVariablesAsObject(getState()));
         } else {
-          const filterType = initialize.typesRegistry.get('filter');
+          const filterType = initialize.types.filter;
           return filterType?.from(null, {});
         }
       },

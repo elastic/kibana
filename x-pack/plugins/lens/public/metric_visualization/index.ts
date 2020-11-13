@@ -5,9 +5,7 @@
  */
 
 import { CoreSetup } from 'kibana/public';
-import { metricVisualization } from './metric_visualization';
 import { ExpressionsSetup } from '../../../../../src/plugins/expressions/public';
-import { metricChart, getMetricChartRenderer } from './metric_expression';
 import { EditorFrameSetup, FormatFactory } from '../types';
 
 export interface MetricVisualizationPluginSetupPlugins {
@@ -23,10 +21,15 @@ export class MetricVisualization {
     _core: CoreSetup | null,
     { expressions, formatFactory, editorFrame }: MetricVisualizationPluginSetupPlugins
   ) {
-    expressions.registerFunction(() => metricChart);
+    editorFrame.registerVisualization(async () => {
+      const { metricVisualization, metricChart, getMetricChartRenderer } = await import(
+        '../async_services'
+      );
 
-    expressions.registerRenderer(() => getMetricChartRenderer(formatFactory));
+      expressions.registerFunction(() => metricChart);
 
-    editorFrame.registerVisualization(metricVisualization);
+      expressions.registerRenderer(() => getMetricChartRenderer(formatFactory));
+      return metricVisualization;
+    });
   }
 }

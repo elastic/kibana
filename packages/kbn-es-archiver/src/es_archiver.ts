@@ -49,7 +49,7 @@ export class EsArchiver {
     this.client = client;
     this.dataDir = dataDir;
     this.log = log;
-    this.kbnClient = new KbnClient(log, { url: kibanaUrl });
+    this.kbnClient = new KbnClient({ log, url: kibanaUrl });
   }
 
   /**
@@ -62,7 +62,11 @@ export class EsArchiver {
    *  @property {Boolean} options.raw - should the archive be raw (unzipped) or not
    *  @return Promise<Stats>
    */
-  async save(name: string, indices: string | string[], { raw = false }: { raw?: boolean } = {}) {
+  async save(
+    name: string,
+    indices: string | string[],
+    { raw = false, query }: { raw?: boolean; query?: Record<string, any> } = {}
+  ) {
     return await saveAction({
       name,
       indices,
@@ -70,6 +74,7 @@ export class EsArchiver {
       client: this.client,
       dataDir: this.dataDir,
       log: this.log,
+      query,
     });
   }
 

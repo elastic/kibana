@@ -19,10 +19,13 @@
 
 import { cloneDeep, isEqual } from 'lodash';
 import * as Rx from 'rxjs';
-import { Adapters, ViewMode } from '../types';
+import { distinctUntilChanged, map } from 'rxjs/operators';
+import { RenderCompleteDispatcher } from '../../../../kibana_utils/public';
+import { Adapters } from '../types';
 import { IContainer } from '../containers';
-import { EmbeddableInput, EmbeddableOutput, IEmbeddable } from './i_embeddable';
+import { EmbeddableOutput, IEmbeddable } from './i_embeddable';
 import { TriggerContextMapping } from '../ui_actions';
+import { EmbeddableInput, ViewMode } from '../../../common/types';
 
 function getPanelTitle(input: EmbeddableInput, output: EmbeddableOutput) {
   return input.hidePanelTitles ? '' : input.title === undefined ? output.defaultTitle : input.title;
@@ -40,12 +43,15 @@ export abstract class Embeddable<
   public readonly isContainer: boolean = false;
   public abstract readonly type: string;
   public readonly id: string;
+  public fatalError?: Error;
 
   protected output: TEmbeddableOutput;
   protected input: TEmbeddableInput;
 
   private readonly input$: Rx.BehaviorSubject<TEmbeddableInput>;
   private readonly output$: Rx.BehaviorSubject<TEmbeddableOutput>;
+
+  protected renderComplete = new RenderCompleteDispatcher();
 
   // Listener to parent changes, if this embeddable exists in a parent, in order
   // to update input when the parent changes.
@@ -77,6 +83,18 @@ export abstract class Embeddable<
         this.onResetInput(newInput);
       });
     }
+
+    this.getOutput$()
+      .pipe(
+        map(({ title }) => title || ''),
+        distinctUntilChanged()
+      )
+      .subscribe(
+        (title) => {
+          this.renderComplete.setTitle(title);
+        },
+        () => {}
+      );
   }
 
   public getIsContainer(): this is IContainer {
@@ -105,8 +123,8 @@ export abstract class Embeddable<
     return this.input;
   }
 
-  public getTitle() {
-    return this.output.title;
+  public getTitle(): string {
+    return this.output.title || '';
   }
 
   /**
@@ -133,7 +151,10 @@ export abstract class Embeddable<
     }
   }
 
-  public render(domNode: HTMLElement | Element): void {
+  public render(el: HTMLElement): void {
+    this.renderComplete.setEl(el);
+    this.renderComplete.setTitle(this.output.title || '');
+
     if (this.destroyed) {
       throw new Error('Embeddable has been destroyed');
     }
@@ -176,16 +197,22 @@ export abstract class Embeddable<
     }
   }
 
+  protected onFatalError(e: Error) {
+    this.fatalError = e;
+    this.output$.error(e);
+  }
+
   private onResetInput(newInput: TEmbeddableInput) {
     if (!isEqual(this.input, newInput)) {
-      if (this.input.lastReloadRequestTime !== newInput.lastReloadRequestTime) {
-        this.reload();
-      }
+      const oldLastReloadRequestTime = this.input.lastReloadRequestTime;
       this.input = newInput;
       this.input$.next(newInput);
       this.updateOutput({
         title: getPanelTitle(this.input, this.output),
       } as Partial<TEmbeddableOutput>);
+      if (oldLastReloadRequestTime !== newInput.lastReloadRequestTime) {
+        this.reload();
+      }
     }
   }
 

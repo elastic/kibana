@@ -17,5 +17,6 @@ export interface SavedObjectsBulkUpdateObject<T = unknown> extends Pick<SavedObj
 |  --- | --- | --- |
 |  [attributes](./kibana-plugin-core-server.savedobjectsbulkupdateobject.attributes.md) | <code>Partial&lt;T&gt;</code> | The data for a Saved Object is stored as an object in the <code>attributes</code> property. |
 |  [id](./kibana-plugin-core-server.savedobjectsbulkupdateobject.id.md) | <code>string</code> | The ID of this Saved Object, guaranteed to be unique for all objects of the same <code>type</code> |
+|  [namespace](./kibana-plugin-core-server.savedobjectsbulkupdateobject.namespace.md) | <code>string</code> | Optional namespace string to use when searching for this object. If this is defined, it will supersede the namespace ID that is in [SavedObjectsBulkUpdateOptions](./kibana-plugin-core-server.savedobjectsbulkupdateoptions.md)<!-- -->.<!-- -->Note: the default namespace's string representation is <code>'default'</code>, and its ID representation is <code>undefined</code>. |
 |  [type](./kibana-plugin-core-server.savedobjectsbulkupdateobject.type.md) | <code>string</code> | The type of this Saved Object. Each plugin can define it's own custom Saved Object types. |
 

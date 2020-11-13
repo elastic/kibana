@@ -4,154 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as Rx from 'rxjs';
 import { KibanaRequest, RequestHandlerContext } from 'src/core/server';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { DataPluginStart } from 'src/plugins/data/server/plugin';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { CancellationToken } from '../../../plugins/reporting/common';
+import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 import { LicensingPluginSetup } from '../../licensing/server';
-import { SecurityPluginSetup } from '../../security/server';
-import { JobStatus } from '../common/types';
+import { AuthenticatedUser, SecurityPluginSetup } from '../../security/server';
+import { SpacesPluginSetup } from '../../spaces/server';
+import { CancellationToken } from '../common';
+import { BaseParams } from '../common/types';
 import { ReportingConfigType } from './config';
 import { ReportingCore } from './core';
 import { LevelLogger } from './lib';
-import { LayoutInstance } from './lib/layouts';
-
-/*
- * Routing / API types
- */
-
-interface ListQuery {
-  page: string;
-  size: string;
-  ids?: string; // optional field forbids us from extending RequestQuery
-}
-
-interface GenerateQuery {
-  jobParams: string;
-}
-
-export type ReportingRequestQuery = ListQuery | GenerateQuery;
-
-export interface ReportingRequestPre {
-  management: {
-    jobTypes: any;
-  };
-  user: string;
-}
-
-// generate a report with unparsed jobParams
-export interface GenerateExportTypePayload {
-  jobParams: string;
-}
-
-export type ReportingRequestPayload = GenerateExportTypePayload | JobParamPostPayload;
-
-export interface TimeRangeParams {
-  timezone: string;
-  min?: Date | string | number | null;
-  max?: Date | string | number | null;
-}
-
-export interface JobParamPostPayload {
-  timerange?: TimeRangeParams;
-}
-
-export interface ScheduledTaskParams<JobParamsType> {
-  headers?: string; // serialized encrypted headers
-  jobParams: JobParamsType;
-  title: string;
-  type: string;
-}
-
-export interface JobSource<JobParamsType> {
-  _id: string;
-  _index: string;
-  _source: {
-    jobtype: string;
-    output: TaskRunResult;
-    payload: ScheduledTaskParams<JobParamsType>;
-    status: JobStatus;
-  };
-}
-
-export interface TaskRunResult {
-  content_type: string;
-  content: string | null;
-  size: number;
-  csv_contains_formulas?: boolean;
-  max_size_reached?: boolean;
-  warnings?: string[];
-}
-
-interface ConditionalHeadersConditions {
-  protocol: string;
-  hostname: string;
-  port: number;
-  basePath: string;
-}
-
-export interface ConditionalHeaders {
-  headers: Record<string, string>;
-  conditions: ConditionalHeadersConditions;
-}
-
-/*
- * Screenshots
- */
-
-export interface ScreenshotObservableOpts {
-  logger: LevelLogger;
-  urls: string[];
-  conditionalHeaders: ConditionalHeaders;
-  layout: LayoutInstance;
-  browserTimezone: string;
-}
-
-export interface AttributesMap {
-  [key: string]: any;
-}
-
-export interface ElementPosition {
-  boundingClientRect: {
-    // modern browsers support x/y, but older ones don't
-    top: number;
-    left: number;
-    width: number;
-    height: number;
-  };
-  scroll: {
-    x: number;
-    y: number;
-  };
-}
-
-export interface ElementsPositionAndAttribute {
-  position: ElementPosition;
-  attributes: AttributesMap;
-}
-
-export interface Screenshot {
-  base64EncodedData: string;
-  title: string;
-  description: string;
-}
-
-export interface ScreenshotResults {
-  timeRange: string | null;
-  screenshots: Screenshot[];
-  error?: Error;
-  elementsPositionAndAttributes?: ElementsPositionAndAttribute[]; // NOTE: for testing
-}
-
-export type ScreenshotsObservableFn = ({
-  logger,
-  urls,
-  conditionalHeaders,
-  layout,
-  browserTimezone,
-}: ScreenshotObservableOpts) => Rx.Observable<ScreenshotResults[]>;
+import { ReportTaskParams, TaskRunResult } from './lib/tasks';
 
 /*
  * Plugin Contract
@@ -159,7 +25,9 @@ export type ScreenshotsObservableFn = ({
 
 export interface ReportingSetupDeps {
   licensing: LicensingPluginSetup;
+  features: FeaturesPluginSetup;
   security?: SecurityPluginSetup;
+  spaces?: SpacesPluginSetup;
   usageCollection?: UsageCollectionSetup;
 }
 
@@ -174,43 +42,50 @@ export type ReportingSetup = object;
  * Internal Types
  */
 
+export type ReportingUser = { username: AuthenticatedUser['username'] } | false;
+
 export type CaptureConfig = ReportingConfigType['capture'];
 export type ScrollConfig = ReportingConfigType['csv']['scroll'];
 
-export type ESQueueCreateJobFn<JobParamsType> = (
+export { BaseParams };
+
+// base params decorated with encrypted headers that come into runJob functions
+export interface BasePayload extends BaseParams {
+  headers: string;
+  spaceId?: string;
+}
+
+// default fn type for CreateJobFnFactory
+export type CreateJobFn<JobParamsType = BaseParams, JobPayloadType = BasePayload> = (
   jobParams: JobParamsType,
   context: RequestHandlerContext,
-  request: KibanaRequest
-) => Promise<JobParamsType>;
+  request: KibanaRequest<any, any, any, any>
+) => Promise<JobPayloadType>;
 
-export type ESQueueWorkerExecuteFn<ScheduledTaskParamsType> = (
+// default fn type for RunTaskFnFactory
+export type RunTaskFn<TaskPayloadType = BasePayload> = (
   jobId: string,
-  job: ScheduledTaskParamsType,
+  payload: ReportTaskParams<TaskPayloadType>['payload'],
   cancellationToken: CancellationToken
-) => Promise<any>;
+) => Promise<TaskRunResult>;
 
-export type ScheduleTaskFnFactory<ScheduleTaskFnType> = (
+export type CreateJobFnFactory<CreateJobFnType> = (
   reporting: ReportingCore,
   logger: LevelLogger
-) => ScheduleTaskFnType;
+) => CreateJobFnType;
 
 export type RunTaskFnFactory<RunTaskFnType> = (
   reporting: ReportingCore,
   logger: LevelLogger
 ) => RunTaskFnType;
 
-export interface ExportTypeDefinition<
-  JobParamsType,
-  ScheduleTaskFnType,
-  JobPayloadType,
-  RunTaskFnType
-> {
+export interface ExportTypeDefinition<CreateJobFnType = CreateJobFn, RunTaskFnType = RunTaskFn> {
   id: string;
   name: string;
   jobType: string;
   jobContentEncoding?: string;
   jobContentExtension: string;
-  scheduleTaskFnFactory: ScheduleTaskFnFactory<ScheduleTaskFnType>;
+  createJobFnFactory: CreateJobFnFactory<CreateJobFnType>;
   runTaskFnFactory: RunTaskFnFactory<RunTaskFnType>;
   validLicenses: string[];
 }

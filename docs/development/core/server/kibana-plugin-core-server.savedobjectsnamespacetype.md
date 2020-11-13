@@ -6,8 +6,6 @@
 
 The namespace type dictates how a saved object can be interacted in relation to namespaces. Each type is mutually exclusive: \* single (default): this type of saved object is namespace-isolated, e.g., it exists in only one namespace. \* multiple: this type of saved object is shareable, e.g., it can exist in one or more namespaces. \* agnostic: this type of saved object is global.
 
-Note: do not write logic that uses this value directly; instead, use the appropriate accessors in the [type registry](./kibana-plugin-core-server.savedobjecttyperegistry.md)<!-- -->.
-
 <b>Signature:</b>
 
 ```typescript

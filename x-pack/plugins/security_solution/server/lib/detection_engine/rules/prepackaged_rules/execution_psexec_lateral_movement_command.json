@@ -6,19 +6,24 @@
   "false_positives": [
     "PsExec is a dual-use tool that can be used for benign or malicious activity. It's important to baseline your environment to determine the amount of noise to expect from this tool."
   ],
+  "from": "now-9m",
   "index": [
-    "winlogbeat-*"
+    "winlogbeat-*",
+    "logs-endpoint.events.*"
   ],
-  "language": "kuery",
+  "language": "eql",
   "license": "Elastic License",
   "name": "PsExec Network Connection",
-  "query": "event.category:network and event.type:connection and process.name:PsExec.exe",
+  "query": "sequence by process.entity_id\n  [process where process.name : \"PsExec.exe\" and event.type == \"start\"]\n  [network where process.name : \"PsExec.exe\"]\n",
   "risk_score": 21,
   "rule_id": "55d551c6-333b-4665-ab7e-5d14a59715ce",
   "severity": "low",
   "tags": [
     "Elastic",
-    "Windows"
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Execution"
   ],
   "threat": [
     {
@@ -52,6 +57,6 @@
       ]
     }
   ],
-  "type": "query",
-  "version": 3
+  "type": "eql",
+  "version": 5
 }

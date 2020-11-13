@@ -17,11 +17,10 @@
  * under the License.
  */
 import React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 import { ReactWrapper } from 'enzyme';
 import { TimechartHeader, TimechartHeaderProps } from './timechart_header';
 import { EuiIconTip } from '@elastic/eui';
-// @ts-ignore
 import { findTestSubject } from '@elastic/eui/lib/test';
 
 describe('timechart header', function () {
@@ -30,8 +29,10 @@ describe('timechart header', function () {
 
   beforeAll(() => {
     props = {
-      from: 'May 14, 2020 @ 11:05:13.590',
-      to: 'May 14, 2020 @ 11:20:13.590',
+      timeRange: {
+        from: 'May 14, 2020 @ 11:05:13.590',
+        to: 'May 14, 2020 @ 11:20:13.590',
+      },
       stateInterval: 's',
       options: [
         {
@@ -48,9 +49,11 @@ describe('timechart header', function () {
         },
       ],
       onChangeInterval: jest.fn(),
-      showScaledInfo: undefined,
-      bucketIntervalDescription: 'second',
-      bucketIntervalScale: undefined,
+      bucketInterval: {
+        scaled: undefined,
+        description: 'second',
+        scale: undefined,
+      },
     };
   });
 
@@ -59,8 +62,8 @@ describe('timechart header', function () {
     expect(component.find(EuiIconTip).length).toBe(0);
   });
 
-  it('TimechartHeader renders an info text by providing the showScaledInfo property', () => {
-    props.showScaledInfo = true;
+  it('TimechartHeader renders an info when bucketInterval.scale is set to true', () => {
+    props.bucketInterval!.scaled = true;
     component = mountWithIntl(<TimechartHeader {...props} />);
     expect(component.find(EuiIconTip).length).toBe(1);
   });

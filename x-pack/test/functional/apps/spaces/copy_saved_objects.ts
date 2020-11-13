@@ -15,8 +15,7 @@ export default function spaceSelectorFunctonalTests({
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['security', 'settings', 'copySavedObjectsToSpace']);
 
-  // TODO: Flakey again https://github.com/elastic/kibana/issues/44575#issuecomment-528864287
-  describe.skip('Copy Saved Objects to Space', function () {
+  describe('Copy Saved Objects to Space', function () {
     before(async () => {
       await esArchiver.load('spaces/copy_saved_objects');
 
@@ -32,6 +31,7 @@ export default function spaceSelectorFunctonalTests({
         disabledFeatures: [],
       });
 
+      await PageObjects.security.forceLogout();
       await PageObjects.security.login(undefined, undefined, {
         expectSpaceSelector: true,
       });
@@ -65,10 +65,10 @@ export default function spaceSelectorFunctonalTests({
       const summaryCounts = await PageObjects.copySavedObjectsToSpace.getSummaryCounts();
 
       expect(summaryCounts).to.eql({
-        copied: 3,
+        success: 3,
+        pending: 0,
         skipped: 0,
         errors: 0,
-        overwrite: undefined,
       });
 
       await PageObjects.copySavedObjectsToSpace.finishCopy();
@@ -93,23 +93,51 @@ export default function spaceSelectorFunctonalTests({
       const summaryCounts = await PageObjects.copySavedObjectsToSpace.getSummaryCounts();
 
       expect(summaryCounts).to.eql({
-        copied: 2,
+        success: 0,
+        pending: 2,
         skipped: 1,
         errors: 0,
-        overwrite: undefined,
       });
 
       // Mark conflict for overwrite
       await testSubjects.click(`cts-space-result-${destinationSpaceId}`);
-      await testSubjects.click(`cts-overwrite-conflict-logstash-*`);
+      await testSubjects.click(`cts-overwrite-conflict-index-pattern:logstash-*`);
 
       // Verify summary changed
-      const updatedSummaryCounts = await PageObjects.copySavedObjectsToSpace.getSummaryCounts(true);
+      const updatedSummaryCounts = await PageObjects.copySavedObjectsToSpace.getSummaryCounts();
 
       expect(updatedSummaryCounts).to.eql({
-        copied: 2,
+        success: 0,
+        pending: 3,
         skipped: 0,
-        overwrite: 1,
+        errors: 0,
+      });
+
+      await PageObjects.copySavedObjectsToSpace.finishCopy();
+    });
+
+    it('allows a dashboard to be copied to the marketing space, with circular references', async () => {
+      const destinationSpaceId = 'marketing';
+
+      await PageObjects.copySavedObjectsToSpace.openCopyToSpaceFlyoutForObject('Dashboard Foo');
+
+      await PageObjects.copySavedObjectsToSpace.setupForm({
+        overwrite: true,
+        destinationSpaceId,
+      });
+
+      await PageObjects.copySavedObjectsToSpace.startCopy();
+
+      // Wait for successful copy
+      await testSubjects.waitForDeleted(`cts-summary-indicator-loading-${destinationSpaceId}`);
+      await testSubjects.existOrFail(`cts-summary-indicator-success-${destinationSpaceId}`);
+
+      const summaryCounts = await PageObjects.copySavedObjectsToSpace.getSummaryCounts();
+
+      expect(summaryCounts).to.eql({
+        success: 2,
+        pending: 0,
+        skipped: 0,
         errors: 0,
       });
 

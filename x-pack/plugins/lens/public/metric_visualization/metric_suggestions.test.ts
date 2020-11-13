@@ -100,7 +100,7 @@ describe('metric_suggestions', () => {
     expect(rest).toHaveLength(0);
     expect(suggestion).toMatchInlineSnapshot(`
       Object {
-        "previewIcon": "test-file-stub",
+        "previewIcon": [Function],
         "score": 0.1,
         "state": Object {
           "accessor": "bytes",

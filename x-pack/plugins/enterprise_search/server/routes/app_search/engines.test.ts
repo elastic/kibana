@@ -4,14 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { MockRouter, mockConfig, mockLogger } from '../__mocks__';
+import { MockRouter, mockRequestHandler, mockDependencies } from '../../__mocks__';
 
-import { registerEnginesRoute } from './engines';
-
-jest.mock('node-fetch');
-const fetch = jest.requireActual('node-fetch');
-const { Response } = fetch;
-const fetchMock = require('node-fetch') as jest.Mocked<typeof fetch>;
+import { registerEnginesRoutes } from './engines';
 
 describe('engine routes', () => {
   describe('GET /api/app_search/engines', () => {
@@ -30,72 +25,58 @@ describe('engine routes', () => {
 
     beforeEach(() => {
       jest.clearAllMocks();
-      mockRouter = new MockRouter({ method: 'get', payload: 'query' });
+      mockRouter = new MockRouter({
+        method: 'get',
+        path: '/api/app_search/engines',
+        payload: 'query',
+      });
 
-      registerEnginesRoute({
+      registerEnginesRoutes({
+        ...mockDependencies,
         router: mockRouter.router,
-        log: mockLogger,
-        config: mockConfig,
       });
     });
 
-    describe('when the underlying App Search API returns a 200', () => {
-      beforeEach(() => {
-        AppSearchAPI.shouldBeCalledWith(
-          `http://localhost:3002/as/engines/collection?type=indexed&page%5Bcurrent%5D=1&page%5Bsize%5D=10`,
-          { headers: { Authorization: AUTH_HEADER } }
-        ).andReturn({
-          results: [{ name: 'engine1' }],
-          meta: { page: { total_results: 1 } },
-        });
-      });
+    it('creates a request handler', () => {
+      mockRouter.callRoute(mockRequest);
 
-      it('should return 200 with a list of engines from the App Search API', async () => {
-        await mockRouter.callRoute(mockRequest);
-
-        expect(mockRouter.response.ok).toHaveBeenCalledWith({
-          body: { results: [{ name: 'engine1' }], meta: { page: { total_results: 1 } } },
-        });
+      expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
+        path: '/as/engines/collection',
+        params: { type: 'indexed', 'page[current]': 1, 'page[size]': 10 },
+        hasValidData: expect.any(Function),
       });
     });
 
-    describe('when the App Search URL is invalid', () => {
-      beforeEach(() => {
-        AppSearchAPI.shouldBeCalledWith(
-          `http://localhost:3002/as/engines/collection?type=indexed&page%5Bcurrent%5D=1&page%5Bsize%5D=10`,
-          { headers: { Authorization: AUTH_HEADER } }
-        ).andReturnError();
-      });
+    it('passes custom parameters to enterpriseSearchRequestHandler', () => {
+      mockRouter.callRoute({ query: { type: 'meta', pageIndex: 99 } });
 
-      it('should return 404 with a message', async () => {
-        await mockRouter.callRoute(mockRequest);
-
-        expect(mockRouter.response.notFound).toHaveBeenCalledWith({
-          body: 'cannot-connect',
-        });
-        expect(mockLogger.error).toHaveBeenCalledWith('Cannot connect to App Search: Failed');
-        expect(mockLogger.debug).not.toHaveBeenCalled();
+      expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
+        path: '/as/engines/collection',
+        params: { type: 'meta', 'page[current]': 99, 'page[size]': 10 },
+        hasValidData: expect.any(Function),
       });
     });
 
-    describe('when the App Search API returns invalid data', () => {
-      beforeEach(() => {
-        AppSearchAPI.shouldBeCalledWith(
-          `http://localhost:3002/as/engines/collection?type=indexed&page%5Bcurrent%5D=1&page%5Bsize%5D=10`,
-          { headers: { Authorization: AUTH_HEADER } }
-        ).andReturnInvalidData();
+    describe('hasValidData', () => {
+      it('should correctly validate that the response has data', () => {
+        const response = {
+          meta: {
+            page: {
+              total_results: 1,
+            },
+          },
+          results: [],
+        };
+
+        mockRouter.callRoute(mockRequest);
+        expect(mockRequestHandler.hasValidData(response)).toBe(true);
       });
 
-      it('should return 404 with a message', async () => {
-        await mockRouter.callRoute(mockRequest);
+      it('should correctly validate that a response does not have data', () => {
+        const response = {};
 
-        expect(mockRouter.response.notFound).toHaveBeenCalledWith({
-          body: 'cannot-connect',
-        });
-        expect(mockLogger.error).toHaveBeenCalledWith(
-          'Cannot connect to App Search: Error: Invalid data received from App Search: {"foo":"bar"}'
-        );
-        expect(mockLogger.debug).toHaveBeenCalled();
+        mockRouter.callRoute(mockRequest);
+        expect(mockRequestHandler.hasValidData(response)).toBe(false);
       });
     });
 
@@ -125,36 +106,31 @@ describe('engine routes', () => {
         mockRouter.shouldThrow(request);
       });
     });
+  });
 
-    const AppSearchAPI = {
-      shouldBeCalledWith(expectedUrl: string, expectedParams: object) {
-        return {
-          andReturn(response: object) {
-            fetchMock.mockImplementation((url: string, params: object) => {
-              expect(url).toEqual(expectedUrl);
-              expect(params).toEqual(expectedParams);
+  describe('GET /api/app_search/engines/{name}', () => {
+    let mockRouter: MockRouter;
 
-              return Promise.resolve(new Response(JSON.stringify(response)));
-            });
-          },
-          andReturnInvalidData() {
-            fetchMock.mockImplementation((url: string, params: object) => {
-              expect(url).toEqual(expectedUrl);
-              expect(params).toEqual(expectedParams);
+    beforeEach(() => {
+      jest.clearAllMocks();
+      mockRouter = new MockRouter({
+        method: 'get',
+        path: '/api/app_search/engines/{name}',
+        payload: 'params',
+      });
 
-              return Promise.resolve(new Response(JSON.stringify({ foo: 'bar' })));
-            });
-          },
-          andReturnError() {
-            fetchMock.mockImplementation((url: string, params: object) => {
-              expect(url).toEqual(expectedUrl);
-              expect(params).toEqual(expectedParams);
+      registerEnginesRoutes({
+        ...mockDependencies,
+        router: mockRouter.router,
+      });
+    });
 
-              return Promise.reject('Failed');
-            });
-          },
-        };
-      },
-    };
+    it('creates a request to enterprise search', () => {
+      mockRouter.callRoute({ params: { name: 'some-engine' } });
+
+      expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
+        path: '/as/engines/some-engine/details',
+      });
+    });
   });
 });

@@ -83,6 +83,8 @@ exports[`ValueAxesPanel component should init with the default set of props 1`] 
     }
     id="yAxisAccordionValueAxis-1"
     initialIsOpen={false}
+    isLoading={false}
+    isLoadingMessage={false}
     key="ValueAxis-1"
     paddingSize="none"
   >
@@ -264,6 +266,8 @@ exports[`ValueAxesPanel component should init with the default set of props 1`] 
     }
     id="yAxisAccordionValueAxis-2"
     initialIsOpen={false}
+    isLoading={false}
+    isLoadingMessage={false}
     key="ValueAxis-2"
     paddingSize="none"
   >

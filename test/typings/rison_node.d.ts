@@ -29,11 +29,11 @@ declare module 'rison-node' {
 
   export const decode: (input: string) => RisonValue;
 
-  // eslint-disable-next-line @typescript-eslint/camelcase
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   export const decode_object: (input: string) => RisonObject;
 
   export const encode: <Input extends RisonValue>(input: Input) => string;
 
-  // eslint-disable-next-line @typescript-eslint/camelcase
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   export const encode_object: <Input extends RisonObject>(input: Input) => string;
 }

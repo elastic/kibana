@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-searchable?: boolean;
+get searchable(): boolean;
 ```

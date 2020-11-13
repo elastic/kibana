@@ -7,6 +7,7 @@ exports[`NewCalendar Renders new calendar form 1`] = `
   />
   <EuiPage
     className="mlCalendarEditForm"
+    data-test-subj="mlPageCalendarEdit"
   >
     <EuiPageBody>
       <EuiPageContent

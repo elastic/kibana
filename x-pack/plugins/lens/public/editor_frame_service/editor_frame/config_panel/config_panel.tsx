@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import './config_panel.scss';
 
 import React, { useMemo, memo } from 'react';
 import { EuiFlexItem, EuiToolTip, EuiButton, EuiForm } from '@elastic/eui';
@@ -39,29 +40,29 @@ function LayerPanels(
   } = props;
   const setVisualizationState = useMemo(
     () => (newState: unknown) => {
-      props.dispatch({
+      dispatch({
         type: 'UPDATE_VISUALIZATION_STATE',
         visualizationId: activeVisualization.id,
         newState,
         clearStagedPreview: false,
       });
     },
-    [props.dispatch, activeVisualization]
+    [dispatch, activeVisualization]
   );
   const updateDatasource = useMemo(
     () => (datasourceId: string, newState: unknown) => {
-      props.dispatch({
+      dispatch({
         type: 'UPDATE_DATASOURCE_STATE',
         updater: () => newState,
         datasourceId,
         clearStagedPreview: false,
       });
     },
-    [props.dispatch]
+    [dispatch]
   );
   const updateAll = useMemo(
     () => (datasourceId: string, newDatasourceState: unknown, newVisualizationState: unknown) => {
-      props.dispatch({
+      dispatch({
         type: 'UPDATE_STATE',
         subType: 'UPDATE_ALL_STATES',
         updater: (prevState) => {
@@ -83,17 +84,18 @@ function LayerPanels(
         },
       });
     },
-    [props.dispatch]
+    [dispatch]
   );
   const layerIds = activeVisualization.getLayerIds(visualizationState);
 
   return (
     <EuiForm className="lnsConfigPanel">
-      {layerIds.map((layerId) => (
+      {layerIds.map((layerId, index) => (
         <LayerPanel
           {...props}
           key={layerId}
           layerId={layerId}
+          dataTestSubj={`lns-layerPanel-${index}`}
           visualizationState={visualizationState}
           updateVisualization={setVisualizationState}
           updateDatasource={updateDatasource}
@@ -119,6 +121,9 @@ function LayerPanels(
         <EuiFlexItem grow={true}>
           <EuiToolTip
             className="eui-fullWidth"
+            title={i18n.translate('xpack.lens.xyChart.addLayer', {
+              defaultMessage: 'Add a layer',
+            })}
             content={i18n.translate('xpack.lens.xyChart.addLayerTooltip', {
               defaultMessage:
                 'Use multiple layers to combine chart types or visualize different index patterns.',
@@ -131,9 +136,6 @@ function LayerPanels(
               size="s"
               data-test-subj="lnsLayerAddButton"
               aria-label={i18n.translate('xpack.lens.xyChart.addLayerButton', {
-                defaultMessage: 'Add layer',
-              })}
-              title={i18n.translate('xpack.lens.xyChart.addLayerButton', {
                 defaultMessage: 'Add layer',
               })}
               onClick={() => {

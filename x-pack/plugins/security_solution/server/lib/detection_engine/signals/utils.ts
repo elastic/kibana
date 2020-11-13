@@ -7,15 +7,27 @@ import { createHash } from 'crypto';
 import moment from 'moment';
 import dateMath from '@elastic/datemath';
 
+import { TimestampOverrideOrUndefined } from '../../../../common/detection_engine/schemas/common/schemas';
 import { Logger, SavedObjectsClientContract } from '../../../../../../../src/core/server';
 import { AlertServices, parseDuration } from '../../../../../alerts/server';
 import { ExceptionListClient, ListClient, ListPluginSetup } from '../../../../../lists/server';
 import { ExceptionListItemSchema } from '../../../../../lists/common/schemas';
-import { ListArrayOrUndefined } from '../../../../common/detection_engine/schemas/types/lists';
-import { BulkResponse, BulkResponseErrorAggregation, isValidUnit } from './types';
+import { ListArray } from '../../../../common/detection_engine/schemas/types/lists';
+import {
+  BulkResponse,
+  BulkResponseErrorAggregation,
+  isValidUnit,
+  SignalHit,
+  BaseSignalHit,
+  SearchAfterAndBulkCreateReturnType,
+  SignalSearchResponse,
+  Signal,
+} from './types';
 import { BuildRuleMessage } from './rule_messages';
+import { parseScheduleDates } from '../../../../common/detection_engine/parse_schedule_dates';
 import { hasLargeValueList } from '../../../../common/detection_engine/utils';
 import { MAX_EXCEPTION_LIST_SIZE } from '../../../../../lists/common/constants';
+import { ShardError } from '../../types';
 
 interface SortExceptionsReturn {
   exceptionsWithValueLists: ExceptionListItemSchema[];
@@ -117,7 +129,7 @@ export const getGapMaxCatchupRatio = ({
   };
 };
 
-export const getListsClient = async ({
+export const getListsClient = ({
   lists,
   spaceId,
   updatedByUser,
@@ -129,20 +141,16 @@ export const getListsClient = async ({
   updatedByUser: string | null;
   services: AlertServices;
   savedObjectClient: SavedObjectsClientContract;
-}): Promise<{
-  listClient: ListClient | undefined;
-  exceptionsClient: ExceptionListClient | undefined;
-}> => {
+}): {
+  listClient: ListClient;
+  exceptionsClient: ExceptionListClient;
+} => {
   if (lists == null) {
     throw new Error('lists plugin unavailable during rule execution');
   }
 
-  const listClient = await lists.getListClient(
-    services.callCluster,
-    spaceId,
-    updatedByUser ?? 'elastic'
-  );
-  const exceptionsClient = await lists.getExceptionListClient(
+  const listClient = lists.getListClient(services.callCluster, spaceId, updatedByUser ?? 'elastic');
+  const exceptionsClient = lists.getExceptionListClient(
     savedObjectClient,
     updatedByUser ?? 'elastic'
   );
@@ -154,14 +162,10 @@ export const getExceptions = async ({
   client,
   lists,
 }: {
-  client: ExceptionListClient | undefined;
-  lists: ListArrayOrUndefined;
+  client: ExceptionListClient;
+  lists: ListArray;
 }): Promise<ExceptionListItemSchema[] | undefined> => {
-  if (client == null) {
-    throw new Error('lists plugin unavailable during rule execution');
-  }
-
-  if (lists != null && lists.length > 0) {
+  if (lists.length > 0) {
     try {
       const listIds = lists.map(({ list_id: listId }) => listId);
       const namespaceTypes = lists.map(({ namespace_type: namespaceType }) => namespaceType);
@@ -212,24 +216,66 @@ export const generateId = (
   ruleId: string
 ): string => createHash('sha256').update(docIndex.concat(docId, version, ruleId)).digest('hex');
 
+// TODO: do we need to include version in the id? If it does matter then we should include it in signal.parents as well
+export const generateSignalId = (signal: Signal) =>
+  createHash('sha256')
+    .update(
+      signal.parents
+        .reduce((acc, parent) => acc.concat(parent.id, parent.index), '')
+        .concat(signal.rule.id)
+    )
+    .digest('hex');
+
+/**
+ * Generates unique doc ids for each building block signal within a sequence. The id of each building block
+ * depends on the parents of every building block, so that a signal which appears in multiple different sequences
+ * (e.g. if multiple rules build sequences that share a common event/signal) will get a unique id per sequence.
+ * @param buildingBlocks The full list of building blocks in the sequence.
+ */
+export const generateBuildingBlockIds = (buildingBlocks: SignalHit[]): string[] => {
+  const baseHashString = buildingBlocks.reduce(
+    (baseString, block) =>
+      baseString
+        .concat(
+          block.signal.parents.reduce((acc, parent) => acc.concat(parent.id, parent.index), '')
+        )
+        .concat(block.signal.rule.id),
+    ''
+  );
+  return buildingBlocks.map((block, idx) =>
+    createHash('sha256').update(baseHashString).update(String(idx)).digest('hex')
+  );
+};
+
+export const wrapBuildingBlocks = (buildingBlocks: SignalHit[], index: string): BaseSignalHit[] => {
+  const blockIds = generateBuildingBlockIds(buildingBlocks);
+  return buildingBlocks.map((block, idx) => {
+    return {
+      _id: blockIds[idx],
+      _index: index,
+      _source: {
+        ...block,
+      },
+    };
+  });
+};
+
+export const wrapSignal = (signal: SignalHit, index: string): BaseSignalHit => {
+  return {
+    _id: generateSignalId(signal.signal),
+    _index: index,
+    _source: {
+      ...signal,
+    },
+  };
+};
+
 export const parseInterval = (intervalString: string): moment.Duration | null => {
   try {
     return moment.duration(parseDuration(intervalString));
   } catch (err) {
     return null;
   }
-};
-
-export const parseScheduleDates = (time: string): moment.Moment | null => {
-  const isValidDateString = !isNaN(Date.parse(time));
-  const isValidInput = isValidDateString || time.trim().startsWith('now');
-  const formattedDate = isValidDateString
-    ? moment(time)
-    : isValidInput
-    ? dateMath.parse(time)
-    : null;
-
-  return formattedDate ?? null;
 };
 
 export const getDriftTolerance = ({
@@ -311,7 +357,7 @@ export const errorAggregator = (
   ignoreStatusCodes: number[]
 ): BulkResponseErrorAggregation => {
   return response.items.reduce<BulkResponseErrorAggregation>((accum, item) => {
-    if (item.create.error != null && !ignoreStatusCodes.includes(item.create.status)) {
+    if (item.create?.error != null && !ignoreStatusCodes.includes(item.create.status)) {
       if (accum[item.create.error.reason] == null) {
         accum[item.create.error.reason] = {
           count: 1,
@@ -457,4 +503,152 @@ export const getSignalTimeTuples = ({
     buildRuleMessage(`totalToFromTuples: ${JSON.stringify(totalToFromTuples, null, 4)}`)
   );
   return totalToFromTuples;
+};
+
+/**
+ * Given errors from a search query this will return an array of strings derived from the errors.
+ * @param errors The errors to derive the strings from
+ */
+export const createErrorsFromShard = ({ errors }: { errors: ShardError[] }): string[] => {
+  return errors.map((error) => {
+    const {
+      reason: {
+        reason,
+        type,
+        caused_by: { reason: causedByReason, type: causedByType } = {
+          reason: undefined,
+          type: undefined,
+        },
+      } = {},
+    } = error;
+
+    return [
+      ...(reason != null ? [`reason: "${reason}"`] : []),
+      ...(type != null ? [`type: "${type}"`] : []),
+      ...(causedByReason != null ? [`caused by reason: "${causedByReason}"`] : []),
+      ...(causedByType != null ? [`caused by type: "${causedByType}"`] : []),
+    ].join(' ');
+  });
+};
+
+/**
+ * Given a SignalSearchResponse this will return a valid last date if it can find one, otherwise it
+ * will return undefined. This tries the "fields" first to get a formatted date time if it can, but if
+ * it cannot it will resort to using the "_source" fields second which can be problematic if the date time
+ * is not correctly ISO8601 or epoch milliseconds formatted.
+ * @param searchResult The result to try and parse out the timestamp.
+ * @param timestampOverride The timestamp override to use its values if we have it.
+ */
+export const lastValidDate = ({
+  searchResult,
+  timestampOverride,
+}: {
+  searchResult: SignalSearchResponse;
+  timestampOverride: TimestampOverrideOrUndefined;
+}): Date | undefined => {
+  if (searchResult.hits.hits.length === 0) {
+    return undefined;
+  } else {
+    const lastRecord = searchResult.hits.hits[searchResult.hits.hits.length - 1];
+    const timestamp = timestampOverride ?? '@timestamp';
+    const timestampValue =
+      lastRecord.fields != null && lastRecord.fields[timestamp] != null
+        ? lastRecord.fields[timestamp][0]
+        : lastRecord._source[timestamp];
+    const lastTimestamp =
+      typeof timestampValue === 'string' || typeof timestampValue === 'number'
+        ? timestampValue
+        : undefined;
+    if (lastTimestamp != null) {
+      const tempMoment = moment(lastTimestamp);
+      if (tempMoment.isValid()) {
+        return tempMoment.toDate();
+      } else {
+        return undefined;
+      }
+    }
+  }
+};
+
+export const createSearchAfterReturnTypeFromResponse = ({
+  searchResult,
+  timestampOverride,
+}: {
+  searchResult: SignalSearchResponse;
+  timestampOverride: TimestampOverrideOrUndefined;
+}): SearchAfterAndBulkCreateReturnType => {
+  return createSearchAfterReturnType({
+    success: searchResult._shards.failed === 0,
+    lastLookBackDate: lastValidDate({ searchResult, timestampOverride }),
+  });
+};
+
+export const createSearchAfterReturnType = ({
+  success,
+  searchAfterTimes,
+  bulkCreateTimes,
+  lastLookBackDate,
+  createdSignalsCount,
+  errors,
+}: {
+  success?: boolean | undefined;
+  searchAfterTimes?: string[] | undefined;
+  bulkCreateTimes?: string[] | undefined;
+  lastLookBackDate?: Date | undefined;
+  createdSignalsCount?: number | undefined;
+  errors?: string[] | undefined;
+} = {}): SearchAfterAndBulkCreateReturnType => {
+  return {
+    success: success ?? true,
+    searchAfterTimes: searchAfterTimes ?? [],
+    bulkCreateTimes: bulkCreateTimes ?? [],
+    lastLookBackDate: lastLookBackDate ?? null,
+    createdSignalsCount: createdSignalsCount ?? 0,
+    errors: errors ?? [],
+  };
+};
+
+export const mergeReturns = (
+  searchAfters: SearchAfterAndBulkCreateReturnType[]
+): SearchAfterAndBulkCreateReturnType => {
+  return searchAfters.reduce((prev, next) => {
+    const {
+      success: existingSuccess,
+      searchAfterTimes: existingSearchAfterTimes,
+      bulkCreateTimes: existingBulkCreateTimes,
+      lastLookBackDate: existingLastLookBackDate,
+      createdSignalsCount: existingCreatedSignalsCount,
+      errors: existingErrors,
+    } = prev;
+
+    const {
+      success: newSuccess,
+      searchAfterTimes: newSearchAfterTimes,
+      bulkCreateTimes: newBulkCreateTimes,
+      lastLookBackDate: newLastLookBackDate,
+      createdSignalsCount: newCreatedSignalsCount,
+      errors: newErrors,
+    } = next;
+
+    return {
+      success: existingSuccess && newSuccess,
+      searchAfterTimes: [...existingSearchAfterTimes, ...newSearchAfterTimes],
+      bulkCreateTimes: [...existingBulkCreateTimes, ...newBulkCreateTimes],
+      lastLookBackDate: newLastLookBackDate ?? existingLastLookBackDate,
+      createdSignalsCount: existingCreatedSignalsCount + newCreatedSignalsCount,
+      errors: [...new Set([...existingErrors, ...newErrors])],
+    };
+  });
+};
+
+export const createTotalHitsFromSearchResult = ({
+  searchResult,
+}: {
+  searchResult: SignalSearchResponse;
+}): number => {
+  const totalHits =
+    typeof searchResult.hits.total === 'number'
+      ? searchResult.hits.total
+      : searchResult.hits.total.value;
+  return totalHits;
 };

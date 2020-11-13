@@ -6,9 +6,7 @@
 
 import * as t from 'io-ts';
 
-/* eslint-disable @typescript-eslint/camelcase */
 import { timeline_id, type } from '../common/schemas';
-/* eslint-enable @typescript-eslint/camelcase */
 
 /**
  * Special schema type that is only the type and the timeline_id.

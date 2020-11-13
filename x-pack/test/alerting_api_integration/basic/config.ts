@@ -11,4 +11,5 @@ export default createTestConfig('basic', {
   disabledPlugins: [],
   license: 'basic',
   ssl: true,
+  enableActionsProxy: false,
 });

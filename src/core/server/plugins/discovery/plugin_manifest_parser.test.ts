@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { PluginDiscoveryErrorType } from './plugin_discovery_error';
-
 import { mockReadFile } from './plugin_manifest_parser.test.mocks';
+
+import { PluginDiscoveryErrorType } from './plugin_discovery_error';
 import { loggingSystemMock } from '../../logging/logging_system.mock';
 
 import { resolve } from 'path';
@@ -114,6 +114,16 @@ test('logs warning if pluginId is not in camelCase format', async () => {
       ],
     ]
   `);
+});
+
+test('does not log pluginId format warning in dist mode', async () => {
+  mockReadFile.mockImplementation((path, cb) => {
+    cb(null, Buffer.from(JSON.stringify({ id: 'some_name', version: 'kibana', server: true })));
+  });
+
+  expect(loggingSystemMock.collect(logger).warn).toHaveLength(0);
+  await parseManifest(pluginPath, { ...packageInfo, dist: true }, logger);
+  expect(loggingSystemMock.collect(logger).warn.length).toBe(0);
 });
 
 test('return error when plugin version is missing', async () => {

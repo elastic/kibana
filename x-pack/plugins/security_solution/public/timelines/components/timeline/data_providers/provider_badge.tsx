@@ -91,7 +91,7 @@ const ConvertFieldBadge = styled(ProviderFieldBadge)`
   }
 `;
 
-const TemplateFieldBadge: React.FC<TemplateFieldBadgeProps> = ({ type, toggleType }) => {
+const TemplateFieldBadgeComponent: React.FC<TemplateFieldBadgeProps> = ({ type, toggleType }) => {
   if (type !== DataProviderType.template) {
     return (
       <ConvertFieldBadge onClick={toggleType}>{i18n.CONVERT_TO_TEMPLATE_FIELD}</ConvertFieldBadge>
@@ -100,6 +100,8 @@ const TemplateFieldBadge: React.FC<TemplateFieldBadgeProps> = ({ type, toggleTyp
 
   return <StyledTemplateFieldBadge>{i18n.TEMPLATE_FIELD_LABEL}</StyledTemplateFieldBadge>;
 };
+
+const TemplateFieldBadge = React.memo(TemplateFieldBadgeComponent);
 
 interface ProviderBadgeProps {
   deleteProvider: () => void;

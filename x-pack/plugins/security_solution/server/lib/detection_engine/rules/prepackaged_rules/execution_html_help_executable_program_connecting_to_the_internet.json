@@ -3,19 +3,24 @@
     "Elastic"
   ],
   "description": "Compiled HTML files (.chm) are commonly distributed as part of the Microsoft HTML Help system. Adversaries may conceal malicious code in a CHM file and deliver it to a victim for execution. CHM content is loaded by the HTML Help executable program (hh.exe).",
+  "from": "now-9m",
   "index": [
-    "winlogbeat-*"
+    "winlogbeat-*",
+    "logs-endpoint.events.*"
   ],
-  "language": "kuery",
+  "language": "eql",
   "license": "Elastic License",
   "name": "Network Connection via Compiled HTML File",
-  "query": "event.category:network and event.type:connection and process.name:hh.exe and not destination.ip:(10.0.0.0/8 or 172.16.0.0/12 or 192.168.0.0/16)",
+  "query": "sequence by process.entity_id\n  [process where process.name : \"hh.exe\" and event.type == \"start\"]\n  [network where process.name : \"hh.exe\" and\n     not cidrmatch(destination.ip, \"10.0.0.0/8\", \"172.16.0.0/12\", \"192.168.0.0/16\")]\n",
   "risk_score": 21,
   "rule_id": "b29ee2be-bf99-446c-ab1a-2dc0183394b8",
   "severity": "low",
   "tags": [
     "Elastic",
-    "Windows"
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Execution"
   ],
   "threat": [
     {
@@ -49,6 +54,6 @@
       ]
     }
   ],
-  "type": "query",
-  "version": 3
+  "type": "eql",
+  "version": 5
 }

@@ -17,14 +17,14 @@
  * under the License.
  */
 import { IScope } from 'angular';
-import { RenderCompleteHelper } from '../../../../../kibana_utils/public';
+import { RenderCompleteListener } from '../../../../../kibana_utils/public';
 
 export function createRenderCompleteDirective() {
   return {
     controller($scope: IScope, $element: JQLite) {
       const el = $element[0];
-      const renderCompleteHelper = new RenderCompleteHelper(el);
-      $scope.$on('$destroy', renderCompleteHelper.destroy);
+      const renderCompleteListener = new RenderCompleteListener(el);
+      $scope.$on('$destroy', renderCompleteListener.destroy);
     },
   };
 }

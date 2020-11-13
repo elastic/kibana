@@ -31,7 +31,7 @@ export { runTestsCli, processRunTestsCliOptions, startServersCli, processStartSe
 export { runTests, startServers } from './functional_tests/tasks';
 
 // @ts-ignore not typed yet
-export { OPTIMIZE_BUNDLE_DIR, KIBANA_ROOT } from './functional_tests/lib/paths';
+export { KIBANA_ROOT } from './functional_tests/lib/paths';
 
 // @ts-ignore not typed yet
 export { esTestConfig, createLegacyEsTestCluster } from './legacy_es';
@@ -54,8 +54,6 @@ export {
 } from './mocha';
 
 export { runFailedTestsReporterCli } from './failed_tests_reporter';
-
-export { makeJunitReportPath } from './junit_report_path';
 
 export { CI_PARALLEL_PROCESS_PREFIX } from './ci_parallel_process_prefix';
 

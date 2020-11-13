@@ -116,6 +116,7 @@ describe('useSavedVisInstance', () => {
         useSavedVisInstance(mockServices, eventEmitter, true, savedVisId)
       );
 
+      result.current.visEditorRef.current = document.createElement('div');
       expect(mockGetVisualizationInstance).toHaveBeenCalledWith(mockServices, savedVisId);
       expect(mockGetVisualizationInstance.mock.calls.length).toBe(1);
 
@@ -129,9 +130,11 @@ describe('useSavedVisInstance', () => {
     });
 
     test('should destroy the editor and the savedVis on unmount if chrome exists', async () => {
-      const { unmount, waitForNextUpdate } = renderHook(() =>
+      const { result, unmount, waitForNextUpdate } = renderHook(() =>
         useSavedVisInstance(mockServices, eventEmitter, true, savedVisId)
       );
+
+      result.current.visEditorRef.current = document.createElement('div');
 
       await waitForNextUpdate();
       unmount();
@@ -149,6 +152,7 @@ describe('useSavedVisInstance', () => {
         pathname: VisualizeConstants.CREATE_PATH,
         search: '?type=area&indexPattern=1a2b3c4d',
       };
+      // @ts-ignore-error
       delete mockSavedVisInstance.savedVis.id;
     });
 
@@ -156,6 +160,8 @@ describe('useSavedVisInstance', () => {
       const { result, waitForNextUpdate } = renderHook(() =>
         useSavedVisInstance(mockServices, eventEmitter, true, undefined)
       );
+
+      result.current.visEditorRef.current = document.createElement('div');
 
       expect(mockGetVisualizationInstance).toHaveBeenCalledWith(mockServices, {
         indexPattern: '1a2b3c4d',

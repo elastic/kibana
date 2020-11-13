@@ -14,6 +14,7 @@ export interface ISearchOptions
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [signal](./kibana-plugin-plugins-data-server.isearchoptions.signal.md) | <code>AbortSignal</code> | An <code>AbortSignal</code> that allows the caller of <code>search</code> to abort a search request. |
-|  [strategy](./kibana-plugin-plugins-data-server.isearchoptions.strategy.md) | <code>string</code> |  |
+|  [abortSignal](./kibana-plugin-plugins-data-server.isearchoptions.abortsignal.md) | <code>AbortSignal</code> | An <code>AbortSignal</code> that allows the caller of <code>search</code> to abort a search request. |
+|  [sessionId](./kibana-plugin-plugins-data-server.isearchoptions.sessionid.md) | <code>string</code> | A session ID, grouping multiple search requests into a single session. |
+|  [strategy](./kibana-plugin-plugins-data-server.isearchoptions.strategy.md) | <code>string</code> | Use this option to force using a specific server side search strategy. Leave empty to use the default strategy. |
 

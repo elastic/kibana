@@ -22,6 +22,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiButtonIcon, EuiTitle, EuiSpacer } from '@elastic/eui';
 import { sortBy } from 'lodash';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
+import { UiStatsMetricType } from '@kbn/analytics';
 import { DiscoverField } from './discover_field';
 import { DiscoverIndexPattern } from './discover_index_pattern';
 import { DiscoverFieldSearch } from './discover_field_search';
@@ -29,13 +30,7 @@ import { IndexPatternAttributes } from '../../../../../data/common';
 import { SavedObject } from '../../../../../../core/types';
 import { FIELDS_LIMIT_SETTING } from '../../../../common';
 import { groupFields } from './lib/group_fields';
-import {
-  IIndexPatternFieldList,
-  IndexPatternField,
-  IndexPattern,
-  UI_SETTINGS,
-} from '../../../../../data/public';
-import { AppState } from '../../angular/discover_state';
+import { IndexPatternField, IndexPattern, UI_SETTINGS } from '../../../../../data/public';
 import { getDetails } from './lib/get_details';
 import { getDefaultFieldFilter, setFieldFilterProp } from './lib/field_filter';
 import { getIndexPatternFieldList } from './lib/get_index_pattern_field_list';
@@ -74,15 +69,17 @@ export interface DiscoverSidebarProps {
   /**
    * Currently selected index pattern
    */
-  selectedIndexPattern: IndexPattern;
+  selectedIndexPattern?: IndexPattern;
   /**
    * Callback function to select another index pattern
    */
   setIndexPattern: (id: string) => void;
   /**
-   * Current app state, used for generating a link to visualize
+   * Metric tracking function
+   * @param metricType
+   * @param eventName
    */
-  state: AppState;
+  trackUiMetric?: (metricType: UiStatsMetricType, eventName: string | string[]) => void;
 }
 
 export function DiscoverSidebar({
@@ -95,32 +92,17 @@ export function DiscoverSidebar({
   onRemoveField,
   selectedIndexPattern,
   setIndexPattern,
-  state,
+  trackUiMetric,
 }: DiscoverSidebarProps) {
-  const [openFieldMap, setOpenFieldMap] = useState(new Map());
   const [showFields, setShowFields] = useState(false);
-  const [fields, setFields] = useState<IIndexPatternFieldList | null>(null);
+  const [fields, setFields] = useState<IndexPatternField[] | null>(null);
   const [fieldFilterState, setFieldFilterState] = useState(getDefaultFieldFilter());
   const services = useMemo(() => getServices(), []);
-
   useEffect(() => {
-    const newFields = getIndexPatternFieldList(selectedIndexPattern, fieldCounts, services);
+    const newFields = getIndexPatternFieldList(selectedIndexPattern, fieldCounts);
     setFields(newFields);
   }, [selectedIndexPattern, fieldCounts, hits, services]);
 
-  const onShowDetails = useCallback(
-    (show: boolean, field: IndexPatternField) => {
-      if (!show) {
-        setOpenFieldMap(new Map(openFieldMap.set(field.name, false)));
-      } else {
-        setOpenFieldMap(new Map(openFieldMap.set(field.name, true)));
-        if (services.capabilities.discover.save) {
-          selectedIndexPattern.popularizeField(field.name, 1);
-        }
-      }
-    },
-    [openFieldMap, selectedIndexPattern, services.capabilities.discover.save]
-  );
   const onChangeFieldSearch = useCallback(
     (field: string, value: string | boolean | undefined) => {
       const newState = setFieldFilterProp(fieldFilterState, field, value);
@@ -130,9 +112,8 @@ export function DiscoverSidebar({
   );
 
   const getDetailsByField = useCallback(
-    (ipField: IndexPatternField) =>
-      getDetails(ipField, selectedIndexPattern, state, columns, hits, services),
-    [selectedIndexPattern, state, columns, hits, services]
+    (ipField: IndexPatternField) => getDetails(ipField, hits, columns, selectedIndexPattern),
+    [hits, columns, selectedIndexPattern]
   );
 
   const popularLimit = services.uiSettings.get(FIELDS_LIMIT_SETTING);
@@ -205,10 +186,10 @@ export function DiscoverSidebar({
                 aria-labelledby="selected_fields"
                 data-test-subj={`fieldList-selected`}
               >
-                {selectedFields.map((field: IndexPatternField, idx: number) => {
+                {selectedFields.map((field: IndexPatternField) => {
                   return (
                     <li
-                      key={`field${idx}`}
+                      key={`field${field.name}`}
                       data-attr-field={field.name}
                       className="dscSidebar__item"
                     >
@@ -218,11 +199,10 @@ export function DiscoverSidebar({
                         onAddField={onAddField}
                         onRemoveField={onRemoveField}
                         onAddFilter={onAddFilter}
-                        onShowDetails={onShowDetails}
                         getDetails={getDetailsByField}
-                        showDetails={openFieldMap.get(field.name) || false}
                         selected={true}
                         useShortDots={useShortDots}
+                        trackUiMetric={trackUiMetric}
                       />
                     </li>
                   );
@@ -282,10 +262,10 @@ export function DiscoverSidebar({
                 aria-labelledby="available_fields available_fields_popular"
                 data-test-subj={`fieldList-popular`}
               >
-                {popularFields.map((field: IndexPatternField, idx: number) => {
+                {popularFields.map((field: IndexPatternField) => {
                   return (
                     <li
-                      key={`field${idx}`}
+                      key={`field${field.name}`}
                       data-attr-field={field.name}
                       className="dscSidebar__item"
                     >
@@ -295,10 +275,9 @@ export function DiscoverSidebar({
                         onAddField={onAddField}
                         onRemoveField={onRemoveField}
                         onAddFilter={onAddFilter}
-                        onShowDetails={onShowDetails}
                         getDetails={getDetailsByField}
-                        showDetails={openFieldMap.get(field.name) || false}
                         useShortDots={useShortDots}
+                        trackUiMetric={trackUiMetric}
                       />
                     </li>
                   );
@@ -314,19 +293,22 @@ export function DiscoverSidebar({
             aria-labelledby="available_fields"
             data-test-subj={`fieldList-unpopular`}
           >
-            {unpopularFields.map((field: IndexPatternField, idx: number) => {
+            {unpopularFields.map((field: IndexPatternField) => {
               return (
-                <li key={`field${idx}`} data-attr-field={field.name} className="dscSidebar__item">
+                <li
+                  key={`field${field.name}`}
+                  data-attr-field={field.name}
+                  className="dscSidebar__item"
+                >
                   <DiscoverField
                     field={field}
                     indexPattern={selectedIndexPattern}
                     onAddField={onAddField}
                     onRemoveField={onRemoveField}
                     onAddFilter={onAddFilter}
-                    onShowDetails={onShowDetails}
                     getDetails={getDetailsByField}
-                    showDetails={openFieldMap.get(field.name) || false}
                     useShortDots={useShortDots}
+                    trackUiMetric={trackUiMetric}
                   />
                 </li>
               );

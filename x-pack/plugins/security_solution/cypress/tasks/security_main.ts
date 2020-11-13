@@ -6,14 +6,14 @@
 
 import { MAIN_PAGE, TIMELINE_TOGGLE_BUTTON } from '../screens/security_main';
 
-export const openTimeline = () => {
+export const openTimelineUsingToggle = () => {
   cy.get(TIMELINE_TOGGLE_BUTTON).click();
 };
 
 export const openTimelineIfClosed = () => {
   cy.get(MAIN_PAGE).then(($page) => {
     if ($page.find(TIMELINE_TOGGLE_BUTTON).length === 1) {
-      openTimeline();
+      openTimelineUsingToggle();
     }
   });
 };

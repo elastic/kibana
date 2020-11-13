@@ -17,10 +17,8 @@
  * under the License.
  */
 
-import { setup } from 'test_utils/http_test_setup';
+import { setup } from '../../../../../core/test_helpers/http_test_setup';
 
 export const { http } = setup((injectedMetadata) => {
   injectedMetadata.getBasePath.mockReturnValue('/hola/daro/');
 });
-
-jest.doMock('ui/new_platform', () => ({ npSetup: { core: { http } } }));

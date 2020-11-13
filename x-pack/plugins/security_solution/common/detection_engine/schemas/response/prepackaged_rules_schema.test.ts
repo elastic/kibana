@@ -86,6 +86,7 @@ describe('prepackaged_rules_schema', () => {
       timelines_installed: 0,
       timelines_updated: 0,
     };
+    // @ts-expect-error
     delete payload.rules_installed;
     const decoded = prePackagedRulesAndTimelinesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -104,6 +105,7 @@ describe('prepackaged_rules_schema', () => {
       timelines_installed: 0,
       timelines_updated: 0,
     };
+    // @ts-expect-error
     delete payload.rules_updated;
     const decoded = prePackagedRulesAndTimelinesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);

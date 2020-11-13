@@ -5,7 +5,7 @@
  */
 
 import { UMElasticsearchQueryFn } from '../adapters';
-import { GetMonitorAvailabilityParams } from '../../../common/runtime_types';
+import { GetMonitorAvailabilityParams, Ping } from '../../../common/runtime_types';
 
 export interface AvailabilityKey {
   monitorId: string;
@@ -14,19 +14,18 @@ export interface AvailabilityKey {
 
 export interface GetMonitorAvailabilityResult {
   monitorId: string;
-  location: string;
-  name: string;
-  url: string;
   up: number;
   down: number;
+  location: string;
   availabilityRatio: number | null;
+  monitorInfo: Ping;
 }
 
 export const formatBuckets = async (buckets: any[]): Promise<GetMonitorAvailabilityResult[]> =>
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   buckets.map(({ key, fields, up_sum, down_sum, ratio }: any) => ({
     ...key,
-    name: fields?.hits?.hits?.[0]?._source?.monitor.name,
-    url: fields?.hits?.hits?.[0]?._source?.url.full,
+    monitorInfo: fields?.hits?.hits?.[0]?._source,
     up: up_sum.value,
     down: down_sum.value,
     availabilityRatio: ratio.value,
@@ -48,6 +47,11 @@ export const getMonitorAvailability: UMElasticsearchQueryFn<
 
   const gte = `now-${range}${rangeUnit}`;
 
+  let parsedFilters: any;
+  if (filters) {
+    parsedFilters = JSON.parse(filters);
+  }
+
   do {
     const esParams: any = {
       index: dynamicSettings.heartbeatIndices,
@@ -63,6 +67,8 @@ export const getMonitorAvailability: UMElasticsearchQueryFn<
                   },
                 },
               },
+              // append user filters, if defined
+              ...(parsedFilters?.bool ? [parsedFilters] : []),
             ],
           },
         },
@@ -93,7 +99,6 @@ export const getMonitorAvailability: UMElasticsearchQueryFn<
               fields: {
                 top_hits: {
                   size: 1,
-                  _source: ['monitor.name', 'url.full'],
                   sort: [
                     {
                       '@timestamp': {
@@ -141,16 +146,11 @@ export const getMonitorAvailability: UMElasticsearchQueryFn<
       },
     };
 
-    if (filters) {
-      const parsedFilters = JSON.parse(filters);
-      esParams.body.query.bool = { ...esParams.body.query.bool, ...parsedFilters.bool };
-    }
-
     if (afterKey) {
       esParams.body.aggs.monitors.composite.after = afterKey;
     }
 
-    const result = await callES('search', esParams);
+    const { body: result } = await callES.search(esParams);
     afterKey = result?.aggregations?.monitors?.after_key;
 
     queryResults.push(formatBuckets(result?.aggregations?.monitors?.buckets || []));

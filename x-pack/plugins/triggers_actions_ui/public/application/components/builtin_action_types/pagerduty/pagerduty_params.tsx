@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { Fragment } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ActionParamsProps } from '../../../../types';
 import { PagerDutyActionParams } from '.././types';
@@ -94,6 +94,9 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
       ),
     },
   ];
+
+  const isDedupeKeyRequired = eventAction !== 'trigger';
+
   return (
     <Fragment>
       <EuiFlexGroup>
@@ -140,16 +143,50 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
           </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
+      <EuiSpacer size="m" />
+      <EuiFormRow
+        id="pagerDutySummary"
+        fullWidth
+        error={errors.summary}
+        isInvalid={errors.summary.length > 0 && summary !== undefined}
+        label={i18n.translate(
+          'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.summaryFieldLabel',
+          {
+            defaultMessage: 'Summary',
+          }
+        )}
+      >
+        <TextFieldWithMessageVariables
+          index={index}
+          editAction={editAction}
+          messageVariables={messageVariables}
+          paramsProperty={'summary'}
+          inputTargetValue={summary}
+          errors={errors.summary as string[]}
+        />
+      </EuiFormRow>
+      <EuiSpacer size="m" />
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiFormRow
             fullWidth
-            label={i18n.translate(
-              'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.dedupKeyTextFieldLabel',
-              {
-                defaultMessage: 'DedupKey (optional)',
-              }
-            )}
+            error={errors.dedupKey}
+            isInvalid={errors.dedupKey.length > 0}
+            label={
+              isDedupeKeyRequired
+                ? i18n.translate(
+                    'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.dedupKeyTextRequiredFieldLabel',
+                    {
+                      defaultMessage: 'DedupKey',
+                    }
+                  )
+                : i18n.translate(
+                    'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.dedupKeyTextFieldLabel',
+                    {
+                      defaultMessage: 'DedupKey (optional)',
+                    }
+                  )
+            }
           >
             <TextFieldWithMessageVariables
               index={index}
@@ -183,6 +220,7 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
           </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
+      <EuiSpacer size="m" />
       <EuiFormRow
         fullWidth
         label={i18n.translate(
@@ -232,27 +270,6 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
           messageVariables={messageVariables}
           paramsProperty={'source'}
           inputTargetValue={source}
-        />
-      </EuiFormRow>
-      <EuiFormRow
-        id="pagerDutySummary"
-        fullWidth
-        error={errors.summary}
-        isInvalid={errors.summary.length > 0 && summary !== undefined}
-        label={i18n.translate(
-          'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.summaryFieldLabel',
-          {
-            defaultMessage: 'Summary',
-          }
-        )}
-      >
-        <TextFieldWithMessageVariables
-          index={index}
-          editAction={editAction}
-          messageVariables={messageVariables}
-          paramsProperty={'summary'}
-          inputTargetValue={summary}
-          errors={errors.summary as string[]}
         />
       </EuiFormRow>
       <EuiFormRow

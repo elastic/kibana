@@ -20,7 +20,7 @@ import React from 'react';
 import { EuiFlexItem, EuiFlexGroup, EuiIcon } from '@elastic/eui';
 
 import { EuiText } from '@elastic/eui';
-import { EuiFlexGrid } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { withEmbeddableSubscription } from '../../../../src/plugins/embeddable/public';
 import { BookEmbeddableInput, BookEmbeddableOutput, BookEmbeddable } from './book_embeddable';
 
@@ -44,26 +44,32 @@ function wrapSearchTerms(task?: string, search?: string) {
   );
 }
 
-export function BookEmbeddableComponentInner({ input: { search }, output: { attributes } }: Props) {
+export function BookEmbeddableComponentInner({
+  input: { search },
+  output: { attributes },
+  embeddable,
+}: Props) {
   const title = attributes?.title;
   const author = attributes?.author;
   const readIt = attributes?.readIt;
 
+  const byReference = embeddable.inputIsRefType(embeddable.getInput());
+
   return (
     <EuiFlexGroup gutterSize="s">
       <EuiFlexItem>
-        <EuiFlexGrid columns={1} gutterSize="none">
+        <EuiFlexGroup direction="column" gutterSize="s">
           {title ? (
             <EuiFlexItem>
               <EuiText data-test-subj="bookEmbeddableTitle">
-                <h3>{wrapSearchTerms(title, search)},</h3>
+                <h3>{wrapSearchTerms(title, search)}</h3>
               </EuiText>
             </EuiFlexItem>
           ) : null}
           {author ? (
             <EuiFlexItem>
               <EuiText data-test-subj="bookEmbeddableAuthor">
-                <h5>-{wrapSearchTerms(author, search)}</h5>
+                -{wrapSearchTerms(author, search)}
               </EuiText>
             </EuiFlexItem>
           ) : null}
@@ -76,7 +82,21 @@ export function BookEmbeddableComponentInner({ input: { search }, output: { attr
               <EuiIcon type="cross" />
             </EuiFlexItem>
           )}
-        </EuiFlexGrid>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiText data-test-subj="bookEmbeddableAuthor">
+          <EuiIcon type={byReference ? 'folderCheck' : 'folderExclamation'} />{' '}
+          <span>
+            {byReference
+              ? i18n.translate('embeddableExamples.book.byReferenceLabel', {
+                  defaultMessage: 'Book is By Reference',
+                })
+              : i18n.translate('embeddableExamples.book.byValueLabel', {
+                  defaultMessage: 'Book is By Value',
+                })}
+          </span>
+        </EuiText>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

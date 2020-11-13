@@ -4,13 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 import typeDetect from 'type-detect';
 import { RunContext, TaskManagerSetupContract } from '../../task_manager/server';
 import { TaskRunnerFactory } from './task_runner';
-import { AlertType } from './types';
+import {
+  AlertType,
+  AlertTypeParams,
+  AlertTypeState,
+  AlertInstanceState,
+  AlertInstanceContext,
+} from './types';
 
 interface ConstructorOptions {
   taskManager: TaskManagerSetupContract;
@@ -59,7 +65,12 @@ export class AlertTypeRegistry {
     return this.alertTypes.has(id);
   }
 
-  public register(alertType: AlertType) {
+  public register<
+    Params extends AlertTypeParams = AlertTypeParams,
+    State extends AlertTypeState = AlertTypeState,
+    InstanceState extends AlertInstanceState = AlertInstanceState,
+    InstanceContext extends AlertInstanceContext = AlertInstanceContext
+  >(alertType: AlertType<Params, State, InstanceState, InstanceContext>) {
     if (this.has(alertType.id)) {
       throw new Error(
         i18n.translate('xpack.alerts.alertTypeRegistry.register.duplicateAlertTypeError', {
@@ -71,18 +82,22 @@ export class AlertTypeRegistry {
       );
     }
     alertType.actionVariables = normalizedActionVariables(alertType.actionVariables);
-    this.alertTypes.set(alertIdSchema.validate(alertType.id), { ...alertType });
+    this.alertTypes.set(alertIdSchema.validate(alertType.id), { ...alertType } as AlertType);
     this.taskManager.registerTaskDefinitions({
       [`alerting:${alertType.id}`]: {
         title: alertType.name,
-        type: `alerting:${alertType.id}`,
         createTaskRunner: (context: RunContext) =>
-          this.taskRunnerFactory.create(alertType, context),
+          this.taskRunnerFactory.create({ ...alertType } as AlertType, context),
       },
     });
   }
 
-  public get(id: string): AlertType {
+  public get<
+    Params extends AlertTypeParams = AlertTypeParams,
+    State extends AlertTypeState = AlertTypeState,
+    InstanceState extends AlertInstanceState = AlertInstanceState,
+    InstanceContext extends AlertInstanceContext = AlertInstanceContext
+  >(id: string): AlertType<Params, State, InstanceState, InstanceContext> {
     if (!this.has(id)) {
       throw Boom.badRequest(
         i18n.translate('xpack.alerts.alertTypeRegistry.get.missingAlertTypeError', {
@@ -93,7 +108,7 @@ export class AlertTypeRegistry {
         })
       );
     }
-    return this.alertTypes.get(id)!;
+    return this.alertTypes.get(id)! as AlertType<Params, State, InstanceState, InstanceContext>;
   }
 
   public list(): Set<RegistryAlertType> {

@@ -4,5 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { getViewAction } from './get_view_action';
+export { useViewAction } from './use_view_action';
 export { ViewButton } from './view_button';

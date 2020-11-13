@@ -220,7 +220,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThr
       <EuiFormLabel>
         <FormattedMessage
           defaultMessage="Select Index to query:"
-          id="xpack.triggersActionsUI.sections.alertAdd.selectIndex"
+          id="xpack.stackAlerts.threshold.ui.selectIndex"
         />
   ....
       </Fragment>
@@ -291,7 +291,7 @@ function getSomeNewAlertType() {
   return { ... } as AlertTypeModel;
 }
 
-triggers_actions_ui.alertTypeRegistry.register(getSomeNewAlertType());
+triggersActionsUi.alertTypeRegistry.register(getSomeNewAlertType());
 ```
 
 ## Create and register new alert type UI example
@@ -640,7 +640,7 @@ Follow the instructions bellow to embed the Create Alert flyout within any Kiban
 1. Add TriggersAndActionsUIPublicPluginSetup to Kibana plugin setup dependencies:
 
 ```
-triggers_actions_ui: TriggersAndActionsUIPublicPluginSetup;
+triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
 ```
 Then this dependency will be used to embed Create Alert flyout or register new alert/action type.
 
@@ -669,8 +669,8 @@ const [alertFlyoutVisible, setAlertFlyoutVisibility] = useState<boolean>(false);
 <AlertsContextProvider
   value={{
     http,
-    actionTypeRegistry: triggers_actions_ui.actionTypeRegistry,
-    alertTypeRegistry: triggers_actions_ui.alertTypeRegistry,
+    actionTypeRegistry: triggersActionsUi.actionTypeRegistry,
+    alertTypeRegistry: triggersActionsUi.alertTypeRegistry,
     toastNotifications: toasts,
     uiSettings,
     docLinks,
@@ -1030,7 +1030,7 @@ function getSomeNewActionType() {
   return { ... } as ActionTypeModel;
 }
 
-triggers_actions_ui.actionTypeRegistry.register(getSomeNewActionType());
+triggersActionsUi.actionTypeRegistry.register(getSomeNewActionType());
 ```
 
 ## Create and register new action type UI
@@ -1244,10 +1244,10 @@ import {
    TriggersAndActionsUIPublicPluginStart,
  } from '../../../../../x-pack/plugins/triggers_actions_ui/public';
 
-triggers_actions_ui: TriggersAndActionsUIPublicPluginSetup;
+triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
 ...
 
-triggers_actions_ui: TriggersAndActionsUIPublicPluginStart;
+triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
 ```
 Then this dependencies will be used to embed Actions form or register your own action type.
 
@@ -1265,8 +1265,8 @@ Then this dependencies will be used to embed Actions form or register your own a
  ];
 
  export const ComponentWithActionsForm: () => {
-   const { http, triggers_actions_ui, toastNotifications } = useKibana().services;
-   const actionTypeRegistry = triggers_actions_ui.actionTypeRegistry;
+   const { http, triggersActionsUi, notifications } = useKibana().services;
+   const actionTypeRegistry = triggersActionsUi.actionTypeRegistry;
    const initialAlert = ({
         name: 'test',
         params: {},
@@ -1307,7 +1307,7 @@ Then this dependencies will be used to embed Actions form or register your own a
           actionTypeRegistry={actionTypeRegistry}
           defaultActionMessage={'Alert [{{ctx.metadata.name}}] has exceeded the threshold'}
           actionTypes={ALOWED_BY_PLUGIN_ACTION_TYPES}
-          toastNotifications={toastNotifications}
+          toastNotifications={notifications.toasts}
           consumer={initialAlert.consumer}
         />
    );
@@ -1319,19 +1319,19 @@ ActionForm Props definition:
 interface ActionAccordionFormProps {
   actions: AlertAction[];
   defaultActionGroupId: string;
+  actionGroups?: ActionGroup[];
   setActionIdByIndex: (id: string, index: number) => void;
+  setActionGroupIdByIndex?: (group: string, index: number) => void;
   setAlertProperty: (actions: AlertAction[]) => void;
   setActionParamsProperty: (key: string, value: any, index: number) => void;
   http: HttpSetup;
-  actionTypeRegistry: TypeRegistry<ActionTypeModel>;
-  toastNotifications: Pick<
-    ToastsApi,
-    'get$' | 'add' | 'remove' | 'addSuccess' | 'addWarning' | 'addDanger' | 'addError'
-  >;
+  actionTypeRegistry: ActionTypeRegistryContract;
+  toastNotifications: ToastsSetup;
+  docLinks: DocLinksStart;
   actionTypes?: ActionType[];
   messageVariables?: ActionVariable[];
   defaultActionMessage?: string;
-  consumer: string;
+  capabilities: ApplicationStart['capabilities'];
 }
 
 ```
@@ -1339,17 +1339,20 @@ interface ActionAccordionFormProps {
 |Property|Description|
 |---|---|
 |actions|List of actions comes from alert.actions property.|
-|defaultActionGroupId|Default action group id to which each new action will belong to.|
+|defaultActionGroupId|Default action group id to which each new action will belong by default.|
+|actionGroups|Optional. List of action groups to which new action can be assigned. The RunWhen field is only displayed when these action groups are specified|
 |setActionIdByIndex|Function for changing action 'id' by the proper index in alert.actions array.|
+|setActionGroupIdByIndex|Function for changing action 'group' by the proper index in alert.actions array.|
 |setAlertProperty|Function for changing alert property 'actions'. Used when deleting action from the array to reset it.|
 |setActionParamsProperty|Function for changing action key/value property by index in alert.actions array.|
 |http|HttpSetup needed for executing API calls.|
 |actionTypeRegistry|Registry for action types.|
-|toastNotifications|Toast messages.|
+|toastNotifications|Toast messages  Plugin Setup Contract.|
+|docLinks|Documentation links Plugin Start Contract.|
 |actionTypes|Optional property, which allowes to define a list of available actions specific for a current plugin.|
 |actionTypes|Optional property, which allowes to define a list of variables for action 'message' property.|
 |defaultActionMessage|Optional property, which allowes to define a message value for action with 'message' property.|
-|consumer|Name of the plugin that creates an action.|
+|capabilities|Kibana core's Capabilities ApplicationStart['capabilities'].|
 
 
 AlertsContextProvider value options:
@@ -1393,10 +1396,10 @@ import {
    TriggersAndActionsUIPublicPluginStart,
  } from '../../../../../x-pack/plugins/triggers_actions_ui/public';
 
-triggers_actions_ui: TriggersAndActionsUIPublicPluginSetup;
+triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
 ...
 
-triggers_actions_ui: TriggersAndActionsUIPublicPluginStart;
+triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
 ```
 Then this dependency will be used to embed Create Connector flyout or register new action type.
 
@@ -1409,7 +1412,7 @@ import { ActionsConnectorsContextProvider, ConnectorAddFlyout } from '../../../.
 const [addFlyoutVisible, setAddFlyoutVisibility] = useState<boolean>(false);
 
 // load required dependancied
-const { http, triggers_actions_ui, toastNotifications, capabilities, docLinks } = useKibana().services;
+const { http, triggersActionsUi, notifications, application, docLinks } = useKibana().services;
 
 const connector = {
       secrets: {},
@@ -1438,9 +1441,9 @@ const connector = {
 <ActionsConnectorsContextProvider
         value={{
           http: http,
-          toastNotifications: toastNotifications,
-          actionTypeRegistry: triggers_actions_ui.actionTypeRegistry,
-          capabilities: capabilities,
+          toastNotifications: notifications.toasts,
+          actionTypeRegistry: triggersActionsUi.actionTypeRegistry,
+          capabilities: application.capabilities,
           docLinks,
         }}
       >
@@ -1510,10 +1513,10 @@ import {
    TriggersAndActionsUIPublicPluginStart,
  } from '../../../../../x-pack/plugins/triggers_actions_ui/public';
 
-triggers_actions_ui: TriggersAndActionsUIPublicPluginSetup;
+triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
 ...
 
-triggers_actions_ui: TriggersAndActionsUIPublicPluginStart;
+triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
 ```
 Then this dependency will be used to embed Edit Connector flyout.
 
@@ -1526,7 +1529,7 @@ import { ActionsConnectorsContextProvider, ConnectorEditFlyout } from '../../../
 const [editFlyoutVisible, setEditFlyoutVisibility] = useState<boolean>(false);
 
 // load required dependancied
-const { http, triggers_actions_ui, toastNotifications, capabilities } = useKibana().services;
+const { http, triggersActionsUi, notifications, application } = useKibana().services;
 
 // UI control item for open flyout
 <EuiButton
@@ -1545,9 +1548,9 @@ const { http, triggers_actions_ui, toastNotifications, capabilities } = useKiban
 <ActionsConnectorsContextProvider
         value={{
           http: http,
-          toastNotifications: toastNotifications,
-          actionTypeRegistry: triggers_actions_ui.actionTypeRegistry,
-          capabilities: capabilities,
+          toastNotifications: notifications.toasts,
+          actionTypeRegistry: triggersActionsUi.actionTypeRegistry,
+          capabilities: application.capabilities,
         }}
       >
         <ConnectorEditFlyout

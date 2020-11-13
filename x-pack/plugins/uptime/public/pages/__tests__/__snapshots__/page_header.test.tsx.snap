@@ -2,25 +2,106 @@
 
 exports[`PageHeader shallow renders extra links: page_header_with_extra_links 1`] = `
 Array [
-  .c0 {
-  white-space: nowrap;
+  @media only screen and (max-width:1024px) and (min-width:868px) {
+
 }
 
-@media only screen and (max-width:1024px) and (min-width:868px) {
-  .c1.c1.c1 .euiSuperDatePicker__flexWrapper {
+@media only screen and (max-width:880px) {
+
+}
+
+<div
+    class="euiCallOut euiCallOut--primary"
+  >
+    <div
+      class="euiCallOutHeader"
+    >
+      <span
+        aria-hidden="true"
+        class="euiCallOutHeader__icon"
+        data-euiicon-type="beaker"
+      />
+      <span
+        class="euiCallOutHeader__title"
+      >
+        Elastic Synthetics
+      </span>
+    </div>
+    <div
+      class="euiText euiText--small"
+    >
+      <p>
+        Uptime is now previewing support for scripted multi-step availability checks. This means you can interact with elements of a webpage and check the availability of an entire journey (such as making a purchase or signing into a system) instead of just a simple single page up/down check. Please click below to read more and, if you'd like to be one of the first to use these capabilities, you can download our preview synthetics agent and view your synthetic checks in Uptime.
+      </p>
+      <div
+        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+      >
+        <div
+          class="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          <a
+            class="euiButton euiButton--primary"
+            href="https://www.elastic.co/what-is/synthetic-monitoring"
+            rel=""
+          >
+            <span
+              class="euiButtonContent euiButton__content"
+            >
+              <span
+                class="euiButton__text"
+              >
+                Read announcement
+              </span>
+            </span>
+          </a>
+        </div>
+        <div
+          class="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          <button
+            class="euiButtonEmpty euiButtonEmpty--primary"
+            type="button"
+          >
+            <span
+              class="euiButtonContent euiButtonEmpty__content"
+            >
+              <span
+                class="euiButtonEmpty__text"
+              >
+                Dismiss
+              </span>
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>,
+  @media only screen and (max-width:1024px) and (min-width:868px) {
+
+}
+
+@media only screen and (max-width:880px) {
+
+}
+
+<div
+    class="euiSpacer euiSpacer--s"
+  />,
+  @media only screen and (max-width:1024px) and (min-width:868px) {
+  .c0.c0.c0 .euiSuperDatePicker__flexWrapper {
     width: 500px;
   }
 }
 
 @media only screen and (max-width:880px) {
-  .c1.c1.c1 {
+  .c0.c0.c0 {
     -webkit-box-flex: 1;
     -webkit-flex-grow: 1;
     -ms-flex-positive: 1;
     flex-grow: 1;
   }
 
-  .c1.c1.c1 .euiSuperDatePicker__flexWrapper {
+  .c0.c0.c0 .euiSuperDatePicker__flexWrapper {
     width: calc(100% + 8px);
   }
 }
@@ -32,7 +113,7 @@ Array [
       class="euiFlexItem"
     >
       <h1
-        class="c0 euiTitle euiTitle--medium"
+        class="euiTitle euiTitle--medium eui-textNoWrap"
       >
         TestingHeading
       </h1>
@@ -54,16 +135,15 @@ Array [
             >
               <button
                 aria-label="Open alert context menu"
-                class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--iconRight"
+                class="euiButtonEmpty euiButtonEmpty--primary"
                 data-test-subj="xpack.uptime.alertsPopover.toggleButton"
                 type="button"
               >
                 <span
-                  class="euiButtonEmpty__content"
+                  class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
                 >
-                  <div
-                    aria-hidden="true"
-                    class="euiButtonEmpty__icon"
+                  <span
+                    class="euiButtonContent__icon"
                     data-euiicon-type="arrowDown"
                   />
                   <span
@@ -86,11 +166,10 @@ Array [
             rel="noreferrer"
           >
             <span
-              class="euiButtonEmpty__content"
+              class="euiButtonContent euiButtonEmpty__content"
             >
-              <div
-                aria-hidden="true"
-                class="euiButtonEmpty__icon"
+              <span
+                class="euiButtonContent__icon"
                 data-euiicon-type="gear"
               />
               <span
@@ -109,11 +188,10 @@ Array [
             type="button"
           >
             <span
-              class="euiButtonEmpty__content"
+              class="euiButtonContent euiButtonEmpty__content"
             >
-              <div
-                aria-hidden="true"
-                class="euiButtonEmpty__icon"
+              <span
+                class="euiButtonContent__icon"
                 data-euiicon-type="plusInCircle"
               />
               <span
@@ -127,7 +205,7 @@ Array [
       </div>
     </div>
     <div
-      class="euiFlexItem euiFlexItem--flexGrowZero c1"
+      class="euiFlexItem euiFlexItem--flexGrowZero c0"
       style="flex-basis:485px"
     >
       <div
@@ -148,22 +226,21 @@ Array [
               >
                 <button
                   aria-label="Date quick select"
-                  class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--iconRight euiFormControlLayout__prepend"
+                  class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiFormControlLayout__prepend"
                   data-test-subj="superDatePickerToggleQuickMenuButton"
                   type="button"
                 >
                   <span
-                    class="euiButtonEmpty__content"
+                    class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
                   >
-                    <div
-                      aria-hidden="true"
-                      class="euiButtonEmpty__icon"
+                    <span
+                      class="euiButtonContent__icon"
                       data-euiicon-type="arrowDown"
                     />
                     <span
                       class="euiButtonEmpty__text euiQuickSelectPopover__buttonText"
                     >
-                      <div
+                      <span
                         data-euiicon-type="clock"
                       />
                     </span>
@@ -199,16 +276,15 @@ Array [
             class="euiToolTipAnchor"
           >
             <button
-              class="euiButton euiButton--primary euiSuperUpdateButton euiButton--fill"
+              class="euiButton euiButton--primary euiButton--fill euiSuperUpdateButton"
               data-test-subj="superDatePickerApplyTimeButton"
               type="button"
             >
               <span
-                class="euiButton__content"
+                class="euiButtonContent euiButton__content"
               >
-                <div
-                  aria-hidden="true"
-                  class="euiButton__icon"
+                <span
+                  class="euiButtonContent__icon"
                   data-euiicon-type="refresh"
                 />
                 <span
@@ -239,25 +315,106 @@ Array [
 
 exports[`PageHeader shallow renders with the date picker: page_header_with_date_picker 1`] = `
 Array [
-  .c0 {
-  white-space: nowrap;
+  @media only screen and (max-width:1024px) and (min-width:868px) {
+
 }
 
-@media only screen and (max-width:1024px) and (min-width:868px) {
-  .c1.c1.c1 .euiSuperDatePicker__flexWrapper {
+@media only screen and (max-width:880px) {
+
+}
+
+<div
+    class="euiCallOut euiCallOut--primary"
+  >
+    <div
+      class="euiCallOutHeader"
+    >
+      <span
+        aria-hidden="true"
+        class="euiCallOutHeader__icon"
+        data-euiicon-type="beaker"
+      />
+      <span
+        class="euiCallOutHeader__title"
+      >
+        Elastic Synthetics
+      </span>
+    </div>
+    <div
+      class="euiText euiText--small"
+    >
+      <p>
+        Uptime is now previewing support for scripted multi-step availability checks. This means you can interact with elements of a webpage and check the availability of an entire journey (such as making a purchase or signing into a system) instead of just a simple single page up/down check. Please click below to read more and, if you'd like to be one of the first to use these capabilities, you can download our preview synthetics agent and view your synthetic checks in Uptime.
+      </p>
+      <div
+        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+      >
+        <div
+          class="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          <a
+            class="euiButton euiButton--primary"
+            href="https://www.elastic.co/what-is/synthetic-monitoring"
+            rel=""
+          >
+            <span
+              class="euiButtonContent euiButton__content"
+            >
+              <span
+                class="euiButton__text"
+              >
+                Read announcement
+              </span>
+            </span>
+          </a>
+        </div>
+        <div
+          class="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          <button
+            class="euiButtonEmpty euiButtonEmpty--primary"
+            type="button"
+          >
+            <span
+              class="euiButtonContent euiButtonEmpty__content"
+            >
+              <span
+                class="euiButtonEmpty__text"
+              >
+                Dismiss
+              </span>
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>,
+  @media only screen and (max-width:1024px) and (min-width:868px) {
+
+}
+
+@media only screen and (max-width:880px) {
+
+}
+
+<div
+    class="euiSpacer euiSpacer--s"
+  />,
+  @media only screen and (max-width:1024px) and (min-width:868px) {
+  .c0.c0.c0 .euiSuperDatePicker__flexWrapper {
     width: 500px;
   }
 }
 
 @media only screen and (max-width:880px) {
-  .c1.c1.c1 {
+  .c0.c0.c0 {
     -webkit-box-flex: 1;
     -webkit-flex-grow: 1;
     -ms-flex-positive: 1;
     flex-grow: 1;
   }
 
-  .c1.c1.c1 .euiSuperDatePicker__flexWrapper {
+  .c0.c0.c0 .euiSuperDatePicker__flexWrapper {
     width: calc(100% + 8px);
   }
 }
@@ -269,16 +426,13 @@ Array [
       class="euiFlexItem"
     >
       <h1
-        class="c0 euiTitle euiTitle--medium"
+        class="euiTitle euiTitle--medium eui-textNoWrap"
       >
         TestingHeading
       </h1>
     </div>
     <div
-      class="euiFlexItem euiFlexItem--flexGrowZero"
-    />
-    <div
-      class="euiFlexItem euiFlexItem--flexGrowZero c1"
+      class="euiFlexItem euiFlexItem--flexGrowZero c0"
       style="flex-basis:485px"
     >
       <div
@@ -299,22 +453,21 @@ Array [
               >
                 <button
                   aria-label="Date quick select"
-                  class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--iconRight euiFormControlLayout__prepend"
+                  class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiFormControlLayout__prepend"
                   data-test-subj="superDatePickerToggleQuickMenuButton"
                   type="button"
                 >
                   <span
-                    class="euiButtonEmpty__content"
+                    class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
                   >
-                    <div
-                      aria-hidden="true"
-                      class="euiButtonEmpty__icon"
+                    <span
+                      class="euiButtonContent__icon"
                       data-euiicon-type="arrowDown"
                     />
                     <span
                       class="euiButtonEmpty__text euiQuickSelectPopover__buttonText"
                     >
-                      <div
+                      <span
                         data-euiicon-type="clock"
                       />
                     </span>
@@ -350,16 +503,15 @@ Array [
             class="euiToolTipAnchor"
           >
             <button
-              class="euiButton euiButton--primary euiSuperUpdateButton euiButton--fill"
+              class="euiButton euiButton--primary euiButton--fill euiSuperUpdateButton"
               data-test-subj="superDatePickerApplyTimeButton"
               type="button"
             >
               <span
-                class="euiButton__content"
+                class="euiButtonContent euiButton__content"
               >
-                <div
-                  aria-hidden="true"
-                  class="euiButton__icon"
+                <span
+                  class="euiButtonContent__icon"
                   data-euiicon-type="refresh"
                 />
                 <span
@@ -390,25 +542,87 @@ Array [
 
 exports[`PageHeader shallow renders without the date picker: page_header_no_date_picker 1`] = `
 Array [
-  .c0 {
-  white-space: nowrap;
-}
-
-<div
+  <div
+    class="euiCallOut euiCallOut--primary"
+  >
+    <div
+      class="euiCallOutHeader"
+    >
+      <span
+        aria-hidden="true"
+        class="euiCallOutHeader__icon"
+        data-euiicon-type="beaker"
+      />
+      <span
+        class="euiCallOutHeader__title"
+      >
+        Elastic Synthetics
+      </span>
+    </div>
+    <div
+      class="euiText euiText--small"
+    >
+      <p>
+        Uptime is now previewing support for scripted multi-step availability checks. This means you can interact with elements of a webpage and check the availability of an entire journey (such as making a purchase or signing into a system) instead of just a simple single page up/down check. Please click below to read more and, if you'd like to be one of the first to use these capabilities, you can download our preview synthetics agent and view your synthetic checks in Uptime.
+      </p>
+      <div
+        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+      >
+        <div
+          class="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          <a
+            class="euiButton euiButton--primary"
+            href="https://www.elastic.co/what-is/synthetic-monitoring"
+            rel=""
+          >
+            <span
+              class="euiButtonContent euiButton__content"
+            >
+              <span
+                class="euiButton__text"
+              >
+                Read announcement
+              </span>
+            </span>
+          </a>
+        </div>
+        <div
+          class="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          <button
+            class="euiButtonEmpty euiButtonEmpty--primary"
+            type="button"
+          >
+            <span
+              class="euiButtonContent euiButtonEmpty__content"
+            >
+              <span
+                class="euiButtonEmpty__text"
+              >
+                Dismiss
+              </span>
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>,
+  <div
+    class="euiSpacer euiSpacer--s"
+  />,
+  <div
     class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--wrap"
   >
     <div
       class="euiFlexItem"
     >
       <h1
-        class="c0 euiTitle euiTitle--medium"
+        class="euiTitle euiTitle--medium eui-textNoWrap"
       >
         TestingHeading
       </h1>
     </div>
-    <div
-      class="euiFlexItem euiFlexItem--flexGrowZero"
-    />
   </div>,
   <div
     class="euiSpacer euiSpacer--s"

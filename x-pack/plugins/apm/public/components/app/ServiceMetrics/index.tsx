@@ -7,6 +7,7 @@
 import {
   EuiFlexGrid,
   EuiFlexItem,
+  EuiPage,
   EuiPanel,
   EuiSpacer,
   EuiFlexGroup,
@@ -15,17 +16,21 @@ import React, { useMemo } from 'react';
 import { useServiceMetricCharts } from '../../../hooks/useServiceMetricCharts';
 import { MetricsChart } from '../../shared/charts/MetricsChart';
 import { useUrlParams } from '../../../hooks/useUrlParams';
-import { ChartsSyncContextProvider } from '../../../context/ChartsSyncContext';
-import { PROJECTION } from '../../../../common/projections/typings';
+import { LegacyChartsSyncContextProvider as ChartsSyncContextProvider } from '../../../context/charts_sync_context';
+import { Projection } from '../../../../common/projections';
 import { LocalUIFilters } from '../../shared/LocalUIFilters';
+import { SearchBar } from '../../shared/search_bar';
 
 interface ServiceMetricsProps {
   agentName: string;
+  serviceName: string;
 }
 
-export function ServiceMetrics({ agentName }: ServiceMetricsProps) {
+export function ServiceMetrics({
+  agentName,
+  serviceName,
+}: ServiceMetricsProps) {
   const { urlParams } = useUrlParams();
-  const { serviceName, serviceNodeName } = urlParams;
   const { data } = useServiceMetricCharts(urlParams, agentName);
   const { start, end } = urlParams;
 
@@ -34,36 +39,37 @@ export function ServiceMetrics({ agentName }: ServiceMetricsProps) {
       filterNames: ['host', 'containerId', 'podName', 'serviceVersion'],
       params: {
         serviceName,
-        serviceNodeName,
       },
-      projection: PROJECTION.METRICS,
+      projection: Projection.metrics,
       showCount: false,
     }),
-    [serviceName, serviceNodeName]
+    [serviceName]
   );
 
   return (
     <>
-      <EuiSpacer />
-      <EuiFlexGroup>
-        <EuiFlexItem grow={1}>
-          <LocalUIFilters {...localFiltersConfig} />
-        </EuiFlexItem>
-        <EuiFlexItem grow={7}>
-          <ChartsSyncContextProvider>
-            <EuiFlexGrid columns={2} gutterSize="s">
-              {data.charts.map((chart) => (
-                <EuiFlexItem key={chart.key}>
-                  <EuiPanel>
-                    <MetricsChart start={start} end={end} chart={chart} />
-                  </EuiPanel>
-                </EuiFlexItem>
-              ))}
-            </EuiFlexGrid>
-            <EuiSpacer size="xxl" />
-          </ChartsSyncContextProvider>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <SearchBar />
+      <EuiPage>
+        <EuiFlexGroup>
+          <EuiFlexItem grow={1}>
+            <LocalUIFilters {...localFiltersConfig} />
+          </EuiFlexItem>
+          <EuiFlexItem grow={7}>
+            <ChartsSyncContextProvider>
+              <EuiFlexGrid columns={2} gutterSize="s">
+                {data.charts.map((chart) => (
+                  <EuiFlexItem key={chart.key}>
+                    <EuiPanel>
+                      <MetricsChart start={start} end={end} chart={chart} />
+                    </EuiPanel>
+                  </EuiFlexItem>
+                ))}
+              </EuiFlexGrid>
+              <EuiSpacer size="xxl" />
+            </ChartsSyncContextProvider>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPage>
     </>
   );
 }

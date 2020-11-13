@@ -7,13 +7,32 @@ import { getRollupSearchStrategy } from './rollup_search_strategy';
 
 describe('Rollup Search Strategy', () => {
   let RollupSearchStrategy;
-  let RollupSearchRequest;
   let RollupSearchCapabilities;
   let callWithRequest;
   let rollupResolvedData;
 
-  const server = 'server';
-  const request = 'request';
+  const request = {
+    requestContext: {
+      core: {
+        elasticsearch: {
+          client: {
+            asCurrentUser: {
+              rollup: {
+                getRollupIndexCaps: jest.fn().mockImplementation(() => rollupResolvedData),
+              },
+            },
+          },
+        },
+      },
+    },
+  };
+  const getRollupService = jest.fn().mockImplementation(() => {
+    return {
+      callAsCurrentUser: async () => {
+        return rollupResolvedData;
+      },
+    };
+  });
   const indexPattern = 'indexPattern';
 
   beforeEach(() => {
@@ -33,19 +52,17 @@ describe('Rollup Search Strategy', () => {
       }
     }
 
-    RollupSearchRequest = jest.fn();
     RollupSearchCapabilities = jest.fn(() => 'capabilities');
-    callWithRequest = jest.fn().mockImplementation(() => rollupResolvedData);
 
     RollupSearchStrategy = getRollupSearchStrategy(
       AbstractSearchStrategy,
-      RollupSearchRequest,
-      RollupSearchCapabilities
+      RollupSearchCapabilities,
+      getRollupService
     );
   });
 
   test('should create instance of RollupSearchRequest', () => {
-    const rollupSearchStrategy = new RollupSearchStrategy(server);
+    const rollupSearchStrategy = new RollupSearchStrategy();
 
     expect(rollupSearchStrategy.name).toBe('rollup');
   });
@@ -55,7 +72,7 @@ describe('Rollup Search Strategy', () => {
     const rollupIndex = 'rollupIndex';
 
     beforeEach(() => {
-      rollupSearchStrategy = new RollupSearchStrategy(server);
+      rollupSearchStrategy = new RollupSearchStrategy();
       rollupSearchStrategy.getRollupData = jest.fn(() => ({
         [rollupIndex]: {
           rollup_jobs: [
@@ -104,7 +121,7 @@ describe('Rollup Search Strategy', () => {
     let rollupSearchStrategy;
 
     beforeEach(() => {
-      rollupSearchStrategy = new RollupSearchStrategy(server);
+      rollupSearchStrategy = new RollupSearchStrategy();
     });
 
     test('should return rollup data', async () => {
@@ -112,10 +129,7 @@ describe('Rollup Search Strategy', () => {
 
       const rollupData = await rollupSearchStrategy.getRollupData(request, indexPattern);
 
-      expect(callWithRequest).toHaveBeenCalledWith('rollup.rollupIndexCapabilities', {
-        indexPattern,
-      });
-      expect(rollupSearchStrategy.getCallWithRequestInstance).toHaveBeenCalledWith(request);
+      expect(getRollupService).toHaveBeenCalled();
       expect(rollupData).toBe('data');
     });
 
@@ -135,7 +149,7 @@ describe('Rollup Search Strategy', () => {
     const rollupIndex = 'rollupIndex';
 
     beforeEach(() => {
-      rollupSearchStrategy = new RollupSearchStrategy(server);
+      rollupSearchStrategy = new RollupSearchStrategy();
       fieldsCapabilities = {
         [rollupIndex]: {
           aggs: {

@@ -16,14 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { GenericFtrProviderContext } from '@kbn/test/types/ftr';
-import { FtrProviderContext } from 'test/functional/ftr_provider_context';
 
-import { KibanaSupertestProvider } from './supertest';
+import { FtrProviderContext } from '../../functional/ftr_provider_context';
 
-export const services = {
-  supertest: KibanaSupertestProvider,
-};
-
-export type PluginFunctionalProviderContext = FtrProviderContext &
-  GenericFtrProviderContext<typeof services, {}>;
+export type PluginFunctionalProviderContext = FtrProviderContext;

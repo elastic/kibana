@@ -17,12 +17,12 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { keys, last, mapValues, reduce, zipObject } from 'lodash';
-import { Executor, ExpressionExecOptions } from '../executor';
+import { Executor } from '../executor';
 import { createExecutionContainer, ExecutionContainer } from './container';
 import { createError } from '../util';
-import { Defer, now } from '../../../kibana_utils/common';
-import { toPromise } from '../../../data/common/utils/abort_utils';
+import { abortSignalToPromise, Defer, now } from '../../../kibana_utils/common';
 import { RequestAdapter, DataAdapter, Adapters } from '../../../inspector/common';
 import { isExpressionValueError, ExpressionValueError } from '../expression_types/specs/error';
 import {
@@ -38,6 +38,7 @@ import { getType, ExpressionValue } from '../expression_types';
 import { ArgumentType, ExpressionFunction } from '../expression_functions';
 import { getByAlias } from '../util/get_by_alias';
 import { ExecutionContract } from './execution_contract';
+import { ExpressionExecutionParams } from '../service';
 
 const createAbortErrorValue = () =>
   createError({
@@ -45,20 +46,11 @@ const createAbortErrorValue = () =>
     name: 'AbortError',
   });
 
-export interface ExecutionParams<
-  ExtraContext extends Record<string, unknown> = Record<string, unknown>
-> {
+export interface ExecutionParams {
   executor: Executor<any>;
   ast?: ExpressionAstExpression;
   expression?: string;
-  context?: ExtraContext;
-
-  /**
-   * Whether to execute expression in *debug mode*. In *debug mode* inputs and
-   * outputs as well as all resolved arguments and time it took to execute each
-   * function are saved and are available for introspection.
-   */
-  debug?: boolean;
+  params: ExpressionExecutionParams;
 }
 
 const createDefaultInspectorAdapters = (): DefaultInspectorAdapters => ({
@@ -67,11 +59,10 @@ const createDefaultInspectorAdapters = (): DefaultInspectorAdapters => ({
 });
 
 export class Execution<
-  ExtraContext extends Record<string, unknown> = Record<string, unknown>,
   Input = unknown,
   Output = unknown,
-  InspectorAdapters extends Adapters = ExtraContext['inspectorAdapters'] extends object
-    ? ExtraContext['inspectorAdapters']
+  InspectorAdapters extends Adapters = ExpressionExecutionParams['inspectorAdapters'] extends object
+    ? ExpressionExecutionParams['inspectorAdapters']
     : DefaultInspectorAdapters
 > {
   /**
@@ -91,7 +82,7 @@ export class Execution<
    * Execution context - object that allows to do side-effects. Context is passed
    * to every function.
    */
-  public readonly context: ExecutionContext<Input, InspectorAdapters> & ExtraContext;
+  public readonly context: ExecutionContext<InspectorAdapters>;
 
   /**
    * AbortController to cancel this Execution.
@@ -101,13 +92,13 @@ export class Execution<
   /**
    * Promise that rejects if/when abort controller sends "abort" signal.
    */
-  private readonly abortRejection = toPromise(this.abortController.signal);
+  private readonly abortRejection = abortSignalToPromise(this.abortController.signal);
 
   /**
    * Races a given promise against the "abort" event of `abortController`.
    */
   private race<T>(promise: Promise<T>): Promise<T> {
-    return Promise.race<T>([this.abortRejection, promise]);
+    return Promise.race<T>([this.abortRejection.promise, promise]);
   }
 
   /**
@@ -125,11 +116,10 @@ export class Execution<
    * can return to other plugins for their consumption.
    */
   public readonly contract: ExecutionContract<
-    ExtraContext,
     Input,
     Output,
     InspectorAdapters
-  > = new ExecutionContract<ExtraContext, Input, Output, InspectorAdapters>(this);
+  > = new ExecutionContract<Input, Output, InspectorAdapters>(this);
 
   public readonly expression: string;
 
@@ -141,17 +131,17 @@ export class Execution<
     return this.context.inspectorAdapters;
   }
 
-  constructor(public readonly params: ExecutionParams<ExtraContext>) {
-    const { executor } = params;
+  constructor(public readonly execution: ExecutionParams) {
+    const { executor } = execution;
 
-    if (!params.ast && !params.expression) {
+    if (!execution.ast && !execution.expression) {
       throw new TypeError('Execution params should contain at least .ast or .expression key.');
-    } else if (params.ast && params.expression) {
+    } else if (execution.ast && execution.expression) {
       throw new TypeError('Execution params cannot contain both .ast and .expression key.');
     }
 
-    this.expression = params.expression || formatExpression(params.ast!);
-    const ast = params.ast || parseExpression(this.expression);
+    this.expression = execution.expression || formatExpression(execution.ast!);
+    const ast = execution.ast || parseExpression(this.expression);
 
     this.state = createExecutionContainer<Output | ExpressionValueError>({
       ...executor.state.get(),
@@ -160,14 +150,13 @@ export class Execution<
     });
 
     this.context = {
-      getInitialInput: () => this.input,
-      variables: {},
+      getSearchContext: () => this.execution.params.searchContext || {},
+      getSearchSessionId: () => execution.params.searchSessionId,
+      variables: execution.params.variables || {},
       types: executor.getTypes(),
       abortSignal: this.abortController.signal,
-      ...(params.context || ({} as ExtraContext)),
-      inspectorAdapters: (params.context && params.context.inspectorAdapters
-        ? params.context.inspectorAdapters
-        : createDefaultInspectorAdapters()) as InspectorAdapters,
+      inspectorAdapters: execution.params.inspectorAdapters || createDefaultInspectorAdapters(),
+      ...(execution.params as any).extraContext,
     };
   }
 
@@ -199,14 +188,18 @@ export class Execution<
       else reject(error);
     });
 
-    this.firstResultFuture.promise.then(
-      (result) => {
-        this.state.transitions.setResult(result);
-      },
-      (error) => {
-        this.state.transitions.setError(error);
-      }
-    );
+    this.firstResultFuture.promise
+      .then(
+        (result) => {
+          this.state.transitions.setResult(result);
+        },
+        (error) => {
+          this.state.transitions.setError(error);
+        }
+      )
+      .finally(() => {
+        this.abortRejection.cleanup();
+      });
   }
 
   async invokeChain(chainArr: ExpressionAstFunction[], input: unknown): Promise<any> {
@@ -217,7 +210,27 @@ export class Execution<
       const fn = getByAlias(this.state.get().functions, fnName);
 
       if (!fn) {
-        return createError({ message: `Function ${fnName} could not be found.` });
+        return createError({
+          name: 'fn not found',
+          message: i18n.translate('expressions.execution.functionNotFound', {
+            defaultMessage: `Function {fnName} could not be found.`,
+            values: {
+              fnName,
+            },
+          }),
+        });
+      }
+
+      if (fn.disabled) {
+        return createError({
+          name: 'fn is disabled',
+          message: i18n.translate('expressions.execution.functionDisabled', {
+            defaultMessage: `Function {fnName} is disabled.`,
+            values: {
+              fnName,
+            },
+          }),
+        });
       }
 
       let args: Record<string, ExpressionValue> = {};
@@ -228,14 +241,14 @@ export class Execution<
         // actually have a `then` function which would be treated as a `Promise`.
         const { resolvedArgs } = await this.race(this.resolveArgs(fn, input, fnArgs));
         args = resolvedArgs;
-        timeStart = this.params.debug ? now() : 0;
+        timeStart = this.execution.params.debug ? now() : 0;
         const output = await this.race(this.invokeFunction(fn, input, resolvedArgs));
 
-        if (this.params.debug) {
+        if (this.execution.params.debug) {
           const timeEnd: number = now();
           (link as ExpressionAstFunction).debug = {
             success: true,
-            fn,
+            fn: fn.name,
             input,
             args: resolvedArgs,
             output,
@@ -246,14 +259,14 @@ export class Execution<
         if (getType(output) === 'error') return output;
         input = output;
       } catch (rawError) {
-        const timeEnd: number = this.params.debug ? now() : 0;
+        const timeEnd: number = this.execution.params.debug ? now() : 0;
         const error = createError(rawError) as ExpressionValueError;
         error.error.message = `[${fnName}] > ${error.error.message}`;
 
-        if (this.params.debug) {
+        if (this.execution.params.debug) {
           (link as ExpressionAstFunction).debug = {
             success: false,
-            fn,
+            fn: fn.name,
             input,
             args,
             error,
@@ -383,9 +396,7 @@ export class Execution<
     const resolveArgFns = mapValues(argAstsWithDefaults, (asts, argName) => {
       return asts.map((item: ExpressionAstExpression) => {
         return async (subInput = input) => {
-          const output = await this.interpret(item, subInput, {
-            debug: this.params.debug,
-          });
+          const output = await this.interpret(item, subInput);
           if (isExpressionValueError(output)) throw output.error;
           const casted = this.cast(output, argDefs[argName as any].types);
           return casted;
@@ -417,17 +428,12 @@ export class Execution<
     return { resolvedArgs };
   }
 
-  public async interpret<T>(
-    ast: ExpressionAstNode,
-    input: T,
-    options?: ExpressionExecOptions
-  ): Promise<unknown> {
+  public async interpret<T>(ast: ExpressionAstNode, input: T): Promise<unknown> {
     switch (getType(ast)) {
       case 'expression':
-        const execution = this.params.executor.createExecution(
+        const execution = this.execution.executor.createExecution(
           ast as ExpressionAstExpression,
-          this.context,
-          options
+          this.execution.params
         );
         execution.start(input);
         return await execution.result;

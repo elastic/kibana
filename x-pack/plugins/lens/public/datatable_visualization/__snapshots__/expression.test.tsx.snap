@@ -1,7 +1,9 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`datatable_expression DatatableComponent it renders the title and value 1`] = `
-<VisualizationContainer>
+<VisualizationContainer
+  reportTitle="My fanci metric chart"
+>
   <EuiBasicTable
     className="lnsDataTable"
     columns={

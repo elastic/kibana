@@ -16,42 +16,46 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { first } from 'rxjs/operators';
-import { SharedGlobalConfig, Logger } from 'kibana/server';
-import { SearchResponse } from 'elasticsearch';
 import { Observable } from 'rxjs';
-import { ISearchStrategy, getDefaultSearchParams, getTotalLoaded } from '..';
+import { first } from 'rxjs/operators';
+
+import type { Logger } from 'kibana/server';
+import type { ApiResponse } from '@elastic/elasticsearch';
+import type { SharedGlobalConfig } from 'kibana/server';
+
+import { doSearch, includeTotalLoaded, toKibanaSearchResponse, toSnakeCase } from '../../../common';
+import { trackSearchStatus } from './es_search_rxjs_utils';
+import { getDefaultSearchParams, getShardTimeout } from '../es_search';
+
+import type { ISearchStrategy } from '../types';
+import type { SearchUsage } from '../collectors/usage';
+import type { IEsRawSearchResponse } from '../../../common';
 
 export const esSearchStrategyProvider = (
   config$: Observable<SharedGlobalConfig>,
-  logger: Logger
-): ISearchStrategy => {
-  return {
-    search: async (context, request, options) => {
-      logger.info(`search ${JSON.stringify(request.params)}`);
+  logger: Logger,
+  usage?: SearchUsage
+): ISearchStrategy => ({
+  search: (request, { abortSignal }, { esClient, uiSettingsClient }) => {
+    // Only default index pattern type is supported here.
+    // See data_enhanced for other type support.
+    if (request.indexType) {
+      throw new Error(`Unsupported index pattern type ${request.indexType}`);
+    }
+
+    return doSearch<ApiResponse<IEsRawSearchResponse>>(async () => {
       const config = await config$.pipe(first()).toPromise();
-      const defaultParams = getDefaultSearchParams(config);
-
-      // Only default index pattern type is supported here.
-      // See data_enhanced for other type support.
-      if (!!request.indexType) {
-        throw new Error(`Unsupported index pattern type ${request.indexType}`);
-      }
-
-      const params = {
-        ...defaultParams,
+      const params = toSnakeCase({
+        ...(await getDefaultSearchParams(uiSettingsClient)),
+        ...getShardTimeout(config),
         ...request.params,
-      };
+      });
 
-      const rawResponse = (await context.core.elasticsearch.legacy.client.callAsCurrentUser(
-        'search',
-        params,
-        options
-      )) as SearchResponse<any>;
-
-      // The above query will either complete or timeout and throw an error.
-      // There is no progress indication on this api.
-      return { rawResponse, ...getTotalLoaded(rawResponse._shards) };
-    },
-  };
-};
+      return esClient.asCurrentUser.search(params);
+    }, abortSignal).pipe(
+      toKibanaSearchResponse(),
+      trackSearchStatus(logger, usage),
+      includeTotalLoaded()
+    );
+  },
+});

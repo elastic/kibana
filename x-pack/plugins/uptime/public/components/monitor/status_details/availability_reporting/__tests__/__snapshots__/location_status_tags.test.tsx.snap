@@ -1034,7 +1034,7 @@ exports[`LocationStatusTags component renders when there are many location 1`] =
               disabled=""
               type="button"
             >
-              <div
+              <span
                 aria-hidden="true"
                 class="euiButtonIcon__icon"
                 data-euiicon-type="arrowLeft"
@@ -1050,13 +1050,13 @@ exports[`LocationStatusTags component renders when there are many location 1`] =
                   aria-controls="generated-id"
                   aria-current="true"
                   aria-label="Page 1 of 2"
-                  class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall euiPaginationButton euiPaginationButton-isActive euiPaginationButton--hideOnMobile"
+                  class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall euiButtonEmpty-isDisabled euiPaginationButton euiPaginationButton-isActive euiPaginationButton--hideOnMobile"
                   data-test-subj="pagination-button-0"
                   disabled=""
                   type="button"
                 >
                   <span
-                    class="euiButtonEmpty__content"
+                    class="euiButtonContent euiButtonEmpty__content"
                   >
                     <span
                       class="euiButtonEmpty__text"
@@ -1078,7 +1078,7 @@ exports[`LocationStatusTags component renders when there are many location 1`] =
                   rel="noreferrer"
                 >
                   <span
-                    class="euiButtonEmpty__content"
+                    class="euiButtonContent euiButtonEmpty__content"
                   >
                     <span
                       class="euiButtonEmpty__text"
@@ -1097,7 +1097,7 @@ exports[`LocationStatusTags component renders when there are many location 1`] =
               href="#generated-id"
               rel="noreferrer"
             >
-              <div
+              <span
                 aria-hidden="true"
                 class="euiButtonIcon__icon"
                 data-euiicon-type="arrowRight"

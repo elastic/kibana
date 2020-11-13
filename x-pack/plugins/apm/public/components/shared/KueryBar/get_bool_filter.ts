@@ -4,34 +4,29 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ESFilter } from '../../../../typings/elasticsearch';
+import { ESFilter } from '../../../../../../typings/elasticsearch';
 import {
-  TRANSACTION_TYPE,
   ERROR_GROUP_ID,
   PROCESSOR_EVENT,
-  TRANSACTION_NAME,
   SERVICE_NAME,
+  TRANSACTION_NAME,
+  TRANSACTION_TYPE,
 } from '../../../../common/elasticsearch_fieldnames';
+import { UIProcessorEvent } from '../../../../common/processor_event';
 import { IUrlParams } from '../../../context/UrlParamsContext/types';
 
-export function getBoolFilter(urlParams: IUrlParams) {
-  const { start, end, serviceName, processorEvent } = urlParams;
-
-  if (!start || !end) {
-    throw new Error('Date range was not defined');
-  }
-
-  const boolFilter: ESFilter[] = [
-    {
-      range: {
-        '@timestamp': {
-          gte: new Date(start).getTime(),
-          lte: new Date(end).getTime(),
-          format: 'epoch_millis',
-        },
-      },
-    },
-  ];
+export function getBoolFilter({
+  groupId,
+  processorEvent,
+  serviceName,
+  urlParams,
+}: {
+  groupId?: string;
+  processorEvent?: UIProcessorEvent;
+  serviceName?: string;
+  urlParams: IUrlParams;
+}) {
+  const boolFilter: ESFilter[] = [];
 
   if (serviceName) {
     boolFilter.push({
@@ -63,9 +58,9 @@ export function getBoolFilter(urlParams: IUrlParams) {
         term: { [PROCESSOR_EVENT]: 'error' },
       });
 
-      if (urlParams.errorGroupId) {
+      if (groupId) {
         boolFilter.push({
-          term: { [ERROR_GROUP_ID]: urlParams.errorGroupId },
+          term: { [ERROR_GROUP_ID]: groupId },
         });
       }
       break;

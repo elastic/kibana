@@ -6,8 +6,10 @@
   "false_positives": [
     "The Build Engine is commonly used by Windows developers but use by non-engineers is unusual."
   ],
+  "from": "now-9m",
   "index": [
-    "winlogbeat-*"
+    "winlogbeat-*",
+    "logs-endpoint.events.*"
   ],
   "language": "kuery",
   "license": "Elastic License",
@@ -18,7 +20,10 @@
   "severity": "low",
   "tags": [
     "Elastic",
-    "Windows"
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Defense Evasion"
   ],
   "threat": [
     {
@@ -31,7 +36,7 @@
       "technique": [
         {
           "id": "T1127",
-          "name": "Trusted Developer Utilities",
+          "name": "Trusted Developer Utilities Proxy Execution",
           "reference": "https://attack.mitre.org/techniques/T1127/"
         }
       ]
@@ -46,12 +51,12 @@
       "technique": [
         {
           "id": "T1127",
-          "name": "Trusted Developer Utilities",
+          "name": "Trusted Developer Utilities Proxy Execution",
           "reference": "https://attack.mitre.org/techniques/T1127/"
         }
       ]
     }
   ],
   "type": "query",
-  "version": 2
+  "version": 4
 }

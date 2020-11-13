@@ -20,8 +20,7 @@ import { Client } from 'elasticsearch';
 import { get } from 'lodash';
 
 import { LegacyElasticsearchErrorHelpers } from './errors';
-import { GetAuthHeaders, isRealRequest, KibanaRequest } from '../../http';
-import { AuditorFactory } from '../../audit_trail';
+import { GetAuthHeaders, isKibanaRequest, isRealRequest } from '../../http';
 import { filterHeaders, ensureRawRequest } from '../../http/router';
 import { Logger } from '../../logging';
 import { ScopeableRequest } from '../types';
@@ -88,6 +87,7 @@ const callAPI = async (
  *
  * See {@link LegacyClusterClient}.
  *
+ * @deprecated Use {@link IClusterClient}.
  * @public
  */
 export type ILegacyClusterClient = Pick<LegacyClusterClient, 'callAsInternalUser' | 'asScoped'>;
@@ -98,7 +98,7 @@ export type ILegacyClusterClient = Pick<LegacyClusterClient, 'callAsInternalUser
  * the actual user that is derived from the request headers (via `asScoped(...)`).
  *
  * See {@link LegacyClusterClient}.
- *
+ * @deprecated Use {@link ICustomClusterClient}.
  * @public
  */
 export type ILegacyCustomClusterClient = Pick<
@@ -108,6 +108,7 @@ export type ILegacyCustomClusterClient = Pick<
 
 /**
  * {@inheritDoc IClusterClient}
+ * @deprecated Use {@link IClusterClient}.
  * @public
  */
 export class LegacyClusterClient implements ILegacyClusterClient {
@@ -130,7 +131,6 @@ export class LegacyClusterClient implements ILegacyClusterClient {
   constructor(
     private readonly config: LegacyElasticsearchClientConfig,
     private readonly log: Logger,
-    private readonly getAuditorFactory: () => AuditorFactory,
     private readonly getAuthHeaders: GetAuthHeaders = noop
   ) {
     this.client = new Client(parseElasticsearchClientConfig(config, log));
@@ -205,19 +205,11 @@ export class LegacyClusterClient implements ILegacyClusterClient {
     return new LegacyScopedClusterClient(
       this.callAsInternalUser,
       this.callAsCurrentUser,
-      filterHeaders(this.getHeaders(request), this.config.requestHeadersWhitelist),
-      this.getScopedAuditor(request)
+      filterHeaders(this.getHeaders(request), [
+        'x-opaque-id',
+        ...this.config.requestHeadersWhitelist,
+      ])
     );
-  }
-
-  private getScopedAuditor(request?: ScopeableRequest) {
-    // TODO: support alternative credential owners from outside of Request context in #39430
-    if (request && isRealRequest(request)) {
-      const kibanaRequest =
-        request instanceof KibanaRequest ? request : KibanaRequest.from(request);
-      const auditorFactory = this.getAuditorFactory();
-      return auditorFactory.asScoped(kibanaRequest);
-    }
   }
 
   /**
@@ -254,8 +246,9 @@ export class LegacyClusterClient implements ILegacyClusterClient {
       return request && request.headers ? request.headers : {};
     }
     const authHeaders = this.getAuthHeaders(request);
-    const headers = ensureRawRequest(request).headers;
+    const requestHeaders = ensureRawRequest(request).headers;
+    const requestIdHeaders = isKibanaRequest(request) ? { 'x-opaque-id': request.id } : {};
 
-    return { ...headers, ...authHeaders };
+    return { ...requestHeaders, ...requestIdHeaders, ...authHeaders };
   }
 }

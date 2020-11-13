@@ -6,10 +6,10 @@
 
 import { inflateSync } from 'zlib';
 import { savedObjectsClientMock } from 'src/core/server/mocks';
-import { createPackageConfigServiceMock } from '../../../../../../ingest_manager/server/mocks';
+import { createPackagePolicyServiceMock } from '../../../../../../fleet/server/mocks';
 import { ArtifactConstants, ManifestConstants, isCompleteArtifact } from '../../../lib/artifacts';
 
-import { getManifestManagerMock } from './manifest_manager.mock';
+import { getManifestManagerMock, ManifestManagerMockType } from './manifest_manager.mock';
 import LRU from 'lru-cache';
 
 describe('manifest_manager', () => {
@@ -26,7 +26,37 @@ describe('manifest_manager', () => {
         },
         {
           id:
+            'endpoint-trustlist-macos-v1-96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3',
+          type: 'delete',
+        },
+        {
+          id:
+            'endpoint-trustlist-windows-v1-96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3',
+          type: 'delete',
+        },
+        {
+          id:
+            'endpoint-trustlist-linux-v1-96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3',
+          type: 'delete',
+        },
+        {
+          id:
             'endpoint-exceptionlist-macos-v1-0a5a2013a79f9e60682472284a1be45ab1ff68b9b43426d00d665016612c15c8',
+          type: 'add',
+        },
+        {
+          id:
+            'endpoint-trustlist-macos-v1-1a8295e6ccb93022c6f5ceb8997b29f2912389b3b38f52a8f5a2ff7b0154b1bc',
+          type: 'add',
+        },
+        {
+          id:
+            'endpoint-trustlist-windows-v1-1a8295e6ccb93022c6f5ceb8997b29f2912389b3b38f52a8f5a2ff7b0154b1bc',
+          type: 'add',
+        },
+        {
+          id:
+            'endpoint-trustlist-linux-v1-1a8295e6ccb93022c6f5ceb8997b29f2912389b3b38f52a8f5a2ff7b0154b1bc',
           type: 'add',
         },
       ]);
@@ -46,14 +76,51 @@ describe('manifest_manager', () => {
         },
         {
           id:
+            'endpoint-trustlist-macos-v1-96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3',
+          type: 'delete',
+        },
+        {
+          id:
+            'endpoint-trustlist-windows-v1-96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3',
+          type: 'delete',
+        },
+        {
+          id:
+            'endpoint-trustlist-linux-v1-96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3',
+          type: 'delete',
+        },
+        {
+          id:
             'endpoint-exceptionlist-macos-v1-0a5a2013a79f9e60682472284a1be45ab1ff68b9b43426d00d665016612c15c8',
+          type: 'add',
+        },
+        {
+          id:
+            'endpoint-trustlist-macos-v1-1a8295e6ccb93022c6f5ceb8997b29f2912389b3b38f52a8f5a2ff7b0154b1bc',
+          type: 'add',
+        },
+        {
+          id:
+            'endpoint-trustlist-windows-v1-1a8295e6ccb93022c6f5ceb8997b29f2912389b3b38f52a8f5a2ff7b0154b1bc',
+          type: 'add',
+        },
+        {
+          id:
+            'endpoint-trustlist-linux-v1-1a8295e6ccb93022c6f5ceb8997b29f2912389b3b38f52a8f5a2ff7b0154b1bc',
           type: 'add',
         },
       ]);
 
-      const newArtifactId = diffs[1].id;
-      await newManifest.compressArtifact(newArtifactId);
-      const artifact = newManifest.getArtifact(newArtifactId)!;
+      const firstNewArtifactId = diffs.find((diff) => diff.type === 'add')!.id;
+
+      // Compress all `add` artifacts
+      for (const artifactDiff of diffs) {
+        if (artifactDiff.type === 'add') {
+          await newManifest.compressArtifact(artifactDiff.id);
+        }
+      }
+
+      const artifact = newManifest.getArtifact(firstNewArtifactId)!;
 
       if (isCompleteArtifact(artifact)) {
         await manifestManager.pushArtifacts([artifact]); // caches the artifact
@@ -61,7 +128,7 @@ describe('manifest_manager', () => {
         throw new Error('Artifact is missing a body.');
       }
 
-      const entry = JSON.parse(inflateSync(cache.get(newArtifactId)! as Buffer).toString());
+      const entry = JSON.parse(inflateSync(cache.get(firstNewArtifactId)! as Buffer).toString());
       expect(entry).toEqual({
         entries: [
           {
@@ -92,8 +159,8 @@ describe('manifest_manager', () => {
     });
 
     test('ManifestManager cannot dispatch incomplete (uncompressed) artifact', async () => {
-      const packageConfigService = createPackageConfigServiceMock();
-      const manifestManager = getManifestManagerMock({ packageConfigService });
+      const packagePolicyService = createPackagePolicyServiceMock();
+      const manifestManager = getManifestManagerMock({ packagePolicyService });
       const oldManifest = await manifestManager.getLastComputedManifest();
       const newManifest = await manifestManager.buildNewManifest(oldManifest!);
       const dispatchErrors = await manifestManager.tryDispatch(newManifest);
@@ -102,13 +169,17 @@ describe('manifest_manager', () => {
     });
 
     test('ManifestManager can dispatch manifest', async () => {
-      const packageConfigService = createPackageConfigServiceMock();
-      const manifestManager = getManifestManagerMock({ packageConfigService });
+      const packagePolicyService = createPackagePolicyServiceMock();
+      const manifestManager = getManifestManagerMock({ packagePolicyService });
       const oldManifest = await manifestManager.getLastComputedManifest();
       const newManifest = await manifestManager.buildNewManifest(oldManifest!);
       const diffs = newManifest.diff(oldManifest!);
-      const newArtifactId = diffs[1].id;
-      await newManifest.compressArtifact(newArtifactId);
+
+      for (const artifactDiff of diffs) {
+        if (artifactDiff.type === 'add') {
+          await newManifest.compressArtifact(artifactDiff.id);
+        }
+      }
 
       newManifest.bumpSemanticVersion();
 
@@ -117,10 +188,10 @@ describe('manifest_manager', () => {
       expect(dispatchErrors).toEqual([]);
 
       // 2 policies updated... 1 is already up-to-date
-      expect(packageConfigService.update.mock.calls.length).toEqual(2);
+      expect(packagePolicyService.update.mock.calls.length).toEqual(2);
 
       expect(
-        packageConfigService.update.mock.calls[0][2].inputs[0].config!.artifact_manifest.value
+        packagePolicyService.update.mock.calls[0][2].inputs[0].config!.artifact_manifest.value
       ).toEqual({
         manifest_version: '1.0.1',
         schema_version: 'v1',
@@ -145,22 +216,56 @@ describe('manifest_manager', () => {
             relative_url:
               '/api/endpoint/artifacts/download/endpoint-exceptionlist-windows-v1/96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3',
           },
+          'endpoint-trustlist-linux-v1': {
+            compression_algorithm: 'zlib',
+            decoded_sha256: '1a8295e6ccb93022c6f5ceb8997b29f2912389b3b38f52a8f5a2ff7b0154b1bc',
+            decoded_size: 287,
+            encoded_sha256: 'c3dec543df1177561ab2aa74a37997ea3c1d748d532a597884f5a5c16670d56c',
+            encoded_size: 133,
+            encryption_algorithm: 'none',
+            relative_url:
+              '/api/endpoint/artifacts/download/endpoint-trustlist-linux-v1/1a8295e6ccb93022c6f5ceb8997b29f2912389b3b38f52a8f5a2ff7b0154b1bc',
+          },
+          'endpoint-trustlist-macos-v1': {
+            compression_algorithm: 'zlib',
+            decoded_sha256: '1a8295e6ccb93022c6f5ceb8997b29f2912389b3b38f52a8f5a2ff7b0154b1bc',
+            decoded_size: 287,
+            encoded_sha256: 'c3dec543df1177561ab2aa74a37997ea3c1d748d532a597884f5a5c16670d56c',
+            encoded_size: 133,
+            encryption_algorithm: 'none',
+            relative_url:
+              '/api/endpoint/artifacts/download/endpoint-trustlist-macos-v1/1a8295e6ccb93022c6f5ceb8997b29f2912389b3b38f52a8f5a2ff7b0154b1bc',
+          },
+          'endpoint-trustlist-windows-v1': {
+            compression_algorithm: 'zlib',
+            decoded_sha256: '1a8295e6ccb93022c6f5ceb8997b29f2912389b3b38f52a8f5a2ff7b0154b1bc',
+            decoded_size: 287,
+            encoded_sha256: 'c3dec543df1177561ab2aa74a37997ea3c1d748d532a597884f5a5c16670d56c',
+            encoded_size: 133,
+            encryption_algorithm: 'none',
+            relative_url:
+              '/api/endpoint/artifacts/download/endpoint-trustlist-windows-v1/1a8295e6ccb93022c6f5ceb8997b29f2912389b3b38f52a8f5a2ff7b0154b1bc',
+          },
         },
       });
     });
 
     test('ManifestManager fails to dispatch on conflict', async () => {
-      const packageConfigService = createPackageConfigServiceMock();
-      const manifestManager = getManifestManagerMock({ packageConfigService });
+      const packagePolicyService = createPackagePolicyServiceMock();
+      const manifestManager = getManifestManagerMock({ packagePolicyService });
       const oldManifest = await manifestManager.getLastComputedManifest();
       const newManifest = await manifestManager.buildNewManifest(oldManifest!);
       const diffs = newManifest.diff(oldManifest!);
-      const newArtifactId = diffs[1].id;
-      await newManifest.compressArtifact(newArtifactId);
+
+      for (const artifactDiff of diffs) {
+        if (artifactDiff.type === 'add') {
+          await newManifest.compressArtifact(artifactDiff.id);
+        }
+      }
 
       newManifest.bumpSemanticVersion();
 
-      packageConfigService.update.mockRejectedValueOnce({ status: 409 });
+      packagePolicyService.update.mockRejectedValueOnce({ status: 409 });
       const dispatchErrors = await manifestManager.tryDispatch(newManifest);
       expect(dispatchErrors).toEqual([{ status: 409 }]);
     });
@@ -174,11 +279,17 @@ describe('manifest_manager', () => {
       const oldManifest = await manifestManager.getLastComputedManifest();
       const newManifest = await manifestManager.buildNewManifest(oldManifest!);
       const diffs = newManifest.diff(oldManifest!);
-      const oldArtifactId = diffs[0].id;
-      const newArtifactId = diffs[1].id;
-      await newManifest.compressArtifact(newArtifactId);
+      const firstOldArtifactId = diffs.find((diff) => diff.type === 'delete')!.id;
+      const FirstNewArtifactId = diffs.find((diff) => diff.type === 'add')!.id;
 
-      const artifact = newManifest.getArtifact(newArtifactId)!;
+      // Compress all new artifacts
+      for (const artifactDiff of diffs) {
+        if (artifactDiff.type === 'add') {
+          await newManifest.compressArtifact(artifactDiff.id);
+        }
+      }
+
+      const artifact = newManifest.getArtifact(FirstNewArtifactId)!;
       if (isCompleteArtifact(artifact)) {
         await manifestManager.pushArtifacts([artifact]);
       } else {
@@ -186,7 +297,7 @@ describe('manifest_manager', () => {
       }
 
       await manifestManager.commit(newManifest);
-      await manifestManager.deleteArtifacts([oldArtifactId]);
+      await manifestManager.deleteArtifacts([firstOldArtifactId]);
 
       // created new artifact
       expect(savedObjectsClient.create.mock.calls[0][0]).toEqual(
@@ -201,8 +312,17 @@ describe('manifest_manager', () => {
       // deleted old artifact
       expect(savedObjectsClient.delete).toHaveBeenCalledWith(
         ArtifactConstants.SAVED_OBJECT_TYPE,
-        oldArtifactId
+        firstOldArtifactId
       );
+    });
+
+    test('ManifestManager handles promise rejections when building artifacts', async () => {
+      // This test won't fail on an unhandled promise rejection, but it will cause
+      // an UnhandledPromiseRejectionWarning to be printed.
+      const manifestManager = getManifestManagerMock({
+        mockType: ManifestManagerMockType.ListClientPromiseRejection,
+      });
+      await expect(manifestManager.buildNewManifest()).rejects.toThrow();
     });
   });
 });

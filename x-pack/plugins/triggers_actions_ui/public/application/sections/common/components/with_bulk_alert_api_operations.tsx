@@ -6,7 +6,13 @@
 
 import React from 'react';
 
-import { Alert, AlertType, AlertTaskState, AlertingFrameworkHealth } from '../../../../types';
+import {
+  Alert,
+  AlertType,
+  AlertTaskState,
+  AlertInstanceSummary,
+  AlertingFrameworkHealth,
+} from '../../../../types';
 import { useAppDependencies } from '../../../app_context';
 import {
   deleteAlerts,
@@ -22,6 +28,7 @@ import {
   unmuteAlertInstance,
   loadAlert,
   loadAlertState,
+  loadAlertInstanceSummary,
   loadAlertTypes,
   health,
 } from '../../../lib/alert_api';
@@ -51,6 +58,7 @@ export interface ComponentOpts {
   }>;
   loadAlert: (id: Alert['id']) => Promise<Alert>;
   loadAlertState: (id: Alert['id']) => Promise<AlertTaskState>;
+  loadAlertInstanceSummary: (id: Alert['id']) => Promise<AlertInstanceSummary>;
   loadAlertTypes: () => Promise<AlertType[]>;
   getHealth: () => Promise<AlertingFrameworkHealth>;
 }
@@ -119,6 +127,9 @@ export function withBulkAlertOperations<T>(
         deleteAlert={async (alert: Alert) => deleteAlerts({ http, ids: [alert.id] })}
         loadAlert={async (alertId: Alert['id']) => loadAlert({ http, alertId })}
         loadAlertState={async (alertId: Alert['id']) => loadAlertState({ http, alertId })}
+        loadAlertInstanceSummary={async (alertId: Alert['id']) =>
+          loadAlertInstanceSummary({ http, alertId })
+        }
         loadAlertTypes={async () => loadAlertTypes({ http })}
         getHealth={async () => health({ http })}
       />

@@ -97,9 +97,7 @@ export function VisualizeEditorPageProvider({ getService, getPageObjects }: FtrP
     }
 
     public async clickSplitDirection(direction: string) {
-      const radioBtn = await find.byCssSelector(
-        `[data-test-subj="visEditorSplitBy"][title="${direction}"]`
-      );
+      const radioBtn = await find.byCssSelector(`[data-test-subj="visEditorSplitBy-${direction}"]`);
       await radioBtn.click();
     }
 
@@ -334,10 +332,7 @@ export function VisualizeEditorPageProvider({ getService, getPageObjects }: FtrP
     }
 
     public async toggleAutoMode() {
-      // this is a temporary solution, should be replaced with initial after fixing the EuiToggleButton
-      // passing the data-test-subj attribute to a checkbox
-      await find.clickByCssSelector('.visEditorSidebar__controls input[type="checkbox"]');
-      // await testSubjects.click('visualizeEditorAutoButton');
+      await testSubjects.click('visualizeEditorAutoButton');
     }
 
     public async isApplyEnabled() {
@@ -445,6 +440,15 @@ export function VisualizeEditorPageProvider({ getService, getPageObjects }: FtrP
       } else if (type === 'custom') {
         await comboBox.setCustom('visEditorInterval', newValue);
       } else {
+        if (type === 'numeric') {
+          const autoMode = await testSubjects.getAttribute(
+            `visEditorIntervalSwitch${aggNth}`,
+            'aria-checked'
+          );
+          if (autoMode === 'true') {
+            await testSubjects.click(`visEditorIntervalSwitch${aggNth}`);
+          }
+        }
         if (append) {
           await testSubjects.append(`visEditorInterval${aggNth}`, String(newValue));
         } else {

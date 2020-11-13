@@ -5,7 +5,9 @@
  */
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
-import { RENDER_AS, SORT_ORDER, SCALING_TYPES } from '../constants';
+import { Query } from 'src/plugins/data/public';
+import { SortDirection } from 'src/plugins/data/common/search';
+import { RENDER_AS, SCALING_TYPES } from '../constants';
 import { MapExtent, MapQuery } from './map_descriptor';
 import { Filter, TimeRange } from '../../../../../src/plugins/data/common';
 
@@ -18,12 +20,11 @@ export type MapFilters = {
   refreshTimerLastTriggeredAt?: string;
   timeFilters: TimeRange;
   zoom: number;
-  geogridPrecision?: number;
 };
 
 type ESSearchSourceSyncMeta = {
   sortField: string;
-  sortOrder: SORT_ORDER;
+  sortOrder: SortDirection;
   scalingType: SCALING_TYPES;
   topHitsSplitField: string;
   topHitsSize: number;
@@ -37,17 +38,23 @@ export type VectorSourceSyncMeta = ESSearchSourceSyncMeta | ESGeoGridSourceSyncM
 
 export type VectorSourceRequestMeta = MapFilters & {
   applyGlobalQuery: boolean;
+  applyGlobalTime: boolean;
   fieldNames: string[];
   geogridPrecision?: number;
-  sourceQuery: MapQuery;
+  sourceQuery?: MapQuery;
   sourceMeta: VectorSourceSyncMeta;
 };
+
+export type VectorJoinSourceRequestMeta = Omit<
+  VectorSourceRequestMeta,
+  'geogridPrecision' | 'sourceMeta'
+> & { sourceQuery?: Query };
 
 export type VectorStyleRequestMeta = MapFilters & {
   dynamicStyleFields: string[];
   isTimeAware: boolean;
   sourceQuery: MapQuery;
-  timeFilters: unknown;
+  timeFilters: TimeRange;
 };
 
 export type ESSearchSourceResponseMeta = {
@@ -60,9 +67,12 @@ export type ESSearchSourceResponseMeta = {
 };
 
 // Partial because objects are justified downstream in constructors
-export type DataMeta = Partial<VectorSourceRequestMeta> &
-  Partial<VectorStyleRequestMeta> &
-  Partial<ESSearchSourceResponseMeta>;
+export type DataMeta = Partial<
+  VectorSourceRequestMeta &
+    VectorJoinSourceRequestMeta &
+    VectorStyleRequestMeta &
+    ESSearchSourceResponseMeta
+>;
 
 type NumericalStyleFieldData = {
   avg: number;

@@ -20,14 +20,16 @@
 export interface TemplateContext {
   artifactTarball: string;
   imageFlavor: string;
-  versionTag: string;
+  version: string;
   license: string;
   artifactsDir: string;
   imageTag: string;
   dockerBuildDir: string;
-  dockerOutputDir: string;
+  dockerTargetFilename: string;
   baseOSImage: string;
   ubiImageFlavor: string;
   dockerBuildDate: string;
   usePublicArtifact?: boolean;
+  ubi: boolean;
+  revision: string;
 }

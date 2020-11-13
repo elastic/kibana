@@ -38,7 +38,7 @@ jest.mock('fs', () => ({
 import sinon from 'sinon';
 import { Keystore } from '../legacy/server/keystore';
 import { list } from './list';
-import Logger from '../cli_plugin/lib/logger';
+import { Logger } from '../cli_plugin/lib/logger';
 
 describe('Kibana keystore', () => {
   describe('list', () => {

@@ -5,7 +5,7 @@
  */
 import { TypeRegistry } from '../../../type_registry';
 import { registerBuiltInActionTypes } from '.././index';
-import { ActionTypeModel, ActionConnector } from '../../../../types';
+import { ActionTypeModel, UserConfiguredActionConnector } from '../../../../types';
 
 const ACTION_TYPE_ID = '.server-log';
 let actionTypeModel: ActionTypeModel;
@@ -28,13 +28,14 @@ describe('actionTypeRegistry.get() works', () => {
 
 describe('server-log connector validation', () => {
   test('connector validation succeeds when connector config is valid', () => {
-    const actionConnector = {
+    const actionConnector: UserConfiguredActionConnector<{}, {}> = {
       secrets: {},
       id: 'test',
       actionTypeId: '.server-log',
       name: 'server-log',
       config: {},
-    } as ActionConnector;
+      isPreconfigured: false,
+    };
 
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
       errors: {},

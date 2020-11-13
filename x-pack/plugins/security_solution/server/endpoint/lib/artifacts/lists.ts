@@ -28,19 +28,20 @@ import {
   internalArtifactCompleteSchema,
   InternalArtifactCompleteSchema,
 } from '../../schemas';
-import { ArtifactConstants } from './common';
+import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '../../../../../lists/common/constants';
 
 export async function buildArtifact(
   exceptions: WrappedTranslatedExceptionList,
   os: string,
-  schemaVersion: string
+  schemaVersion: string,
+  name: string
 ): Promise<InternalArtifactCompleteSchema> {
   const exceptionsBuffer = Buffer.from(JSON.stringify(exceptions));
   const sha256 = createHash('sha256').update(exceptionsBuffer.toString()).digest('hex');
 
   // Keep compression info empty in case its a duplicate. Lazily compress before committing if needed.
   return {
-    identifier: `${ArtifactConstants.GLOBAL_ALLOWLIST_NAME}-${os}-${schemaVersion}`,
+    identifier: `${name}-${os}-${schemaVersion}`,
     compressionAlgorithm: 'none',
     encryptionAlgorithm: 'none',
     decodedSha256: sha256,
@@ -76,7 +77,8 @@ export function isCompressed(artifact: InternalArtifactSchema) {
 export async function getFullEndpointExceptionList(
   eClient: ExceptionListClient,
   os: string,
-  schemaVersion: string
+  schemaVersion: string,
+  listId: typeof ENDPOINT_LIST_ID | typeof ENDPOINT_TRUSTED_APPS_LIST_ID
 ): Promise<WrappedTranslatedExceptionList> {
   const exceptions: WrappedTranslatedExceptionList = { entries: [] };
   let page = 1;
@@ -84,9 +86,9 @@ export async function getFullEndpointExceptionList(
 
   while (paging) {
     const response = await eClient.findExceptionListItem({
-      listId: ENDPOINT_LIST_ID,
+      listId,
       namespaceType: 'agnostic',
-      filter: `exception-list-agnostic.attributes._tags:\"os:${os}\"`,
+      filter: `exception-list-agnostic.attributes.os_types:\"${os}\"`,
       perPage: 100,
       page,
       sortField: 'created_at',
@@ -139,16 +141,16 @@ export function translateToEndpointExceptions(
 
 function getMatcherFunction(field: string, matchAny?: boolean): TranslatedEntryMatcher {
   return matchAny
-    ? field.endsWith('.text')
+    ? field.endsWith('.caseless')
       ? 'exact_caseless_any'
       : 'exact_cased_any'
-    : field.endsWith('.text')
+    : field.endsWith('.caseless')
     ? 'exact_caseless'
     : 'exact_cased';
 }
 
 function normalizeFieldName(field: string): string {
-  return field.endsWith('.text') ? field.substring(0, field.length - 5) : field;
+  return field.endsWith('.caseless') ? field.substring(0, field.lastIndexOf('.')) : field;
 }
 
 function translateItem(

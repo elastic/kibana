@@ -66,6 +66,7 @@ export const MonitorSummaryType = t.intersection([
   }),
   t.partial({
     histogram: HistogramType,
+    minInterval: t.number,
   }),
 ]);
 

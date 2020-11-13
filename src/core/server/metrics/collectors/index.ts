@@ -18,6 +18,6 @@
  */
 
 export { OpsProcessMetrics, OpsOsMetrics, OpsServerMetrics, MetricsCollector } from './types';
-export { OsMetricsCollector } from './os';
+export { OsMetricsCollector, OpsMetricsCollectorOptions } from './os';
 export { ProcessMetricsCollector } from './process';
 export { ServerMetricsCollector } from './server';

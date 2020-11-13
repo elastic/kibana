@@ -7,9 +7,9 @@
 import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { TRANSFORM_STATE } from '../../../../../../common';
+import { TRANSFORM_MODE, TRANSFORM_STATE } from '../../../../../../common/constants';
 
-import { TRANSFORM_MODE, TransformListRow } from '../../../../common';
+import { TransformListRow } from '../../../../common';
 
 import { StatsBar, TransformStatsBarStats } from '../stats_bar';
 

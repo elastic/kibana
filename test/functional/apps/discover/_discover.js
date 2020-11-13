@@ -26,12 +26,14 @@ export default function ({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const queryBar = getService('queryBar');
+  const inspector = getService('inspector');
   const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker']);
   const defaultSettings = {
     defaultIndex: 'logstash-*',
   };
 
-  describe('discover test', function describeIndexTests() {
+  // Failing: See https://github.com/elastic/kibana/issues/82915
+  describe.skip('discover test', function describeIndexTests() {
     before(async function () {
       log.debug('load kibana index with default index pattern');
       await esArchiver.load('discover');
@@ -224,9 +226,7 @@ export default function ({ getService, getPageObjects }) {
         await kibanaServer.uiSettings.replace({ 'dateFormat:tz': 'America/Phoenix' });
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.header.awaitKibanaChrome();
-        await queryBar.setQuery('');
-        // To remove focus of the of the search bar so date/time picker can show
-        await PageObjects.discover.selectIndexPattern(defaultSettings.defaultIndex);
+        await queryBar.clearQuery();
         await PageObjects.timePicker.setDefaultAbsoluteRange();
 
         log.debug(
@@ -292,6 +292,38 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.discover.clickFieldListItemAdd('_score');
         const currentUrlWithoutScore = await browser.getCurrentUrl();
         expect(currentUrlWithoutScore).not.to.contain('_score');
+      });
+    });
+
+    describe('refresh interval', function () {
+      it('should refetch when autofresh is enabled', async () => {
+        const intervalS = 5;
+        await PageObjects.timePicker.startAutoRefresh(intervalS);
+
+        // check inspector panel request stats for timestamp
+        await inspector.open();
+
+        const getRequestTimestamp = async () => {
+          const requestStats = await inspector.getTableData();
+          const requestTimestamp = requestStats.filter((r) =>
+            r[0].includes('Request timestamp')
+          )[0][1];
+          return requestTimestamp;
+        };
+
+        const requestTimestampBefore = await getRequestTimestamp();
+        await retry.waitFor('refetch because of refresh interval', async () => {
+          const requestTimestampAfter = await getRequestTimestamp();
+          log.debug(
+            `Timestamp before: ${requestTimestampBefore}, Timestamp after: ${requestTimestampAfter}`
+          );
+          return requestTimestampBefore !== requestTimestampAfter;
+        });
+      });
+
+      after(async () => {
+        await inspector.close();
+        await PageObjects.timePicker.pauseAutoRefresh();
       });
     });
   });

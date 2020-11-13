@@ -17,8 +17,6 @@
  * under the License.
  */
 
-import { getFunctionalTestGroupRunConfigs } from '../function_test_groups';
-
 const { version } = require('../../package.json');
 const KIBANA_INSTALL_DIR =
   process.env.KIBANA_INSTALL_DIR ||
@@ -64,17 +62,6 @@ module.exports = function () {
       cmd: NODE,
       args: [
         'scripts/check_file_casing',
-        '--quiet', // only log errors, not warnings
-      ],
-    }),
-
-    // used by the test tasks
-    //    runs the check_lockfile_symlinks script to ensure manifests with non-dev dependencies have adjacent lockfile symlinks
-    checkLockfileSymlinks: scriptWithGithubChecks({
-      title: 'Check lockfile symlinks',
-      cmd: NODE,
-      args: [
-        'scripts/check_lockfile_symlinks',
         '--quiet', // only log errors, not warnings
       ],
     }),
@@ -154,12 +141,6 @@ module.exports = function () {
       args: ['scripts/test_hardening.js'],
     }),
 
-    test_package_safer_lodash_set: scriptWithGithubChecks({
-      title: '@elastic/safer-lodash-set tests',
-      cmd: YARN,
-      args: ['--cwd', 'packages/elastic-safer-lodash-set', 'test'],
-    }),
-
     apiIntegrationTests: scriptWithGithubChecks({
       title: 'API integration tests',
       cmd: NODE,
@@ -182,7 +163,11 @@ module.exports = function () {
         '--config',
         'test/server_integration/http/ssl_redirect/config.js',
         '--config',
-        'test/server_integration/http/cache/config.js',
+        'test/server_integration/http/platform/config.ts',
+        '--config',
+        'test/server_integration/http/ssl_with_p12/config.js',
+        '--config',
+        'test/server_integration/http/ssl_with_p12_intermediate/config.js',
         '--bail',
         '--debug',
         '--kibana-install-dir',
@@ -210,7 +195,7 @@ module.exports = function () {
       args: [
         'scripts/functional_tests',
         '--config',
-        'test/plugin_functional/config.js',
+        'test/plugin_functional/config.ts',
         '--bail',
         '--debug',
       ],
@@ -246,19 +231,11 @@ module.exports = function () {
       args: ['scripts/check_licenses', '--dev'],
     }),
 
-    verifyDependencyVersions: gruntTaskWithGithubChecks(
-      'Verify dependency versions',
-      'verifyDependencyVersions'
-    ),
     test_jest: gruntTaskWithGithubChecks('Jest tests', 'test:jest'),
     test_jest_integration: gruntTaskWithGithubChecks(
       'Jest integration tests',
       'test:jest_integration'
     ),
     test_projects: gruntTaskWithGithubChecks('Project tests', 'test:projects'),
-
-    ...getFunctionalTestGroupRunConfigs({
-      kibanaInstallDir: KIBANA_INSTALL_DIR,
-    }),
   };
 };

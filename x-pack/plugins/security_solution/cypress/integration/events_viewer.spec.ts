@@ -14,8 +14,6 @@ import {
   HOST_GEO_CITY_NAME_HEADER,
   HOST_GEO_COUNTRY_NAME_HEADER,
   INSPECT_MODAL,
-  LOAD_MORE,
-  LOCAL_EVENTS_COUNT,
 } from '../screens/hosts/events';
 import { HEADERS_GROUP } from '../screens/timeline';
 
@@ -142,21 +140,13 @@ describe('Events Viewer', () => {
           cy.get(HEADER_SUBTITLE).invoke('text').should('not.equal', initialNumberOfEvents);
         });
     });
-
-    it('loads more events when the load more button is clicked', () => {
-      const defaultNumberOfLoadedEvents = '25';
-      cy.get(LOCAL_EVENTS_COUNT).invoke('text').should('equal', defaultNumberOfLoadedEvents);
-
-      cy.get(LOAD_MORE).click({ force: true });
-
-      cy.get(LOCAL_EVENTS_COUNT).invoke('text').should('not.equal', defaultNumberOfLoadedEvents);
-    });
   });
 
-  context.skip('Events columns', () => {
+  context('Events columns', () => {
     before(() => {
       loginAndWaitForPage(HOSTS_URL);
       openEvents();
+      cy.scrollTo('bottom');
       waitsForEventsToBeLoaded();
     });
 
@@ -172,7 +162,7 @@ describe('Events Viewer', () => {
         'message@timestamphost.nameevent.moduleevent.datasetevent.actionuser.namesource.ipdestination.ip';
 
       cy.get(HEADERS_GROUP).invoke('text').should('equal', originalColumnOrder);
-      dragAndDropColumn({ column: 0, newPosition: 1 });
+      dragAndDropColumn({ column: 0, newPosition: 0 });
       cy.get(HEADERS_GROUP).invoke('text').should('equal', expectedOrderAfterDragAndDrop);
     });
   });

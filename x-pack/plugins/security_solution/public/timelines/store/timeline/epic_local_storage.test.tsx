@@ -8,7 +8,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 // we don't have the types for waitFor just yet, so using "as waitFor" for when we do
-import { wait as waitFor } from '@testing-library/react';
+import { waitFor } from '@testing-library/react';
 import '../../../common/mock/match_media';
 import {
   mockGlobalState,
@@ -42,7 +42,7 @@ import { Direction } from '../../../graphql/types';
 
 import { addTimelineInStorage } from '../../containers/local_storage';
 import { isPageTimeline } from './epic_local_storage';
-import { TimelineStatus, TimelineType } from '../../../../common/types/timeline';
+import { TimelineId, TimelineStatus, TimelineType } from '../../../../common/types/timeline';
 
 jest.mock('../../containers/local_storage');
 
@@ -84,38 +84,32 @@ describe('epicLocalStorage', () => {
       dataProviders: mockDataProviders,
       docValueFields: [],
       end: endDate,
-      eventType: 'raw' as TimelineComponentProps['eventType'],
       filters: [],
+      indexNames: [],
       indexPattern,
-      indexToAdd: [],
       isLive: false,
-      isLoadingSource: false,
       isSaving: false,
       itemsPerPage: 5,
       itemsPerPageOptions: [5, 10, 20],
       kqlMode: 'search' as TimelineComponentProps['kqlMode'],
       kqlQueryExpression: '',
-      loadingIndexName: false,
+      loadingSourcerer: false,
       onChangeItemsPerPage: jest.fn(),
       onClose: jest.fn(),
-      onDataProviderEdited: jest.fn(),
-      onDataProviderRemoved: jest.fn(),
-      onToggleDataProviderEnabled: jest.fn(),
-      onToggleDataProviderExcluded: jest.fn(),
-      onToggleDataProviderType: jest.fn(),
       show: true,
       showCallOutUnauthorizedMsg: false,
       start: startDate,
       status: TimelineStatus.active,
       sort,
       timelineType: TimelineType.default,
+      timerangeKind: 'absolute',
       toggleColumn: jest.fn(),
       usersViewing: ['elastic'],
     };
   });
 
   it('filters correctly page timelines', () => {
-    expect(isPageTimeline('timeline-1')).toBe(false);
+    expect(isPageTimeline(TimelineId.active)).toBe(false);
     expect(isPageTimeline('hosts-page-alerts')).toBe(true);
   });
 

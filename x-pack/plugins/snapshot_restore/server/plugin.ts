@@ -20,7 +20,7 @@ import {
   ILegacyScopedClusterClient,
 } from 'kibana/server';
 
-import { PLUGIN } from '../common';
+import { PLUGIN, APP_REQUIRED_CLUSTER_PRIVILEGES } from '../common';
 import { License } from './services';
 import { ApiRoutes } from './routes';
 import { wrapEsError } from './lib';
@@ -54,7 +54,7 @@ export class SnapshotRestoreServerPlugin implements Plugin<void, void, any, any>
 
   public async setup(
     { http, getStartServices }: CoreSetup,
-    { licensing, security, cloud }: Dependencies
+    { licensing, features, security, cloud }: Dependencies
   ): Promise<void> {
     const pluginConfig = await this.context.config
       .create<SnapshotRestoreConfig>()
@@ -80,6 +80,20 @@ export class SnapshotRestoreServerPlugin implements Plugin<void, void, any, any>
         logger: this.logger,
       }
     );
+
+    features.registerElasticsearchFeature({
+      id: PLUGIN.id,
+      management: {
+        data: [PLUGIN.id],
+      },
+      catalogue: [PLUGIN.id],
+      privileges: [
+        {
+          requiredClusterPrivileges: [...APP_REQUIRED_CLUSTER_PRIVILEGES],
+          ui: [],
+        },
+      ],
+    });
 
     http.registerRouteHandlerContext('snapshotRestore', async (ctx, request) => {
       this.snapshotRestoreESClient =

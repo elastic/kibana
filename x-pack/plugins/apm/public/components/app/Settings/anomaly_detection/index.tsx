@@ -8,7 +8,7 @@ import React, { useState } from 'react';
 import { EuiTitle, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EuiPanel, EuiEmptyPrompt } from '@elastic/eui';
-import { MLErrorMessages } from '../../../../../common/anomaly_detection';
+import { ML_ERRORS } from '../../../../../common/anomaly_detection';
 import { useApmPluginContext } from '../../../../hooks/useApmPluginContext';
 import { JobsList } from './jobs_list';
 import { AddEnvironments } from './add_environments';
@@ -25,12 +25,11 @@ export type AnomalyDetectionApiResponse = APIReturnType<
 const DEFAULT_VALUE: AnomalyDetectionApiResponse = {
   jobs: [],
   hasLegacyJobs: false,
-  errorCode: undefined,
 };
 
 export function AnomalyDetection() {
   const plugin = useApmPluginContext();
-  const canGetJobs = !!plugin.core.application.capabilities.ml.canGetJobs;
+  const canGetJobs = !!plugin.core.application.capabilities.ml?.canGetJobs;
   const license = useLicense();
   const hasValidLicense = license?.isActive && license?.hasAtLeast('platinum');
 
@@ -49,15 +48,7 @@ export function AnomalyDetection() {
   if (!hasValidLicense) {
     return (
       <EuiPanel>
-        <LicensePrompt
-          text={i18n.translate(
-            'xpack.apm.settings.anomaly_detection.license.text',
-            {
-              defaultMessage:
-                "To use anomaly detection, you must be subscribed to an Elastic Platinum license. With it, you'll have the ability monitor your services with the aid of machine learning.",
-            }
-          )}
-        />
+        <LicensePrompt text={ML_ERRORS.INVALID_LICENSE} />
       </EuiPanel>
     );
   }
@@ -66,8 +57,8 @@ export function AnomalyDetection() {
     return (
       <EuiPanel>
         <EuiEmptyPrompt
-          iconType="warning"
-          body={<>{MLErrorMessages.MISSING_READ_PRIVILEGES}</>}
+          iconType="alert"
+          body={<>{ML_ERRORS.MISSING_READ_PRIVILEGES}</>}
         />
       </EuiPanel>
     );
@@ -85,8 +76,7 @@ export function AnomalyDetection() {
       <EuiSpacer size="l" />
       <EuiText>
         {i18n.translate('xpack.apm.settings.anomalyDetection.descriptionText', {
-          defaultMessage:
-            'The Machine Learning anomaly detection integration enables application health status indicators for each configured environment in the Service map by identifying transaction duration anomalies.',
+          defaultMessage: `Machine Learning's anomaly detection integration enables application health status indicators for services in each configured environment by identifying transaction duration anomalies.`,
         })}
       </EuiText>
       <EuiSpacer size="l" />

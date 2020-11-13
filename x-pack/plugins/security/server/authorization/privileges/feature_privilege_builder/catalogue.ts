@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Feature, FeatureKibanaPrivileges } from '../../../../../features/server';
+import { FeatureKibanaPrivileges } from '../../../../../features/server';
 import { BaseFeaturePrivilegeBuilder } from './feature_privilege_builder';
 
 export class FeaturePrivilegeCatalogueBuilder extends BaseFeaturePrivilegeBuilder {
-  public getActions(privilegeDefinition: FeatureKibanaPrivileges, feature: Feature): string[] {
+  public getActions(privilegeDefinition: FeatureKibanaPrivileges): string[] {
     const catalogueEntries = privilegeDefinition.catalogue;
 
     if (!catalogueEntries) {

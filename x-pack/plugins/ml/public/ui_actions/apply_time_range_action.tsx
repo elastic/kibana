@@ -7,11 +7,8 @@
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { ActionContextMapping, createAction } from '../../../../../src/plugins/ui_actions/public';
-import {
-  AnomalySwimlaneEmbeddable,
-  SwimLaneDrilldownContext,
-} from '../embeddables/anomaly_swimlane/anomaly_swimlane_embeddable';
 import { MlCoreSetup } from '../plugin';
+import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE, SwimLaneDrilldownContext } from '../embeddables';
 
 export const APPLY_TIME_RANGE_SELECTION_ACTION = 'applyTimeRangeSelectionAction';
 
@@ -42,8 +39,7 @@ export function createApplyTimeRangeSelectionAction(
 
       let [from, to] = data.times;
       from = from * 1000;
-      // extend bounds with the interval
-      to = to * 1000 + interval * 1000;
+      to = to * 1000;
 
       timefilter.setTime({
         from: moment(from),
@@ -52,7 +48,7 @@ export function createApplyTimeRangeSelectionAction(
       });
     },
     async isCompatible({ embeddable, data }: SwimLaneDrilldownContext) {
-      return embeddable instanceof AnomalySwimlaneEmbeddable && data !== undefined;
+      return embeddable.type === ANOMALY_SWIMLANE_EMBEDDABLE_TYPE && data !== undefined;
     },
   });
 }

@@ -16,6 +16,7 @@ export const createApolloClient = (fetch: HttpHandler) => {
   const cache = new InMemoryCache({
     addTypename: false,
     fragmentMatcher: new IntrospectionFragmentMatcher({
+      // @ts-expect-error apollo-cache-inmemory types don't match actual introspection data
       introspectionQueryResultData,
     }),
   });

@@ -13,7 +13,14 @@ import { Plugin } from './plugin';
 // run-time contracts.
 export { uiCapabilitiesRegex } from './feature_schema';
 
-export { Feature, FeatureConfig, FeatureKibanaPrivileges } from '../common';
+export {
+  KibanaFeature,
+  KibanaFeatureConfig,
+  FeatureKibanaPrivileges,
+  ElasticsearchFeature,
+  ElasticsearchFeatureConfig,
+  FeatureElasticsearchPrivileges,
+} from '../common';
 export { PluginSetupContract, PluginStartContract } from './plugin';
 
 export const plugin = (initializerContext: PluginInitializerContext) =>

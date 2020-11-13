@@ -23,9 +23,9 @@ import { SerializedFieldFormat } from '../../../../expressions/common/types';
 
 import { FieldFormat } from '../../../common';
 import { FormatFactory } from '../../../common/field_formats/utils';
+import { getFormatWithAggs } from '../../../common/search/aggs';
 import { DataPublicPluginStart, IFieldFormat } from '../../../public';
 import { getUiSettings } from '../../../public/services';
-import { getFormatWithAggs } from '../../search/aggs/utils';
 
 const getConfig = (key: string, defaultOverride?: any): any =>
   getUiSettings().get(key, defaultOverride);

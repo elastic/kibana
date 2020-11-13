@@ -8,9 +8,9 @@
 
 import React from 'react';
 import moment from 'moment';
-import { TlsNode } from '../../../graphql/types';
-import { Columns } from '../../../common/components/paginated_table';
 
+import { NetworkTlsNode } from '../../../../common/search_strategy';
+import { Columns } from '../../../common/components/paginated_table';
 import {
   getRowItemDraggables,
   getRowItemDraggable,
@@ -21,11 +21,11 @@ import { PreferenceFormattedDate } from '../../../common/components/formatted_da
 import * as i18n from './translations';
 
 export type TlsColumns = [
-  Columns<TlsNode>,
-  Columns<TlsNode>,
-  Columns<TlsNode['_id']>,
-  Columns<TlsNode>,
-  Columns<TlsNode>
+  Columns<NetworkTlsNode>,
+  Columns<NetworkTlsNode>,
+  Columns<NetworkTlsNode['_id']>,
+  Columns<NetworkTlsNode>,
+  Columns<NetworkTlsNode>
 ];
 
 export const getTlsColumns = (tableId: string): TlsColumns => [
@@ -64,7 +64,7 @@ export const getTlsColumns = (tableId: string): TlsColumns => [
     render: (sha1) =>
       getRowItemDraggable({
         rowItem: sha1,
-        attrName: 'tls.server_certificate.fingerprint.sha1',
+        attrName: 'tls.server.hash.sha1',
         idPrefix: `${tableId}-${sha1}-table-sha1`,
       }),
   },
@@ -77,7 +77,7 @@ export const getTlsColumns = (tableId: string): TlsColumns => [
     render: ({ _id, ja3 }) =>
       getRowItemDraggables({
         rowItems: ja3,
-        attrName: 'tls.fingerprints.ja3.hash',
+        attrName: 'tls.server.ja3s',
         idPrefix: `${tableId}-${_id}-table-ja3`,
       }),
   },
@@ -90,7 +90,7 @@ export const getTlsColumns = (tableId: string): TlsColumns => [
     render: ({ _id, notAfter }) =>
       getRowItemDraggables({
         rowItems: notAfter,
-        attrName: 'tls.server_certificate.not_after',
+        attrName: 'tls.server.not_after',
         idPrefix: `${tableId}-${_id}-table-notAfter`,
         render: (validUntil) => (
           <LocalizedDateTooltip date={moment(new Date(validUntil)).toDate()}>

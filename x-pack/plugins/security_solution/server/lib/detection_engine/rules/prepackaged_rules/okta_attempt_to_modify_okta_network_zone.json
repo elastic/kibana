@@ -7,13 +7,14 @@
     "Consider adding exceptions to this rule to filter false positives if Oyour organization's Okta network zones are regularly modified."
   ],
   "index": [
-    "filebeat-*"
+    "filebeat-*",
+    "logs-okta*"
   ],
   "language": "kuery",
   "license": "Elastic License",
   "name": "Attempt to Modify Okta Network Zone",
   "note": "The Okta Filebeat module must be enabled to use this rule.",
-  "query": "event.module:okta and event.dataset:okta.system and event.action:(zone.update or zone.deactivate or zone.delete or network_zone.rule.disabled or zone.remove_blacklist)",
+  "query": "event.dataset:okta.system and event.action:(zone.update or zone.deactivate or zone.delete or network_zone.rule.disabled or zone.remove_blacklist)",
   "references": [
     "https://developer.okta.com/docs/reference/api/system-log/",
     "https://developer.okta.com/docs/reference/api/event-types/"
@@ -23,8 +24,12 @@
   "severity": "medium",
   "tags": [
     "Elastic",
-    "Okta"
+    "Identity",
+    "Okta",
+    "Continuous Monitoring",
+    "SecOps",
+    "Network Security"
   ],
   "type": "query",
-  "version": 1
+  "version": 2
 }

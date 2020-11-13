@@ -21,7 +21,7 @@ import _ from 'lodash';
 // Debounce service, angularized version of lodash debounce
 // borrowed heavily from https://github.com/shahata/angular-debounce
 
-export function DebounceProviderTimeout($timeout) {
+export function createDebounceProviderTimeout($timeout) {
   return function (func, wait, options) {
     let timeout;
     let args;
@@ -65,8 +65,4 @@ export function DebounceProviderTimeout($timeout) {
 
     return debounce;
   };
-}
-
-export function DebounceProvider(debounce) {
-  return debounce;
 }

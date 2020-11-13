@@ -8,7 +8,6 @@ import { PolicyDetailsState } from '../../types';
 import { applyMiddleware, createStore, Dispatch, Store } from 'redux';
 import { policyDetailsReducer, PolicyDetailsAction, policyDetailsMiddlewareFactory } from './index';
 import { policyConfig } from './selectors';
-import { clone } from '../../models/policy_details_config';
 import { factory as policyConfigFactory } from '../../../../../../common/endpoint/models/policy_config';
 import { PolicyData } from '../../../../../../common/endpoint/types';
 import {
@@ -20,6 +19,7 @@ import {
   createAppRootMockRenderer,
 } from '../../../../../common/mock/endpoint';
 import { HttpFetchOptions } from 'kibana/public';
+import { cloneDeep } from 'lodash';
 
 describe('policy details: ', () => {
   let store: Store;
@@ -36,7 +36,7 @@ describe('policy details: ', () => {
       created_by: '',
       updated_at: '',
       updated_by: '',
-      config_id: '',
+      policy_id: '',
       enabled: true,
       output_id: '',
       inputs: [
@@ -93,7 +93,7 @@ describe('policy details: ', () => {
           throw new Error();
         }
 
-        const newPayload1 = clone(config);
+        const newPayload1 = cloneDeep(config);
         newPayload1.windows.events.process = true;
 
         dispatch({
@@ -115,7 +115,7 @@ describe('policy details: ', () => {
           throw new Error();
         }
 
-        const newPayload1 = clone(config);
+        const newPayload1 = cloneDeep(config);
         newPayload1.mac.events.file = true;
 
         dispatch({
@@ -137,7 +137,7 @@ describe('policy details: ', () => {
           throw new Error();
         }
 
-        const newPayload1 = clone(config);
+        const newPayload1 = cloneDeep(config);
         newPayload1.linux.events.file = true;
 
         dispatch({
@@ -213,7 +213,7 @@ describe('policy details: ', () => {
       expect(JSON.parse(lastPutCallPayload.body as string)).toEqual({
         name: '',
         description: '',
-        config_id: '',
+        policy_id: '',
         enabled: true,
         output_id: '',
         inputs: [
@@ -238,11 +238,26 @@ describe('policy details: ', () => {
                       security: true,
                     },
                     malware: { mode: 'prevent' },
+                    popup: {
+                      malware: {
+                        enabled: true,
+                        message: '',
+                      },
+                    },
                     logging: { file: 'info' },
+                    antivirus_registration: {
+                      enabled: false,
+                    },
                   },
                   mac: {
                     events: { process: true, file: true, network: true },
                     malware: { mode: 'prevent' },
+                    popup: {
+                      malware: {
+                        enabled: true,
+                        message: '',
+                      },
+                    },
                     logging: { file: 'info' },
                   },
                   linux: {

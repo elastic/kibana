@@ -41,17 +41,19 @@ const specLabel = i18n.translate('visTypeVega.inspector.specLabel', {
   defaultMessage: 'Spec',
 });
 
-export const VegaDataInspector = ({ adapters }: VegaDataInspectorProps) => {
+const VegaDataInspector = ({ adapters }: VegaDataInspectorProps) => {
   const tabs = [
     {
       id: 'data-viewer--id',
       name: dataSetsLabel,
       content: <DataViewer vegaAdapter={adapters.vega} />,
+      'data-test-subj': 'vegaDataInspectorDataViewerButton',
     },
     {
       id: 'signal-viewer--id',
       name: signalValuesLabel,
       content: <SignalViewer vegaAdapter={adapters.vega} />,
+      'data-test-subj': 'vegaDataInspectorSignalViewerButton',
     },
     {
       id: 'spec-viewer--id',
@@ -59,6 +61,7 @@ export const VegaDataInspector = ({ adapters }: VegaDataInspectorProps) => {
       content: (
         <SpecViewer className="vgaVegaDataInspector__specViewer" vegaAdapter={adapters.vega} />
       ),
+      'data-test-subj': 'vegaDataInspectorSpecViewerButton',
     },
   ];
 
@@ -72,3 +75,7 @@ export const VegaDataInspector = ({ adapters }: VegaDataInspectorProps) => {
     />
   );
 };
+
+// default export required for React.Lazy
+// eslint-disable-next-line import/no-default-export
+export { VegaDataInspector as default };

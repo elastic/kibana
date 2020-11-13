@@ -12,7 +12,7 @@ type NavigateToAppHandlerOptions<S = unknown> = NavigateToAppOptions & {
   state?: S;
   onClick?: EventHandlerCallback;
 };
-type EventHandlerCallback = MouseEventHandler<HTMLButtonElement | HTMLAnchorElement>;
+type EventHandlerCallback = MouseEventHandler<HTMLButtonElement | HTMLAnchorElement | Element>;
 
 /**
  * Provides an event handlers that can be used with (for example) `onClick` to prevent the
@@ -25,8 +25,8 @@ type EventHandlerCallback = MouseEventHandler<HTMLButtonElement | HTMLAnchorElem
  *
  * @example
  *
- * const handleOnClick = useNavigateToAppEventHandler('ingestManager', {path: '#/configs'})
- * return <EuiLink onClick={handleOnClick}>See configs</EuiLink>
+ * const handleOnClick = useNavigateToAppEventHandler('ingestManager', {path: '#/policies'})
+ * return <EuiLink onClick={handleOnClick}>See policies</EuiLink>
  */
 export const useNavigateToAppEventHandler = <S = unknown>(
   /** the app id - normally the value of the `id` in that plugin's `kibana.json`  */

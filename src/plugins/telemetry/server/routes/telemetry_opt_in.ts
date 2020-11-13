@@ -21,11 +21,12 @@ import moment from 'moment';
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { schema } from '@kbn/config-schema';
-import { IRouter } from 'kibana/server';
+import { IRouter, Logger } from 'kibana/server';
 import {
   StatsGetterConfig,
   TelemetryCollectionManagerPluginSetup,
 } from 'src/plugins/telemetry_collection_manager/server';
+import { SavedObjectsErrorHelpers } from '../../../../core/server';
 import { getTelemetryAllowChangingOptInStatus } from '../../common/telemetry_config';
 import { sendTelemetryOptInStatus } from './telemetry_opt_in_stats';
 
@@ -39,12 +40,14 @@ import { TelemetryConfigType } from '../config';
 interface RegisterOptInRoutesParams {
   currentKibanaVersion: string;
   router: IRouter;
+  logger: Logger;
   config$: Observable<TelemetryConfigType>;
   telemetryCollectionManager: TelemetryCollectionManagerPluginSetup;
 }
 
 export function registerTelemetryOptInRoutes({
   config$,
+  logger,
   router,
   currentKibanaVersion,
   telemetryCollectionManager,
@@ -83,8 +86,7 @@ export function registerTelemetryOptInRoutes({
       }
 
       const statsGetterConfig: StatsGetterConfig = {
-        start: moment().subtract(20, 'minutes').toISOString(),
-        end: moment().toISOString(),
+        timestamp: moment().valueOf(),
         unencrypted: false,
       };
 
@@ -95,14 +97,25 @@ export function registerTelemetryOptInRoutes({
 
       if (config.sendUsageFrom === 'server') {
         const optInStatusUrl = config.optInStatusUrl;
-        await sendTelemetryOptInStatus(
+        sendTelemetryOptInStatus(
           telemetryCollectionManager,
-          { optInStatusUrl, newOptInStatus },
+          { optInStatusUrl, newOptInStatus, currentKibanaVersion },
           statsGetterConfig
-        );
+        ).catch((err) => {
+          // The server is likely behind a firewall and can't reach the remote service
+          logger.warn(
+            `Failed to notify "${optInStatusUrl}" from the server about the opt-in selection. Possibly blocked by a firewall? - Error: ${err.message}`
+          );
+        });
       }
 
-      await updateTelemetrySavedObject(context.core.savedObjects.client, attributes);
+      try {
+        await updateTelemetrySavedObject(context.core.savedObjects.client, attributes);
+      } catch (e) {
+        if (SavedObjectsErrorHelpers.isForbiddenError(e)) {
+          return res.forbidden();
+        }
+      }
       return res.ok({ body: optInStatus });
     }
   );

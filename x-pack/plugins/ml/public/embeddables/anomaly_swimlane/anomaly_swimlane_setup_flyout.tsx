@@ -7,27 +7,33 @@
 import React from 'react';
 import { CoreStart } from 'kibana/public';
 import moment from 'moment';
+import { takeUntil } from 'rxjs/operators';
+import { from } from 'rxjs';
 import { VIEW_BY_JOB_LABEL } from '../../application/explorer/explorer_constants';
 import {
   KibanaContextProvider,
   toMountPoint,
 } from '../../../../../../src/plugins/kibana_react/public';
 import { AnomalySwimlaneInitializer } from './anomaly_swimlane_initializer';
-import { JobSelectorFlyout } from '../../application/components/job_selector/job_selector_flyout';
+import { JobSelectorFlyoutContent } from '../../application/components/job_selector/job_selector_flyout';
 import { AnomalyDetectorService } from '../../application/services/anomaly_detector_service';
 import { getInitialGroupsMap } from '../../application/components/job_selector/job_selector';
-import {
-  AnomalySwimlaneEmbeddableInput,
-  getDefaultPanelTitle,
-} from './anomaly_swimlane_embeddable';
+import { getDefaultPanelTitle } from './anomaly_swimlane_embeddable';
 import { getMlGlobalServices } from '../../application/app';
 import { HttpService } from '../../application/services/http_service';
+import { DashboardConstants } from '../../../../../../src/plugins/dashboard/public';
+import { AnomalySwimlaneEmbeddableInput } from '..';
 
 export async function resolveAnomalySwimlaneUserInput(
   coreStart: CoreStart,
   input?: AnomalySwimlaneEmbeddableInput
 ): Promise<Partial<AnomalySwimlaneEmbeddableInput>> {
-  const { http, uiSettings, overlays } = coreStart;
+  const {
+    http,
+    uiSettings,
+    overlays,
+    application: { currentAppId$ },
+  } = coreStart;
 
   const anomalyDetectorService = new AnomalyDetectorService(new HttpService(http));
 
@@ -45,7 +51,7 @@ export async function resolveAnomalySwimlaneUserInput(
     const flyoutSession = coreStart.overlays.openFlyout(
       toMountPoint(
         <KibanaContextProvider services={{ ...coreStart, mlServices: getMlGlobalServices(http) }}>
-          <JobSelectorFlyout
+          <JobSelectorFlyoutContent
             selectedIds={selectedIds}
             withTimeRangeSelector={false}
             dateFormatTz={dateFormatTz}
@@ -88,8 +94,17 @@ export async function resolveAnomalySwimlaneUserInput(
         </KibanaContextProvider>
       ),
       {
-        'data-test-subj': 'mlAnomalySwimlaneEmbeddable',
+        'data-test-subj': 'mlFlyoutJobSelector',
+        ownFocus: true,
+        closeButtonAriaLabel: 'jobSelectorFlyout',
       }
     );
+
+    // Close the flyout when user navigates out of the dashboard plugin
+    currentAppId$.pipe(takeUntil(from(flyoutSession.onClose))).subscribe((appId) => {
+      if (appId !== DashboardConstants.DASHBOARDS_ID) {
+        flyoutSession.close();
+      }
+    });
   });
 }

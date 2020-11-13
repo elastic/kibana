@@ -88,7 +88,11 @@ describe('spacesManagementApp', () => {
     expect(setBreadcrumbs).toHaveBeenCalledWith([{ href: `/`, text: 'Spaces' }]);
     expect(container).toMatchInlineSnapshot(`
       <div>
-        Spaces Page: {"capabilities":{"catalogue":{},"management":{},"navLinks":{}},"notifications":{"toasts":{}},"spacesManager":{"onActiveSpaceChange$":{"_isScalar":false}},"history":{"action":"PUSH","length":1,"location":{"pathname":"/","search":"","hash":""}},"securityEnabled":true}
+        <div
+          class="kbnRedirectCrossAppLinks"
+        >
+          Spaces Page: {"capabilities":{"catalogue":{},"management":{},"navLinks":{}},"notifications":{"toasts":{}},"spacesManager":{"onActiveSpaceChange$":{"_isScalar":false}},"history":{"action":"PUSH","length":1,"location":{"pathname":"/","search":"","hash":""}},"securityEnabled":true}
+        </div>
       </div>
     `);
 
@@ -107,7 +111,11 @@ describe('spacesManagementApp', () => {
     ]);
     expect(container).toMatchInlineSnapshot(`
       <div>
-        Spaces Edit Page: {"capabilities":{"catalogue":{},"management":{},"navLinks":{}},"notifications":{"toasts":{}},"spacesManager":{"onActiveSpaceChange$":{"_isScalar":false}},"history":{"action":"PUSH","length":1,"location":{"pathname":"/create","search":"","hash":""}},"securityEnabled":true}
+        <div
+          class="kbnRedirectCrossAppLinks"
+        >
+          Spaces Edit Page: {"capabilities":{"catalogue":{},"management":{},"navLinks":{}},"notifications":{"toasts":{}},"spacesManager":{"onActiveSpaceChange$":{"_isScalar":false}},"history":{"action":"PUSH","length":1,"location":{"pathname":"/create","search":"","hash":""}},"securityEnabled":true}
+        </div>
       </div>
     `);
 
@@ -128,7 +136,11 @@ describe('spacesManagementApp', () => {
     ]);
     expect(container).toMatchInlineSnapshot(`
       <div>
-        Spaces Edit Page: {"capabilities":{"catalogue":{},"management":{},"navLinks":{}},"notifications":{"toasts":{}},"spacesManager":{"onActiveSpaceChange$":{"_isScalar":false}},"spaceId":"some-space","history":{"action":"PUSH","length":1,"location":{"pathname":"/edit/some-space","search":"","hash":""}},"securityEnabled":true}
+        <div
+          class="kbnRedirectCrossAppLinks"
+        >
+          Spaces Edit Page: {"capabilities":{"catalogue":{},"management":{},"navLinks":{}},"notifications":{"toasts":{}},"spacesManager":{"onActiveSpaceChange$":{"_isScalar":false}},"spaceId":"some-space","history":{"action":"PUSH","length":1,"location":{"pathname":"/edit/some-space","search":"","hash":""}},"securityEnabled":true}
+        </div>
       </div>
     `);
 

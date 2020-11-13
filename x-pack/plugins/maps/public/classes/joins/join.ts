@@ -4,13 +4,37 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IESTermSource } from '../sources/es_term_source';
+import { Feature, GeoJsonProperties } from 'geojson';
+import { ESTermSource } from '../sources/es_term_source';
 import { JoinDescriptor } from '../../../common/descriptor_types';
+import { ITooltipProperty } from '../tooltips/tooltip_property';
+import { IField } from '../fields/field';
+import { PropertiesMap } from '../../../common/elasticsearch_util';
 
 export interface IJoin {
-  getRightJoinSource(): IESTermSource;
+  destroy: () => void;
 
-  toDescriptor(): JoinDescriptor;
+  getRightJoinSource: () => ESTermSource;
 
-  getSourceMetaDataRequestId(): string;
+  toDescriptor: () => JoinDescriptor;
+
+  getJoinFields: () => IField[];
+
+  getLeftField: () => IField;
+
+  getIndexPatternIds: () => string[];
+
+  getQueryableIndexPatternIds: () => string[];
+
+  getSourceDataRequestId: () => string;
+
+  getSourceMetaDataRequestId: () => string;
+
+  getSourceFormattersDataRequestId: () => string;
+
+  getTooltipProperties: (properties: GeoJsonProperties) => Promise<ITooltipProperty[]>;
+
+  hasCompleteConfig: () => boolean;
+
+  joinPropertiesToFeature: (feature: Feature, propertiesMap?: PropertiesMap) => boolean;
 }

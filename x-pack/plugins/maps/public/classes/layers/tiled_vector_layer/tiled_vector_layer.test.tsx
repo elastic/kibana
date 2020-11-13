@@ -128,32 +128,41 @@ describe('syncData', () => {
     sinon.assert.notCalled(syncContext2.stopLoading);
   });
 
-  it('Should resync when changes to source params', async () => {
-    const layer1: TiledVectorLayer = createLayer({}, {});
-    const syncContext1 = new MockSyncContext({ dataFilters: {} });
+  describe('Should resync when changes to source params: ', () => {
+    [
+      { layerName: 'barfoo' },
+      { urlTemplate: 'https://sub.example.com/{z}/{x}/{y}.pbf' },
+      { minSourceZoom: 1 },
+      { maxSourceZoom: 12 },
+    ].forEach((changes) => {
+      it(`change in ${Object.keys(changes).join(',')}`, async () => {
+        const layer1: TiledVectorLayer = createLayer({}, {});
+        const syncContext1 = new MockSyncContext({ dataFilters: {} });
 
-    await layer1.syncData(syncContext1);
+        await layer1.syncData(syncContext1);
 
-    const dataRequestDescriptor: DataRequestDescriptor = {
-      data: defaultConfig,
-      dataId: 'source',
-    };
-    const layer2: TiledVectorLayer = createLayer(
-      {
-        __dataRequests: [dataRequestDescriptor],
-      },
-      { layerName: 'barfoo' }
-    );
-    const syncContext2 = new MockSyncContext({ dataFilters: {} });
-    await layer2.syncData(syncContext2);
+        const dataRequestDescriptor: DataRequestDescriptor = {
+          data: defaultConfig,
+          dataId: 'source',
+        };
+        const layer2: TiledVectorLayer = createLayer(
+          {
+            __dataRequests: [dataRequestDescriptor],
+          },
+          changes
+        );
+        const syncContext2 = new MockSyncContext({ dataFilters: {} });
+        await layer2.syncData(syncContext2);
 
-    // @ts-expect-error
-    sinon.assert.calledOnce(syncContext2.startLoading);
-    // @ts-expect-error
-    sinon.assert.calledOnce(syncContext2.stopLoading);
+        // @ts-expect-error
+        sinon.assert.calledOnce(syncContext2.startLoading);
+        // @ts-expect-error
+        sinon.assert.calledOnce(syncContext2.stopLoading);
 
-    // @ts-expect-error
-    const call = syncContext2.stopLoading.getCall(0);
-    expect(call.args[2]).toEqual({ ...defaultConfig, layerName: 'barfoo' });
+        // @ts-expect-error
+        const call = syncContext2.stopLoading.getCall(0);
+        expect(call.args[2]).toEqual({ ...defaultConfig, ...changes });
+      });
+    });
   });
 });

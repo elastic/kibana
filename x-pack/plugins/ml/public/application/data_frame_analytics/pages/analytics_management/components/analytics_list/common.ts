@@ -4,16 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Query, Ast } from '@elastic/eui';
+import { EuiTableActionsColumnType, Query, Ast } from '@elastic/eui';
 
 import { DATA_FRAME_TASK_STATE } from './data_frame_task_state';
 export { DATA_FRAME_TASK_STATE };
 
-import {
-  DataFrameAnalyticsId,
-  DataFrameAnalyticsConfig,
-  ANALYSIS_CONFIG_TYPE,
-} from '../../../../common';
+import { DataFrameAnalyticsId, DataFrameAnalyticsConfig } from '../../../../common';
+import { DataFrameAnalysisConfigType } from '../../../../../../../common/types/data_frame_analytics';
 
 export enum DATA_FRAME_MODE {
   BATCH = 'batch',
@@ -26,6 +23,7 @@ export type Clause = Parameters<typeof Query['isMust']>[0];
 type ExtractClauseType<T> = T extends (x: any) => x is infer Type ? Type : never;
 export type TermClause = ExtractClauseType<typeof Ast['Term']['isInstance']>;
 export type FieldClause = ExtractClauseType<typeof Ast['Field']['isInstance']>;
+export type Value = Parameters<typeof Ast['Term']['must']>[0];
 
 interface ProgressSection {
   phase: string;
@@ -35,6 +33,11 @@ interface ProgressSection {
 export interface DataFrameAnalyticsStats {
   assignment_explanation?: string;
   id: DataFrameAnalyticsId;
+  memory_usage?: {
+    timestamp?: string;
+    peak_usage_bytes: number;
+    status: string;
+  };
   node?: {
     attributes: Record<string, any>;
     ephemeral_id: string;
@@ -105,13 +108,11 @@ export interface DataFrameAnalyticsListRow {
   checkpointing: object;
   config: DataFrameAnalyticsConfig;
   id: DataFrameAnalyticsId;
-  job_type:
-    | ANALYSIS_CONFIG_TYPE.CLASSIFICATION
-    | ANALYSIS_CONFIG_TYPE.OUTLIER_DETECTION
-    | ANALYSIS_CONFIG_TYPE.REGRESSION;
+  job_type: DataFrameAnalysisConfigType;
   mode: string;
   state: DataFrameAnalyticsStats['state'];
   stats: DataFrameAnalyticsStats;
+  spaces?: string[];
 }
 
 // Used to pass on attribute names to table columns
@@ -121,6 +122,7 @@ export enum DataFrameAnalyticsListColumn {
   configCreateTime = 'config.create_time',
   description = 'config.description',
   id = 'id',
+  memoryStatus = 'stats.memory_usage.status',
 }
 
 export type ItemIdToExpandedRowMap = Record<string, JSX.Element>;
@@ -130,6 +132,10 @@ export function isCompletedAnalyticsJob(stats: DataFrameAnalyticsStats) {
   return stats.state === DATA_FRAME_TASK_STATE.STOPPED && progress === 100;
 }
 
-export function getResultsUrl(jobId: string, analysisType: string) {
-  return `#/data_frame_analytics/exploration?_g=(ml:(jobId:${jobId},analysisType:${analysisType}))`;
-}
+// The single Action type is not exported as is
+// from EUI so we use that code to get the single
+// Action type from the array of actions.
+type ArrayElement<ArrayType extends readonly unknown[]> = ArrayType[number];
+export type DataFrameAnalyticsListAction = ArrayElement<
+  EuiTableActionsColumnType<DataFrameAnalyticsListRow>['actions']
+>;

@@ -7,8 +7,6 @@
 import { takeLatest } from 'redux-saga/effects';
 import {
   getMonitorDetailsAction,
-  getMonitorDetailsActionSuccess,
-  getMonitorDetailsActionFail,
   getMonitorLocationsAction,
   getMonitorLocationsActionSuccess,
   getMonitorLocationsActionFail,
@@ -18,11 +16,11 @@ import { fetchEffectFactory } from './fetch_effect';
 
 export function* fetchMonitorDetailsEffect() {
   yield takeLatest(
-    getMonitorDetailsAction,
+    getMonitorDetailsAction.get,
     fetchEffectFactory(
       fetchMonitorDetails,
-      getMonitorDetailsActionSuccess,
-      getMonitorDetailsActionFail
+      getMonitorDetailsAction.success,
+      getMonitorDetailsAction.fail
     )
   );
 

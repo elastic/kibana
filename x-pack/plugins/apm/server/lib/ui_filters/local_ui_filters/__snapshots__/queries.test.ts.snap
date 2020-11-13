@@ -2,6 +2,13 @@
 
 exports[`local ui filter queries fetches local ui filter aggregations 1`] = `
 Object {
+  "apm": Object {
+    "events": Array [
+      "transaction",
+      "metric",
+      "error",
+    ],
+  },
   "body": Object {
     "aggs": Object {
       "by_terms": Object {
@@ -29,15 +36,6 @@ Object {
       "bool": Object {
         "filter": Array [
           Object {
-            "terms": Object {
-              "processor.event": Array [
-                "transaction",
-                "error",
-                "metric",
-              ],
-            },
-          },
-          Object {
             "range": Object {
               "@timestamp": Object {
                 "format": "epoch_millis",
@@ -48,7 +46,7 @@ Object {
           },
           Object {
             "term": Object {
-              "my.custom.ui.filter": "foo-bar",
+              "service.environment": "test",
             },
           },
         ],
@@ -56,10 +54,5 @@ Object {
     },
     "size": 0,
   },
-  "index": Array [
-    "myIndex",
-    "myIndex",
-    "myIndex",
-  ],
 }
 `;

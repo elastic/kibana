@@ -9,15 +9,15 @@ import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { ExplorationPageWrapper } from '../exploration_page_wrapper';
-
 import { EvaluatePanel } from './evaluate_panel';
-
+import { FeatureImportanceSummaryPanel } from '../total_feature_importance_summary/feature_importance_summary';
 interface Props {
   jobId: string;
+  defaultIsTraining?: boolean;
 }
 
-export const ClassificationExploration: FC<Props> = ({ jobId }) => {
-  return (
+export const ClassificationExploration: FC<Props> = ({ jobId, defaultIsTraining }) => (
+  <div className="mlDataFrameAnalyticsClassification">
     <ExplorationPageWrapper
       jobId={jobId}
       title={i18n.translate(
@@ -28,6 +28,8 @@ export const ClassificationExploration: FC<Props> = ({ jobId }) => {
         }
       )}
       EvaluatePanel={EvaluatePanel}
+      FeatureImportanceSummaryPanel={FeatureImportanceSummaryPanel}
+      defaultIsTraining={defaultIsTraining}
     />
-  );
-};
+  </div>
+);

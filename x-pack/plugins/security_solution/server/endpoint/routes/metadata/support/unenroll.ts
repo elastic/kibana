@@ -5,8 +5,8 @@
  */
 
 import { SavedObjectsClientContract } from 'kibana/server';
-import { AgentService } from '../../../../../../ingest_manager/server';
-import { Agent } from '../../../../../../ingest_manager/common/types/models';
+import { AgentService } from '../../../../../../fleet/server';
+import { Agent } from '../../../../../../fleet/common/types/models';
 
 export async function findAllUnenrolledAgentIds(
   agentService: AgentService,
@@ -19,7 +19,7 @@ export async function findAllUnenrolledAgentIds(
       perPage: pageSize,
       showInactive: true,
       kuery:
-        '(fleet-agents.packages : "endpoint" AND fleet-agents.active : false) OR (NOT fleet-agents.packages : "endpoint" AND fleet-agents.active : true)',
+        '(fleet-agents.active : false) OR (NOT fleet-agents.packages : "endpoint" AND fleet-agents.active : true)',
     };
   };
 

@@ -4,12 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { DataType } from '../types';
+import { IndexPatternPrivateState, IndexPattern, IndexPatternLayer } from './types';
 import { DraggedField } from './indexpattern';
 import {
   BaseIndexPatternColumn,
   FieldBasedIndexPatternColumn,
 } from './operations/definitions/column_types';
-import { DataType } from '../types';
+import { operationDefinitionMap, OperationType } from './operations';
 
 /**
  * Normalizes the specified operation type. (e.g. document operations
@@ -36,7 +38,64 @@ export function isDraggedField(fieldCandidate: unknown): fieldCandidate is Dragg
   return (
     typeof fieldCandidate === 'object' &&
     fieldCandidate !== null &&
-    'field' in fieldCandidate &&
-    'indexPatternId' in fieldCandidate
+    ['id', 'field', 'indexPatternId'].every((prop) => prop in fieldCandidate)
+  );
+}
+
+export function hasInvalidReference(state: IndexPatternPrivateState) {
+  return getInvalidReferences(state).length > 0;
+}
+
+export function getInvalidReferences(state: IndexPatternPrivateState) {
+  return Object.values(state.layers).filter((layer) => {
+    return layer.columnOrder.some((columnId) => {
+      const column = layer.columns[columnId];
+      return (
+        hasField(column) &&
+        fieldIsInvalid(
+          column.sourceField,
+          column.operationType,
+          state.indexPatterns[layer.indexPatternId]
+        )
+      );
+    });
+  });
+}
+
+export function getInvalidFieldReferencesForLayer(
+  layers: IndexPatternLayer[],
+  indexPatternMap: Record<string, IndexPattern>
+) {
+  return layers.map((layer) => {
+    return layer.columnOrder.filter((columnId) => {
+      const column = layer.columns[columnId];
+      return (
+        hasField(column) &&
+        fieldIsInvalid(
+          column.sourceField,
+          column.operationType,
+          indexPatternMap[layer.indexPatternId]
+        )
+      );
+    });
+  });
+}
+
+export function fieldIsInvalid(
+  sourceField: string | undefined,
+  operationType: OperationType | undefined,
+  indexPattern: IndexPattern
+) {
+  const operationDefinition = operationType && operationDefinitionMap[operationType];
+  const field = sourceField ? indexPattern.getFieldByName(sourceField) : undefined;
+
+  return Boolean(
+    sourceField &&
+      operationDefinition &&
+      !(
+        field &&
+        operationDefinition?.input === 'field' &&
+        operationDefinition.getPossibleOperationForField(field) !== undefined
+      )
   );
 }

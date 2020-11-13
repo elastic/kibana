@@ -8,8 +8,14 @@ import { skipWhile } from 'rxjs/operators';
 import { HttpSetup } from 'src/core/public';
 import { SavedObjectsManagementRecord } from 'src/plugins/saved_objects_management/public';
 import { Space } from '../../common/model/space';
-import { GetSpacePurpose } from '../../common/model/types';
+import { GetAllSpacesPurpose, GetSpaceResult } from '../../common/model/types';
 import { CopySavedObjectsToSpaceResponse } from '../copy_saved_objects_to_space/types';
+
+type SavedObject = Pick<SavedObjectsManagementRecord, 'type' | 'id'>;
+interface GetAllSpacesOptions {
+  purpose?: GetAllSpacesPurpose;
+  includeAuthorizedPurposes?: boolean;
+}
 
 export class SpacesManager {
   private activeSpace$: BehaviorSubject<Space | null> = new BehaviorSubject<Space | null>(null);
@@ -28,8 +34,10 @@ export class SpacesManager {
     this.refreshActiveSpace();
   }
 
-  public async getSpaces(purpose?: GetSpacePurpose): Promise<Space[]> {
-    return await this.http.get('/api/spaces/space', { query: { purpose } });
+  public async getSpaces(options: GetAllSpacesOptions = {}): Promise<GetSpaceResult[]> {
+    const { purpose, includeAuthorizedPurposes } = options;
+    const query = { purpose, include_authorized_purposes: includeAuthorizedPurposes };
+    return await this.http.get('/api/spaces/space', { query });
   }
 
   public async getSpace(id: string): Promise<Space> {
@@ -72,9 +80,10 @@ export class SpacesManager {
   }
 
   public async copySavedObjects(
-    objects: Array<Pick<SavedObjectsManagementRecord, 'type' | 'id'>>,
+    objects: SavedObject[],
     spaces: string[],
     includeReferences: boolean,
+    createNewCopies: boolean,
     overwrite: boolean
   ): Promise<CopySavedObjectsToSpaceResponse> {
     return this.http.post('/api/spaces/_copy_saved_objects', {
@@ -82,22 +91,42 @@ export class SpacesManager {
         objects,
         spaces,
         includeReferences,
-        overwrite,
+        ...(createNewCopies ? { createNewCopies } : { overwrite }),
       }),
     });
   }
 
   public async resolveCopySavedObjectsErrors(
-    objects: Array<Pick<SavedObjectsManagementRecord, 'type' | 'id'>>,
+    objects: SavedObject[],
     retries: unknown,
-    includeReferences: boolean
+    includeReferences: boolean,
+    createNewCopies: boolean
   ): Promise<CopySavedObjectsToSpaceResponse> {
     return this.http.post(`/api/spaces/_resolve_copy_saved_objects_errors`, {
       body: JSON.stringify({
         objects,
         includeReferences,
+        createNewCopies,
         retries,
       }),
+    });
+  }
+
+  public async getShareSavedObjectPermissions(
+    type: string
+  ): Promise<{ shareToAllSpaces: boolean }> {
+    return this.http.get('/internal/spaces/_share_saved_object_permissions', { query: { type } });
+  }
+
+  public async shareSavedObjectAdd(object: SavedObject, spaces: string[]): Promise<void> {
+    return this.http.post(`/api/spaces/_share_saved_object_add`, {
+      body: JSON.stringify({ object, spaces }),
+    });
+  }
+
+  public async shareSavedObjectRemove(object: SavedObject, spaces: string[]): Promise<void> {
+    return this.http.post(`/api/spaces/_share_saved_object_remove`, {
+      body: JSON.stringify({ object, spaces }),
     });
   }
 

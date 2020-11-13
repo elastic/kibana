@@ -104,4 +104,18 @@ export class BundleCache {
   public getOptimizerCacheKey() {
     return this.get().optimizerCacheKey;
   }
+
+  public clear() {
+    this.state = undefined;
+
+    if (this.path) {
+      try {
+        Fs.unlinkSync(this.path);
+      } catch (error) {
+        if (error.code !== 'ENOENT') {
+          throw error;
+        }
+      }
+    }
+  }
 }

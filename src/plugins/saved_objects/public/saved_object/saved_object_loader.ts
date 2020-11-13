@@ -16,9 +16,20 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { ChromeStart, SavedObjectsClientContract, SavedObjectsFindOptions } from 'kibana/public';
+import {
+  SavedObjectsClientContract,
+  SavedObjectsFindOptions,
+  SavedObjectsFindOptionsReference,
+  SavedObjectReference,
+} from 'kibana/public';
 import { SavedObject } from '../types';
 import { StringUtils } from './helpers/string_utils';
+
+export interface SavedObjectLoaderFindOptions {
+  size?: number;
+  fields?: string[];
+  hasReference?: SavedObjectsFindOptionsReference[];
+}
 
 /**
  * The SavedObjectLoader class provides some convenience functions
@@ -36,8 +47,7 @@ export class SavedObjectLoader {
 
   constructor(
     SavedObjectClass: any,
-    private readonly savedObjectsClient: SavedObjectsClientContract,
-    private readonly chrome: ChromeStart
+    private readonly savedObjectsClient: SavedObjectsClientContract
   ) {
     this.type = SavedObjectClass.type;
     this.Class = SavedObjectClass;
@@ -78,31 +88,24 @@ export class SavedObjectLoader {
       return savedObject.delete();
     });
     await Promise.all(deletions);
-
-    const coreNavLinks = this.chrome.navLinks;
-    /**
-     * Modify last url for deleted saved objects to avoid loading pages with "Could not locate..."
-     */
-    coreNavLinks
-      .getAll()
-      .filter(
-        (link) =>
-          link.linkToLastSubUrl &&
-          idsUsed.find((deletedId) => link.url && link.url.includes(deletedId)) !== undefined
-      )
-      .forEach((link) => coreNavLinks.update(link.id, { url: link.baseUrl }));
   }
 
   /**
-   * Updates source to contain an id and url field, and returns the updated
+   * Updates source to contain an id, url and references fields, and returns the updated
    * source object.
    * @param source
    * @param id
+   * @param references
    * @returns {source} The modified source object, with an id and url field.
    */
-  mapHitSource(source: Record<string, unknown>, id: string) {
+  mapHitSource(
+    source: Record<string, unknown>,
+    id: string,
+    references: SavedObjectReference[] = []
+  ) {
     source.id = id;
     source.url = this.urlFor(id);
+    source.references = references;
     return source;
   }
 
@@ -112,8 +115,16 @@ export class SavedObjectLoader {
    * @param hit
    * @returns {hit.attributes} The modified hit.attributes object, with an id and url field.
    */
-  mapSavedObjectApiHits(hit: { attributes: Record<string, unknown>; id: string }) {
-    return this.mapHitSource(hit.attributes, hit.id);
+  mapSavedObjectApiHits({
+    attributes,
+    id,
+    references = [],
+  }: {
+    attributes: Record<string, unknown>;
+    id: string;
+    references?: SavedObjectReference[];
+  }) {
+    return this.mapHitSource(attributes, id, references);
   }
 
   /**
@@ -125,7 +136,10 @@ export class SavedObjectLoader {
    * @param fields
    * @returns {Promise}
    */
-  findAll(search: string = '', size: number = 100, fields?: string[]) {
+  private findAll(
+    search: string = '',
+    { size = 100, fields, hasReference }: SavedObjectLoaderFindOptions
+  ) {
     return this.savedObjectsClient
       .find<Record<string, unknown>>({
         type: this.lowercaseType,
@@ -135,6 +149,7 @@ export class SavedObjectLoader {
         searchFields: ['title^3', 'description'],
         defaultSearchOperator: 'AND',
         fields,
+        hasReference,
       } as SavedObjectsFindOptions)
       .then((resp) => {
         return {
@@ -144,8 +159,15 @@ export class SavedObjectLoader {
       });
   }
 
-  find(search: string = '', size: number = 100) {
-    return this.findAll(search, size).then((resp) => {
+  find(search: string = '', sizeOrOptions: number | SavedObjectLoaderFindOptions = 100) {
+    const options: SavedObjectLoaderFindOptions =
+      typeof sizeOrOptions === 'number'
+        ? {
+            size: sizeOrOptions,
+          }
+        : sizeOrOptions;
+
+    return this.findAll(search, options).then((resp) => {
       return {
         total: resp.total,
         hits: resp.hits.filter((savedObject) => !savedObject.error),

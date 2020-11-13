@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ILegacyScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from 'kibana/server';
 import { INDEX_META_DATA_CREATED_BY } from '../../../common/constants/file_datavisualizer';
 import {
   ImportResponse,
@@ -15,7 +15,7 @@ import {
 } from '../../../common/types/file_datavisualizer';
 import { InputData } from './file_data_visualizer';
 
-export function importDataProvider({ callAsCurrentUser }: ILegacyScopedClusterClient) {
+export function importDataProvider({ asCurrentUser }: IScopedClusterClient) {
   async function importData(
     id: string,
     index: string,
@@ -40,9 +40,9 @@ export function importDataProvider({ callAsCurrentUser }: ILegacyScopedClusterCl
 
         // create the pipeline if one has been supplied
         if (pipelineId !== undefined) {
-          const success = await createPipeline(pipelineId, pipeline);
-          if (success.acknowledged !== true) {
-            throw success;
+          const resp = await createPipeline(pipelineId, pipeline);
+          if (resp.acknowledged !== true) {
+            throw resp;
           }
         }
         createdPipelineId = pipelineId;
@@ -80,7 +80,7 @@ export function importDataProvider({ callAsCurrentUser }: ILegacyScopedClusterCl
         id,
         index: createdIndex,
         pipelineId: createdPipelineId,
-        error: error.error !== undefined ? error.error : error,
+        error: error.body !== undefined ? error.body : error,
         docCount,
         ingestError: error.ingestError,
         failures: error.failures || [],
@@ -94,7 +94,7 @@ export function importDataProvider({ callAsCurrentUser }: ILegacyScopedClusterCl
         _meta: {
           created_by: INDEX_META_DATA_CREATED_BY,
         },
-        properties: mappings,
+        properties: mappings.properties,
       },
     };
 
@@ -102,7 +102,7 @@ export function importDataProvider({ callAsCurrentUser }: ILegacyScopedClusterCl
       body.settings = settings;
     }
 
-    await callAsCurrentUser('indices.create', { index, body });
+    await asCurrentUser.indices.create({ index, body });
   }
 
   async function indexData(index: string, pipelineId: string, data: InputData) {
@@ -118,7 +118,7 @@ export function importDataProvider({ callAsCurrentUser }: ILegacyScopedClusterCl
         settings.pipeline = pipelineId;
       }
 
-      const resp = await callAsCurrentUser('bulk', settings);
+      const { body: resp } = await asCurrentUser.bulk(settings);
       if (resp.errors) {
         throw resp;
       } else {
@@ -151,7 +151,8 @@ export function importDataProvider({ callAsCurrentUser }: ILegacyScopedClusterCl
   }
 
   async function createPipeline(id: string, pipeline: any) {
-    return await callAsCurrentUser('ingest.putPipeline', { id, body: pipeline });
+    const { body } = await asCurrentUser.ingest.putPipeline({ id, body: pipeline });
+    return body;
   }
 
   function getFailures(items: any[], data: InputData): ImportFailure[] {

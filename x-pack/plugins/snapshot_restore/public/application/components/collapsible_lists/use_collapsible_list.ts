@@ -24,7 +24,7 @@ const maximumItemPreviewCount = 10;
 
 export const useCollapsibleList = ({ items }: Arg): ReturnValue => {
   const [isShowingFullList, setIsShowingFullList] = useState<boolean>(false);
-  const itemsArray = csvToArray(items);
+  const itemsArray = csvToArray(items) ?? [];
   const displayItems: ChildItems =
     items === undefined
       ? 'all'

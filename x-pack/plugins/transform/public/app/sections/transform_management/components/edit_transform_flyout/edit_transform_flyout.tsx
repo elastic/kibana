@@ -23,13 +23,12 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { getErrorMessage } from '../../../../../shared_imports';
+import { isPostTransformsUpdateResponseSchema } from '../../../../../../common/api_schemas/type_guards';
+import { TransformPivotConfig } from '../../../../../../common/types/transform';
 
-import {
-  refreshTransformList$,
-  TransformPivotConfig,
-  REFRESH_TRANSFORM_LIST_STATE,
-} from '../../../../common';
+import { getErrorMessage } from '../../../../../../common/utils/errors';
+
+import { refreshTransformList$, REFRESH_TRANSFORM_LIST_STATE } from '../../../../common';
 import { useToastNotifications } from '../../../../app_dependencies';
 
 import { useApi } from '../../../../hooks/use_api';
@@ -58,19 +57,21 @@ export const EditTransformFlyout: FC<EditTransformFlyoutProps> = ({ closeFlyout,
     const requestConfig = applyFormFieldsToTransformConfig(config, state.formFields);
     const transformId = config.id;
 
-    try {
-      await api.updateTransform(transformId, requestConfig);
-      toastNotifications.addSuccess(
-        i18n.translate('xpack.transform.transformList.editTransformSuccessMessage', {
-          defaultMessage: 'Transform {transformId} updated.',
-          values: { transformId },
-        })
-      );
-      closeFlyout();
-      refreshTransformList$.next(REFRESH_TRANSFORM_LIST_STATE.REFRESH);
-    } catch (e) {
-      setErrorMessage(getErrorMessage(e));
+    const resp = await api.updateTransform(transformId, requestConfig);
+
+    if (!isPostTransformsUpdateResponseSchema(resp)) {
+      setErrorMessage(getErrorMessage(resp));
+      return;
     }
+
+    toastNotifications.addSuccess(
+      i18n.translate('xpack.transform.transformList.editTransformSuccessMessage', {
+        defaultMessage: 'Transform {transformId} updated.',
+        values: { transformId },
+      })
+    );
+    closeFlyout();
+    refreshTransformList$.next(REFRESH_TRANSFORM_LIST_STATE.REFRESH);
   }
 
   const isUpdateButtonDisabled = !state.isFormValid || !state.isFormTouched;

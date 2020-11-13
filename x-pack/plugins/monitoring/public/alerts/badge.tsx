@@ -14,14 +14,15 @@ import {
   EuiFlexItem,
   EuiText,
 } from '@elastic/eui';
-import { CommonAlertStatus, CommonAlertState } from '../../common/types';
+import { CommonAlertStatus, CommonAlertState } from '../../common/types/alerts';
 import { AlertSeverity } from '../../common/enums';
 // @ts-ignore
 import { formatDateTimeLocal } from '../../common/formatting';
-import { AlertState } from '../../server/alerts/types';
+import { AlertMessage, AlertState } from '../../common/types/alerts';
 import { AlertPanel } from './panel';
 import { Legacy } from '../legacy_shims';
 import { isInSetupMode } from '../lib/setup_mode';
+import { SetupModeContext } from '../components/setup_mode/setup_mode_context';
 
 function getDateFromState(state: CommonAlertState) {
   const timestamp = state.state.ui.triggeredMS;
@@ -39,11 +40,12 @@ interface AlertInPanel {
 interface Props {
   alerts: { [alertTypeId: string]: CommonAlertStatus };
   stateFilter: (state: AlertState) => boolean;
+  nextStepsFilter: (nextStep: AlertMessage) => boolean;
 }
 export const AlertsBadge: React.FC<Props> = (props: Props) => {
-  const { stateFilter = () => true } = props;
+  const { stateFilter = () => true, nextStepsFilter = () => true } = props;
   const [showPopover, setShowPopover] = React.useState<AlertSeverity | boolean | null>(null);
-  const inSetupMode = isInSetupMode();
+  const inSetupMode = isInSetupMode(React.useContext(SetupModeContext));
   const alerts = Object.values(props.alerts).filter(Boolean);
 
   if (alerts.length === 0) {
@@ -80,7 +82,7 @@ export const AlertsBadge: React.FC<Props> = (props: Props) => {
           id: index + 1,
           title: alertStatus.alert.label,
           width: 400,
-          content: <AlertPanel alert={alertStatus} />,
+          content: <AlertPanel alert={alertStatus} nextStepsFilter={nextStepsFilter} />,
         };
       }),
     ];
@@ -92,7 +94,6 @@ export const AlertsBadge: React.FC<Props> = (props: Props) => {
         isOpen={showPopover === true}
         closePopover={() => setShowPopover(null)}
         panelPaddingSize="none"
-        withTitle
         anchorPosition="downLeft"
       >
         <EuiContextMenu initialPanelId={0} panels={panels} />
@@ -158,7 +159,13 @@ export const AlertsBadge: React.FC<Props> = (props: Props) => {
             id: index + 1,
             title: getDateFromState(alertStatus.alertState),
             width: 400,
-            content: <AlertPanel alert={alertStatus.alert} alertState={alertStatus.alertState} />,
+            content: (
+              <AlertPanel
+                alert={alertStatus.alert}
+                alertState={alertStatus.alertState}
+                nextStepsFilter={nextStepsFilter}
+              />
+            ),
           };
         }),
       ];
@@ -170,7 +177,6 @@ export const AlertsBadge: React.FC<Props> = (props: Props) => {
           isOpen={showPopover === type}
           closePopover={() => setShowPopover(null)}
           panelPaddingSize="none"
-          withTitle
           anchorPosition="downLeft"
         >
           <EuiContextMenu initialPanelId={0} panels={panels} />
@@ -180,7 +186,7 @@ export const AlertsBadge: React.FC<Props> = (props: Props) => {
   }
 
   return (
-    <EuiFlexGrid>
+    <EuiFlexGrid data-test-subj="monitoringSetupModeAlertBadges">
       {badges.map((badge, index) => (
         <EuiFlexItem key={index} grow={false}>
           {badge}

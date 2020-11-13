@@ -16,25 +16,35 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import {
-  SavedObjectLoader,
-  SavedObjectKibanaServices,
-} from '../../../../plugins/saved_objects/public';
+
+import { SavedObjectReference, SavedObjectsFindOptionsReference } from 'kibana/public';
+import { SavedObjectLoader } from '../../../../plugins/saved_objects/public';
 import { findListItems } from './find_list_items';
-import { createSavedVisClass } from './_saved_vis';
+import { createSavedVisClass, SavedVisServices } from './_saved_vis';
 import { TypesStart } from '../vis_types';
 
-export interface SavedObjectKibanaServicesWithVisualizations extends SavedObjectKibanaServices {
+export interface SavedVisServicesWithVisualizations extends SavedVisServices {
   visualizationTypes: TypesStart;
 }
 export type SavedVisualizationsLoader = ReturnType<typeof createSavedVisLoader>;
-export function createSavedVisLoader(services: SavedObjectKibanaServicesWithVisualizations) {
+
+export interface FindListItemsOptions {
+  size?: number;
+  references?: SavedObjectsFindOptionsReference[];
+}
+
+export function createSavedVisLoader(services: SavedVisServicesWithVisualizations) {
   const { savedObjectsClient, visualizationTypes } = services;
 
   class SavedObjectLoaderVisualize extends SavedObjectLoader {
-    mapHitSource = (source: Record<string, any>, id: string) => {
+    mapHitSource = (
+      source: Record<string, any>,
+      id: string,
+      references: SavedObjectReference[] = []
+    ) => {
       const visTypes = visualizationTypes;
       source.id = id;
+      source.references = references;
       source.url = this.urlFor(id);
 
       let typeName = source.typeName;
@@ -43,7 +53,7 @@ export function createSavedVisLoader(services: SavedObjectKibanaServicesWithVisu
           typeName = JSON.parse(String(source.visState)).type;
         } catch (e) {
           /* missing typename handled below */
-        } // eslint-disable-line no-empty
+        }
       }
 
       if (!typeName || !visTypes.get(typeName)) {
@@ -65,10 +75,17 @@ export function createSavedVisLoader(services: SavedObjectKibanaServicesWithVisu
     }
     // This behaves similarly to find, except it returns visualizations that are
     // defined as appExtensions and which may not conform to type: visualization
-    findListItems(search: string = '', size: number = 100) {
+    findListItems(search: string = '', sizeOrOptions: number | FindListItemsOptions = 100) {
+      const { size = 100, references = undefined } =
+        typeof sizeOrOptions === 'number'
+          ? {
+              size: sizeOrOptions,
+            }
+          : sizeOrOptions;
       return findListItems({
         search,
         size,
+        references,
         mapSavedObjectApiHits: this.mapSavedObjectApiHits.bind(this),
         savedObjectsClient,
         visTypes: visualizationTypes.getAliases(),
@@ -76,9 +93,7 @@ export function createSavedVisLoader(services: SavedObjectKibanaServicesWithVisu
     }
   }
   const SavedVis = createSavedVisClass(services);
-  return new SavedObjectLoaderVisualize(
-    SavedVis,
-    savedObjectsClient,
-    services.chrome
-  ) as SavedObjectLoader & { findListItems: (search: string, size: number) => any };
+  return new SavedObjectLoaderVisualize(SavedVis, savedObjectsClient) as SavedObjectLoader & {
+    findListItems: (search: string, sizeOrOptions?: number | FindListItemsOptions) => any;
+  };
 }

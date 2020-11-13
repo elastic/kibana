@@ -23,7 +23,7 @@ export function initPlugin(router: IRouter, path: string) {
       validate: {
         body: schema.object(
           {
-            dedup_key: schema.string(),
+            dedup_key: schema.maybe(schema.string()),
             payload: schema.object(
               {
                 summary: schema.string(),
@@ -48,12 +48,7 @@ export function initPlugin(router: IRouter, path: string) {
       res: KibanaResponseFactory
     ): Promise<IKibanaResponse<any>> {
       const { body } = req;
-      let dedupKey = body && body.dedup_key;
-      const summary = body && body.payload && body.payload.summary;
-
-      if (dedupKey == null) {
-        dedupKey = `kibana-ft-simulator-dedup-key-${new Date().toISOString()}`;
-      }
+      const summary = body?.payload?.summary;
 
       switch (summary) {
         case 'respond-with-429':
@@ -67,7 +62,7 @@ export function initPlugin(router: IRouter, path: string) {
       return jsonResponse(res, 202, {
         status: 'success',
         message: 'Event processed',
-        dedup_key: dedupKey,
+        ...(body?.dedup_key ? { dedup_key: body?.dedup_key } : {}),
       });
     }
   );

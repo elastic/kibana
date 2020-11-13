@@ -20,20 +20,16 @@ import { i18n } from '@kbn/i18n';
 
 import { EuiSpacer, EuiButtonGroup, EuiFormRow, EuiSwitch } from '@elastic/eui';
 import {
-  CATEGORICAL_DATA_TYPES,
-  ORDINAL_DATA_TYPES,
   LABEL_BORDER_SIZES,
   VECTOR_STYLES,
   STYLE_TYPE,
   VECTOR_SHAPE_TYPE,
 } from '../../../../../common/constants';
+import { createStyleFieldsHelper } from '../style_fields_helper';
 
 export class VectorStyleEditor extends Component {
   state = {
-    dateFields: [],
-    numberFields: [],
-    fields: [],
-    ordinalAndCategoricalFields: [],
+    styleFields: [],
     defaultDynamicProperties: getDefaultDynamicProperties(),
     defaultStaticProperties: getDefaultStaticProperties(),
     supportedFeatures: undefined,
@@ -56,33 +52,17 @@ export class VectorStyleEditor extends Component {
   }
 
   async _loadFields() {
-    const getFieldMeta = async (field) => {
-      return {
-        label: await field.getLabel(),
-        name: field.getName(),
-        origin: field.getOrigin(),
-        type: await field.getDataType(),
-        supportsAutoDomain: field.supportsAutoDomain(),
-      };
-    };
-
-    //These are all fields (only used for text labeling)
-    const fields = await this.props.layer.getStyleEditorFields();
-    const fieldPromises = fields.map(getFieldMeta);
-    const fieldsArrayAll = await Promise.all(fieldPromises);
-    if (!this._isMounted || _.isEqual(fieldsArrayAll, this.state.fields)) {
+    const styleFieldsHelper = await createStyleFieldsHelper(
+      await this.props.layer.getStyleEditorFields()
+    );
+    const styleFields = styleFieldsHelper.getStyleFields();
+    if (!this._isMounted || _.isEqual(styleFields, this.state.styleFields)) {
       return;
     }
 
     this.setState({
-      fields: fieldsArrayAll,
-      ordinalAndCategoricalFields: fieldsArrayAll.filter((field) => {
-        return (
-          CATEGORICAL_DATA_TYPES.includes(field.type) || ORDINAL_DATA_TYPES.includes(field.type)
-        );
-      }),
-      dateFields: fieldsArrayAll.filter((field) => field.type === 'date'),
-      numberFields: fieldsArrayAll.filter((field) => field.type === 'number'),
+      styleFields,
+      styleFieldsHelper,
     });
   }
 
@@ -107,12 +87,6 @@ export class VectorStyleEditor extends Component {
         selectedFeature: selectedFeature,
       });
     }
-  }
-
-  _getOrdinalFields() {
-    return [...this.state.dateFields, ...this.state.numberFields].filter((field) => {
-      return field.supportsAutoDomain;
-    });
   }
 
   _handleSelectedFeatureChange = (selectedFeature) => {
@@ -165,7 +139,7 @@ export class VectorStyleEditor extends Component {
         onStaticStyleChange={this._onStaticStyleChange}
         onDynamicStyleChange={this._onDynamicStyleChange}
         styleProperty={this.props.styleProperties[VECTOR_STYLES.FILL_COLOR]}
-        fields={this.state.ordinalAndCategoricalFields}
+        fields={this.state.styleFieldsHelper.getFieldsForStyle(VECTOR_STYLES.FILL_COLOR)}
         defaultStaticStyleOptions={
           this.state.defaultStaticProperties[VECTOR_STYLES.FILL_COLOR].options
         }
@@ -186,7 +160,7 @@ export class VectorStyleEditor extends Component {
         onStaticStyleChange={this._onStaticStyleChange}
         onDynamicStyleChange={this._onDynamicStyleChange}
         styleProperty={this.props.styleProperties[VECTOR_STYLES.LINE_COLOR]}
-        fields={this.state.ordinalAndCategoricalFields}
+        fields={this.state.styleFieldsHelper.getFieldsForStyle(VECTOR_STYLES.LINE_COLOR)}
         defaultStaticStyleOptions={
           this.state.defaultStaticProperties[VECTOR_STYLES.LINE_COLOR].options
         }
@@ -205,7 +179,7 @@ export class VectorStyleEditor extends Component {
         onStaticStyleChange={this._onStaticStyleChange}
         onDynamicStyleChange={this._onDynamicStyleChange}
         styleProperty={this.props.styleProperties[VECTOR_STYLES.LINE_WIDTH]}
-        fields={this._getOrdinalFields()}
+        fields={this.state.styleFieldsHelper.getFieldsForStyle(VECTOR_STYLES.LINE_WIDTH)}
         defaultStaticStyleOptions={
           this.state.defaultStaticProperties[VECTOR_STYLES.LINE_WIDTH].options
         }
@@ -225,7 +199,7 @@ export class VectorStyleEditor extends Component {
           onStaticStyleChange={this._onStaticStyleChange}
           onDynamicStyleChange={this._onDynamicStyleChange}
           styleProperty={this.props.styleProperties[VECTOR_STYLES.LABEL_TEXT]}
-          fields={this.state.fields}
+          fields={this.state.styleFieldsHelper.getFieldsForStyle(VECTOR_STYLES.LABEL_TEXT)}
           defaultStaticStyleOptions={
             this.state.defaultStaticProperties[VECTOR_STYLES.LABEL_TEXT].options
           }
@@ -242,7 +216,7 @@ export class VectorStyleEditor extends Component {
           onStaticStyleChange={this._onStaticStyleChange}
           onDynamicStyleChange={this._onDynamicStyleChange}
           styleProperty={this.props.styleProperties[VECTOR_STYLES.LABEL_COLOR]}
-          fields={this.state.ordinalAndCategoricalFields}
+          fields={this.state.styleFieldsHelper.getFieldsForStyle(VECTOR_STYLES.LABEL_COLOR)}
           defaultStaticStyleOptions={
             this.state.defaultStaticProperties[VECTOR_STYLES.LABEL_COLOR].options
           }
@@ -258,7 +232,7 @@ export class VectorStyleEditor extends Component {
           onStaticStyleChange={this._onStaticStyleChange}
           onDynamicStyleChange={this._onDynamicStyleChange}
           styleProperty={this.props.styleProperties[VECTOR_STYLES.LABEL_SIZE]}
-          fields={this._getOrdinalFields()}
+          fields={this.state.styleFieldsHelper.getFieldsForStyle(VECTOR_STYLES.LABEL_SIZE)}
           defaultStaticStyleOptions={
             this.state.defaultStaticProperties[VECTOR_STYLES.LABEL_SIZE].options
           }
@@ -275,7 +249,7 @@ export class VectorStyleEditor extends Component {
           onStaticStyleChange={this._onStaticStyleChange}
           onDynamicStyleChange={this._onDynamicStyleChange}
           styleProperty={this.props.styleProperties[VECTOR_STYLES.LABEL_BORDER_COLOR]}
-          fields={this.state.ordinalAndCategoricalFields}
+          fields={this.state.styleFieldsHelper.getFieldsForStyle(VECTOR_STYLES.LABEL_BORDER_COLOR)}
           defaultStaticStyleOptions={
             this.state.defaultStaticProperties[VECTOR_STYLES.LABEL_BORDER_COLOR].options
           }
@@ -309,7 +283,7 @@ export class VectorStyleEditor extends Component {
             onStaticStyleChange={this._onStaticStyleChange}
             onDynamicStyleChange={this._onDynamicStyleChange}
             styleProperty={this.props.styleProperties[VECTOR_STYLES.ICON_ORIENTATION]}
-            fields={this.state.numberFields}
+            fields={this.state.styleFieldsHelper.getFieldsForStyle(VECTOR_STYLES.ICON_ORIENTATION)}
             defaultStaticStyleOptions={
               this.state.defaultStaticProperties[VECTOR_STYLES.ICON_ORIENTATION].options
             }
@@ -328,7 +302,7 @@ export class VectorStyleEditor extends Component {
             onStaticStyleChange={this._onStaticStyleChange}
             onDynamicStyleChange={this._onDynamicStyleChange}
             styleProperty={this.props.styleProperties[VECTOR_STYLES.ICON]}
-            fields={this.state.ordinalAndCategoricalFields}
+            fields={this.state.styleFieldsHelper.getFieldsForStyle(VECTOR_STYLES.ICON)}
             defaultStaticStyleOptions={
               this.state.defaultStaticProperties[VECTOR_STYLES.ICON].options
             }
@@ -368,7 +342,7 @@ export class VectorStyleEditor extends Component {
           onStaticStyleChange={this._onStaticStyleChange}
           onDynamicStyleChange={this._onDynamicStyleChange}
           styleProperty={this.props.styleProperties[VECTOR_STYLES.ICON_SIZE]}
-          fields={this._getOrdinalFields()}
+          fields={this.state.styleFieldsHelper.getFieldsForStyle(VECTOR_STYLES.ICON_SIZE)}
           defaultStaticStyleOptions={
             this.state.defaultStaticProperties[VECTOR_STYLES.ICON_SIZE].options
           }
@@ -409,9 +383,9 @@ export class VectorStyleEditor extends Component {
   }
 
   _renderProperties() {
-    const { supportedFeatures, selectedFeature } = this.state;
+    const { supportedFeatures, selectedFeature, styleFieldsHelper } = this.state;
 
-    if (!supportedFeatures) {
+    if (!supportedFeatures || !styleFieldsHelper) {
       return null;
     }
 

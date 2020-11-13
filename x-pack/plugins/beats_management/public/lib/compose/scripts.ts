@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { configBlockSchemas } from '../../../../../legacy/plugins/beats_management/common/config_schemas';
-import { translateConfigSchema } from '../../../../../legacy/plugins/beats_management/common/config_schemas_translations_map';
+import { configBlockSchemas } from '../../../common/config_schemas';
+import { translateConfigSchema } from '../../../common/config_schemas_translations_map';
 import { RestBeatsAdapter } from '../adapters/beats/rest_beats_adapter';
 import { RestConfigBlocksAdapter } from '../adapters/configuration_blocks/rest_config_blocks_adapter';
 import { MemoryElasticsearchAdapter } from '../adapters/elasticsearch/memory';

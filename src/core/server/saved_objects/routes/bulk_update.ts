@@ -40,6 +40,7 @@ export const registerBulkUpdateRoute = (router: IRouter) => {
                 })
               )
             ),
+            namespace: schema.maybe(schema.string({ minLength: 1 })),
           })
         ),
       },

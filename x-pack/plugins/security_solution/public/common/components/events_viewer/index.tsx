@@ -7,8 +7,8 @@
 import React, { useCallback, useMemo, useEffect } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
+import styled from 'styled-components';
 
-import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
 import { inputsModel, inputsSelectors, State } from '../../store';
 import { inputsActions } from '../../store/actions';
 import { timelineSelectors, timelineActions } from '../../../timelines/store/timeline';
@@ -19,20 +19,30 @@ import {
 } from '../../../timelines/store/timeline/model';
 import { OnChangeItemsPerPage } from '../../../timelines/components/timeline/events';
 import { Filter } from '../../../../../../../src/plugins/data/public';
-import { useUiSetting } from '../../lib/kibana';
 import { EventsViewer } from './events_viewer';
-import { useFetchIndexPatterns } from '../../../detections/containers/detection_engine/rules/fetch_index_patterns';
 import { InspectButtonContainer } from '../inspect';
+import { useFullScreen } from '../../containers/use_full_screen';
+import { SourcererScopeName } from '../../store/sourcerer/model';
+import { useSourcererScope } from '../../containers/sourcerer';
+
+const DEFAULT_EVENTS_VIEWER_HEIGHT = 652;
+
+const FullScreenContainer = styled.div<{ $isFullScreen: boolean }>`
+  height: ${({ $isFullScreen }) => ($isFullScreen ? '100%' : `${DEFAULT_EVENTS_VIEWER_HEIGHT}px`)};
+  flex: 1 1 auto;
+  display: flex;
+  width: 100%;
+`;
 
 export interface OwnProps {
-  defaultIndices?: string[];
   defaultModel: SubsetTimelineModel;
   end: string;
-  height?: number;
   id: string;
+  scopeId: SourcererScopeName;
   start: string;
   headerFilterGroup?: React.ReactNode;
   pageFilters?: Filter[];
+  onRuleChange?: () => void;
   utilityBar?: (refetch: inputsModel.Refetch, totalCount: number) => React.ReactNode;
 }
 
@@ -43,13 +53,11 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   columns,
   dataProviders,
   deletedEventIds,
-  defaultIndices,
   deleteEventQuery,
   end,
   excludedRowRendererIds,
   filters,
   headerFilterGroup,
-  height,
   id,
   isLive,
   itemsPerPage,
@@ -57,8 +65,10 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   kqlMode,
   pageFilters,
   query,
+  onRuleChange,
   removeColumn,
   start,
+  scopeId,
   showCheckboxes,
   sort,
   updateItemsPerPage,
@@ -67,12 +77,14 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   // If truthy, the graph viewer (Resolver) is showing
   graphEventId,
 }) => {
-  const [
-    { docValueFields, browserFields, indexPatterns, isLoading: isLoadingIndexPattern },
-  ] = useFetchIndexPatterns(
-    defaultIndices ?? useUiSetting<string[]>(DEFAULT_INDEX_KEY),
-    'events_viewer'
-  );
+  const {
+    browserFields,
+    docValueFields,
+    indexPattern,
+    selectedPatterns,
+    loading: isLoadingIndexPattern,
+  } = useSourcererScope(scopeId);
+  const { globalFullScreen } = useFullScreen();
 
   useEffect(() => {
     if (createTimeline != null) {
@@ -80,6 +92,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
         id,
         columns,
         excludedRowRendererIds,
+        indexNames: selectedPatterns,
         sort,
         itemsPerPage,
         showCheckboxes,
@@ -121,33 +134,36 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   const globalFilters = useMemo(() => [...filters, ...(pageFilters ?? [])], [filters, pageFilters]);
 
   return (
-    <InspectButtonContainer>
-      <EventsViewer
-        browserFields={browserFields}
-        columns={columns}
-        docValueFields={docValueFields}
-        id={id}
-        dataProviders={dataProviders!}
-        deletedEventIds={deletedEventIds}
-        end={end}
-        isLoadingIndexPattern={isLoadingIndexPattern}
-        filters={globalFilters}
-        headerFilterGroup={headerFilterGroup}
-        height={height}
-        indexPattern={indexPatterns}
-        isLive={isLive}
-        itemsPerPage={itemsPerPage!}
-        itemsPerPageOptions={itemsPerPageOptions!}
-        kqlMode={kqlMode}
-        onChangeItemsPerPage={onChangeItemsPerPage}
-        query={query}
-        start={start}
-        sort={sort}
-        toggleColumn={toggleColumn}
-        utilityBar={utilityBar}
-        graphEventId={graphEventId}
-      />
-    </InspectButtonContainer>
+    <FullScreenContainer $isFullScreen={globalFullScreen}>
+      <InspectButtonContainer>
+        <EventsViewer
+          browserFields={browserFields}
+          columns={columns}
+          docValueFields={docValueFields}
+          id={id}
+          dataProviders={dataProviders!}
+          deletedEventIds={deletedEventIds}
+          end={end}
+          isLoadingIndexPattern={isLoadingIndexPattern}
+          filters={globalFilters}
+          headerFilterGroup={headerFilterGroup}
+          indexNames={selectedPatterns}
+          indexPattern={indexPattern}
+          isLive={isLive}
+          itemsPerPage={itemsPerPage!}
+          itemsPerPageOptions={itemsPerPageOptions!}
+          kqlMode={kqlMode}
+          onChangeItemsPerPage={onChangeItemsPerPage}
+          query={query}
+          onRuleChange={onRuleChange}
+          start={start}
+          sort={sort}
+          toggleColumn={toggleColumn}
+          utilityBar={utilityBar}
+          graphEventId={graphEventId}
+        />
+      </InspectButtonContainer>
+    </FullScreenContainer>
   );
 };
 
@@ -209,17 +225,15 @@ type PropsFromRedux = ConnectedProps<typeof connector>;
 export const StatefulEventsViewer = connector(
   React.memo(
     StatefulEventsViewerComponent,
-    // eslint-disable-next-line complexity
     (prevProps, nextProps) =>
       prevProps.id === nextProps.id &&
+      prevProps.scopeId === nextProps.scopeId &&
       deepEqual(prevProps.columns, nextProps.columns) &&
-      deepEqual(prevProps.defaultIndices, nextProps.defaultIndices) &&
       deepEqual(prevProps.dataProviders, nextProps.dataProviders) &&
       deepEqual(prevProps.excludedRowRendererIds, nextProps.excludedRowRendererIds) &&
       prevProps.deletedEventIds === nextProps.deletedEventIds &&
       prevProps.end === nextProps.end &&
       deepEqual(prevProps.filters, nextProps.filters) &&
-      prevProps.height === nextProps.height &&
       prevProps.isLive === nextProps.isLive &&
       prevProps.itemsPerPage === nextProps.itemsPerPage &&
       deepEqual(prevProps.itemsPerPageOptions, nextProps.itemsPerPageOptions) &&

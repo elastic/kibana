@@ -19,7 +19,6 @@
 
 import { DiscoverUrlGenerator } from './url_generator';
 import { hashedItemStore, getStatesFromKbnUrl } from '../../kibana_utils/public';
-// eslint-disable-next-line
 import { mockStorage } from '../../kibana_utils/public/storage/hashed_item_store/mock';
 import { FilterStateStore } from '../../data/common';
 
@@ -211,6 +210,15 @@ describe('Discover url generator', () => {
         to: 'now',
       },
     });
+  });
+
+  test('can specify a search session id', async () => {
+    const { generator } = await setup();
+    const url = await generator.createUrl({
+      searchSessionId: '__test__',
+    });
+    expect(url).toMatchInlineSnapshot(`"xyz/app/discover#/?_g=()&_a=()&searchSessionId=__test__"`);
+    expect(url).toContain('__test__');
   });
 
   describe('useHash property', () => {

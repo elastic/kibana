@@ -2,9 +2,8 @@
 
 exports[`MetricAggParamEditor should be rendered with default set of props 1`] = `
 <EuiFormRow
-  compressed={true}
   describedByIds={Array []}
-  display="row"
+  display="rowCompressed"
   fullWidth={true}
   hasChildLabel={true}
   hasEmptyLabelSpace={false}

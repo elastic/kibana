@@ -5,6 +5,7 @@
  */
 
 import { IRouter } from 'src/core/server';
+import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 import { LicensingPluginSetup } from '../../licensing/server';
 import { IndexManagementPluginSetup } from '../../index_management/server';
 import { RemoteClustersPluginSetup } from '../../remote_clusters/server';
@@ -16,6 +17,7 @@ export interface Dependencies {
   licensing: LicensingPluginSetup;
   indexManagement: IndexManagementPluginSetup;
   remoteClusters: RemoteClustersPluginSetup;
+  features: FeaturesPluginSetup;
 }
 
 export interface RouteDependencies {

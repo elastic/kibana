@@ -30,7 +30,7 @@ jest.mock('./components/time_field', () => ({ TimeField: 'TimeField' }));
 jest.mock('./components/advanced_options', () => ({ AdvancedOptions: 'AdvancedOptions' }));
 jest.mock('./components/action_buttons', () => ({ ActionButtons: 'ActionButtons' }));
 jest.mock('./../../lib', () => ({
-  extractTimeFields: require.requireActual('./../../lib').extractTimeFields,
+  extractTimeFields: jest.requireActual('./../../lib').extractTimeFields,
   ensureMinimumTime: async (fields: IFieldType) => Promise.resolve(fields),
 }));
 
@@ -48,11 +48,8 @@ const fields = [
   },
 ];
 mockContext.data.indexPatterns = {
-  make: () => ({
-    fieldsFetcher: {
-      fetchForWildcard: jest.fn().mockReturnValue(Promise.resolve(fields)),
-    },
-  }),
+  create: () => ({}),
+  getFieldsForWildcard: jest.fn().mockReturnValue(Promise.resolve(fields)),
 } as any;
 
 describe('StepTimeField', () => {

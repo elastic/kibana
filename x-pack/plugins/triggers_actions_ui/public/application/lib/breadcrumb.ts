@@ -5,9 +5,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { routeToHome, routeToConnectors, routeToAlerts } from '../constants';
+import { routeToHome, routeToConnectors, routeToAlerts, routeToAlertDetails } from '../constants';
 
-export const getCurrentBreadcrumb = (type: string): { text: string; href: string } => {
+export const getAlertingSectionBreadcrumb = (type: string): { text: string; href: string } => {
   // Home and sections
   switch (type) {
     case 'connectors':
@@ -32,4 +32,14 @@ export const getCurrentBreadcrumb = (type: string): { text: string; href: string
         href: `${routeToHome}`,
       };
   }
+};
+
+export const getAlertDetailsBreadcrumb = (
+  id: string,
+  name: string
+): { text: string; href: string } => {
+  return {
+    text: name,
+    href: `${routeToAlertDetails.replace(':alertId', id)}`,
+  };
 };

@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { pick } from '@kbn/std';
 import { CoreId } from '../server';
 import { PackageInfo, EnvironmentMode } from '../server/types';
 import { CoreSetup, CoreStart } from '.';
@@ -30,13 +31,11 @@ import {
   InjectedMetadataSetup,
   InjectedMetadataStart,
 } from './injected_metadata';
-import { LegacyPlatformParams, LegacyPlatformService } from './legacy';
 import { NotificationsService } from './notifications';
 import { OverlayService } from './overlays';
 import { PluginsService } from './plugins';
 import { UiSettingsService } from './ui_settings';
 import { ApplicationService } from './application';
-import { mapToObject, pick } from '../utils/';
 import { DocLinksService } from './doc_links';
 import { RenderingService } from './rendering';
 import { SavedObjectsService } from './saved_objects';
@@ -49,9 +48,6 @@ interface Params {
   rootDomElement: HTMLElement;
   browserSupportsCsp: boolean;
   injectedMetadata: InjectedMetadataParams['injectedMetadata'];
-  requireLegacyFiles?: LegacyPlatformParams['requireLegacyFiles'];
-  requireLegacyBootstrapModule?: LegacyPlatformParams['requireLegacyBootstrapModule'];
-  requireNewPlatformShimModule?: LegacyPlatformParams['requireNewPlatformShimModule'];
 }
 
 /** @internal */
@@ -86,7 +82,6 @@ export interface InternalCoreStart extends Omit<CoreStart, 'application'> {
 export class CoreSystem {
   private readonly fatalErrors: FatalErrorsService;
   private readonly injectedMetadata: InjectedMetadataService;
-  private readonly legacy: LegacyPlatformService;
   private readonly notifications: NotificationsService;
   private readonly http: HttpService;
   private readonly savedObjects: SavedObjectsService;
@@ -107,14 +102,7 @@ export class CoreSystem {
   private fatalErrorsSetup: FatalErrorsSetup | null = null;
 
   constructor(params: Params) {
-    const {
-      rootDomElement,
-      browserSupportsCsp,
-      injectedMetadata,
-      requireLegacyFiles,
-      requireLegacyBootstrapModule,
-      requireNewPlatformShimModule,
-    } = params;
+    const { rootDomElement, browserSupportsCsp, injectedMetadata } = params;
 
     this.rootDomElement = rootDomElement;
 
@@ -145,12 +133,6 @@ export class CoreSystem {
     this.context = new ContextService(this.coreContext);
     this.plugins = new PluginsService(this.coreContext, injectedMetadata.uiPlugins);
     this.coreApp = new CoreApp(this.coreContext);
-
-    this.legacy = new LegacyPlatformService({
-      requireLegacyFiles,
-      requireLegacyBootstrapModule,
-      requireNewPlatformShimModule,
-    });
   }
 
   public async setup() {
@@ -170,16 +152,9 @@ export class CoreSystem {
 
       const pluginDependencies = this.plugins.getOpaqueIds();
       const context = this.context.setup({
-        // We inject a fake "legacy plugin" with dependencies on every plugin so that legacy plugins:
-        // 1) Can access context from any NP plugin
-        // 2) Can register context providers that will only be available to other legacy plugins and will not leak into
-        //    New Platform plugins.
-        pluginDependencies: new Map([
-          ...pluginDependencies,
-          [this.legacy.legacyId, [...pluginDependencies.keys()]],
-        ]),
+        pluginDependencies: new Map([...pluginDependencies]),
       });
-      const application = this.application.setup({ context, http, injectedMetadata });
+      const application = this.application.setup({ context, http });
       this.coreApp.setup({ application, http, injectedMetadata, notifications });
 
       const core: InternalCoreSetup = {
@@ -193,12 +168,7 @@ export class CoreSystem {
       };
 
       // Services that do not expose contracts at setup
-      const plugins = await this.plugins.setup(core);
-
-      await this.legacy.setup({
-        core,
-        plugins: mapToObject(plugins.contracts),
-      });
+      await this.plugins.setup(core);
 
       return { fatalErrors: this.fatalErrorsSetup };
     } catch (error) {
@@ -277,7 +247,7 @@ export class CoreSystem {
         fatalErrors,
       };
 
-      const plugins = await this.plugins.start(core);
+      await this.plugins.start(core);
 
       // ensure the rootDomElement is empty
       this.rootDomElement.textContent = '';
@@ -286,18 +256,11 @@ export class CoreSystem {
       this.rootDomElement.appendChild(notificationsTargetDomElement);
       this.rootDomElement.appendChild(overlayTargetDomElement);
 
-      const rendering = this.rendering.start({
+      this.rendering.start({
         application,
         chrome,
-        injectedMetadata,
         overlays,
         targetDomElement: coreUiTargetDomElement,
-      });
-
-      await this.legacy.start({
-        core,
-        plugins: mapToObject(plugins.contracts),
-        targetDomElement: rendering.legacyTargetDomElement,
       });
 
       return {
@@ -315,7 +278,6 @@ export class CoreSystem {
   }
 
   public stop() {
-    this.legacy.stop();
     this.plugins.stop();
     this.coreApp.stop();
     this.notifications.stop();

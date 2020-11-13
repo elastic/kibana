@@ -233,6 +233,10 @@ function isBeatFromAPM(bucket) {
 }
 
 async function hasNecessaryPermissions(req) {
+  const securityFeature = req.server.plugins.monitoring.info.getSecurityFeature();
+  if (!securityFeature.isAvailable || !securityFeature.isEnabled) {
+    return true;
+  }
   try {
     const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('data');
     const response = await callWithRequest(req, 'transport.request', {
@@ -248,6 +252,9 @@ async function hasNecessaryPermissions(req) {
     if (
       err.message === 'no handler found for uri [/_security/user/_has_privileges] and method [POST]'
     ) {
+      return true;
+    }
+    if (err.message.includes('Invalid index name [_security]')) {
       return true;
     }
     return false;

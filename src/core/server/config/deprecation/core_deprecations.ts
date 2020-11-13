@@ -18,7 +18,7 @@
  */
 
 import { has, get } from 'lodash';
-import { ConfigDeprecationProvider, ConfigDeprecation } from './types';
+import { ConfigDeprecationProvider, ConfigDeprecation } from '@kbn/config';
 
 const configPathDeprecation: ConfigDeprecation = (settings, fromPath, log) => {
   if (has(process.env, 'CONFIG_PATH')) {
@@ -113,18 +113,33 @@ const mapManifestServiceUrlDeprecation: ConfigDeprecation = (settings, fromPath,
   return settings;
 };
 
-export const coreDeprecationProvider: ConfigDeprecationProvider = ({
-  unusedFromRoot,
-  renameFromRoot,
-}) => [
+export const coreDeprecationProvider: ConfigDeprecationProvider = ({ rename, unusedFromRoot }) => [
   unusedFromRoot('savedObjects.indexCheckTimeout'),
   unusedFromRoot('server.xsrf.token'),
   unusedFromRoot('maps.manifestServiceUrl'),
-  renameFromRoot('optimize.lazy', 'optimize.watch'),
-  renameFromRoot('optimize.lazyPort', 'optimize.watchPort'),
-  renameFromRoot('optimize.lazyHost', 'optimize.watchHost'),
-  renameFromRoot('optimize.lazyPrebuild', 'optimize.watchPrebuild'),
-  renameFromRoot('optimize.lazyProxyTimeout', 'optimize.watchProxyTimeout'),
+  unusedFromRoot('optimize.lazy'),
+  unusedFromRoot('optimize.lazyPort'),
+  unusedFromRoot('optimize.lazyHost'),
+  unusedFromRoot('optimize.lazyPrebuild'),
+  unusedFromRoot('optimize.lazyProxyTimeout'),
+  unusedFromRoot('optimize.enabled'),
+  unusedFromRoot('optimize.bundleFilter'),
+  unusedFromRoot('optimize.bundleDir'),
+  unusedFromRoot('optimize.viewCaching'),
+  unusedFromRoot('optimize.watch'),
+  unusedFromRoot('optimize.watchPort'),
+  unusedFromRoot('optimize.watchHost'),
+  unusedFromRoot('optimize.watchPrebuild'),
+  unusedFromRoot('optimize.watchProxyTimeout'),
+  unusedFromRoot('optimize.useBundleCache'),
+  unusedFromRoot('optimize.sourceMaps'),
+  unusedFromRoot('optimize.workers'),
+  unusedFromRoot('optimize.profile'),
+  unusedFromRoot('optimize.validateSyntaxOfNodeModules'),
+  unusedFromRoot('elasticsearch.preserveHost'),
+  unusedFromRoot('elasticsearch.startupTimeout'),
+  rename('cpu.cgroup.path.override', 'ops.cGroupOverrides.cpuPath'),
+  rename('cpuacct.cgroup.path.override', 'ops.cGroupOverrides.cpuAcctPath'),
   configPathDeprecation,
   dataPathDeprecation,
   rewriteBasePathDeprecation,

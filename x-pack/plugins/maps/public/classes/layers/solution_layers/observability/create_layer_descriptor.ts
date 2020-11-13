@@ -29,7 +29,6 @@ import { OBSERVABILITY_LAYER_TYPE } from './layer_select';
 import { OBSERVABILITY_METRIC_TYPE } from './metric_select';
 import { DISPLAY } from './display_select';
 import { VectorStyle } from '../../../styles/vector/vector_style';
-// @ts-ignore
 import { EMSFileSource } from '../../../sources/ems_file_source';
 // @ts-ignore
 import { ESGeoGridSource } from '../../../sources/es_geo_grid_source';
@@ -178,6 +177,8 @@ export function createLayerDescriptor({
             term: 'client.geo.country_iso_code',
             metrics: [metricsDescriptor],
             whereQuery: apmSourceQuery,
+            applyGlobalQuery: true,
+            applyGlobalTime: true,
           },
         },
       ],

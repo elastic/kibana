@@ -5,14 +5,15 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiSpacer, EuiButtonEmpty } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 import { UptimeDatePicker } from '../components/common/uptime_date_picker';
 import { SETTINGS_ROUTE } from '../../common/constants';
 import { ToggleAlertFlyoutButton } from '../components/overview/alerts/alerts_containers';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
+import { ReactRouterEuiButtonEmpty } from '../components/common/react_router_helpers';
+import { SyntheticsCallout } from '../components/overview/synthetics_callout';
 
 interface PageHeaderProps {
   headingText: string | JSX.Element;
@@ -20,7 +21,7 @@ interface PageHeaderProps {
   datePicker?: boolean;
 }
 
-const SETTINGS_LINK_TEXT = i18n.translate('xpack.uptime.page_header.settingsLink', {
+export const SETTINGS_LINK_TEXT = i18n.translate('xpack.uptime.page_header.settingsLink', {
   defaultMessage: 'Settings',
 });
 
@@ -44,10 +45,6 @@ const StyledPicker = styled(EuiFlexItem)`
   }
 `;
 
-const H1Text = styled.h1`
-  white-space: nowrap;
-`;
-
 export const PageHeader = React.memo(
   ({ headingText, extraLinks = false, datePicker = true }: PageHeaderProps) => {
     const DatePickerComponent = () =>
@@ -58,7 +55,6 @@ export const PageHeader = React.memo(
       ) : null;
 
     const kibana = useKibana();
-    const history = useHistory();
 
     const extraLinkComponents = !extraLinks ? null : (
       <EuiFlexGroup alignItems="flexEnd" responsive={false}>
@@ -66,13 +62,13 @@ export const PageHeader = React.memo(
           <ToggleAlertFlyoutButton />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
+          <ReactRouterEuiButtonEmpty
             data-test-subj="settings-page-link"
             iconType="gear"
-            href={history.createHref({ pathname: SETTINGS_ROUTE })}
+            to={SETTINGS_ROUTE}
           >
             {SETTINGS_LINK_TEXT}
-          </EuiButtonEmpty>
+          </ReactRouterEuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
@@ -88,6 +84,7 @@ export const PageHeader = React.memo(
 
     return (
       <>
+        <SyntheticsCallout />
         <EuiFlexGroup
           alignItems="center"
           justifyContent="spaceBetween"
@@ -97,10 +94,10 @@ export const PageHeader = React.memo(
         >
           <EuiFlexItem grow={true}>
             <EuiTitle>
-              <H1Text>{headingText}</H1Text>
+              <h1 className="eui-textNoWrap">{headingText}</h1>
             </EuiTitle>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>{extraLinkComponents}</EuiFlexItem>
+          {extraLinks && <EuiFlexItem grow={false}>{extraLinkComponents}</EuiFlexItem>}
           <DatePickerComponent />
         </EuiFlexGroup>
         <EuiSpacer size="s" />

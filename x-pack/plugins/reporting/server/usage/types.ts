@@ -162,8 +162,3 @@ export interface SearchResponse {
     };
   };
 }
-
-export interface AvailableTotal {
-  available: boolean;
-  total: number;
-}

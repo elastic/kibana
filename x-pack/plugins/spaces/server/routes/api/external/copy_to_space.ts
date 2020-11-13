@@ -30,39 +30,49 @@ export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
         tags: ['access:copySavedObjectsToSpaces'],
       },
       validate: {
-        body: schema.object({
-          spaces: schema.arrayOf(
-            schema.string({
-              validate: (value) => {
-                if (!SPACE_ID_REGEX.test(value)) {
-                  return `lower case, a-z, 0-9, "_", and "-" are allowed`;
-                }
-              },
-            }),
-            {
-              validate: (spaceIds) => {
-                if (_.uniq(spaceIds).length !== spaceIds.length) {
-                  return 'duplicate space ids are not allowed';
-                }
-              },
-            }
-          ),
-          objects: schema.arrayOf(
-            schema.object({
-              type: schema.string(),
-              id: schema.string(),
-            }),
-            {
-              validate: (objects) => {
-                if (!areObjectsUnique(objects)) {
-                  return 'duplicate objects are not allowed';
-                }
-              },
-            }
-          ),
-          includeReferences: schema.boolean({ defaultValue: false }),
-          overwrite: schema.boolean({ defaultValue: false }),
-        }),
+        body: schema.object(
+          {
+            spaces: schema.arrayOf(
+              schema.string({
+                validate: (value) => {
+                  if (!SPACE_ID_REGEX.test(value)) {
+                    return `lower case, a-z, 0-9, "_", and "-" are allowed`;
+                  }
+                },
+              }),
+              {
+                validate: (spaceIds) => {
+                  if (_.uniq(spaceIds).length !== spaceIds.length) {
+                    return 'duplicate space ids are not allowed';
+                  }
+                },
+              }
+            ),
+            objects: schema.arrayOf(
+              schema.object({
+                type: schema.string(),
+                id: schema.string(),
+              }),
+              {
+                validate: (objects) => {
+                  if (!areObjectsUnique(objects)) {
+                    return 'duplicate objects are not allowed';
+                  }
+                },
+              }
+            ),
+            includeReferences: schema.boolean({ defaultValue: false }),
+            overwrite: schema.boolean({ defaultValue: false }),
+            createNewCopies: schema.boolean({ defaultValue: false }),
+          },
+          {
+            validate: (object) => {
+              if (object.overwrite && object.createNewCopies) {
+                return 'cannot use [overwrite] with [createNewCopies]';
+              }
+            },
+          }
+        ),
       },
     },
     createLicensedRouteHandler(async (context, request, response) => {
@@ -73,12 +83,19 @@ export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
         getImportExportObjectLimit,
         request
       );
-      const { spaces: destinationSpaceIds, objects, includeReferences, overwrite } = request.body;
+      const {
+        spaces: destinationSpaceIds,
+        objects,
+        includeReferences,
+        overwrite,
+        createNewCopies,
+      } = request.body;
       const sourceSpaceId = spacesService.getSpaceId(request);
       const copyResponse = await copySavedObjectsToSpaces(sourceSpaceId, destinationSpaceIds, {
         objects,
         includeReferences,
         overwrite,
+        createNewCopies,
       });
       return response.ok({ body: copyResponse });
     })
@@ -105,6 +122,9 @@ export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
                 type: schema.string(),
                 id: schema.string(),
                 overwrite: schema.boolean({ defaultValue: false }),
+                destinationId: schema.maybe(schema.string()),
+                createNewCopy: schema.maybe(schema.boolean()),
+                ignoreMissingReferences: schema.maybe(schema.boolean()),
               })
             )
           ),
@@ -122,6 +142,7 @@ export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
             }
           ),
           includeReferences: schema.boolean({ defaultValue: false }),
+          createNewCopies: schema.boolean({ defaultValue: false }),
         }),
       },
     },
@@ -133,7 +154,7 @@ export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
         getImportExportObjectLimit,
         request
       );
-      const { objects, includeReferences, retries } = request.body;
+      const { objects, includeReferences, retries, createNewCopies } = request.body;
       const sourceSpaceId = spacesService.getSpaceId(request);
       const resolveConflictsResponse = await resolveCopySavedObjectsToSpacesConflicts(
         sourceSpaceId,
@@ -141,6 +162,7 @@ export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
           objects,
           includeReferences,
           retries,
+          createNewCopies,
         }
       );
       return response.ok({ body: resolveConflictsResponse });

@@ -12,11 +12,6 @@ import { ComponentTemplateDeserialized } from '../../shared_imports';
 
 const { setup } = pageHelpers.componentTemplateDetails;
 
-jest.mock('ui/i18n', () => {
-  const I18nContext = ({ children }: any) => children;
-  return { I18nContext };
-});
-
 const COMPONENT_TEMPLATE: ComponentTemplateDeserialized = {
   name: 'comp-1',
   template: {

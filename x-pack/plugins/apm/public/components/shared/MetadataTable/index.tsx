@@ -5,31 +5,31 @@
  */
 
 import {
+  EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
   EuiSpacer,
+  EuiText,
   EuiTitle,
-  EuiFieldSearch,
 } from '@elastic/eui';
-import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
-import { EuiText } from '@elastic/eui';
+import React, { useCallback } from 'react';
+import { useHistory, useLocation } from 'react-router-dom';
+import { useUrlParams } from '../../../hooks/useUrlParams';
 import { ElasticDocsLink } from '../../shared/Links/ElasticDocsLink';
 import { HeightRetainer } from '../HeightRetainer';
-import { Section } from './Section';
-import { history } from '../../../utils/history';
 import { fromQuery, toQuery } from '../Links/url_helpers';
-import { useLocation } from '../../../hooks/useLocation';
-import { useUrlParams } from '../../../hooks/useUrlParams';
-import { SectionsWithRows, filterSectionsByTerm } from './helper';
+import { filterSectionsByTerm, SectionsWithRows } from './helper';
+import { Section } from './Section';
 
 interface Props {
   sections: SectionsWithRows;
 }
 
 export function MetadataTable({ sections }: Props) {
+  const history = useHistory();
   const location = useLocation();
   const { urlParams } = useUrlParams();
   const { searchTerm = '' } = urlParams;
@@ -47,7 +47,7 @@ export function MetadataTable({ sections }: Props) {
         }),
       });
     },
-    [location]
+    [history, location]
   );
   const noResultFound = Boolean(searchTerm) && isEmpty(filteredSections);
   return (

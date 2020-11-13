@@ -7,7 +7,7 @@
 import { useParams } from 'react-router-dom';
 
 export const useMonitorId = (): string => {
-  const { monitorId } = useParams();
+  const { monitorId } = useParams<{ monitorId: string }>();
 
   // decode 64 base string, it was decoded to make it a valid url, since monitor id can be a url
   return atob(monitorId || '');

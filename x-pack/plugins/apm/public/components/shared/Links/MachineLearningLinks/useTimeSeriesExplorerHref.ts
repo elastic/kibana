@@ -4,12 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import url from 'url';
-import querystring from 'querystring';
-import rison from 'rison-node';
-import { useLocation } from '../../../../hooks/useLocation';
 import { useApmPluginContext } from '../../../../hooks/useApmPluginContext';
-import { getTimepickerRisonData } from '../rison_helpers';
+import { useMlHref } from '../../../../../../ml/public';
+import { useUrlParams } from '../../../../hooks/useUrlParams';
 
 export function useTimeSeriesExplorerHref({
   jobId,
@@ -20,39 +17,37 @@ export function useTimeSeriesExplorerHref({
   serviceName?: string;
   transactionType?: string;
 }) {
-  const { core } = useApmPluginContext();
-  const location = useLocation();
+  // default to link to ML Anomaly Detection jobs management page
+  const {
+    core,
+    plugins: { ml },
+  } = useApmPluginContext();
+  const { urlParams } = useUrlParams();
+  const { rangeFrom, rangeTo, refreshInterval, refreshPaused } = urlParams;
 
-  const search = querystring.stringify(
-    {
-      _g: rison.encode({
-        ml: { jobIds: [jobId] },
-        ...getTimepickerRisonData(location.search),
-      }),
+  const timeRange =
+    rangeFrom !== undefined && rangeTo !== undefined
+      ? { from: rangeFrom, to: rangeTo }
+      : undefined;
+  const mlAnomalyDetectionHref = useMlHref(ml, core.http.basePath.get(), {
+    page: 'timeseriesexplorer',
+    pageState: {
+      jobIds: [jobId],
+      timeRange,
+      refreshInterval:
+        refreshPaused !== undefined && refreshInterval !== undefined
+          ? { pause: refreshPaused, value: refreshInterval }
+          : undefined,
       ...(serviceName && transactionType
         ? {
-            _a: rison.encode({
-              mlTimeSeriesExplorer: {
-                entities: {
-                  'service.name': serviceName,
-                  'transaction.type': transactionType,
-                },
-              },
-            }),
+            entities: {
+              'service.name': serviceName,
+              'transaction.type': transactionType,
+            },
           }
-        : null),
+        : {}),
     },
-    undefined,
-    undefined,
-    {
-      encodeURIComponent(str: string) {
-        return str;
-      },
-    }
-  );
-
-  return url.format({
-    pathname: core.http.basePath.prepend('/app/ml'),
-    hash: url.format({ pathname: '/timeseriesexplorer', search }),
   });
+
+  return mlAnomalyDetectionHref;
 }

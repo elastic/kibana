@@ -15,6 +15,7 @@ import { SectionLoading, RestoreSnapshotForm } from '../../components';
 import { useServices } from '../../app_context';
 import { breadcrumbService, docTitleService } from '../../services/navigation';
 import { useLoadSnapshot, executeRestore } from '../../services/http';
+import { useDecodedParams } from '../../lib';
 
 interface MatchParams {
   repositoryName: string;
@@ -22,12 +23,10 @@ interface MatchParams {
 }
 
 export const RestoreSnapshot: React.FunctionComponent<RouteComponentProps<MatchParams>> = ({
-  match: {
-    params: { repositoryName, snapshotId },
-  },
   history,
 }) => {
   const { i18n } = useServices();
+  const { repositoryName, snapshotId } = useDecodedParams<MatchParams>();
 
   // Set breadcrumb and page title
   useEffect(() => {

@@ -8,20 +8,21 @@ import { set } from '@elastic/safer-lodash-set';
 import { get, merge } from 'lodash';
 
 import { StatsGetter } from 'src/plugins/telemetry_collection_manager/server';
-import { LOGSTASH_SYSTEM_ID, KIBANA_SYSTEM_ID, BEATS_SYSTEM_ID } from '../../common/constants';
+import moment from 'moment';
+import {
+  LOGSTASH_SYSTEM_ID,
+  KIBANA_SYSTEM_ID,
+  BEATS_SYSTEM_ID,
+  USAGE_FETCH_INTERVAL,
+} from '../../common/constants';
 import { getElasticsearchStats, ESClusterStats } from './get_es_stats';
 import { getKibanaStats, KibanaStats } from './get_kibana_stats';
-import { getBeatsStats } from './get_beats_stats';
-import { getHighLevelStats } from './get_high_level_stats';
-
-type PromiseReturnType<T extends (...args: any[]) => any> = ReturnType<T> extends Promise<infer R>
-  ? R
-  : T;
+import { getBeatsStats, BeatsStatsByClusterUuid } from './get_beats_stats';
+import { getHighLevelStats, ClustersHighLevelStats } from './get_high_level_stats';
 
 export interface CustomContext {
   maxBucketSize: number;
 }
-
 /**
  * Get statistics for all products joined by Elasticsearch cluster.
  * Returns the array of clusters joined with the Kibana and Logstash instances.
@@ -29,9 +30,12 @@ export interface CustomContext {
  */
 export const getAllStats: StatsGetter<CustomContext> = async (
   clustersDetails,
-  { callCluster, start, end },
+  { callCluster, timestamp },
   { maxBucketSize }
 ) => {
+  const start = moment(timestamp).subtract(USAGE_FETCH_INTERVAL, 'ms').toISOString();
+  const end = moment(timestamp).toISOString();
+
   const clusterUuids = clustersDetails.map((clusterDetails) => clusterDetails.clusterUuid);
 
   const [esClusters, kibana, logstash, beats] = await Promise.all([
@@ -62,8 +66,8 @@ export function handleAllStats(
     beats,
   }: {
     kibana: KibanaStats;
-    logstash: PromiseReturnType<typeof getHighLevelStats>;
-    beats: PromiseReturnType<typeof getBeatsStats>;
+    logstash: ClustersHighLevelStats;
+    beats: BeatsStatsByClusterUuid;
   }
 ) {
   return clusters.map((cluster) => {

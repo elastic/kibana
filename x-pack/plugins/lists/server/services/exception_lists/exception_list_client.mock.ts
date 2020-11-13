@@ -9,7 +9,10 @@ import { savedObjectsClientMock } from 'src/core/server/mocks';
 import { getFoundExceptionListSchemaMock } from '../../../common/schemas/response/found_exception_list_schema.mock';
 import { getFoundExceptionListItemSchemaMock } from '../../../common/schemas/response/found_exception_list_item_schema.mock';
 import { getExceptionListItemSchemaMock } from '../../../common/schemas/response/exception_list_item_schema.mock';
-import { getExceptionListSchemaMock } from '../../../common/schemas/response/exception_list_schema.mock';
+import {
+  getExceptionListSchemaMock,
+  getTrustedAppsListSchemaMock,
+} from '../../../common/schemas/response/exception_list_schema.mock';
 
 import { ExceptionListClient } from './exception_list_client';
 
@@ -24,6 +27,7 @@ export class ExceptionListClientMock extends ExceptionListClient {
   public deleteExceptionListItem = jest.fn().mockResolvedValue(getExceptionListItemSchemaMock());
   public findExceptionListItem = jest.fn().mockResolvedValue(getFoundExceptionListItemSchemaMock());
   public findExceptionList = jest.fn().mockResolvedValue(getFoundExceptionListSchemaMock());
+  public createTrustedAppsList = jest.fn().mockResolvedValue(getTrustedAppsListSchemaMock());
 }
 
 export const getExceptionListClientMock = (): ExceptionListClient => {

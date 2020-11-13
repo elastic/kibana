@@ -1,0 +1,15 @@
+{
+  "name": "@kbn/ace",
+  "version": "1.0.0",
+  "private": true,
+  "main": "./target/index.js",
+  "license": "Apache-2.0",
+  "scripts": {
+    "build": "node ./scripts/build.js",
+    "kbn:bootstrap": "yarn build --dev"
+  },
+  "devDependencies": {
+    "@kbn/dev-utils": "link:../kbn-dev-utils",
+    "@kbn/babel-preset": "link:../kbn-babel-preset"
+  }
+}

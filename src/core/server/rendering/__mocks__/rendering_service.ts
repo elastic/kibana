@@ -16,9 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import { RenderingService as Service } from '../rendering_service';
-import { InternalRenderingServiceSetup } from '../types';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { RenderingService as Service } from '../rendering_service';
+import type { InternalRenderingServiceSetup } from '../types';
 import { mockRenderingServiceParams } from './params';
 
 type IRenderingService = PublicMethodsOf<Service>;
@@ -27,11 +27,9 @@ export const setupMock: jest.Mocked<InternalRenderingServiceSetup> = {
   render: jest.fn(),
 };
 export const mockSetup = jest.fn().mockResolvedValue(setupMock);
-export const mockStart = jest.fn();
 export const mockStop = jest.fn();
 export const mockRenderingService: jest.Mocked<IRenderingService> = {
   setup: mockSetup,
-  start: mockStart,
   stop: mockStop,
 };
 export const RenderingService = jest.fn<IRenderingService, [typeof mockRenderingServiceParams]>(

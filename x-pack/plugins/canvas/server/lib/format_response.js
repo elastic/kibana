@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import boom from 'boom';
+import boom from '@hapi/boom';
 
 export const formatResponse = (esErrors) => (resp) => {
   if (resp.isBoom) {

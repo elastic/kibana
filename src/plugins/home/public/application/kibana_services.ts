@@ -29,7 +29,7 @@ import {
 } from 'kibana/public';
 import { UiStatsMetricType } from '@kbn/analytics';
 import { TelemetryPluginStart } from '../../../telemetry/public';
-import { KibanaLegacyStart } from '../../../kibana_legacy/public';
+import { UrlForwardingStart } from '../../../url_forwarding/public';
 import { TutorialService } from '../services/tutorials';
 import { FeatureCatalogueRegistry } from '../services/feature_catalogue';
 import { EnvironmentService } from '../services/environment';
@@ -41,7 +41,7 @@ export interface HomeKibanaServices {
   chrome: ChromeStart;
   application: ApplicationStart;
   uiSettings: IUiSettingsClient;
-  kibanaLegacy: KibanaLegacyStart;
+  urlForwarding: UrlForwardingStart;
   homeConfig: ConfigSchema;
   featureCatalogue: FeatureCatalogueRegistry;
   http: HttpStart;

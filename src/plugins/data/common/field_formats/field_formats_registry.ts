@@ -32,8 +32,9 @@ import {
 import { baseFormatters } from './constants/base_formatters';
 import { FieldFormat } from './field_format';
 import { SerializedFieldFormat } from '../../../expressions/common/types';
-import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '../types';
-import { UI_SETTINGS } from '../';
+import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '../kbn_field_types/types';
+import { UI_SETTINGS } from '../constants';
+import { FieldFormatNotFoundError } from '../field_formats';
 
 export class FieldFormatsRegistry {
   protected fieldFormats: Map<FieldFormatId, FieldFormatInstanceType> = new Map();
@@ -161,7 +162,7 @@ export class FieldFormatsRegistry {
       const ConcreteFieldFormat = this.getType(formatId);
 
       if (!ConcreteFieldFormat) {
-        throw new Error(`Field Format '${formatId}' not found!`);
+        throw new FieldFormatNotFoundError(`Field Format '${formatId}' not found!`, formatId);
       }
 
       return new ConcreteFieldFormat(params, this.getConfig);
@@ -180,11 +181,11 @@ export class FieldFormatsRegistry {
    * @param  {ES_FIELD_TYPES[]} esTypes
    * @return {FieldFormat}
    */
-  getDefaultInstancePlain(
+  getDefaultInstancePlain = (
     fieldType: KBN_FIELD_TYPES,
     esTypes?: ES_FIELD_TYPES[],
     params: Record<string, any> = {}
-  ): FieldFormat {
+  ): FieldFormat => {
     const conf = this.getDefaultConfig(fieldType, esTypes);
     const instanceParams = {
       ...conf.params,
@@ -192,7 +193,7 @@ export class FieldFormatsRegistry {
     };
 
     return this.getInstance(conf.id, instanceParams);
-  }
+  };
   /**
    * Returns a cache key built by the given variables for caching in memoized
    * Where esType contains fieldType, fieldType is returned

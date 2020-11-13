@@ -28,6 +28,8 @@ interface PreviewMetricThresholdAlertParams {
   config: InfraSource['configuration'];
   lookback: Unit;
   alertInterval: string;
+  alertThrottle: string;
+  alertOnNoData: boolean;
   end?: number;
   overrideLookbackIntervalInSeconds?: number;
 }
@@ -36,19 +38,23 @@ export const previewMetricThresholdAlert: (
   params: PreviewMetricThresholdAlertParams,
   iterations?: number,
   precalculatedNumberOfGroups?: number
-) => Promise<Array<number | null>> = async (
+) => Promise<number[][]> = async (
   {
     callCluster,
     params,
     config,
     lookback,
     alertInterval,
+    alertThrottle,
+    alertOnNoData,
     end = Date.now(),
     overrideLookbackIntervalInSeconds,
   },
   iterations = 0,
   precalculatedNumberOfGroups
 ) => {
+  if (params.criteria.length === 0) throw new Error('Cannot execute an alert with 0 conditions');
+
   // There are three different "intervals" we're dealing with here, so to disambiguate:
   // - The lookback interval, which is how long of a period of time we want to examine to count
   //   how many times the alert fired
@@ -70,39 +76,68 @@ export const previewMetricThresholdAlert: (
   // Get a date histogram using the bucket interval and the lookback interval
   try {
     const alertResults = await evaluateAlert(callCluster, params, config, timeframe);
-    const groups = Object.keys(first(alertResults) as any);
+    const groups = Object.keys(first(alertResults)!);
 
     // Now determine how to interpolate this histogram based on the alert interval
     const alertIntervalInSeconds = getIntervalInSeconds(alertInterval);
     const alertResultsPerExecution = alertIntervalInSeconds / bucketIntervalInSeconds;
+    const throttleIntervalInSeconds = Math.max(
+      getIntervalInSeconds(alertThrottle),
+      alertIntervalInSeconds
+    );
+
     const previewResults = await Promise.all(
       groups.map(async (group) => {
-        const isNoData = alertResults.some((alertResult) => alertResult[group].isNoData);
-        if (isNoData) {
-          return null;
-        }
-        const isError = alertResults.some((alertResult) => alertResult[group].isError);
-        if (isError) {
-          return NaN;
-        }
-
         // Interpolate the buckets returned by evaluateAlert and return a count of how many of these
         // buckets would have fired the alert. If the alert interval and bucket interval are the same,
         // this will be a 1:1 evaluation of the alert results. If these are different, the interpolation
         // will skip some buckets or read some buckets more than once, depending on the differential
-        const numberOfResultBuckets = (first(alertResults) as any)[group].shouldFire.length;
+        const numberOfResultBuckets = first(alertResults)![group].shouldFire.length;
         const numberOfExecutionBuckets = Math.floor(
           numberOfResultBuckets / alertResultsPerExecution
         );
         let numberOfTimesFired = 0;
+        let numberOfNoDataResults = 0;
+        let numberOfErrors = 0;
+        let numberOfNotifications = 0;
+        let throttleTracker = 0;
+        const notifyWithThrottle = () => {
+          if (throttleTracker === 0) numberOfNotifications++;
+          throttleTracker += alertIntervalInSeconds;
+        };
         for (let i = 0; i < numberOfExecutionBuckets; i++) {
           const mappedBucketIndex = Math.floor(i * alertResultsPerExecution);
           const allConditionsFiredInMappedBucket = alertResults.every(
             (alertResult) => alertResult[group].shouldFire[mappedBucketIndex]
           );
-          if (allConditionsFiredInMappedBucket) numberOfTimesFired++;
+          const someConditionsNoDataInMappedBucket = alertResults.some((alertResult) => {
+            const hasNoData = alertResult[group].isNoData as boolean[];
+            return hasNoData[mappedBucketIndex];
+          });
+          const someConditionsErrorInMappedBucket = alertResults.some((alertResult) => {
+            return alertResult[group].isError;
+          });
+          if (someConditionsErrorInMappedBucket) {
+            numberOfErrors++;
+            if (alertOnNoData) {
+              notifyWithThrottle();
+            }
+          } else if (someConditionsNoDataInMappedBucket) {
+            numberOfNoDataResults++;
+            if (alertOnNoData) {
+              notifyWithThrottle();
+            }
+          } else if (allConditionsFiredInMappedBucket) {
+            numberOfTimesFired++;
+            notifyWithThrottle();
+          } else if (throttleTracker > 0) {
+            throttleTracker += alertIntervalInSeconds;
+          }
+          if (throttleTracker >= throttleIntervalInSeconds) {
+            throttleTracker = 0;
+          }
         }
-        return numberOfTimesFired;
+        return [numberOfTimesFired, numberOfNoDataResults, numberOfErrors, numberOfNotifications];
       })
     );
     return previewResults;
@@ -110,7 +145,15 @@ export const previewMetricThresholdAlert: (
     if (isTooManyBucketsPreviewException(e)) {
       // If there's too much data on the first request, recursively slice the lookback interval
       // until all the data can be retrieved
-      const basePreviewParams = { callCluster, params, config, lookback, alertInterval };
+      const basePreviewParams = {
+        callCluster,
+        params,
+        config,
+        lookback,
+        alertInterval,
+        alertThrottle,
+        alertOnNoData,
+      };
       const { maxBuckets } = e;
       // If this is still the first iteration, try to get the number of groups in order to
       // calculate max buckets. If this fails, just estimate based on 1 group
@@ -118,8 +161,7 @@ export const previewMetricThresholdAlert: (
         ? await evaluateAlert(callCluster, params, config)
         : [];
       const numberOfGroups =
-        precalculatedNumberOfGroups ??
-        Math.max(Object.keys(first(currentAlertResults) as any).length, 1);
+        precalculatedNumberOfGroups ?? Math.max(Object.keys(first(currentAlertResults)!).length, 1);
       const estimatedTotalBuckets =
         (lookbackIntervalInSeconds / bucketIntervalInSeconds) * numberOfGroups;
       // The minimum number of slices is 2. In case we underestimate the total number of buckets
@@ -150,14 +192,16 @@ export const previewMetricThresholdAlert: (
           // `undefined` values occur if there is no data at all in a certain slice, and that slice
           // returns an empty array. This is different from an error or no data state,
           // so filter these results out entirely and only regard the resultA portion
-          .filter((value) => typeof value !== 'undefined')
+          .filter(
+            <Value>(value: Value): value is NonNullable<Value> => typeof value !== 'undefined'
+          )
           .reduce((a, b) => {
-            if (typeof a !== 'number') return a;
-            if (typeof b !== 'number') return b;
-            return a + b;
+            if (!a) return b;
+            if (!b) return a;
+            return [a[0] + b[0], a[1] + b[1], a[2] + b[2], a[3] + b[3]];
           })
       );
-      return zippedResult as any;
+      return zippedResult;
     } else throw e;
   }
 };

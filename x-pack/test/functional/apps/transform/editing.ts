@@ -3,15 +3,16 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import expect from '@kbn/expect';
+
+import { TransformPivotConfig } from '../../../../plugins/transform/common/types/transform';
+import { TRANSFORM_STATE } from '../../../../plugins/transform/common/constants';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { TransformPivotConfig } from '../../../../plugins/transform/public/app/common';
 
 function getTransformConfig(): TransformPivotConfig {
   const date = Date.now();
   return {
-    id: `ec_2_${date}`,
+    id: `ec_editing_${date}`,
     source: { index: ['ft_ecommerce'] },
     pivot: {
       group_by: { category: { terms: { field: 'category.keyword' } } },
@@ -33,7 +34,7 @@ export default function ({ getService }: FtrProviderContext) {
     before(async () => {
       await esArchiver.loadIfNeeded('ml/ecommerce');
       await transform.testResources.createIndexPatternIfNeeded('ft_ecommerce', 'order_date');
-      await transform.api.createAndRunTransform(transformConfig);
+      await transform.api.createAndRunTransform(transformConfig.id, transformConfig);
       await transform.testResources.setKibanaTimeZoneToUTC();
 
       await transform.securityUI.loginAsTransformPowerUser();
@@ -53,7 +54,7 @@ export default function ({ getService }: FtrProviderContext) {
       expected: {
         messageText: 'updated transform.',
         row: {
-          status: 'stopped',
+          status: TRANSFORM_STATE.STOPPED,
           mode: 'batch',
           progress: '100',
         },
@@ -61,32 +62,30 @@ export default function ({ getService }: FtrProviderContext) {
     };
 
     describe(`${testData.suiteTitle}`, function () {
-      it('should load the home page', async () => {
+      it('opens the edit flyout for an existing transform', async () => {
+        await transform.testExecution.logTestStep('should load the home page');
         await transform.navigation.navigateTo();
         await transform.management.assertTransformListPageExists();
-      });
 
-      it('should display the transforms table', async () => {
+        await transform.testExecution.logTestStep('should display the transforms table');
         await transform.management.assertTransformsTableExists();
-      });
 
-      it('should display the original transform in the transform list', async () => {
+        await transform.testExecution.logTestStep(
+          'should display the original transform in the transform list'
+        );
         await transform.table.refreshTransformList();
-        await transform.table.filterWithSearchString(transformConfig.id);
-        const rows = await transform.table.parseTransformTable();
-        expect(rows.filter((row) => row.id === transformConfig.id)).to.have.length(1);
-      });
+        await transform.table.filterWithSearchString(transformConfig.id, 1);
 
-      it('should show the actions popover', async () => {
+        await transform.testExecution.logTestStep('should show the actions popover');
         await transform.table.assertTransformRowActions(false);
-      });
 
-      it('should show the edit flyout', async () => {
+        await transform.testExecution.logTestStep('should show the edit flyout');
         await transform.table.clickTransformRowAction('Edit');
         await transform.editFlyout.assertTransformEditFlyoutExists();
       });
 
-      it('should update the transform description', async () => {
+      it('navigates through the edit flyout and sets all needed fields', async () => {
+        await transform.testExecution.logTestStep('should update the transform description');
         await transform.editFlyout.assertTransformEditFlyoutInputExists('Description');
         await transform.editFlyout.assertTransformEditFlyoutInputValue(
           'Description',
@@ -96,18 +95,19 @@ export default function ({ getService }: FtrProviderContext) {
           'Description',
           testData.transformDescription
         );
-      });
 
-      it('should update the transform documents per second', async () => {
+        await transform.testExecution.logTestStep(
+          'should update the transform documents per second'
+        );
+        await transform.editFlyout.openTransformEditAccordionAdvancedSettings();
         await transform.editFlyout.assertTransformEditFlyoutInputExists('DocsPerSecond');
         await transform.editFlyout.assertTransformEditFlyoutInputValue('DocsPerSecond', '');
         await transform.editFlyout.setTransformEditFlyoutInputValue(
           'DocsPerSecond',
           testData.transformDocsPerSecond
         );
-      });
 
-      it('should update the transform frequency', async () => {
+        await transform.testExecution.logTestStep('should update the transform frequency');
         await transform.editFlyout.assertTransformEditFlyoutInputExists('Frequency');
         await transform.editFlyout.assertTransformEditFlyoutInputValue('Frequency', '');
         await transform.editFlyout.setTransformEditFlyoutInputValue(
@@ -116,22 +116,22 @@ export default function ({ getService }: FtrProviderContext) {
         );
       });
 
-      it('should update the transform', async () => {
+      it('updates the transform and displays it correctly in the job list', async () => {
+        await transform.testExecution.logTestStep('should update the transform');
         await transform.editFlyout.updateTransform();
-      });
 
-      it('should display the transforms table', async () => {
+        await transform.testExecution.logTestStep('should display the transforms table');
         await transform.management.assertTransformsTableExists();
-      });
 
-      it('should display the updated transform in the transform list', async () => {
+        await transform.testExecution.logTestStep(
+          'should display the updated transform in the transform list'
+        );
         await transform.table.refreshTransformList();
-        await transform.table.filterWithSearchString(transformConfig.id);
-        const rows = await transform.table.parseTransformTable();
-        expect(rows.filter((row) => row.id === transformConfig.id)).to.have.length(1);
-      });
+        await transform.table.filterWithSearchString(transformConfig.id, 1);
 
-      it('should display the updated transform in the transform list row cells', async () => {
+        await transform.testExecution.logTestStep(
+          'should display the updated transform in the transform list row cells'
+        );
         await transform.table.assertTransformRowFields(transformConfig.id, {
           id: transformConfig.id,
           description: testData.transformDescription,
@@ -139,9 +139,10 @@ export default function ({ getService }: FtrProviderContext) {
           mode: testData.expected.row.mode,
           progress: testData.expected.row.progress,
         });
-      });
 
-      it('should display the messages tab and include an update message', async () => {
+        await transform.testExecution.logTestStep(
+          'should display the messages tab and include an update message'
+        );
         await transform.table.assertTransformExpandedRowMessages(testData.expected.messageText);
       });
     });

@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import dateMath from '../src';
-import moment from 'moment';
-import sinon from 'sinon';
-import expect from '@kbn/expect';
+const dateMath = require('../index');
+const moment = require('moment');
+const sinon = require('sinon');
+const expect = require('@kbn/expect');
 
 /**
  * Require a new instance of the moment library, bypassing the require cache.

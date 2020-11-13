@@ -8,7 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { ToastsApi } from 'kibana/public';
 import React, { useState, useEffect } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
-import { Alert, AlertTaskState } from '../../../../types';
+import { Alert, AlertInstanceSummary, AlertType } from '../../../../types';
 import { useAppDependencies } from '../../../app_context';
 import {
   ComponentOpts as AlertApis,
@@ -16,33 +16,43 @@ import {
 } from '../../common/components/with_bulk_alert_api_operations';
 import { AlertInstancesWithApi as AlertInstances } from './alert_instances';
 
-type WithAlertStateProps = {
+type WithAlertInstanceSummaryProps = {
   alert: Alert;
+  alertType: AlertType;
   readOnly: boolean;
   requestRefresh: () => Promise<void>;
-} & Pick<AlertApis, 'loadAlertState'>;
+} & Pick<AlertApis, 'loadAlertInstanceSummary'>;
 
-export const AlertInstancesRoute: React.FunctionComponent<WithAlertStateProps> = ({
+export const AlertInstancesRoute: React.FunctionComponent<WithAlertInstanceSummaryProps> = ({
   alert,
+  alertType,
   readOnly,
   requestRefresh,
-  loadAlertState,
+  loadAlertInstanceSummary: loadAlertInstanceSummary,
 }) => {
   const { toastNotifications } = useAppDependencies();
 
-  const [alertState, setAlertState] = useState<AlertTaskState | null>(null);
+  const [alertInstanceSummary, setAlertInstanceSummary] = useState<AlertInstanceSummary | null>(
+    null
+  );
 
   useEffect(() => {
-    getAlertState(alert.id, loadAlertState, setAlertState, toastNotifications);
+    getAlertInstanceSummary(
+      alert.id,
+      loadAlertInstanceSummary,
+      setAlertInstanceSummary,
+      toastNotifications
+    );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [alert]);
 
-  return alertState ? (
+  return alertInstanceSummary ? (
     <AlertInstances
       requestRefresh={requestRefresh}
       alert={alert}
+      alertType={alertType}
       readOnly={readOnly}
-      alertState={alertState}
+      alertInstanceSummary={alertInstanceSummary}
     />
   ) : (
     <div
@@ -56,21 +66,21 @@ export const AlertInstancesRoute: React.FunctionComponent<WithAlertStateProps> =
   );
 };
 
-export async function getAlertState(
+export async function getAlertInstanceSummary(
   alertId: string,
-  loadAlertState: AlertApis['loadAlertState'],
-  setAlertState: React.Dispatch<React.SetStateAction<AlertTaskState | null>>,
+  loadAlertInstanceSummary: AlertApis['loadAlertInstanceSummary'],
+  setAlertInstanceSummary: React.Dispatch<React.SetStateAction<AlertInstanceSummary | null>>,
   toastNotifications: Pick<ToastsApi, 'addDanger'>
 ) {
   try {
-    const loadedState = await loadAlertState(alertId);
-    setAlertState(loadedState);
+    const loadedInstanceSummary = await loadAlertInstanceSummary(alertId);
+    setAlertInstanceSummary(loadedInstanceSummary);
   } catch (e) {
     toastNotifications.addDanger({
       title: i18n.translate(
-        'xpack.triggersActionsUI.sections.alertDetails.unableToLoadAlertStateMessage',
+        'xpack.triggersActionsUI.sections.alertDetails.unableToLoadAlertInstanceSummaryMessage',
         {
-          defaultMessage: 'Unable to load alert state: {message}',
+          defaultMessage: 'Unable to load alert instance summary: {message}',
           values: {
             message: e.message,
           },

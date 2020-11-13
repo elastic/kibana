@@ -12,6 +12,7 @@ import { HttpStart } from 'src/core/public';
 import { GlobalSearchProviderResult, GlobalSearchBatchedResults } from '../../common/types';
 import { GlobalSearchFindError } from '../../common/errors';
 import { takeInArray } from '../../common/operators';
+import { defaultMaxProviderResults } from '../../common/constants';
 import { processProviderResult } from '../../common/process_result';
 import { ILicenseChecker } from '../../common/license_checker';
 import { GlobalSearchResultProvider } from '../types';
@@ -79,7 +80,6 @@ interface StartDeps {
   licenseChecker: ILicenseChecker;
 }
 
-const defaultMaxProviderResults = 20;
 const mapToUndefined = () => undefined;
 
 /** @internal */

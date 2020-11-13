@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DeprecationInfo } from 'src/legacy/core_plugins/elasticsearch';
 import { SavedObject, SavedObjectAttributes } from 'src/core/public';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import type { DeprecationInfo } from '../../../../src/core/server/elasticsearch/legacy/api_types';
 
 export enum ReindexStep {
   // Enum values are spaced out by 10 to give us room to insert steps in between.
@@ -184,41 +185,17 @@ export interface UpgradeAssistantStatus {
   indices: EnrichedDeprecationInfo[];
 }
 
-export interface ClusterStateIndexAPIResponse {
-  state: 'open' | 'close';
-  settings: {
-    index: {
-      verified_before_close: string;
-      search: {
-        throttled: string;
-      };
-      number_of_shards: string;
-      provided_name: string;
-      frozen: string;
-      creation_date: string;
-      number_of_replicas: string;
-      uuid: string;
-      version: {
-        created: string;
-      };
-    };
-  };
-  mappings: any;
-  aliases: string[];
-}
-
-export interface ClusterStateAPIResponse {
-  cluster_name: string;
-  cluster_uuid: string;
-  metadata: {
-    cluster_uuid: string;
-    cluster_coordination: {
-      term: number;
-      last_committed_config: string[];
-      last_accepted_config: string[];
-      voting_config_exclusions: [];
-    };
-    templates: any;
-    indices: { [indexName: string]: ClusterStateIndexAPIResponse };
-  };
+export interface ResolveIndexResponseFromES {
+  indices: Array<{
+    name: string;
+    // per https://github.com/elastic/elasticsearch/pull/57626
+    attributes: Array<'open' | 'closed' | 'hidden' | 'frozen'>;
+    aliases?: string[];
+    data_stream?: string;
+  }>;
+  aliases: Array<{
+    name: string;
+    indices: string[];
+  }>;
+  data_streams: Array<{ name: string; backing_indices: string[]; timestamp_field: string }>;
 }

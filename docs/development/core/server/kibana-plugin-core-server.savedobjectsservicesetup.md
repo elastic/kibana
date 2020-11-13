@@ -16,8 +16,6 @@ export interface SavedObjectsServiceSetup
 
 When plugins access the Saved Objects client, a new client is created using the factory provided to `setClientFactory` and wrapped by all wrappers registered through `addClientWrapper`<!-- -->.
 
-All the setup APIs will throw if called after the service has started, and therefor cannot be used from legacy plugin code. Legacy plugins should use the legacy savedObject service until migrated.
-
 ## Example 1
 
 

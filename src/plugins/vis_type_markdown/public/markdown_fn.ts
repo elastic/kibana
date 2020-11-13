@@ -21,17 +21,19 @@ import { i18n } from '@kbn/i18n';
 import { ExpressionFunctionDefinition, Render } from '../../expressions/public';
 import { Arguments, MarkdownVisParams } from './types';
 
-interface RenderValue {
+export interface MarkdownVisRenderValue {
   visType: 'markdown';
-  visConfig: MarkdownVisParams;
+  visParams: MarkdownVisParams;
 }
 
-export const createMarkdownVisFn = (): ExpressionFunctionDefinition<
+export type MarkdownVisExpressionFunctionDefinition = ExpressionFunctionDefinition<
   'markdownVis',
   unknown,
   Arguments,
-  Render<RenderValue>
-> => ({
+  Render<MarkdownVisRenderValue>
+>;
+
+export const createMarkdownVisFn = (): MarkdownVisExpressionFunctionDefinition => ({
   name: 'markdownVis',
   type: 'render',
   inputTypes: [],
@@ -65,10 +67,10 @@ export const createMarkdownVisFn = (): ExpressionFunctionDefinition<
   fn(input, args) {
     return {
       type: 'render',
-      as: 'visualization',
+      as: 'markdown_vis',
       value: {
         visType: 'markdown',
-        visConfig: {
+        visParams: {
           markdown: args.markdown,
           openLinksInNewTab: args.openLinksInNewTab,
           fontSize: parseInt(args.font.spec.fontSize || '12', 10),

@@ -18,36 +18,18 @@ export const MapRecordSchema = schema.object({
   actionType: MappingActionType,
 });
 
-export const CaseConfigurationSchema = schema.object({
+export const IncidentConfigurationSchema = schema.object({
   mapping: schema.arrayOf(MapRecordSchema),
 });
-
-export const ExternalIncidentServiceConfiguration = {
-  apiUrl: schema.string(),
-  casesConfiguration: CaseConfigurationSchema,
-};
-
-export const ExternalIncidentServiceConfigurationSchema = schema.object(
-  ExternalIncidentServiceConfiguration
-);
-
-export const ExternalIncidentServiceSecretConfiguration = {
-  password: schema.string(),
-  username: schema.string(),
-};
-
-export const ExternalIncidentServiceSecretConfigurationSchema = schema.object(
-  ExternalIncidentServiceSecretConfiguration
-);
 
 export const UserSchema = schema.object({
   fullName: schema.nullable(schema.string()),
   username: schema.nullable(schema.string()),
 });
 
-const EntityInformation = {
-  createdAt: schema.string(),
-  createdBy: UserSchema,
+export const EntityInformation = {
+  createdAt: schema.nullable(schema.string()),
+  createdBy: schema.nullable(UserSchema),
   updatedAt: schema.nullable(schema.string()),
   updatedBy: schema.nullable(UserSchema),
 };
@@ -59,40 +41,3 @@ export const CommentSchema = schema.object({
   comment: schema.string(),
   ...EntityInformation,
 });
-
-export const ExecutorSubActionSchema = schema.oneOf([
-  schema.literal('getIncident'),
-  schema.literal('pushToService'),
-  schema.literal('handshake'),
-]);
-
-export const ExecutorSubActionPushParamsSchema = schema.object({
-  savedObjectId: schema.string(),
-  title: schema.string(),
-  description: schema.nullable(schema.string()),
-  comments: schema.nullable(schema.arrayOf(CommentSchema)),
-  externalId: schema.nullable(schema.string()),
-  ...EntityInformation,
-});
-
-export const ExecutorSubActionGetIncidentParamsSchema = schema.object({
-  externalId: schema.string(),
-});
-
-// Reserved for future implementation
-export const ExecutorSubActionHandshakeParamsSchema = schema.object({});
-
-export const ExecutorParamsSchema = schema.oneOf([
-  schema.object({
-    subAction: schema.literal('getIncident'),
-    subActionParams: ExecutorSubActionGetIncidentParamsSchema,
-  }),
-  schema.object({
-    subAction: schema.literal('handshake'),
-    subActionParams: ExecutorSubActionHandshakeParamsSchema,
-  }),
-  schema.object({
-    subAction: schema.literal('pushToService'),
-    subActionParams: ExecutorSubActionPushParamsSchema,
-  }),
-]);

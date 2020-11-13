@@ -14,13 +14,29 @@ import {
   EuiSpacer,
   EuiText,
   EuiToolTip,
+  EuiFormFieldset,
+  EuiCheckableCard,
+  EuiTextColor,
+  EuiTitle,
+  EuiLink,
+  EuiBetaBadge,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { txtChangeButton } from './i18n';
+import {
+  txtBetaActionFactoryLabel,
+  txtBetaActionFactoryTooltip,
+  txtChangeButton,
+  txtTriggerPickerHelpText,
+  txtTriggerPickerLabel,
+  txtTriggerPickerHelpTooltip,
+} from './i18n';
 import './action_wizard.scss';
-import { ActionFactory } from '../../dynamic_actions';
+import { ActionFactory, BaseActionConfig, BaseActionFactoryContext } from '../../dynamic_actions';
+import { Trigger, TriggerId } from '../../../../../../src/plugins/ui_actions/public';
 
-export interface ActionWizardProps {
+export interface ActionWizardProps<
+  ActionFactoryContext extends BaseActionFactoryContext = BaseActionFactoryContext
+> {
   /**
    * List of available action factories
    */
@@ -41,17 +57,32 @@ export interface ActionWizardProps {
   /**
    * current config for currently selected action factory
    */
-  config?: object;
+  config?: BaseActionConfig;
 
   /**
    * config changed
    */
-  onConfigChange: (config: object) => void;
+  onConfigChange: (config: BaseActionConfig) => void;
 
   /**
    * Context will be passed into ActionFactory's methods
    */
-  context: object;
+  context: ActionFactoryContext;
+
+  /**
+   * Trigger selection has changed
+   * @param triggers
+   */
+  onSelectedTriggersChange: (triggers?: TriggerId[]) => void;
+
+  getTriggerInfo: (triggerId: TriggerId) => Trigger;
+
+  /**
+   * List of possible triggers in current context
+   */
+  triggers: TriggerId[];
+
+  triggerPickerDocsLink?: string;
 }
 
 export const ActionWizard: React.FC<ActionWizardProps> = ({
@@ -61,17 +92,30 @@ export const ActionWizard: React.FC<ActionWizardProps> = ({
   onConfigChange,
   config,
   context,
+  onSelectedTriggersChange,
+  getTriggerInfo,
+  triggers,
+  triggerPickerDocsLink,
 }) => {
   // auto pick action factory if there is only 1 available
   if (
     !currentActionFactory &&
     actionFactories.length === 1 &&
-    actionFactories[0].isCompatibleLicence()
+    actionFactories[0].isCompatibleLicense()
   ) {
     onActionFactoryChange(actionFactories[0]);
   }
 
+  // auto pick selected trigger if none is picked
+  if (currentActionFactory && !((context.triggers?.length ?? 0) > 0)) {
+    const actionTriggers = getTriggersForActionFactory(currentActionFactory, triggers);
+    if (actionTriggers.length > 0) {
+      onSelectedTriggersChange([actionTriggers[0]]);
+    }
+  }
+
   if (currentActionFactory && config) {
+    const allTriggers = getTriggersForActionFactory(currentActionFactory, triggers);
     return (
       <SelectedActionFactory
         actionFactory={currentActionFactory}
@@ -84,6 +128,10 @@ export const ActionWizard: React.FC<ActionWizardProps> = ({
         onConfigChange={(newConfig) => {
           onConfigChange(newConfig);
         }}
+        allTriggers={allTriggers}
+        getTriggerInfo={getTriggerInfo}
+        onSelectedTriggersChange={onSelectedTriggersChange}
+        triggerPickerDocsLink={triggerPickerDocsLink}
       />
     );
   }
@@ -99,13 +147,87 @@ export const ActionWizard: React.FC<ActionWizardProps> = ({
   );
 };
 
-interface SelectedActionFactoryProps {
+interface TriggerPickerProps {
+  triggers: TriggerId[];
+  selectedTriggers?: TriggerId[];
+  getTriggerInfo: (triggerId: TriggerId) => Trigger;
+  onSelectedTriggersChange: (triggers?: TriggerId[]) => void;
+  triggerPickerDocsLink?: string;
+}
+
+const TriggerPicker: React.FC<TriggerPickerProps> = ({
+  triggers,
+  selectedTriggers,
+  getTriggerInfo,
+  onSelectedTriggersChange,
+  triggerPickerDocsLink,
+}) => {
+  const selectedTrigger = selectedTriggers ? selectedTriggers[0] : undefined;
+  return (
+    <EuiFormFieldset
+      data-test-subj={`triggerPicker`}
+      legend={{
+        children: (
+          <EuiText size="s">
+            <h5>
+              <span>{txtTriggerPickerLabel}</span>{' '}
+              <EuiToolTip content={txtTriggerPickerHelpTooltip}>
+                <EuiLink href={triggerPickerDocsLink} target={'blank'} external>
+                  {txtTriggerPickerHelpText}
+                </EuiLink>
+              </EuiToolTip>
+            </h5>
+          </EuiText>
+        ),
+      }}
+      style={{ maxWidth: `80%` }}
+    >
+      {triggers.map((trigger) => (
+        <React.Fragment key={trigger}>
+          <EuiCheckableCard
+            id={trigger}
+            label={
+              <>
+                <EuiTitle size={'xxs'}>
+                  <span>{getTriggerInfo(trigger)?.title ?? 'Unknown'}</span>
+                </EuiTitle>
+                {getTriggerInfo(trigger)?.description && (
+                  <div>
+                    <EuiText size={'s'}>
+                      <EuiTextColor color={'subdued'}>
+                        {getTriggerInfo(trigger)?.description}
+                      </EuiTextColor>
+                    </EuiText>
+                  </div>
+                )}
+              </>
+            }
+            name={trigger}
+            value={trigger}
+            checked={selectedTrigger === trigger}
+            onChange={() => onSelectedTriggersChange([trigger])}
+            data-test-subj={`triggerPicker-${trigger}`}
+          />
+          <EuiSpacer size={'s'} />
+        </React.Fragment>
+      ))}
+    </EuiFormFieldset>
+  );
+};
+
+interface SelectedActionFactoryProps<
+  ActionFactoryContext extends BaseActionFactoryContext = BaseActionFactoryContext
+> {
   actionFactory: ActionFactory;
-  config: object;
-  context: object;
-  onConfigChange: (config: object) => void;
+  config: BaseActionConfig;
+  context: ActionFactoryContext;
+  onConfigChange: (config: BaseActionConfig) => void;
   showDeselect: boolean;
   onDeselect: () => void;
+  allTriggers: TriggerId[];
+  getTriggerInfo: (triggerId: TriggerId) => Trigger;
+  onSelectedTriggersChange: (triggers?: TriggerId[]) => void;
+  triggerPickerDocsLink?: string;
 }
 
 export const TEST_SUBJ_SELECTED_ACTION_FACTORY = 'selectedActionFactory';
@@ -117,6 +239,10 @@ const SelectedActionFactory: React.FC<SelectedActionFactoryProps> = ({
   onConfigChange,
   config,
   context,
+  allTriggers,
+  getTriggerInfo,
+  onSelectedTriggersChange,
+  triggerPickerDocsLink,
 }) => {
   return (
     <div
@@ -124,7 +250,7 @@ const SelectedActionFactory: React.FC<SelectedActionFactoryProps> = ({
       data-test-subj={`${TEST_SUBJ_SELECTED_ACTION_FACTORY}-${actionFactory.id}`}
     >
       <header>
-        <EuiFlexGroup alignItems="center" gutterSize="s">
+        <EuiFlexGroup alignItems="center" responsive={false} gutterSize="s">
           {actionFactory.getIconType(context) && (
             <EuiFlexItem grow={false}>
               <EuiIcon type={actionFactory.getIconType(context)!} size="m" />
@@ -132,7 +258,15 @@ const SelectedActionFactory: React.FC<SelectedActionFactoryProps> = ({
           )}
           <EuiFlexItem grow={true}>
             <EuiText>
-              <h4>{actionFactory.getDisplayName(context)}</h4>
+              <h4>
+                {actionFactory.getDisplayName(context)}{' '}
+                {actionFactory.isBeta && (
+                  <EuiBetaBadge
+                    label={txtBetaActionFactoryLabel}
+                    tooltipContent={txtBetaActionFactoryTooltip}
+                  />
+                )}
+              </h4>
             </EuiText>
           </EuiFlexItem>
           {showDeselect && (
@@ -144,6 +278,18 @@ const SelectedActionFactory: React.FC<SelectedActionFactoryProps> = ({
           )}
         </EuiFlexGroup>
       </header>
+      {allTriggers.length > 1 && (
+        <>
+          <EuiSpacer size="l" />
+          <TriggerPicker
+            triggers={allTriggers}
+            getTriggerInfo={getTriggerInfo}
+            selectedTriggers={context.triggers}
+            onSelectedTriggersChange={onSelectedTriggersChange}
+            triggerPickerDocsLink={triggerPickerDocsLink}
+          />
+        </>
+      )}
       <EuiSpacer size="m" />
       <div>
         <actionFactory.ReactCollectConfig
@@ -156,9 +302,11 @@ const SelectedActionFactory: React.FC<SelectedActionFactoryProps> = ({
   );
 };
 
-interface ActionFactorySelectorProps {
+interface ActionFactorySelectorProps<
+  ActionFactoryContext extends BaseActionFactoryContext = BaseActionFactoryContext
+> {
   actionFactories: ActionFactory[];
-  context: object;
+  context: ActionFactoryContext;
   onActionFactorySelected: (actionFactory: ActionFactory) => void;
 }
 
@@ -185,8 +333,8 @@ const ActionFactorySelector: React.FC<ActionFactorySelectorProps> = ({
    * make sure not compatible factories are in the end
    */
   const ensureOrder = (factories: ActionFactory[]) => {
-    const compatibleLicense = factories.filter((f) => f.isCompatibleLicence());
-    const notCompatibleLicense = factories.filter((f) => !f.isCompatibleLicence());
+    const compatibleLicense = factories.filter((f) => f.isCompatibleLicense());
+    const notCompatibleLicense = factories.filter((f) => !f.isCompatibleLicense());
     return [
       ...compatibleLicense.sort((f1, f2) => f2.order - f1.order),
       ...notCompatibleLicense.sort((f1, f2) => f2.order - f1.order),
@@ -194,12 +342,12 @@ const ActionFactorySelector: React.FC<ActionFactorySelectorProps> = ({
   };
 
   return (
-    <EuiFlexGroup gutterSize="m" wrap={true} style={firefoxBugFix}>
+    <EuiFlexGroup gutterSize="m" responsive={false} wrap={true} style={firefoxBugFix}>
       {ensureOrder(actionFactories).map((actionFactory) => (
         <EuiFlexItem grow={false} key={actionFactory.id}>
           <EuiToolTip
             content={
-              !actionFactory.isCompatibleLicence() && (
+              !actionFactory.isCompatibleLicense() && (
                 <FormattedMessage
                   defaultMessage="Insufficient license level"
                   id="xpack.uiActionsEnhanced.components.actionWizard.insufficientLicenseLevelTooltip"
@@ -212,7 +360,11 @@ const ActionFactorySelector: React.FC<ActionFactorySelectorProps> = ({
               label={actionFactory.getDisplayName(context)}
               data-test-subj={`${TEST_SUBJ_ACTION_FACTORY_ITEM}-${actionFactory.id}`}
               onClick={() => onActionFactorySelected(actionFactory)}
-              disabled={!actionFactory.isCompatibleLicence()}
+              disabled={!actionFactory.isCompatibleLicense()}
+              betaBadgeLabel={actionFactory.isBeta ? txtBetaActionFactoryLabel : undefined}
+              betaBadgeTooltipContent={
+                actionFactory.isBeta ? txtBetaActionFactoryTooltip : undefined
+              }
             >
               {actionFactory.getIconType(context) && (
                 <EuiIcon type={actionFactory.getIconType(context)!} size="m" />
@@ -224,3 +376,10 @@ const ActionFactorySelector: React.FC<ActionFactorySelectorProps> = ({
     </EuiFlexGroup>
   );
 };
+
+function getTriggersForActionFactory(
+  actionFactory: ActionFactory,
+  allTriggers: TriggerId[]
+): TriggerId[] {
+  return actionFactory.supportedTriggers().filter((trigger) => allTriggers.includes(trigger));
+}

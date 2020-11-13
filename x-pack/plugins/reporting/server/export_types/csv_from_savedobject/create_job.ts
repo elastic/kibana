@@ -4,59 +4,42 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { notFound, notImplemented } from 'boom';
+import { notFound, notImplemented } from '@hapi/boom';
 import { get } from 'lodash';
-import { KibanaRequest, RequestHandlerContext } from 'src/core/server';
+import { RequestHandlerContext } from 'src/core/server';
 import { CSV_FROM_SAVEDOBJECT_JOB_TYPE } from '../../../common/constants';
-import { cryptoFactory } from '../../lib';
-import { ScheduleTaskFnFactory, TimeRangeParams } from '../../types';
+import { CsvFromSavedObjectRequest } from '../../routes/generate_from_savedobject_immediate';
+import { CreateJobFnFactory } from '../../types';
 import {
   JobParamsPanelCsv,
+  JobPayloadPanelCsv,
   SavedObject,
   SavedObjectReference,
   SavedObjectServiceError,
-  SavedSearchObjectAttributesJSON,
-  SearchPanel,
   VisObjectAttributesJSON,
 } from './types';
 
 export type ImmediateCreateJobFn = (
   jobParams: JobParamsPanelCsv,
-  headers: KibanaRequest['headers'],
   context: RequestHandlerContext,
-  req: KibanaRequest
-) => Promise<{
-  type: string;
-  title: string;
-  jobParams: JobParamsPanelCsv;
-}>;
+  req: CsvFromSavedObjectRequest
+) => Promise<JobPayloadPanelCsv>;
 
-interface VisData {
-  title: string;
-  visType: string;
-  panel: SearchPanel;
-}
-
-export const scheduleTaskFnFactory: ScheduleTaskFnFactory<ImmediateCreateJobFn> = function createJobFactoryFn(
+export const createJobFnFactory: CreateJobFnFactory<ImmediateCreateJobFn> = function createJobFactoryFn(
   reporting,
   parentLogger
 ) {
-  const config = reporting.getConfig();
-  const crypto = cryptoFactory(config.get('encryptionKey'));
   const logger = parentLogger.clone([CSV_FROM_SAVEDOBJECT_JOB_TYPE, 'create-job']);
 
-  return async function scheduleTask(jobParams, headers, context, req) {
+  return async function createJob(jobParams, context, req) {
     const { savedObjectType, savedObjectId } = jobParams;
-    const serializedEncryptedHeaders = await crypto.encrypt(headers);
 
-    const { panel, title, visType }: VisData = await Promise.resolve()
+    const panel = await Promise.resolve()
       .then(() => context.core.savedObjects.client.get(savedObjectType, savedObjectId))
       .then(async (savedObject: SavedObject) => {
         const { attributes, references } = savedObject;
-        const {
-          kibanaSavedObjectMeta: kibanaSavedObjectMetaJSON,
-        } = attributes as SavedSearchObjectAttributesJSON;
-        const { timerange } = req.body as { timerange: TimeRangeParams };
+        const { kibanaSavedObjectMeta: kibanaSavedObjectMetaJSON } = attributes;
+        const { timerange } = req.body;
 
         if (!kibanaSavedObjectMetaJSON) {
           throw new Error('Could not parse saved object data!');
@@ -85,7 +68,7 @@ export const scheduleTaskFnFactory: ScheduleTaskFnFactory<ImmediateCreateJobFn> 
           throw new Error('Could not find index pattern for the saved search!');
         }
 
-        const sPanel = {
+        return {
           attributes: {
             ...attributes,
             kibanaSavedObjectMeta: { searchSource },
@@ -93,8 +76,6 @@ export const scheduleTaskFnFactory: ScheduleTaskFnFactory<ImmediateCreateJobFn> 
           indexPatternSavedObjectId: indexPatternMeta.id,
           timerange,
         };
-
-        return { panel: sPanel, title: attributes.title, visType: 'search' };
       })
       .catch((err: Error) => {
         const boomErr = (err as unknown) as { isBoom: boolean };
@@ -105,17 +86,10 @@ export const scheduleTaskFnFactory: ScheduleTaskFnFactory<ImmediateCreateJobFn> 
         if (errPayload.statusCode === 404) {
           throw notFound(errPayload.message);
         }
-        if (err.stack) {
-          logger.error(err.stack);
-        }
+        logger.error(err);
         throw new Error(`Unable to create a job from saved object data! Error: ${err}`);
       });
 
-    return {
-      headers: serializedEncryptedHeaders,
-      jobParams: { ...jobParams, panel, visType },
-      type: visType,
-      title,
-    };
+    return { ...jobParams, panel };
   };
 };

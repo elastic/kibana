@@ -132,7 +132,7 @@ export const getCases = async ({
 }: FetchCasesProps): Promise<AllCases> => {
   const query = {
     reporters: filterOptions.reporters.map((r) => r.username ?? '').filter((r) => r !== ''),
-    tags: filterOptions.tags,
+    tags: filterOptions.tags.map((t) => `"${t.replace(/"/g, '\\"')}"`),
     ...(filterOptions.status !== '' ? { status: filterOptions.status } : {}),
     ...(filterOptions.search.length > 0 ? { search: filterOptions.search } : {}),
     ...queryParams,
@@ -241,16 +241,15 @@ export const pushToService = async (
   casePushParams: ServiceConnectorCaseParams,
   signal: AbortSignal
 ): Promise<ServiceConnectorCaseResponse> => {
-  const response = await KibanaServices.get().http.fetch<ActionTypeExecutorResult>(
-    `${ACTION_URL}/action/${connectorId}/_execute`,
-    {
-      method: 'POST',
-      body: JSON.stringify({
-        params: { subAction: 'pushToService', subActionParams: casePushParams },
-      }),
-      signal,
-    }
-  );
+  const response = await KibanaServices.get().http.fetch<
+    ActionTypeExecutorResult<ReturnType<typeof decodeServiceConnectorCaseResponse>>
+  >(`${ACTION_URL}/action/${connectorId}/_execute`, {
+    method: 'POST',
+    body: JSON.stringify({
+      params: { subAction: 'pushToService', subActionParams: casePushParams },
+    }),
+    signal,
+  });
 
   if (response.status === 'error') {
     throw new Error(response.serviceMessage ?? response.message ?? i18n.ERROR_PUSH_TO_SERVICE);

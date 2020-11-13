@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-jest.mock('ui/new_platform'); // actions/elements has some dependencies on ui/new_platform.
 jest.mock('../../../lib/app_state');
 
 import { workpadRefresh } from '../workpad_refresh';

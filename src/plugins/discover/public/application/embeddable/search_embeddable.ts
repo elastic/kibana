@@ -78,7 +78,8 @@ interface SearchEmbeddableConfig {
   filterManager: FilterManager;
 }
 
-export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
+export class SearchEmbeddable
+  extends Embeddable<SearchInput, SearchOutput>
   implements ISearchEmbeddable {
   private readonly savedSearch: SavedSearch;
   private $rootScope: ng.IRootScopeService;
@@ -220,7 +221,6 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
       if (!searchScope.columns) {
         return;
       }
-      indexPattern.popularizeField(columnName, 1);
       const columns = columnActions.addColumn(searchScope.columns, columnName);
       this.updateInput({ columns });
     };
@@ -266,6 +266,8 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
   }
 
   private fetch = async () => {
+    const searchSessionId = this.input.searchSessionId;
+
     if (!this.searchScope) return;
 
     const { searchSource } = this.savedSearch;
@@ -292,7 +294,11 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
     const description = i18n.translate('discover.embeddable.inspectorRequestDescription', {
       defaultMessage: 'This request queries Elasticsearch to fetch the data for the search.',
     });
-    const inspectorRequest = this.inspectorAdaptors.requests.start(title, { description });
+
+    const inspectorRequest = this.inspectorAdaptors.requests.start(title, {
+      description,
+      searchSessionId,
+    });
     inspectorRequest.stats(getRequestInspectorStats(searchSource));
     searchSource.getSearchRequestBody().then((body: Record<string, unknown>) => {
       inspectorRequest.json(body);
@@ -303,6 +309,7 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
       // Make the request
       const resp = await searchSource.fetch({
         abortSignal: this.abortController.signal,
+        sessionId: searchSessionId,
       });
       this.updateOutput({ loading: false, error: undefined });
 

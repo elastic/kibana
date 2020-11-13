@@ -14,17 +14,6 @@ exports[`SourceFiltersTable should add a filter 1`] = `
     fieldWildcardMatcher={[Function]}
     indexPattern={
       Object {
-        "save": [MockFunction] {
-          "calls": Array [
-            Array [],
-          ],
-          "results": Array [
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-          ],
-        },
         "sourceFilters": Array [
           Object {
             "value": "tim*",
@@ -108,17 +97,6 @@ exports[`SourceFiltersTable should remove a filter 1`] = `
     fieldWildcardMatcher={[Function]}
     indexPattern={
       Object {
-        "save": [MockFunction] {
-          "calls": Array [
-            Array [],
-          ],
-          "results": Array [
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-          ],
-        },
         "sourceFilters": Array [
           Object {
             "clientId": 2,
@@ -279,17 +257,6 @@ exports[`SourceFiltersTable should update a filter 1`] = `
     fieldWildcardMatcher={[Function]}
     indexPattern={
       Object {
-        "save": [MockFunction] {
-          "calls": Array [
-            Array [],
-          ],
-          "results": Array [
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-          ],
-        },
         "sourceFilters": Array [
           Object {
             "clientId": 1,

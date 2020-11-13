@@ -4,17 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook, RenderHookResult } from '@testing-library/react-hooks';
 import { delay } from '../utils/testHelpers';
-import { useFetcher } from './useFetcher';
+import { FetcherResult, useFetcher } from './useFetcher';
 import { MockApmPluginContextWrapper } from '../context/ApmPluginContext/MockApmPluginContext';
+import { ApmPluginContextValue } from '../context/ApmPluginContext';
 
 // Wrap the hook with a provider so it can useApmPluginContext
 const wrapper = MockApmPluginContextWrapper;
 
 describe('useFetcher', () => {
   describe('when resolving after 500ms', () => {
-    let hook: ReturnType<typeof renderHook>;
+    let hook: RenderHookResult<
+      { children?: React.ReactNode; value?: ApmPluginContextValue },
+      FetcherResult<string> & {
+        refetch: () => void;
+      }
+    >;
     beforeEach(() => {
       jest.useFakeTimers();
       async function fn() {
@@ -58,7 +64,12 @@ describe('useFetcher', () => {
   });
 
   describe('when throwing after 500ms', () => {
-    let hook: ReturnType<typeof renderHook>;
+    let hook: RenderHookResult<
+      { children?: React.ReactNode; value?: ApmPluginContextValue },
+      FetcherResult<void> & {
+        refetch: () => void;
+      }
+    >;
     beforeEach(() => {
       jest.useFakeTimers();
       async function fn() {

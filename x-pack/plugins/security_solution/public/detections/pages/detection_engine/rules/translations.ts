@@ -16,7 +16,7 @@ export const BACK_TO_DETECTIONS = i18n.translate(
 export const IMPORT_RULE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.importRuleTitle',
   {
-    defaultMessage: 'Import rule…',
+    defaultMessage: 'Import rule',
   }
 );
 
@@ -100,7 +100,7 @@ export const BATCH_ACTION_ACTIVATE_SELECTED_ERROR = (totalRules: number) =>
     'xpack.securitySolution.detectionEngine.rules.allRules.batchActions.activateSelectedErrorTitle',
     {
       values: { totalRules },
-      defaultMessage: 'Error activating {totalRules, plural, =1 {rule} other {rules}}…',
+      defaultMessage: 'Error activating {totalRules, plural, =1 {rule} other {rules}}',
     }
   );
 
@@ -116,7 +116,7 @@ export const BATCH_ACTION_DEACTIVATE_SELECTED_ERROR = (totalRules: number) =>
     'xpack.securitySolution.detectionEngine.rules.allRules.batchActions.deactivateSelectedErrorTitle',
     {
       values: { totalRules },
-      defaultMessage: 'Error deactivating {totalRules, plural, =1 {rule} other {rules}}…',
+      defaultMessage: 'Error deactivating {totalRules, plural, =1 {rule} other {rules}}',
     }
   );
 
@@ -130,14 +130,14 @@ export const BATCH_ACTION_EXPORT_SELECTED = i18n.translate(
 export const BATCH_ACTION_DUPLICATE_SELECTED = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.batchActions.duplicateSelectedTitle',
   {
-    defaultMessage: 'Duplicate selected…',
+    defaultMessage: 'Duplicate selected',
   }
 );
 
 export const BATCH_ACTION_DELETE_SELECTED = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.batchActions.deleteSelectedTitle',
   {
-    defaultMessage: 'Delete selected…',
+    defaultMessage: 'Delete selected',
   }
 );
 
@@ -153,7 +153,7 @@ export const BATCH_ACTION_DELETE_SELECTED_ERROR = (totalRules: number) =>
     'xpack.securitySolution.detectionEngine.rules.allRules.batchActions.deleteSelectedErrorTitle',
     {
       values: { totalRules },
-      defaultMessage: 'Error deleting {totalRules, plural, =1 {rule} other {rules}}…',
+      defaultMessage: 'Error deleting {totalRules, plural, =1 {rule} other {rules}}',
     }
   );
 
@@ -214,6 +214,13 @@ export const EDIT_RULE_SETTINGS = i18n.translate(
   }
 );
 
+export const EDIT_RULE_SETTINGS_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.actions.editRuleSettingsToolTip',
+  {
+    defaultMessage: 'You do not have Kibana Actions privileges',
+  }
+);
+
 export const DUPLICATE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.actions.duplicateTitle',
   {
@@ -224,7 +231,7 @@ export const DUPLICATE = i18n.translate(
 export const DUPLICATE_RULE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.actions.duplicateRuleDescription',
   {
-    defaultMessage: 'Duplicate rule…',
+    defaultMessage: 'Duplicate rule',
   }
 );
 
@@ -241,7 +248,7 @@ export const SUCCESSFULLY_DUPLICATED_RULES = (totalRules: number) =>
 export const DUPLICATE_RULE_ERROR = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.actions.duplicateRuleErrorDescription',
   {
-    defaultMessage: 'Error duplicating rule…',
+    defaultMessage: 'Error duplicating rule',
   }
 );
 
@@ -255,7 +262,7 @@ export const EXPORT_RULE = i18n.translate(
 export const DELETE_RULE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.actions.deleteeRuleDescription',
   {
-    defaultMessage: 'Delete rule…',
+    defaultMessage: 'Delete rule',
   }
 );
 
@@ -287,6 +294,13 @@ export const COLUMN_LAST_COMPLETE_RUN = i18n.translate(
   }
 );
 
+export const COLUMN_LAST_UPDATE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.columns.lastUpdateTitle',
+  {
+    defaultMessage: 'Last updated',
+  }
+);
+
 export const COLUMN_LAST_RESPONSE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.columns.lastResponseTitle',
   {
@@ -294,10 +308,24 @@ export const COLUMN_LAST_RESPONSE = i18n.translate(
   }
 );
 
+export const COLUMN_VERSION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.columns.versionTitle',
+  {
+    defaultMessage: 'Version',
+  }
+);
+
 export const COLUMN_TAGS = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.columns.tagsTitle',
   {
     defaultMessage: 'Tags',
+  }
+);
+
+export const COLUMN_SEE_ALL_POPOVER = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.columns.tagsPopoverTitle',
+  {
+    defaultMessage: 'See all',
   }
 );
 
@@ -473,46 +501,6 @@ export const DELETE = i18n.translate(
   }
 );
 
-export const LOAD_PREPACKAGED_RULES = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.loadPrePackagedRulesButton',
-  {
-    defaultMessage: 'Load Elastic prebuilt rules and timeline templates',
-  }
-);
-
-export const RELOAD_MISSING_PREPACKAGED_RULES = (missingRules: number) =>
-  i18n.translate(
-    'xpack.securitySolution.detectionEngine.rules.reloadMissingPrePackagedRulesButton',
-    {
-      values: { missingRules },
-      defaultMessage:
-        'Install {missingRules} Elastic prebuilt {missingRules, plural, =1 {rule} other {rules}} ',
-    }
-  );
-
-export const RELOAD_MISSING_PREPACKAGED_TIMELINES = (missingTimelines: number) =>
-  i18n.translate(
-    'xpack.securitySolution.detectionEngine.rules.reloadMissingPrePackagedTimelinesButton',
-    {
-      values: { missingTimelines },
-      defaultMessage:
-        'Install {missingTimelines} Elastic prebuilt {missingTimelines, plural, =1 {timeline} other {timelines}} ',
-    }
-  );
-
-export const RELOAD_MISSING_PREPACKAGED_RULES_AND_TIMELINES = (
-  missingRules: number,
-  missingTimelines: number
-) =>
-  i18n.translate(
-    'xpack.securitySolution.detectionEngine.rules.reloadMissingPrePackagedRulesAndTimelinesButton',
-    {
-      values: { missingRules, missingTimelines },
-      defaultMessage:
-        'Install {missingRules} Elastic prebuilt {missingRules, plural, =1 {rule} other {rules}} and {missingTimelines} Elastic prebuilt {missingTimelines, plural, =1 {timeline} other {timelines}} ',
-    }
-  );
-
 export const IMPORT_RULE_BTN_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.components.importRuleModal.importRuleTitle',
   {
@@ -566,3 +554,38 @@ export const IMPORT_FAILED_DETAILED = (ruleId: string, statusCode: number, messa
       defaultMessage: 'Rule ID: {ruleId}\n Status Code: {statusCode}\n Message: {message}',
     }
   );
+
+export const REFRESH_PROMPT_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.refreshPromptTitle',
+  {
+    defaultMessage: 'Are you still there?',
+  }
+);
+
+export const REFRESH_PROMPT_CONFIRM = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.refreshPromptConfirm',
+  {
+    defaultMessage: 'Continue',
+  }
+);
+
+export const REFRESH_PROMPT_BODY = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.refreshPromptBody',
+  {
+    defaultMessage: 'Rule auto-refresh has been paused. Click "Continue" to resume.',
+  }
+);
+
+export const REFRESH_RULE_POPOVER_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.refreshRulePopoverDescription',
+  {
+    defaultMessage: 'Automatically refresh table',
+  }
+);
+
+export const REFRESH_RULE_POPOVER_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.refreshRulePopoverLabel',
+  {
+    defaultMessage: 'Refresh settings',
+  }
+);

@@ -9,8 +9,6 @@ import {
   MonitorDetailsState,
   getMonitorDetailsAction,
   getMonitorLocationsAction,
-  getMonitorDetailsActionSuccess,
-  getMonitorDetailsActionFail,
   getMonitorLocationsActionSuccess,
   getMonitorLocationsActionFail,
 } from '../actions/monitor';
@@ -34,12 +32,12 @@ const initialState: MonitorState = {
 
 export function monitorReducer(state = initialState, action: Action<any>): MonitorState {
   switch (action.type) {
-    case String(getMonitorDetailsAction):
+    case String(getMonitorDetailsAction.get):
       return {
         ...state,
         loading: true,
       };
-    case String(getMonitorDetailsActionSuccess):
+    case String(getMonitorDetailsAction.success):
       const { monitorId } = action.payload;
       return {
         ...state,
@@ -49,10 +47,11 @@ export function monitorReducer(state = initialState, action: Action<any>): Monit
         },
         loading: false,
       };
-    case String(getMonitorDetailsActionFail):
+    case String(getMonitorDetailsAction.fail):
       return {
         ...state,
         errors: [...state.errors, action.payload],
+        loading: false,
       };
     case String(getMonitorLocationsAction):
       return {

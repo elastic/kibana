@@ -20,28 +20,31 @@
 import Fs from 'fs';
 
 import * as Rx from 'rxjs';
-import { mergeMap, toArray, map, catchError } from 'rxjs/operators';
+import { mergeMap, map, catchError } from 'rxjs/operators';
+import { allValuesFrom } from '../common';
 
-const stat$ = Rx.bindNodeCallback(Fs.stat);
+const stat$ = Rx.bindNodeCallback<Fs.PathLike, Fs.Stats>(Fs.stat);
 
 /**
  * get mtimes of referenced paths concurrently, limit concurrency to 100
  */
 export async function getMtimes(paths: Iterable<string>) {
-  return await Rx.from(paths)
-    .pipe(
-      // map paths to [path, mtimeMs] entries with concurrency of
-      // 100 at a time, ignoring missing paths
-      mergeMap(
-        (path) =>
-          stat$(path).pipe(
-            map((stat) => [path, stat.mtimeMs] as const),
-            catchError((error: any) => (error?.code === 'ENOENT' ? Rx.EMPTY : Rx.throwError(error)))
-          ),
-        100
-      ),
-      toArray(),
-      map((entries) => new Map(entries))
+  return new Map(
+    await allValuesFrom(
+      Rx.from(paths).pipe(
+        // map paths to [path, mtimeMs] entries with concurrency of
+        // 100 at a time, ignoring missing paths
+        mergeMap(
+          (path) =>
+            stat$(path).pipe(
+              map((stat) => [path, stat.mtimeMs] as const),
+              catchError((error: any) =>
+                error?.code === 'ENOENT' ? Rx.EMPTY : Rx.throwError(error)
+              )
+            ),
+          100
+        )
+      )
     )
-    .toPromise();
+  );
 }

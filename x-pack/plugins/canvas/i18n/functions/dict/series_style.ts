@@ -43,7 +43,7 @@ export const help: FunctionHelp<FunctionFactory<typeof seriesStyle>> = {
       defaultMessage: 'The width of the line.',
     }),
     points: i18n.translate('xpack.canvas.functions.seriesStyle.args.pointsHelpText', {
-      defaultMessage: 'Size of points on line',
+      defaultMessage: 'The size of points on line.',
     }),
     stack: i18n.translate('xpack.canvas.functions.seriesStyle.args.stackHelpText', {
       defaultMessage:

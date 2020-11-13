@@ -104,9 +104,11 @@ export function getUsageStats(rawStats: SearchResponse<KibanaUsageStats>) {
       dashboard,
       visualization,
       search,
+      /* eslint-disable @typescript-eslint/naming-convention */
       index_pattern,
       graph_workspace,
       timelion_sheet,
+      /* eslint-enable @typescript-eslint/naming-convention */
       xpack,
       ...pluginsTop
     } = currUsage;
@@ -145,13 +147,21 @@ export function combineStats(
  * Ensure the start and end dates are, at least, TELEMETRY_COLLECTION_INTERVAL apart
  * because, otherwise, we are sending telemetry with empty Kibana usage data.
  *
- * @param {date} [start] The start time from which to get the telemetry data
- * @param {date} [end] The end time from which to get the telemetry data
+ * @param {string} [start] The start time (in ISO string format) from which to get the telemetry data
+ * @param {string} [end] The end time (in ISO string format) from which to get the telemetry data
  */
+export function ensureTimeSpan(start: string, end: string): { start: string; end: string };
+export function ensureTimeSpan(start: string, end: undefined): { start: string; end: undefined };
+export function ensureTimeSpan(start: undefined, end: string): { start: undefined; end: string };
 export function ensureTimeSpan(
-  start?: StatsCollectionConfig['start'],
-  end?: StatsCollectionConfig['end']
-) {
+  start: undefined,
+  end: undefined
+): { start: undefined; end: undefined };
+
+export function ensureTimeSpan(
+  start?: string,
+  end?: string
+): { start: string | undefined; end: string | undefined } {
   // We only care if we have a start date, because that's the limit that might make us lose the document
   if (start) {
     const duration = moment.duration(TELEMETRY_COLLECTION_INTERVAL, 'milliseconds');
@@ -175,8 +185,8 @@ export function ensureTimeSpan(
 export async function getKibanaStats(
   callCluster: StatsCollectionConfig['callCluster'],
   clusterUuids: string[],
-  start: StatsCollectionConfig['start'],
-  end: StatsCollectionConfig['end'],
+  start: string,
+  end: string,
   maxBucketSize: number
 ) {
   const { start: safeStart, end: safeEnd } = ensureTimeSpan(start, end);

@@ -10,27 +10,21 @@ import { setupServer } from 'src/core/server/test_utils';
 import supertest from 'supertest';
 import { ReportingCore } from '..';
 import { ReportingInternalSetup } from '../core';
-import { LevelLogger } from '../lib';
 import { ExportTypesRegistry } from '../lib/export_types_registry';
-import { createMockReportingCore } from '../test_helpers';
+import { createMockConfig, createMockConfigSchema, createMockReportingCore } from '../test_helpers';
 import { ExportTypeDefinition } from '../types';
 import { registerJobInfoRoutes } from './jobs';
 
-type setupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
+type SetupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
 
 describe('GET /api/reporting/jobs/download', () => {
   const reportingSymbol = Symbol('reporting');
-  let server: setupServerReturn['server'];
-  let httpSetup: setupServerReturn['httpSetup'];
+  let server: SetupServerReturn['server'];
+  let httpSetup: SetupServerReturn['httpSetup'];
   let exportTypesRegistry: ExportTypesRegistry;
   let core: ReportingCore;
 
-  const config = { get: jest.fn(), kbnConfig: { get: jest.fn() } };
-  const mockLogger = ({
-    error: jest.fn(),
-    debug: jest.fn(),
-  } as unknown) as jest.Mocked<LevelLogger>;
-
+  const config = createMockConfig(createMockConfigSchema());
   const getHits = (...sources: any) => {
     return {
       hits: {
@@ -74,20 +68,18 @@ describe('GET /api/reporting/jobs/download', () => {
       jobType: 'unencodedJobType',
       jobContentExtension: 'csv',
       validLicenses: ['basic', 'gold'],
-    } as ExportTypeDefinition<unknown, unknown, unknown, unknown>);
+    } as ExportTypeDefinition);
     exportTypesRegistry.register({
       id: 'base64Encoded',
       jobType: 'base64EncodedJobType',
       jobContentEncoding: 'base64',
       jobContentExtension: 'pdf',
       validLicenses: ['basic', 'gold'],
-    } as ExportTypeDefinition<unknown, unknown, unknown, unknown>);
+    } as ExportTypeDefinition);
     core.getExportTypesRegistry = () => exportTypesRegistry;
   });
 
   afterEach(async () => {
-    mockLogger.debug.mockReset();
-    mockLogger.error.mockReset();
     await server.stop();
   });
 

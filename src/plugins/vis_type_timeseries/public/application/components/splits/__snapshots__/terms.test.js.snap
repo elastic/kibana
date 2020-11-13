@@ -44,6 +44,7 @@ exports[`src/legacy/core_plugins/metrics/public/components/splits/terms.test.js 
         labelType="label"
       >
         <InjectIntl(FieldSelectUi)
+          data-test-subj="groupByField"
           fields={
             Object {
               "kibana_sample_data_flights": Array [

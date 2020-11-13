@@ -32,36 +32,60 @@ describe('server/index_patterns/service/lib/es_api', () => {
     afterEach(() => sandbox.restore());
 
     it('calls indices.getAlias() via callCluster', async () => {
-      const callCluster = sinon.stub();
+      const getAlias = sinon.stub();
+      const callCluster = {
+        indices: {
+          getAlias,
+        },
+        fieldCaps: sinon.stub(),
+      };
+
       await callIndexAliasApi(callCluster);
-      sinon.assert.calledOnce(callCluster);
-      sinon.assert.calledWith(callCluster, 'indices.getAlias');
+      sinon.assert.calledOnce(getAlias);
     });
 
     it('passes indices directly to es api', async () => {
       const football = {};
-      const callCluster = sinon.stub();
+      const getAlias = sinon.stub();
+      const callCluster = {
+        indices: {
+          getAlias,
+        },
+        fieldCaps: sinon.stub(),
+      };
       await callIndexAliasApi(callCluster, football);
-      sinon.assert.calledOnce(callCluster);
-      expect(callCluster.args[0][1].index).toBe(football);
+      sinon.assert.calledOnce(getAlias);
+      expect(getAlias.args[0][0].index).toBe(football);
     });
 
     it('returns the es response directly', async () => {
       const football = {};
-      const callCluster = sinon.stub().returns(football);
+      const getAlias = sinon.stub().returns(football);
+      const callCluster = {
+        indices: {
+          getAlias,
+        },
+        fieldCaps: sinon.stub(),
+      };
       const resp = await callIndexAliasApi(callCluster);
-      sinon.assert.calledOnce(callCluster);
+      sinon.assert.calledOnce(getAlias);
       expect(resp).toBe(football);
     });
 
     it('sets ignoreUnavailable and allowNoIndices params', async () => {
-      const callCluster = sinon.stub();
+      const getAlias = sinon.stub();
+      const callCluster = {
+        indices: {
+          getAlias,
+        },
+        fieldCaps: sinon.stub(),
+      };
       await callIndexAliasApi(callCluster);
-      sinon.assert.calledOnce(callCluster);
+      sinon.assert.calledOnce(getAlias);
 
-      const passedOpts = callCluster.args[0][1];
-      expect(passedOpts).toHaveProperty('ignoreUnavailable', true);
-      expect(passedOpts).toHaveProperty('allowNoIndices', false);
+      const passedOpts = getAlias.args[0][0];
+      expect(passedOpts).toHaveProperty('ignore_unavailable', true);
+      expect(passedOpts).toHaveProperty('allow_no_indices', false);
     });
 
     it('handles errors with convertEsError()', async () => {
@@ -70,9 +94,15 @@ describe('server/index_patterns/service/lib/es_api', () => {
       const convertedError = new Error('convertedError');
 
       sandbox.stub(convertEsErrorNS, 'convertEsError').throws(convertedError);
-      const callCluster = sinon.spy(async () => {
+      const getAlias = sinon.stub(async () => {
         throw esError;
       });
+      const callCluster = {
+        indices: {
+          getAlias,
+        },
+        fieldCaps: sinon.stub(),
+      };
       try {
         await callIndexAliasApi(callCluster, indices);
         throw new Error('expected callIndexAliasApi() to throw');
@@ -91,37 +121,60 @@ describe('server/index_patterns/service/lib/es_api', () => {
     afterEach(() => sandbox.restore());
 
     it('calls fieldCaps() via callCluster', async () => {
-      const callCluster = sinon.stub();
+      const fieldCaps = sinon.stub();
+      const callCluster = {
+        indices: {
+          getAlias: sinon.stub(),
+        },
+        fieldCaps,
+      };
       await callFieldCapsApi(callCluster);
-      sinon.assert.calledOnce(callCluster);
-      sinon.assert.calledWith(callCluster, 'fieldCaps');
+      sinon.assert.calledOnce(fieldCaps);
     });
 
     it('passes indices directly to es api', async () => {
       const football = {};
-      const callCluster = sinon.stub();
+      const fieldCaps = sinon.stub();
+      const callCluster = {
+        indices: {
+          getAlias: sinon.stub(),
+        },
+        fieldCaps,
+      };
       await callFieldCapsApi(callCluster, football);
-      sinon.assert.calledOnce(callCluster);
-      expect(callCluster.args[0][1].index).toBe(football);
+      sinon.assert.calledOnce(fieldCaps);
+      expect(fieldCaps.args[0][0].index).toBe(football);
     });
 
     it('returns the es response directly', async () => {
       const football = {};
-      const callCluster = sinon.stub().returns(football);
+      const fieldCaps = sinon.stub().returns(football);
+      const callCluster = {
+        indices: {
+          getAlias: sinon.stub(),
+        },
+        fieldCaps,
+      };
       const resp = await callFieldCapsApi(callCluster);
-      sinon.assert.calledOnce(callCluster);
+      sinon.assert.calledOnce(fieldCaps);
       expect(resp).toBe(football);
     });
 
     it('sets ignoreUnavailable, allowNoIndices, and fields params', async () => {
-      const callCluster = sinon.stub();
+      const fieldCaps = sinon.stub();
+      const callCluster = {
+        indices: {
+          getAlias: sinon.stub(),
+        },
+        fieldCaps,
+      };
       await callFieldCapsApi(callCluster);
-      sinon.assert.calledOnce(callCluster);
+      sinon.assert.calledOnce(fieldCaps);
 
-      const passedOpts = callCluster.args[0][1];
+      const passedOpts = fieldCaps.args[0][0];
       expect(passedOpts).toHaveProperty('fields', '*');
-      expect(passedOpts).toHaveProperty('ignoreUnavailable', true);
-      expect(passedOpts).toHaveProperty('allowNoIndices', false);
+      expect(passedOpts).toHaveProperty('ignore_unavailable', true);
+      expect(passedOpts).toHaveProperty('allow_no_indices', false);
     });
 
     it('handles errors with convertEsError()', async () => {
@@ -130,9 +183,15 @@ describe('server/index_patterns/service/lib/es_api', () => {
       const convertedError = new Error('convertedError');
 
       sandbox.stub(convertEsErrorNS, 'convertEsError').throws(convertedError);
-      const callCluster = sinon.spy(async () => {
+      const fieldCaps = sinon.spy(async () => {
         throw esError;
       });
+      const callCluster = {
+        indices: {
+          getAlias: sinon.stub(),
+        },
+        fieldCaps,
+      };
       try {
         await callFieldCapsApi(callCluster, indices);
         throw new Error('expected callFieldCapsApi() to throw');

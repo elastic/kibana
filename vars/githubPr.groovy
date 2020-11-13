@@ -15,7 +15,7 @@
 */
 def withDefaultPrComments(closure) {
   catchErrors {
-    // sendCommentOnError() needs to know if comments are enabled, so lets track it with a global
+    // kibanaPipeline.notifyOnError() needs to know if comments are enabled, so lets track it with a global
     // isPr() just ensures this functionality is skipped for non-PR builds
     buildState.set('PR_COMMENTS_ENABLED', isPr())
     catchErrors {
@@ -59,19 +59,6 @@ def sendComment(isFinal = false) {
   }
 }
 
-def sendCommentOnError(Closure closure) {
-  try {
-    closure()
-  } catch (ex) {
-    // If this is the first failed step, it's likely that the error hasn't propagated up far enough to mark the build as a failure
-    currentBuild.result = 'FAILURE'
-    catchErrors {
-      sendComment(false)
-    }
-    throw ex
-  }
-}
-
 // Checks whether or not this currently executing build was triggered via a PR in the elastic/kibana repo
 def isPr() {
   return !!(env.ghprbPullId && env.ghprbPullLink && env.ghprbPullLink =~ /\/elastic\/kibana\//)
@@ -98,15 +85,6 @@ def getLatestBuildInfo() {
 
 def getLatestBuildInfo(comment) {
   return comment ? getBuildInfoFromComment(comment.body) : null
-}
-
-def createBuildInfo() {
-  return [
-    status: buildUtils.getBuildStatus(),
-    url: env.BUILD_URL,
-    number: env.BUILD_NUMBER,
-    commit: getCommitHash()
-  ]
 }
 
 def getHistoryText(builds) {
@@ -168,6 +146,16 @@ def getTestFailuresMessage() {
   return messages.join("\n")
 }
 
+def getBuildStatusIncludingMetrics() {
+  def status = buildUtils.getBuildStatus()
+
+  if (status == 'SUCCESS' && shouldCheckCiMetricSuccess() && !ciStats.getMetricsSuccess()) {
+    return 'FAILURE'
+  }
+
+  return status
+}
+
 def getNextCommentMessage(previousCommentInfo = [:], isFinal = false) {
   def info = previousCommentInfo ?: [:]
   info.builds = previousCommentInfo.builds ?: []
@@ -176,7 +164,10 @@ def getNextCommentMessage(previousCommentInfo = [:], isFinal = false) {
   info.builds = info.builds.findAll { it.number != env.BUILD_NUMBER }
 
   def messages = []
-  def status = buildUtils.getBuildStatus()
+
+  def status = isFinal
+    ? getBuildStatusIncludingMetrics()
+    : buildUtils.getBuildStatus()
 
   if (!isFinal) {
     def failuresPart = status != 'SUCCESS' ? ', with failures' : ''
@@ -241,7 +232,12 @@ def getNextCommentMessage(previousCommentInfo = [:], isFinal = false) {
 
   messages << "To update your PR or re-run it, just comment with:\n`@elasticmachine merge upstream`"
 
-  info.builds << createBuildInfo()
+  info.builds << [
+    status: status,
+    url: env.BUILD_URL,
+    number: env.BUILD_NUMBER,
+    commit: getCommitHash()
+  ]
 
   messages << """
     <!--PIPELINE
@@ -300,4 +296,13 @@ def getFailedSteps() {
   return jenkinsApi.getFailedSteps()?.findAll { step ->
     step.displayName != 'Check out from version control'
   }
+}
+
+def shouldCheckCiMetricSuccess() {
+  // disable ciMetrics success check when a PR is targetting a non-tracked branch
+  if (buildState.has('checkoutInfo') && !buildState.get('checkoutInfo').targetsTrackedBranch) {
+    return false
+  }
+
+  return true
 }

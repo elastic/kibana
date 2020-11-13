@@ -5,10 +5,11 @@
  */
 import { FilterStateStore } from '../../../../../../src/plugins/data/common/es_query/filters/meta_filter';
 
-import { TimelineType, TimelineStatus } from '../../../common/types/timeline';
+import { TimelineId, TimelineType, TimelineStatus } from '../../../common/types/timeline';
 
 import { OpenTimelineResult } from '../../timelines/components/open_timeline/types';
 import { GetAllTimeline, SortFieldTimeline, TimelineResult, Direction } from '../../graphql/types';
+import { TimelineEventsDetailsItem } from '../../../common/search_strategy';
 import { allTimelinesQuery } from '../../timelines/containers/all/index.gql_query';
 import { CreateTimelineProps } from '../../detections/components/alerts_table/types';
 import { TimelineModel } from '../../timelines/store/timeline/model';
@@ -31,7 +32,7 @@ export interface MockedProvidedQuery {
 export const mockOpenTimelineQueryResults: MockedProvidedQuery[] = [
   {
     request: {
-      query: allTimelinesQuery,
+      query: (allTimelinesQuery as unknown) as GetAllTimeline.Query,
       variables: {
         onlyUserFavorite: false,
         pageInfo: {
@@ -2118,6 +2119,7 @@ export const mockTimelineModel: TimelineModel = {
   highlightedDropAndProviderId: '',
   historyIds: [],
   id: 'ef579e40-jibber-jabber',
+  indexNames: [],
   isFavorite: false,
   isLive: false,
   isLoading: false,
@@ -2221,7 +2223,8 @@ export const defaultTimelineProps: CreateTimelineProps = {
     filters: [],
     highlightedDropAndProviderId: '',
     historyIds: [],
-    id: 'timeline-1',
+    id: TimelineId.active,
+    indexNames: [],
     isFavorite: false,
     isLive: false,
     isLoading: false,
@@ -2252,5 +2255,32 @@ export const defaultTimelineProps: CreateTimelineProps = {
     width: 1100,
   },
   to: '2018-11-05T19:03:25.937Z',
+  notes: null,
   ruleNote: '# this is some markdown documentation',
+};
+
+export const mockTimelineDetails: TimelineEventsDetailsItem[] = [
+  {
+    field: 'host.name',
+    values: ['apache'],
+    originalValue: 'apache',
+  },
+  {
+    field: 'user.id',
+    values: ['1'],
+    originalValue: 1,
+  },
+];
+
+export const mockTimelineDetailsApollo = {
+  data: {
+    source: {
+      TimelineDetails: {
+        data: mockTimelineDetails,
+      },
+    },
+  },
+  loading: false,
+  networkStatus: 7,
+  stale: false,
 };

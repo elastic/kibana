@@ -5,28 +5,19 @@
  */
 
 import { EuiSuperDatePicker } from '@elastic/eui';
-import React from 'react';
-import { isEmpty, isEqual, pickBy } from 'lodash';
-import { fromQuery, toQuery } from '../Links/url_helpers';
-import { history } from '../../../utils/history';
-import { useLocation } from '../../../hooks/useLocation';
+import React, { useEffect } from 'react';
+import { useHistory, useLocation } from 'react-router-dom';
+import { UI_SETTINGS } from '../../../../../../../src/plugins/data/common';
+import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { clearCache } from '../../../services/rest/callApi';
-import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
-import { UI_SETTINGS } from '../../../../../../../src/plugins/data/common';
-import {
-  TimePickerQuickRange,
-  TimePickerTimeDefaults,
-  TimePickerRefreshInterval,
-} from './typings';
-
-function removeUndefinedAndEmptyProps<T extends object>(obj: T): Partial<T> {
-  return pickBy(obj, (value) => value !== undefined && !isEmpty(String(value)));
-}
+import { fromQuery, toQuery } from '../Links/url_helpers';
+import { TimePickerQuickRange, TimePickerTimeDefaults } from './typings';
 
 export function DatePicker() {
+  const history = useHistory();
   const location = useLocation();
-  const { core } = useApmPluginContext();
+  const { core, plugins } = useApmPluginContext();
 
   const timePickerQuickRanges = core.uiSettings.get<TimePickerQuickRange[]>(
     UI_SETTINGS.TIMEPICKER_QUICK_RANGES
@@ -35,21 +26,6 @@ export function DatePicker() {
   const timePickerTimeDefaults = core.uiSettings.get<TimePickerTimeDefaults>(
     UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS
   );
-
-  const timePickerRefreshIntervalDefaults = core.uiSettings.get<
-    TimePickerRefreshInterval
-  >(UI_SETTINGS.TIMEPICKER_REFRESH_INTERVAL_DEFAULTS);
-
-  const DEFAULT_VALUES = {
-    rangeFrom: timePickerTimeDefaults.from,
-    rangeTo: timePickerTimeDefaults.to,
-    refreshPaused: timePickerRefreshIntervalDefaults.pause,
-    /*
-     * Must be replaced by timePickerRefreshIntervalDefaults.value when this issue is fixed.
-     * https://github.com/elastic/kibana/issues/70562
-     */
-    refreshInterval: 10000,
-  };
 
   const commonlyUsedRanges = timePickerQuickRanges.map(
     ({ from, to, display }) => ({
@@ -90,28 +66,48 @@ export function DatePicker() {
     updateUrl({ rangeFrom: start, rangeTo: end });
   }
 
-  const { rangeFrom, rangeTo, refreshPaused, refreshInterval } = urlParams;
-  const timePickerURLParams = removeUndefinedAndEmptyProps({
-    rangeFrom,
-    rangeTo,
-    refreshPaused,
-    refreshInterval,
-  });
+  useEffect(() => {
+    // set time if both to and from are given in the url
+    if (urlParams.rangeFrom && urlParams.rangeTo) {
+      plugins.data.query.timefilter.timefilter.setTime({
+        from: urlParams.rangeFrom,
+        to: urlParams.rangeTo,
+      });
+      return;
+    }
 
-  const nextParams = {
-    ...DEFAULT_VALUES,
-    ...timePickerURLParams,
-  };
-  if (!isEqual(nextParams, timePickerURLParams)) {
-    updateUrl(nextParams);
-  }
+    // read time from state and update the url
+    const timePickerSharedState = plugins.data.query.timefilter.timefilter.getTime();
+
+    history.replace({
+      ...location,
+      search: fromQuery({
+        ...toQuery(location.search),
+        rangeFrom:
+          urlParams.rangeFrom ??
+          timePickerSharedState.from ??
+          timePickerTimeDefaults.from,
+        rangeTo:
+          urlParams.rangeTo ??
+          timePickerSharedState.to ??
+          timePickerTimeDefaults.to,
+      }),
+    });
+  }, [
+    urlParams.rangeFrom,
+    urlParams.rangeTo,
+    plugins,
+    history,
+    location,
+    timePickerTimeDefaults,
+  ]);
 
   return (
     <EuiSuperDatePicker
-      start={rangeFrom}
-      end={rangeTo}
-      isPaused={refreshPaused}
-      refreshInterval={refreshInterval}
+      start={urlParams.rangeFrom}
+      end={urlParams.rangeTo}
+      isPaused={urlParams.refreshPaused}
+      refreshInterval={urlParams.refreshInterval}
       onTimeChange={onTimeChange}
       onRefresh={({ start, end }) => {
         clearCache();

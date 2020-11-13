@@ -19,7 +19,7 @@ Table of Contents
   - [Usage](#usage)
   - [Kibana Actions Configuration](#kibana-actions-configuration)
     - [Configuration Options](#configuration-options)
-      - [Whitelisting Built-in Action Types](#whitelisting-built-in-action-types)
+      - [Adding Built-in Action Types to allowedHosts](#adding-built-in-action-types-to-allowedhosts)
     - [Configuration Utilities](#configuration-utilities)
   - [Action types](#action-types)
     - [Methods](#methods)
@@ -69,18 +69,29 @@ Table of Contents
     - [`secrets`](#secrets-6)
     - [`params`](#params-6)
       - [`subActionParams (pushToService)`](#subactionparams-pushtoservice)
+      - [`subActionParams (getFields)`](#subactionparams-getfields-1)
   - [Jira](#jira)
     - [`config`](#config-7)
     - [`secrets`](#secrets-7)
     - [`params`](#params-7)
       - [`subActionParams (pushToService)`](#subactionparams-pushtoservice-1)
+      - [`subActionParams (issueTypes)`](#subactionparams-issuetypes)
+      - [`subActionParams (getFields)`](#subactionparams-getfields-2)
+      - [`subActionParams (pushToService)`](#subactionparams-pushtoservice-2)
   - [IBM Resilient](#ibm-resilient)
     - [`config`](#config-8)
     - [`secrets`](#secrets-8)
     - [`params`](#params-8)
-      - [`subActionParams (pushToService)`](#subactionparams-pushtoservice-2)
+      - [`subActionParams (pushToService)`](#subactionparams-pushtoservice-3)
+      - [`subActionParams (getFields)`](#subactionparams-getfields-3)
 - [Command Line Utility](#command-line-utility)
 - [Developing New Action Types](#developing-new-action-types)
+  - [licensing](#licensing)
+  - [plugin location](#plugin-location)
+  - [documentation](#documentation)
+  - [tests](#tests)
+  - [action type config and secrets](#action-type-config-and-secrets)
+  - [user interface](#user-interface)
 
 ## Terminology
 
@@ -103,31 +114,31 @@ Implemented under the [Actions Config](./server/actions_config.ts).
 
 Built-In-Actions are configured using the _xpack.actions_ namespoace under _kibana.yml_, and have the following configuration options:
 
-| Namespaced Key                         | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | Type          |
-| -------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- |
-| _xpack.actions._**enabled**            | Feature toggle which enabled Actions in Kibana.                                                                                                                                                                                                                                                                                                                                                                                                                               | boolean       |
-| _xpack.actions._**whitelistedHosts**   | Which _hostnames_ are whitelisted for the Built-In-Action? This list should contain hostnames of every external service you wish to interact with using Webhooks, Email or any other built in Action. Note that you may use the string "\*" in place of a specific hostname to enable Kibana to target any URL, but keep in mind the potential use of such a feature to execute [SSRF](https://www.owasp.org/index.php/Server_Side_Request_Forgery) attacks from your server. | Array<String> |
-| _xpack.actions._**enabledActionTypes** | A list of _actionTypes_ id's that are enabled. A "\*" may be used as an element to indicate all registered actionTypes should be enabled. The actionTypes registered for Kibana are `.server-log`, `.slack`, `.email`, `.index`, `.pagerduty`, `.webhook`. Default: `["*"]`                                                                                                                                                                                                   | Array<String> |
-| _xpack.actions._**preconfigured**      | A object of action id / preconfigured actions. Default: `{}`                                                                                                                                                                                                                                                                                                                                                                                                                  | Array<Object> |
+| Namespaced Key                         | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                               | Type          |
+| -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- |
+| _xpack.actions._**enabled**            | Feature toggle which enabled Actions in Kibana.                                                                                                                                                                                                                                                                                                                                                                                                                           | boolean       |
+| _xpack.actions._**allowedHosts**       | Which _hostnames_ are allowed for the Built-In-Action? This list should contain hostnames of every external service you wish to interact with using Webhooks, Email or any other built in Action. Note that you may use the string "\*" in place of a specific hostname to enable Kibana to target any URL, but keep in mind the potential use of such a feature to execute [SSRF](https://www.owasp.org/index.php/Server_Side_Request_Forgery) attacks from your server. | Array<String> |
+| _xpack.actions._**enabledActionTypes** | A list of _actionTypes_ id's that are enabled. A "\*" may be used as an element to indicate all registered actionTypes should be enabled. The actionTypes registered for Kibana are `.server-log`, `.slack`, `.email`, `.index`, `.pagerduty`, `.webhook`. Default: `["*"]`                                                                                                                                                                                               | Array<String> |
+| _xpack.actions._**preconfigured**      | A object of action id / preconfigured actions. Default: `{}`                                                                                                                                                                                                                                                                                                                                                                                                              | Array<Object> |
 
-#### Whitelisting Built-in Action Types
+#### Adding Built-in Action Types to allowedHosts
 
-It is worth noting that the **whitelistedHosts** configuation applies to built-in action types (such as Slack, or PagerDuty) as well.
+It is worth noting that the **allowedHosts** configuation applies to built-in action types (such as Slack, or PagerDuty) as well.
 
-Uniquely, the _PagerDuty Action Type_ has been configured to support the service's Events API (at _https://events.pagerduty.com/v2/enqueue_, which you can read about [here](https://v2.developer.pagerduty.com/docs/events-api-v2)) as a default, but this too, must be included in the whitelist before the PagerDuty action can be used.
+Uniquely, the _PagerDuty Action Type_ has been configured to support the service's Events API (at _https://events.pagerduty.com/v2/enqueue_, which you can read about [here](https://v2.developer.pagerduty.com/docs/events-api-v2)) as a default, but this too, must be included in the allowedHosts before the PagerDuty action can be used.
 
 ### Configuration Utilities
 
 This module provides a Utilities for interacting with the configuration.
 
-| Method                    | Arguments                                                    | Description                                                                                                                                                                                                                                                                                                 | Return Type                                           |
-| ------------------------- | ------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
-| isWhitelistedUri          | _uri_: The URI you wish to validate is whitelisted           | Validates whether the URI is whitelisted. This checks the configuration and validates that the hostname of the URI is in the list of whitelisted Hosts and returns `true` if it is whitelisted. If the configuration says that all URI's are whitelisted (using an "\*") then it will always return `true`. | Boolean                                               |
-| isWhitelistedHostname     | _hostname_: The Hostname you wish to validate is whitelisted | Validates whether the Hostname is whitelisted. This checks the configuration and validates that the hostname is in the list of whitelisted Hosts and returns `true` if it is whitelisted. If the configuration says that all Hostnames are whitelisted (using an "\*") then it will always return `true`.   | Boolean                                               |
-| isActionTypeEnabled       | _actionType_: The actionType to check to see if it's enabled | Returns true if the actionType is enabled, otherwise false.                                                                                                                                                                                                                                                 | Boolean                                               |
-| ensureWhitelistedUri      | _uri_: The URI you wish to validate is whitelisted           | Validates whether the URI is whitelisted. This checks the configuration and validates that the hostname of the URI is in the list of whitelisted Hosts and throws an error if it is not whitelisted. If the configuration says that all URI's are whitelisted (using an "\*") then it will never throw.     | No return value, throws if URI isn't whitelisted      |
-| ensureWhitelistedHostname | _hostname_: The Hostname you wish to validate is whitelisted | Validates whether the Hostname is whitelisted. This checks the configuration and validates that the hostname is in the list of whitelisted Hosts and throws an error if it is not whitelisted. If the configuration says that all Hostnames are whitelisted (using an "\*") then it will never throw        | No return value, throws if Hostname isn't whitelisted |
-| ensureActionTypeEnabled   | _actionType_: The actionType to check to see if it's enabled | Throws an error if the actionType is not enabled                                                                                                                                                                                                                                                            | No return value, throws if actionType isn't enabled   |
+| Method                  | Arguments                                                    | Description                                                                                                                                                                                                                                                                                 | Return Type                                         |
+| ----------------------- | ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
+| isUriAllowed            | _uri_: The URI you wish to validate is allowed               | Validates whether the URI is allowed. This checks the configuration and validates that the hostname of the URI is in the list of allowed Hosts and returns `true` if it is allowed. If the configuration says that all URI's are allowed (using an "\*") then it will always return `true`. | Boolean                                             |
+| isHostnameAllowed       | _hostname_: The Hostname you wish to validate is allowed     | Validates whether the Hostname is allowed. This checks the configuration and validates that the hostname is in the list of allowed Hosts and returns `true` if it is allowed. If the configuration says that all Hostnames are allowed (using an "\*") then it will always return `true`.   | Boolean                                             |
+| isActionTypeEnabled     | _actionType_: The actionType to check to see if it's enabled | Returns true if the actionType is enabled, otherwise false.                                                                                                                                                                                                                                 | Boolean                                             |
+| ensureUriAllowed        | _uri_: The URI you wish to validate is allowed               | Validates whether the URI is allowed. This checks the configuration and validates that the hostname of the URI is in the list of allowed Hosts and throws an error if it is not allowed. If the configuration says that all URI's are allowed (using an "\*") then it will never throw.     | No return value, throws if URI isn't allowed        |
+| ensureHostnameAllowed   | _hostname_: The Hostname you wish to validate is allowed     | Validates whether the Hostname is allowed. This checks the configuration and validates that the hostname is in the list of allowed Hosts and throws an error if it is not allowed. If the configuration says that all Hostnames are allowed (using an "\*") then it will never throw        | No return value, throws if Hostname isn't allowed . |
+| ensureActionTypeEnabled | _actionType_: The actionType to check to see if it's enabled | Throws an error if the actionType is not enabled                                                                                                                                                                                                                                            | No return value, throws if actionType isn't enabled |
 
 ## Action types
 
@@ -266,18 +277,20 @@ Running the action by scheduling a task means that we will no longer have a user
 
 The following table describes the properties of the `options` object.
 
-| Property | Description                                                                                            | Type   |
-| -------- | ------------------------------------------------------------------------------------------------------ | ------ |
-| id       | The id of the action you want to execute.                                                              | string |
-| params   | The `params` value to give the action type executor.                                                   | object |
-| spaceId  | The space id the action is within.                                                                     | string |
-| apiKey   | The Elasticsearch API key to use for context. (Note: only required and used when security is enabled). | string |
+| Property | Description                                                                                            | Type             |
+| -------- | ------------------------------------------------------------------------------------------------------ | ---------------- |
+| id       | The id of the action you want to execute.                                                              | string           |
+| params   | The `params` value to give the action type executor.                                                   | object           |
+| spaceId  | The space id the action is within.                                                                     | string           |
+| apiKey   | The Elasticsearch API key to use for context. (Note: only required and used when security is enabled). | string           |
+| source   | The source of the execution, either an HTTP request or a reference to a Saved Object.                  | object, optional |
 
 ## Example
 
 This example makes action `3c5b2bd4-5424-4e4b-8cf5-c0a58c762cc5` send an email. The action plugin will load the saved object and find what action type to call with `params`.
 
 ```typescript
+const request: KibanaRequest = { ... };
 const actionsClient = await server.plugins.actions.getActionsClientWithRequest(request);
 await actionsClient.enqueueExecution({
   id: '3c5b2bd4-5424-4e4b-8cf5-c0a58c762cc5',
@@ -288,6 +301,7 @@ await actionsClient.enqueueExecution({
     subject: 'My email subject',
     body: 'My email body',
   },
+  source: asHttpRequestExecutionSource(request),
 });
 ```
 
@@ -297,10 +311,11 @@ This api runs the action and asynchronously returns the result of running the ac
 
 The following table describes the properties of the `options` object.
 
-| Property | Description                                          | Type   |
-| -------- | ---------------------------------------------------- | ------ |
-| id       | The id of the action you want to execute.            | string |
-| params   | The `params` value to give the action type executor. | object |
+| Property | Description                                                                           | Type             |
+| -------- | ------------------------------------------------------------------------------------- | ---------------- |
+| id       | The id of the action you want to execute.                                             | string           |
+| params   | The `params` value to give the action type executor.                                  | object           |
+| source   | The source of the execution, either an HTTP request or a reference to a Saved Object. | object, optional |
 
 ## Example
 
@@ -316,6 +331,10 @@ const result = await actionsClient.execute({
     subject: 'My email subject',
     body: 'My email body',
   },
+  source: asSavedObjectExecutionSource({
+    id: '573891ae-8c48-49cb-a197-0cd5ec34a88b',
+    type: 'alert',
+  }),
 });
 ```
 
@@ -323,15 +342,17 @@ const result = await actionsClient.execute({
 
 Kibana ships with a set of built-in action types:
 
-| Type                      | Id            | Description                                                        |
-| ------------------------- | ------------- | ------------------------------------------------------------------ |
-| [Server log](#server-log) | `.server-log` | Logs messages to the Kibana log using Kibana's logger              |
-| [Email](#email)           | `.email`      | Sends an email using SMTP                                          |
-| [Slack](#slack)           | `.slack`      | Posts a message to a slack channel                                 |
-| [Index](#index)           | `.index`      | Indexes document(s) into Elasticsearch                             |
-| [Webhook](#webhook)       | `.webhook`    | Send a payload to a web service using HTTP POST or PUT             |
-| [PagerDuty](#pagerduty)   | `.pagerduty`  | Trigger, resolve, or acknowlege an incident to a PagerDuty service |
-| [ServiceNow](#servicenow) | `.servicenow` | Create or update an incident to a ServiceNow instance              |
+| Type                            | Id            | Description                                                        |
+| ------------------------------- | ------------- | ------------------------------------------------------------------ |
+| [Server log](#server-log)       | `.server-log` | Logs messages to the Kibana log using Kibana's logger              |
+| [Email](#email)                 | `.email`      | Sends an email using SMTP                                          |
+| [Slack](#slack)                 | `.slack`      | Posts a message to a slack channel                                 |
+| [Index](#index)                 | `.index`      | Indexes document(s) into Elasticsearch                             |
+| [Webhook](#webhook)             | `.webhook`    | Send a payload to a web service using HTTP POST or PUT             |
+| [PagerDuty](#pagerduty)         | `.pagerduty`  | Trigger, resolve, or acknowlege an incident to a PagerDuty service |
+| [ServiceNow](#servicenow)       | `.servicenow` | Create or update an incident to a ServiceNow instance              |
+| [Jira](#jira)                   | `.jira`       | Create or update an issue to a Jira instance                       |
+| [IBM Resilient](#ibm-resilient) | `.resilient`  | Create or update an incident to a IBM Resilient instance           |
 
 ---
 
@@ -442,7 +463,7 @@ The config and params properties are modelled after the [Watcher Index Action](h
 | index                | The Elasticsearch index to index into.                     | string _(optional)_  |
 | doc_id               | The optional \_id of the document.                         | string _(optional)_  |
 | execution_time_field | The field that will store/index the action execution time. | string _(optional)_  |
-| refresh              | Setting of the refresh policy for the write request.        | boolean _(optional)_ |
+| refresh              | Setting of the refresh policy for the write request.       | boolean _(optional)_ |
 
 ### `secrets`
 
@@ -450,9 +471,9 @@ This action type has no `secrets` properties.
 
 ### `params`
 
-| Property  | Description                              | Type                |
-| --------- | ---------------------------------------- | ------------------- |
-| documents | JSON object that describes the [document](https://www.elastic.co/guide/en/elasticsearch/reference/current/getting-started-index.html#getting-started-batch-processing). | object[]            |
+| Property  | Description                                                                                                                                                             | Type     |
+| --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- |
+| documents | JSON object that describes the [document](https://www.elastic.co/guide/en/elasticsearch/reference/current/getting-started-index.html#getting-started-batch-processing). | object[] |
 
 ---
 
@@ -529,10 +550,10 @@ The ServiceNow action uses the [V2 Table API](https://developer.servicenow.com/a
 
 ### `config`
 
-| Property           | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | Type   |
-| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
-| apiUrl             | ServiceNow instance URL.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | string |
-| casesConfiguration | Case configuration object. The object should contain an attribute called `mapping`. A `mapping` is an array of objects. Each mapping object should be of the form `{ source: string, target: string, actionType: string }`. `source` is the Case field. `target` is the ServiceNow field where `source` will be mapped to. `actionType` can be one of `nothing`, `overwrite` or `append`. For example the `{ source: 'title', target: 'short_description', actionType: 'overwrite' }` record, inside mapping array, means that the title of a case will be mapped to the short description of an incident in ServiceNow and will be overwrite on each update. | object |
+| Property              | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | Type                |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------- |
+| apiUrl                | ServiceNow instance URL.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         | string              |
+| incidentConfiguration | Optional property and specific to **Cases only**. If defined, the object should contain an attribute called `mapping`. A `mapping` is an array of objects. Each mapping object should be of the form `{ source: string, target: string, actionType: string }`. `source` is the Case field. `target` is the ServiceNow field where `source` will be mapped to. `actionType` can be one of `nothing`, `overwrite` or `append`. For example the `{ source: 'title', target: 'short_description', actionType: 'overwrite' }` record, inside mapping array, means that the title of a case will be mapped to the short description of an incident in ServiceNow and will be overwrite on each update. | object _(optional)_ |
 
 ### `secrets`
 
@@ -545,18 +566,26 @@ The ServiceNow action uses the [V2 Table API](https://developer.servicenow.com/a
 
 | Property        | Description                                                                          | Type   |
 | --------------- | ------------------------------------------------------------------------------------ | ------ |
-| subAction       | The sub action to perform. It can be `pushToService`, `handshake`, and `getIncident` | string |
+| subAction       | The sub action to perform. It can be `getFields`, `pushToService`, `handshake`, and `getIncident` | string |
 | subActionParams | The parameters of the sub action                                                     | object |
 
 #### `subActionParams (pushToService)`
 
-| Property    | Description                                                                                                                | Type                  |
-| ----------- | -------------------------------------------------------------------------------------------------------------------------- | --------------------- |
-| caseId      | The case id                                                                                                                | string                |
-| title       | The title of the case                                                                                                      | string _(optional)_   |
-| description | The description of the case                                                                                                | string _(optional)_   |
-| comments    | The comments of the case. A comment is of the form `{ commentId: string, version: string, comment: string }`               | object[] _(optional)_ |
-| externalId  | The id of the incident in ServiceNow . If presented the incident will be update. Otherwise a new incident will be created. | string _(optional)_   |
+| Property      | Description                                                                                                               | Type                  |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------- | --------------------- |
+| savedObjectId | The id of the saved object.                                                                                               | string                |
+| title         | The title of the incident.                                                                                                | string _(optional)_   |
+| description   | The description of the incident.                                                                                          | string _(optional)_   |
+| comment       | A comment.                                                                                                                | string _(optional)_   |
+| comments      | The comments of the case. A comment is of the form `{ commentId: string, version: string, comment: string }`.             | object[] _(optional)_ |
+| externalId    | The id of the incident in ServiceNow. If presented the incident will be update. Otherwise a new incident will be created. | string _(optional)_   |
+| severity      | The name of the severity in ServiceNow.                                                                                   | string _(optional)_   |
+| urgency       | The name of the urgency in ServiceNow.                                                                                    | string _(optional)_   |
+| impact        | The name of the impact in ServiceNow.                                                                                     | string _(optional)_   |
+
+#### `subActionParams (getFields)`
+
+No parameters for `getFields` sub-action. Provide an empty object `{}`.
 
 ---
 
@@ -568,34 +597,52 @@ The Jira action uses the [V2 API](https://developer.atlassian.com/cloud/jira/pla
 
 ### `config`
 
-| Property           | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             | Type   |
-| ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
-| apiUrl             | Jira instance URL.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | string |
-| casesConfiguration | Case configuration object. The object should contain an attribute called `mapping`. A `mapping` is an array of objects. Each mapping object should be of the form `{ source: string, target: string, actionType: string }`. `source` is the Case field. `target` is the Jira field where `source` will be mapped to. `actionType` can be one of `nothing`, `overwrite` or `append`. For example the `{ source: 'title', target: 'summary', actionType: 'overwrite' }` record, inside mapping array, means that the title of a case will be mapped to the short description of an incident in Jira and will be overwrite on each update. | object |
+| Property              | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | Type                |
+| --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------- |
+| apiUrl                | Jira instance URL.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         | string              |
+| incidentConfiguration | Optional property and specific to **Cases only**. if defined, the object should contain an attribute called `mapping`. A `mapping` is an array of objects. Each mapping object should be of the form `{ source: string, target: string, actionType: string }`. `source` is the Case field. `target` is the Jira field where `source` will be mapped to. `actionType` can be one of `nothing`, `overwrite` or `append`. For example the `{ source: 'title', target: 'summary', actionType: 'overwrite' }` record, inside mapping array, means that the title of a case will be mapped to the short description of an incident in Jira and will be overwrite on each update. | object _(optional)_ |
 
 ### `secrets`
 
-| Property | Description                             | Type   |
-| -------- | --------------------------------------- | ------ |
-| email    | email for HTTP Basic authentication     | string |
-| apiToken | API token for HTTP Basic authentication | string |
+| Property | Description                                           | Type   |
+| -------- | ----------------------------------------------------- | ------ |
+| email    | email (or username) for HTTP Basic authentication     | string |
+| apiToken | API token (or password) for HTTP Basic authentication | string |
 
 ### `params`
 
-| Property        | Description                                                                          | Type   |
-| --------------- | ------------------------------------------------------------------------------------ | ------ |
-| subAction       | The sub action to perform. It can be `pushToService`, `handshake`, and `getIncident` | string |
-| subActionParams | The parameters of the sub action                                                     | object |
+| Property        | Description                                                                                                             | Type   |
+| --------------- | ----------------------------------------------------------------------------------------------------------------------- | ------ |
+| subAction       | The sub action to perform. It can be `getFields`, `pushToService`, `handshake`, `getIncident`, `issueTypes`, and `fieldsByIssueType` | string |
+| subActionParams | The parameters of the sub action                                                                                        | object |
 
 #### `subActionParams (pushToService)`
 
-| Property    | Description                                                                                                         | Type                  |
-| ----------- | ------------------------------------------------------------------------------------------------------------------- | --------------------- |
-| caseId      | The case id                                                                                                         | string                |
-| title       | The title of the case                                                                                               | string _(optional)_   |
-| description | The description of the case                                                                                         | string _(optional)_   |
-| comments    | The comments of the case. A comment is of the form `{ commentId: string, version: string, comment: string }`        | object[] _(optional)_ |
-| externalId  | The id of the incident in Jira. If presented the incident will be update. Otherwise a new incident will be created. | string _(optional)_   |
+| Property      | Description                                                                                                      | Type                  |
+| ------------- | ---------------------------------------------------------------------------------------------------------------- | --------------------- |
+| savedObjectId | The id of the saved object                                                                                       | string                |
+| title         | The title of the issue                                                                                           | string _(optional)_   |
+| description   | The description of the issue                                                                                     | string _(optional)_   |
+| externalId    | The id of the issue in Jira. If presented the incident will be update. Otherwise a new incident will be created. | string _(optional)_   |
+| issueType     | The id of the issue type in Jira.                                                                                | string _(optional)_   |
+| priority      | The name of the priority in Jira. Example: `Medium`.                                                             | string _(optional)_   |
+| labels        | An array of labels.                                                                                              | string[] _(optional)_ |
+| parent        | The parent issue id or key. Only for `Sub-task` issue types.                                                     | string _(optional)_   |
+| comments      | The comments of the case. A comment is of the form `{ commentId: string, version: string, comment: string }`     | object[] _(optional)_ |
+
+#### `subActionParams (issueTypes)`
+
+No parameters for `issueTypes` sub-action. Provide an empty object `{}`.
+
+#### `subActionParams (getFields)`
+
+No parameters for `getFields` sub-action. Provide an empty object `{}`.
+
+#### `subActionParams (pushToService)`
+
+| Property | Description                      | Type   |
+| -------- | -------------------------------- | ------ |
+| id       | The id of the issue type in Jira | string |
 
 ## IBM Resilient
 
@@ -603,10 +650,10 @@ ID: `.resilient`
 
 ### `config`
 
-| Property           | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | Type   |
-| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------ |
-| apiUrl             | IBM Resilient instance URL.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | string |
-| casesConfiguration | Case configuration object. The object should contain an attribute called `mapping`. A `mapping` is an array of objects. Each mapping object should be of the form `{ source: string, target: string, actionType: string }`. `source` is the Case field. `target` is the Jira field where `source` will be mapped to. `actionType` can be one of `nothing`, `overwrite` or `append`. For example the `{ source: 'title', target: 'summary', actionType: 'overwrite' }` record, inside mapping array, means that the title of a case will be mapped to the short description of an incident in IBM Resilient and will be overwrite on each update. | object |
+| Property              | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         | Type   |
+| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
+| apiUrl                | IBM Resilient instance URL.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         | string |
+| incidentConfiguration | Optional property and specific to **Cases only**. If defined, the object should contain an attribute called `mapping`. A `mapping` is an array of objects. Each mapping object should be of the form `{ source: string, target: string, actionType: string }`. `source` is the Case field. `target` is the Jira field where `source` will be mapped to. `actionType` can be one of `nothing`, `overwrite` or `append`. For example the `{ source: 'title', target: 'summary', actionType: 'overwrite' }` record, inside mapping array, means that the title of a case will be mapped to the short description of an incident in IBM Resilient and will be overwrite on each update. | object |
 
 ### `secrets`
 
@@ -619,18 +666,24 @@ ID: `.resilient`
 
 | Property        | Description                                                                          | Type   |
 | --------------- | ------------------------------------------------------------------------------------ | ------ |
-| subAction       | The sub action to perform. It can be `pushToService`, `handshake`, and `getIncident` | string |
+| subAction       | The sub action to perform. It can be `getFields`, `pushToService`, `handshake`, and `getIncident` | string |
 | subActionParams | The parameters of the sub action                                                     | object |
 
 #### `subActionParams (pushToService)`
 
-| Property    | Description                                                                                                                  | Type                  |
-| ----------- | ---------------------------------------------------------------------------------------------------------------------------- | --------------------- |
-| caseId      | The case id                                                                                                                  | string                |
-| title       | The title of the case                                                                                                        | string _(optional)_   |
-| description | The description of the case                                                                                                  | string _(optional)_   |
-| comments    | The comments of the case. A comment is of the form `{ commentId: string, version: string, comment: string }`                 | object[] _(optional)_ |
-| externalId  | The id of the incident in IBM Resilient. If presented the incident will be update. Otherwise a new incident will be created. | string _(optional)_   |
+| Property      | Description                                                                                                                  | Type                  |
+| ------------- | ---------------------------------------------------------------------------------------------------------------------------- | --------------------- |
+| savedObjectId | The id of the saved object                                                                                                   | string                |
+| title         | The title of the incident                                                                                                    | string _(optional)_   |
+| description   | The description of the incident                                                                                              | string _(optional)_   |
+| comments      | The comments of the incident. A comment is of the form `{ commentId: string, version: string, comment: string }`             | object[] _(optional)_ |
+| externalId    | The id of the incident in IBM Resilient. If presented the incident will be update. Otherwise a new incident will be created. | string _(optional)_   |
+| incidentTypes | An array with the ids of IBM Resilient incident types.                                                                       | number[] _(optional)_ |
+| severityCode  | IBM Resilient id of the severity code.                                                                                       | number _(optional)_   |
+
+#### `subActionParams (getFields)`
+
+No parameters for `getFields` sub-action. Provide an empty object `{}`.
 
 # Command Line Utility
 
@@ -660,30 +713,30 @@ Consider working with the alerting team on early structure /design feedback of n
 
 ## licensing
 
-Currently actions are licensed as "basic" if the action only interacts with the stack, eg the server log and es index actions.  Other actions are at least "gold" level.  
+Currently actions are licensed as "basic" if the action only interacts with the stack, eg the server log and es index actions. Other actions are at least "gold" level.
 
 ## plugin location
 
-Currently actions that are licensed as "basic" **MUST** be implemented in the actions plugin, other actions can be implemented in any other plugin that pre-reqs the actions plugin.  If the new action is generic across the stack, it probably belongs in the actions plugin, but if your action is very specific to a plugin/solution, it might be easiest to implement it in the plugin/solution.  Keep in mind that if Kibana is run without the plugin being enabled, any actions defined in that plugin will not run, nor will those actions be available via APIs or UI.
+Currently actions that are licensed as "basic" **MUST** be implemented in the actions plugin, other actions can be implemented in any other plugin that pre-reqs the actions plugin. If the new action is generic across the stack, it probably belongs in the actions plugin, but if your action is very specific to a plugin/solution, it might be easiest to implement it in the plugin/solution. Keep in mind that if Kibana is run without the plugin being enabled, any actions defined in that plugin will not run, nor will those actions be available via APIs or UI.
 
-Actions that take URLs or hostnames should check that those values are whitelisted.  The whitelisting utilities are currently internal to the actions plugin, and so such actions will need to be implemented in the actions plugin.  Longer-term, we will expose these utilities so they can be used by alerts implemented in other plugins; see [issue #64659](https://github.com/elastic/kibana/issues/64659).
+Actions that take URLs or hostnames should check that those values are allowed. The allowed host list utilities are currently internal to the actions plugin, and so such actions will need to be implemented in the actions plugin. Longer-term, we will expose these utilities so they can be used by alerts implemented in other plugins; see [issue #64659](https://github.com/elastic/kibana/issues/64659).
 
 ## documentation
 
-You should also create some asciidoc for the new action type.  An entry should be made in the action type index - [`docs/user/alerting/action-types.asciidoc`](../../../docs/user/alerting/action-types.asciidoc) which points to a new document for the action type that should be in the directory [`docs/user/alerting/action-types`](../../../docs/user/alerting/action-types).
+You should also create some asciidoc for the new action type. An entry should be made in the action type index - [`docs/user/alerting/action-types.asciidoc`](../../../docs/user/alerting/action-types.asciidoc) which points to a new document for the action type that should be in the directory [`docs/user/alerting/action-types`](../../../docs/user/alerting/action-types).
 
 ## tests
 
-The action type should have both jest tests and functional tests.  For functional tests, if your action interacts with a 3rd party service via HTTP, you may be able to create a simulator for your service, to test with.  See the existing functional test servers in the directory [`x-pack/test/alerting_api_integration/common/fixtures/plugins/actions_simulators/server`](../../test/alerting_api_integration/common/fixtures/plugins/actions_simulators/server)
+The action type should have both jest tests and functional tests. For functional tests, if your action interacts with a 3rd party service via HTTP, you may be able to create a simulator for your service, to test with. See the existing functional test servers in the directory [`x-pack/test/alerting_api_integration/common/fixtures/plugins/actions_simulators/server`](../../test/alerting_api_integration/common/fixtures/plugins/actions_simulators/server)
 
 ## action type config and secrets
 
-Action types must define `config` and `secrets` which are used to create connectors.  This data should be described with `@kbn/config-schema` object schemas, and you **MUST NOT** use `schema.maybe()` to define properties.
+Action types must define `config` and `secrets` which are used to create connectors. This data should be described with `@kbn/config-schema` object schemas, and you **MUST NOT** use `schema.maybe()` to define properties.
 
-This is due to the fact that the structures are persisted in saved objects, which performs partial updates on the persisted data.  If a property value is already persisted, but an update either doesn't include the property, or sets it to `undefined`, the persisted value will not be changed.  Beyond this being a semantic error in general, it also ends up invalidating the encryption used to save secrets, and will render the secrets will not be able to be unencrypted later.
+This is due to the fact that the structures are persisted in saved objects, which performs partial updates on the persisted data. If a property value is already persisted, but an update either doesn't include the property, or sets it to `undefined`, the persisted value will not be changed. Beyond this being a semantic error in general, it also ends up invalidating the encryption used to save secrets, and will render the secrets will not be able to be unencrypted later.
 
-Instead of `schema.maybe()`, use `schema.nullable()`, which is the same as `schema.maybe()` except that when passed an `undefined` value, the object returned from the validation will be set to `null`.  The resulting type will be `property-type | null`, whereas with `schema.maybe()` it would be `property-type | undefined`.
+Instead of `schema.maybe()`, use `schema.nullable()`, which is the same as `schema.maybe()` except that when passed an `undefined` value, the object returned from the validation will be set to `null`. The resulting type will be `property-type | null`, whereas with `schema.maybe()` it would be `property-type | undefined`.
 
 ## user interface
 
-In order to make this action usable in the Kibana UI, you will need to provide all the UI editing aspects of the action.  The existing action type user interfaces are defined in [`x-pack/plugins/triggers_actions_ui/public/application/components/builtin_action_types`](../triggers_actions_ui/public/application/components/builtin_action_types).  For more information, see the [UI documentation](../triggers_actions_ui/README.md#create-and-register-new-action-type-ui).
+In order to make this action usable in the Kibana UI, you will need to provide all the UI editing aspects of the action. The existing action type user interfaces are defined in [`x-pack/plugins/triggers_actions_ui/public/application/components/builtin_action_types`](../triggers_actions_ui/public/application/components/builtin_action_types). For more information, see the [UI documentation](../triggers_actions_ui/README.md#create-and-register-new-action-type-ui).

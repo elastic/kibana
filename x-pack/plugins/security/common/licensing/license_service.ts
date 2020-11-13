@@ -10,6 +10,7 @@ import { ILicense } from '../../../licensing/common/types';
 import { SecurityLicenseFeatures } from './license_features';
 
 export interface SecurityLicense {
+  isLicenseAvailable(): boolean;
   isEnabled(): boolean;
   getFeatures(): SecurityLicenseFeatures;
   features$: Observable<SecurityLicenseFeatures>;
@@ -31,6 +32,8 @@ export class SecurityLicenseService {
 
     return {
       license: Object.freeze({
+        isLicenseAvailable: () => rawLicense?.isAvailable ?? false,
+
         isEnabled: () => this.isSecurityEnabledFromRawLicense(rawLicense),
 
         getFeatures: () => this.calculateFeaturesFromRawLicense(rawLicense),

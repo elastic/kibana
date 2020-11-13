@@ -4,14 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { mockHistory } from './react_router_history.mock';
-export { mockKibanaContext } from './kibana_context.mock';
-export { mockLicenseContext } from './license_context.mock';
-export {
-  mountWithContext,
-  mountWithKibanaContext,
-  mountWithAsyncContext,
-} from './mount_with_context.mock';
-export { shallowWithIntl } from './shallow_with_i18n.mock';
+export { mockHistory, mockLocation } from './react_router_history.mock';
+export { mockKibanaValues } from './kibana_logic.mock';
+export { mockLicensingValues } from './licensing_logic.mock';
+export { mockHttpValues } from './http_logic.mock';
+export { mockTelemetryActions } from './telemetry_logic.mock';
+export { mockFlashMessagesValues, mockFlashMessagesActions } from './flash_messages_logic.mock';
+export { mockAllValues, mockAllActions, setMockValues, setMockActions } from './kea.mock';
 
-// Note: shallow_usecontext must be imported directly as a file
+export { mountAsync } from './mount_async.mock';
+export { mountWithIntl } from './mount_with_i18n.mock';
+export { shallowWithIntl } from './shallow_with_i18n.mock';
+export { rerender } from './enzyme_rerender.mock';
+// Note: shallow_useeffect must be imported directly as a file

@@ -5,7 +5,8 @@
  */
 
 import { List } from '../../../../../../common/detection_engine/schemas/types';
-import { NewRule } from '../../../../containers/detection_engine/rules';
+import { CreateRulesSchema } from '../../../../../../common/detection_engine/schemas/request';
+import { Rule } from '../../../../containers/detection_engine/rules';
 import {
   getListMock,
   getEndpointListMock,
@@ -132,6 +133,7 @@ describe('helpers', () => {
       const mockStepData = {
         ...mockData,
       };
+      // @ts-expect-error
       delete mockStepData.timeline.id;
 
       const result: DefineStepRuleJson = formatDefineStepData(mockStepData);
@@ -180,6 +182,7 @@ describe('helpers', () => {
           id: '86aa74d0-2136-11ea-9864-ebc8cc1cb8c2',
         },
       };
+      // @ts-expect-error
       delete mockStepData.timeline.title;
       const result: DefineStepRuleJson = formatDefineStepData(mockStepData);
 
@@ -237,6 +240,32 @@ describe('helpers', () => {
       };
 
       expect(result).toEqual(expected);
+    });
+
+    test('returns query fields if type is eql', () => {
+      const mockStepData: DefineStepRule = {
+        ...mockData,
+        ruleType: 'eql',
+        queryBar: {
+          ...mockData.queryBar,
+          query: {
+            ...mockData.queryBar.query,
+            language: 'eql',
+            query: 'process where process_name == "explorer.exe"',
+          },
+        },
+      };
+      const result: DefineStepRuleJson = formatDefineStepData(mockStepData);
+
+      const expected = {
+        filters: mockStepData.queryBar.filters,
+        index: mockStepData.index,
+        language: 'eql',
+        query: 'process where process_name == "explorer.exe"',
+        type: 'eql',
+      };
+
+      expect(result).toEqual(expect.objectContaining(expected));
     });
   });
 
@@ -719,13 +748,13 @@ describe('helpers', () => {
       mockActions = mockActionsStepRule();
     });
 
-    test('returns NewRule with type of saved_query when saved_id exists', () => {
-      const result: NewRule = formatRule(mockDefine, mockAbout, mockSchedule, mockActions);
+    test('returns rule with type of saved_query when saved_id exists', () => {
+      const result: Rule = formatRule<Rule>(mockDefine, mockAbout, mockSchedule, mockActions);
 
       expect(result.type).toEqual('saved_query');
     });
 
-    test('returns NewRule with type of query when saved_id does not exist', () => {
+    test('returns rule with type of query when saved_id does not exist', () => {
       const mockDefineStepRuleWithoutSavedId = {
         ...mockDefine,
         queryBar: {
@@ -733,7 +762,7 @@ describe('helpers', () => {
           saved_id: '',
         },
       };
-      const result: NewRule = formatRule(
+      const result: CreateRulesSchema = formatRule<CreateRulesSchema>(
         mockDefineStepRuleWithoutSavedId,
         mockAbout,
         mockSchedule,
@@ -743,10 +772,15 @@ describe('helpers', () => {
       expect(result.type).toEqual('query');
     });
 
-    test('returns NewRule without id if ruleId does not exist', () => {
-      const result: NewRule = formatRule(mockDefine, mockAbout, mockSchedule, mockActions);
+    test('returns rule without id if ruleId does not exist', () => {
+      const result: CreateRulesSchema = formatRule<CreateRulesSchema>(
+        mockDefine,
+        mockAbout,
+        mockSchedule,
+        mockActions
+      );
 
-      expect(result.id).toBeUndefined();
+      expect(result).not.toHaveProperty<CreateRulesSchema>('id');
     });
   });
 

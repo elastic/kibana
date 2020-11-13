@@ -23,23 +23,26 @@ import {
   createSplitStream,
   createMapStream,
   createFilterStream,
-} from '../../../../legacy/utils/streams';
+  createPromiseFromStreams,
+  createListStream,
+  createConcatStream,
+} from '../../utils/streams';
 
-export function createSavedObjectsStreamFromNdJson(ndJsonStream: Readable) {
-  return ndJsonStream
-    .pipe(createSplitStream('\n'))
-    .pipe(
-      createMapStream((str: string) => {
-        if (str && str.trim() !== '') {
-          return JSON.parse(str);
-        }
-      })
-    )
-    .pipe(
-      createFilterStream<SavedObject | SavedObjectsExportResultDetails>(
-        (obj) => !!obj && !(obj as SavedObjectsExportResultDetails).exportedCount
-      )
-    );
+export async function createSavedObjectsStreamFromNdJson(ndJsonStream: Readable) {
+  const savedObjects = await createPromiseFromStreams([
+    ndJsonStream,
+    createSplitStream('\n'),
+    createMapStream((str: string) => {
+      if (str && str.trim() !== '') {
+        return JSON.parse(str);
+      }
+    }),
+    createFilterStream<SavedObject | SavedObjectsExportResultDetails>(
+      (obj) => !!obj && !(obj as SavedObjectsExportResultDetails).exportedCount
+    ),
+    createConcatStream([]),
+  ]);
+  return createListStream(savedObjects);
 }
 
 export function validateTypes(types: string[], supportedTypes: string[]): string | undefined {

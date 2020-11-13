@@ -22,15 +22,17 @@ import { cloneDeep } from 'lodash';
 import { Duration } from 'moment';
 import { checkServerIdentity } from 'tls';
 import url from 'url';
-import { pick } from '../../../utils';
+import { pick } from '@kbn/std';
 import { Logger } from '../../logging';
 import { ElasticsearchConfig } from '../elasticsearch_config';
+import { DEFAULT_HEADERS } from '../default_headers';
 
 /**
  * @privateRemarks Config that consumers can pass to the Elasticsearch JS client is complex and includes
  * not only entries from standard `elasticsearch.*` yaml config, but also some Elasticsearch JS
  * client specific options like `keepAlive` or `plugins` (that eventually will be deprecated).
  *
+ * @deprecated
  * @public
  */
 export type LegacyElasticsearchClientConfig = Pick<ConfigOptions, 'keepAlive' | 'log' | 'plugins'> &
@@ -129,7 +131,10 @@ export function parseElasticsearchClientConfig(
         protocol: uri.protocol,
         path: uri.pathname,
         query: uri.query,
-        headers: config.customHeaders,
+        headers: {
+          ...DEFAULT_HEADERS,
+          ...config.customHeaders,
+        },
       };
 
       if (needsAuth) {

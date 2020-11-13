@@ -4,12 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { errors as elasticsearchErrors } from 'elasticsearch';
 import { kibanaResponseFactory } from 'src/core/server';
 import { ReportingCore } from '../';
 import { API_BASE_URL } from '../../common/constants';
 import { LevelLogger as Logger } from '../lib';
+import { enqueueJobFactory } from '../lib/enqueue_job';
 import { registerGenerateFromJobParams } from './generate_from_jobparams';
 import { registerGenerateCsvFromSavedObjectImmediate } from './generate_from_savedobject_immediate';
 import { HandlerFunction } from './types';
@@ -43,11 +44,10 @@ export function registerJobGenerationRoutes(reporting: ReportingCore, logger: Lo
     }
 
     try {
-      const enqueueJob = await reporting.getEnqueueJob();
-      const job = await enqueueJob(exportTypeId, jobParams, user, context, req);
+      const enqueueJob = enqueueJobFactory(reporting, logger);
+      const report = await enqueueJob(exportTypeId, jobParams, user, context, req);
 
       // return the queue's job information
-      const jobJson = job.toJSON();
       const downloadBaseUrl = getDownloadBaseUrl(reporting);
 
       return res.ok({
@@ -55,8 +55,8 @@ export function registerJobGenerationRoutes(reporting: ReportingCore, logger: Lo
           'content-type': 'application/json',
         },
         body: {
-          path: `${downloadBaseUrl}/${jobJson.id}`,
-          job: jobJson,
+          path: `${downloadBaseUrl}/${report._id}`,
+          job: report.toApiJSON(),
         },
       });
     } catch (err) {

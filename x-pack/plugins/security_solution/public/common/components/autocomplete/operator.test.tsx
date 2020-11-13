@@ -9,7 +9,7 @@ import { mount } from 'enzyme';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 
-import { getField } from '../../../../../../../src/plugins/data/common/index_patterns/fields/fields.mocks.ts';
+import { getField } from '../../../../../../../src/plugins/data/common/index_patterns/fields/fields.mocks';
 import { OperatorComponent } from './operator';
 import { isOperator, isNotOperator } from './operators';
 

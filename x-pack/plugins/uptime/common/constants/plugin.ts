@@ -17,7 +17,6 @@ export const PLUGIN = {
   NAME: i18n.translate('xpack.uptime.featureRegistry.uptimeFeatureName', {
     defaultMessage: 'Uptime',
   }),
-  ROUTER_BASE_NAME: '/app/uptime#',
   TITLE: i18n.translate('xpack.uptime.uptimeFeatureCatalogueTitle', {
     defaultMessage: 'Uptime',
   }),

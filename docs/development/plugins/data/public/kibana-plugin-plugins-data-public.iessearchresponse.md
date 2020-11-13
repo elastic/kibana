@@ -2,17 +2,10 @@
 
 [Home](./index.md) &gt; [kibana-plugin-plugins-data-public](./kibana-plugin-plugins-data-public.md) &gt; [IEsSearchResponse](./kibana-plugin-plugins-data-public.iessearchresponse.md)
 
-## IEsSearchResponse interface
+## IEsSearchResponse type
 
 <b>Signature:</b>
 
 ```typescript
-export interface IEsSearchResponse extends IKibanaSearchResponse 
+export declare type IEsSearchResponse<Source = any> = IKibanaSearchResponse<SearchResponse<Source>>;
 ```
-
-## Properties
-
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [rawResponse](./kibana-plugin-plugins-data-public.iessearchresponse.rawresponse.md) | <code>SearchResponse&lt;any&gt;</code> |  |
-

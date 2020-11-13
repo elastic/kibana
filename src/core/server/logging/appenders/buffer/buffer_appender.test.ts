@@ -17,8 +17,7 @@
  * under the License.
  */
 
-import { LogLevel } from '../../log_level';
-import { LogRecord } from '../../log_record';
+import { LogLevel, LogRecord } from '@kbn/logging';
 import { BufferAppender } from './buffer_appender';
 
 test('`flush()` does not return any record buffered at the beginning.', () => {

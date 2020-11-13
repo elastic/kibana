@@ -19,7 +19,7 @@ export const useMetricsExplorerChartData = (
   derivedIndexPattern: IIndexPattern,
   source: InfraSource | null,
   filterQuery?: string,
-  groupBy?: string
+  groupBy?: string | string[]
 ) => {
   const { timeSize, timeUnit } = expression || { timeSize: 1, timeUnit: 'm' };
   const options: MetricsExplorerOptions = useMemo(

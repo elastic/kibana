@@ -4,12 +4,6 @@
 
 ## IndexPatternAttributes interface
 
-> Warning: This API is now obsolete.
-> 
-> 
-
-Use data plugin interface instead
-
 <b>Signature:</b>
 
 ```typescript

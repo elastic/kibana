@@ -5,42 +5,56 @@
  */
 
 import axios from 'axios';
+import { omitBy, isNil } from 'lodash/fp';
 
-import { ExternalServiceCredentials, ExternalService, ExternalServiceParams } from '../case/types';
+import { Logger } from '../../../../../../src/core/server';
 import {
+  ExternalServiceCredentials,
+  ExternalService,
+  ExternalServiceParams,
+  CreateCommentParams,
+  UpdateIncidentParams,
+  CreateIncidentParams,
+  CreateIncidentData,
   ResilientPublicConfigurationType,
   ResilientSecretConfigurationType,
-  CreateIncidentRequest,
   UpdateIncidentRequest,
-  CreateCommentRequest,
-  UpdateFieldText,
-  UpdateFieldTextArea,
+  GetValueTextContentResponse,
 } from './types';
 
 import * as i18n from './translations';
 import { getErrorMessage, request } from '../lib/axios_utils';
-
-const BASE_URL = `rest`;
-const INCIDENT_URL = `incidents`;
-const COMMENT_URL = `comments`;
+import { ProxySettings } from '../../types';
 
 const VIEW_INCIDENT_URL = `#incidents`;
 
 export const getValueTextContent = (
   field: string,
-  value: string
-): UpdateFieldText | UpdateFieldTextArea => {
+  value: string | number | number[]
+): GetValueTextContentResponse => {
   if (field === 'description') {
     return {
       textarea: {
         format: 'html',
-        content: value,
+        content: value as string,
       },
     };
   }
 
+  if (field === 'incidentTypes') {
+    return {
+      ids: value as number[],
+    };
+  }
+
+  if (field === 'severityCode') {
+    return {
+      id: value as number,
+    };
+  }
+
   return {
-    text: value,
+    text: value as string,
   };
 };
 
@@ -49,18 +63,38 @@ export const formatUpdateRequest = ({
   newIncident,
 }: ExternalServiceParams): UpdateIncidentRequest => {
   return {
-    changes: Object.keys(newIncident).map((key) => ({
-      field: { name: key },
-      old_value: getValueTextContent(key, oldIncident[key]),
-      new_value: getValueTextContent(key, newIncident[key]),
-    })),
+    changes: Object.keys(newIncident as Record<string, unknown>).map((key) => {
+      let name = key;
+
+      if (key === 'incidentTypes') {
+        name = 'incident_type_ids';
+      }
+
+      if (key === 'severityCode') {
+        name = 'severity_code';
+      }
+
+      return {
+        field: { name },
+        // TODO: Fix ugly casting
+        old_value: getValueTextContent(
+          key,
+          (oldIncident as Record<string, unknown>)[name] as string
+        ),
+        new_value: getValueTextContent(
+          key,
+          (newIncident as Record<string, unknown>)[key] as string
+        ),
+      };
+    }),
   };
 };
 
-export const createExternalService = ({
-  config,
-  secrets,
-}: ExternalServiceCredentials): ExternalService => {
+export const createExternalService = (
+  { config, secrets }: ExternalServiceCredentials,
+  logger: Logger,
+  proxySettings?: ProxySettings
+): ExternalService => {
   const { apiUrl: url, orgId } = config as ResilientPublicConfigurationType;
   const { apiKeyId, apiKeySecret } = secrets as ResilientSecretConfigurationType;
 
@@ -69,8 +103,12 @@ export const createExternalService = ({
   }
 
   const urlWithoutTrailingSlash = url.endsWith('/') ? url.slice(0, -1) : url;
-  const incidentUrl = `${urlWithoutTrailingSlash}/${BASE_URL}/orgs/${orgId}/${INCIDENT_URL}`;
-  const commentUrl = `${incidentUrl}/{inc_id}/${COMMENT_URL}`;
+  const orgUrl = `${urlWithoutTrailingSlash}/rest/orgs/${orgId}`;
+  const incidentUrl = `${orgUrl}/incidents`;
+  const commentUrl = `${incidentUrl}/{inc_id}/comments`;
+  const incidentFieldsUrl = `${orgUrl}/types/incident/fields`;
+  const incidentTypesUrl = `${incidentFieldsUrl}/incident_type_ids`;
+  const severityUrl = `${incidentFieldsUrl}/severity_code`;
   const axiosInstance = axios.create({
     auth: { username: apiKeyId, password: apiKeySecret },
   });
@@ -88,33 +126,59 @@ export const createExternalService = ({
       const res = await request({
         axios: axiosInstance,
         url: `${incidentUrl}/${id}`,
+        logger,
         params: {
           text_content_output_format: 'objects_convert',
         },
+        proxySettings,
       });
 
       return { ...res.data, description: res.data.description?.content ?? '' };
     } catch (error) {
       throw new Error(
-        getErrorMessage(i18n.NAME, `Unable to get incident with id ${id}. Error: ${error.message}`)
+        getErrorMessage(i18n.NAME, `Unable to get incident with id ${id}. Error: ${error.message}.`)
       );
     }
   };
 
-  const createIncident = async ({ incident }: ExternalServiceParams) => {
-    try {
-      const res = await request<CreateIncidentRequest>({
-        axios: axiosInstance,
-        url: `${incidentUrl}`,
-        method: 'post',
-        data: {
-          ...incident,
-          description: {
-            format: 'html',
-            content: incident.description ?? '',
-          },
-          discovered_date: Date.now(),
+  const createIncident = async ({ incident }: CreateIncidentParams) => {
+    let data: CreateIncidentData = {
+      name: incident.name,
+      discovered_date: Date.now(),
+    };
+
+    if (incident.description) {
+      data = {
+        ...data,
+        description: {
+          format: 'html',
+          content: incident.description ?? '',
         },
+      };
+    }
+
+    if (incident.incidentTypes) {
+      data = {
+        ...data,
+        incident_type_ids: incident.incidentTypes.map((id) => ({ id })),
+      };
+    }
+
+    if (incident.severityCode) {
+      data = {
+        ...data,
+        severity_code: { id: incident.severityCode },
+      };
+    }
+
+    try {
+      const res = await request({
+        axios: axiosInstance,
+        url: `${incidentUrl}?text_content_output_format=objects_convert`,
+        method: 'post',
+        logger,
+        data,
+        proxySettings,
       });
 
       return {
@@ -125,21 +189,26 @@ export const createExternalService = ({
       };
     } catch (error) {
       throw new Error(
-        getErrorMessage(i18n.NAME, `Unable to create incident. Error: ${error.message}`)
+        getErrorMessage(i18n.NAME, `Unable to create incident. Error: ${error.message}.`)
       );
     }
   };
 
-  const updateIncident = async ({ incidentId, incident }: ExternalServiceParams) => {
+  const updateIncident = async ({ incidentId, incident }: UpdateIncidentParams) => {
     try {
       const latestIncident = await getIncident(incidentId);
 
-      const data = formatUpdateRequest({ oldIncident: latestIncident, newIncident: incident });
-      const res = await request<UpdateIncidentRequest>({
+      // Remove null or undefined values. Allowing null values sets the field in IBM Resilient to empty.
+      const newIncident = omitBy(isNil, incident);
+      const data = formatUpdateRequest({ oldIncident: latestIncident, newIncident });
+
+      const res = await request({
         axios: axiosInstance,
         method: 'patch',
         url: `${incidentUrl}/${incidentId}`,
+        logger,
         data,
+        proxySettings,
       });
 
       if (!res.data.success) {
@@ -164,13 +233,15 @@ export const createExternalService = ({
     }
   };
 
-  const createComment = async ({ incidentId, comment, field }: ExternalServiceParams) => {
+  const createComment = async ({ incidentId, comment }: CreateCommentParams) => {
     try {
-      const res = await request<CreateCommentRequest>({
+      const res = await request({
         axios: axiosInstance,
         method: 'post',
         url: getCommentsURL(incidentId),
+        logger,
         data: { text: { format: 'text', content: comment.comment } },
+        proxySettings,
       });
 
       return {
@@ -182,16 +253,77 @@ export const createExternalService = ({
       throw new Error(
         getErrorMessage(
           i18n.NAME,
-          `Unable to create comment at incident with id ${incidentId}. Error: ${error.message}`
+          `Unable to create comment at incident with id ${incidentId}. Error: ${error.message}.`
         )
       );
     }
   };
 
+  const getIncidentTypes = async () => {
+    try {
+      const res = await request({
+        axios: axiosInstance,
+        method: 'get',
+        url: incidentTypesUrl,
+        logger,
+        proxySettings,
+      });
+
+      const incidentTypes = res.data?.values ?? [];
+      return incidentTypes.map((type: { value: string; label: string }) => ({
+        id: type.value,
+        name: type.label,
+      }));
+    } catch (error) {
+      throw new Error(
+        getErrorMessage(i18n.NAME, `Unable to get incident types. Error: ${error.message}.`)
+      );
+    }
+  };
+
+  const getSeverity = async () => {
+    try {
+      const res = await request({
+        axios: axiosInstance,
+        method: 'get',
+        url: severityUrl,
+        logger,
+        proxySettings,
+      });
+
+      const incidentTypes = res.data?.values ?? [];
+      return incidentTypes.map((type: { value: string; label: string }) => ({
+        id: type.value,
+        name: type.label,
+      }));
+    } catch (error) {
+      throw new Error(
+        getErrorMessage(i18n.NAME, `Unable to get severity. Error: ${error.message}.`)
+      );
+    }
+  };
+
+  const getFields = async () => {
+    try {
+      const res = await request({
+        axios: axiosInstance,
+        url: incidentFieldsUrl,
+        logger,
+        proxySettings,
+      });
+      return res.data ?? [];
+    } catch (error) {
+      throw new Error(getErrorMessage(i18n.NAME, `Unable to get fields. Error: ${error.message}.`));
+    }
+  };
+
   return {
-    getIncident,
-    createIncident,
-    updateIncident,
     createComment,
+    createIncident,
+    getFields,
+    getIncident,
+    getIncidentTypes,
+    getSeverity,
+    updateIncident,
   };
 };

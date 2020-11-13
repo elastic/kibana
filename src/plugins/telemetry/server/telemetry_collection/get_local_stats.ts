@@ -37,10 +37,11 @@ import { getDataTelemetry, DATA_TELEMETRY_ID, DataTelemetryPayload } from './get
  * @param {Object} kibana The Kibana Usage stats
  */
 export function handleLocalStats(
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   { cluster_name, cluster_uuid, version }: ESClusterInfo,
   { _nodes, cluster_name: clusterName, ...clusterStats }: any,
-  kibana: KibanaUsageStats,
-  dataTelemetry: DataTelemetryPayload,
+  kibana: KibanaUsageStats | undefined,
+  dataTelemetry: DataTelemetryPayload | undefined,
   context: StatsCollectionContext
 ) {
   return {
@@ -61,22 +62,25 @@ export type TelemetryLocalStats = ReturnType<typeof handleLocalStats>;
 
 /**
  * Get statistics for all products joined by Elasticsearch cluster.
+ * @param {Array} cluster uuids
+ * @param {Object} config contains the new esClient already scoped contains usageCollection, callCluster, esClient, start, end
+ * @param {Object} StatsCollectionContext contains logger and version (string)
  */
 export const getLocalStats: StatsGetter<{}, TelemetryLocalStats> = async (
-  clustersDetails,
-  config,
-  context
+  clustersDetails, // array of cluster uuid's
+  config, // contains the new esClient already scoped contains usageCollection, callCluster, esClient, start, end and the saved objects client scoped to the request or the internal repository
+  context // StatsCollectionContext contains logger and version (string)
 ) => {
-  const { callCluster, usageCollection } = config;
+  const { callCluster, usageCollection, esClient, soClient } = config;
 
   return await Promise.all(
     clustersDetails.map(async (clustersDetail) => {
       const [clusterInfo, clusterStats, nodesUsage, kibana, dataTelemetry] = await Promise.all([
-        getClusterInfo(callCluster), // cluster info
-        getClusterStats(callCluster), // cluster stats (not to be confused with cluster _state_)
-        getNodesUsage(callCluster), // nodes_usage info
-        getKibana(usageCollection, callCluster),
-        getDataTelemetry(callCluster),
+        getClusterInfo(esClient), // cluster info
+        getClusterStats(esClient), // cluster stats (not to be confused with cluster _state_)
+        getNodesUsage(esClient), // nodes_usage info
+        getKibana(usageCollection, callCluster, esClient, soClient),
+        getDataTelemetry(esClient),
       ]);
       return handleLocalStats(
         clusterInfo,

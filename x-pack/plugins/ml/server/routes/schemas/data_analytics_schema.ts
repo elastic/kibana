@@ -38,6 +38,7 @@ export const dataAnalyticsEvaluateSchema = schema.object({
     schema.object({
       regression: schema.maybe(schema.any()),
       classification: schema.maybe(schema.any()),
+      outlier_detection: schema.maybe(schema.any()),
     })
   ),
 });
@@ -47,7 +48,7 @@ export const dataAnalyticsExplainSchema = schema.object({
   dest: schema.maybe(schema.any()),
   /** Source */
   source: schema.object({
-    index: schema.string(),
+    index: schema.oneOf([schema.string(), schema.arrayOf(schema.string())]),
     query: schema.maybe(schema.any()),
   }),
   analysis: schema.any(),
@@ -81,3 +82,12 @@ export const dataAnalyticsJobUpdateSchema = schema.object({
 export const stopsDataFrameAnalyticsJobQuerySchema = schema.object({
   force: schema.maybe(schema.boolean()),
 });
+
+export const jobsExistSchema = schema.object({
+  analyticsIds: schema.arrayOf(schema.string()),
+  allSpaces: schema.maybe(schema.boolean()),
+});
+
+export const analyticsMapQuerySchema = schema.maybe(
+  schema.object({ treatAsRoot: schema.maybe(schema.any()) })
+);

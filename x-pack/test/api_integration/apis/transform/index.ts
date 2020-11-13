@@ -10,7 +10,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const transform = getService('transform');
 
-  describe('Machine Learning', function () {
+  describe('transform', function () {
     this.tags(['transform']);
 
     before(async () => {
@@ -28,5 +28,11 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     });
 
     loadTestFile(require.resolve('./delete_transforms'));
+    loadTestFile(require.resolve('./start_transforms'));
+    loadTestFile(require.resolve('./stop_transforms'));
+    loadTestFile(require.resolve('./transforms'));
+    loadTestFile(require.resolve('./transforms_preview'));
+    loadTestFile(require.resolve('./transforms_stats'));
+    loadTestFile(require.resolve('./transforms_update'));
   });
 }

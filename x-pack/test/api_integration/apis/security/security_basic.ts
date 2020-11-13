@@ -20,6 +20,5 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./index_fields'));
     loadTestFile(require.resolve('./roles'));
     loadTestFile(require.resolve('./privileges_basic'));
-    loadTestFile(require.resolve('./session'));
   });
 }

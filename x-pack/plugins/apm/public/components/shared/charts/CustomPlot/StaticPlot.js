@@ -71,11 +71,29 @@ class StaticPlot extends PureComponent {
         const data = serie.data.map((value) => {
           return 'y' in value && isValidCoordinateValue(value.y)
             ? value
-            : {
-                ...value,
-                y: undefined,
-              };
+            : { ...value, y: undefined };
         });
+
+        // make sure individual markers are displayed in cases
+        // where there are gaps
+
+        const markersForGaps = serie.data.map((value, index) => {
+          const prevHasData = getNull(serie.data[index - 1] ?? {});
+          const nextHasData = getNull(serie.data[index + 1] ?? {});
+          const thisHasData = getNull(value);
+
+          const isGap = !prevHasData && !nextHasData && thisHasData;
+
+          if (!isGap) {
+            return {
+              ...value,
+              y: undefined,
+            };
+          }
+
+          return value;
+        });
+
         return [
           <AreaSeries
             getNull={getNull}
@@ -98,6 +116,21 @@ class StaticPlot extends PureComponent {
             color={serie.color}
             stack={true}
             cluster="line"
+          />,
+          <LineMarkSeries
+            getNull={getNull}
+            key={`${serie.title}-line-markers`}
+            xType="time-utc"
+            curve={'curveMonotoneX'}
+            data={markersForGaps}
+            stroke={serie.color}
+            color={serie.color}
+            lineStyle={{
+              opacity: 0,
+            }}
+            stack={true}
+            cluster="line-mark"
+            size={1}
           />,
         ];
       }
@@ -132,7 +165,7 @@ class StaticPlot extends PureComponent {
             curve={'curveMonotoneX'}
             data={serie.data}
             color={serie.color}
-            size={0.5}
+            size={1}
           />
         );
       default:

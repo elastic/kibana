@@ -4,23 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButtonEmpty, EuiFormRow } from '@elastic/eui';
-import React, { FC, memo, useCallback, useState, useEffect } from 'react';
+import { EuiButtonEmpty, EuiFormRow, EuiSpacer } from '@elastic/eui';
+import React, { FC, memo, useCallback, useState, useEffect, useMemo } from 'react';
 import styled from 'styled-components';
-import deepEqual from 'fast-deep-equal';
+// Prefer importing entire lodash library, e.g. import { get } from "lodash"
+// eslint-disable-next-line no-restricted-imports
+import isEqual from 'lodash/isEqual';
 
+import { IndexPattern } from 'src/plugins/data/public';
 import { DEFAULT_INDEX_KEY } from '../../../../../common/constants';
+import { DEFAULT_TIMELINE_TITLE } from '../../../../timelines/components/timeline/translations';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
 import { hasMlAdminPermissions } from '../../../../../common/machine_learning/has_ml_admin_permissions';
-import { IIndexPattern } from '../../../../../../../../src/plugins/data/public';
-import { useFetchIndexPatterns } from '../../../containers/detection_engine/rules';
-import { DEFAULT_TIMELINE_TITLE } from '../../../../timelines/components/timeline/translations';
-import { useMlCapabilities } from '../../../../common/components/ml_popover/hooks/use_ml_capabilities';
+import { hasMlLicense } from '../../../../../common/machine_learning/has_ml_license';
+import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
 import { useUiSetting$ } from '../../../../common/lib/kibana';
-import {
-  filterRuleFieldsForType,
-  RuleFields,
-} from '../../../pages/detection_engine/rules/create/helpers';
+import { filterRuleFieldsForType } from '../../../pages/detection_engine/rules/create/helpers';
 import {
   DefineStepRule,
   RuleStep,
@@ -41,30 +40,44 @@ import {
   getUseField,
   UseField,
   UseMultiFields,
-  FormDataProvider,
   useForm,
-  FormSchema,
+  useFormData,
 } from '../../../../shared_imports';
 import { schema } from './schema';
 import * as i18n from './translations';
+import {
+  isEqlRule,
+  isThreatMatchRule,
+  isThresholdRule,
+} from '../../../../../common/detection_engine/utils';
+import { EqlQueryBar } from '../eql_query_bar';
+import { ThreatMatchInput } from '../threatmatch_input';
+import { useFetchIndex } from '../../../../common/containers/source';
+import { PreviewQuery, Threshold } from '../query_preview';
 
 const CommonUseField = getUseField({ component: Field });
 
 interface StepDefineRuleProps extends RuleStepProps {
-  defaultValues?: DefineStepRule | null;
+  defaultValues?: DefineStepRule;
 }
 
 const stepDefineDefaultValue: DefineStepRule = {
   anomalyThreshold: 50,
   index: [],
-  isNew: true,
   machineLearningJobId: '',
   ruleType: 'query',
+  threatIndex: [],
   queryBar: {
     query: { query: '', language: 'kuery' },
     filters: [],
     saved_id: undefined,
   },
+  threatQueryBar: {
+    query: { query: '*:*', language: 'kuery' },
+    filters: [],
+    saved_id: undefined,
+  },
+  threatMapping: [],
   threshold: {
     field: [],
     value: '200',
@@ -73,6 +86,17 @@ const stepDefineDefaultValue: DefineStepRule = {
     id: null,
     title: DEFAULT_TIMELINE_TITLE,
   },
+};
+
+/**
+ * This default query will be used for threat query/indicator matches
+ * as the default when the user swaps to using it by changing their
+ * rule type from any rule type to the "threatMatchRule" type. Only
+ * difference is that "*:*" is used instead of '' for its query.
+ */
+const threatQueryBarDefaultValue: DefineStepRule['queryBar'] = {
+  ...stepDefineDefaultValue.queryBar,
+  query: { ...stepDefineDefaultValue.queryBar.query, query: '*:*' },
 };
 
 const MyLabelButton = styled(EuiButtonEmpty)`
@@ -102,8 +126,8 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   isReadOnlyView,
   isLoading,
   isUpdateView = false,
+  onSubmit,
   setForm,
-  setStepData,
 }) => {
   const mlCapabilities = useMlCapabilities();
   const [openTimelineSearch, setOpenTimelineSearch] = useState(false);
@@ -111,38 +135,110 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const [indicesConfig] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
   const initialState = defaultValues ?? {
     ...stepDefineDefaultValue,
-    index: indicesConfig ?? [],
+    index: indicesConfig,
   };
-  const [localRuleType, setLocalRuleType] = useState(initialState.ruleType);
-  const [myStepData, setMyStepData] = useState<DefineStepRule>(initialState);
-  const [
-    { browserFields, indexPatterns: indexPatternQueryBar, isLoading: indexPatternLoadingQueryBar },
-  ] = useFetchIndexPatterns(myStepData.index, 'step_define_rule');
-
-  const { form } = useForm({
+  const { form } = useForm<DefineStepRule>({
     defaultValue: initialState,
     options: { stripEmptyFields: false },
     schema,
   });
-  const { getFields, reset, submit } = form;
-  const clearErrors = useCallback(() => reset({ resetValues: false }), [reset]);
-
-  const onSubmit = useCallback(async () => {
-    if (setStepData) {
-      setStepData(RuleStep.defineRule, null, false);
-      const { isValid, data } = await submit();
-      if (isValid && setStepData) {
-        setStepData(RuleStep.defineRule, data, isValid);
-        setMyStepData({ ...data, isNew: false } as DefineStepRule);
-      }
+  const { getFields, getFormData, reset, submit } = form;
+  const [
+    {
+      index: formIndex,
+      ruleType: formRuleType,
+      queryBar: formQuery,
+      threatIndex: formThreatIndex,
+      'threshold.value': formThresholdValue,
+      'threshold.field': formThresholdField,
+    },
+  ] = useFormData<
+    DefineStepRule & {
+      'threshold.value': number | undefined;
+      'threshold.field': string[] | undefined;
     }
-  }, [setStepData, submit]);
+  >({
+    form,
+    watch: ['index', 'ruleType', 'queryBar', 'threshold.value', 'threshold.field', 'threatIndex'],
+  });
+  const [isQueryBarValid, setIsQueryBarValid] = useState(false);
+  const index = formIndex || initialState.index;
+  const threatIndex = formThreatIndex || initialState.threatIndex;
+  const ruleType = formRuleType || initialState.ruleType;
+  const queryBarQuery =
+    formQuery != null ? formQuery.query.query : '' || initialState.queryBar.query.query;
+  const [indexPatternsLoading, { browserFields, indexPatterns }] = useFetchIndex(index);
+  const [
+    threatIndexPatternsLoading,
+    { browserFields: threatBrowserFields, indexPatterns: threatIndexPatterns },
+  ] = useFetchIndex(threatIndex);
+
+  // reset form when rule type changes
+  useEffect(() => {
+    reset({ resetValues: false });
+  }, [reset, ruleType]);
 
   useEffect(() => {
-    if (setForm) {
-      setForm(RuleStep.defineRule, form);
+    setIndexModified(!isEqual(index, indicesConfig));
+  }, [index, indicesConfig]);
+
+  /**
+   * When a rule type is changed to or from a threat match this will modify the
+   * default query string to either:
+   *   * from the empty string '' to '*:*' if the rule type is "threatMatchRule"
+   *   * from '*:*' back to the empty string '' if the rule type is not "threatMatchRule"
+   * This calls queryBar.reset() in both cases to not trigger validation errors as
+   * the user has not entered data into those areas yet.
+   * If the user has entered data then through reference compares we can detect reliably if
+   * the user has changed data.
+   *   * queryBar.value === defaultQueryBar (Has the user changed the input of '' yet?)
+   *   * queryBar.value === threatQueryBarDefaultValue (Has the user changed the input of '*:*' yet?)
+   * This is a stronger guarantee than "isPristine" off of the forms as that value can be reset
+   * if you go to step 2) and then back to step 1) or the form is reset in another way. Using
+   * the reference compare we know factually if the data is changed as the references must change
+   * in the form libraries form the initial defaults.
+   */
+  useEffect(() => {
+    const { queryBar } = getFields();
+    if (queryBar != null) {
+      const { queryBar: defaultQueryBar } = stepDefineDefaultValue;
+      if (isThreatMatchRule(ruleType) && queryBar.value === defaultQueryBar) {
+        queryBar.reset({
+          defaultValue: threatQueryBarDefaultValue,
+        });
+      } else if (queryBar.value === threatQueryBarDefaultValue) {
+        queryBar.reset({
+          defaultValue: defaultQueryBar,
+        });
+      }
     }
-  }, [form, setForm]);
+  }, [ruleType, getFields]);
+
+  const handleSubmit = useCallback(() => {
+    if (onSubmit) {
+      onSubmit();
+    }
+  }, [onSubmit]);
+
+  const getData = useCallback(async () => {
+    const result = await submit();
+    return result.isValid
+      ? result
+      : {
+          isValid: false,
+          data: getFormData(),
+        };
+  }, [getFormData, submit]);
+
+  useEffect(() => {
+    let didCancel = false;
+    if (setForm && !didCancel) {
+      setForm(RuleStep.defineRule, getData);
+    }
+    return () => {
+      didCancel = true;
+    };
+  }, [getData, setForm]);
 
   const handleResetIndices = useCallback(() => {
     const indexField = getFields().index;
@@ -157,6 +253,12 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     setOpenTimelineSearch(false);
   }, []);
 
+  const thresholdFormValue = useMemo((): Threshold | undefined => {
+    return formThresholdValue != null && formThresholdField != null
+      ? { value: formThresholdValue, field: formThresholdField[0] }
+      : undefined;
+  }, [formThresholdField, formThresholdValue]);
+
   const ThresholdInputChildren = useCallback(
     ({ thresholdField, thresholdValue }) => (
       <ThresholdInput
@@ -168,13 +270,26 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     [browserFields]
   );
 
+  const ThreatMatchInputChildren = useCallback(
+    ({ threatMapping }) => (
+      <ThreatMatchInput
+        threatBrowserFields={threatBrowserFields}
+        indexPatterns={indexPatterns as IndexPattern}
+        threatIndexPatterns={threatIndexPatterns as IndexPattern}
+        threatMapping={threatMapping}
+        threatIndexPatternsLoading={threatIndexPatternsLoading}
+      />
+    ),
+    [threatBrowserFields, threatIndexPatternsLoading, threatIndexPatterns, indexPatterns]
+  );
+
   return isReadOnlyView ? (
     <StepContentWrapper data-test-subj="definitionRule" addPadding={addPadding}>
       <StepRuleDescription
         columns={descriptionColumns}
-        indexPatterns={indexPatternQueryBar as IIndexPattern}
-        schema={filterRuleFieldsForType(schema as FormSchema & RuleFields, myStepData.ruleType)}
-        data={filterRuleFieldsForType(myStepData, myStepData.ruleType)}
+        indexPatterns={indexPatterns}
+        schema={filterRuleFieldsForType(schema, ruleType)}
+        data={filterRuleFieldsForType(initialState, ruleType)}
       />
     </StepContentWrapper>
   ) : (
@@ -186,12 +301,12 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
             component={SelectRuleType}
             componentProps={{
               describedByIds: ['detectionEngineStepDefineRuleType'],
-              isReadOnly: isUpdateView,
-              hasValidLicense: mlCapabilities.isPlatinumOrTrialLicense,
+              isUpdateView,
+              hasValidLicense: hasMlLicense(mlCapabilities),
               isMlAdmin: hasMlAdminPermissions(mlCapabilities),
             }}
           />
-          <RuleTypeEuiFormRow $isVisible={!isMlRule(localRuleType)} fullWidth>
+          <RuleTypeEuiFormRow $isVisible={!isMlRule(ruleType)} fullWidth>
             <>
               <CommonUseField
                 path="index"
@@ -213,34 +328,56 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                   },
                 }}
               />
-              <UseField
-                path="queryBar"
-                config={{
-                  ...schema.queryBar,
-                  labelAppend: (
-                    <MyLabelButton
-                      data-test-subj="importQueryFromSavedTimeline"
-                      onClick={handleOpenTimelineSearch}
-                    >
-                      {i18n.IMPORT_TIMELINE_QUERY}
-                    </MyLabelButton>
-                  ),
-                }}
-                component={QueryBarDefineRule}
-                componentProps={{
-                  browserFields,
-                  idAria: 'detectionEngineStepDefineRuleQueryBar',
-                  indexPattern: indexPatternQueryBar,
-                  isDisabled: isLoading,
-                  isLoading: indexPatternLoadingQueryBar,
-                  dataTestSubj: 'detectionEngineStepDefineRuleQueryBar',
-                  openTimelineSearch,
-                  onCloseTimelineSearch: handleCloseTimelineSearch,
-                }}
-              />
+              {isEqlRule(ruleType) ? (
+                <UseField
+                  key="EqlQueryBar"
+                  path="queryBar"
+                  component={EqlQueryBar}
+                  componentProps={{
+                    onValidityChange: setIsQueryBarValid,
+                    idAria: 'detectionEngineStepDefineRuleEqlQueryBar',
+                    isDisabled: isLoading,
+                    isLoading: indexPatternsLoading,
+                    dataTestSubj: 'detectionEngineStepDefineRuleEqlQueryBar',
+                  }}
+                  config={{
+                    ...schema.queryBar,
+                    label: i18n.EQL_QUERY_BAR_LABEL,
+                  }}
+                />
+              ) : (
+                <UseField
+                  key="QueryBarDefineRule"
+                  path="queryBar"
+                  config={{
+                    ...schema.queryBar,
+                    label: i18n.QUERY_BAR_LABEL,
+                    labelAppend: (
+                      <MyLabelButton
+                        data-test-subj="importQueryFromSavedTimeline"
+                        onClick={handleOpenTimelineSearch}
+                      >
+                        {i18n.IMPORT_TIMELINE_QUERY}
+                      </MyLabelButton>
+                    ),
+                  }}
+                  component={QueryBarDefineRule}
+                  componentProps={{
+                    browserFields,
+                    idAria: 'detectionEngineStepDefineRuleQueryBar',
+                    indexPattern: indexPatterns,
+                    isDisabled: isLoading,
+                    isLoading: indexPatternsLoading,
+                    dataTestSubj: 'detectionEngineStepDefineRuleQueryBar',
+                    openTimelineSearch,
+                    onValidityChange: setIsQueryBarValid,
+                    onCloseTimelineSearch: handleCloseTimelineSearch,
+                  }}
+                />
+              )}
             </>
           </RuleTypeEuiFormRow>
-          <RuleTypeEuiFormRow $isVisible={isMlRule(localRuleType)} fullWidth>
+          <RuleTypeEuiFormRow $isVisible={isMlRule(ruleType)} fullWidth>
             <>
               <UseField
                 path="machineLearningJobId"
@@ -259,7 +396,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
             </>
           </RuleTypeEuiFormRow>
           <RuleTypeEuiFormRow
-            $isVisible={localRuleType === 'threshold'}
+            $isVisible={isThresholdRule(ruleType)}
             data-test-subj="thresholdInput"
             fullWidth
           >
@@ -268,15 +405,30 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                 fields={{
                   thresholdField: {
                     path: 'threshold.field',
-                    defaultValue: initialState.threshold.field,
                   },
                   thresholdValue: {
                     path: 'threshold.value',
-                    defaultValue: initialState.threshold.value,
                   },
                 }}
               >
                 {ThresholdInputChildren}
+              </UseMultiFields>
+            </>
+          </RuleTypeEuiFormRow>
+          <RuleTypeEuiFormRow
+            $isVisible={isThreatMatchRule(ruleType)}
+            data-test-subj="threatMatchInput"
+            fullWidth
+          >
+            <>
+              <UseMultiFields
+                fields={{
+                  threatMapping: {
+                    path: 'threatMapping',
+                  },
+                }}
+              >
+                {ThreatMatchInputChildren}
               </UseMultiFields>
             </>
           </RuleTypeEuiFormRow>
@@ -289,31 +441,25 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               dataTestSubj: 'detectionEngineStepDefineRuleTimeline',
             }}
           />
-          <FormDataProvider pathsToWatch={['index', 'ruleType']}>
-            {({ index, ruleType }) => {
-              if (index != null) {
-                if (deepEqual(index, indicesConfig) && indexModified) {
-                  setIndexModified(false);
-                } else if (!deepEqual(index, indicesConfig) && !indexModified) {
-                  setIndexModified(true);
-                }
-                if (myStepData.index !== index) {
-                  setMyStepData((prevValue) => ({ ...prevValue, index }));
-                }
-              }
-
-              if (ruleType !== localRuleType) {
-                setLocalRuleType(ruleType);
-                clearErrors();
-              }
-              return null;
-            }}
-          </FormDataProvider>
         </Form>
+        {ruleType !== 'machine_learning' && ruleType !== 'threat_match' && (
+          <>
+            <EuiSpacer size="s" />
+            <PreviewQuery
+              dataTestSubj="ruleCreationQueryPreview"
+              idAria="ruleCreationQueryPreview"
+              ruleType={ruleType}
+              index={index}
+              query={formQuery}
+              isDisabled={queryBarQuery.trim() === '' || !isQueryBarValid || index.length === 0}
+              threshold={thresholdFormValue}
+            />
+          </>
+        )}
       </StepContentWrapper>
 
       {!isUpdateView && (
-        <NextStep dataTestSubj="define-continue" onClick={onSubmit} isDisabled={isLoading} />
+        <NextStep dataTestSubj="define-continue" onClick={handleSubmit} isDisabled={isLoading} />
       )}
     </>
   );

@@ -5,15 +5,13 @@
  */
 
 import React from 'react';
-import { shallowWithIntl, mountWithIntl } from 'test_utils/enzyme_helpers';
+import { shallowWithIntl, mountWithIntl } from '@kbn/test/jest';
 import { FilterPopoverProps, FilterPopover } from '../filter_popover';
 import { UptimeFilterButton } from '../uptime_filter_button';
 import { EuiFilterSelectItem } from '@elastic/eui';
 
 describe('FilterPopover component', () => {
   let props: FilterPopoverProps;
-  let setState: jest.Mock<any, any>;
-  let useStateSpy: jest.SpyInstance;
 
   beforeEach(() => {
     props = {
@@ -25,9 +23,6 @@ describe('FilterPopover component', () => {
       selectedItems: ['first', 'third'],
       title: 'bar',
     };
-    setState = jest.fn();
-    useStateSpy = jest.spyOn(React, 'useState');
-    useStateSpy.mockImplementation((initialValue) => [initialValue, setState]);
   });
 
   afterEach(() => {
@@ -41,9 +36,15 @@ describe('FilterPopover component', () => {
 
   it('expands on button click', () => {
     const wrapper = mountWithIntl(<FilterPopover {...props} />);
+
+    // ensure the popover isn't open
+    expect(wrapper.find('EuiPopoverTitle')).toHaveLength(0);
+
     expect(wrapper.find(UptimeFilterButton)).toHaveLength(1);
     wrapper.find(UptimeFilterButton).simulate('click');
-    expect(setState).toHaveBeenCalledTimes(1);
+
+    // check that the popover is now open
+    expect(wrapper.find('EuiPopoverTitle')).toHaveLength(1);
   });
 
   it('does not show item list when loading', () => {

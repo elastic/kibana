@@ -8,7 +8,12 @@ import axios from 'axios';
 
 import { createExternalService, getValueTextContent, formatUpdateRequest } from './service';
 import * as utils from '../lib/axios_utils';
-import { ExternalService } from '../case/types';
+import { ExternalService } from './types';
+import { Logger } from '../../../../../../src/core/server';
+import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
+import { incidentTypes, resilientFields, severity } from './mocks';
+
+const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
 jest.mock('axios');
 jest.mock('../lib/axios_utils', () => {
@@ -38,6 +43,8 @@ const mockIncidentUpdate = (withUpdateError = false) => {
         format: 'html',
         content: 'description',
       },
+      incident_type_ids: [1001, 16, 12],
+      severity_code: 6,
     },
   }));
 
@@ -72,10 +79,13 @@ describe('IBM Resilient service', () => {
   let service: ExternalService;
 
   beforeAll(() => {
-    service = createExternalService({
-      config: { apiUrl: 'https://resilient.elastic.co', orgId: '201' },
-      secrets: { apiKeyId: 'keyId', apiKeySecret: 'secret' },
-    });
+    service = createExternalService(
+      {
+        config: { apiUrl: 'https://resilient.elastic.co', orgId: '201' },
+        secrets: { apiKeyId: 'keyId', apiKeySecret: 'secret' },
+      },
+      logger
+    );
   });
 
   afterAll(() => {
@@ -138,37 +148,49 @@ describe('IBM Resilient service', () => {
   describe('createExternalService', () => {
     test('throws without url', () => {
       expect(() =>
-        createExternalService({
-          config: { apiUrl: null, orgId: '201' },
-          secrets: { apiKeyId: 'token', apiKeySecret: 'secret' },
-        })
+        createExternalService(
+          {
+            config: { apiUrl: null, orgId: '201' },
+            secrets: { apiKeyId: 'token', apiKeySecret: 'secret' },
+          },
+          logger
+        )
       ).toThrow();
     });
 
     test('throws without orgId', () => {
       expect(() =>
-        createExternalService({
-          config: { apiUrl: 'test.com', orgId: null },
-          secrets: { apiKeyId: 'token', apiKeySecret: 'secret' },
-        })
+        createExternalService(
+          {
+            config: { apiUrl: 'test.com', orgId: null },
+            secrets: { apiKeyId: 'token', apiKeySecret: 'secret' },
+          },
+          logger
+        )
       ).toThrow();
     });
 
     test('throws without username', () => {
       expect(() =>
-        createExternalService({
-          config: { apiUrl: 'test.com', orgId: '201' },
-          secrets: { apiKeyId: '', apiKeySecret: 'secret' },
-        })
+        createExternalService(
+          {
+            config: { apiUrl: 'test.com', orgId: '201' },
+            secrets: { apiKeyId: '', apiKeySecret: 'secret' },
+          },
+          logger
+        )
       ).toThrow();
     });
 
     test('throws without password', () => {
       expect(() =>
-        createExternalService({
-          config: { apiUrl: 'test.com', orgId: '201' },
-          secrets: { apiKeyId: '', apiKeySecret: undefined },
-        })
+        createExternalService(
+          {
+            config: { apiUrl: 'test.com', orgId: '201' },
+            secrets: { apiKeyId: '', apiKeySecret: undefined },
+          },
+          logger
+        )
       ).toThrow();
     });
   });
@@ -197,6 +219,7 @@ describe('IBM Resilient service', () => {
       await service.getIncident('1');
       expect(requestMock).toHaveBeenCalledWith({
         axios,
+        logger,
         url: 'https://resilient.elastic.co/rest/orgs/201/incidents/1',
         params: {
           text_content_output_format: 'objects_convert',
@@ -208,7 +231,7 @@ describe('IBM Resilient service', () => {
       requestMock.mockImplementation(() => {
         throw new Error('An error has occurred');
       });
-      expect(service.getIncident('1')).rejects.toThrow(
+      await expect(service.getIncident('1')).rejects.toThrow(
         'Unable to get incident with id 1. Error: An error has occurred'
       );
     });
@@ -227,7 +250,12 @@ describe('IBM Resilient service', () => {
       }));
 
       const res = await service.createIncident({
-        incident: { name: 'title', description: 'desc' },
+        incident: {
+          name: 'title',
+          description: 'desc',
+          incidentTypes: [1001],
+          severityCode: 6,
+        },
       });
 
       expect(res).toEqual({
@@ -250,12 +278,19 @@ describe('IBM Resilient service', () => {
       }));
 
       await service.createIncident({
-        incident: { name: 'title', description: 'desc' },
+        incident: {
+          name: 'title',
+          description: 'desc',
+          incidentTypes: [1001],
+          severityCode: 6,
+        },
       });
 
       expect(requestMock).toHaveBeenCalledWith({
         axios,
-        url: 'https://resilient.elastic.co/rest/orgs/201/incidents',
+        url:
+          'https://resilient.elastic.co/rest/orgs/201/incidents?text_content_output_format=objects_convert',
+        logger,
         method: 'post',
         data: {
           name: 'title',
@@ -264,6 +299,8 @@ describe('IBM Resilient service', () => {
             content: 'desc',
           },
           discovered_date: TIMESTAMP,
+          incident_type_ids: [{ id: 1001 }],
+          severity_code: { id: 6 },
         },
       });
     });
@@ -273,9 +310,14 @@ describe('IBM Resilient service', () => {
         throw new Error('An error has occurred');
       });
 
-      expect(
+      await expect(
         service.createIncident({
-          incident: { name: 'title', description: 'desc' },
+          incident: {
+            name: 'title',
+            description: 'desc',
+            incidentTypes: [1001],
+            severityCode: 6,
+          },
         })
       ).rejects.toThrow(
         '[Action][IBM Resilient]: Unable to create incident. Error: An error has occurred'
@@ -288,7 +330,12 @@ describe('IBM Resilient service', () => {
       mockIncidentUpdate();
       const res = await service.updateIncident({
         incidentId: '1',
-        incident: { name: 'title_updated', description: 'desc_updated' },
+        incident: {
+          name: 'title',
+          description: 'desc',
+          incidentTypes: [1001],
+          severityCode: 6,
+        },
       });
 
       expect(res).toEqual({
@@ -304,13 +351,19 @@ describe('IBM Resilient service', () => {
 
       await service.updateIncident({
         incidentId: '1',
-        incident: { name: 'title_updated', description: 'desc_updated' },
+        incident: {
+          name: 'title_updated',
+          description: 'desc_updated',
+          incidentTypes: [1001],
+          severityCode: 5,
+        },
       });
 
       // Incident update makes three calls to the API.
       // The second call to the API is the update call.
       expect(requestMock.mock.calls[1][0]).toEqual({
         axios,
+        logger,
         method: 'patch',
         url: 'https://resilient.elastic.co/rest/orgs/201/incidents/1',
         data: {
@@ -335,6 +388,28 @@ describe('IBM Resilient service', () => {
                 },
               },
             },
+            {
+              field: {
+                name: 'incident_type_ids',
+              },
+              old_value: {
+                ids: [1001, 16, 12],
+              },
+              new_value: {
+                ids: [1001],
+              },
+            },
+            {
+              field: {
+                name: 'severity_code',
+              },
+              old_value: {
+                id: 6,
+              },
+              new_value: {
+                id: 5,
+              },
+            },
           ],
         },
       });
@@ -343,10 +418,15 @@ describe('IBM Resilient service', () => {
     test('it should throw an error', async () => {
       mockIncidentUpdate(true);
 
-      expect(
+      await expect(
         service.updateIncident({
           incidentId: '1',
-          incident: { name: 'title', description: 'desc' },
+          incident: {
+            name: 'title',
+            description: 'desc',
+            incidentTypes: [1001],
+            severityCode: 5,
+          },
         })
       ).rejects.toThrow(
         '[Action][IBM Resilient]: Unable to update incident with id 1. Error: An error has occurred'
@@ -365,8 +445,14 @@ describe('IBM Resilient service', () => {
 
       const res = await service.createComment({
         incidentId: '1',
-        comment: { comment: 'comment', commentId: 'comment-1' },
-        field: 'comments',
+        comment: {
+          comment: 'comment',
+          commentId: 'comment-1',
+          createdBy: null,
+          createdAt: null,
+          updatedAt: null,
+          updatedBy: null,
+        },
       });
 
       expect(res).toEqual({
@@ -386,13 +472,21 @@ describe('IBM Resilient service', () => {
 
       await service.createComment({
         incidentId: '1',
-        comment: { comment: 'comment', commentId: 'comment-1' },
-        field: 'my_field',
+        comment: {
+          comment: 'comment',
+          commentId: 'comment-1',
+          createdBy: null,
+          createdAt: null,
+          updatedAt: null,
+          updatedBy: null,
+        },
       });
 
       expect(requestMock).toHaveBeenCalledWith({
         axios,
+        logger,
         method: 'post',
+        proxySettings: undefined,
         url: 'https://resilient.elastic.co/rest/orgs/201/incidents/1/comments',
         data: {
           text: {
@@ -408,14 +502,115 @@ describe('IBM Resilient service', () => {
         throw new Error('An error has occurred');
       });
 
-      expect(
+      await expect(
         service.createComment({
           incidentId: '1',
-          comment: { comment: 'comment', commentId: 'comment-1' },
-          field: 'comments',
+          comment: {
+            comment: 'comment',
+            commentId: 'comment-1',
+            createdBy: null,
+            createdAt: null,
+            updatedAt: null,
+            updatedBy: null,
+          },
         })
       ).rejects.toThrow(
         '[Action][IBM Resilient]: Unable to create comment at incident with id 1. Error: An error has occurred'
+      );
+    });
+  });
+
+  describe('getIncidentTypes', () => {
+    test('it creates the incident correctly', async () => {
+      requestMock.mockImplementation(() => ({
+        data: {
+          values: incidentTypes,
+        },
+      }));
+
+      const res = await service.getIncidentTypes();
+
+      expect(res).toEqual([
+        { id: 17, name: 'Communication error (fax; email)' },
+        { id: 1001, name: 'Custom type' },
+      ]);
+    });
+
+    test('it should throw an error', async () => {
+      requestMock.mockImplementation(() => {
+        throw new Error('An error has occurred');
+      });
+
+      await expect(service.getIncidentTypes()).rejects.toThrow(
+        '[Action][IBM Resilient]: Unable to get incident types. Error: An error has occurred.'
+      );
+    });
+  });
+
+  describe('getSeverity', () => {
+    test('it creates the incident correctly', async () => {
+      requestMock.mockImplementation(() => ({
+        data: {
+          values: severity,
+        },
+      }));
+
+      const res = await service.getSeverity();
+
+      expect(res).toEqual([
+        {
+          id: 4,
+          name: 'Low',
+        },
+        {
+          id: 5,
+          name: 'Medium',
+        },
+        {
+          id: 6,
+          name: 'High',
+        },
+      ]);
+    });
+
+    test('it should throw an error', async () => {
+      requestMock.mockImplementation(() => {
+        throw new Error('An error has occurred');
+      });
+
+      await expect(service.getIncidentTypes()).rejects.toThrow(
+        '[Action][IBM Resilient]: Unable to get incident types. Error: An error has occurred.'
+      );
+    });
+  });
+
+  describe('getFields', () => {
+    test('it should call request with correct arguments', async () => {
+      requestMock.mockImplementation(() => ({
+        data: resilientFields,
+      }));
+      await service.getFields();
+
+      expect(requestMock).toHaveBeenCalledWith({
+        axios,
+        logger,
+        url: 'https://resilient.elastic.co/rest/orgs/201/types/incident/fields',
+      });
+    });
+    test('it returns common fields correctly', async () => {
+      requestMock.mockImplementation(() => ({
+        data: resilientFields,
+      }));
+      const res = await service.getFields();
+      expect(res).toEqual(resilientFields);
+    });
+
+    test('it should throw an error', async () => {
+      requestMock.mockImplementation(() => {
+        throw new Error('An error has occurred');
+      });
+      await expect(service.getFields()).rejects.toThrow(
+        'Unable to get fields. Error: An error has occurred'
       );
     });
   });

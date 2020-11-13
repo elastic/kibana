@@ -70,3 +70,10 @@
   flex-direction: column;
 }
 
+.visChart__spinner, .visError {
+  display: flex;
+  flex: 1 1 auto;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}

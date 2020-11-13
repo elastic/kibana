@@ -26,10 +26,7 @@ export function createProxyBundlesRoute({
   port: number;
   buildHash: string;
 }) {
-  return [
-    buildProxyRouteForBundles(`/${buildHash}/bundles/`, host, port),
-    buildProxyRouteForBundles(`/${buildHash}/built_assets/css/`, host, port),
-  ];
+  return [buildProxyRouteForBundles(`/${buildHash}/bundles/`, host, port)];
 }
 
 function buildProxyRouteForBundles(routePath: string, host: string, port: number) {

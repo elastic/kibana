@@ -4,8 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import httpProxy from 'http-proxy';
 import expect from '@kbn/expect';
 
+import { getHttpProxyServer } from '../../../../common/lib/get_proxy_server';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import {
@@ -35,12 +37,14 @@ const mapping = [
 export default function resilientTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const kibanaServer = getService('kibanaServer');
+  const configService = getService('config');
 
   const mockResilient = {
     config: {
-      apiUrl: 'www.jiraisinkibanaactions.com',
+      apiUrl: 'www.resilientisinkibanaactions.com',
       orgId: '201',
-      casesConfiguration: { mapping },
+      incidentConfiguration: { mapping },
+      isCaseOwned: true,
     },
     secrets: {
       apiKeyId: 'key',
@@ -52,6 +56,8 @@ export default function resilientTest({ getService }: FtrProviderContext) {
         savedObjectId: '123',
         title: 'a title',
         description: 'a description',
+        incidentTypes: [1001],
+        severityCode: 6,
         createdAt: '2020-03-13T08:34:53.450Z',
         createdBy: { fullName: 'Elastic User', username: 'elastic' },
         updatedAt: null,
@@ -105,7 +111,8 @@ export default function resilientTest({ getService }: FtrProviderContext) {
           config: {
             apiUrl: resilientSimulatorURL,
             orgId: mockResilient.config.orgId,
-            casesConfiguration: mockResilient.config.casesConfiguration,
+            incidentConfiguration: mockResilient.config.incidentConfiguration,
+            isCaseOwned: true,
           },
         });
 
@@ -121,7 +128,8 @@ export default function resilientTest({ getService }: FtrProviderContext) {
           config: {
             apiUrl: resilientSimulatorURL,
             orgId: mockResilient.config.orgId,
-            casesConfiguration: mockResilient.config.casesConfiguration,
+            incidentConfiguration: mockResilient.config.incidentConfiguration,
+            isCaseOwned: true,
           },
         });
       });
@@ -166,7 +174,7 @@ export default function resilientTest({ getService }: FtrProviderContext) {
           });
       });
 
-      it('should respond with a 400 Bad Request when creating a ibm resilient action with a non whitelisted apiUrl', async () => {
+      it('should respond with a 400 Bad Request when creating a ibm resilient action with a not present in allowedHosts apiUrl', async () => {
         await supertest
           .post('/api/actions/action')
           .set('kbn-xsrf', 'foo')
@@ -176,7 +184,7 @@ export default function resilientTest({ getService }: FtrProviderContext) {
             config: {
               apiUrl: 'http://resilient.mynonexistent.com',
               orgId: mockResilient.config.orgId,
-              casesConfiguration: mockResilient.config.casesConfiguration,
+              incidentConfiguration: mockResilient.config.incidentConfiguration,
             },
             secrets: mockResilient.secrets,
           })
@@ -186,7 +194,7 @@ export default function resilientTest({ getService }: FtrProviderContext) {
               statusCode: 400,
               error: 'Bad Request',
               message:
-                'error validating action type config: error configuring connector action: target url "http://resilient.mynonexistent.com" is not whitelisted in the Kibana config xpack.actions.whitelistedHosts',
+                'error validating action type config: error configuring connector action: target url "http://resilient.mynonexistent.com" is not added to the Kibana config xpack.actions.allowedHosts',
             });
           });
       });
@@ -201,7 +209,7 @@ export default function resilientTest({ getService }: FtrProviderContext) {
             config: {
               apiUrl: resilientSimulatorURL,
               orgId: mockResilient.config.orgId,
-              casesConfiguration: mockResilient.config.casesConfiguration,
+              incidentConfiguration: mockResilient.config.incidentConfiguration,
             },
           })
           .expect(400)
@@ -211,30 +219,6 @@ export default function resilientTest({ getService }: FtrProviderContext) {
               error: 'Bad Request',
               message:
                 'error validating action type secrets: [apiKeyId]: expected value of type [string] but got [undefined]',
-            });
-          });
-      });
-
-      it('should respond with a 400 Bad Request when creating a ibm resilient action without casesConfiguration', async () => {
-        await supertest
-          .post('/api/actions/action')
-          .set('kbn-xsrf', 'foo')
-          .send({
-            name: 'An IBM Resilient',
-            actionTypeId: '.resilient',
-            config: {
-              apiUrl: resilientSimulatorURL,
-              orgId: mockResilient.config.orgId,
-            },
-            secrets: mockResilient.secrets,
-          })
-          .expect(400)
-          .then((resp: any) => {
-            expect(resp.body).to.eql({
-              statusCode: 400,
-              error: 'Bad Request',
-              message:
-                'error validating action type config: [casesConfiguration.mapping]: expected value of type [array] but got [undefined]',
             });
           });
       });
@@ -249,7 +233,7 @@ export default function resilientTest({ getService }: FtrProviderContext) {
             config: {
               apiUrl: resilientSimulatorURL,
               orgId: mockResilient.config.orgId,
-              casesConfiguration: { mapping: [] },
+              incidentConfiguration: { mapping: [] },
             },
             secrets: mockResilient.secrets,
           })
@@ -259,7 +243,7 @@ export default function resilientTest({ getService }: FtrProviderContext) {
               statusCode: 400,
               error: 'Bad Request',
               message:
-                'error validating action type config: [casesConfiguration.mapping]: expected non-empty but got empty',
+                'error validating action type config: [incidentConfiguration.mapping]: expected non-empty but got empty',
             });
           });
       });
@@ -274,7 +258,7 @@ export default function resilientTest({ getService }: FtrProviderContext) {
             config: {
               apiUrl: resilientSimulatorURL,
               orgId: mockResilient.config.orgId,
-              casesConfiguration: {
+              incidentConfiguration: {
                 mapping: [
                   {
                     source: 'title',
@@ -292,6 +276,8 @@ export default function resilientTest({ getService }: FtrProviderContext) {
 
     describe('IBM Resilient - Executor', () => {
       let simulatedActionId: string;
+      let proxyServer: httpProxy | undefined;
+      let proxyHaveBeenCalled = false;
       before(async () => {
         const { body } = await supertest
           .post('/api/actions/action')
@@ -302,11 +288,19 @@ export default function resilientTest({ getService }: FtrProviderContext) {
             config: {
               apiUrl: resilientSimulatorURL,
               orgId: mockResilient.config.orgId,
-              casesConfiguration: mockResilient.config.casesConfiguration,
+              incidentConfiguration: mockResilient.config.incidentConfiguration,
             },
             secrets: mockResilient.secrets,
           });
         simulatedActionId = body.id;
+
+        proxyServer = await getHttpProxyServer(
+          kibanaServer.resolveUrl('/'),
+          configService.get('kbnTestServer.serverArgs'),
+          () => {
+            proxyHaveBeenCalled = true;
+          }
+        );
       });
 
       describe('Validation', () => {
@@ -318,12 +312,36 @@ export default function resilientTest({ getService }: FtrProviderContext) {
               params: {},
             })
             .then((resp: any) => {
-              expect(resp.body).to.eql({
-                actionId: simulatedActionId,
-                status: 'error',
-                retry: false,
-                message: `error validating action params: Cannot read property 'Symbol(Symbol.iterator)' of undefined`,
-              });
+              expect(Object.keys(resp.body)).to.eql(['status', 'actionId', 'message', 'retry']);
+              expect(resp.body.actionId).to.eql(simulatedActionId);
+              expect(resp.body.status).to.eql('error');
+              expect(resp.body.retry).to.eql(false);
+              // Node.js 12 oddity:
+              //
+              // The first time after the server is booted, the error message will be:
+              //
+              //     undefined is not iterable (cannot read property Symbol(Symbol.iterator))
+              //
+              // After this, the error will be:
+              //
+              //     Cannot destructure property 'value' of 'undefined' as it is undefined.
+              //
+              // The error seems to come from the exact same place in the code based on the
+              // exact same circomstances:
+              //
+              //     https://github.com/elastic/kibana/blob/b0a223ebcbac7e404e8ae6da23b2cc6a4b509ff1/packages/kbn-config-schema/src/types/literal_type.ts#L28
+              //
+              // What triggers the error is that the `handleError` function expects its 2nd
+              // argument to be an object containing a `valids` property of type array.
+              //
+              // In this test the object does not contain a `valids` property, so hence the
+              // error.
+              //
+              // Why the error message isn't the same in all scenarios is unknown to me and
+              // could be a bug in V8.
+              expect(resp.body.message).to.match(
+                /^error validating action params: (undefined is not iterable \(cannot read property Symbol\(Symbol.iterator\)\)|Cannot destructure property 'value' of 'undefined' as it is undefined\.)$/
+              );
             });
         });
 
@@ -340,7 +358,7 @@ export default function resilientTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: false,
                 message:
-                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getIncident]\n- [1.subAction]: expected value to equal [handshake]\n- [2.subAction]: expected value to equal [pushToService]',
+                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subAction]: expected value to equal [pushToService]\n- [4.subAction]: expected value to equal [incidentTypes]\n- [5.subAction]: expected value to equal [severity]',
               });
             });
         });
@@ -358,25 +376,7 @@ export default function resilientTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: false,
                 message:
-                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getIncident]\n- [1.subAction]: expected value to equal [handshake]\n- [2.subActionParams.savedObjectId]: expected value of type [string] but got [undefined]',
-              });
-            });
-        });
-
-        it('should handle failing with a simulated success without savedObjectId', async () => {
-          await supertest
-            .post(`/api/actions/action/${simulatedActionId}/_execute`)
-            .set('kbn-xsrf', 'foo')
-            .send({
-              params: { subAction: 'pushToService', subActionParams: {} },
-            })
-            .then((resp: any) => {
-              expect(resp.body).to.eql({
-                actionId: simulatedActionId,
-                status: 'error',
-                retry: false,
-                message:
-                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getIncident]\n- [1.subAction]: expected value to equal [handshake]\n- [2.subActionParams.savedObjectId]: expected value of type [string] but got [undefined]',
+                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subActionParams.title]: expected value of type [string] but got [undefined]\n- [4.subAction]: expected value to equal [incidentTypes]\n- [5.subAction]: expected value to equal [severity]',
               });
             });
         });
@@ -399,31 +399,7 @@ export default function resilientTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: false,
                 message:
-                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getIncident]\n- [1.subAction]: expected value to equal [handshake]\n- [2.subActionParams.title]: expected value of type [string] but got [undefined]',
-              });
-            });
-        });
-
-        it('should handle failing with a simulated success without createdAt', async () => {
-          await supertest
-            .post(`/api/actions/action/${simulatedActionId}/_execute`)
-            .set('kbn-xsrf', 'foo')
-            .send({
-              params: {
-                ...mockResilient.params,
-                subActionParams: {
-                  savedObjectId: 'success',
-                  title: 'success',
-                },
-              },
-            })
-            .then((resp: any) => {
-              expect(resp.body).to.eql({
-                actionId: simulatedActionId,
-                status: 'error',
-                retry: false,
-                message:
-                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getIncident]\n- [1.subAction]: expected value to equal [handshake]\n- [2.subActionParams.createdAt]: expected value of type [string] but got [undefined]',
+                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subActionParams.title]: expected value of type [string] but got [undefined]\n- [4.subAction]: expected value to equal [incidentTypes]\n- [5.subAction]: expected value to equal [severity]',
               });
             });
         });
@@ -451,7 +427,7 @@ export default function resilientTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: false,
                 message:
-                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getIncident]\n- [1.subAction]: expected value to equal [handshake]\n- [2.subActionParams.comments]: types that failed validation:\n - [subActionParams.comments.0.0.commentId]: expected value of type [string] but got [undefined]\n - [subActionParams.comments.1]: expected value to equal [null]',
+                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subActionParams.comments]: types that failed validation:\n - [subActionParams.comments.0.0.commentId]: expected value of type [string] but got [undefined]\n - [subActionParams.comments.1]: expected value to equal [null]\n- [4.subAction]: expected value to equal [incidentTypes]\n- [5.subAction]: expected value to equal [severity]',
               });
             });
         });
@@ -479,35 +455,7 @@ export default function resilientTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: false,
                 message:
-                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getIncident]\n- [1.subAction]: expected value to equal [handshake]\n- [2.subActionParams.comments]: types that failed validation:\n - [subActionParams.comments.0.0.comment]: expected value of type [string] but got [undefined]\n - [subActionParams.comments.1]: expected value to equal [null]',
-              });
-            });
-        });
-
-        it('should handle failing with a simulated success without comment.createdAt', async () => {
-          await supertest
-            .post(`/api/actions/action/${simulatedActionId}/_execute`)
-            .set('kbn-xsrf', 'foo')
-            .send({
-              params: {
-                ...mockResilient.params,
-                subActionParams: {
-                  ...mockResilient.params.subActionParams,
-                  savedObjectId: 'success',
-                  title: 'success',
-                  createdAt: 'success',
-                  createdBy: { username: 'elastic' },
-                  comments: [{ commentId: 'success', comment: 'success' }],
-                },
-              },
-            })
-            .then((resp: any) => {
-              expect(resp.body).to.eql({
-                actionId: simulatedActionId,
-                status: 'error',
-                retry: false,
-                message:
-                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getIncident]\n- [1.subAction]: expected value to equal [handshake]\n- [2.subActionParams.comments]: types that failed validation:\n - [subActionParams.comments.0.0.createdAt]: expected value of type [string] but got [undefined]\n - [subActionParams.comments.1]: expected value to equal [null]',
+                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subActionParams.comments]: types that failed validation:\n - [subActionParams.comments.0.0.comment]: expected value of type [string] but got [undefined]\n - [subActionParams.comments.1]: expected value to equal [null]\n- [4.subAction]: expected value to equal [incidentTypes]\n- [5.subAction]: expected value to equal [severity]',
               });
             });
         });
@@ -523,12 +471,13 @@ export default function resilientTest({ getService }: FtrProviderContext) {
                 ...mockResilient.params,
                 subActionParams: {
                   ...mockResilient.params.subActionParams,
-                  comments: [],
+                  comments: null,
                 },
               },
             })
             .expect(200);
 
+          expect(proxyHaveBeenCalled).to.equal(true);
           expect(body).to.eql({
             status: 'ok',
             actionId: simulatedActionId,
@@ -540,6 +489,12 @@ export default function resilientTest({ getService }: FtrProviderContext) {
             },
           });
         });
+      });
+
+      after(() => {
+        if (proxyServer) {
+          proxyServer.close();
+        }
       });
     });
   });

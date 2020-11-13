@@ -26,7 +26,7 @@ export function FieldStatsCard({ field }) {
 
   return (
     <EuiPanel hasShadow={false} className="mlFieldDataCard">
-      <div className="ml-field-data-card">
+      <div className="ml-field-data-card" data-test-subj="mlPageFileDataVisFieldDataCard">
         <div className={`ml-field-title-bar ${type}`}>
           <FieldTypeIcon type={type} needsAria={false} />
           <div className="field-name" tabIndex="0" aria-label={`${cardTitleAriaLabel.join(', ')}`}>

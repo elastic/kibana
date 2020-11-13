@@ -38,6 +38,7 @@ export const saveTemplate = async ({
   if (isLegacy) {
     const {
       order,
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       index_patterns,
       version,
       settings,

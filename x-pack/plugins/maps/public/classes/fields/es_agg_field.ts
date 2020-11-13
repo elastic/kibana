@@ -12,7 +12,7 @@ import { IVectorSource } from '../sources/vector_source';
 import { ESDocField } from './es_doc_field';
 import { AGG_TYPE, FIELD_ORIGIN } from '../../../common/constants';
 import { isMetricCountable } from '../util/is_metric_countable';
-import { getField, addFieldToDSL } from '../util/es_agg_utils';
+import { getField, addFieldToDSL } from '../../../common/elasticsearch_util';
 import { TopTermPercentageField } from './top_term_percentage_field';
 import { ITooltipProperty, TooltipProperty } from '../tooltips/tooltip_property';
 import { ESAggTooltipProperty } from '../tooltips/es_agg_tooltip_property';
@@ -30,6 +30,7 @@ export class ESAggField implements IESAggField {
   private readonly _label?: string;
   private readonly _aggType: AGG_TYPE;
   private readonly _esDocField?: IField | undefined;
+  private readonly _canReadFromGeoJson: boolean;
 
   constructor({
     label,
@@ -37,18 +38,21 @@ export class ESAggField implements IESAggField {
     aggType,
     esDocField,
     origin,
+    canReadFromGeoJson = true,
   }: {
     label?: string;
     source: IESAggSource;
     aggType: AGG_TYPE;
     esDocField?: IField;
     origin: FIELD_ORIGIN;
+    canReadFromGeoJson?: boolean;
   }) {
     this._source = source;
     this._origin = origin;
     this._label = label;
     this._aggType = aggType;
     this._esDocField = esDocField;
+    this._canReadFromGeoJson = canReadFromGeoJson;
   }
 
   getSource(): IVectorSource {
@@ -132,14 +136,19 @@ export class ESAggField implements IESAggField {
   }
 
   supportsAutoDomain(): boolean {
-    return true;
+    return this._canReadFromGeoJson ? true : this.supportsFieldMeta();
+  }
+
+  canReadFromGeoJson(): boolean {
+    return this._canReadFromGeoJson;
   }
 }
 
 export function esAggFieldsFactory(
   aggDescriptor: AggDescriptor,
   source: IESAggSource,
-  origin: FIELD_ORIGIN
+  origin: FIELD_ORIGIN,
+  canReadFromGeoJson: boolean = true
 ): IESAggField[] {
   const aggField = new ESAggField({
     label: aggDescriptor.label,
@@ -149,12 +158,13 @@ export function esAggFieldsFactory(
     aggType: aggDescriptor.type,
     source,
     origin,
+    canReadFromGeoJson,
   });
 
   const aggFields: IESAggField[] = [aggField];
 
   if (aggDescriptor.field && aggDescriptor.type === AGG_TYPE.TERMS) {
-    aggFields.push(new TopTermPercentageField(aggField));
+    aggFields.push(new TopTermPercentageField(aggField, canReadFromGeoJson));
   }
 
   return aggFields;

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { Component, Fragment } from 'react';
+import React, { Component, Fragment, ReactNode } from 'react';
 import { take, get as getField } from 'lodash';
 import {
   EuiFlyout,
@@ -30,19 +30,15 @@ import {
   EuiTitle,
   EuiForm,
   EuiFormRow,
-  EuiSwitch,
   EuiFilePicker,
   EuiInMemoryTable,
   EuiSelect,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLoadingKibana,
+  EuiLoadingElastic,
   EuiCallOut,
   EuiSpacer,
   EuiLink,
-  EuiConfirmModal,
-  EuiOverlayMask,
-  EUI_MODAL_CONFIRM_BUTTON,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -57,7 +53,6 @@ import {
   importLegacyFile,
   resolveImportErrors,
   logLegacyImport,
-  getDefaultTitle,
   processImportResponse,
   ProcessedImportResponse,
 } from '../../../lib';
@@ -68,6 +63,13 @@ import {
   saveObjects,
 } from '../../../lib/resolve_saved_objects';
 import { ISavedObjectsManagementServiceRegistry } from '../../../services';
+import { FailedImportConflict, RetryDecision } from '../../../lib/resolve_import_errors';
+import { OverwriteModal } from './overwrite_modal';
+import { ImportModeControl, ImportMode } from './import_mode_control';
+import { ImportSummary } from './import_summary';
+
+const CREATE_NEW_COPIES_DEFAULT = false;
+const OVERWRITE_ALL_DEFAULT = true;
 
 export interface FlyoutProps {
   serviceRegistry: ISavedObjectsManagementServiceRegistry;
@@ -86,24 +88,35 @@ export interface FlyoutState {
   conflictedSavedObjectsLinkedToSavedSearches?: any[];
   conflictedSearchDocs?: any[];
   unmatchedReferences?: ProcessedImportResponse['unmatchedReferences'];
+  unmatchedReferencesTablePagination: { pageIndex: number; pageSize: number };
   failedImports?: ProcessedImportResponse['failedImports'];
+  successfulImports?: ProcessedImportResponse['successfulImports'];
   conflictingRecord?: ConflictingRecord;
   error?: string;
   file?: File;
   importCount: number;
   indexPatterns?: IIndexPattern[];
-  isOverwriteAllChecked: boolean;
+  importMode: ImportMode;
   loadingMessage?: string;
   isLegacyFile: boolean;
   status: string;
 }
 
 interface ConflictingRecord {
-  id: string;
-  type: string;
-  title: string;
-  done: (success: boolean) => void;
+  conflict: FailedImportConflict;
+  done: (result: [boolean, string | undefined]) => void;
 }
+
+const getErrorMessage = (e: any) => {
+  const errorMessage =
+    e.body?.error && e.body?.message ? `${e.body.error}: ${e.body.message}` : e.message;
+  return i18n.translate('savedObjectsManagement.objectsTable.flyout.importFileErrorMessage', {
+    defaultMessage: 'The file could not be processed due to error: "{error}"',
+    values: {
+      error: errorMessage,
+    },
+  });
+};
 
 export class Flyout extends Component<FlyoutProps, FlyoutState> {
   constructor(props: FlyoutProps) {
@@ -114,12 +127,16 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
       conflictedSavedObjectsLinkedToSavedSearches: undefined,
       conflictedSearchDocs: undefined,
       unmatchedReferences: undefined,
+      unmatchedReferencesTablePagination: {
+        pageIndex: 0,
+        pageSize: 5,
+      },
       conflictingRecord: undefined,
       error: undefined,
       file: undefined,
       importCount: 0,
       indexPatterns: undefined,
-      isOverwriteAllChecked: true,
+      importMode: { createNewCopies: CREATE_NEW_COPIES_DEFAULT, overwrite: OVERWRITE_ALL_DEFAULT },
       loadingMessage: undefined,
       isLegacyFile: false,
       status: 'idle',
@@ -131,14 +148,15 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
   }
 
   fetchIndexPatterns = async () => {
-    const indexPatterns = await this.props.indexPatterns.getFields(['id', 'title']);
+    const indexPatterns = (await this.props.indexPatterns.getCache())?.map((savedObject) => ({
+      id: savedObject.id,
+      title: savedObject.attributes.title,
+    }));
     this.setState({ indexPatterns } as any);
   };
 
-  changeOverwriteAll = () => {
-    this.setState((state) => ({
-      isOverwriteAllChecked: !state.isOverwriteAllChecked,
-    }));
+  changeImportMode = (importMode: FlyoutState['importMode']) => {
+    this.setState(() => ({ importMode }));
   };
 
   setImportFile = (files: FileList | null) => {
@@ -160,12 +178,12 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
    */
   import = async () => {
     const { http } = this.props;
-    const { file, isOverwriteAllChecked } = this.state;
+    const { file, importMode } = this.state;
     this.setState({ status: 'loading', error: undefined });
 
     // Import the file
     try {
-      const response = await importFile(http, file!, isOverwriteAllChecked);
+      const response = await importFile(http, file!, importMode);
       this.setState(processImportResponse(response), () => {
         // Resolve import errors right away if there's no index patterns to match
         // This will ask about overwriting each object, etc
@@ -176,9 +194,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
     } catch (e) {
       this.setState({
         status: 'error',
-        error: i18n.translate('savedObjectsManagement.objectsTable.flyout.importFileErrorMessage', {
-          defaultMessage: 'The file could not be processed.',
-        }),
+        error: getErrorMessage(e),
       });
       return;
     }
@@ -189,23 +205,24 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
    *
    * Function iterates through the objects, displays a modal for each asking the user if they wish to overwrite it or not.
    *
-   * @param {array} objects List of objects to request the user if they wish to overwrite it
+   * @param {array} failures List of objects to request the user if they wish to overwrite it
    * @return {Promise<array>} An object with the key being "type:id" and value the resolution chosen by the user
    */
-  getConflictResolutions = async (objects: any[]) => {
-    const resolutions: Record<string, boolean> = {};
-    for (const { type, id, title } of objects) {
-      const overwrite = await new Promise<boolean>((resolve) => {
-        this.setState({
-          conflictingRecord: {
-            id,
-            type,
-            title,
-            done: resolve,
-          },
-        });
-      });
-      resolutions[`${type}:${id}`] = overwrite;
+  getConflictResolutions = async (failures: FailedImportConflict[]) => {
+    const resolutions: Record<string, RetryDecision> = {};
+    for (const conflict of failures) {
+      const [overwrite, destinationId] = await new Promise<[boolean, string | undefined]>(
+        (done) => {
+          this.setState({ conflictingRecord: { conflict, done } });
+        }
+      );
+      if (overwrite) {
+        const { type, id } = conflict.obj;
+        resolutions[`${type}:${id}`] = {
+          retry: true,
+          options: { overwrite: true, ...(destinationId && { destinationId }) },
+        };
+      }
       this.setState({ conflictingRecord: undefined });
     }
     return resolutions;
@@ -233,17 +250,14 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
     } catch (e) {
       this.setState({
         status: 'error',
-        error: i18n.translate(
-          'savedObjectsManagement.objectsTable.flyout.resolveImportErrorsFileErrorMessage',
-          { defaultMessage: 'The file could not be processed.' }
-        ),
+        error: getErrorMessage(e),
       });
     }
   };
 
   legacyImport = async () => {
     const { serviceRegistry, indexPatterns, overlays, http, allowedTypes } = this.props;
-    const { file, isOverwriteAllChecked } = this.state;
+    const { file, importMode } = this.state;
 
     this.setState({ status: 'loading', error: undefined });
 
@@ -295,7 +309,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
       failedImports,
     } = await resolveSavedObjects(
       contents,
-      isOverwriteAllChecked,
+      importMode.overwrite,
       serviceRegistry.all().map((e) => e.service),
       indexPatterns,
       overlays.openConfirm
@@ -360,7 +374,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
   confirmLegacyImport = async () => {
     const {
       conflictedIndexPatterns,
-      isOverwriteAllChecked,
+      importMode,
       conflictedSavedObjectsLinkedToSavedSearches,
       conflictedSearchDocs,
       failedImports,
@@ -391,11 +405,8 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
           importCount += await resolveIndexPatternConflicts(
             resolutions,
             conflictedIndexPatterns!,
-            isOverwriteAllChecked,
-            {
-              indexPatterns,
-              search,
-            }
+            importMode.overwrite,
+            { indexPatterns, search }
           );
         }
         this.setState({
@@ -406,7 +417,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
         });
         importCount += await saveObjects(
           conflictedSavedObjectsLinkedToSavedSearches!,
-          isOverwriteAllChecked
+          importMode.overwrite
         );
         this.setState({
           loadingMessage: i18n.translate(
@@ -418,7 +429,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
           conflictedSearchDocs!,
           serviceRegistry.all().map((e) => e.service),
           indexPatterns,
-          isOverwriteAllChecked
+          importMode.overwrite
         );
         this.setState({
           loadingMessage: i18n.translate(
@@ -428,12 +439,12 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
         });
         importCount += await saveObjects(
           failedImports!.map(({ obj }) => obj) as any[],
-          isOverwriteAllChecked
+          importMode.overwrite
         );
       } catch (e) {
         this.setState({
-          error: e.message,
           status: 'error',
+          error: getErrorMessage(e),
           loadingMessage: undefined,
         });
         return;
@@ -467,7 +478,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
   };
 
   renderUnmatchedReferences() {
-    const { unmatchedReferences } = this.state;
+    const { unmatchedReferences, unmatchedReferencesTablePagination: tablePagination } = this.state;
 
     if (!unmatchedReferences) {
       return null;
@@ -527,22 +538,28 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
           { defaultMessage: 'New index pattern' }
         ),
         render: (id: string) => {
-          const options = this.state.indexPatterns!.map(
-            (indexPattern) =>
-              ({
-                text: indexPattern.title,
-                value: indexPattern.id,
-                'data-test-subj': `indexPatternOption-${indexPattern.title}`,
-              } as { text: string; value: string; 'data-test-subj'?: string })
-          );
+          const options = [
+            {
+              text: '-- Skip Import --',
+              value: '',
+            },
+            ...this.state.indexPatterns!.map(
+              (indexPattern) =>
+                ({
+                  text: indexPattern.title,
+                  value: indexPattern.id,
+                  'data-test-subj': `indexPatternOption-${indexPattern.title}`,
+                } as { text: string; value: string; 'data-test-subj'?: string })
+            ),
+          ];
 
-          options.unshift({
-            text: '-- Skip Import --',
-            value: '',
-          });
+          const selectedValue =
+            unmatchedReferences?.find((unmatchedRef) => unmatchedRef.existingIndexPatternId === id)
+              ?.newIndexPatternId ?? '';
 
           return (
             <EuiSelect
+              value={selectedValue}
               data-test-subj={`managementChangeIndexSelection-${id}`}
               onChange={(e) => this.onIndexChanged(id, e)}
               options={options}
@@ -553,6 +570,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
     ];
 
     const pagination = {
+      ...tablePagination,
       pageSizeOptions: [5, 10, 25],
     };
 
@@ -561,6 +579,16 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
         items={unmatchedReferences as any[]}
         columns={columns}
         pagination={pagination}
+        onTableChange={({ page }) => {
+          if (page) {
+            this.setState({
+              unmatchedReferencesTablePagination: {
+                pageSize: page.size,
+                pageIndex: page.index,
+              },
+            });
+          }
+        }}
       />
     );
   }
@@ -583,7 +611,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
           }
           color="danger"
         >
-          <p>{error}</p>
+          <p data-test-subj="importSavedObjectsErrorText">{error}</p>
         </EuiCallOut>
         <EuiSpacer size="s" />
       </Fragment>
@@ -594,17 +622,18 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
     const {
       status,
       loadingMessage,
-      isOverwriteAllChecked,
       importCount,
       failedImports = [],
+      successfulImports = [],
       isLegacyFile,
+      importMode,
     } = this.state;
 
     if (status === 'loading') {
       return (
         <EuiFlexGroup justifyContent="spaceAround">
           <EuiFlexItem grow={false}>
-            <EuiLoadingKibana size="xl" />
+            <EuiLoadingElastic size="xl" />
             <EuiSpacer size="m" />
             <EuiText>
               <p>{loadingMessage}</p>
@@ -614,11 +643,12 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
       );
     }
 
-    // Kept backwards compatible logic
-    if (
-      failedImports.length &&
-      (!this.hasUnmatchedReferences || (isLegacyFile === false && status === 'success'))
-    ) {
+    if (isLegacyFile === false && status === 'success') {
+      return <ImportSummary failedImports={failedImports} successfulImports={successfulImports} />;
+    }
+
+    // Import summary for failed legacy import
+    if (failedImports.length && !this.hasUnmatchedReferences) {
       return (
         <EuiCallOut
           data-test-subj="importSavedObjectsFailedWarning"
@@ -679,6 +709,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
       );
     }
 
+    // Import summary for completed legacy import
     if (status === 'success') {
       if (importCount === 0) {
         return (
@@ -725,14 +756,17 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
     return (
       <EuiForm>
         <EuiFormRow
+          fullWidth
           label={
             <FormattedMessage
               id="savedObjectsManagement.objectsTable.flyout.selectFileToImportFormRowLabel"
-              defaultMessage="Please select a file to import"
+              defaultMessage="Select a file to import"
             />
           }
         >
           <EuiFilePicker
+            accept=".ndjson, .json"
+            fullWidth
             initialPromptText={
               <FormattedMessage
                 id="savedObjectsManagement.objectsTable.flyout.importPromptText"
@@ -742,18 +776,11 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
             onChange={this.setImportFile}
           />
         </EuiFormRow>
-        <EuiFormRow>
-          <EuiSwitch
-            name="overwriteAll"
-            label={
-              <FormattedMessage
-                id="savedObjectsManagement.objectsTable.flyout.overwriteSavedObjectsLabel"
-                defaultMessage="Automatically overwrite all saved objects?"
-              />
-            }
-            data-test-subj="importSavedObjectsOverwriteToggle"
-            checked={isOverwriteAllChecked}
-            onChange={this.changeOverwriteAll}
+        <EuiFormRow fullWidth>
+          <ImportModeControl
+            initialValues={importMode}
+            isLegacyFile={isLegacyFile}
+            updateSelection={(newValues: ImportMode) => this.changeImportMode(newValues)}
           />
         </EuiFormRow>
       </EuiForm>
@@ -761,7 +788,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
   }
 
   renderFooter() {
-    const { status } = this.state;
+    const { isLegacyFile, status } = this.state;
     const { done, close } = this.props;
 
     let confirmButton;
@@ -778,7 +805,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
     } else if (this.hasUnmatchedReferences) {
       confirmButton = (
         <EuiButton
-          onClick={this.state.isLegacyFile ? this.confirmLegacyImport : this.resolveImportErrors}
+          onClick={isLegacyFile ? this.confirmLegacyImport : this.resolveImportErrors}
           size="s"
           fill
           isLoading={status === 'loading'}
@@ -793,7 +820,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
     } else {
       confirmButton = (
         <EuiButton
-          onClick={this.state.isLegacyFile ? this.legacyImport : this.import}
+          onClick={isLegacyFile ? this.legacyImport : this.import}
           size="s"
           fill
           isLoading={status === 'loading'}
@@ -810,7 +837,12 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
     return (
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty onClick={close} size="s">
+          <EuiButtonEmpty
+            onClick={close}
+            size="s"
+            disabled={status === 'loading' || (isLegacyFile === false && status === 'success')}
+            data-test-subj="importSavedObjectsCancelBtn"
+          >
             <FormattedMessage
               id="savedObjectsManagement.objectsTable.flyout.import.cancelButtonLabel"
               defaultMessage="Cancel"
@@ -830,24 +862,27 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
     let legacyFileWarning;
     if (this.state.isLegacyFile) {
       legacyFileWarning = (
-        <EuiCallOut
-          data-test-subj="importSavedObjectsLegacyWarning"
-          title={
-            <FormattedMessage
-              id="savedObjectsManagement.objectsTable.flyout.legacyFileUsedTitle"
-              defaultMessage="Support for JSON files is going away"
-            />
-          }
-          color="warning"
-          iconType="help"
-        >
-          <p>
-            <FormattedMessage
-              id="savedObjectsManagement.objectsTable.flyout.legacyFileUsedBody"
-              defaultMessage="Use our updated export to generate NDJSON files, and you'll be all set."
-            />
-          </p>
-        </EuiCallOut>
+        <>
+          <EuiCallOut
+            data-test-subj="importSavedObjectsLegacyWarning"
+            title={
+              <FormattedMessage
+                id="savedObjectsManagement.objectsTable.flyout.legacyFileUsedTitle"
+                defaultMessage="Support for JSON files is going away"
+              />
+            }
+            color="warning"
+            iconType="help"
+          >
+            <p>
+              <FormattedMessage
+                id="savedObjectsManagement.objectsTable.flyout.legacyFileUsedBody"
+                defaultMessage="Use our updated export to generate NDJSON files, and you'll be all set."
+              />
+            </p>
+          </EuiCallOut>
+          <EuiSpacer size="m" />
+        </>
       );
     }
 
@@ -909,56 +944,16 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
     );
   }
 
-  overwriteConfirmed() {
-    this.state.conflictingRecord!.done(true);
-  }
-
-  overwriteSkipped() {
-    this.state.conflictingRecord!.done(false);
-  }
-
   render() {
     const { close } = this.props;
 
-    let confirmOverwriteModal;
-    if (this.state.conflictingRecord) {
-      confirmOverwriteModal = (
-        <EuiOverlayMask>
-          <EuiConfirmModal
-            title={i18n.translate(
-              'savedObjectsManagement.objectsTable.flyout.confirmOverwriteTitle',
-              {
-                defaultMessage: 'Overwrite {type}?',
-                values: { type: this.state.conflictingRecord.type },
-              }
-            )}
-            cancelButtonText={i18n.translate(
-              'savedObjectsManagement.objectsTable.flyout.confirmOverwriteCancelButtonText',
-              { defaultMessage: 'Cancel' }
-            )}
-            confirmButtonText={i18n.translate(
-              'savedObjectsManagement.objectsTable.flyout.confirmOverwriteOverwriteButtonText',
-              { defaultMessage: 'Overwrite' }
-            )}
-            buttonColor="danger"
-            onCancel={this.overwriteSkipped.bind(this)}
-            onConfirm={this.overwriteConfirmed.bind(this)}
-            defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
-          >
-            <p>
-              <FormattedMessage
-                id="savedObjectsManagement.objectsTable.flyout.confirmOverwriteBody"
-                defaultMessage="Are you sure you want to overwrite {title}?"
-                values={{
-                  title:
-                    this.state.conflictingRecord.title ||
-                    getDefaultTitle(this.state.conflictingRecord),
-                }}
-              />
-            </p>
-          </EuiConfirmModal>
-        </EuiOverlayMask>
-      );
+    let confirmOverwriteModal: ReactNode;
+    const { conflictingRecord } = this.state;
+    if (conflictingRecord) {
+      const { conflict } = conflictingRecord;
+      const onFinish = (overwrite: boolean, destinationId?: string) =>
+        conflictingRecord.done([overwrite, destinationId]);
+      confirmOverwriteModal = <OverwriteModal {...{ conflict, onFinish }} />;
     }
 
     return (

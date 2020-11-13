@@ -28,7 +28,7 @@ interface IWaterfallGroup {
 const ROOT_ID = 'root';
 
 export interface IWaterfall {
-  entryTransaction?: Transaction;
+  entryWaterfallTransaction?: IWaterfallTransaction;
   rootTransaction?: Transaction;
 
   /**
@@ -36,6 +36,7 @@ export interface IWaterfall {
    */
   duration: number;
   items: IWaterfallItem[];
+  childrenByParentId: Record<string | number, IWaterfallItem[]>;
   errorsPerTransaction: TraceAPIResponse['errorsPerTransaction'];
   errorsCount: number;
   serviceColors: IServiceColors;
@@ -329,6 +330,7 @@ export function getWaterfall(
       errorsCount: sum(Object.values(errorsPerTransaction)),
       serviceColors: {},
       errorItems: [],
+      childrenByParentId: {},
     };
   }
 
@@ -357,10 +359,8 @@ export function getWaterfall(
   const duration = getWaterfallDuration(items);
   const serviceColors = getServiceColors(items);
 
-  const entryTransaction = entryWaterfallTransaction?.doc;
-
   return {
-    entryTransaction,
+    entryWaterfallTransaction,
     rootTransaction,
     duration,
     items,
@@ -368,5 +368,6 @@ export function getWaterfall(
     errorsCount: errorItems.length,
     serviceColors,
     errorItems,
+    childrenByParentId: getChildrenGroupedByParentId(items),
   };
 }

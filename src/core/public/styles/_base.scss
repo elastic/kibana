@@ -1,16 +1,11 @@
-@import '@elastic/eui/src/components/collapsible_nav/variables';
-// Application Layout
+// Charts themes available app-wide
+@import '@elastic/charts/dist/theme';
+@import '@elastic/eui/src/themes/charts/theme';
 
-// chrome-context
-// TODO #64541
-// Delete this block
-.chrHeaderWrapper:not(.headerWrapper) .content {
-  display: flex;
-  flex-flow: row nowrap;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-}
+// Grab some nav-specific EUI vars
+@import '@elastic/eui/src/components/collapsible_nav/variables';
+
+// Application Layout
 
 .application,
 .app-container {

@@ -150,7 +150,7 @@ export function LogsSection({ absoluteTime, relativeTime, bucketSize }: Props) {
                 />
                 <Axis
                   id="y-axis"
-                  showGridLines
+                  gridLine={{ visible: true }}
                   position={Position.Left}
                   tickFormat={(d: number) => numeral(d).format('0a')}
                 />

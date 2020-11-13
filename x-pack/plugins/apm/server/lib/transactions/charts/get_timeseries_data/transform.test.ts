@@ -48,21 +48,33 @@ describe('getTpmBuckets', () => {
               key_as_string: '',
               key: 0,
               doc_count: 0,
+              count: {
+                value: 0,
+              },
             },
             {
               key_as_string: '',
               key: 1,
               doc_count: 200,
+              count: {
+                value: 200,
+              },
             },
             {
               key_as_string: '',
               key: 2,
               doc_count: 300,
+              count: {
+                value: 300,
+              },
             },
             {
               key_as_string: '',
               key: 3,
               doc_count: 400,
+              count: {
+                value: 400,
+              },
             },
           ],
         },
@@ -76,21 +88,33 @@ describe('getTpmBuckets', () => {
               key_as_string: '',
               key: 0,
               doc_count: 0,
+              count: {
+                value: 0,
+              },
             },
             {
               key_as_string: '',
               key: 1,
               doc_count: 100,
+              count: {
+                value: 100,
+              },
             },
             {
               key_as_string: '',
               key: 2,
               doc_count: 100,
+              count: {
+                value: 100,
+              },
             },
             {
               key_as_string: '',
               key: 3,
               doc_count: 300,
+              count: {
+                value: 300,
+              },
             },
           ],
         },

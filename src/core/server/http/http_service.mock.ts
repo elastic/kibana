@@ -17,10 +17,11 @@
  * under the License.
  */
 
-import { Server } from 'hapi';
+import { Server } from '@hapi/hapi';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+
 import { CspConfig } from '../csp';
 import { mockRouter, RouterMock } from './router/router.mock';
-import { configMock } from '../config/config.mock';
 import {
   InternalHttpServiceSetup,
   HttpServiceSetup,
@@ -35,6 +36,7 @@ import { sessionStorageMock } from './cookie_session_storage.mocks';
 import { OnPostAuthToolkit } from './lifecycle/on_post_auth';
 import { OnPreAuthToolkit } from './lifecycle/on_pre_auth';
 import { OnPreResponseToolkit } from './lifecycle/on_pre_response';
+import { configMock } from '../config/mocks';
 
 type BasePathMocked = jest.Mocked<InternalHttpServiceSetup['basePath']>;
 type AuthMocked = jest.Mocked<InternalHttpServiceSetup['auth']>;
@@ -86,6 +88,7 @@ const createInternalSetupContractMock = () => {
       start: jest.fn(),
       stop: jest.fn(),
       config: jest.fn().mockReturnValue(configMock.create()),
+      // @ts-expect-error somehow it thinks that `Server` isn't a `Construtable`
     } as unknown) as jest.MockedClass<Server>,
     createCookieSessionStorageFactory: jest.fn(),
     registerOnPreRouting: jest.fn(),
@@ -196,6 +199,7 @@ const createAuthToolkitMock = (): jest.Mocked<AuthToolkit> => ({
 });
 
 const createOnPreResponseToolkitMock = (): jest.Mocked<OnPreResponseToolkit> => ({
+  render: jest.fn(),
   next: jest.fn(),
 });
 

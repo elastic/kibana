@@ -4,19 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint-disable @typescript-eslint/camelcase */
 import * as t from 'io-ts';
 import { isObject } from 'lodash/fp';
 import { Either, left, fold } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { typeAndTimelineOnlySchema, TypeAndTimelineOnly } from './type_timeline_only_schema';
-import { isMlRule } from '../../../machine_learning/helpers';
 
+import { isMlRule } from '../../../machine_learning/helpers';
+import { isThresholdRule } from '../../utils';
 import {
   actions,
   anomaly_threshold,
   description,
   enabled,
+  event_category_override,
   false_positives,
   from,
   id,
@@ -61,12 +61,23 @@ import {
   rule_name_override,
   timestamp_override,
 } from '../common/schemas';
+import {
+  threat_index,
+  concurrent_searches,
+  items_per_search,
+  threat_query,
+  threat_filters,
+  threat_mapping,
+  threat_language,
+} from '../types/threat_mapping';
+
 import { DefaultListArray } from '../types/lists_default_array';
 import {
   DefaultStringArray,
   DefaultRiskScoreMappingArray,
   DefaultSeverityMappingArray,
 } from '../types';
+import { typeAndTimelineOnlySchema, TypeAndTimelineOnly } from './type_timeline_only_schema';
 
 /**
  * This is the required fields for the rules schema response. Put all required properties on
@@ -114,7 +125,10 @@ export const dependentRulesSchema = t.partial({
   language,
   query,
 
-  // when type = saved_query, saved_is is required
+  // eql only fields
+  event_category_override,
+
+  // when type = saved_query, saved_id is required
   saved_id,
 
   // These two are required together or not at all.
@@ -127,6 +141,15 @@ export const dependentRulesSchema = t.partial({
 
   // Threshold fields
   threshold,
+
+  // Threat Match fields
+  threat_filters,
+  threat_index,
+  threat_query,
+  concurrent_searches,
+  items_per_search,
+  threat_mapping,
+  threat_language,
 });
 
 /**
@@ -206,7 +229,7 @@ export const addTimelineTitle = (typeAndTimelineOnly: TypeAndTimelineOnly): t.Mi
 };
 
 export const addQueryFields = (typeAndTimelineOnly: TypeAndTimelineOnly): t.Mixed[] => {
-  if (['query', 'saved_query', 'threshold'].includes(typeAndTimelineOnly.type)) {
+  if (['query', 'saved_query', 'threshold', 'threat_match'].includes(typeAndTimelineOnly.type)) {
     return [
       t.exact(t.type({ query: dependentRulesSchema.props.query })),
       t.exact(t.type({ language: dependentRulesSchema.props.language })),
@@ -230,10 +253,45 @@ export const addMlFields = (typeAndTimelineOnly: TypeAndTimelineOnly): t.Mixed[]
 };
 
 export const addThresholdFields = (typeAndTimelineOnly: TypeAndTimelineOnly): t.Mixed[] => {
-  if (typeAndTimelineOnly.type === 'threshold') {
+  if (isThresholdRule(typeAndTimelineOnly.type)) {
     return [
       t.exact(t.type({ threshold: dependentRulesSchema.props.threshold })),
       t.exact(t.partial({ saved_id: dependentRulesSchema.props.saved_id })),
+    ];
+  } else {
+    return [];
+  }
+};
+
+export const addEqlFields = (typeAndTimelineOnly: TypeAndTimelineOnly): t.Mixed[] => {
+  if (typeAndTimelineOnly.type === 'eql') {
+    return [
+      t.exact(
+        t.partial({ event_category_override: dependentRulesSchema.props.event_category_override })
+      ),
+      t.exact(t.type({ query: dependentRulesSchema.props.query })),
+      t.exact(t.type({ language: dependentRulesSchema.props.language })),
+    ];
+  } else {
+    return [];
+  }
+};
+
+export const addThreatMatchFields = (typeAndTimelineOnly: TypeAndTimelineOnly): t.Mixed[] => {
+  if (typeAndTimelineOnly.type === 'threat_match') {
+    return [
+      t.exact(t.type({ threat_query: dependentRulesSchema.props.threat_query })),
+      t.exact(t.type({ threat_index: dependentRulesSchema.props.threat_index })),
+      t.exact(t.type({ threat_mapping: dependentRulesSchema.props.threat_mapping })),
+      t.exact(t.partial({ threat_language: dependentRulesSchema.props.threat_language })),
+      t.exact(t.partial({ threat_filters: dependentRulesSchema.props.threat_filters })),
+      t.exact(t.partial({ saved_id: dependentRulesSchema.props.saved_id })),
+      t.exact(t.partial({ concurrent_searches: dependentRulesSchema.props.concurrent_searches })),
+      t.exact(
+        t.partial({
+          items_per_search: dependentRulesSchema.props.items_per_search,
+        })
+      ),
     ];
   } else {
     return [];
@@ -249,6 +307,8 @@ export const getDependents = (typeAndTimelineOnly: TypeAndTimelineOnly): t.Mixed
     ...addQueryFields(typeAndTimelineOnly),
     ...addMlFields(typeAndTimelineOnly),
     ...addThresholdFields(typeAndTimelineOnly),
+    ...addEqlFields(typeAndTimelineOnly),
+    ...addThreatMatchFields(typeAndTimelineOnly),
   ];
 
   if (dependents.length > 1) {

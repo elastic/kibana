@@ -18,11 +18,16 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { LogRecord, Layout, DisposableAppender } from '@kbn/logging';
 import { createWriteStream, WriteStream } from 'fs';
 
-import { Layout, Layouts } from '../../layouts/layouts';
-import { LogRecord } from '../../log_record';
-import { DisposableAppender } from '../appenders';
+import { Layouts, LayoutConfigType } from '../../layouts/layouts';
+
+export interface FileAppenderConfig {
+  kind: 'file';
+  layout: LayoutConfigType;
+  path: string;
+}
 
 /**
  * Appender that formats all the `LogRecord` instances it receives and writes them to the specified file.
@@ -71,7 +76,7 @@ export class FileAppender implements DisposableAppender {
         return resolve();
       }
 
-      this.outputStream.end(undefined, undefined, () => {
+      this.outputStream.end(() => {
         this.outputStream = undefined;
         resolve();
       });

@@ -4,15 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 import WebhookParamsFields from './webhook_params';
 import { DocLinksStart } from 'kibana/public';
+import { coreMock } from 'src/core/public/mocks';
 
 describe('WebhookParamsFields renders', () => {
   test('all params fields is rendered', () => {
+    const mocks = coreMock.createSetup();
     const actionParams = {
       body: 'test message',
     };
+
     const wrapper = mountWithIntl(
       <WebhookParamsFields
         actionParams={actionParams}
@@ -20,6 +23,8 @@ describe('WebhookParamsFields renders', () => {
         editAction={() => {}}
         index={0}
         docLinks={{ ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart}
+        toastNotifications={mocks.notifications.toasts}
+        http={mocks.http}
       />
     );
     expect(wrapper.find('[data-test-subj="bodyJsonEditor"]').length > 0).toBeTruthy();

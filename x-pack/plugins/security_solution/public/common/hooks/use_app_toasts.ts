@@ -10,7 +10,7 @@ import { ErrorToastOptions, ToastsStart, Toast } from '../../../../../../src/cor
 import { useToasts } from '../lib/kibana';
 import { isAppError, AppError } from '../utils/api';
 
-export type UseAppToasts = Pick<ToastsStart, 'addSuccess'> & {
+export type UseAppToasts = Pick<ToastsStart, 'addSuccess' | 'addWarning'> & {
   api: ToastsStart;
   addError: (error: unknown, options: ErrorToastOptions) => Toast;
 };
@@ -19,6 +19,7 @@ export const useAppToasts = (): UseAppToasts => {
   const toasts = useToasts();
   const addError = useRef(toasts.addError.bind(toasts)).current;
   const addSuccess = useRef(toasts.addSuccess.bind(toasts)).current;
+  const addWarning = useRef(toasts.addWarning.bind(toasts)).current;
 
   const addAppError = useCallback(
     (error: AppError, options: ErrorToastOptions) =>
@@ -44,5 +45,5 @@ export const useAppToasts = (): UseAppToasts => {
     [addAppError, addError]
   );
 
-  return { api: toasts, addError: _addError, addSuccess };
+  return { api: toasts, addError: _addError, addSuccess, addWarning };
 };

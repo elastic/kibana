@@ -83,7 +83,7 @@
         "id": "opbeans-go~>postgresql",
         "sourceData": {
           "id": "opbeans-go",
-          "service.environment": "testing",
+          "service.environment": "test",
           "service.name": "opbeans-go",
           "agent.name": "go"
         },
@@ -103,7 +103,7 @@
         "id": "opbeans-go~opbeans-java",
         "sourceData": {
           "id": "opbeans-go",
-          "service.environment": "testing",
+          "service.environment": "test",
           "service.name": "opbeans-go",
           "agent.name": "go"
         },
@@ -123,13 +123,13 @@
         "id": "opbeans-go~opbeans-node",
         "sourceData": {
           "id": "opbeans-go",
-          "service.environment": "testing",
+          "service.environment": "test",
           "service.name": "opbeans-go",
           "agent.name": "go"
         },
         "targetData": {
           "id": "opbeans-node",
-          "service.environment": "testing",
+          "service.environment": "test",
           "service.name": "opbeans-node",
           "agent.name": "nodejs"
         },
@@ -143,7 +143,7 @@
         "id": "opbeans-go~opbeans-ruby",
         "sourceData": {
           "id": "opbeans-go",
-          "service.environment": "testing",
+          "service.environment": "test",
           "service.name": "opbeans-go",
           "agent.name": "go"
         },
@@ -189,7 +189,7 @@
         },
         "targetData": {
           "id": "opbeans-go",
-          "service.environment": "testing",
+          "service.environment": "test",
           "service.name": "opbeans-go",
           "agent.name": "go"
         },
@@ -209,7 +209,7 @@
         },
         "targetData": {
           "id": "opbeans-node",
-          "service.environment": "testing",
+          "service.environment": "test",
           "service.name": "opbeans-node",
           "agent.name": "nodejs"
         }
@@ -242,7 +242,7 @@
         "id": "opbeans-node~>postgresql",
         "sourceData": {
           "id": "opbeans-node",
-          "service.environment": "testing",
+          "service.environment": "test",
           "service.name": "opbeans-node",
           "agent.name": "nodejs"
         },
@@ -262,7 +262,7 @@
         "id": "opbeans-node~>redis",
         "sourceData": {
           "id": "opbeans-node",
-          "service.environment": "testing",
+          "service.environment": "test",
           "service.name": "opbeans-node",
           "agent.name": "nodejs"
         },
@@ -282,13 +282,13 @@
         "id": "opbeans-node~opbeans-go",
         "sourceData": {
           "id": "opbeans-node",
-          "service.environment": "testing",
+          "service.environment": "test",
           "service.name": "opbeans-node",
           "agent.name": "nodejs"
         },
         "targetData": {
           "id": "opbeans-go",
-          "service.environment": "testing",
+          "service.environment": "test",
           "service.name": "opbeans-go",
           "agent.name": "go"
         },
@@ -302,7 +302,7 @@
         "id": "opbeans-node~opbeans-python",
         "sourceData": {
           "id": "opbeans-node",
-          "service.environment": "testing",
+          "service.environment": "test",
           "service.name": "opbeans-node",
           "agent.name": "nodejs"
         },
@@ -322,7 +322,7 @@
         "id": "opbeans-node~opbeans-ruby",
         "sourceData": {
           "id": "opbeans-node",
-          "service.environment": "testing",
+          "service.environment": "test",
           "service.name": "opbeans-node",
           "agent.name": "nodejs"
         },
@@ -408,7 +408,7 @@
         },
         "targetData": {
           "id": "opbeans-go",
-          "service.environment": "testing",
+          "service.environment": "test",
           "service.name": "opbeans-go",
           "agent.name": "go"
         }
@@ -427,7 +427,7 @@
         },
         "targetData": {
           "id": "opbeans-node",
-          "service.environment": "testing",
+          "service.environment": "test",
           "service.name": "opbeans-node",
           "agent.name": "nodejs"
         },
@@ -487,7 +487,7 @@
         },
         "targetData": {
           "id": "opbeans-go",
-          "service.environment": "testing",
+          "service.environment": "test",
           "service.name": "opbeans-go",
           "agent.name": "go"
         },
@@ -527,7 +527,7 @@
         },
         "targetData": {
           "id": "opbeans-node",
-          "service.environment": "testing",
+          "service.environment": "test",
           "service.name": "opbeans-node",
           "agent.name": "nodejs"
         },
@@ -566,7 +566,7 @@
         },
         "targetData": {
           "id": "opbeans-go",
-          "service.environment": "testing",
+          "service.environment": "test",
           "service.name": "opbeans-go",
           "agent.name": "go"
         }
@@ -602,7 +602,7 @@
         },
         "targetData": {
           "id": "opbeans-node",
-          "service.environment": "testing",
+          "service.environment": "test",
           "service.name": "opbeans-node",
           "agent.name": "nodejs"
         }
@@ -673,7 +673,7 @@
     {
       "data": {
         "id": "opbeans-node",
-        "service.environment": "testing",
+        "service.environment": "test",
         "service.name": "opbeans-node",
         "agent.name": "nodejs",
         "anomaly_score": 41.31593099784474,
@@ -733,7 +733,7 @@
     {
       "data": {
         "id": "opbeans-go",
-        "service.environment": "testing",
+        "service.environment": "test",
         "service.name": "opbeans-go",
         "agent.name": "go",
         "anomaly_score": 0.2633884161762746,

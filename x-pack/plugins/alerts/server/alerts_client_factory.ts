@@ -4,11 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import {
+  KibanaRequest,
+  Logger,
+  SavedObjectsServiceStart,
+  PluginInitializerContext,
+} from 'src/core/server';
 import { PluginStartContract as ActionsPluginStartContract } from '../../actions/server';
 import { AlertsClient } from './alerts_client';
 import { ALERTS_FEATURE_ID } from '../common';
 import { AlertTypeRegistry, SpaceIdToNamespaceFunction } from './types';
-import { KibanaRequest, Logger, SavedObjectsServiceStart } from '../../../../src/core/server';
 import { InvalidateAPIKeyParams, SecurityPluginSetup } from '../../security/server';
 import { EncryptedSavedObjectsClient } from '../../encrypted_saved_objects/server';
 import { TaskManagerStartContract } from '../../task_manager/server';
@@ -16,6 +21,7 @@ import { PluginStartContract as FeaturesPluginStart } from '../../features/serve
 import { AlertsAuthorization } from './authorization/alerts_authorization';
 import { AlertsAuthorizationAuditLogger } from './authorization/audit_logger';
 import { Space } from '../../spaces/server';
+import { IEventLogClientService } from '../../../plugins/event_log/server';
 
 export interface AlertsClientFactoryOpts {
   logger: Logger;
@@ -28,6 +34,8 @@ export interface AlertsClientFactoryOpts {
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
   actions: ActionsPluginStartContract;
   features: FeaturesPluginStart;
+  eventLog: IEventLogClientService;
+  kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
 }
 
 export class AlertsClientFactory {
@@ -42,6 +50,8 @@ export class AlertsClientFactory {
   private encryptedSavedObjectsClient!: EncryptedSavedObjectsClient;
   private actions!: ActionsPluginStartContract;
   private features!: FeaturesPluginStart;
+  private eventLog!: IEventLogClientService;
+  private kibanaVersion!: PluginInitializerContext['env']['packageInfo']['version'];
 
   public initialize(options: AlertsClientFactoryOpts) {
     if (this.isInitialized) {
@@ -58,10 +68,12 @@ export class AlertsClientFactory {
     this.encryptedSavedObjectsClient = options.encryptedSavedObjectsClient;
     this.actions = options.actions;
     this.features = options.features;
+    this.eventLog = options.eventLog;
+    this.kibanaVersion = options.kibanaVersion;
   }
 
   public create(request: KibanaRequest, savedObjects: SavedObjectsServiceStart): AlertsClient {
-    const { securityPluginSetup, actions, features } = this;
+    const { securityPluginSetup, actions, eventLog, features } = this;
     const spaceId = this.getSpaceId(request);
     const authorization = new AlertsAuthorization({
       authorization: securityPluginSetup?.authz,
@@ -76,6 +88,7 @@ export class AlertsClientFactory {
 
     return new AlertsClient({
       spaceId,
+      kibanaVersion: this.kibanaVersion,
       logger: this.logger,
       taskManager: this.taskManager,
       alertTypeRegistry: this.alertTypeRegistry,
@@ -134,6 +147,9 @@ export class AlertsClientFactory {
       },
       async getActionsClient() {
         return actions.getActionsClientWithRequest(request);
+      },
+      async getEventLogClient() {
+        return eventLog.getClient(request);
       },
     });
   }

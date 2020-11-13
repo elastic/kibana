@@ -19,7 +19,7 @@ import {
 import styled from 'styled-components';
 import { isJobStarted } from '../../../../../common/machine_learning/helpers';
 import { FieldHook, getFieldValidityAndErrorMessage } from '../../../../shared_imports';
-import { useSiemJobs } from '../../../../common/components/ml_popover/hooks/use_siem_jobs';
+import { useSecurityJobs } from '../../../../common/components/ml_popover/hooks/use_security_jobs';
 import { useKibana } from '../../../../common/lib/kibana';
 import {
   ML_JOB_SELECT_PLACEHOLDER_TEXT,
@@ -81,7 +81,7 @@ interface MlJobSelectProps {
 export const MlJobSelect: React.FC<MlJobSelectProps> = ({ describedByIds = [], field }) => {
   const jobId = field.value as string;
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
-  const [isLoading, siemJobs] = useSiemJobs(false);
+  const { loading, jobs } = useSecurityJobs(false);
   const mlUrl = useKibana().services.application.getUrlForApp('ml');
   const handleJobChange = useCallback(
     (machineLearningJobId: string) => {
@@ -96,7 +96,7 @@ export const MlJobSelect: React.FC<MlJobSelectProps> = ({ describedByIds = [], f
     disabled: true,
   };
 
-  const jobOptions = siemJobs.map((job) => ({
+  const jobOptions = jobs.map((job) => ({
     value: job.id,
     inputDisplay: job.id,
     dropdownDisplay: <JobDisplay title={job.id} description={job.description} />,
@@ -107,9 +107,9 @@ export const MlJobSelect: React.FC<MlJobSelectProps> = ({ describedByIds = [], f
   const isJobRunning = useMemo(() => {
     // If the selected job is not found in the list, it means the placeholder is selected
     // and so we don't want to show the warning, thus isJobRunning will be true when 'job == null'
-    const job = siemJobs.find((j) => j.id === jobId);
+    const job = jobs.find(({ id }) => id === jobId);
     return job == null || isJobStarted(job.jobState, job.datafeedState);
-  }, [siemJobs, jobId]);
+  }, [jobs, jobId]);
 
   return (
     <MlJobSelectEuiFlexGroup>
@@ -126,7 +126,7 @@ export const MlJobSelect: React.FC<MlJobSelectProps> = ({ describedByIds = [], f
             <EuiFlexItem>
               <EuiSuperSelect
                 hasDividers
-                isLoading={isLoading}
+                isLoading={loading}
                 onChange={handleJobChange}
                 options={options}
                 valueOfSelected={jobId || 'placeholder'}

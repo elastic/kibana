@@ -17,14 +17,14 @@
  * under the License.
  */
 import React from 'react';
-import { shallowWithIntl as shallow } from 'test_utils/enzyme_helpers';
+import { shallowWithIntl as shallow } from '@kbn/test/jest';
 
 // @ts-ignore
 import { ShallowWrapper } from 'enzyme';
 import { ChangeIndexPattern } from './change_indexpattern';
 import { SavedObject } from 'kibana/server';
 import { DiscoverIndexPattern } from './discover_index_pattern';
-import { EuiSelectable, EuiSelectableList } from '@elastic/eui';
+import { EuiSelectable } from '@elastic/eui';
 import { IIndexPattern } from 'src/plugins/data/public';
 
 const indexPattern = {
@@ -57,7 +57,7 @@ function getIndexPatternPickerList(instance: ShallowWrapper) {
 }
 
 function getIndexPatternPickerOptions(instance: ShallowWrapper) {
-  return getIndexPatternPickerList(instance).dive().find(EuiSelectableList).prop('options');
+  return getIndexPatternPickerList(instance).prop('options');
 }
 
 function selectIndexPatternPickerOption(instance: ShallowWrapper, selectedLabel: string) {

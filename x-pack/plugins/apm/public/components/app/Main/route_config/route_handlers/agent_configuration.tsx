@@ -5,18 +5,22 @@
  */
 
 import React from 'react';
+import { RouteComponentProps } from 'react-router-dom';
 import { useFetcher } from '../../../../../hooks/useFetcher';
-import { history } from '../../../../../utils/history';
+import { toQuery } from '../../../../shared/Links/url_helpers';
 import { Settings } from '../../../Settings';
 import { AgentConfigurationCreateEdit } from '../../../Settings/AgentConfigurations/AgentConfigurationCreateEdit';
-import { toQuery } from '../../../../shared/Links/url_helpers';
 
-export function EditAgentConfigurationRouteHandler() {
-  const { search } = history.location;
+type EditAgentConfigurationRouteHandler = RouteComponentProps<{}>;
+
+export function EditAgentConfigurationRouteHandler(
+  props: EditAgentConfigurationRouteHandler
+) {
+  const { search } = props.history.location;
 
   // typescript complains because `pageStop` does not exist in `APMQueryParams`
   // Going forward we should move away from globally declared query params and this is a first step
-  // @ts-ignore
+  // @ts-expect-error
   const { name, environment, pageStep } = toQuery(search);
 
   const res = useFetcher(
@@ -30,7 +34,7 @@ export function EditAgentConfigurationRouteHandler() {
   );
 
   return (
-    <Settings>
+    <Settings {...props}>
       <AgentConfigurationCreateEdit
         pageStep={pageStep || 'choose-settings-step'}
         existingConfigResult={res}
@@ -39,15 +43,19 @@ export function EditAgentConfigurationRouteHandler() {
   );
 }
 
-export function CreateAgentConfigurationRouteHandler() {
-  const { search } = history.location;
+type CreateAgentConfigurationRouteHandlerProps = RouteComponentProps<{}>;
+
+export function CreateAgentConfigurationRouteHandler(
+  props: CreateAgentConfigurationRouteHandlerProps
+) {
+  const { search } = props.history.location;
 
   // Ignoring here because we specifically DO NOT want to add the query params to the global route handler
-  // @ts-ignore
+  // @ts-expect-error
   const { pageStep } = toQuery(search);
 
   return (
-    <Settings>
+    <Settings {...props}>
       <AgentConfigurationCreateEdit
         pageStep={pageStep || 'choose-service-step'}
       />

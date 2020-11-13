@@ -16,7 +16,7 @@ import { useSelector } from 'react-redux';
 import React, { useEffect, useState } from 'react';
 import { AnomalyTranslations } from './translations';
 import { AlertExpressionPopover } from '../alert_expression_popover';
-import { DEFAULT_SEVERITY, SelectSeverity } from './select_severity';
+import { DEFAULT_SEVERITY, SelectSeverity, SEVERITY_OPTIONS } from './select_severity';
 import { monitorIdSelector } from '../../../../state/selectors';
 import { getSeverityColor, getSeverityType } from '../../../../../../ml/public';
 
@@ -39,6 +39,14 @@ export function AnomalyAlertComponent({ setAlertParams, alertParams }: Props) {
   useEffect(() => {
     setAlertParams('severity', severity.val);
   }, [severity, setAlertParams]);
+
+  useEffect(() => {
+    if (alertParams.severity !== undefined) {
+      setSeverity(SEVERITY_OPTIONS.find(({ val }) => val === alertParams.severity)!);
+    }
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <>

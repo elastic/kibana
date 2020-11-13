@@ -42,6 +42,7 @@ export function getSplits(resp, panel, series, meta) {
       return buckets.map((bucket) => {
         bucket.id = `${series.id}:${bucket.key}`;
         bucket.label = formatKey(bucket.key, series);
+        bucket.labelFormatted = bucket.key_as_string ? formatKey(bucket.key_as_string, series) : '';
         bucket.color = panel.type === 'top_n' ? color.string() : colors.shift();
         bucket.meta = meta;
         return bucket;

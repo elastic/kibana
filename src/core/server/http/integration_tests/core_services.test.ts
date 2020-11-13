@@ -23,14 +23,14 @@ import {
   legacyClusterClientInstanceMock,
 } from './core_service.test.mocks';
 
-import Boom from 'boom';
-import { Request } from 'hapi';
+import Boom from '@hapi/boom';
+import { Request } from '@hapi/hapi';
 import { errors as esErrors } from 'elasticsearch';
 import { LegacyElasticsearchErrorHelpers } from '../../elasticsearch/legacy';
 
 import { elasticsearchClientMock } from '../../elasticsearch/client/mocks';
 import { ResponseError } from '@elastic/elasticsearch/lib/errors';
-import * as kbnTestServer from '../../../../test_utils/kbn_server';
+import * as kbnTestServer from '../../../test_helpers/kbn_server';
 import { InternalElasticsearchServiceStart } from '../../elasticsearch';
 
 interface User {
@@ -406,7 +406,10 @@ describe('http service', () => {
       // client contains authHeaders for BWC with legacy platform.
       const [client] = MockLegacyScopedClusterClient.mock.calls;
       const [, , clientHeaders] = client;
-      expect(clientHeaders).toEqual(authHeaders);
+      expect(clientHeaders).toEqual({
+        ...authHeaders,
+        'x-opaque-id': expect.any(String),
+      });
     });
 
     it('passes request authorization header to Elasticsearch if registerAuth was not set', async () => {
@@ -430,7 +433,10 @@ describe('http service', () => {
 
       const [client] = MockLegacyScopedClusterClient.mock.calls;
       const [, , clientHeaders] = client;
-      expect(clientHeaders).toEqual({ authorization: authorizationHeader });
+      expect(clientHeaders).toEqual({
+        authorization: authorizationHeader,
+        'x-opaque-id': expect.any(String),
+      });
     });
 
     it('forwards 401 errors returned from elasticsearch', async () => {

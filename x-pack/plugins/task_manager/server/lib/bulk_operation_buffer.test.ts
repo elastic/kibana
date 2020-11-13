@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { mockLogger } from '../test_utils';
+
 import { createBuffer, Entity, OperationError, BulkOperation } from './bulk_operation_buffer';
 import { mapErr, asOk, asErr, Ok, Err } from './result_type';
 
@@ -160,7 +162,7 @@ describe('Bulk Operation Buffer', () => {
       });
     });
 
-    test('handles both resolutions and rejections at individual task level', async (done) => {
+    test('handles both resolutions and rejections at individual task level', async () => {
       const bulkUpdate: jest.Mocked<BulkOperation<TaskInstance, Error>> = jest.fn(
         ([task1, task2, task3]) => {
           return Promise.resolve([
@@ -177,7 +179,7 @@ describe('Bulk Operation Buffer', () => {
       const task2 = createTask();
       const task3 = createTask();
 
-      return Promise.all([
+      await Promise.all([
         expect(bufferedUpdate(task1)).resolves.toMatchObject(incrementAttempts(task1)),
         expect(bufferedUpdate(task2)).rejects.toMatchObject(
           mapErr(
@@ -186,13 +188,12 @@ describe('Bulk Operation Buffer', () => {
           )
         ),
         expect(bufferedUpdate(task3)).resolves.toMatchObject(incrementAttempts(task3)),
-      ]).then(() => {
-        expect(bulkUpdate).toHaveBeenCalledTimes(1);
-        done();
-      });
+      ]);
+
+      expect(bulkUpdate).toHaveBeenCalledTimes(1);
     });
 
-    test('handles bulkUpdate failure', async (done) => {
+    test('handles bulkUpdate failure', async () => {
       const bulkUpdate: jest.Mocked<BulkOperation<TaskInstance, Error>> = jest.fn(() => {
         return Promise.reject(new Error('bulkUpdate is an illusion'));
       });
@@ -203,7 +204,7 @@ describe('Bulk Operation Buffer', () => {
       const task2 = createTask();
       const task3 = createTask();
 
-      return Promise.all([
+      await Promise.all([
         expect(bufferedUpdate(task1)).rejects.toMatchInlineSnapshot(`
             Object {
               "error": [Error: bulkUpdate is an illusion],
@@ -222,10 +223,41 @@ describe('Bulk Operation Buffer', () => {
               "tag": "err",
             }
           `),
-      ]).then(() => {
-        expect(bulkUpdate).toHaveBeenCalledTimes(1);
-        done();
-      });
+      ]);
+
+      expect(bulkUpdate).toHaveBeenCalledTimes(1);
+    });
+
+    test('logs unknown bulk operation results', async () => {
+      const bulkUpdate: jest.Mocked<BulkOperation<TaskInstance, Error>> = jest.fn(
+        ([task1, task2, task3]) => {
+          return Promise.resolve([
+            incrementAttempts(task1),
+            errorAttempts(createTask()),
+            incrementAttempts(createTask()),
+          ]);
+        }
+      );
+
+      const logger = mockLogger();
+
+      const bufferedUpdate = createBuffer(bulkUpdate, { logger });
+
+      const task1 = createTask();
+      const task2 = createTask();
+      const task3 = createTask();
+
+      await Promise.all([
+        expect(bufferedUpdate(task1)).resolves.toMatchObject(incrementAttempts(task1)),
+        expect(bufferedUpdate(task2)).rejects.toMatchObject(
+          asErr(new Error(`Unhandled buffered operation for entity: ${task2.id}`))
+        ),
+        expect(bufferedUpdate(task3)).rejects.toMatchObject(
+          asErr(new Error(`Unhandled buffered operation for entity: ${task3.id}`))
+        ),
+      ]);
+
+      expect(logger.warn).toHaveBeenCalledTimes(2);
     });
   });
 });

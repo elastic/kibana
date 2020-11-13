@@ -74,16 +74,13 @@ export const MetricsExplorerChart = ({
     const [from, to] = x;
     onTimeChange(moment(from).toISOString(), moment(to).toISOString());
   };
-  const dateFormatter = useMemo(
-    () =>
-      series.rows.length > 0
-        ? niceTimeFormatter([
-            (first(series.rows) as any).timestamp,
-            (last(series.rows) as any).timestamp,
-          ])
-        : (value: number) => `${value}`,
-    [series.rows]
-  );
+  const dateFormatter = useMemo(() => {
+    const firstRow = first(series.rows);
+    const lastRow = last(series.rows);
+    return firstRow && lastRow
+      ? niceTimeFormatter([firstRow.timestamp, lastRow.timestamp])
+      : (value: number) => `${value}`;
+  }, [series.rows]);
   const tooltipProps = {
     headerFormatter: useCallback(
       (data: TooltipValue) => moment(data.value).format(dateFormat || 'Y-MM-DD HH:mm:ss.SSS'),

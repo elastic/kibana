@@ -6,27 +6,51 @@
 
 import React from 'react';
 import { EuiFieldText, EuiForm, EuiFormRow, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiCallOut } from '@elastic/eui';
+import { EuiCode } from '@elastic/eui';
 import { txtDrilldownAction, txtNameOfDrilldown, txtUntitledDrilldown } from './i18n';
-import { ActionFactory } from '../../../dynamic_actions';
+import {
+  ActionFactory,
+  BaseActionConfig,
+  BaseActionFactoryContext,
+} from '../../../dynamic_actions';
 import { ActionWizard } from '../../../components/action_wizard';
+import { Trigger, TriggerId } from '../../../../../../../src/plugins/ui_actions/public';
+import { txtGetMoreActions } from './i18n';
 
 const GET_MORE_ACTIONS_LINK = 'https://www.elastic.co/subscriptions';
 
 const noopFn = () => {};
 
-export interface FormDrilldownWizardProps {
+export interface FormDrilldownWizardProps<
+  ActionFactoryContext extends BaseActionFactoryContext = BaseActionFactoryContext
+> {
   name?: string;
   onNameChange?: (name: string) => void;
 
   currentActionFactory?: ActionFactory;
   onActionFactoryChange?: (actionFactory?: ActionFactory) => void;
-  actionFactoryContext: object;
+  actionFactoryContext: ActionFactoryContext;
 
-  actionConfig?: object;
-  onActionConfigChange?: (config: object) => void;
+  actionConfig?: BaseActionConfig;
+  onActionConfigChange?: (config: BaseActionConfig) => void;
 
   actionFactories?: ActionFactory[];
+
+  /**
+   * Trigger selection has changed
+   * @param triggers
+   */
+  onSelectedTriggersChange: (triggers?: TriggerId[]) => void;
+
+  getTriggerInfo: (triggerId: TriggerId) => Trigger;
+
+  /**
+   * List of possible triggers in current context
+   */
+  triggers: TriggerId[];
+
+  triggerPickerDocsLink?: string;
 }
 
 export const FormDrilldownWizard: React.FC<FormDrilldownWizardProps> = ({
@@ -38,7 +62,22 @@ export const FormDrilldownWizard: React.FC<FormDrilldownWizardProps> = ({
   onActionFactoryChange = noopFn,
   actionFactories = [],
   actionFactoryContext,
+  onSelectedTriggersChange,
+  getTriggerInfo,
+  triggers,
+  triggerPickerDocsLink,
 }) => {
+  if (!triggers || !triggers.length) {
+    // Below callout is not translated, because this message is only for developers.
+    return (
+      <EuiCallOut title="Sorry, there was an error" color="danger" iconType="alert">
+        <p>
+          No triggers provided in <EuiCode>trigger</EuiCode> prop.
+        </p>
+      </EuiCallOut>
+    );
+  }
+
   const nameFragment = (
     <EuiFormRow label={txtNameOfDrilldown}>
       <EuiFieldText
@@ -53,7 +92,7 @@ export const FormDrilldownWizard: React.FC<FormDrilldownWizardProps> = ({
   );
 
   const hasNotCompatibleLicenseFactory = () =>
-    actionFactories?.some((f) => !f.isCompatibleLicence());
+    actionFactories?.some((f) => !f.isCompatibleLicense());
 
   const renderGetMoreActionsLink = () => (
     <EuiText size="s">
@@ -63,10 +102,7 @@ export const FormDrilldownWizard: React.FC<FormDrilldownWizardProps> = ({
         external
         data-test-subj={'getMoreActionsLink'}
       >
-        <FormattedMessage
-          id="xpack.uiActionsEnhanced.drilldowns.components.FormDrilldownWizard.getMoreActionsLinkLabel"
-          defaultMessage="Get more actions"
-        />
+        {txtGetMoreActions}
       </EuiLink>
     </EuiText>
   );
@@ -86,6 +122,10 @@ export const FormDrilldownWizard: React.FC<FormDrilldownWizardProps> = ({
         onActionFactoryChange={(actionFactory) => onActionFactoryChange(actionFactory)}
         onConfigChange={(config) => onActionConfigChange(config)}
         context={actionFactoryContext}
+        onSelectedTriggersChange={onSelectedTriggersChange}
+        getTriggerInfo={getTriggerInfo}
+        triggers={triggers}
+        triggerPickerDocsLink={triggerPickerDocsLink}
       />
     </EuiFormRow>
   );

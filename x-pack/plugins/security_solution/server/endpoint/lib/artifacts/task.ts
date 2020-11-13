@@ -39,7 +39,6 @@ export class ManifestTask {
     setupContract.taskManager.registerTaskDefinitions({
       [ManifestTaskConstants.TYPE]: {
         title: 'Security Solution Endpoint Exceptions Handler',
-        type: ManifestTaskConstants.TYPE,
         timeout: ManifestTaskConstants.TIMEOUT,
         createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
           return {
@@ -148,7 +147,7 @@ export class ManifestTask {
         }
       }
 
-      // Try dispatching to ingest-manager package configs
+      // Try dispatching to ingest-manager package policies
       const dispatchErrors = await manifestManager.tryDispatch(newManifest);
       if (dispatchErrors.length) {
         reportErrors(this.logger, dispatchErrors);

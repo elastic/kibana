@@ -5,7 +5,7 @@
  */
 import { act } from 'react-dom/test-utils';
 
-import { TestBed } from '../../../../../../../../../test_utils';
+import { TestBed } from '@kbn/test/jest';
 
 interface MappingField {
   name: string;
@@ -85,6 +85,9 @@ export const getFormActions = (testBed: TestBed) => {
           value: type,
         },
       ]);
+    });
+
+    await act(async () => {
       find('createFieldForm.addButton').simulate('click');
     });
 

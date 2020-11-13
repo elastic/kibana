@@ -6,13 +6,13 @@
 
 import { useState } from 'react';
 
-import { PreviewRequestBody } from '../../../../../common';
+import { PostTransformsPreviewRequestSchema } from '../../../../../../../common/api_schemas/transforms';
 
 import { StepDefineExposedState } from '../common';
 
 export const useAdvancedSourceEditor = (
   defaults: StepDefineExposedState,
-  previewRequest: PreviewRequestBody
+  previewRequest: PostTransformsPreviewRequestSchema
 ) => {
   const stringifiedSourceConfig = JSON.stringify(previewRequest.source.query, null, 2);
 

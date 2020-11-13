@@ -22,11 +22,9 @@ import { registerLanguage } from './lib/monaco_language_def';
 import { SetupRegistries } from './plugin_api';
 import { initRegistries, populateRegistries, destroyRegistries } from './registries';
 import { getDocumentationLinks } from './lib/documentation_links';
-// @ts-expect-error untyped component
 import { HelpMenu } from './components/help_menu/help_menu';
 import { createStore } from './store';
 
-/* eslint-enable */
 import { init as initStatsReporter } from './lib/ui_metric';
 
 import { CapabilitiesStrings } from '../i18n';
@@ -87,7 +85,8 @@ export const initializeCanvas = async (
   const canvasFunctions = initFunctions({
     timefilter: setupPlugins.data.query.timefilter.timefilter,
     prependBasePath: coreSetup.http.basePath.prepend,
-    typesRegistry: setupPlugins.expressions.__LEGACY.types,
+    types: setupPlugins.expressions.getTypes(),
+    paletteService: await setupPlugins.charts.palettes.getPalettes(),
   });
 
   for (const fn of canvasFunctions) {
@@ -129,7 +128,10 @@ export const initializeCanvas = async (
       },
     ],
     content: (domNode) => {
-      ReactDOM.render(<HelpMenu />, domNode);
+      ReactDOM.render(
+        <HelpMenu functionRegistry={services.expressions.getService().getFunctions()} />,
+        domNode
+      );
       return () => ReactDOM.unmountComponentAtNode(domNode);
     },
   });

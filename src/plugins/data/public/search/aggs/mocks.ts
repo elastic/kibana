@@ -17,16 +17,17 @@
  * under the License.
  */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { coreMock } from '../../../../../../src/core/public/mocks';
 import {
   AggConfigs,
   AggTypesRegistrySetup,
   AggTypesRegistryStart,
   getCalculateAutoTimeExpression,
-} from './';
-import { SearchAggsSetup, SearchAggsStart } from './types';
-import { mockAggTypesRegistry } from './test_helpers';
+} from '../../../common';
+import { AggsSetup, AggsStart } from './types';
+
+import { mockAggTypesRegistry } from '../../../common/search/aggs/test_helpers';
+
+const getConfig = jest.fn();
 
 const aggTypeBaseParamMock = () => ({
   name: 'some_param',
@@ -54,21 +55,19 @@ export const aggTypesRegistrySetupMock = (): AggTypesRegistrySetup => ({
 
 export const aggTypesRegistryStartMock = (): AggTypesRegistryStart => ({
   get: jest.fn().mockImplementation(aggTypeConfigMock),
-  getBuckets: jest.fn().mockImplementation(() => [aggTypeConfigMock()]),
-  getMetrics: jest.fn().mockImplementation(() => [aggTypeConfigMock()]),
   getAll: jest.fn().mockImplementation(() => ({
     buckets: [aggTypeConfigMock()],
     metrics: [aggTypeConfigMock()],
   })),
 });
 
-export const searchAggsSetupMock = (): SearchAggsSetup => ({
-  calculateAutoTimeExpression: getCalculateAutoTimeExpression(coreMock.createSetup().uiSettings),
+export const searchAggsSetupMock = (): AggsSetup => ({
   types: aggTypesRegistrySetupMock(),
 });
 
-export const searchAggsStartMock = (): SearchAggsStart => ({
-  calculateAutoTimeExpression: getCalculateAutoTimeExpression(coreMock.createStart().uiSettings),
+export const searchAggsStartMock = (): AggsStart => ({
+  calculateAutoTimeExpression: getCalculateAutoTimeExpression(getConfig),
+  getDateMetaByDatatableColumn: jest.fn(),
   createAggConfigs: jest.fn().mockImplementation((indexPattern, configStates = [], schemas) => {
     return new AggConfigs(indexPattern, configStates, {
       typesRegistry: mockAggTypesRegistry(),

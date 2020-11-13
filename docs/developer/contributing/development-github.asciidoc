@@ -1,5 +1,5 @@
 [[development-github]]
-== How we use git and github
+== How we use Git and GitHub
 
 [discrete]
 === Forking
@@ -12,17 +12,21 @@ repo, which we'll refer to in later code snippets.
 [discrete]
 === Branching
 
-* All work on the next major release goes into master.
-* Past major release branches are named `{majorVersion}.x`. They contain
-work that will go into the next minor release. For example, if the next
-minor release is `5.2.0`, work for it should go into the `5.x` branch.
-* Past minor release branches are named `{majorVersion}.{minorVersion}`.
-They contain work that will go into the next patch release. For example,
-if the next patch release is `5.3.1`, work for it should go into the
-`5.3` branch.
-* All work is done on feature branches and merged into one of these
-branches.
-* Where appropriate, we'll backport changes into older release branches.
+At Elastic, all products in the stack, including Kibana, are released at the same time with the same version number. Most of these projects have the following branching strategy:
+
+* `master` is the next major version.
+* `<major>.x` is the next minor version.
+* `<major>.<minor>` is the next release of a minor version, including patch releases.
+
+As an example, let's assume that the `7.x` branch is currently a not-yet-released `7.6.0`. Once `7.6.0` has reached feature freeze, it will be branched to `7.6` and `7.x` will be updated to reflect `7.7.0`. The release of `7.6.0` and subsequent patch releases will be cut from the `7.6` branch. At any time, you can verify the current version of a branch by inspecting the `version` attribute in the `package.json` file within the Kibana source.
+
+Pull requests are made into the `master` branch and then backported when it is safe and appropriate.
+
+* Breaking changes do not get backported and only go into `master`.
+* All non-breaking changes can be backported to the `<major>.x` branch.
+* Features should not be backported to a `<major>.<minor>` branch.
+* Bug fixes can be backported to a `<major>.<minor>` branch if the changes are safe and appropriate. Safety is a judgment call you make based on factors like the bug's severity, test coverage, confidence in the changes, etc. Your reasoning should be included in the pull request description.
+* Documentation changes can be backported to any branch at any time.
 
 [discrete]
 === Commits and Merging

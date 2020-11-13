@@ -68,6 +68,9 @@ export const useLinkProps = (
 
   const onClick = useMemo(() => {
     return (e: React.MouseEvent | React.MouseEvent<HTMLAnchorElement | HTMLButtonElement>) => {
+      if (e.defaultPrevented || isModifiedEvent(e)) {
+        return;
+      }
       e.preventDefault();
 
       const navigate = () => {
@@ -112,3 +115,6 @@ const validateParams = ({ app, pathname, hash, search }: LinkDescriptor) => {
     );
   }
 };
+
+const isModifiedEvent = (event: any) =>
+  !!(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey);

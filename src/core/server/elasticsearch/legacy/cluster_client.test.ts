@@ -27,7 +27,6 @@ import {
 
 import { errors } from 'elasticsearch';
 import { get } from 'lodash';
-import { auditTrailServiceMock } from '../../audit_trail/audit_trail_service.mock';
 import { Logger } from '../../logging';
 import { loggingSystemMock } from '../../logging/logging_system.mock';
 import { httpServerMock } from '../../http/http_server.mocks';
@@ -43,11 +42,7 @@ test('#constructor creates client with parsed config', () => {
   const mockEsConfig = { apiVersion: 'es-version' } as any;
   const mockLogger = logger.get();
 
-  const clusterClient = new LegacyClusterClient(
-    mockEsConfig,
-    mockLogger,
-    auditTrailServiceMock.createAuditorFactory
-  );
+  const clusterClient = new LegacyClusterClient(mockEsConfig, mockLogger);
   expect(clusterClient).toBeDefined();
 
   expect(mockParseElasticsearchClientConfig).toHaveBeenCalledTimes(1);
@@ -73,11 +68,7 @@ describe('#callAsInternalUser', () => {
     };
     MockClient.mockImplementation(() => mockEsClientInstance);
 
-    clusterClient = new LegacyClusterClient(
-      { apiVersion: 'es-version' } as any,
-      logger.get(),
-      auditTrailServiceMock.createAuditorFactory
-    );
+    clusterClient = new LegacyClusterClient({ apiVersion: 'es-version' } as any, logger.get());
   });
 
   test('fails if cluster client is closed', async () => {
@@ -246,11 +237,7 @@ describe('#asScoped', () => {
       requestHeadersWhitelist: ['one', 'two'],
     } as any;
 
-    clusterClient = new LegacyClusterClient(
-      mockEsConfig,
-      mockLogger,
-      auditTrailServiceMock.createAuditorFactory
-    );
+    clusterClient = new LegacyClusterClient(mockEsConfig, mockLogger);
     jest.clearAllMocks();
   });
 
@@ -285,11 +272,7 @@ describe('#asScoped', () => {
 
   test('properly configures `ignoreCertAndKey` for various configurations', () => {
     // Config without SSL.
-    clusterClient = new LegacyClusterClient(
-      mockEsConfig,
-      mockLogger,
-      auditTrailServiceMock.createAuditorFactory
-    );
+    clusterClient = new LegacyClusterClient(mockEsConfig, mockLogger);
 
     mockParseElasticsearchClientConfig.mockClear();
     clusterClient.asScoped(httpServerMock.createRawRequest({ headers: { one: '1' } }));
@@ -302,11 +285,7 @@ describe('#asScoped', () => {
 
     // Config ssl.alwaysPresentCertificate === false
     mockEsConfig = { ...mockEsConfig, ssl: { alwaysPresentCertificate: false } } as any;
-    clusterClient = new LegacyClusterClient(
-      mockEsConfig,
-      mockLogger,
-      auditTrailServiceMock.createAuditorFactory
-    );
+    clusterClient = new LegacyClusterClient(mockEsConfig, mockLogger);
 
     mockParseElasticsearchClientConfig.mockClear();
     clusterClient.asScoped(httpServerMock.createRawRequest({ headers: { one: '1' } }));
@@ -319,11 +298,7 @@ describe('#asScoped', () => {
 
     // Config ssl.alwaysPresentCertificate === true
     mockEsConfig = { ...mockEsConfig, ssl: { alwaysPresentCertificate: true } } as any;
-    clusterClient = new LegacyClusterClient(
-      mockEsConfig,
-      mockLogger,
-      auditTrailServiceMock.createAuditorFactory
-    );
+    clusterClient = new LegacyClusterClient(mockEsConfig, mockLogger);
 
     mockParseElasticsearchClientConfig.mockClear();
     clusterClient.asScoped(httpServerMock.createRawRequest({ headers: { one: '1' } }));
@@ -344,8 +319,22 @@ describe('#asScoped', () => {
     expect(MockScopedClusterClient).toHaveBeenCalledWith(
       expect.any(Function),
       expect.any(Function),
-      { one: '1', two: '2' },
-      expect.any(Object)
+      { one: '1', two: '2' }
+    );
+  });
+
+  test('passes x-opaque-id header with request id', () => {
+    clusterClient.asScoped(
+      httpServerMock.createKibanaRequest({
+        kibanaRequestState: { requestId: 'alpha', requestUuid: 'ignore-this-id' },
+      })
+    );
+
+    expect(MockScopedClusterClient).toHaveBeenCalledTimes(1);
+    expect(MockScopedClusterClient).toHaveBeenCalledWith(
+      expect.any(Function),
+      expect.any(Function),
+      { 'x-opaque-id': 'alpha' }
     );
   });
 
@@ -367,141 +356,74 @@ describe('#asScoped', () => {
   });
 
   test('does not fail when scope to not defined request', async () => {
-    clusterClient = new LegacyClusterClient(
-      mockEsConfig,
-      mockLogger,
-      auditTrailServiceMock.createAuditorFactory
-    );
+    clusterClient = new LegacyClusterClient(mockEsConfig, mockLogger);
     clusterClient.asScoped();
     expect(MockScopedClusterClient).toHaveBeenCalledTimes(1);
     expect(MockScopedClusterClient).toHaveBeenCalledWith(
       expect.any(Function),
       expect.any(Function),
-      {},
-      undefined
+      {}
     );
   });
 
   test('does not fail when scope to a request without headers', async () => {
-    clusterClient = new LegacyClusterClient(
-      mockEsConfig,
-      mockLogger,
-      auditTrailServiceMock.createAuditorFactory
-    );
+    clusterClient = new LegacyClusterClient(mockEsConfig, mockLogger);
     clusterClient.asScoped({} as any);
     expect(MockScopedClusterClient).toHaveBeenCalledTimes(1);
     expect(MockScopedClusterClient).toHaveBeenCalledWith(
       expect.any(Function),
       expect.any(Function),
-      {},
-      undefined
+      {}
     );
   });
 
   test('calls getAuthHeaders and filters results for a real request', async () => {
-    clusterClient = new LegacyClusterClient(
-      mockEsConfig,
-      mockLogger,
-      auditTrailServiceMock.createAuditorFactory,
-      () => ({
-        one: '1',
-        three: '3',
-      })
-    );
+    clusterClient = new LegacyClusterClient(mockEsConfig, mockLogger, () => ({
+      one: '1',
+      three: '3',
+    }));
     clusterClient.asScoped(httpServerMock.createRawRequest({ headers: { two: '2' } }));
     expect(MockScopedClusterClient).toHaveBeenCalledTimes(1);
     expect(MockScopedClusterClient).toHaveBeenCalledWith(
       expect.any(Function),
       expect.any(Function),
-      { one: '1', two: '2' },
-      expect.any(Object)
+      { one: '1', two: '2' }
     );
   });
 
   test('getAuthHeaders results rewrite extends a request headers', async () => {
-    clusterClient = new LegacyClusterClient(
-      mockEsConfig,
-      mockLogger,
-      auditTrailServiceMock.createAuditorFactory,
-      () => ({ one: 'foo' })
-    );
+    clusterClient = new LegacyClusterClient(mockEsConfig, mockLogger, () => ({ one: 'foo' }));
     clusterClient.asScoped(httpServerMock.createRawRequest({ headers: { one: '1', two: '2' } }));
     expect(MockScopedClusterClient).toHaveBeenCalledTimes(1);
     expect(MockScopedClusterClient).toHaveBeenCalledWith(
       expect.any(Function),
       expect.any(Function),
-      { one: 'foo', two: '2' },
-      expect.any(Object)
+      { one: 'foo', two: '2' }
     );
   });
 
   test("doesn't call getAuthHeaders for a fake request", async () => {
-    clusterClient = new LegacyClusterClient(
-      mockEsConfig,
-      mockLogger,
-      auditTrailServiceMock.createAuditorFactory,
-      () => ({})
-    );
+    clusterClient = new LegacyClusterClient(mockEsConfig, mockLogger, () => ({}));
     clusterClient.asScoped({ headers: { one: 'foo' } });
 
     expect(MockScopedClusterClient).toHaveBeenCalledTimes(1);
     expect(MockScopedClusterClient).toHaveBeenCalledWith(
       expect.any(Function),
       expect.any(Function),
-      { one: 'foo' },
-      undefined
+      { one: 'foo' }
     );
   });
 
   test('filters a fake request headers', async () => {
-    clusterClient = new LegacyClusterClient(
-      mockEsConfig,
-      mockLogger,
-      auditTrailServiceMock.createAuditorFactory
-    );
+    clusterClient = new LegacyClusterClient(mockEsConfig, mockLogger);
     clusterClient.asScoped({ headers: { one: '1', two: '2', three: '3' } });
 
     expect(MockScopedClusterClient).toHaveBeenCalledTimes(1);
     expect(MockScopedClusterClient).toHaveBeenCalledWith(
       expect.any(Function),
       expect.any(Function),
-      { one: '1', two: '2' },
-      undefined
+      { one: '1', two: '2' }
     );
-  });
-
-  describe('Auditor', () => {
-    it('creates Auditor for KibanaRequest', async () => {
-      const auditor = auditTrailServiceMock.createAuditor();
-      const auditorFactory = auditTrailServiceMock.createAuditorFactory();
-      auditorFactory.asScoped.mockReturnValue(auditor);
-      clusterClient = new LegacyClusterClient(mockEsConfig, mockLogger, () => auditorFactory);
-      clusterClient.asScoped(httpServerMock.createKibanaRequest());
-
-      expect(MockScopedClusterClient).toHaveBeenCalledTimes(1);
-      expect(MockScopedClusterClient).toHaveBeenCalledWith(
-        expect.any(Function),
-        expect.any(Function),
-        {},
-        auditor
-      );
-    });
-
-    it("doesn't create Auditor for a fake request", async () => {
-      const getAuthHeaders = jest.fn();
-      clusterClient = new LegacyClusterClient(mockEsConfig, mockLogger, getAuthHeaders);
-      clusterClient.asScoped({ headers: { one: '1', two: '2', three: '3' } });
-
-      expect(getAuthHeaders).not.toHaveBeenCalled();
-    });
-
-    it("doesn't create Auditor when no request passed", async () => {
-      const getAuthHeaders = jest.fn();
-      clusterClient = new LegacyClusterClient(mockEsConfig, mockLogger, getAuthHeaders);
-      clusterClient.asScoped();
-
-      expect(getAuthHeaders).not.toHaveBeenCalled();
-    });
   });
 });
 
@@ -520,8 +442,7 @@ describe('#close', () => {
 
     clusterClient = new LegacyClusterClient(
       { apiVersion: 'es-version', requestHeadersWhitelist: [] } as any,
-      logger.get(),
-      auditTrailServiceMock.createAuditorFactory
+      logger.get()
     );
   });
 

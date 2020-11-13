@@ -10,9 +10,9 @@ import { AlertTypeModel, ValidationResult } from '../../../../triggers_actions_u
 import { AlertTypeInitializer } from '.';
 
 import { CLIENT_ALERT_TYPES } from '../../../common/constants/alerts';
-import { MonitorStatusTranslations } from './translations';
+import { MonitorStatusTranslations } from '../../../common/translations';
 
-const { defaultActionMessage } = MonitorStatusTranslations;
+const { defaultActionMessage, description } = MonitorStatusTranslations;
 
 const MonitorStatusAlert = React.lazy(() => import('./lazy_wrapper/monitor_status'));
 
@@ -29,7 +29,11 @@ export const initMonitorStatusAlertType: AlertTypeInitializer = ({
       defaultMessage="Uptime monitor status"
     />
   ),
+  description,
   iconClass: 'uptimeApp',
+  documentationUrl(docLinks) {
+    return `${docLinks.ELASTIC_WEBSITE_URL}guide/en/uptime/${docLinks.DOC_LINK_VERSION}/uptime-alerting.html#_monitor_status_alerts`;
+  },
   alertParamsExpression: (params: any) => (
     <MonitorStatusAlert core={core} plugins={plugins} params={params} />
   ),
@@ -42,7 +46,7 @@ export const initMonitorStatusAlertType: AlertTypeInitializer = ({
         validateFunc = validateMonitorStatusParams;
       })();
     }
-    return validateFunc && validateFunc(alertParams);
+    return validateFunc ? validateFunc(alertParams) : ({} as ValidationResult);
   },
   defaultActionMessage,
   requiresAppContext: false,

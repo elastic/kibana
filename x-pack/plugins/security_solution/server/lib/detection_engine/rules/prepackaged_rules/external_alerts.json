@@ -1,5 +1,7 @@
 {
-  "author": ["Elastic"],
+  "author": [
+    "Elastic"
+  ],
   "description": "Generates a detection alert for each external alert written to the configured indices. Enabling this rule allows you to immediately begin investigating external alerts in the app.",
   "index": [
     "apm-*-transaction*",
@@ -51,8 +53,15 @@
       "value": "99"
     }
   ],
-  "tags": ["Elastic"],
+  "tags": [
+    "Elastic",
+    "Network",
+    "Windows",
+    "APM",
+    "macOS",
+    "Linux"
+  ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 1
+  "version": 2
 }

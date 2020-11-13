@@ -21,7 +21,8 @@ import _ from 'lodash';
 import schemaParser from 'vega-schema-url-parser';
 import versionCompare from 'compare-versions';
 import hjson from 'hjson';
-import { VISUALIZATION_COLORS } from '@elastic/eui';
+import { euiPaletteColorBlind } from '@elastic/eui';
+import { euiThemeVars } from '@kbn/ui-shared-deps/theme';
 import { i18n } from '@kbn/i18n';
 // @ts-ignore
 import { vega, vegaLite } from '../lib/vega';
@@ -47,7 +48,7 @@ import {
 } from './types';
 
 // Set default single color to match other Kibana visualizations
-const defaultColor: string = VISUALIZATION_COLORS[0];
+const defaultColor: string = euiPaletteColorBlind()[0];
 
 const locToDirMap: Record<string, ControlsLocation> = {
   left: 'row-reverse',
@@ -55,7 +56,6 @@ const locToDirMap: Record<string, ControlsLocation> = {
   top: 'column-reverse',
   bottom: 'column',
 };
-const DEFAULT_SCHEMA: string = 'https://vega.github.io/schema/vega/v5.json';
 
 // If there is no "%type%" parameter, use this parser
 const DEFAULT_PARSER: string = 'elasticsearch';
@@ -65,7 +65,7 @@ export class VegaParser {
   hideWarnings: boolean;
   error?: string;
   warnings: string[];
-  _urlParsers: UrlParserConfig;
+  _urlParsers: UrlParserConfig | undefined;
   isVegaLite?: boolean;
   useHover?: boolean;
   _config?: VegaConfig;
@@ -75,18 +75,19 @@ export class VegaParser {
   mapConfig?: object;
   vlspec?: VegaSpec;
   useResize?: boolean;
-  paddingWidth?: number;
-  paddingHeight?: number;
   containerDir?: ControlsLocation | ControlsDirection;
   controlsDir?: ControlsLocation;
   searchAPI: SearchAPI;
+  getServiceSettings: () => Promise<IServiceSettings>;
+  filters: Bool;
+  timeCache: TimeCache;
 
   constructor(
     spec: VegaSpec | string,
     searchAPI: SearchAPI,
     timeCache: TimeCache,
     filters: Bool,
-    serviceSettings: IServiceSettings
+    getServiceSettings: () => Promise<IServiceSettings>
   ) {
     this.spec = spec as VegaSpec;
     this.hideWarnings = false;
@@ -94,13 +95,9 @@ export class VegaParser {
     this.error = undefined;
     this.warnings = [];
     this.searchAPI = searchAPI;
-
-    const onWarn = this._onWarning.bind(this);
-    this._urlParsers = {
-      elasticsearch: new EsQueryParser(timeCache, this.searchAPI, filters, onWarn),
-      emsfile: new EmsFileParser(serviceSettings),
-      url: new UrlParser(onWarn),
-    };
+    this.getServiceSettings = getServiceSettings;
+    this.filters = filters;
+    this.timeCache = timeCache;
   }
 
   async parseAsync() {
@@ -117,8 +114,27 @@ export class VegaParser {
     if (this.isVegaLite !== undefined) throw new Error();
 
     if (typeof this.spec === 'string') {
-      this.spec = hjson.parse(this.spec, { legacyRoot: false });
+      const spec = hjson.parse(this.spec, { legacyRoot: false });
+
+      if (!spec.$schema) {
+        throw new Error(
+          i18n.translate('visTypeVega.vegaParser.inputSpecDoesNotSpecifySchemaErrorMessage', {
+            defaultMessage: `Your specification requires a {schemaParam} field with a valid URL for
+Vega (see {vegaSchemaUrl}) or
+Vega-Lite (see {vegaLiteSchemaUrl}).
+The URL is an identifier only. Kibana and your browser will never access this URL.`,
+            values: {
+              schemaParam: '"$schema"',
+              vegaLiteSchemaUrl: 'https://vega.github.io/vega-lite/docs/spec.html#top-level',
+              vegaSchemaUrl:
+                'https://vega.github.io/vega/docs/specification/#top-level-specification-properties',
+            },
+          })
+        );
+      }
+      this.spec = spec;
     }
+
     if (!_.isPlainObject(this.spec)) {
       throw new Error(
         i18n.translate('visTypeVega.vegaParser.invalidVegaSpecErrorMessage', {
@@ -126,7 +142,7 @@ export class VegaParser {
         })
       );
     }
-    this.isVegaLite = this._parseSchema();
+    this.isVegaLite = this.parseSchema(this.spec).isVegaLite;
     this.useHover = !this.isVegaLite;
 
     this._config = this._parseConfig();
@@ -139,9 +155,9 @@ export class VegaParser {
     this._parseControlPlacement();
     if (this.useMap) {
       this.mapConfig = this._parseMapConfig();
-    } else if (this.spec && this.spec.autosize === undefined) {
-      // Default autosize should be fit, unless it's a map (leaflet-vega handles that)
-      this.spec.autosize = { type: 'fit', contains: 'padding' };
+      this.useResize = false;
+    } else if (this.spec) {
+      this._compileWithAutosize();
     }
 
     await this._resolveDataUrls();
@@ -149,17 +165,87 @@ export class VegaParser {
     if (this.isVegaLite) {
       this._compileVegaLite();
     }
+  }
 
-    this._calcSizing();
+  /**
+   * Ensure that Vega and Vega-Lite will take the full width of the container unless
+   * the user has explicitly disabled this setting by setting it to "none".
+   * Also sets the default width to include the padding. This creates the least configuration
+   * needed for most cases, with the option to do more.
+   */
+  private _compileWithAutosize() {
+    const defaultAutosize = {
+      type: 'fit',
+      contains: 'padding',
+    };
+
+    let autosize = this.spec.autosize;
+    let useResize = true;
+
+    if (!this.isVegaLite && autosize && typeof autosize === 'object' && 'signal' in autosize) {
+      // Vega supports dynamic autosize information, so we ignore it
+      return;
+    }
+
+    if (!autosize && typeof autosize !== 'undefined') {
+      this._onWarning(
+        i18n.translate('visTypeVega.vegaParser.autoSizeDoesNotAllowFalse', {
+          defaultMessage:
+            '{autoSizeParam} is enabled, it can only be disabled by setting {autoSizeParam} to {noneParam}',
+          values: {
+            autoSizeParam: '"autosize"',
+            noneParam: '"none"',
+          },
+        })
+      );
+    }
+
+    if (typeof autosize === 'string') {
+      useResize = autosize !== 'none';
+      autosize = { ...defaultAutosize, type: autosize };
+    } else if (typeof autosize === 'object') {
+      autosize = { ...defaultAutosize, ...autosize } as {
+        type: string;
+        contains: string;
+      };
+      useResize = Boolean(autosize?.type && autosize?.type !== 'none');
+    } else {
+      autosize = defaultAutosize;
+    }
+
+    if (
+      useResize &&
+      ((this.spec.width && this.spec.width !== 'container') ||
+        (this.spec.height && this.spec.height !== 'container'))
+    ) {
+      this._onWarning(
+        i18n.translate('visTypeVega.vegaParser.widthAndHeightParamsAreIgnored', {
+          defaultMessage:
+            '{widthParam} and {heightParam} params are ignored because {autoSizeParam} is enabled. Set {autoSizeParam}: {noneParam} to disable',
+          values: {
+            widthParam: '"width"',
+            heightParam: '"height"',
+            autoSizeParam: '"autosize"',
+            noneParam: '"none"',
+          },
+        })
+      );
+    }
+
+    if (useResize) {
+      this.spec.width = 'container';
+      this.spec.height = 'container';
+    }
+
+    this.spec.autosize = autosize;
+    this.useResize = useResize;
   }
 
   /**
    * Convert VegaLite to Vega spec
-   * @private
    */
-  _compileVegaLite() {
+  private _compileVegaLite() {
     this.vlspec = this.spec;
-    // eslint-disable-next-line import/namespace
     const logger = vega.logger(vega.Warn); // note: eslint has a false positive here
     logger.warn = this._onWarning.bind(this);
     this.spec = vegaLite.compile(this.vlspec, logger).spec;
@@ -205,62 +291,6 @@ export class VegaParser {
         (this.vlspec.config === undefined || (hasConfig && !this.vlspec.config.autosize))
       ) {
         delete this.spec.autosize;
-      }
-    }
-  }
-
-  /**
-   * Process graph size and padding
-   * @private
-   */
-  _calcSizing() {
-    this.useResize = false;
-
-    // Padding is not included in the width/height by default
-    this.paddingWidth = 0;
-    this.paddingHeight = 0;
-    if (this.spec) {
-      if (!this.useMap) {
-        // when useResize is true, vega's canvas size will be set based on the size of the container,
-        // and will be automatically updated on resize events.
-        // We delete width & height if the autosize is set to "fit"
-        // We also set useResize=true in case autosize=none, and width & height are not set
-        const autosize = this.spec.autosize.type || this.spec.autosize;
-        if (autosize === 'fit' || (autosize === 'none' && !this.spec.width && !this.spec.height)) {
-          this.useResize = true;
-        }
-      }
-
-      if (this.useResize && this.spec.padding && this.spec.autosize.contains !== 'padding') {
-        if (typeof this.spec.padding === 'object') {
-          this.paddingWidth += (+this.spec.padding.left || 0) + (+this.spec.padding.right || 0);
-          this.paddingHeight += (+this.spec.padding.top || 0) + (+this.spec.padding.bottom || 0);
-        } else {
-          this.paddingWidth += 2 * (+this.spec.padding || 0);
-          this.paddingHeight += 2 * (+this.spec.padding || 0);
-        }
-      }
-
-      if (this.useResize && (this.spec.width || this.spec.height)) {
-        if (this.isVegaLite) {
-          delete this.spec.width;
-          delete this.spec.height;
-        } else {
-          this._onWarning(
-            i18n.translate(
-              'visTypeVega.vegaParser.widthAndHeightParamsAreIgnoredWithAutosizeFitWarningMessage',
-              {
-                defaultMessage:
-                  'The {widthParam} and {heightParam} params are ignored with {autosizeParam}',
-                values: {
-                  autosizeParam: 'autosize=fit',
-                  widthParam: '"width"',
-                  heightParam: '"height"',
-                },
-              }
-            )
-          );
-        }
       }
     }
   }
@@ -375,6 +405,17 @@ export class VegaParser {
         i18n.translate('visTypeVega.vegaParser.paddingConfigValueTypeErrorMessage', {
           defaultMessage: '{configName} is expected to be a number',
           values: { configName: 'config.kibana.result.padding' },
+        })
+      );
+    }
+
+    if (result.textTruncate === undefined) {
+      result.textTruncate = false;
+    } else if (typeof result.textTruncate !== 'boolean') {
+      throw new Error(
+        i18n.translate('visTypeVega.vegaParser.textTruncateConfigValueTypeErrorMessage', {
+          defaultMessage: '{configName} is expected to be a boolean',
+          values: { configName: 'textTruncate' },
         })
       );
     }
@@ -498,23 +539,11 @@ export class VegaParser {
 
   /**
    * Parse Vega schema element
-   * @returns {boolean} is this a VegaLite schema?
+   * @returns {object} isVegaLite, libVersion
    * @private
    */
-  _parseSchema() {
-    if (!this.spec) return false;
-    if (!this.spec.$schema) {
-      this._onWarning(
-        i18n.translate('visTypeVega.vegaParser.inputSpecDoesNotSpecifySchemaWarningMessage', {
-          defaultMessage:
-            'The input spec does not specify a {schemaParam}, defaulting to {defaultSchema}',
-          values: { defaultSchema: `"${DEFAULT_SCHEMA}"`, schemaParam: '"$schema"' },
-        })
-      );
-      this.spec.$schema = DEFAULT_SCHEMA;
-    }
-
-    const schema = schemaParser(this.spec.$schema);
+  private parseSchema(spec: VegaSpec) {
+    const schema = schemaParser(spec.$schema);
     const isVegaLite = schema.library === 'vega-lite';
     const libVersion = isVegaLite ? vegaLite.version : vega.version;
 
@@ -532,7 +561,7 @@ export class VegaParser {
       );
     }
 
-    return isVegaLite;
+    return { isVegaLite, libVersion };
   }
 
   /**
@@ -541,6 +570,15 @@ export class VegaParser {
    * @private
    */
   async _resolveDataUrls() {
+    if (!this._urlParsers) {
+      const serviceSettings = await this.getServiceSettings();
+      const onWarn = this._onWarning.bind(this);
+      this._urlParsers = {
+        elasticsearch: new EsQueryParser(this.timeCache, this.searchAPI, this.filters, onWarn),
+        emsfile: new EmsFileParser(serviceSettings),
+        url: new UrlParser(onWarn),
+      };
+    }
     const pending: PendingType = {};
 
     this.searchAPI.resetSearchStats();
@@ -554,7 +592,7 @@ export class VegaParser {
         type = DEFAULT_PARSER;
       }
 
-      const parser = this._urlParsers[type];
+      const parser = this._urlParsers![type];
       if (parser === undefined) {
         throw new Error(
           i18n.translate('visTypeVega.vegaParser.notSupportedUrlTypeErrorMessage', {
@@ -578,7 +616,7 @@ export class VegaParser {
     if (pendingParsers.length > 0) {
       // let each parser populate its data in parallel
       await Promise.all(
-        pendingParsers.map((type) => this._urlParsers[type].populateData(pending[type]))
+        pendingParsers.map((type) => this._urlParsers![type].populateData(pending[type]))
       );
     }
   }
@@ -654,6 +692,35 @@ export class VegaParser {
         this._setDefaultValue(defaultColor, 'config', 'trail', 'fill');
       }
     }
+
+    // provide right colors for light and dark themes
+    this._setDefaultValue(euiThemeVars.euiColorDarkestShade, 'config', 'title', 'color');
+    this._setDefaultValue(euiThemeVars.euiColorDarkShade, 'config', 'style', 'guide-label', 'fill');
+    this._setDefaultValue(
+      euiThemeVars.euiColorDarkestShade,
+      'config',
+      'style',
+      'guide-title',
+      'fill'
+    );
+    this._setDefaultValue(
+      euiThemeVars.euiColorDarkestShade,
+      'config',
+      'style',
+      'group-title',
+      'fill'
+    );
+    this._setDefaultValue(
+      euiThemeVars.euiColorDarkestShade,
+      'config',
+      'style',
+      'group-subtitle',
+      'fill'
+    );
+    this._setDefaultValue(euiThemeVars.euiColorChartLines, 'config', 'axis', 'tickColor');
+    this._setDefaultValue(euiThemeVars.euiColorChartLines, 'config', 'axis', 'domainColor');
+    this._setDefaultValue(euiThemeVars.euiColorChartLines, 'config', 'axis', 'gridColor');
+    this._setDefaultValue('transparent', 'config', 'background');
   }
 
   /**

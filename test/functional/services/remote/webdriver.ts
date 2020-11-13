@@ -37,7 +37,7 @@ import { Executor } from 'selenium-webdriver/lib/http';
 import { getLogger } from 'selenium-webdriver/lib/logging';
 import { installDriver } from 'ms-chromium-edge-driver';
 
-import { REPO_ROOT } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/utils';
 import { pollForLogEntry$ } from './poll_for_log_entry';
 import { createStdoutSocket } from './create_stdout_stream';
 import { preventParallelCalls } from './prevent_parallel_calls';
@@ -53,9 +53,15 @@ const SECOND = 1000;
 const MINUTE = 60 * SECOND;
 const NO_QUEUE_COMMANDS = ['getLog', 'getStatus', 'newSession', 'quit'];
 const downloadDir = resolve(REPO_ROOT, 'target/functional-tests/downloads');
-const chromiumDownloadPrefs = {
+const chromiumUserPrefs = {
   'download.default_directory': downloadDir,
   'download.prompt_for_download': false,
+  'profile.content_settings.exceptions.clipboard': {
+    '[*.],*': {
+      last_modified: Date.now(),
+      setting: 1,
+    },
+  },
 };
 
 /**
@@ -135,7 +141,7 @@ async function attemptToCreateCommand(
 
         const prefs = new logging.Preferences();
         prefs.setLevel(logging.Type.BROWSER, logging.Level.ALL);
-        chromeOptions.setUserPreferences(chromiumDownloadPrefs);
+        chromeOptions.setUserPreferences(chromiumUserPrefs);
         chromeOptions.setLoggingPrefs(prefs);
         chromeOptions.set('unexpectedAlertBehaviour', 'accept');
         chromeOptions.setAcceptInsecureCerts(config.acceptInsecureCerts);
@@ -185,7 +191,7 @@ async function attemptToCreateCommand(
           edgeOptions.setBinaryPath(edgePaths.browserPath);
           const options = edgeOptions.get('ms:edgeOptions');
           // overriding options to include preferences
-          Object.assign(options, { prefs: chromiumDownloadPrefs });
+          Object.assign(options, { prefs: chromiumUserPrefs });
           edgeOptions.set('ms:edgeOptions', options);
           const session = await new Builder()
             .forBrowser('MicrosoftEdge')

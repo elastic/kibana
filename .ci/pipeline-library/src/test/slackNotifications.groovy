@@ -9,6 +9,7 @@ class SlackNotificationsTest extends KibanaBasePipelineTest {
     super.setUp()
 
     helper.registerAllowedMethod('slackSend', [Map.class], null)
+    prop('buildState', loadScript("vars/buildState.groovy"))
     slackNotifications = loadScript('vars/slackNotifications.groovy')
   }
 
@@ -25,10 +26,46 @@ class SlackNotificationsTest extends KibanaBasePipelineTest {
   }
 
   @Test
-  void 'sendFailedBuild() should call slackSend() with message'() {
+  void 'sendFailedBuild() should call slackSend() with an in-progress message'() {
     mockFailureBuild()
 
     slackNotifications.sendFailedBuild()
+
+    def args = fnMock('slackSend').args[0]
+
+    def expected = [
+      channel: '#kibana-operations-alerts',
+      username: 'Kibana Operations',
+      iconEmoji: ':jenkins:',
+      color: 'danger',
+      message: ':hourglass_flowing_sand: elastic / kibana # master #1',
+    ]
+
+    expected.each {
+      assertEquals(it.value.toString(), args[it.key].toString())
+    }
+
+    assertEquals(
+      ":hourglass_flowing_sand: *<http://jenkins.localhost:8080/job/elastic+kibana+master/1/|elastic / kibana # master #1>*",
+      args.blocks[0].text.text.toString()
+    )
+
+    assertEquals(
+      "*Failed Steps*\n• <http://jenkins.localhost:8080|Execute test task>",
+      args.blocks[1].text.text.toString()
+    )
+
+    assertEquals(
+      "*Test Failures*\n• <https://localhost/|x-pack/test/functional/apps/fake/test·ts.Fake test &lt;Component&gt; should &amp; pass &amp;>",
+      args.blocks[2].text.text.toString()
+    )
+  }
+
+  @Test
+  void 'sendFailedBuild() should call slackSend() with message'() {
+    mockFailureBuild()
+
+    slackNotifications.sendFailedBuild(isFinal: true)
 
     def args = fnMock('slackSend').args[0]
 
@@ -65,7 +102,7 @@ class SlackNotificationsTest extends KibanaBasePipelineTest {
     mockFailureBuild()
     def counter = 0
     helper.registerAllowedMethod('slackSend', [Map.class], { ++counter > 1 })
-    slackNotifications.sendFailedBuild()
+    slackNotifications.sendFailedBuild(isFinal: true)
 
     def args = fnMocks('slackSend')[1].args[0]
 
@@ -86,6 +123,29 @@ class SlackNotificationsTest extends KibanaBasePipelineTest {
         "\n\nFirst attempt at sending this notification failed. Please check the build.",
       args.blocks[0].text.text.toString()
     )
+  }
+
+  @Test
+  void 'sendFailedBuild() should call slackSend() with a channel id and timestamp on second call'() {
+    mockFailureBuild()
+    helper.registerAllowedMethod('slackSend', [Map.class], { [ channelId: 'CHANNEL_ID', ts: 'TIMESTAMP' ] })
+    slackNotifications.sendFailedBuild(isFinal: false)
+    slackNotifications.sendFailedBuild(isFinal: true)
+
+    def args = fnMocks('slackSend')[1].args[0]
+
+    def expected = [
+      channel: 'CHANNEL_ID',
+      timestamp: 'TIMESTAMP',
+      username: 'Kibana Operations',
+      iconEmoji: ':jenkins:',
+      color: 'danger',
+      message: ':broken_heart: elastic / kibana # master #1',
+    ]
+
+    expected.each {
+      assertEquals(it.value.toString(), args[it.key].toString())
+    }
   }
 
   @Test

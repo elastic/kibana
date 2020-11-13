@@ -7,14 +7,9 @@
 import { act } from 'react-dom/test-utils';
 import { ReactWrapper } from 'enzyme';
 
-import {
-  registerTestBed,
-  TestBed,
-  TestBedConfig,
-  findTestSubject,
-} from '../../../../../test_utils';
-import { IndexManagementHome } from '../../../public/application/sections/home'; // eslint-disable-line @kbn/eslint/no-restricted-paths
-import { indexManagementStore } from '../../../public/application/store'; // eslint-disable-line @kbn/eslint/no-restricted-paths
+import { registerTestBed, TestBed, TestBedConfig, findTestSubject } from '@kbn/test/jest';
+import { IndexManagementHome } from '../../../public/application/sections/home';
+import { indexManagementStore } from '../../../public/application/store';
 import { WithAppDependencies, services, TestSubjects } from '../helpers';
 
 const testBedConfig: TestBedConfig = {
@@ -25,8 +20,6 @@ const testBedConfig: TestBedConfig = {
   },
   doMountAsync: true,
 };
-
-const initTestBed = registerTestBed(WithAppDependencies(IndexManagementHome), testBedConfig);
 
 export interface IndicesTestBed extends TestBed<TestSubjects> {
   actions: {
@@ -39,7 +32,11 @@ export interface IndicesTestBed extends TestBed<TestSubjects> {
   findDataStreamDetailPanelTitle: () => string;
 }
 
-export const setup = async (): Promise<IndicesTestBed> => {
+export const setup = async (overridingDependencies: any = {}): Promise<IndicesTestBed> => {
+  const initTestBed = registerTestBed(
+    WithAppDependencies(IndexManagementHome, overridingDependencies),
+    testBedConfig
+  );
   const testBed = await initTestBed();
 
   /**

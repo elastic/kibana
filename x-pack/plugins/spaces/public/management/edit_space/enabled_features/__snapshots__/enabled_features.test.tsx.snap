@@ -2,14 +2,12 @@
 
 exports[`EnabledFeatures renders as expected 1`] = `
 <SectionPanel
-  collapsible={true}
   data-test-subj="enabled-features-panel"
   description="Customize visible features"
-  initiallyCollapsed={true}
   title={
     <span>
       <FormattedMessage
-        defaultMessage="Customize feature display"
+        defaultMessage="Features"
         id="xpack.spaces.management.enabledSpaceFeatures.enabledFeaturesSectionMessage"
         values={Object {}}
       />
@@ -41,7 +39,7 @@ exports[`EnabledFeatures renders as expected 1`] = `
       >
         <h3>
           <FormattedMessage
-            defaultMessage="Control which features are visible in this space."
+            defaultMessage="Set feature visibility for this space"
             id="xpack.spaces.management.enabledSpaceFeatures.enableFeaturesInSpaceMessage"
             values={Object {}}
           />
@@ -63,15 +61,16 @@ exports[`EnabledFeatures renders as expected 1`] = `
         </p>
         <p>
           <FormattedMessage
-            defaultMessage="Want to secure access? Go to {rolesLink}."
+            defaultMessage="If you wish to secure access to features, please {manageSecurityRoles}."
             id="xpack.spaces.management.enabledSpaceFeatures.goToRolesLink"
             values={
               Object {
-                "rolesLink": <EuiLink
+                "manageSecurityRoles": <EuiLink
+                  data-test-subj="goToRoles"
                   href="management"
                 >
                   <FormattedMessage
-                    defaultMessage="Roles"
+                    defaultMessage="manage security roles"
                     id="xpack.spaces.management.enabledSpaceFeatures.rolesLinkText"
                     values={Object {}}
                   />
@@ -88,14 +87,24 @@ exports[`EnabledFeatures renders as expected 1`] = `
           Array [
             Object {
               "app": Array [],
-              "icon": "spacesApp",
+              "category": Object {
+                "euiIconType": "logoKibana",
+                "id": "kibana",
+                "label": "Analytics",
+                "order": 1000,
+              },
               "id": "feature-1",
               "name": "Feature 1",
               "privileges": null,
             },
             Object {
               "app": Array [],
-              "icon": "spacesApp",
+              "category": Object {
+                "euiIconType": "logoKibana",
+                "id": "kibana",
+                "label": "Analytics",
+                "order": 1000,
+              },
               "id": "feature-2",
               "name": "Feature 2",
               "privileges": null,

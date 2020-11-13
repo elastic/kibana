@@ -17,11 +17,9 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function DiscoverPageProvider({ getService, getPageObjects }: FtrProviderContext) {
-  const log = getService('log');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const find = getService('find');
@@ -29,10 +27,10 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
   const { header } = getPageObjects(['header']);
   const browser = getService('browser');
   const globalNav = getService('globalNav');
-  const config = getService('config');
-  const defaultFindTimeout = config.get('timeouts.find');
   const elasticChart = getService('elasticChart');
   const docTable = getService('docTable');
+  const config = getService('config');
+  const defaultFindTimeout = config.get('timeouts.find');
 
   class DiscoverPage {
     public async getChartTimespan() {
@@ -51,9 +49,16 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
     }
 
     public async saveSearch(searchName: string) {
-      log.debug('saveSearch');
       await this.clickSaveSearchButton();
-      await testSubjects.setValue('savedObjectTitle', searchName);
+      // preventing an occasional flakiness when the saved object wasn't set and the form can't be submitted
+      await retry.waitFor(
+        `saved search title is set to ${searchName} and save button is clickable`,
+        async () => {
+          const saveButton = await testSubjects.find('confirmSaveSavedObjectButton');
+          await testSubjects.setValue('savedObjectTitle', searchName);
+          return (await saveButton.getAttribute('disabled')) !== 'true';
+        }
+      );
       await testSubjects.click('confirmSaveSavedObjectButton');
       await header.waitUntilLoadingHasFinished();
       // LeeDr - this additional checking for the saved search name was an attempt
@@ -61,9 +66,8 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
       // that the next action wouldn't have to retry.  But it doesn't really solve
       // that issue.  But it does typically take about 3 retries to
       // complete with the expected searchName.
-      await retry.try(async () => {
-        const name = await this.getCurrentQueryName();
-        expect(name).to.be(searchName);
+      await retry.waitFor(`saved search was persisted with name ${searchName}`, async () => {
+        return (await this.getCurrentQueryName()) === searchName;
       });
     }
 
@@ -80,8 +84,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
     }
 
     public async waitUntilSearchingHasFinished() {
-      const spinner = await testSubjects.find('loadingSpinner');
-      await find.waitForElementHidden(spinner, defaultFindTimeout * 10);
+      await testSubjects.missingOrFail('loadingSpinner', { timeout: defaultFindTimeout * 10 });
     }
 
     public async getColumnHeaders() {
@@ -96,11 +99,11 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
 
       // We need this try loop here because previous actions in Discover like
       // saving a search cause reloading of the page and the "Open" menu item goes stale.
-      await retry.try(async () => {
+      await retry.waitFor('saved search panel is opened', async () => {
         await this.clickLoadSavedSearchButton();
         await header.waitUntilLoadingHasFinished();
         isOpen = await testSubjects.exists('loadSearchForm');
-        expect(isOpen).to.be(true);
+        return isOpen === true;
       });
     }
 
@@ -115,8 +118,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
 
     public async loadSavedSearch(searchName: string) {
       await this.openLoadSavedSearchPanel();
-      const searchLink = await find.byButtonText(searchName);
-      await searchLink.click();
+      await testSubjects.click(`savedObjectTitle${searchName.split(' ').join('-')}`);
       await header.waitUntilLoadingHasFinished();
     }
 
@@ -250,7 +252,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
     }
 
     public async getSidebarWidth() {
-      const sidebar = await find.byCssSelector('.sidebar-list');
+      const sidebar = await testSubjects.find('discover-sidebar');
       return await sidebar.getAttribute('clientWidth');
     }
 
@@ -328,6 +330,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
 
     public async selectIndexPattern(indexPattern: string) {
       await testSubjects.click('indexPattern-switch-link');
+      await find.setValue('[data-test-subj="indexPattern-switcher"] input', indexPattern);
       await find.clickByCssSelector(
         `[data-test-subj="indexPattern-switcher"] [title="${indexPattern}"]`
       );
@@ -346,7 +349,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
 
     public async closeSidebarFieldFilter() {
       await testSubjects.click('toggleFieldFilterButton');
-      await testSubjects.missingOrFail('filterSelectionPanel', { allowHidden: true });
+      await testSubjects.missingOrFail('filterSelectionPanel');
     }
 
     public async waitForChartLoadingComplete(renderCount: number) {
@@ -381,6 +384,42 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
       await retry.waitFor('Discover app on screen', async () => {
         return await this.isDiscoverAppOnScreen();
       });
+    }
+
+    public async showAllFilterActions() {
+      await testSubjects.click('showFilterActions');
+    }
+
+    public async clickSavedQueriesPopOver() {
+      await testSubjects.click('saved-query-management-popover-button');
+    }
+
+    public async clickCurrentSavedQuery() {
+      await testSubjects.click('saved-query-management-save-button');
+    }
+
+    public async setSaveQueryFormTitle(savedQueryName: string) {
+      await testSubjects.setValue('saveQueryFormTitle', savedQueryName);
+    }
+
+    public async toggleIncludeFilters() {
+      await testSubjects.click('saveQueryFormIncludeFiltersOption');
+    }
+
+    public async saveCurrentSavedQuery() {
+      await testSubjects.click('savedQueryFormSaveButton');
+    }
+
+    public async deleteSavedQuery() {
+      await testSubjects.click('delete-saved-query-TEST-button');
+    }
+
+    public async confirmDeletionOfSavedQuery() {
+      await testSubjects.click('confirmModalConfirmButton');
+    }
+
+    public async clearSavedQuery() {
+      await testSubjects.click('saved-query-management-clear-button');
     }
   }
 

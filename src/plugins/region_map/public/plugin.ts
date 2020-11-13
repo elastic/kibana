@@ -31,17 +31,25 @@ import { createRegionMapFn } from './region_map_fn';
 // @ts-ignore
 import { createRegionMapTypeDefinition } from './region_map_type';
 import { IServiceSettings, MapsLegacyPluginSetup } from '../../maps_legacy/public';
-import { setFormatService, setNotifications, setKibanaLegacy } from './kibana_services';
+import {
+  setCoreService,
+  setFormatService,
+  setNotifications,
+  setKibanaLegacy,
+  setQueryService,
+  setShareService,
+} from './kibana_services';
 import { DataPublicPluginStart } from '../../data/public';
 import { RegionMapsConfigType } from './index';
-import { ConfigSchema } from '../../maps_legacy/config';
+import { MapsLegacyConfig } from '../../maps_legacy/config';
 import { KibanaLegacyStart } from '../../kibana_legacy/public';
+import { SharePluginStart } from '../../share/public';
 
 /** @private */
 interface RegionMapVisualizationDependencies {
   uiSettings: IUiSettingsClient;
   regionmapsConfig: RegionMapsConfig;
-  serviceSettings: IServiceSettings;
+  getServiceSettings: () => Promise<IServiceSettings>;
   BaseMapsVisualization: any;
 }
 
@@ -57,6 +65,7 @@ export interface RegionMapPluginStartDependencies {
   data: DataPublicPluginStart;
   notifications: NotificationsStart;
   kibanaLegacy: KibanaLegacyStart;
+  share: SharePluginStart;
 }
 
 /** @internal */
@@ -73,7 +82,7 @@ export interface RegionMapPluginStart {}
 
 /** @internal */
 export class RegionMapPlugin implements Plugin<RegionMapPluginSetup, RegionMapPluginStart> {
-  readonly _initializerContext: PluginInitializerContext<ConfigSchema>;
+  readonly _initializerContext: PluginInitializerContext<MapsLegacyConfig>;
 
   constructor(initializerContext: PluginInitializerContext) {
     this._initializerContext = initializerContext;
@@ -93,7 +102,7 @@ export class RegionMapPlugin implements Plugin<RegionMapPluginSetup, RegionMapPl
     const visualizationDependencies: Readonly<RegionMapVisualizationDependencies> = {
       uiSettings: core.uiSettings,
       regionmapsConfig: config as RegionMapsConfig,
-      serviceSettings: mapsLegacy.serviceSettings,
+      getServiceSettings: mapsLegacy.getServiceSettings,
       BaseMapsVisualization: mapsLegacy.getBaseMapsVis(),
     };
 
@@ -108,10 +117,13 @@ export class RegionMapPlugin implements Plugin<RegionMapPluginSetup, RegionMapPl
     };
   }
 
-  // @ts-ignore
-  public start(core: CoreStart, { data, kibanaLegacy }: RegionMapPluginStartDependencies) {
-    setFormatService(data.fieldFormats);
+  public start(core: CoreStart, plugins: RegionMapPluginStartDependencies) {
+    setCoreService(core);
+    setFormatService(plugins.data.fieldFormats);
+    setQueryService(plugins.data.query);
     setNotifications(core.notifications);
-    setKibanaLegacy(kibanaLegacy);
+    setKibanaLegacy(plugins.kibanaLegacy);
+    setShareService(plugins.share);
+    return {};
   }
 }

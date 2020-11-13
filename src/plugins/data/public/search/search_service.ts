@@ -17,148 +17,138 @@
  * under the License.
  */
 
-import { Plugin, CoreSetup, CoreStart, PackageInfo } from '../../../../core/public';
-import { ISearchSetup, ISearchStart } from './types';
-import { ExpressionsSetup } from '../../../../plugins/expressions/public';
+import { Plugin, CoreSetup, CoreStart, PluginInitializerContext } from 'src/core/public';
+import { BehaviorSubject } from 'rxjs';
+import { ISearchSetup, ISearchStart, SearchEnhancements } from './types';
 
-import { createSearchSource, SearchSource, SearchSourceDependencies } from './search_source';
-import { getEsClient, LegacyApiCaller } from './legacy';
-import { getForceNow } from '../query/timefilter/lib/get_force_now';
-import { calculateBounds, TimeRange } from '../../common/query';
-
-import { IndexPatternsContract } from '../index_patterns/index_patterns';
-import { GetInternalStartServicesFn } from '../types';
-import { SearchInterceptor } from './search_interceptor';
+import { handleResponse } from './fetch';
 import {
-  getAggTypes,
-  getAggTypesFunctions,
-  AggTypesRegistry,
-  AggConfigs,
-  getCalculateAutoTimeExpression,
-} from './aggs';
-import { ISearchGeneric } from './types';
+  kibana,
+  kibanaContext,
+  kibanaContextFunction,
+  ISearchGeneric,
+  ISessionService,
+  SearchSourceDependencies,
+  SearchSourceService,
+} from '../../common/search';
+import { getCallMsearch } from './legacy';
+import { AggsService, AggsStartDependencies } from './aggs';
+import { IndexPatternsContract } from '../index_patterns/index_patterns';
+import { ISearchInterceptor, SearchInterceptor } from './search_interceptor';
 import { SearchUsageCollector, createUsageCollector } from './collectors';
 import { UsageCollectionSetup } from '../../../usage_collection/public';
+import { esdsl, esRawResponse } from './expressions';
+import { ExpressionsSetup } from '../../../expressions/public';
+import { SessionService } from './session_service';
+import { ConfigSchema } from '../../config';
+import {
+  SHARD_DELAY_AGG_NAME,
+  getShardDelayBucketAgg,
+} from '../../common/search/aggs/buckets/shard_delay';
+import { aggShardDelay } from '../../common/search/aggs/buckets/shard_delay_fn';
 
-interface SearchServiceSetupDependencies {
+/** @internal */
+export interface SearchServiceSetupDependencies {
   expressions: ExpressionsSetup;
   usageCollection?: UsageCollectionSetup;
-  getInternalStartServices: GetInternalStartServicesFn;
-  packageInfo: PackageInfo;
 }
 
-interface SearchServiceStartDependencies {
+/** @internal */
+export interface SearchServiceStartDependencies {
+  fieldFormats: AggsStartDependencies['fieldFormats'];
   indexPatterns: IndexPatternsContract;
 }
 
 export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
-  private esClient?: LegacyApiCaller;
-  private readonly aggTypesRegistry = new AggTypesRegistry();
-  private searchInterceptor!: SearchInterceptor;
+  private readonly aggsService = new AggsService();
+  private readonly searchSourceService = new SearchSourceService();
+  private searchInterceptor!: ISearchInterceptor;
   private usageCollector?: SearchUsageCollector;
+  private sessionService!: ISessionService;
 
-  /**
-   * getForceNow uses window.location, so we must have a separate implementation
-   * of calculateBounds on the client and the server.
-   */
-  private calculateBounds = (timeRange: TimeRange) =>
-    calculateBounds(timeRange, { forceNow: getForceNow() });
+  constructor(private initializerContext: PluginInitializerContext<ConfigSchema>) {}
 
   public setup(
-    core: CoreSetup,
-    {
-      expressions,
-      usageCollection,
-      packageInfo,
-      getInternalStartServices,
-    }: SearchServiceSetupDependencies
+    { http, getStartServices, notifications, uiSettings }: CoreSetup,
+    { expressions, usageCollection }: SearchServiceSetupDependencies
   ): ISearchSetup {
-    this.usageCollector = createUsageCollector(core, usageCollection);
-    this.esClient = getEsClient(core.injectedMetadata, core.http, packageInfo);
+    this.usageCollector = createUsageCollector(getStartServices, usageCollection);
 
-    const aggTypesSetup = this.aggTypesRegistry.setup();
-
-    // register each agg type
-    const aggTypes = getAggTypes({
-      calculateBounds: this.calculateBounds,
-      getInternalStartServices,
-      uiSettings: core.uiSettings,
-    });
-    aggTypes.buckets.forEach((b) => aggTypesSetup.registerBucket(b));
-    aggTypes.metrics.forEach((m) => aggTypesSetup.registerMetric(m));
-
-    // register expression functions for each agg type
-    const aggFunctions = getAggTypesFunctions();
-    aggFunctions.forEach((fn) => expressions.registerFunction(fn));
-
-    return {
-      aggs: {
-        calculateAutoTimeExpression: getCalculateAutoTimeExpression(core.uiSettings),
-        types: aggTypesSetup,
-      },
-    };
-  }
-
-  public start(core: CoreStart, dependencies: SearchServiceStartDependencies): ISearchStart {
+    this.sessionService = new SessionService(this.initializerContext, getStartServices);
     /**
      * A global object that intercepts all searches and provides convenience methods for cancelling
      * all pending search requests, as well as getting the number of pending search requests.
-     * TODO: Make this modular so that apps can opt in/out of search collection, or even provide
-     * their own search collector instances
      */
-    this.searchInterceptor = new SearchInterceptor(
-      {
-        toasts: core.notifications.toasts,
-        application: core.application,
-        http: core.http,
-        uiSettings: core.uiSettings,
-        usageCollector: this.usageCollector!,
-      },
-      core.injectedMetadata.getInjectedVar('esRequestTimeout') as number
-    );
+    this.searchInterceptor = new SearchInterceptor({
+      toasts: notifications.toasts,
+      http,
+      uiSettings,
+      startServices: getStartServices(),
+      usageCollector: this.usageCollector!,
+      session: this.sessionService,
+    });
 
-    const aggTypesStart = this.aggTypesRegistry.start();
+    expressions.registerFunction(kibana);
+    expressions.registerFunction(kibanaContextFunction);
+    expressions.registerType(kibanaContext);
 
-    const search: ISearchGeneric = (request, options) => {
-      return this.searchInterceptor.search(request, options);
-    };
+    expressions.registerFunction(esdsl);
+    expressions.registerType(esRawResponse);
 
-    const legacySearch = {
-      esClient: this.esClient!,
-    };
+    const aggs = this.aggsService.setup({
+      registerFunction: expressions.registerFunction,
+      uiSettings,
+    });
 
-    const searchSourceDependencies: SearchSourceDependencies = {
-      uiSettings: core.uiSettings,
-      injectedMetadata: core.injectedMetadata,
-      search,
-      legacySearch,
-    };
+    if (this.initializerContext.config.get().search.aggs.shardDelay.enabled) {
+      aggs.types.registerBucket(SHARD_DELAY_AGG_NAME, getShardDelayBucketAgg);
+      expressions.registerFunction(aggShardDelay);
+    }
 
     return {
-      aggs: {
-        calculateAutoTimeExpression: getCalculateAutoTimeExpression(core.uiSettings),
-        createAggConfigs: (indexPattern, configStates = [], schemas) => {
-          return new AggConfigs(indexPattern, configStates, {
-            typesRegistry: aggTypesStart,
-          });
-        },
-        types: aggTypesStart,
-      },
-      search,
+      aggs,
       usageCollector: this.usageCollector!,
-      searchSource: {
-        create: createSearchSource(dependencies.indexPatterns, searchSourceDependencies),
-        createEmpty: () => {
-          return new SearchSource({}, searchSourceDependencies);
-        },
+      __enhance: (enhancements: SearchEnhancements) => {
+        this.searchInterceptor = enhancements.searchInterceptor;
       },
-      setInterceptor: (searchInterceptor: SearchInterceptor) => {
-        // TODO: should an intercepror have a destroy method?
-        this.searchInterceptor = searchInterceptor;
-      },
-      __LEGACY: legacySearch,
+      session: this.sessionService,
     };
   }
 
-  public stop() {}
+  public start(
+    { application, http, notifications, uiSettings }: CoreStart,
+    { fieldFormats, indexPatterns }: SearchServiceStartDependencies
+  ): ISearchStart {
+    const search = ((request, options) => {
+      return this.searchInterceptor.search(request, options);
+    }) as ISearchGeneric;
+
+    const loadingCount$ = new BehaviorSubject(0);
+    http.addLoadingCountSource(loadingCount$);
+
+    const searchSourceDependencies: SearchSourceDependencies = {
+      getConfig: uiSettings.get.bind(uiSettings),
+      search,
+      onResponse: handleResponse,
+      legacy: {
+        callMsearch: getCallMsearch({ http }),
+        loadingCount$,
+      },
+    };
+
+    return {
+      aggs: this.aggsService.start({ fieldFormats, uiSettings, indexPatterns }),
+      search,
+      showError: (e: Error) => {
+        this.searchInterceptor.showError(e);
+      },
+      session: this.sessionService,
+      searchSource: this.searchSourceService.start(indexPatterns, searchSourceDependencies),
+    };
+  }
+
+  public stop() {
+    this.aggsService.stop();
+    this.searchSourceService.stop();
+  }
 }

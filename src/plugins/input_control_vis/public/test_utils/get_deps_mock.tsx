@@ -26,6 +26,7 @@ fields.push({ name: 'myField' } as any);
 fields.getByName = (name: any) => {
   return fields.find(({ name: n }: { name: string }) => n === name);
 };
+fields.getAll = () => [...fields];
 
 export const getDepsMock = ({
   searchSource = {

@@ -16,18 +16,18 @@ import {
   CoreStart,
   ScopedHistory,
 } from 'kibana/public';
+import { KibanaFeature } from '../../../features/common';
 import { Section, routeToAlertDetails } from './constants';
 import { AppContextProvider } from './app_context';
-import { ActionTypeModel, AlertTypeModel } from '../types';
-import { TypeRegistry } from './type_registry';
+import { ActionTypeRegistryContract, AlertTypeRegistryContract } from '../types';
 import { ChartsPluginStart } from '../../../../../src/plugins/charts/public';
 import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
 import { PluginStartContract as AlertingStart } from '../../../alerts/public';
 import { suspendedComponentWithProps } from './lib/suspended_component_with_props';
 
 const TriggersActionsUIHome = lazy(async () => import('./home'));
-const AlertDetailsRoute = lazy(() =>
-  import('./sections/alert_details/components/alert_details_route')
+const AlertDetailsRoute = lazy(
+  () => import('./sections/alert_details/components/alert_details_route')
 );
 
 export interface AppDeps {
@@ -42,9 +42,10 @@ export interface AppDeps {
   uiSettings: IUiSettingsClient;
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
   capabilities: ApplicationStart['capabilities'];
-  actionTypeRegistry: TypeRegistry<ActionTypeModel>;
-  alertTypeRegistry: TypeRegistry<AlertTypeModel>;
+  actionTypeRegistry: ActionTypeRegistryContract;
+  alertTypeRegistry: AlertTypeRegistryContract;
   history: ScopedHistory;
+  kibanaFeatures: KibanaFeature[];
 }
 
 export const App = (appDeps: AppDeps) => {

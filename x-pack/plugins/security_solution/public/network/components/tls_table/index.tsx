@@ -5,12 +5,17 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { connect, ConnectedProps } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 
 import { networkActions, networkModel, networkSelectors } from '../../store';
-import { TlsEdges, TlsSortField, TlsFields, Direction } from '../../../graphql/types';
-import { State } from '../../../common/store';
+import {
+  Direction,
+  NetworkTlsEdges,
+  NetworkTlsFields,
+  SortField,
+} from '../../../../common/search_strategy';
+import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import {
   Criteria,
   ItemsPerRow,
@@ -20,8 +25,8 @@ import {
 import { getTlsColumns } from './columns';
 import * as i18n from './translations';
 
-interface OwnProps {
-  data: TlsEdges[];
+interface TlsTableProps {
+  data: NetworkTlsEdges[];
   fakeTotalCount: number;
   id: string;
   isInspect: boolean;
@@ -31,8 +36,6 @@ interface OwnProps {
   totalCount: number;
   type: networkModel.NetworkType;
 }
-
-type TlsTableProps = OwnProps & PropsFromRedux;
 
 const rowItems: ItemsPerRow[] = [
   {
@@ -47,123 +50,114 @@ const rowItems: ItemsPerRow[] = [
 
 export const tlsTableId = 'tls-table';
 
-const TlsTableComponent = React.memo<TlsTableProps>(
-  ({
-    activePage,
-    data,
-    fakeTotalCount,
-    id,
-    isInspect,
-    limit,
-    loading,
-    loadPage,
-    showMorePagesIndicator,
-    sort,
-    totalCount,
-    type,
-    updateNetworkTable,
-  }) => {
-    const tableType: networkModel.TopTlsTableType =
-      type === networkModel.NetworkType.page
-        ? networkModel.NetworkTableType.tls
-        : networkModel.IpDetailsTableType.tls;
+const TlsTableComponent: React.FC<TlsTableProps> = ({
+  data,
+  fakeTotalCount,
+  id,
+  isInspect,
+  loading,
+  loadPage,
+  showMorePagesIndicator,
+  totalCount,
+  type,
+}) => {
+  const dispatch = useDispatch();
+  const getTlsSelector = networkSelectors.tlsSelector();
+  const { activePage, limit, sort } = useShallowEqualSelector((state) =>
+    getTlsSelector(state, type)
+  );
+  const tableType: networkModel.TopTlsTableType =
+    type === networkModel.NetworkType.page
+      ? networkModel.NetworkTableType.tls
+      : networkModel.NetworkDetailsTableType.tls;
 
-    const updateLimitPagination = useCallback(
-      (newLimit) =>
-        updateNetworkTable({
+  const updateLimitPagination = useCallback(
+    (newLimit) =>
+      dispatch(
+        networkActions.updateNetworkTable({
           networkType: type,
           tableType,
           updates: { limit: newLimit },
-        }),
-      [type, updateNetworkTable, tableType]
-    );
+        })
+      ),
+    [dispatch, type, tableType]
+  );
 
-    const updateActivePage = useCallback(
-      (newPage) =>
-        updateNetworkTable({
+  const updateActivePage = useCallback(
+    (newPage) =>
+      dispatch(
+        networkActions.updateNetworkTable({
           networkType: type,
           tableType,
           updates: { activePage: newPage },
-        }),
-      [type, updateNetworkTable, tableType]
-    );
+        })
+      ),
+    [dispatch, type, tableType]
+  );
 
-    const onChange = useCallback(
-      (criteria: Criteria) => {
-        if (criteria.sort != null) {
-          const splitField = criteria.sort.field.split('.');
-          const newTlsSort: TlsSortField = {
-            field: getSortFromString(splitField[splitField.length - 1]),
-            direction: criteria.sort.direction as Direction,
-          };
-          if (!deepEqual(newTlsSort, sort)) {
-            updateNetworkTable({
+  const onChange = useCallback(
+    (criteria: Criteria) => {
+      if (criteria.sort != null) {
+        const splitField = criteria.sort.field.split('.');
+        const newTlsSort: SortField<NetworkTlsFields> = {
+          field: getSortFromString(splitField[splitField.length - 1]),
+          direction: criteria.sort.direction as Direction,
+        };
+        if (!deepEqual(newTlsSort, sort)) {
+          dispatch(
+            networkActions.updateNetworkTable({
               networkType: type,
               tableType,
               updates: { sort: newTlsSort },
-            });
-          }
+            })
+          );
         }
-      },
-      [sort, type, tableType, updateNetworkTable]
-    );
+      }
+    },
+    [sort, dispatch, type, tableType]
+  );
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    const columns = useMemo(() => getTlsColumns(tlsTableId), [tlsTableId]);
+  const columns = useMemo(() => getTlsColumns(tlsTableId), []);
 
-    return (
-      <PaginatedTable
-        activePage={activePage}
-        columns={columns}
-        dataTestSubj={`table-${tableType}`}
-        showMorePagesIndicator={showMorePagesIndicator}
-        headerCount={totalCount}
-        headerTitle={i18n.TRANSPORT_LAYER_SECURITY}
-        headerUnit={i18n.UNIT(totalCount)}
-        id={id}
-        isInspect={isInspect}
-        itemsPerRow={rowItems}
-        limit={limit}
-        loading={loading}
-        loadPage={loadPage}
-        onChange={onChange}
-        pageOfItems={data}
-        sorting={getSortField(sort)}
-        totalCount={fakeTotalCount}
-        updateActivePage={updateActivePage}
-        updateLimitPagination={updateLimitPagination}
-      />
-    );
-  }
-);
+  return (
+    <PaginatedTable
+      activePage={activePage}
+      columns={columns}
+      dataTestSubj={`table-${tableType}`}
+      showMorePagesIndicator={showMorePagesIndicator}
+      headerCount={totalCount}
+      headerTitle={i18n.TRANSPORT_LAYER_SECURITY}
+      headerUnit={i18n.UNIT(totalCount)}
+      id={id}
+      isInspect={isInspect}
+      itemsPerRow={rowItems}
+      limit={limit}
+      loading={loading}
+      loadPage={loadPage}
+      onChange={onChange}
+      pageOfItems={data}
+      sorting={getSortField(sort)}
+      totalCount={fakeTotalCount}
+      updateActivePage={updateActivePage}
+      updateLimitPagination={updateLimitPagination}
+    />
+  );
+};
 
 TlsTableComponent.displayName = 'TlsTableComponent';
 
-const makeMapStateToProps = () => {
-  const getTlsSelector = networkSelectors.tlsSelector();
-  return (state: State, { type }: OwnProps) => getTlsSelector(state, type);
-};
+export const TlsTable = React.memo(TlsTableComponent);
 
-const mapDispatchToProps = {
-  updateNetworkTable: networkActions.updateNetworkTable,
-};
-
-const connector = connect(makeMapStateToProps, mapDispatchToProps);
-
-type PropsFromRedux = ConnectedProps<typeof connector>;
-
-export const TlsTable = connector(TlsTableComponent);
-
-const getSortField = (sortField: TlsSortField): SortingBasicTable => ({
+const getSortField = (sortField: SortField<NetworkTlsFields>): SortingBasicTable => ({
   field: `node.${sortField.field}`,
   direction: sortField.direction,
 });
 
-const getSortFromString = (sortField: string): TlsFields => {
+const getSortFromString = (sortField: string): NetworkTlsFields => {
   switch (sortField) {
     case '_id':
-      return TlsFields._id;
+      return NetworkTlsFields._id;
     default:
-      return TlsFields._id;
+      return NetworkTlsFields._id;
   }
 };

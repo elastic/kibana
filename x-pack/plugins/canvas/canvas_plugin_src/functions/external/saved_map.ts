@@ -13,7 +13,6 @@ import {
   EmbeddableExpression,
 } from '../../expression_types';
 import { getFunctionHelp } from '../../../i18n';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { MapEmbeddableInput } from '../../../../../plugins/maps/public/embeddable';
 
 interface Arguments {
@@ -84,6 +83,7 @@ export function savedMap(): ExpressionFunctionDefinition<
       return {
         type: EmbeddableExpressionType,
         input: {
+          attributes: { title: '' },
           id: args.id,
           filters: getQueryFilters(filters),
           timeRange: args.timerange || defaultTimeRange,
@@ -94,7 +94,7 @@ export function savedMap(): ExpressionFunctionDefinition<
 
           mapCenter: center,
           hideFilterActions: true,
-          title: args.title ? args.title : undefined,
+          title: args.title === null ? undefined : args.title,
           isLayerTOCOpen: false,
           hiddenLayers: args.hideLayer || [],
         },

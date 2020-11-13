@@ -125,9 +125,10 @@ export const useWaffleOptions = () => {
 
   const { inventoryPrefill } = useAlertPrefillContext();
   useEffect(() => {
-    const { setNodeType, setMetric } = inventoryPrefill;
+    const { setNodeType, setMetric, setCustomMetrics } = inventoryPrefill;
     setNodeType(state.nodeType);
     setMetric(state.metric);
+    setCustomMetrics(state.customMetrics);
   }, [state, inventoryPrefill]);
 
   return {

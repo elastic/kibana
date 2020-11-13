@@ -8,7 +8,7 @@
 <b>Signature:</b>
 
 ```typescript
-export interface ISyncStateRef<stateStorage extends IStateStorage = IStateStorage> 
+export interface ISyncStateRef<StateStorage extends IStateStorage = IStateStorage> 
 ```
 
 ## Properties

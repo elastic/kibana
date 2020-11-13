@@ -7,7 +7,8 @@
 import { mount, shallow } from 'enzyme';
 import React from 'react';
 
-import { DeprecationInfo } from 'src/legacy/core_plugins/elasticsearch';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import type { DeprecationInfo } from '../../../../../../../../src/core/server/elasticsearch/legacy/api_types';
 import { LevelFilterOption } from '../../types';
 import { FilterBar } from './filter_bar';
 

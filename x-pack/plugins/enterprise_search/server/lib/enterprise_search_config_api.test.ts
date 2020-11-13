@@ -5,11 +5,13 @@
  */
 
 jest.mock('node-fetch');
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const fetchMock = require('node-fetch') as jest.Mock;
 const { Response } = jest.requireActual('node-fetch');
 
 import { loggingSystemMock } from 'src/core/server/mocks';
 
+import { DEFAULT_INITIAL_APP_DATA } from '../../common/__mocks__';
 import { callEnterpriseSearchConfigAPI } from './enterprise_search_config_api';
 
 describe('callEnterpriseSearchConfigAPI', () => {
@@ -19,7 +21,6 @@ describe('callEnterpriseSearchConfigAPI', () => {
     accessCheckTimeoutWarning: 100,
   };
   const mockRequest = {
-    url: { path: '/app/kibana' },
     headers: { authorization: '==someAuth' },
   };
   const mockDependencies = {
@@ -34,12 +35,62 @@ describe('callEnterpriseSearchConfigAPI', () => {
     },
     settings: {
       external_url: 'http://some.vanity.url/',
+      read_only_mode: false,
+      ilm_enabled: true,
+      is_federated_auth: false,
+      configured_limits: {
+        app_search: {
+          engine: {
+            document_size_in_bytes: 102400,
+            source_engines_per_meta_engine: 15,
+          },
+        },
+        workplace_search: {
+          custom_api_source: {
+            document_size_in_bytes: 102400,
+            total_fields: 64,
+          },
+        },
+      },
     },
-    access: {
-      user: 'someuser',
-      products: {
+    current_user: {
+      name: 'someuser',
+      access: {
         app_search: true,
         workplace_search: false,
+      },
+      app_search: {
+        account: {
+          id: 'some-id-string',
+          onboarding_complete: true,
+        },
+        role: {
+          id: 'account_id:somestring|user_oid:somestring',
+          role_type: 'owner',
+          ability: {
+            access_all_engines: true,
+            manage: ['account_credentials', 'account_engines'], // etc
+            edit: ['LocoMoco::Account'], // etc
+            view: ['Engine'], // etc
+            credential_types: ['admin', 'private', 'search'],
+            available_role_types: ['owner', 'admin'],
+          },
+        },
+      },
+      workplace_search: {
+        organization: {
+          name: 'ACME Donuts',
+          default_org_name: 'My Organization',
+        },
+        account: {
+          id: 'some-id-string',
+          groups: ['Default', 'Cats'],
+          is_admin: true,
+          can_create_personal_sources: true,
+          can_create_invitations: true,
+          is_curated: false,
+          viewed_onboarding_page: true,
+        },
       },
     },
   };
@@ -50,15 +101,76 @@ describe('callEnterpriseSearchConfigAPI', () => {
 
   it('calls the config API endpoint', async () => {
     fetchMock.mockImplementationOnce((url: string) => {
-      expect(url).toEqual('http://localhost:3002/api/ent/v1/internal/client_config');
+      expect(url).toEqual('http://localhost:3002/api/ent/v2/internal/client_config');
       return Promise.resolve(new Response(JSON.stringify(mockResponse)));
     });
 
     expect(await callEnterpriseSearchConfigAPI(mockDependencies)).toEqual({
-      publicUrl: 'http://some.vanity.url/',
       access: {
         hasAppSearchAccess: true,
         hasWorkplaceSearchAccess: false,
+      },
+      publicUrl: 'http://some.vanity.url',
+      ...DEFAULT_INITIAL_APP_DATA,
+    });
+  });
+
+  it('falls back without error when data is unavailable', async () => {
+    fetchMock.mockImplementationOnce((url: string) => Promise.resolve(new Response('{}')));
+
+    expect(await callEnterpriseSearchConfigAPI(mockDependencies)).toEqual({
+      access: {
+        hasAppSearchAccess: false,
+        hasWorkplaceSearchAccess: false,
+      },
+      publicUrl: undefined,
+      readOnlyMode: false,
+      ilmEnabled: false,
+      isFederatedAuth: false,
+      configuredLimits: {
+        appSearch: {
+          engine: {
+            maxDocumentByteSize: undefined,
+            maxEnginesPerMetaEngine: undefined,
+          },
+        },
+        workplaceSearch: {
+          customApiSource: {
+            maxDocumentByteSize: undefined,
+            totalFields: undefined,
+          },
+        },
+      },
+      appSearch: {
+        accountId: undefined,
+        onboardingComplete: false,
+        role: {
+          id: undefined,
+          roleType: undefined,
+          ability: {
+            accessAllEngines: false,
+            manage: [],
+            edit: [],
+            view: [],
+            credentialTypes: [],
+            availableRoleTypes: [],
+          },
+        },
+      },
+      workplaceSearch: {
+        organization: {
+          name: undefined,
+          defaultOrgName: undefined,
+        },
+        account: {
+          id: undefined,
+          groups: [],
+          isAdmin: false,
+          canCreatePersonalSources: false,
+          canCreateInvitations: false,
+          isCurated: false,
+          viewedOnboardingPage: false,
+        },
       },
     });
   });
@@ -95,7 +207,7 @@ describe('callEnterpriseSearchConfigAPI', () => {
     callEnterpriseSearchConfigAPI(mockDependencies);
     jest.advanceTimersByTime(150);
     expect(mockDependencies.log.warn).toHaveBeenCalledWith(
-      'Enterprise Search access check took over 100ms. Please ensure your Enterprise Search server is respondingly normally and not adversely impacting Kibana load speeds.'
+      'Enterprise Search access check took over 100ms. Please ensure your Enterprise Search server is responding normally and not adversely impacting Kibana load speeds.'
     );
 
     // Timeout

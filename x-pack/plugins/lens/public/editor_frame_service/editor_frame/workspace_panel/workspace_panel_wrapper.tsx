@@ -4,15 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import './workspace_panel_wrapper.scss';
+
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import classNames from 'classnames';
 import {
   EuiPageContent,
   EuiPageContentBody,
-  EuiPageContentHeader,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiScreenReaderOnly,
 } from '@elastic/eui';
 import { Datasource, FramePublicAPI, Visualization } from '../../../types';
 import { NativeRenderer } from '../../../native_renderer';
@@ -24,7 +25,6 @@ export interface WorkspacePanelWrapperProps {
   framePublicAPI: FramePublicAPI;
   visualizationState: unknown;
   dispatch: (action: Action) => void;
-  emptyExpression: boolean;
   title?: string;
   visualizationMap: Record<string, Visualization>;
   visualizationId: string | null;
@@ -44,7 +44,6 @@ export function WorkspacePanelWrapper({
   visualizationState,
   dispatch,
   title,
-  emptyExpression,
   visualizationId,
   visualizationMap,
   datasourceMap,
@@ -67,8 +66,14 @@ export function WorkspacePanelWrapper({
   );
   return (
     <>
-      <div className="lnsWorkspacePanelWrapper__toolbar">
-        <EuiFlexGroup gutterSize="s" direction="row" responsive={false}>
+      <div>
+        <EuiFlexGroup
+          gutterSize="m"
+          direction="row"
+          responsive={false}
+          wrap={true}
+          className="lnsWorkspacePanelWrapper__toolbar"
+        >
           <EuiFlexItem grow={false}>
             <ChartSwitch
               data-test-subj="lnsChartSwitcher"
@@ -82,7 +87,7 @@ export function WorkspacePanelWrapper({
             />
           </EuiFlexItem>
           {activeVisualization && activeVisualization.renderToolbar && (
-            <EuiFlexItem grow>
+            <EuiFlexItem grow={false}>
               <NativeRenderer
                 render={activeVisualization.renderToolbar}
                 nativeProps={{
@@ -96,18 +101,12 @@ export function WorkspacePanelWrapper({
         </EuiFlexGroup>
       </div>
       <EuiPageContent className="lnsWorkspacePanelWrapper">
-        {(!emptyExpression || title) && (
-          <EuiPageContentHeader
-            className={classNames('lnsWorkspacePanelWrapper__pageContentHeader', {
-              'lnsWorkspacePanelWrapper__pageContentHeader--unsaved': !title,
-            })}
-          >
-            <span data-test-subj="lns_ChartTitle">
-              {title ||
-                i18n.translate('xpack.lens.chartTitle.unsaved', { defaultMessage: 'Unsaved' })}
-            </span>
-          </EuiPageContentHeader>
-        )}
+        <EuiScreenReaderOnly>
+          <h1 data-test-subj="lns_ChartTitle">
+            {title ||
+              i18n.translate('xpack.lens.chartTitle.unsaved', { defaultMessage: 'Unsaved' })}
+          </h1>
+        </EuiScreenReaderOnly>
         <EuiPageContentBody className="lnsWorkspacePanelWrapper__pageContentBody">
           {children}
         </EuiPageContentBody>

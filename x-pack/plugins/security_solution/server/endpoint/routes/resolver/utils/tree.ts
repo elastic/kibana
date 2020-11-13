@@ -6,74 +6,42 @@
 
 import _ from 'lodash';
 import {
-  ResolverEvent,
+  SafeResolverEvent,
   ResolverNodeStats,
-  ResolverRelatedEvents,
-  ResolverAncestry,
-  ResolverTree,
-  ResolverChildren,
+  SafeResolverAncestry,
+  SafeResolverTree,
+  SafeResolverChildren,
   ResolverRelatedAlerts,
 } from '../../../../../common/endpoint/types';
 import { createTree } from './node';
 
 interface Node {
   entityID: string;
-  lifecycle: ResolverEvent[];
+  lifecycle: SafeResolverEvent[];
   stats?: ResolverNodeStats;
 }
 
 export interface Options {
-  relatedEvents?: ResolverRelatedEvents;
-  ancestry?: ResolverAncestry;
-  children?: ResolverChildren;
+  ancestry?: SafeResolverAncestry;
+  children?: SafeResolverChildren;
   relatedAlerts?: ResolverRelatedAlerts;
 }
 
 /**
- * This class aids in constructing a tree of process events. It works in the following way:
+ * This class aids in constructing a tree of process events.
  *
- * 1. We construct a tree structure starting with the root node for the event we're requesting.
- * 2. We leverage the ability to pass hashes and arrays by reference to construct a fast cache of
- *  process identifiers that updates the tree structure as we push values into the cache.
- *
- * When we query a single level of results for child process events we have a flattened, sorted result
- * list that we need to add into a constructed tree. We also need to signal in an API response whether
- * or not there are more child processes events that we have not yet retrieved, and, if so, for what parent
- * process. So, at the end of our tree construction we have a relational layout of the events with no
- * pagination information for the given parent nodes. In order to actually construct both the tree and
- * insert the pagination information we basically do the following:
- *
- * 1. Using a terms aggregation query, we return an approximate roll-up of the number of child process
- *  "creation" events, this gives us an estimation of the number of associated children per parent
- * 2. We feed these child process creation event "unique identifiers" (basically a process.entity_id)
- * into a second query to get the current state of the process via its "lifecycle" events.
- * 3. We construct the tree above with the "lifecycle" events.
- * 4. Using the terms query results, we mark each non-leaf node with the number of expected children, if our
- * tree has less children than expected, we create a pagination cursor to indicate "we have a truncated set
- * of values".
- * 5. We mark each leaf node (the last level of the tree we're constructing) with a "null" for the expected
- *   number of children to indicate "we have not yet attempted to get any children".
- *
- * Following this scheme, we use exactly 2 queries per level of children that we return--one for the pagination
- * and one for the lifecycle events of the processes. The downside to this is that we need to dynamically expand
- * the number of documents we can retrieve per level due to the exponential fanout of child processes,
- * what this means is that noisy neighbors for a given level may hide other child process events that occur later
- * temporally in the same level--so, while a heavily forking process might get shown, maybe the actually malicious
- * event doesn't show up in the tree at the beginning.
- *
- * This Tree's root/origin could be in the middle of the tree. The origin corresponds to the id passed in when this
+ * This Tree's root/origin will likely be in the middle of the tree. The origin corresponds to the id passed in when this
  * Tree object is constructed. The tree can have ancestors and children coming from the origin.
  */
 export class Tree {
   protected cache: Map<string, Node> = new Map();
-  protected tree: ResolverTree;
+  protected tree: SafeResolverTree;
 
   constructor(protected readonly id: string, options: Options = {}) {
     const tree = createTree(this.id);
     this.tree = tree;
     this.cache.set(id, tree);
 
-    this.addRelatedEvents(options.relatedEvents);
     this.addAncestors(options.ancestry);
     this.addChildren(options.children);
     this.addRelatedAlerts(options.relatedAlerts);
@@ -84,7 +52,7 @@ export class Tree {
    *
    * @returns the origin ResolverNode
    */
-  public render(): ResolverTree {
+  public render(): SafeResolverTree {
     return this.tree;
   }
 
@@ -95,20 +63,6 @@ export class Tree {
    */
   public ids(): string[] {
     return [...this.cache.keys()];
-  }
-
-  /**
-   * Add related events for the tree's origin node. Related events cannot be added for other nodes.
-   *
-   * @param relatedEventsInfo is the related events and pagination information to add to the tree.
-   */
-  private addRelatedEvents(relatedEventsInfo: ResolverRelatedEvents | undefined) {
-    if (!relatedEventsInfo) {
-      return;
-    }
-
-    this.tree.relatedEvents.events = relatedEventsInfo.events;
-    this.tree.relatedEvents.nextEvent = relatedEventsInfo.nextEvent;
   }
 
   /**
@@ -130,7 +84,7 @@ export class Tree {
    *
    * @param ancestorInfo is the ancestors and pagination information to add to the tree.
    */
-  private addAncestors(ancestorInfo: ResolverAncestry | undefined) {
+  private addAncestors(ancestorInfo: SafeResolverAncestry | undefined) {
     if (!ancestorInfo) {
       return;
     }
@@ -161,7 +115,7 @@ export class Tree {
     }
   }
 
-  private addChildren(children: ResolverChildren | undefined) {
+  private addChildren(children: SafeResolverChildren | undefined) {
     if (!children) {
       return;
     }

@@ -379,14 +379,12 @@ async function migrateIndex({
   index,
   migrations,
   mappingProperties,
-  validateDoc,
   obsoleteIndexTemplatePattern,
 }: {
   esClient: ElasticsearchClient;
   index: string;
   migrations: Record<string, SavedObjectMigrationMap>;
   mappingProperties: SavedObjectsTypeMappingDefinitions;
-  validateDoc?: (doc: any) => void;
   obsoleteIndexTemplatePattern?: string;
 }) {
   const typeRegistry = new SavedObjectTypeRegistry();
@@ -396,7 +394,6 @@ async function migrateIndex({
   const documentMigrator = new DocumentMigrator({
     kibanaVersion: '99.9.9',
     typeRegistry,
-    validateDoc: validateDoc || _.noop,
     log: getLogMock(),
   });
 

@@ -19,10 +19,7 @@ import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { flatten, sortBy } from 'lodash';
 import moment from 'moment';
 import React from 'react';
-import {
-  BeatTag,
-  CMBeat,
-} from '../../../../../legacy/plugins/beats_management/common/domain_types';
+import { BeatTag, CMBeat } from '../../../common/domain_types';
 import { EnrollBeat } from '../../components/enroll_beats';
 import { Breadcrumb } from '../../components/navigation/breadcrumb';
 import { BeatsTableType, Table } from '../../components/table';

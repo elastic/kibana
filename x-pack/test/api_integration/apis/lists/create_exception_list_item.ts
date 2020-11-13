@@ -40,9 +40,11 @@ export default function ({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'xxx')
         .send(badItem)
         .expect(400);
-      expect(body.message).to.eql(
-        'cannot add exception item with entry of type "list" to endpoint exception list'
-      );
+      expect(body.message).to.eql([
+        'Invalid value "list" supplied to "type"',
+        'Invalid value "undefined" supplied to "value"',
+        'Invalid value "undefined" supplied to "entries"',
+      ]);
     });
 
     it('should return a 400 if endpoint exception entry has disallowed field', async () => {

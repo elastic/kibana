@@ -10,6 +10,7 @@ export const DynamicSettingsType = t.type({
   heartbeatIndices: t.string,
   certAgeThreshold: t.number,
   certExpirationThreshold: t.number,
+  defaultConnectors: t.array(t.string),
 });
 
 export const DynamicSettingsSaveType = t.intersection([

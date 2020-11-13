@@ -17,10 +17,11 @@
  * under the License.
  */
 
-import { Lifecycle, Request, ResponseToolkit, Server, ServerOptions, Util } from 'hapi';
-import Hoek from 'hoek';
+import { Lifecycle, Request, ResponseToolkit, Server, ServerOptions, Util } from '@hapi/hapi';
+import Hoek from '@hapi/hoek';
 import { ServerOptions as TLSOptions } from 'https';
 import { ValidationError } from 'joi';
+import uuid from 'uuid';
 import { HttpConfig } from './http_config';
 import { validateObject } from './prototype_pollution';
 
@@ -102,6 +103,10 @@ interface ListenerOptions {
 export function createServer(serverOptions: ServerOptions, listenerOptions: ListenerOptions) {
   const server = new Server(serverOptions);
 
+  // remove fix + test as soon as update node.js to v12.19 https://github.com/elastic/kibana/pull/61587
+  server.listener.headersTimeout =
+    listenerOptions.keepaliveTimeout + 2 * server.listener.headersTimeout;
+
   server.listener.keepAliveTimeout = listenerOptions.keepaliveTimeout;
   server.listener.setTimeout(listenerOptions.socketTimeout);
   server.listener.on('timeout', (socket) => {
@@ -168,4 +173,13 @@ export function defaultValidationErrorHandler(
   }
 
   throw err;
+}
+
+export function getRequestId(request: Request, options: HttpConfig['requestId']): string {
+  return options.allowFromAnyIp ||
+    // socket may be undefined in integration tests that connect via the http listener directly
+    (request.raw.req.socket?.remoteAddress &&
+      options.ipAllowlist.includes(request.raw.req.socket.remoteAddress))
+    ? request.headers['x-opaque-id'] ?? uuid.v4()
+    : uuid.v4();
 }

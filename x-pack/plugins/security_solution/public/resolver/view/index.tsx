@@ -7,7 +7,7 @@
 
 import React, { useMemo } from 'react';
 import { Provider } from 'react-redux';
-import { storeFactory } from '../store';
+import { resolverStoreFactory } from '../store';
 import { StartServices } from '../../types';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { DataAccessLayer, ResolverProps } from '../types';
@@ -24,7 +24,7 @@ export const Resolver = React.memo((props: ResolverProps) => {
   ]);
 
   const store = useMemo(() => {
-    return storeFactory(dataAccessLayer);
+    return resolverStoreFactory(dataAccessLayer);
   }, [dataAccessLayer]);
 
   return (

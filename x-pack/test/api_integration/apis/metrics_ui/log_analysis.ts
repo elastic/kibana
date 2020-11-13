@@ -22,21 +22,57 @@ const TIME_AFTER_END = 1570016700000;
 const COMMON_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',
 };
+const ML_JOB_ID = 'kibana-logs-ui-default-default-log-entry-rate';
 
-// eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
+  const retry = getService('retry');
+
+  async function createDummyJob(jobId: string) {
+    await supertest
+      .put(`/api/ml/anomaly_detectors/${jobId}`)
+      .set(COMMON_HEADERS)
+      .send({
+        job_id: jobId,
+        groups: [],
+        analysis_config: {
+          bucket_span: '15m',
+          detectors: [{ function: 'count' }],
+          influencers: [],
+        },
+        data_description: { time_field: '@timestamp' },
+        analysis_limits: { model_memory_limit: '11MB' },
+        model_plot_config: { enabled: false, annotations_enabled: false },
+      })
+      .expect(200);
+  }
+
+  async function deleteDummyJob(jobId: string) {
+    await supertest.delete(`/api/ml/anomaly_detectors/${jobId}`).set(COMMON_HEADERS).expect(200);
+
+    await retry.waitForWithTimeout(`'${jobId}' to not exist`, 5 * 1000, async () => {
+      if (await supertest.get(`/api/ml/anomaly_detectors/${jobId}`).expect(404)) {
+        return true;
+      } else {
+        throw new Error(`expected anomaly detection job '${jobId}' not to exist`);
+      }
+    });
+  }
 
   describe('log analysis apis', () => {
-    before(() => esArchiver.load('infra/8.0.0/ml_anomalies_partitioned_log_rate'));
-    after(() => esArchiver.unload('infra/8.0.0/ml_anomalies_partitioned_log_rate'));
+    before(async () => {
+      // a real ML job must exist when searching for the results
+      await createDummyJob(ML_JOB_ID);
+      await esArchiver.load('infra/8.0.0/ml_anomalies_partitioned_log_rate');
+    });
+    after(async () => {
+      await deleteDummyJob(ML_JOB_ID);
+      await esArchiver.unload('infra/8.0.0/ml_anomalies_partitioned_log_rate');
+    });
 
     describe('log rate results', () => {
       describe('with the default source', () => {
-        before(() => esArchiver.load('empty_kibana'));
-        after(() => esArchiver.unload('empty_kibana'));
-
         it('should return buckets when there are matching ml result documents', async () => {
           const { body } = await supertest
             .post(LOG_ANALYSIS_GET_LOG_ENTRY_RATE_PATH)

@@ -9,3 +9,9 @@ exports[`kibana_usage_collection Runs the setup method without issues 3`] = `fal
 exports[`kibana_usage_collection Runs the setup method without issues 4`] = `false`;
 
 exports[`kibana_usage_collection Runs the setup method without issues 5`] = `false`;
+
+exports[`kibana_usage_collection Runs the setup method without issues 6`] = `true`;
+
+exports[`kibana_usage_collection Runs the setup method without issues 7`] = `false`;
+
+exports[`kibana_usage_collection Runs the setup method without issues 8`] = `true`;

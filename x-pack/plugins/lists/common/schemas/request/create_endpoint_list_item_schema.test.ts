@@ -7,7 +7,7 @@
 import { left } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 
-import { exactCheck, foldLeftRight, getPaths } from '../../siem_common_deps';
+import { exactCheck, foldLeftRight, getPaths } from '../../shared_imports';
 import { getCreateCommentsArrayMock } from '../types/create_comment.mock';
 import { getCommentsMock } from '../types/comment.mock';
 import { CommentsArray } from '../types';
@@ -31,6 +31,7 @@ describe('create_endpoint_list_item_schema', () => {
 
   test('it should fail validation when supplied an undefined for "description"', () => {
     const payload = getCreateEndpointListItemSchemaMock();
+    // @ts-expect-error
     delete payload.description;
     const decoded = createEndpointListItemSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -43,6 +44,7 @@ describe('create_endpoint_list_item_schema', () => {
 
   test('it should fail validation when supplied an undefined for "name"', () => {
     const payload = getCreateEndpointListItemSchemaMock();
+    // @ts-expect-error
     delete payload.name;
     const decoded = createEndpointListItemSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -55,6 +57,7 @@ describe('create_endpoint_list_item_schema', () => {
 
   test('it should fail validation when supplied an undefined for "type"', () => {
     const payload = getCreateEndpointListItemSchemaMock();
+    // @ts-expect-error
     delete payload.type;
     const decoded = createEndpointListItemSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -145,6 +148,7 @@ describe('create_endpoint_list_item_schema', () => {
   test('it should fail validation when supplied an undefined for "entries"', () => {
     const inputPayload = getCreateEndpointListItemSchemaMock();
     const outputPayload = getCreateEndpointListItemSchemaMock();
+    // @ts-expect-error
     delete inputPayload.entries;
     outputPayload.entries = [];
     const decoded = createEndpointListItemSchema.decode(inputPayload);
@@ -162,19 +166,6 @@ describe('create_endpoint_list_item_schema', () => {
     const outputPayload = getCreateEndpointListItemSchemaMock();
     delete inputPayload.tags;
     outputPayload.tags = [];
-    const decoded = createEndpointListItemSchema.decode(inputPayload);
-    const checked = exactCheck(inputPayload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    delete (message.schema as CreateEndpointListItemSchema).item_id;
-    expect(getPaths(left(message.errors))).toEqual([]);
-    expect(message.schema).toEqual(outputPayload);
-  });
-
-  test('it should pass validation when supplied an undefined for "_tags" but return an array and generate a correct body not counting the auto generated uuid', () => {
-    const inputPayload = getCreateEndpointListItemSchemaMock();
-    const outputPayload = getCreateEndpointListItemSchemaMock();
-    delete inputPayload._tags;
-    outputPayload._tags = [];
     const decoded = createEndpointListItemSchema.decode(inputPayload);
     const checked = exactCheck(inputPayload, decoded);
     const message = pipe(checked, foldLeftRight);

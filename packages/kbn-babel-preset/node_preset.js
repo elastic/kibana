@@ -18,23 +18,6 @@
  */
 
 module.exports = (_, options = {}) => {
-  const overrides = [];
-  if (!process.env.ALLOW_PERFORMANCE_HOOKS_IN_TASK_MANAGER) {
-    overrides.push({
-      test: [/x-pack[\/\\]legacy[\/\\]plugins[\/\\]task_manager/],
-      plugins: [
-        [
-          require.resolve('babel-plugin-filter-imports'),
-          {
-            imports: {
-              perf_hooks: ['performance'],
-            },
-          },
-        ],
-      ],
-    });
-  }
-
   return {
     presets: [
       [
@@ -66,14 +49,5 @@ module.exports = (_, options = {}) => {
       ],
       require('./common_preset'),
     ],
-    plugins: [
-      [
-        require.resolve('babel-plugin-transform-define'),
-        {
-          'global.__BUILT_WITH_BABEL__': 'true',
-        },
-      ],
-    ],
-    overrides,
   };
 };

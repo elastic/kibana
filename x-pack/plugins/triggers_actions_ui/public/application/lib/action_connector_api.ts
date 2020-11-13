@@ -7,6 +7,7 @@
 import { HttpSetup } from 'kibana/public';
 import { BASE_ACTION_API_PATH } from '../constants';
 import { ActionConnector, ActionConnectorWithoutId, ActionType } from '../../types';
+import { ActionTypeExecutorResult } from '../../../../../plugins/actions/common';
 
 export async function loadActionTypes({ http }: { http: HttpSetup }): Promise<ActionType[]> {
   return await http.get(`${BASE_ACTION_API_PATH}/list_action_types`);
@@ -64,4 +65,18 @@ export async function deleteActions({
     }
   );
   return { successes, errors };
+}
+
+export async function executeAction({
+  id,
+  params,
+  http,
+}: {
+  id: string;
+  http: HttpSetup;
+  params: Record<string, unknown>;
+}): Promise<ActionTypeExecutorResult<unknown>> {
+  return http.post(`${BASE_ACTION_API_PATH}/action/${id}/_execute`, {
+    body: JSON.stringify({ params }),
+  });
 }

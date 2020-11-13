@@ -11,7 +11,7 @@ import { FunctionFactory } from '../../../types';
 
 export const help: FunctionHelp<FunctionFactory<typeof timerange>> = {
   help: i18n.translate('xpack.canvas.functions.timerangeHelpText', {
-    defaultMessage: `An object that represents a span of time`,
+    defaultMessage: `An object that represents a span of time.`,
   }),
   args: {
     from: i18n.translate('xpack.canvas.functions.timerange.args.fromHelpText', {

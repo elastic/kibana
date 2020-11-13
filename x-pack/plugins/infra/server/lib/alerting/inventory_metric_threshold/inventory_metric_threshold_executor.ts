@@ -3,9 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { first, get } from 'lodash';
+import { first, get, last } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
+import { getCustomMetricLabel } from '../../../../common/formatters/get_custom_metric_label';
 import { toMetricOpt } from '../../../../common/snapshot_metric_i18n';
 import { AlertStates, InventoryMetricConditions } from './types';
 import { AlertExecutorOptions } from '../../../../../alerts/server';
@@ -41,26 +42,29 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
     alertOnNoData,
   } = params as InventoryMetricThresholdParams;
 
+  if (criteria.length === 0) throw new Error('Cannot execute an alert with 0 conditions');
+
   const source = await libs.sources.getSourceConfiguration(
     services.savedObjectsClient,
     sourceId || 'default'
   );
 
   const results = await Promise.all(
-    criteria.map((c) =>
-      evaluateCondition(c, nodeType, source.configuration, services.callCluster, filterQuery)
-    )
+    criteria.map((c) => evaluateCondition(c, nodeType, source, services.callCluster, filterQuery))
   );
 
-  const inventoryItems = Object.keys(first(results) as any);
+  const inventoryItems = Object.keys(first(results)!);
   for (const item of inventoryItems) {
     const alertInstance = services.alertInstanceFactory(`${item}`);
     // AND logic; all criteria must be across the threshold
-    const shouldAlertFire = results.every((result) => result[item].shouldFire);
+    const shouldAlertFire = results.every((result) =>
+      // Grab the result of the most recent bucket
+      last(result[item].shouldFire)
+    );
 
     // AND logic; because we need to evaluate all criteria, if one of them reports no data then the
     // whole alert is in a No Data/Error state
-    const isNoData = results.some((result) => result[item].isNoData);
+    const isNoData = results.some((result) => last(result[item].isNoData));
     const isError = results.some((result) => result[item].isError);
 
     const nextState = isError
@@ -74,27 +78,19 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
     let reason;
     if (nextState === AlertStates.ALERT) {
       reason = results
-        .map((result) => {
-          if (!result[item]) return '';
-          const resultWithVerboseMetricName = {
-            ...result[item],
-            metric: toMetricOpt(result[item].metric)?.text || result[item].metric,
-            currentValue: formatMetric(result[item].metric, result[item].currentValue),
-          };
-          return buildFiredAlertReason(resultWithVerboseMetricName);
-        })
+        .map((result) => buildReasonWithVerboseMetricName(result[item], buildFiredAlertReason))
         .join('\n');
     }
     if (alertOnNoData) {
       if (nextState === AlertStates.NO_DATA) {
         reason = results
           .filter((result) => result[item].isNoData)
-          .map((result) => buildNoDataAlertReason(result[item]))
+          .map((result) => buildReasonWithVerboseMetricName(result[item], buildNoDataAlertReason))
           .join('\n');
       } else if (nextState === AlertStates.ERROR) {
         reason = results
           .filter((result) => result[item].isError)
-          .map((result) => buildErrorAlertReason(result[item].metric))
+          .map((result) => buildReasonWithVerboseMetricName(result[item], buildErrorAlertReason))
           .join('\n');
       }
     }
@@ -118,6 +114,20 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
   }
 };
 
+const buildReasonWithVerboseMetricName = (resultItem: any, buildReason: (r: any) => string) => {
+  if (!resultItem) return '';
+  const resultWithVerboseMetricName = {
+    ...resultItem,
+    metric:
+      toMetricOpt(resultItem.metric)?.text ||
+      (resultItem.metric === 'custom'
+        ? getCustomMetricLabel(resultItem.customMetric)
+        : resultItem.metric),
+    currentValue: formatMetric(resultItem.metric, resultItem.currentValue),
+  };
+  return buildReason(resultWithVerboseMetricName);
+};
+
 const mapToConditionsLookup = (
   list: any[],
   mapFn: (value: any, index: number, array: any[]) => unknown
@@ -137,13 +147,11 @@ export const FIRED_ACTIONS = {
 };
 
 const formatMetric = (metric: SnapshotMetricType, value: number) => {
-  // if (SnapshotCustomMetricInputRT.is(metric)) {
-  //   const formatter = createFormatterForMetric(metric);
-  //   return formatter(val);
-  // }
   const metricFormatter = get(METRIC_FORMATTERS, metric, METRIC_FORMATTERS.count);
-  if (value == null) {
-    return '';
+  if (isNaN(value)) {
+    return i18n.translate('xpack.infra.metrics.alerting.inventory.noDataFormattedValue', {
+      defaultMessage: '[NO DATA]',
+    });
   }
   const formatter = createFormatter(metricFormatter.formatter, metricFormatter.template);
   return formatter(value);

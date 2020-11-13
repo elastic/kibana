@@ -18,7 +18,6 @@
  */
 
 /* eslint max-len: 0 */
-/* eslint-disable */
 
 import { i18n } from '@kbn/i18n';
 import { SavedObject } from 'kibana/server';
@@ -249,11 +248,11 @@ export const getSavedObjects = (): SavedObject[] => [
     version: '1',
     migrationVersion: {},
     attributes: {
-      title: i18n.translate('home.sampleData.ecommerceSpec.averageSalesPerRegionTitle', {
-        defaultMessage: '[eCommerce] Average Sales Per Region',
+      title: i18n.translate('home.sampleData.ecommerceSpec.salesCountMapTitle', {
+        defaultMessage: '[eCommerce] Sales Count Map',
       }),
       visState:
-        '{"title":"[eCommerce] Average Sales Per Region","type":"region_map","params":{"legendPosition":"bottomright","addTooltip":true,"colorSchema":"Blues","selectedLayer":{"attribution":"<p><a href=\\"http://www.naturalearthdata.com/about/terms-of-use\\">Made with NaturalEarth</a>|<a href=\\"https://www.elastic.co/elastic-maps-service\\">Elastic Maps Service</a></p>&#10;","weight":1,"name":"World Countries","url":"https://vector.maps.elastic.co/blob/5659313586569216?elastic_tile_service_tos=agree&my_app_version=7.0.0-alpha1&license=f6c534b8-91b9-4499-8804-a2e9789ecc95","format":{"type":"geojson"},"fields":[{"name":"iso2","description":"Two letter abbreviation"},{"name":"name","description":"Country name"},{"name":"iso3","description":"Three letter abbreviation"}],"created_at":"2017-04-26T17:12:15.978370","tags":[],"id":5659313586569216,"layerId":"elastic_maps_service.World Countries","isEMS":true},"emsHotLink":"https://maps.elastic.co/v2#file/World Countries","selectedJoinField":{"name":"iso2","description":"Two letter abbreviation"},"isDisplayWarning":true,"wms":{"enabled":false,"options":{"format":"image/png","transparent":true}},"mapZoom":2,"mapCenter":[0,0],"outlineWeight":1,"showAllShapes":true},"aggs":[{"id":"1","enabled":true,"type":"avg","schema":"metric","params":{"field":"taxful_total_price","customLabel":"Average Sale"}},{"id":"2","enabled":true,"type":"terms","schema":"segment","params":{"field":"geoip.country_iso_code","size":100,"order":"desc","orderBy":"1","otherBucket":false,"otherBucketLabel":"Other","missingBucket":false,"missingBucketLabel":"Missing"}}]}',
+        '{"title":"[eCommerce] Sales Count Map","type":"vega","aggs":[],"params":{"spec":"{\\n  $schema: https://vega.github.io/schema/vega/v5.json\\n  config: {\\n    kibana: {type: \\"map\\", latitude: 25, longitude: -40, zoom: 3}\\n  }\\n  data: [\\n    {\\n      name: table\\n      url: {\\n        index: kibana_sample_data_ecommerce\\n        %context%: true\\n        %timefield%: order_date\\n        body: {\\n          size: 0\\n          aggs: {\\n            gridSplit: {\\n              geotile_grid: {field: \\"geoip.location\\", precision: 4, size: 10000}\\n              aggs: {\\n                gridCentroid: {\\n                  geo_centroid: {\\n                    field: \\"geoip.location\\"\\n                  }\\n                }\\n              }\\n            }\\n          }\\n        }\\n      }\\n      format: {property: \\"aggregations.gridSplit.buckets\\"}\\n      transform: [\\n        {\\n          type: geopoint\\n          projection: projection\\n          fields: [\\n            gridCentroid.location.lon\\n            gridCentroid.location.lat\\n          ]\\n        }\\n      ]\\n    }\\n  ]\\n  scales: [\\n    {\\n      name: gridSize\\n      type: linear\\n      domain: {data: \\"table\\", field: \\"doc_count\\"}\\n      range: [\\n        50\\n        1000\\n      ]\\n    }\\n  ]\\n  marks: [\\n    {\\n      name: gridMarker\\n      type: symbol\\n      from: {data: \\"table\\"}\\n      encode: {\\n        update: {\\n          size: {scale: \\"gridSize\\", field: \\"doc_count\\"}\\n          xc: {signal: \\"datum.x\\"}\\n          yc: {signal: \\"datum.y\\"}\\n        }\\n      }\\n    },\\n    {\\n      name: gridLabel\\n      type: text\\n      from: {data: \\"table\\"}\\n      encode: {\\n        enter: {\\n          fill: {value: \\"firebrick\\"}\\n          text: {signal: \\"datum.doc_count\\"}\\n        }\\n        update: {\\n          x: {signal: \\"datum.x\\"}\\n          y: {signal: \\"datum.y\\"}\\n          dx: {value: -6}\\n          dy: {value: 6}\\n          fontSize: {value: 18}\\n          fontWeight: {value: \\"bold\\"}\\n        }\\n      }\\n    }\\n  ]\\n}"}}',
       uiStateJSON: '{}',
       description: '',
       version: 1,

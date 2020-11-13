@@ -25,7 +25,7 @@ import {
 import { extractMappingsDefinition } from './lib';
 import { useMappingsState } from './mappings_state_context';
 import { useMappingsStateListener } from './use_state_listener';
-import { IndexSettingsProvider } from './index_settings_context';
+import { useIndexSettings } from './index_settings_context';
 
 type TabName = 'fields' | 'advanced' | 'templates';
 
@@ -59,11 +59,13 @@ export const MappingsEditor = React.memo(({ onChange, value, indexSettings }: Pr
       _meta,
       _routing,
       dynamic,
+      /* eslint-disable @typescript-eslint/naming-convention */
       numeric_detection,
       date_detection,
       dynamic_date_formats,
       properties,
       dynamic_templates,
+      /* eslint-enable @typescript-eslint/naming-convention */
     } = mappingsDefinition;
 
     const parsed = {
@@ -91,6 +93,12 @@ export const MappingsEditor = React.memo(({ onChange, value, indexSettings }: Pr
    * 2. "state" changes in order to communicate any updates to the consumer
    */
   useMappingsStateListener({ onChange, value: parsedDefaultValue });
+
+  // Update the Index settings context so it is available in the Global flyout
+  const { update: updateIndexSettings } = useIndexSettings();
+  if (indexSettings !== undefined) {
+    updateIndexSettings(indexSettings);
+  }
 
   const state = useMappingsState();
   const [selectedTab, selectTab] = useState<TabName>('fields');
@@ -139,43 +147,41 @@ export const MappingsEditor = React.memo(({ onChange, value, indexSettings }: Pr
       {multipleMappingsDeclared ? (
         <MultipleMappingsWarning />
       ) : (
-        <IndexSettingsProvider indexSettings={indexSettings}>
-          <div className="mappingsEditor">
-            <EuiTabs>
-              <EuiTab
-                onClick={() => changeTab('fields')}
-                isSelected={selectedTab === 'fields'}
-                data-test-subj="formTab"
-              >
-                {i18n.translate('xpack.idxMgmt.mappingsEditor.fieldsTabLabel', {
-                  defaultMessage: 'Mapped fields',
-                })}
-              </EuiTab>
-              <EuiTab
-                onClick={() => changeTab('templates')}
-                isSelected={selectedTab === 'templates'}
-                data-test-subj="formTab"
-              >
-                {i18n.translate('xpack.idxMgmt.mappingsEditor.templatesTabLabel', {
-                  defaultMessage: 'Dynamic templates',
-                })}
-              </EuiTab>
-              <EuiTab
-                onClick={() => changeTab('advanced')}
-                isSelected={selectedTab === 'advanced'}
-                data-test-subj="formTab"
-              >
-                {i18n.translate('xpack.idxMgmt.mappingsEditor.advancedTabLabel', {
-                  defaultMessage: 'Advanced options',
-                })}
-              </EuiTab>
-            </EuiTabs>
+        <div className="mappingsEditor">
+          <EuiTabs>
+            <EuiTab
+              onClick={() => changeTab('fields')}
+              isSelected={selectedTab === 'fields'}
+              data-test-subj="formTab"
+            >
+              {i18n.translate('xpack.idxMgmt.mappingsEditor.fieldsTabLabel', {
+                defaultMessage: 'Mapped fields',
+              })}
+            </EuiTab>
+            <EuiTab
+              onClick={() => changeTab('templates')}
+              isSelected={selectedTab === 'templates'}
+              data-test-subj="formTab"
+            >
+              {i18n.translate('xpack.idxMgmt.mappingsEditor.templatesTabLabel', {
+                defaultMessage: 'Dynamic templates',
+              })}
+            </EuiTab>
+            <EuiTab
+              onClick={() => changeTab('advanced')}
+              isSelected={selectedTab === 'advanced'}
+              data-test-subj="formTab"
+            >
+              {i18n.translate('xpack.idxMgmt.mappingsEditor.advancedTabLabel', {
+                defaultMessage: 'Advanced options',
+              })}
+            </EuiTab>
+          </EuiTabs>
 
-            <EuiSpacer size="l" />
+          <EuiSpacer size="l" />
 
-            {tabToContentMap[selectedTab]}
-          </div>
-        </IndexSettingsProvider>
+          {tabToContentMap[selectedTab]}
+        </div>
       )}
     </div>
   );

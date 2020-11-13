@@ -10,6 +10,7 @@ export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['monitoring', 'common', 'header']);
   const esSupertest = getService('esSupertest');
   const noData = getService('monitoringNoData');
+  const testSubjects = getService('testSubjects');
   const clusterOverview = getService('monitoringClusterOverview');
   const retry = getService('retry');
 
@@ -46,8 +47,10 @@ export default function ({ getService, getPageObjects }) {
       });
 
       // Here we are checking that once Monitoring is enabled,
-      //it moves on to the cluster overview page.
-      await retry.try(async () => {
+      // it moves on to the cluster overview page.
+      await retry.tryForTime(10000, async () => {
+        // Click the refresh button
+        await testSubjects.click('querySubmitButton');
         expect(await clusterOverview.isOnClusterOverview()).to.be(true);
       });
     });

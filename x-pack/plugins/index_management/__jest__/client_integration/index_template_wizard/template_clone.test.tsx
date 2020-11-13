@@ -7,8 +7,8 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 
-import { getTemplate } from '../../../test/fixtures';
-import { setupEnvironment, nextTick } from '../helpers';
+import { getComposableTemplate } from '../../../test/fixtures';
+import { setupEnvironment } from '../helpers';
 
 import { TEMPLATE_NAME, INDEX_PATTERNS as DEFAULT_INDEX_PATTERNS, MAPPINGS } from './constants';
 import { setup } from './template_clone.helpers';
@@ -41,32 +41,35 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
-// FLAKY: https://github.com/elastic/kibana/issues/59849
-describe.skip('<TemplateClone />', () => {
+const templateToClone = getComposableTemplate({
+  name: TEMPLATE_NAME,
+  indexPatterns: ['indexPattern1'],
+  template: {
+    mappings: MAPPINGS,
+  },
+});
+
+describe('<TemplateClone />', () => {
   let testBed: TemplateFormTestBed;
 
   const { server, httpRequestsMockHelpers } = setupEnvironment();
 
-  afterAll(() => {
-    server.restore();
+  beforeAll(() => {
+    jest.useFakeTimers();
+    httpRequestsMockHelpers.setLoadComponentTemplatesResponse([]);
+    httpRequestsMockHelpers.setLoadTemplateResponse(templateToClone);
   });
 
-  const templateToClone = getTemplate({
-    name: TEMPLATE_NAME,
-    indexPatterns: ['indexPattern1'],
-    template: {
-      mappings: MAPPINGS,
-    },
-    isLegacy: true,
+  afterAll(() => {
+    server.restore();
+    jest.useRealTimers();
   });
 
   beforeEach(async () => {
-    httpRequestsMockHelpers.setLoadTemplateResponse(templateToClone);
-
     await act(async () => {
       testBed = await setup();
-      await testBed.waitFor('templateForm');
     });
+    testBed.component.update();
   });
 
   test('should set the correct page title', () => {
@@ -80,30 +83,26 @@ describe.skip('<TemplateClone />', () => {
     beforeEach(async () => {
       const { actions } = testBed;
 
-      await act(async () => {
-        // Complete step 1 (logistics)
-        // Specify index patterns, but do not change name (keep default)
-        await actions.completeStepOne({
-          indexPatterns: DEFAULT_INDEX_PATTERNS,
-        });
-
-        // Bypass step 2 (index settings)
-        await actions.completeStepTwo();
-
-        // Bypass step 3 (mappings)
-        await actions.completeStepThree();
-
-        // Bypass step 4 (aliases)
-        await actions.completeStepFour();
+      // Logistics
+      // Specify index patterns, but do not change name (keep default)
+      await actions.completeStepOne({
+        indexPatterns: DEFAULT_INDEX_PATTERNS,
       });
+      // Component templates
+      await actions.completeStepTwo();
+      // Index settings
+      await actions.completeStepThree();
+      // Mappings
+      await actions.completeStepFour();
+      // Aliases
+      await actions.completeStepFive();
     });
 
     it('should send the correct payload', async () => {
       const { actions } = testBed;
 
       await act(async () => {
-        actions.clickSubmitButton();
-        await nextTick();
+        actions.clickNextButton();
       });
 
       const latestRequest = server.requests[server.requests.length - 1];
@@ -113,6 +112,8 @@ describe.skip('<TemplateClone />', () => {
         name: `${templateToClone.name}-copy`,
         indexPatterns: DEFAULT_INDEX_PATTERNS,
       };
+
+      delete expected.template; // As no settings, mappings or aliases have been defined, no "template" param is sent
 
       expect(JSON.parse(JSON.parse(latestRequest.requestBody).body)).toEqual(expected);
     });

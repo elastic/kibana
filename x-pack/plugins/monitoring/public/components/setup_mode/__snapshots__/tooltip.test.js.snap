@@ -2,6 +2,7 @@
 
 exports[`setupMode SetupModeTooltip allInternalCollection should render for apm 1`] = `
 <EuiFlexItem
+  data-test-subj="monitoringSetupModeMetricbeatMigrationTooltip"
   grow={false}
 >
   <EuiToolTip
@@ -23,6 +24,7 @@ exports[`setupMode SetupModeTooltip allInternalCollection should render for apm 
 
 exports[`setupMode SetupModeTooltip allInternalCollection should render for beats 1`] = `
 <EuiFlexItem
+  data-test-subj="monitoringSetupModeMetricbeatMigrationTooltip"
   grow={false}
 >
   <EuiToolTip
@@ -44,6 +46,7 @@ exports[`setupMode SetupModeTooltip allInternalCollection should render for beat
 
 exports[`setupMode SetupModeTooltip allInternalCollection should render for elasticsearch 1`] = `
 <EuiFlexItem
+  data-test-subj="monitoringSetupModeMetricbeatMigrationTooltip"
   grow={false}
 >
   <EuiToolTip
@@ -65,6 +68,7 @@ exports[`setupMode SetupModeTooltip allInternalCollection should render for elas
 
 exports[`setupMode SetupModeTooltip allInternalCollection should render for kibana 1`] = `
 <EuiFlexItem
+  data-test-subj="monitoringSetupModeMetricbeatMigrationTooltip"
   grow={false}
 >
   <EuiToolTip
@@ -86,6 +90,7 @@ exports[`setupMode SetupModeTooltip allInternalCollection should render for kiba
 
 exports[`setupMode SetupModeTooltip allInternalCollection should render for logstash 1`] = `
 <EuiFlexItem
+  data-test-subj="monitoringSetupModeMetricbeatMigrationTooltip"
   grow={false}
 >
   <EuiToolTip
@@ -107,6 +112,7 @@ exports[`setupMode SetupModeTooltip allInternalCollection should render for logs
 
 exports[`setupMode SetupModeTooltip allMonitoredByMetricbeat should render for apm 1`] = `
 <EuiFlexItem
+  data-test-subj="monitoringSetupModeMetricbeatMigrationTooltip"
   grow={false}
 >
   <EuiToolTip
@@ -128,6 +134,7 @@ exports[`setupMode SetupModeTooltip allMonitoredByMetricbeat should render for a
 
 exports[`setupMode SetupModeTooltip allMonitoredByMetricbeat should render for beats 1`] = `
 <EuiFlexItem
+  data-test-subj="monitoringSetupModeMetricbeatMigrationTooltip"
   grow={false}
 >
   <EuiToolTip
@@ -149,6 +156,7 @@ exports[`setupMode SetupModeTooltip allMonitoredByMetricbeat should render for b
 
 exports[`setupMode SetupModeTooltip allMonitoredByMetricbeat should render for elasticsearch 1`] = `
 <EuiFlexItem
+  data-test-subj="monitoringSetupModeMetricbeatMigrationTooltip"
   grow={false}
 >
   <EuiToolTip
@@ -170,6 +178,7 @@ exports[`setupMode SetupModeTooltip allMonitoredByMetricbeat should render for e
 
 exports[`setupMode SetupModeTooltip allMonitoredByMetricbeat should render for kibana 1`] = `
 <EuiFlexItem
+  data-test-subj="monitoringSetupModeMetricbeatMigrationTooltip"
   grow={false}
 >
   <EuiToolTip
@@ -191,6 +200,7 @@ exports[`setupMode SetupModeTooltip allMonitoredByMetricbeat should render for k
 
 exports[`setupMode SetupModeTooltip allMonitoredByMetricbeat should render for logstash 1`] = `
 <EuiFlexItem
+  data-test-subj="monitoringSetupModeMetricbeatMigrationTooltip"
   grow={false}
 >
   <EuiToolTip
@@ -212,6 +222,7 @@ exports[`setupMode SetupModeTooltip allMonitoredByMetricbeat should render for l
 
 exports[`setupMode SetupModeTooltip internalCollectionOn should render for apm 1`] = `
 <EuiFlexItem
+  data-test-subj="monitoringSetupModeMetricbeatMigrationTooltip"
   grow={false}
 >
   <EuiToolTip
@@ -233,6 +244,7 @@ exports[`setupMode SetupModeTooltip internalCollectionOn should render for apm 1
 
 exports[`setupMode SetupModeTooltip internalCollectionOn should render for beats 1`] = `
 <EuiFlexItem
+  data-test-subj="monitoringSetupModeMetricbeatMigrationTooltip"
   grow={false}
 >
   <EuiToolTip
@@ -254,6 +266,7 @@ exports[`setupMode SetupModeTooltip internalCollectionOn should render for beats
 
 exports[`setupMode SetupModeTooltip internalCollectionOn should render for elasticsearch 1`] = `
 <EuiFlexItem
+  data-test-subj="monitoringSetupModeMetricbeatMigrationTooltip"
   grow={false}
 >
   <EuiToolTip
@@ -275,6 +288,7 @@ exports[`setupMode SetupModeTooltip internalCollectionOn should render for elast
 
 exports[`setupMode SetupModeTooltip internalCollectionOn should render for kibana 1`] = `
 <EuiFlexItem
+  data-test-subj="monitoringSetupModeMetricbeatMigrationTooltip"
   grow={false}
 >
   <EuiToolTip
@@ -296,6 +310,7 @@ exports[`setupMode SetupModeTooltip internalCollectionOn should render for kiban
 
 exports[`setupMode SetupModeTooltip internalCollectionOn should render for logstash 1`] = `
 <EuiFlexItem
+  data-test-subj="monitoringSetupModeMetricbeatMigrationTooltip"
   grow={false}
 >
   <EuiToolTip
@@ -317,6 +332,7 @@ exports[`setupMode SetupModeTooltip internalCollectionOn should render for logst
 
 exports[`setupMode SetupModeTooltip no detectable instances should render for apm 1`] = `
 <EuiFlexItem
+  data-test-subj="monitoringSetupModeMetricbeatMigrationTooltip"
   grow={false}
 >
   <EuiToolTip
@@ -338,6 +354,7 @@ exports[`setupMode SetupModeTooltip no detectable instances should render for ap
 
 exports[`setupMode SetupModeTooltip no detectable instances should render for beats 1`] = `
 <EuiFlexItem
+  data-test-subj="monitoringSetupModeMetricbeatMigrationTooltip"
   grow={false}
 >
   <EuiToolTip
@@ -359,6 +376,7 @@ exports[`setupMode SetupModeTooltip no detectable instances should render for be
 
 exports[`setupMode SetupModeTooltip no detectable instances should render for elasticsearch 1`] = `
 <EuiFlexItem
+  data-test-subj="monitoringSetupModeMetricbeatMigrationTooltip"
   grow={false}
 >
   <EuiToolTip
@@ -380,6 +398,7 @@ exports[`setupMode SetupModeTooltip no detectable instances should render for el
 
 exports[`setupMode SetupModeTooltip no detectable instances should render for kibana 1`] = `
 <EuiFlexItem
+  data-test-subj="monitoringSetupModeMetricbeatMigrationTooltip"
   grow={false}
 >
   <EuiToolTip
@@ -401,6 +420,7 @@ exports[`setupMode SetupModeTooltip no detectable instances should render for ki
 
 exports[`setupMode SetupModeTooltip no detectable instances should render for logstash 1`] = `
 <EuiFlexItem
+  data-test-subj="monitoringSetupModeMetricbeatMigrationTooltip"
   grow={false}
 >
   <EuiToolTip
@@ -422,6 +442,7 @@ exports[`setupMode SetupModeTooltip no detectable instances should render for lo
 
 exports[`setupMode SetupModeTooltip only detectable instances should render for apm 1`] = `
 <EuiFlexItem
+  data-test-subj="monitoringSetupModeMetricbeatMigrationTooltip"
   grow={false}
 >
   <EuiToolTip
@@ -443,6 +464,7 @@ exports[`setupMode SetupModeTooltip only detectable instances should render for 
 
 exports[`setupMode SetupModeTooltip only detectable instances should render for beats 1`] = `
 <EuiFlexItem
+  data-test-subj="monitoringSetupModeMetricbeatMigrationTooltip"
   grow={false}
 >
   <EuiToolTip
@@ -464,6 +486,7 @@ exports[`setupMode SetupModeTooltip only detectable instances should render for 
 
 exports[`setupMode SetupModeTooltip only detectable instances should render for elasticsearch 1`] = `
 <EuiFlexItem
+  data-test-subj="monitoringSetupModeMetricbeatMigrationTooltip"
   grow={false}
 >
   <EuiToolTip
@@ -485,6 +508,7 @@ exports[`setupMode SetupModeTooltip only detectable instances should render for 
 
 exports[`setupMode SetupModeTooltip only detectable instances should render for kibana 1`] = `
 <EuiFlexItem
+  data-test-subj="monitoringSetupModeMetricbeatMigrationTooltip"
   grow={false}
 >
   <EuiToolTip
@@ -506,6 +530,7 @@ exports[`setupMode SetupModeTooltip only detectable instances should render for 
 
 exports[`setupMode SetupModeTooltip only detectable instances should render for logstash 1`] = `
 <EuiFlexItem
+  data-test-subj="monitoringSetupModeMetricbeatMigrationTooltip"
   grow={false}
 >
   <EuiToolTip

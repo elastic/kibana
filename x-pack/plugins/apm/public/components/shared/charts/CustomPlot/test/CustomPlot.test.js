@@ -6,7 +6,11 @@
 
 import moment from 'moment';
 import React from 'react';
-import { toJson, mountWithTheme } from '../../../../../utils/testHelpers';
+import {
+  disableConsoleWarning,
+  toJson,
+  mountWithTheme,
+} from '../../../../../utils/testHelpers';
 import { InnerCustomPlot } from '../index';
 import responseWithData from './responseWithData.json';
 import VoronoiPlot from '../VoronoiPlot';
@@ -19,10 +23,19 @@ function getXValueByIndex(index) {
 }
 
 describe('when response has data', () => {
+  let consoleMock;
   let wrapper;
   let onHover;
   let onMouseLeave;
   let onSelectionEnd;
+
+  beforeAll(() => {
+    consoleMock = disableConsoleWarning('Warning: componentWillReceiveProps');
+  });
+
+  afterAll(() => {
+    consoleMock.mockRestore();
+  });
 
   beforeEach(() => {
     const series = getResponseTimeSeries({ apmTimeseries: responseWithData });

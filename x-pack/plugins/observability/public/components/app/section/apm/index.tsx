@@ -112,7 +112,7 @@ export function APMSection({ absoluteTime, relativeTime, bucketSize }: Props) {
             <Axis
               id="y-axis"
               position={Position.Left}
-              showGridLines
+              gridLine={{ visible: true }}
               tickFormat={(value) => `${formatTpm(value)} tpm`}
             />
             <Axis id="x-axis" position={Position.Bottom} tickFormat={formatter} />

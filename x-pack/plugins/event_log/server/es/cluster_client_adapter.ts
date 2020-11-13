@@ -6,6 +6,7 @@
 
 import { reject, isUndefined } from 'lodash';
 import { SearchResponse, Client } from 'elasticsearch';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { Logger, LegacyClusterClient } from 'src/core/server';
 
 import { IValidatedEvent, SAVED_OBJECT_REL_PRIMARY } from '../types';
@@ -133,6 +134,7 @@ export class ClusterClientAdapter {
     namespace: string | undefined,
     type: string,
     id: string,
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     { page, per_page: perPage, start, end, sort_field, sort_order }: FindOptionsType
   ): Promise<QueryEventsBySavedObjectResult> {
     const defaultNamespaceQuery = {

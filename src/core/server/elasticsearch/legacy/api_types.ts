@@ -150,6 +150,7 @@ import {
  * processed.
  *
  * @public
+ * @deprecated
  */
 export interface LegacyCallAPIOptions {
   /**
@@ -165,7 +166,10 @@ export interface LegacyCallAPIOptions {
   signal?: AbortSignal;
 }
 
-/** @public */
+/**
+ * @deprecated
+ * @public
+ * */
 export interface LegacyAPICaller {
   /* eslint-disable */
   (endpoint: 'bulk', params: BulkIndexDocumentsParams, options?: LegacyCallAPIOptions): ReturnType<Client['bulk']>;
@@ -317,18 +321,30 @@ export interface LegacyAPICaller {
   /* eslint-enable */
 }
 
-/** @public */
+/**
+ * @deprecated
+ * @public
+ * */
 export interface AssistantAPIClientParams extends GenericParams {
   path: '/_migration/assistance';
   method: 'GET';
 }
 
-/** @public */
+/**
+ * @deprecated
+ * @public
+ * */
 export type MIGRATION_ASSISTANCE_INDEX_ACTION = 'upgrade' | 'reindex';
-/** @public */
+/**
+ * @deprecated
+ * @public
+ * */
 export type MIGRATION_DEPRECATION_LEVEL = 'none' | 'info' | 'warning' | 'critical';
 
-/** @public */
+/**
+ * @deprecated
+ * @public
+ * */
 export interface AssistanceAPIResponse {
   indices: {
     [indexName: string]: {
@@ -337,13 +353,19 @@ export interface AssistanceAPIResponse {
   };
 }
 
-/** @public */
+/**
+ * @deprecated
+ * @public
+ * */
 export interface DeprecationAPIClientParams extends GenericParams {
   path: '/_migration/deprecations';
   method: 'GET';
 }
 
-/** @public */
+/**
+ * @deprecated
+ * @public
+ * */
 export interface DeprecationInfo {
   level: MIGRATION_DEPRECATION_LEVEL;
   message: string;
@@ -351,12 +373,18 @@ export interface DeprecationInfo {
   details?: string;
 }
 
-/** @public */
+/**
+ * @deprecated
+ * @public
+ * */
 export interface IndexSettingsDeprecationInfo {
   [indexName: string]: DeprecationInfo[];
 }
 
-/** @public */
+/**
+ * @deprecated
+ * @public
+ * */
 export interface DeprecationAPIResponse {
   cluster_settings: DeprecationInfo[];
   ml_settings: DeprecationInfo[];

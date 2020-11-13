@@ -19,6 +19,8 @@
 
 import { map, shareReplay } from 'rxjs/operators';
 import { combineLatest } from 'rxjs';
+import { PathConfigType, config as pathConfig } from '@kbn/utils';
+import { pick, deepFreeze } from '@kbn/std';
 import { CoreContext } from '../core_context';
 import { PluginWrapper } from './plugin';
 import { PluginsServiceSetupDeps, PluginsServiceStartDeps } from './plugins_service';
@@ -28,14 +30,17 @@ import {
   PluginOpaqueId,
   SharedGlobalConfigKeys,
 } from './types';
-import { PathConfigType, config as pathConfig } from '../path';
 import { KibanaConfigType, config as kibanaConfig } from '../kibana_config';
 import {
   ElasticsearchConfigType,
   config as elasticsearchConfig,
 } from '../elasticsearch/elasticsearch_config';
-import { pick, deepFreeze } from '../../utils';
+import { SavedObjectsConfigType, savedObjectsConfig } from '../saved_objects/saved_objects_config';
 import { CoreSetup, CoreStart } from '..';
+
+export interface InstanceInfo {
+  uuid: string;
+}
 
 /**
  * This returns a facade for `CoreContext` that will be exposed to the plugin initializer.
@@ -53,7 +58,8 @@ import { CoreSetup, CoreStart } from '..';
 export function createPluginInitializerContext(
   coreContext: CoreContext,
   opaqueId: PluginOpaqueId,
-  pluginManifest: PluginManifest
+  pluginManifest: PluginManifest,
+  instanceInfo: InstanceInfo
 ): PluginInitializerContext {
   return {
     opaqueId,
@@ -64,6 +70,7 @@ export function createPluginInitializerContext(
     env: {
       mode: coreContext.env.mode,
       packageInfo: coreContext.env.packageInfo,
+      instanceUuid: instanceInfo.uuid,
     },
 
     /**
@@ -85,16 +92,18 @@ export function createPluginInitializerContext(
          * Note: naming not final here, it will be renamed in a near future (https://github.com/elastic/kibana/issues/46240)
          * @deprecated
          */
-        globalConfig$: combineLatest(
+        globalConfig$: combineLatest([
           coreContext.configService.atPath<KibanaConfigType>(kibanaConfig.path),
           coreContext.configService.atPath<ElasticsearchConfigType>(elasticsearchConfig.path),
-          coreContext.configService.atPath<PathConfigType>(pathConfig.path)
-        ).pipe(
-          map(([kibana, elasticsearch, path]) =>
+          coreContext.configService.atPath<PathConfigType>(pathConfig.path),
+          coreContext.configService.atPath<SavedObjectsConfigType>(savedObjectsConfig.path),
+        ]).pipe(
+          map(([kibana, elasticsearch, path, savedObjects]) =>
             deepFreeze({
               kibana: pick(kibana, SharedGlobalConfigKeys.kibana),
               elasticsearch: pick(elasticsearch, SharedGlobalConfigKeys.elasticsearch),
               path: pick(path, SharedGlobalConfigKeys.path),
+              savedObjects: pick(savedObjects, SharedGlobalConfigKeys.savedObjects),
             })
           )
         ),
@@ -167,8 +176,13 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
       csp: deps.http.csp,
       getServerInfo: deps.http.getServerInfo,
     },
+    i18n: deps.i18n,
     logging: {
       configure: (config$) => deps.logging.configure(['plugins', plugin.name], config$),
+    },
+    metrics: {
+      collectionInterval: deps.metrics.collectionInterval,
+      getOpsMetrics$: deps.metrics.getOpsMetrics$,
     },
     savedObjects: {
       setClientFactoryProvider: deps.savedObjects.setClientFactoryProvider,
@@ -178,15 +192,16 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
     },
     status: {
       core$: deps.status.core$,
+      overall$: deps.status.overall$,
+      set: deps.status.plugins.set.bind(null, plugin.name),
+      dependencies$: deps.status.plugins.getDependenciesStatus$(plugin.name),
+      derivedStatus$: deps.status.plugins.getDerivedStatus$(plugin.name),
+      isStatusPageAnonymous: deps.status.isStatusPageAnonymous,
     },
     uiSettings: {
       register: deps.uiSettings.register,
     },
-    uuid: {
-      getInstanceUuid: deps.uuid.getInstanceUuid,
-    },
     getStartServices: () => plugin.startDependencies,
-    auditTrail: deps.auditTrail,
   };
 }
 
@@ -212,6 +227,8 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>(
       resolveCapabilities: deps.capabilities.resolveCapabilities,
     },
     elasticsearch: {
+      client: deps.elasticsearch.client,
+      createClient: deps.elasticsearch.createClient,
       legacy: deps.elasticsearch.legacy,
     },
     http: {
@@ -227,11 +244,12 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>(
       getTypeRegistry: deps.savedObjects.getTypeRegistry,
     },
     metrics: {
+      collectionInterval: deps.metrics.collectionInterval,
       getOpsMetrics$: deps.metrics.getOpsMetrics$,
     },
     uiSettings: {
       asScopedToClient: deps.uiSettings.asScopedToClient,
     },
-    auditTrail: deps.auditTrail,
+    coreUsageData: deps.coreUsageData,
   };
 }

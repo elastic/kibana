@@ -25,4 +25,10 @@ export enum AlertMessageTokenType {
 export enum AlertParamType {
   Duration = 'duration',
   Percentage = 'percentage',
+  Number = 'number',
+}
+
+export enum SetupModeFeature {
+  MetricbeatMigration = 'metricbeatMigration',
+  Alerts = 'alerts',
 }

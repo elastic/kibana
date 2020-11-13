@@ -7,7 +7,7 @@
   "from": "now-1d",
   "interval": "30s",
   "to": "now",
-  "query": "signal.parent.depth: 1 and _id: *",
+  "query": "signal.depth: 1 and _id: *",
   "enabled": true,
-  "index": ".siem-signals-default"
+  "index": [".siem-signals-default"]
 }

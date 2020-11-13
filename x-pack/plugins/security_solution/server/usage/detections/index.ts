@@ -4,8 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LegacyAPICaller } from '../../../../../../src/core/server';
-import { getMlJobsUsage, getRulesUsage } from './detections_helpers';
+import { LegacyAPICaller, SavedObjectsClientContract } from '../../../../../../src/core/server';
+import {
+  getMlJobsUsage,
+  getRulesUsage,
+  initialRulesUsage,
+  initialMlJobsUsage,
+} from './detections_helpers';
 import { MlPluginSetup } from '../../../../ml/server';
 
 interface FeatureUsage {
@@ -28,12 +33,24 @@ export interface DetectionsUsage {
   ml_jobs: MlJobsUsage;
 }
 
+export const defaultDetectionsUsage = {
+  detection_rules: initialRulesUsage,
+  ml_jobs: initialMlJobsUsage,
+};
+
 export const fetchDetectionsUsage = async (
   kibanaIndex: string,
   callCluster: LegacyAPICaller,
-  ml: MlPluginSetup | undefined
+  ml: MlPluginSetup | undefined,
+  savedObjectClient: SavedObjectsClientContract
 ): Promise<DetectionsUsage> => {
-  const rulesUsage = await getRulesUsage(kibanaIndex, callCluster);
-  const mlJobsUsage = await getMlJobsUsage(ml);
-  return { detection_rules: rulesUsage, ml_jobs: mlJobsUsage };
+  const [rulesUsage, mlJobsUsage] = await Promise.allSettled([
+    getRulesUsage(kibanaIndex, callCluster),
+    getMlJobsUsage(ml, savedObjectClient),
+  ]);
+
+  return {
+    detection_rules: rulesUsage.status === 'fulfilled' ? rulesUsage.value : initialRulesUsage,
+    ml_jobs: mlJobsUsage.status === 'fulfilled' ? mlJobsUsage.value : initialMlJobsUsage,
+  };
 };

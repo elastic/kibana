@@ -5,8 +5,8 @@
  */
 
 import { difference } from 'lodash';
-import { ILegacyScopedClusterClient } from 'kibana/server';
 import { EventManager, CalendarEvent } from './event_manager';
+import type { MlClient } from '../../lib/ml_client';
 
 interface BasicCalendar {
   job_ids: string[];
@@ -23,30 +23,30 @@ export interface FormCalendar extends BasicCalendar {
 }
 
 export class CalendarManager {
-  private _callAsInternalUser: ILegacyScopedClusterClient['callAsInternalUser'];
+  private _mlClient: MlClient;
   private _eventManager: EventManager;
 
-  constructor(mlClusterClient: ILegacyScopedClusterClient) {
-    this._callAsInternalUser = mlClusterClient.callAsInternalUser;
-    this._eventManager = new EventManager(mlClusterClient);
+  constructor(mlClient: MlClient) {
+    this._mlClient = mlClient;
+    this._eventManager = new EventManager(mlClient);
   }
 
   async getCalendar(calendarId: string) {
-    const resp = await this._callAsInternalUser('ml.calendars', {
-      calendarId,
+    const { body } = await this._mlClient.getCalendars({
+      calendar_id: calendarId,
     });
 
-    const calendars = resp.calendars;
+    const calendars = body.calendars;
     const calendar = calendars[0]; // Endpoint throws a 404 if calendar is not found.
     calendar.events = await this._eventManager.getCalendarEvents(calendarId);
     return calendar;
   }
 
   async getAllCalendars() {
-    const calendarsResp = await this._callAsInternalUser('ml.calendars');
+    const { body } = await this._mlClient.getCalendars({ size: 1000 });
 
     const events: CalendarEvent[] = await this._eventManager.getAllEvents();
-    const calendars: Calendar[] = calendarsResp.calendars;
+    const calendars: Calendar[] = body.calendars;
     calendars.forEach((cal) => (cal.events = []));
 
     // loop events and combine with related calendars
@@ -70,13 +70,10 @@ export class CalendarManager {
   }
 
   async newCalendar(calendar: FormCalendar) {
-    const calendarId = calendar.calendarId;
-    const events = calendar.events;
-    delete calendar.calendarId;
-    delete calendar.events;
-    await this._callAsInternalUser('ml.addCalendar', {
-      calendarId,
-      body: calendar,
+    const { calendarId, events, ...newCalendar } = calendar;
+    await this._mlClient.putCalendar({
+      calendar_id: calendarId,
+      body: newCalendar,
     });
 
     if (events.length) {
@@ -109,17 +106,17 @@ export class CalendarManager {
 
     // add all new jobs
     if (jobsToAdd.length) {
-      await this._callAsInternalUser('ml.addJobToCalendar', {
-        calendarId,
-        jobId: jobsToAdd.join(','),
+      await this._mlClient.putCalendarJob({
+        calendar_id: calendarId,
+        job_id: jobsToAdd.join(','),
       });
     }
 
     // remove all removed jobs
     if (jobsToRemove.length) {
-      await this._callAsInternalUser('ml.removeJobFromCalendar', {
-        calendarId,
-        jobId: jobsToRemove.join(','),
+      await this._mlClient.deleteCalendarJob({
+        calendar_id: calendarId,
+        job_id: jobsToRemove.join(','),
       });
     }
 
@@ -140,6 +137,7 @@ export class CalendarManager {
   }
 
   async deleteCalendar(calendarId: string) {
-    return this._callAsInternalUser('ml.deleteCalendar', { calendarId });
+    const { body } = await this._mlClient.deleteCalendar({ calendar_id: calendarId });
+    return body;
   }
 }

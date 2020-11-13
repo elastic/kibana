@@ -19,28 +19,40 @@ import {
   EuiBetaBadge,
   EuiText,
   EuiLink,
+  EuiTabs,
+  EuiTab,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { Option, none, some } from 'fp-ts/lib/Option';
 import { ActionConnectorForm, validateBaseProperties } from './action_connector_form';
-import { ActionConnectorTableItem, ActionConnector, IErrorObject } from '../../../types';
+import { TestConnectorForm } from './test_connector_form';
+import { ActionConnector, IErrorObject } from '../../../types';
 import { connectorReducer } from './connector_reducer';
-import { updateActionConnector } from '../../lib/action_connector_api';
+import { updateActionConnector, executeAction } from '../../lib/action_connector_api';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
 import { useActionsConnectorsContext } from '../../context/actions_connectors_context';
-import { PLUGIN } from '../../constants/plugin';
+import {
+  ActionTypeExecutorResult,
+  isActionTypeExecutorResult,
+} from '../../../../../actions/common';
+import './connector_edit_flyout.scss';
 
 export interface ConnectorEditProps {
-  initialConnector: ActionConnectorTableItem;
-  editFlyoutVisible: boolean;
-  setEditFlyoutVisibility: React.Dispatch<React.SetStateAction<boolean>>;
+  initialConnector: ActionConnector;
+  onClose: () => void;
+  tab?: EditConectorTabs;
+}
+
+export enum EditConectorTabs {
+  Configuration = 'configuration',
+  Test = 'test',
 }
 
 export const ConnectorEditFlyout = ({
   initialConnector,
-  editFlyoutVisible,
-  setEditFlyoutVisibility,
+  onClose,
+  tab = EditConectorTabs.Configuration,
 }: ConnectorEditProps) => {
-  let hasErrors = false;
   const {
     http,
     toastNotifications,
@@ -56,26 +68,39 @@ export const ConnectorEditFlyout = ({
     connector: { ...initialConnector, secrets: {} },
   });
   const [isSaving, setIsSaving] = useState<boolean>(false);
+  const [selectedTab, setTab] = useState<EditConectorTabs>(tab);
+
+  const [hasChanges, setHasChanges] = useState<boolean>(false);
   const setConnector = (key: string, value: any) => {
     dispatch({ command: { type: 'setConnector' }, payload: { key, value } });
   };
 
-  const closeFlyout = useCallback(() => {
-    setEditFlyoutVisibility(false);
-    setConnector('connector', { ...initialConnector, secrets: {} });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [setEditFlyoutVisibility]);
+  const [testExecutionActionParams, setTestExecutionActionParams] = useState<
+    Record<string, unknown>
+  >({});
+  const [testExecutionResult, setTestExecutionResult] = useState<
+    Option<ActionTypeExecutorResult<unknown>>
+  >(none);
+  const [isExecutingAction, setIsExecutinAction] = useState<boolean>(false);
 
-  if (!editFlyoutVisible) {
-    return null;
-  }
+  const closeFlyout = useCallback(() => {
+    setConnector('connector', { ...initialConnector, secrets: {} });
+    setHasChanges(false);
+    setTestExecutionResult(none);
+    onClose();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [onClose]);
 
   const actionTypeModel = actionTypeRegistry.get(connector.actionTypeId);
-  const errors = {
-    ...actionTypeModel?.validateConnector(connector).errors,
-    ...validateBaseProperties(connector).errors,
-  } as IErrorObject;
-  hasErrors = !!Object.keys(errors).find((errorKey) => errors[errorKey].length >= 1);
+  const errorsInConnectorConfig = (!connector.isPreconfigured
+    ? {
+        ...actionTypeModel?.validateConnector(connector).errors,
+        ...validateBaseProperties(connector).errors,
+      }
+    : {}) as IErrorObject;
+  const hasErrorsInConnectorConfig = !!Object.keys(errorsInConnectorConfig).find(
+    (errorKey) => errorsInConnectorConfig[errorKey].length >= 1
+  );
 
   const onActionConnectorSave = async (): Promise<ActionConnector | undefined> =>
     await updateActionConnector({ http, connector, id: connector.id })
@@ -124,20 +149,6 @@ export const ConnectorEditFlyout = ({
               }
             )}
           />
-          &emsp;
-          <EuiBetaBadge
-            label="Beta"
-            tooltipContent={i18n.translate(
-              'xpack.triggersActionsUI.sections.preconfiguredConnectorForm.betaBadgeTooltipContent',
-              {
-                defaultMessage:
-                  '{pluginName} is in beta and is subject to change. The design and code is less mature than official GA features and is being provided as-is with no warranties. Beta features are not subject to the support SLA of official GA features.',
-                values: {
-                  pluginName: PLUGIN.getI18nName(i18n),
-                },
-              }
-            )}
-          />
         </h3>
       </EuiTitle>
       <EuiText size="s">
@@ -155,23 +166,46 @@ export const ConnectorEditFlyout = ({
           defaultMessage="Edit connector"
           id="xpack.triggersActionsUI.sections.editConnectorForm.flyoutPreconfiguredTitle"
         />
-        &emsp;
-        <EuiBetaBadge
-          label="Beta"
-          tooltipContent={i18n.translate(
-            'xpack.triggersActionsUI.sections.editConnectorForm.betaBadgeTooltipContent',
-            {
-              defaultMessage:
-                '{pluginName} is in beta and is subject to change. The design and code is less mature than official GA features and is being provided as-is with no warranties. Beta features are not subject to the support SLA of official GA features.',
-              values: {
-                pluginName: PLUGIN.getI18nName(i18n),
-              },
-            }
-          )}
-        />
       </h3>
     </EuiTitle>
   );
+
+  const onExecutAction = () => {
+    setIsExecutinAction(true);
+    return executeAction({ id: connector.id, params: testExecutionActionParams, http })
+      .then((result) => {
+        setIsExecutinAction(false);
+        setTestExecutionResult(some(result));
+        return result;
+      })
+      .catch((ex: Error | ActionTypeExecutorResult<unknown>) => {
+        const result: ActionTypeExecutorResult<unknown> = isActionTypeExecutorResult(ex)
+          ? ex
+          : {
+              actionId: connector.id,
+              status: 'error',
+              message: ex.message,
+            };
+        setIsExecutinAction(false);
+        setTestExecutionResult(some(result));
+        return result;
+      });
+  };
+
+  const onSaveClicked = async (closeAfterSave: boolean = true) => {
+    setIsSaving(true);
+    const savedAction = await onActionConnectorSave();
+    setIsSaving(false);
+    if (savedAction) {
+      setHasChanges(false);
+      if (closeAfterSave) {
+        closeFlyout();
+      }
+      if (reloadConnectors) {
+        reloadConnectors();
+      }
+    }
+  };
 
   return (
     <EuiFlyout onClose={closeFlyout} aria-labelledby="flyoutActionEditTitle" size="m">
@@ -184,40 +218,78 @@ export const ConnectorEditFlyout = ({
           ) : null}
           <EuiFlexItem>{flyoutTitle}</EuiFlexItem>
         </EuiFlexGroup>
+        <EuiTabs className="connectorEditFlyoutTabs">
+          <EuiTab
+            onClick={() => setTab(EditConectorTabs.Configuration)}
+            data-test-subj="configureConnectorTab"
+            isSelected={EditConectorTabs.Configuration === selectedTab}
+          >
+            {i18n.translate('xpack.triggersActionsUI.sections.editConnectorForm.tabText', {
+              defaultMessage: 'Configuration',
+            })}
+          </EuiTab>
+          <EuiTab
+            onClick={() => setTab(EditConectorTabs.Test)}
+            data-test-subj="testConnectorTab"
+            isSelected={EditConectorTabs.Test === selectedTab}
+          >
+            {i18n.translate('xpack.triggersActionsUI.sections.testConnectorForm.tabText', {
+              defaultMessage: 'Test',
+            })}
+          </EuiTab>
+        </EuiTabs>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        {!connector.isPreconfigured ? (
-          <ActionConnectorForm
-            connector={connector}
-            errors={errors}
-            actionTypeName={connector.actionType}
-            dispatch={dispatch}
-            actionTypeRegistry={actionTypeRegistry}
-            http={http}
-            docLinks={docLinks}
-            capabilities={capabilities}
-            consumer={consumer}
-          />
+        {selectedTab === EditConectorTabs.Configuration ? (
+          !connector.isPreconfigured ? (
+            <ActionConnectorForm
+              connector={connector}
+              errors={errorsInConnectorConfig}
+              actionTypeName={connector.actionType}
+              dispatch={(changes) => {
+                setHasChanges(true);
+                // if the user changes the connector, "forget" the last execution
+                // so the user comes back to a clean form ready to run a fresh test
+                setTestExecutionResult(none);
+                dispatch(changes);
+              }}
+              actionTypeRegistry={actionTypeRegistry}
+              http={http}
+              docLinks={docLinks}
+              capabilities={capabilities}
+              consumer={consumer}
+            />
+          ) : (
+            <Fragment>
+              <EuiText>
+                {i18n.translate(
+                  'xpack.triggersActionsUI.sections.editConnectorForm.descriptionText',
+                  {
+                    defaultMessage: 'This connector is readonly.',
+                  }
+                )}
+              </EuiText>
+              <EuiLink
+                href={`${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/pre-configured-action-types-and-connectors.html`}
+                target="_blank"
+              >
+                <FormattedMessage
+                  id="xpack.triggersActionsUI.sections.editConnectorForm.preconfiguredHelpLabel"
+                  defaultMessage="Learn more about preconfigured connectors."
+                />
+              </EuiLink>
+            </Fragment>
+          )
         ) : (
-          <Fragment>
-            <EuiText>
-              {i18n.translate(
-                'xpack.triggersActionsUI.sections.editConnectorForm.descriptionText',
-                {
-                  defaultMessage: 'This connector is readonly.',
-                }
-              )}
-            </EuiText>
-            <EuiLink
-              href={`${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/pre-configured-action-types-and-connectors.html`}
-              target="_blank"
-            >
-              <FormattedMessage
-                id="xpack.triggersActionsUI.sections.editConnectorForm.preconfiguredHelpLabel"
-                defaultMessage="Learn more about preconfigured connectors."
-              />
-            </EuiLink>
-          </Fragment>
+          <TestConnectorForm
+            connector={connector}
+            executeEnabled={!hasChanges}
+            actionParams={testExecutionActionParams}
+            setActionParams={setTestExecutionActionParams}
+            onExecutAction={onExecutAction}
+            isExecutingAction={isExecutingAction}
+            executionResult={testExecutionResult}
+          />
         )}
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
@@ -232,35 +304,48 @@ export const ConnectorEditFlyout = ({
               )}
             </EuiButtonEmpty>
           </EuiFlexItem>
-          {canSave && actionTypeModel && !connector.isPreconfigured ? (
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                fill
-                color="secondary"
-                data-test-subj="saveEditedActionButton"
-                type="submit"
-                iconType="check"
-                isDisabled={hasErrors}
-                isLoading={isSaving}
-                onClick={async () => {
-                  setIsSaving(true);
-                  const savedAction = await onActionConnectorSave();
-                  setIsSaving(false);
-                  if (savedAction) {
-                    closeFlyout();
-                    if (reloadConnectors) {
-                      reloadConnectors();
-                    }
-                  }
-                }}
-              >
-                <FormattedMessage
-                  id="xpack.triggersActionsUI.sections.editConnectorForm.saveButtonLabel"
-                  defaultMessage="Save"
-                />
-              </EuiButton>
-            </EuiFlexItem>
-          ) : null}
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup justifyContent="spaceBetween">
+              {canSave && actionTypeModel && !connector.isPreconfigured ? (
+                <Fragment>
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
+                      color="secondary"
+                      data-test-subj="saveEditedActionButton"
+                      isDisabled={hasErrorsInConnectorConfig || !hasChanges}
+                      isLoading={isSaving || isExecutingAction}
+                      onClick={async () => {
+                        await onSaveClicked(false);
+                      }}
+                    >
+                      <FormattedMessage
+                        id="xpack.triggersActionsUI.sections.editConnectorForm.saveButtonLabel"
+                        defaultMessage="Save"
+                      />
+                    </EuiButton>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
+                      fill
+                      color="secondary"
+                      data-test-subj="saveAndCloseEditedActionButton"
+                      type="submit"
+                      isDisabled={hasErrorsInConnectorConfig || !hasChanges}
+                      isLoading={isSaving || isExecutingAction}
+                      onClick={async () => {
+                        await onSaveClicked();
+                      }}
+                    >
+                      <FormattedMessage
+                        id="xpack.triggersActionsUI.sections.editConnectorForm.saveAndCloseButtonLabel"
+                        defaultMessage="Save & Close"
+                      />
+                    </EuiButton>
+                  </EuiFlexItem>
+                </Fragment>
+              ) : null}
+            </EuiFlexGroup>
+          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutFooter>
     </EuiFlyout>

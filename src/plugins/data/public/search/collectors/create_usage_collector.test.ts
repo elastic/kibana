@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import type { MockedKeys } from '@kbn/utility-types/jest';
 import { CoreSetup, CoreStart } from '../../../../../core/public';
 import { coreMock } from '../../../../../core/public/mocks';
 import { usageCollectionPluginMock, Setup } from '../../../../usage_collection/public/mocks';
@@ -42,7 +42,7 @@ describe('Search Usage Collector', () => {
       {} as any,
     ]);
     mockUsageCollectionSetup = usageCollectionPluginMock.createSetupContract();
-    usageCollector = createUsageCollector(mockCoreSetup, mockUsageCollectionSetup);
+    usageCollector = createUsageCollector(mockCoreSetup.getStartServices, mockUsageCollectionSetup);
   });
 
   test('tracks query timeouts', async () => {
@@ -62,46 +62,5 @@ describe('Search Usage Collector', () => {
     expect(mockUsageCollectionSetup.reportUiStats.mock.calls[0][2]).toBe(
       SEARCH_EVENT_TYPE.QUERIES_CANCELLED
     );
-  });
-
-  test('tracks long popups', async () => {
-    await usageCollector.trackLongQueryPopupShown();
-    expect(mockUsageCollectionSetup.reportUiStats).toHaveBeenCalled();
-    expect(mockUsageCollectionSetup.reportUiStats.mock.calls[0][1]).toBe(METRIC_TYPE.LOADED);
-    expect(mockUsageCollectionSetup.reportUiStats.mock.calls[0][2]).toBe(
-      SEARCH_EVENT_TYPE.LONG_QUERY_POPUP_SHOWN
-    );
-  });
-
-  test('tracks long popups dismissed', async () => {
-    await usageCollector.trackLongQueryDialogDismissed();
-    expect(mockUsageCollectionSetup.reportUiStats).toHaveBeenCalled();
-    expect(mockUsageCollectionSetup.reportUiStats.mock.calls[0][1]).toBe(METRIC_TYPE.CLICK);
-    expect(mockUsageCollectionSetup.reportUiStats.mock.calls[0][2]).toBe(
-      SEARCH_EVENT_TYPE.LONG_QUERY_DIALOG_DISMISSED
-    );
-  });
-
-  test('tracks run query beyond timeout', async () => {
-    await usageCollector.trackLongQueryRunBeyondTimeout();
-    expect(mockUsageCollectionSetup.reportUiStats).toHaveBeenCalled();
-    expect(mockUsageCollectionSetup.reportUiStats.mock.calls[0][1]).toBe(METRIC_TYPE.CLICK);
-    expect(mockUsageCollectionSetup.reportUiStats.mock.calls[0][2]).toBe(
-      SEARCH_EVENT_TYPE.LONG_QUERY_RUN_BEYOND_TIMEOUT
-    );
-  });
-
-  test('tracks response errors', async () => {
-    const duration = 10;
-    await usageCollector.trackError(duration);
-    expect(mockCoreSetup.http.post).toBeCalled();
-    expect(mockCoreSetup.http.post.mock.calls[0][0]).toBe('/api/search/usage');
-  });
-
-  test('tracks response duration', async () => {
-    const duration = 5;
-    await usageCollector.trackSuccess(duration);
-    expect(mockCoreSetup.http.post).toBeCalled();
-    expect(mockCoreSetup.http.post.mock.calls[0][0]).toBe('/api/search/usage');
   });
 });

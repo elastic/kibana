@@ -18,6 +18,7 @@
  */
 
 import { SearchResponse, SearchParams } from 'elasticsearch';
+
 import { Filter } from 'src/plugins/data/public';
 import { DslQuery } from 'src/plugins/data/common';
 import { EsQueryParser } from './es_query_parser';
@@ -42,10 +43,17 @@ interface Encoding {
   y: Coordinate;
 }
 
-interface AutoSize {
-  type: string;
-  contains: string;
-}
+type AutoSize =
+  | 'pad'
+  | 'fit'
+  | 'fit-x'
+  | 'fit-y'
+  | 'none'
+  | {
+      type: string;
+      contains: string;
+    }
+  | { signal: string };
 
 interface Padding {
   left: number;
@@ -62,7 +70,7 @@ interface Mark {
 type Renderer = 'svg' | 'canvas';
 
 interface VegaSpecConfig extends KibanaConfig {
-  kibana: KibanaConfig;
+  kibana?: KibanaConfig;
   padding: Padding;
   projection: Projection;
   autosize: AutoSize;
@@ -75,11 +83,8 @@ interface Projection {
 }
 
 interface RequestDataObject {
+  name?: string;
   values: SearchResponse<unknown>;
-}
-
-interface RequestObject {
-  url: string;
 }
 
 type ContextVarsObjectProps =
@@ -105,10 +110,10 @@ export interface VegaSpec {
   encoding?: Encoding;
   mark?: string;
   title?: string;
-  autosize: AutoSize;
-  projections: Projection[];
-  width?: number;
-  height?: number;
+  autosize?: AutoSize;
+  projections?: Projection[];
+  width?: number | 'container';
+  height?: number | 'container';
   padding?: number | Padding;
   _hostConfig?: KibanaConfig;
   config: VegaSpecConfig;
@@ -176,21 +181,21 @@ export interface Data {
   source?: unknown;
 }
 
-export interface CacheOptions {
-  max: number;
-  maxAge: number;
-}
-
 export interface CacheBounds {
   min: number;
   max: number;
 }
 
-export interface Requests extends RequestObject {
-  obj: RequestObject;
+interface Requests<TUrlData = UrlObject, TRequestDataObject = RequestDataObject> {
+  url: TUrlData;
   name: string;
-  dataObject: RequestDataObject;
+  dataObject: TRequestDataObject;
 }
+
+export type EsQueryRequest = Requests;
+export type EmsQueryRequest = Requests & {
+  obj: UrlObject;
+};
 
 export interface ContextVarsObject {
   [index: string]: any;
@@ -202,6 +207,7 @@ export interface TooltipConfig {
   position?: ToolTipPositions;
   padding?: number | Padding;
   centerOnMark?: boolean | number;
+  textTruncate?: boolean;
 }
 
 export interface DstObj {

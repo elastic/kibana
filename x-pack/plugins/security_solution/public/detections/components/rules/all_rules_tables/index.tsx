@@ -20,7 +20,7 @@ import {
   RulesColumns,
   RuleStatusRowItemType,
 } from '../../../pages/detection_engine/rules/all/columns';
-import { Rule, Rules } from '../../../containers/detection_engine/rules/types';
+import { Rule, Rules, RulesSortingFields } from '../../../containers/detection_engine/rules/types';
 import { AllRulesTabs } from '../../../pages/detection_engine/rules/all';
 
 // EuiBasicTable give me a hardtime with adding the ref attributes so I went the easy way
@@ -30,7 +30,7 @@ const MyEuiBasicTable = styled(EuiBasicTable as any)`` as any;
 
 export interface SortingType {
   sort: {
-    field: 'enabled';
+    field: RulesSortingFields;
     direction: Direction;
   };
 }
@@ -48,12 +48,7 @@ interface AllRulesTablesProps {
   rules: Rules;
   rulesColumns: RulesColumns[];
   rulesStatuses: RuleStatusRowItemType[];
-  sorting: {
-    sort: {
-      field: 'enabled';
-      direction: Direction;
-    };
-  };
+  sorting: SortingType;
   tableOnChangeCallback: ({ page, sort }: EuiBasicTableOnChange) => void;
   tableRef?: React.MutableRefObject<EuiBasicTable | undefined>;
   selectedTab: AllRulesTabs;

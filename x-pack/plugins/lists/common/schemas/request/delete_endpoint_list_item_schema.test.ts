@@ -7,7 +7,7 @@
 import { left } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 
-import { exactCheck, foldLeftRight, getPaths } from '../../siem_common_deps';
+import { exactCheck, foldLeftRight, getPaths } from '../../shared_imports';
 
 import {
   DeleteEndpointListItemSchema,
@@ -30,6 +30,7 @@ describe('delete_endpoint_list_item_schema', () => {
     const payload: DeleteEndpointListItemSchema & {
       namespace_type: string;
     } = { ...getDeleteEndpointListItemSchemaMock(), namespace_type: 'single' };
+    // @ts-expect-error
     delete payload.namespace_type;
     const decoded = deleteEndpointListItemSchema.decode(payload);
     const checked = exactCheck(payload, decoded);

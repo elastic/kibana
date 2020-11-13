@@ -34,6 +34,7 @@ describe('injectMetaAttributes', () => {
       path: 'path',
       uiCapabilitiesPath: 'uiCapabilitiesPath',
     });
+    managementService.getNamespaceType.mockReturnValue('single');
   });
 
   it('inject the metadata to the obj', () => {
@@ -58,6 +59,7 @@ describe('injectMetaAttributes', () => {
           path: 'path',
           uiCapabilitiesPath: 'uiCapabilitiesPath',
         },
+        namespaceType: 'single',
       },
     });
   });

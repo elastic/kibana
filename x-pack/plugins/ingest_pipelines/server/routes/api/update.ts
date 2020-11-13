@@ -32,6 +32,7 @@ export const registerUpdateRoute = ({
     license.guardApiRoute(async (ctx, req, res) => {
       const { callAsCurrentUser } = ctx.core.elasticsearch.legacy.client;
       const { name } = req.params;
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       const { description, processors, version, on_failure } = req.body;
 
       try {

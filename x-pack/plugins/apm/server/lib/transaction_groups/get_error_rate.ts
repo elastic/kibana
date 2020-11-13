@@ -3,35 +3,44 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { mean } from 'lodash';
+
+import { Coordinate } from '../../../typings/timeseries';
+
 import {
-  PROCESSOR_EVENT,
-  HTTP_RESPONSE_STATUS_CODE,
+  EVENT_OUTCOME,
+  SERVICE_NAME,
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
-  SERVICE_NAME,
 } from '../../../common/elasticsearch_fieldnames';
-import { ProcessorEvent } from '../../../common/processor_event';
+import { EventOutcome } from '../../../common/event_outcome';
 import { rangeFilter } from '../../../common/utils/range_filter';
-import { getMetricsDateHistogramParams } from '../helpers/metrics';
+import { getProcessorEventForAggregatedTransactions } from '../helpers/aggregated_transactions';
+import { getBucketSize } from '../helpers/get_bucket_size';
+import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import {
-  Setup,
-  SetupTimeRange,
-  SetupUIFilters,
-} from '../helpers/setup_request';
+  calculateTransactionErrorPercentage,
+  getOutcomeAggregation,
+  getTransactionErrorRateTimeSeries,
+} from '../helpers/transaction_error_rate';
 
 export async function getErrorRate({
   serviceName,
   transactionType,
   transactionName,
   setup,
+  searchAggregatedTransactions,
 }: {
   serviceName: string;
   transactionType?: string;
   transactionName?: string;
-  setup: Setup & SetupTimeRange & SetupUIFilters;
-}) {
-  const { start, end, uiFiltersES, client, indices } = setup;
+  setup: Setup & SetupTimeRange;
+  searchAggregatedTransactions: boolean;
+}): Promise<{
+  noHits: boolean;
+  transactionErrorRate: Coordinate[];
+  average: number | null;
+}> {
+  const { start, end, esFilter, apmEventClient } = setup;
 
   const transactionNamefilter = transactionName
     ? [{ term: { [TRANSACTION_NAME]: transactionName } }]
@@ -42,54 +51,60 @@ export async function getErrorRate({
 
   const filter = [
     { term: { [SERVICE_NAME]: serviceName } },
-    { term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } },
     { range: rangeFilter(start, end) },
-    { exists: { field: HTTP_RESPONSE_STATUS_CODE } },
+    {
+      terms: { [EVENT_OUTCOME]: [EventOutcome.failure, EventOutcome.success] },
+    },
     ...transactionNamefilter,
     ...transactionTypefilter,
-    ...uiFiltersES,
+    ...esFilter,
   ];
 
+  const outcomes = getOutcomeAggregation({ searchAggregatedTransactions });
+
   const params = {
-    index: indices['apm_oss.transactionIndices'],
+    apm: {
+      events: [
+        getProcessorEventForAggregatedTransactions(
+          searchAggregatedTransactions
+        ),
+      ],
+    },
     body: {
       size: 0,
       query: { bool: { filter } },
       aggs: {
-        total_transactions: {
-          date_histogram: getMetricsDateHistogramParams(start, end),
+        outcomes,
+        timeseries: {
+          date_histogram: {
+            field: '@timestamp',
+            fixed_interval: getBucketSize(start, end).intervalString,
+            min_doc_count: 0,
+            extended_bounds: { min: start, max: end },
+          },
           aggs: {
-            erroneous_transactions: {
-              filter: { range: { [HTTP_RESPONSE_STATUS_CODE]: { gte: 400 } } },
-            },
+            outcomes,
           },
         },
       },
     },
   };
 
-  const resp = await client.search(params);
+  const resp = await apmEventClient.search(params);
 
   const noHits = resp.hits.total.value === 0;
 
-  const erroneousTransactionsRate =
-    resp.aggregations?.total_transactions.buckets.map(
-      ({ key, doc_count: totalTransactions, erroneous_transactions }) => {
-        const errornousTransactionsCount =
-          // @ts-ignore
-          erroneous_transactions.doc_count;
-        return {
-          x: key,
-          y: errornousTransactionsCount / totalTransactions,
-        };
-      }
-    ) || [];
+  if (!resp.aggregations) {
+    return { noHits, transactionErrorRate: [], average: null };
+  }
 
-  const average = mean(
-    erroneousTransactionsRate
-      .map((errorRate) => errorRate.y)
-      .filter((y) => isFinite(y))
+  const transactionErrorRate = getTransactionErrorRateTimeSeries(
+    resp.aggregations.timeseries.buckets
   );
 
-  return { noHits, erroneousTransactionsRate, average };
+  const average = calculateTransactionErrorPercentage(
+    resp.aggregations.outcomes
+  );
+
+  return { noHits, transactionErrorRate, average };
 }

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { notFound } from 'boom';
+import { notFound } from '@hapi/boom';
 import { set } from '@elastic/safer-lodash-set';
 import { findIndex } from 'lodash';
 import { getClustersStats } from './get_clusters_stats';
@@ -133,6 +133,16 @@ export async function getClustersFromRequest(
           continue;
         }
 
+        if (!alertsClient) {
+          cluster.alerts = {
+            list: {},
+            alertsMeta: {
+              enabled: false,
+            },
+          };
+          continue;
+        }
+
         // check the license type of the production cluster for alerts feature support
         const license = cluster.license || {};
         const prodLicenseInfo = checkLicenseForAlerts(
@@ -161,7 +171,7 @@ export async function getClustersFromRequest(
         cluster.alerts = {
           list: {},
           alertsMeta: {
-            enabled: true,
+            enabled: false,
           },
           clusterMeta: {
             enabled: false,

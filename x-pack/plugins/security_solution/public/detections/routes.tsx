@@ -12,12 +12,11 @@ import { NotFoundPage } from '../app/404';
 
 export const AlertsRoutes: React.FC = () => (
   <Switch>
-    <Route
-      path="/"
-      render={({ location, match }) => (
-        <DetectionEngineContainer location={location} url={match.url} />
-      )}
-    />
-    <Route render={() => <NotFoundPage />} />
+    <Route path="/">
+      <DetectionEngineContainer />
+    </Route>
+    <Route>
+      <NotFoundPage />
+    </Route>
   </Switch>
 );

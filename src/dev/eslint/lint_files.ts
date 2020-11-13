@@ -19,9 +19,9 @@
 
 import { CLIEngine } from 'eslint';
 
+import { REPO_ROOT } from '@kbn/utils';
 import { createFailError, ToolingLog } from '@kbn/dev-utils';
 import { File } from '../file';
-import { REPO_ROOT } from '../constants';
 
 /**
  * Lints a list of files with eslint. eslint reports are written to the log

@@ -20,11 +20,15 @@
 /* eslint new-cap: 0 */
 /* eslint no-unused-vars: 0 */
 
+import { always } from './utils';
+
 export const Right = (x) => ({
   chain: (f) => f(x),
   map: (f) => Right(f(x)),
   fold: (leftFn, rightFn) => rightFn(x),
   inspect: () => `Right(${x})`,
+  isLeft: always(false),
+  isRight: always(true),
 });
 
 Right.of = function of(x) {
@@ -40,6 +44,8 @@ export const Left = (x) => ({
   map: (f) => Left(x),
   fold: (leftFn, rightFn) => leftFn(x),
   inspect: () => `Left(${x})`,
+  isLeft: always(true),
+  isRight: always(false),
 });
 
 Left.of = function of(x) {

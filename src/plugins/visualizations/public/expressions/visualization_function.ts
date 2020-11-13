@@ -117,7 +117,6 @@ export const visualization = (): ExpressionFunctionVisualization => ({
         uiState,
         inspectorAdapters,
         queryFilter: getFilterManager(),
-        forceFetch: true,
         aggs,
       });
     }

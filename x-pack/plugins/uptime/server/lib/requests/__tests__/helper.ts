@@ -4,15 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LegacyScopedClusterClient } from 'src/core/server';
 import { elasticsearchServiceMock } from '../../../../../../../src/core/server/mocks';
+
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { ElasticsearchClientMock } from '../../../../../../../src/core/server/elasticsearch/client/mocks';
 
 export interface MultiPageCriteria<K, T> {
   after_key?: K;
   bucketCriteria: T[];
 }
-
-export type MockCallES = (method: any, params: any) => Promise<any>;
 
 /**
  * This utility function will set up a mock ES client, and store subsequent calls. It is designed
@@ -30,9 +30,10 @@ export type MockCallES = (method: any, params: any) => Promise<any>;
 export const setupMockEsCompositeQuery = <K, C, I>(
   criteria: Array<MultiPageCriteria<K, C>>,
   genBucketItem: (criteria: C) => I
-): [MockCallES, jest.Mocked<Pick<LegacyScopedClusterClient, 'callAsCurrentUser'>>] => {
-  const esMock = elasticsearchServiceMock.createLegacyScopedClusterClient();
+): ElasticsearchClientMock => {
+  const esMock = elasticsearchServiceMock.createElasticsearchClient();
 
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   criteria.forEach(({ after_key, bucketCriteria }) => {
     const mockResponse = {
       aggregations: {
@@ -42,8 +43,14 @@ export const setupMockEsCompositeQuery = <K, C, I>(
         },
       },
     };
-    esMock.callAsCurrentUser.mockResolvedValueOnce(mockResponse);
+    esMock.search.mockResolvedValueOnce({
+      body: mockResponse,
+      statusCode: 200,
+      headers: {},
+      warnings: [],
+      meta: {} as any,
+    });
   });
 
-  return [(method: any, params: any) => esMock.callAsCurrentUser(method, params), esMock];
+  return esMock;
 };

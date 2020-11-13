@@ -20,7 +20,7 @@
 import { PluginInitializerContext } from 'src/core/public';
 import { coreMock } from '../../../core/public/mocks';
 import { managementPluginMock } from '../../management/public/mocks';
-import { kibanaLegacyPluginMock } from '../../kibana_legacy/public/mocks';
+import { urlForwardingPluginMock } from '../../url_forwarding/public/mocks';
 import { dataPluginMock } from '../../data/public/mocks';
 import {
   IndexPatternManagementSetup,
@@ -39,6 +39,9 @@ const createSetupContract = (): IndexPatternManagementSetup => ({
     getAll: jest.fn(),
     getById: jest.fn(),
   } as any,
+  environment: {
+    update: jest.fn(),
+  },
 });
 
 const createStartContract = (): IndexPatternManagementStart => ({
@@ -62,7 +65,7 @@ const createInstance = async () => {
 
   const setup = plugin.setup(coreMock.createSetup(), {
     management: managementPluginMock.createSetupContract(),
-    kibanaLegacy: kibanaLegacyPluginMock.createSetupContract(),
+    urlForwarding: urlForwardingPluginMock.createSetupContract(),
   });
   const doStart = () =>
     plugin.start(coreMock.createStart(), {

@@ -18,6 +18,8 @@
  */
 
 import React from 'react';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+
 import { I18nService, I18nStart } from './i18n_service';
 
 const PassThroughComponent = ({ children }: { children: React.ReactNode }) => children;

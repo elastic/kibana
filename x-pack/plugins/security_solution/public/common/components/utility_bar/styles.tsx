@@ -26,13 +26,11 @@ export const Bar = styled.aside.attrs({
   className: 'siemUtilityBar',
 })<BarProps>`
   ${({ border, theme }) => css`
-    ${
-      border &&
-      css`
-        border-bottom: ${theme.eui.euiBorderThin};
-        padding-bottom: ${theme.eui.paddingSizes.s};
-      `
-    }
+    ${border &&
+    css`
+      border-bottom: ${theme.eui.euiBorderThin};
+      padding-bottom: ${theme.eui.paddingSizes.s};
+    `}
 
     @media only screen and (min-width: ${theme.eui.euiBreakpoints.l}) {
       display: flex;

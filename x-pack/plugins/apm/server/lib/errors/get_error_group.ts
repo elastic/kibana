@@ -4,20 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { PromiseReturnType } from '../../../../observability/typings/common';
 import {
   ERROR_GROUP_ID,
-  PROCESSOR_EVENT,
   SERVICE_NAME,
   TRANSACTION_SAMPLED,
 } from '../../../common/elasticsearch_fieldnames';
-import { PromiseReturnType } from '../../../typings/common';
-import { APMError } from '../../../typings/es_schemas/ui/apm_error';
+import { ProcessorEvent } from '../../../common/processor_event';
 import { rangeFilter } from '../../../common/utils/range_filter';
-import {
-  Setup,
-  SetupTimeRange,
-  SetupUIFilters,
-} from '../helpers/setup_request';
+import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { getTransaction } from '../transactions/get_transaction';
 
 export type ErrorGroupAPIResponse = PromiseReturnType<typeof getErrorGroup>;
@@ -30,22 +25,23 @@ export async function getErrorGroup({
 }: {
   serviceName: string;
   groupId: string;
-  setup: Setup & SetupTimeRange & SetupUIFilters;
+  setup: Setup & SetupTimeRange;
 }) {
-  const { start, end, uiFiltersES, client, indices } = setup;
+  const { start, end, esFilter, apmEventClient } = setup;
 
   const params = {
-    index: indices['apm_oss.errorIndices'],
+    apm: {
+      events: [ProcessorEvent.error as const],
+    },
     body: {
       size: 1,
       query: {
         bool: {
           filter: [
             { term: { [SERVICE_NAME]: serviceName } },
-            { term: { [PROCESSOR_EVENT]: 'error' } },
             { term: { [ERROR_GROUP_ID]: groupId } },
             { range: rangeFilter(start, end) },
-            ...uiFiltersES,
+            ...esFilter,
           ],
           should: [{ term: { [TRANSACTION_SAMPLED]: true } }],
         },
@@ -57,7 +53,7 @@ export async function getErrorGroup({
     },
   };
 
-  const resp = await client.search<APMError>(params);
+  const resp = await apmEventClient.search(params);
   const error = resp.hits.hits[0]?._source;
   const transactionId = error?.transaction?.id;
   const traceId = error?.trace?.id;

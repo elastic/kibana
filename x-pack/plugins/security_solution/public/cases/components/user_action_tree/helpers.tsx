@@ -4,32 +4,32 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiBadgeGroup, EuiBadge, EuiLink } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiCommentProps } from '@elastic/eui';
 import React from 'react';
 
-import { CaseFullExternalService, Connector } from '../../../../../case/common/api';
+import { CaseFullExternalService, ActionConnector } from '../../../../../case/common/api';
 import { CaseUserActions } from '../../containers/types';
+import { CaseServices } from '../../containers/use_get_case_user_actions';
+import { parseString } from '../../containers/utils';
+import { Tags } from '../tag_list/tags';
 import * as i18n from '../case_view/translations';
+import { UserActionUsernameWithAvatar } from './user_action_username_with_avatar';
+import { UserActionTimestamp } from './user_action_timestamp';
+import { UserActionCopyLink } from './user_action_copy_link';
+import { UserActionMoveToReference } from './user_action_move_to_reference';
 
 interface LabelTitle {
   action: CaseUserActions;
-  connectors: Connector[];
   field: string;
-  firstPush: boolean;
 }
 
-export const getLabelTitle = ({ action, connectors, field, firstPush }: LabelTitle) => {
+export const getLabelTitle = ({ action, field }: LabelTitle) => {
   if (field === 'tags') {
     return getTagsLabelTitle(action);
   } else if (field === 'title' && action.action === 'update') {
     return `${i18n.CHANGED_FIELD.toLowerCase()} ${i18n.CASE_NAME.toLowerCase()}  ${i18n.TO} "${
       action.newValue
     }"`;
-  } else if (field === 'connector_id' && action.action === 'update') {
-    const newConnector = connectors.find((c) => c.id === action.newValue);
-    return action.newValue != null && action.newValue !== 'none' && newConnector != null
-      ? i18n.SELECTED_THIRD_PARTY(newConnector.name)
-      : i18n.REMOVED_THIRD_PARTY;
   } else if (field === 'description' && action.action === 'update') {
     return `${i18n.EDITED_FIELD} ${i18n.DESCRIPTION.toLowerCase()}`;
   } else if (field === 'status' && action.action === 'update') {
@@ -38,30 +38,54 @@ export const getLabelTitle = ({ action, connectors, field, firstPush }: LabelTit
     } ${i18n.CASE}`;
   } else if (field === 'comment' && action.action === 'update') {
     return `${i18n.EDITED_FIELD} ${i18n.COMMENT.toLowerCase()}`;
-  } else if (field === 'pushed' && action.action === 'push-to-service' && action.newValue != null) {
-    return getPushedServiceLabelTitle(action, firstPush);
   }
+
   return '';
 };
 
-const getTagsLabelTitle = (action: CaseUserActions) => (
-  <EuiFlexGroup alignItems="baseline" gutterSize="xs" component="span">
-    <EuiFlexItem data-test-subj="ua-tags-label">
-      {action.action === 'add' && i18n.ADDED_FIELD}
-      {action.action === 'delete' && i18n.REMOVED_FIELD} {i18n.TAGS.toLowerCase()}
-    </EuiFlexItem>
-    <EuiBadgeGroup>
-      {action.newValue != null &&
-        action.newValue.split(',').map((tag) => (
-          <EuiBadge data-test-subj={`ua-tag`} color="default">
-            {tag}
-          </EuiBadge>
-        ))}
-    </EuiBadgeGroup>
-  </EuiFlexGroup>
-);
+export const getConnectorLabelTitle = ({
+  action,
+  connectors,
+}: {
+  action: CaseUserActions;
+  connectors: ActionConnector[];
+}) => {
+  const oldValue = parseString(`${action.oldValue}`);
+  const newValue = parseString(`${action.newValue}`);
 
-const getPushedServiceLabelTitle = (action: CaseUserActions, firstPush: boolean) => {
+  if (oldValue === null || newValue === null) {
+    return '';
+  }
+
+  // Connector changed
+  if (oldValue.id !== newValue.id) {
+    const newConnector = connectors.find((c) => c.id === newValue.id);
+    return newValue.id != null && newValue.id !== 'none' && newConnector != null
+      ? i18n.SELECTED_THIRD_PARTY(newConnector.name)
+      : i18n.REMOVED_THIRD_PARTY;
+  } else {
+    // Field changed
+    return i18n.CHANGED_CONNECTOR_FIELD;
+  }
+};
+
+const getTagsLabelTitle = (action: CaseUserActions) => {
+  const tags = action.newValue != null ? action.newValue.split(',') : [];
+
+  return (
+    <EuiFlexGroup alignItems="baseline" gutterSize="xs" component="span">
+      <EuiFlexItem data-test-subj="ua-tags-label" grow={false}>
+        {action.action === 'add' && i18n.ADDED_FIELD}
+        {action.action === 'delete' && i18n.REMOVED_FIELD} {i18n.TAGS.toLowerCase()}
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <Tags tags={tags} gutterSize="xs" />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
+
+export const getPushedServiceLabelTitle = (action: CaseUserActions, firstPush: boolean) => {
   const pushedVal = JSON.parse(action.newValue ?? '') as CaseFullExternalService;
   return (
     <EuiFlexGroup alignItems="baseline" gutterSize="xs" data-test-subj="pushed-service-label-title">
@@ -78,3 +102,54 @@ const getPushedServiceLabelTitle = (action: CaseUserActions, firstPush: boolean)
     </EuiFlexGroup>
   );
 };
+
+export const getPushInfo = (
+  caseServices: CaseServices,
+  parsedValue: { connector_id: string; connector_name: string },
+  index: number
+) =>
+  parsedValue != null
+    ? {
+        firstPush: caseServices[parsedValue.connector_id]?.firstPushIndex === index,
+        parsedConnectorId: parsedValue.connector_id,
+        parsedConnectorName: parsedValue.connector_name,
+      }
+    : {
+        firstPush: false,
+        parsedConnectorId: 'none',
+        parsedConnectorName: 'none',
+      };
+
+export const getUpdateAction = ({
+  action,
+  label,
+  handleOutlineComment,
+}: {
+  action: CaseUserActions;
+  label: string | JSX.Element;
+  handleOutlineComment: (id: string) => void;
+}): EuiCommentProps => ({
+  username: (
+    <UserActionUsernameWithAvatar
+      username={action.actionBy.username}
+      fullName={action.actionBy.fullName}
+    />
+  ),
+  type: 'update',
+  event: label,
+  'data-test-subj': `${action.actionField[0]}-${action.action}-action-${action.actionId}`,
+  timestamp: <UserActionTimestamp createdAt={action.actionAt} />,
+  timelineIcon: action.action === 'add' || action.action === 'delete' ? 'tag' : 'dot',
+  actions: (
+    <EuiFlexGroup>
+      <EuiFlexItem>
+        <UserActionCopyLink id={action.actionId} />
+      </EuiFlexItem>
+      {action.action === 'update' && action.commentId != null && (
+        <EuiFlexItem>
+          <UserActionMoveToReference id={action.commentId} outlineComment={handleOutlineComment} />
+        </EuiFlexItem>
+      )}
+    </EuiFlexGroup>
+  ),
+});

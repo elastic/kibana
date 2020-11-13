@@ -6,8 +6,10 @@
   "false_positives": [
     "Automated tools such as Jenkins may encode or decode files as part of their normal behavior. These events can be filtered by the process executable or username values."
   ],
+  "from": "now-9m",
   "index": [
-    "auditbeat-*"
+    "auditbeat-*",
+    "logs-endpoint.events.*"
   ],
   "language": "kuery",
   "license": "Elastic License",
@@ -18,7 +20,10 @@
   "severity": "low",
   "tags": [
     "Elastic",
-    "Linux"
+    "Host",
+    "Linux",
+    "Threat Detection",
+    "Defense Evasion"
   ],
   "threat": [
     {
@@ -53,5 +58,5 @@
     }
   ],
   "type": "query",
-  "version": 2
+  "version": 4
 }

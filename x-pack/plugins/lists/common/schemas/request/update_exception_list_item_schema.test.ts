@@ -7,7 +7,7 @@
 import { left } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 
-import { exactCheck, foldLeftRight, getPaths } from '../../siem_common_deps';
+import { exactCheck, foldLeftRight, getPaths } from '../../shared_imports';
 
 import {
   UpdateExceptionListItemSchema,
@@ -27,6 +27,7 @@ describe('update_exception_list_item_schema', () => {
 
   test('it should not accept an undefined for "description"', () => {
     const payload = getUpdateExceptionListItemSchemaMock();
+    // @ts-expect-error
     delete payload.description;
     const decoded = updateExceptionListItemSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -39,6 +40,7 @@ describe('update_exception_list_item_schema', () => {
 
   test('it should not accept an undefined for "name"', () => {
     const payload = getUpdateExceptionListItemSchemaMock();
+    // @ts-expect-error
     delete payload.name;
     const decoded = updateExceptionListItemSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -51,6 +53,7 @@ describe('update_exception_list_item_schema', () => {
 
   test('it should not accept an undefined for "type"', () => {
     const payload = getUpdateExceptionListItemSchemaMock();
+    // @ts-expect-error
     delete payload.type;
     const decoded = updateExceptionListItemSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -100,6 +103,7 @@ describe('update_exception_list_item_schema', () => {
   test('it should NOT accept an undefined for "entries"', () => {
     const inputPayload = getUpdateExceptionListItemSchemaMock();
     const outputPayload = getUpdateExceptionListItemSchemaMock();
+    // @ts-expect-error
     delete inputPayload.entries;
     outputPayload.entries = [];
     const decoded = updateExceptionListItemSchema.decode(inputPayload);
@@ -128,18 +132,6 @@ describe('update_exception_list_item_schema', () => {
     const outputPayload = getUpdateExceptionListItemSchemaMock();
     delete inputPayload.tags;
     outputPayload.tags = [];
-    const decoded = updateExceptionListItemSchema.decode(inputPayload);
-    const checked = exactCheck(inputPayload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([]);
-    expect(message.schema).toEqual(outputPayload);
-  });
-
-  test('it should accept an undefined for "_tags" but return an array', () => {
-    const inputPayload = getUpdateExceptionListItemSchemaMock();
-    const outputPayload = getUpdateExceptionListItemSchemaMock();
-    delete inputPayload._tags;
-    outputPayload._tags = [];
     const decoded = updateExceptionListItemSchema.decode(inputPayload);
     const checked = exactCheck(inputPayload, decoded);
     const message = pipe(checked, foldLeftRight);

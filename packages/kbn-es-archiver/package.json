@@ -3,15 +3,15 @@
   "version": "1.0.0",
   "license": "Apache-2.0",
   "main": "target/index.js",
+  "kibana": {
+    "devOnly": true
+  },
   "scripts": {
-    "kbn:bootstrap": "tsc",
-    "kbn:watch": "tsc --watch"
+    "kbn:bootstrap": "rm -rf target && ../../node_modules/.bin/tsc",
+    "kbn:watch": "rm -rf target && ../../node_modules/.bin/tsc --watch"
   },
   "dependencies": {
-    "@kbn/dev-utils": "1.0.0",
-    "elasticsearch": "^16.7.0"
-  },
-  "devDependencies": {
-    "@types/elasticsearch": "^5.0.33"
+    "@kbn/dev-utils": "link:../kbn-dev-utils",
+    "@kbn/test": "link:../kbn-test"
   }
 }

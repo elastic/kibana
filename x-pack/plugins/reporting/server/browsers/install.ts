@@ -4,18 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import del from 'del';
 import os from 'os';
 import path from 'path';
-import del from 'del';
-
 import * as Rx from 'rxjs';
-import { LevelLogger } from '../lib';
+import { GenericLevelLogger } from '../lib/level_logger';
+import { paths } from './chromium/paths';
 import { ensureBrowserDownloaded } from './download';
 // @ts-ignore
 import { md5 } from './download/checksum';
 // @ts-ignore
 import { extract } from './extract';
-import { paths } from './chromium/paths';
 
 interface Package {
   platforms: string[];
@@ -23,11 +22,31 @@ interface Package {
 }
 
 /**
+ * Small helper util to resolve where chromium is installed
+ */
+export const getBinaryPath = (
+  chromiumPath: string = path.resolve(__dirname, '../../chromium'),
+  platform: string = process.platform,
+  architecture: string = os.arch()
+) => {
+  const pkg = paths.packages.find((p: Package) => {
+    return p.platforms.includes(platform) && p.architecture === architecture;
+  });
+
+  if (!pkg) {
+    // TODO: validate this
+    throw new Error(`Unsupported platform: ${platform}-${architecture}`);
+  }
+
+  return path.join(chromiumPath, pkg.binaryRelativePath);
+};
+
+/**
  * "install" a browser by type into installs path by extracting the downloaded
  * archive. If there is an error extracting the archive an `ExtractError` is thrown
  */
 export function installBrowser(
-  logger: LevelLogger,
+  logger: GenericLevelLogger,
   chromiumPath: string = path.resolve(__dirname, '../../chromium'),
   platform: string = process.platform,
   architecture: string = os.arch()
@@ -43,7 +62,7 @@ export function installBrowser(
       throw new Error(`Unsupported platform: ${platform}-${architecture}`);
     }
 
-    const binaryPath = path.join(chromiumPath, pkg.binaryRelativePath);
+    const binaryPath = getBinaryPath(chromiumPath, platform, architecture);
     const binaryChecksum = await md5(binaryPath).catch(() => '');
 
     if (binaryChecksum !== pkg.binaryChecksum) {

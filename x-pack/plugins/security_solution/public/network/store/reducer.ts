@@ -11,13 +11,13 @@ import {
   FlowTarget,
   NetworkDnsFields,
   NetworkTopTablesFields,
-  TlsFields,
-  UsersFields,
-} from '../../graphql/types';
+  NetworkTlsFields,
+  NetworkUsersFields,
+} from '../../../common/search_strategy';
 import { DEFAULT_TABLE_ACTIVE_PAGE, DEFAULT_TABLE_LIMIT } from '../../common/store/constants';
 
 import {
-  setIpDetailsTablesActivePageToZero,
+  setNetworkDetailsTablesActivePageToZero,
   setNetworkTablesActivePageToZero,
   updateNetworkTable,
 } from './actions';
@@ -25,7 +25,7 @@ import {
   setNetworkDetailsQueriesActivePageToZero,
   setNetworkPageQueriesActivePageToZero,
 } from './helpers';
-import { IpDetailsTableType, NetworkModel, NetworkTableType } from './model';
+import { NetworkDetailsTableType, NetworkModel, NetworkTableType } from './model';
 
 export type NetworkState = NetworkModel;
 
@@ -68,7 +68,7 @@ export const initialNetworkState: NetworkState = {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,
         sort: {
-          field: TlsFields._id,
+          field: NetworkTlsFields._id,
           direction: Direction.desc,
         },
       },
@@ -96,14 +96,14 @@ export const initialNetworkState: NetworkState = {
   },
   details: {
     queries: {
-      [IpDetailsTableType.http]: {
+      [NetworkDetailsTableType.http]: {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,
         sort: {
           direction: Direction.desc,
         },
       },
-      [IpDetailsTableType.topCountriesSource]: {
+      [NetworkDetailsTableType.topCountriesSource]: {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,
         sort: {
@@ -111,7 +111,7 @@ export const initialNetworkState: NetworkState = {
           direction: Direction.desc,
         },
       },
-      [IpDetailsTableType.topCountriesDestination]: {
+      [NetworkDetailsTableType.topCountriesDestination]: {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,
         sort: {
@@ -119,7 +119,7 @@ export const initialNetworkState: NetworkState = {
           direction: Direction.desc,
         },
       },
-      [IpDetailsTableType.topNFlowSource]: {
+      [NetworkDetailsTableType.topNFlowSource]: {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,
         sort: {
@@ -127,7 +127,7 @@ export const initialNetworkState: NetworkState = {
           direction: Direction.desc,
         },
       },
-      [IpDetailsTableType.topNFlowDestination]: {
+      [NetworkDetailsTableType.topNFlowDestination]: {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,
         sort: {
@@ -135,19 +135,19 @@ export const initialNetworkState: NetworkState = {
           direction: Direction.desc,
         },
       },
-      [IpDetailsTableType.tls]: {
+      [NetworkDetailsTableType.tls]: {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,
         sort: {
-          field: TlsFields._id,
+          field: NetworkTlsFields._id,
           direction: Direction.desc,
         },
       },
-      [IpDetailsTableType.users]: {
+      [NetworkDetailsTableType.users]: {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,
         sort: {
-          field: UsersFields.name,
+          field: NetworkUsersFields.name,
           direction: Direction.asc,
         },
       },
@@ -181,7 +181,7 @@ export const networkReducer = reducerWithInitialState(initialNetworkState)
       queries: setNetworkDetailsQueriesActivePageToZero(state),
     },
   }))
-  .case(setIpDetailsTablesActivePageToZero, (state) => ({
+  .case(setNetworkDetailsTablesActivePageToZero, (state) => ({
     ...state,
     details: {
       ...state.details,

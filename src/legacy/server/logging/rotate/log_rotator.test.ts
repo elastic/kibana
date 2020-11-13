@@ -22,6 +22,7 @@ import fs, { existsSync, mkdirSync, statSync, writeFileSync } from 'fs';
 import { LogRotator } from './log_rotator';
 import { tmpdir } from 'os';
 import { dirname, join } from 'path';
+import lodash from 'lodash';
 
 const mockOn = jest.fn();
 jest.mock('chokidar', () => ({
@@ -31,10 +32,7 @@ jest.mock('chokidar', () => ({
   })),
 }));
 
-jest.mock('lodash', () => ({
-  ...require.requireActual('lodash'),
-  throttle: (fn: any) => fn,
-}));
+lodash.throttle = (fn: any) => fn;
 
 const tempDir = join(tmpdir(), 'kbn_log_rotator_test');
 const testFilePath = join(tempDir, 'log_rotator_test_log_file.log');

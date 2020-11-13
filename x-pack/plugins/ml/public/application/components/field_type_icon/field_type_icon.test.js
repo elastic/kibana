@@ -27,6 +27,9 @@ describe('FieldTypeIcon', () => {
   });
 
   test(`render with tooltip and test hovering`, () => {
+    // Use fake timers so we don't have to wait for the EuiToolTip timeout
+    jest.useFakeTimers();
+
     const typeIconComponent = mount(
       <FieldTypeIcon type={ML_JOB_FIELD_TYPES.KEYWORD} tooltipEnabled={true} />
     );
@@ -35,11 +38,23 @@ describe('FieldTypeIcon', () => {
     expect(typeIconComponent.find('EuiToolTip').children()).toHaveLength(1);
 
     container.simulate('mouseover');
-    // EuiToolTip mounts children after a 250ms delay
-    setTimeout(() => expect(typeIconComponent.find('EuiToolTip').children()).toHaveLength(2), 250);
+
+    // Run the timers so the EuiTooltip will be visible
+    jest.runAllTimers();
+
+    typeIconComponent.update();
+    expect(typeIconComponent.find('EuiToolTip').children()).toHaveLength(2);
 
     container.simulate('mouseout');
+
+    // Run the timers so the EuiTooltip will be hidden again
+    jest.runAllTimers();
+
+    typeIconComponent.update();
     expect(typeIconComponent.find('EuiToolTip').children()).toHaveLength(1);
+
+    // Clearing all mocks will also reset fake timers.
+    jest.clearAllMocks();
   });
 
   test(`update component`, () => {

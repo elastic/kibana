@@ -5,7 +5,7 @@
  */
 import React from 'react';
 import { act } from '@testing-library/react';
-import { mountWithIntl, nextTick } from 'test_utils/enzyme_helpers';
+import { mountWithIntl, nextTick } from '@kbn/test/jest';
 import { AuthenticatedUser } from '../../common/model';
 import { AccountManagementPage } from './account_management_page';
 import { coreMock } from 'src/core/public/mocks';
@@ -115,8 +115,8 @@ describe('<AccountManagementPage>', () => {
       wrapper.update();
     });
 
-    expect(wrapper.find('EuiFieldText[data-test-subj="currentPassword"]')).toHaveLength(1);
-    expect(wrapper.find('EuiFieldText[data-test-subj="newPassword"]')).toHaveLength(1);
+    expect(wrapper.find('EuiFieldPassword[data-test-subj="currentPassword"]')).toHaveLength(1);
+    expect(wrapper.find('EuiFieldPassword[data-test-subj="newPassword"]')).toHaveLength(1);
   });
 
   it(`does not display change password form for users in the saml realm`, async () => {

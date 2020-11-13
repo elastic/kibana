@@ -11,13 +11,13 @@
 
 import PropTypes from 'prop-types';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 
-import _ from 'lodash';
 import d3 from 'd3';
 import $ from 'jquery';
 import moment from 'moment';
 
-import { formatHumanReadableDateTime } from '../../util/date_utils';
+import { formatHumanReadableDateTime } from '../../../../common/util/date_utils';
 import { formatValue } from '../../formatters/format_value';
 import { getSeverityColor, getSeverityWithLow } from '../../../../common/util/anomaly_utils';
 import {
@@ -32,8 +32,6 @@ import { getTimeBucketsFromCache } from '../../util/time_buckets';
 import { mlFieldFormatService } from '../../services/field_format_service';
 
 import { CHART_TYPE } from '../explorer_constants';
-
-import { i18n } from '@kbn/i18n';
 
 const CONTENT_WRAPPER_HEIGHT = 215;
 
@@ -403,7 +401,7 @@ export class ExplorerChartDistribution extends React.Component {
         .attr('cy', (d) => lineChartYScale(d[CHART_Y_ATTRIBUTE]))
         .attr('class', (d) => {
           let markerClass = 'metric-value';
-          if (_.has(d, 'anomalyScore') && Number(d.anomalyScore) >= severity) {
+          if (d.anomalyScore !== undefined && Number(d.anomalyScore) >= severity) {
             markerClass += ' anomaly-marker ';
             markerClass += getSeverityWithLow(d.anomalyScore).id;
           }
@@ -444,7 +442,7 @@ export class ExplorerChartDistribution extends React.Component {
       const tooltipData = [{ label: formattedDate }];
       const seriesKey = config.detectorLabel;
 
-      if (_.has(marker, 'entity')) {
+      if (marker.entity !== undefined) {
         tooltipData.push({
           label: i18n.translate('xpack.ml.explorer.distributionChart.entityLabel', {
             defaultMessage: 'entity',
@@ -457,7 +455,7 @@ export class ExplorerChartDistribution extends React.Component {
         });
       }
 
-      if (_.has(marker, 'anomalyScore')) {
+      if (marker.anomalyScore !== undefined) {
         const score = parseInt(marker.anomalyScore);
         const displayScore = score > 0 ? score : '< 1';
         tooltipData.push({
@@ -494,7 +492,7 @@ export class ExplorerChartDistribution extends React.Component {
               valueAccessor: 'typical',
             });
           }
-          if (typeof marker.byFieldName !== 'undefined' && _.has(marker, 'numberOfCauses')) {
+          if (typeof marker.byFieldName !== 'undefined' && marker.numberOfCauses !== undefined) {
             tooltipData.push({
               label: i18n.translate(
                 'xpack.ml.explorer.distributionChart.unusualByFieldValuesLabel',
@@ -532,7 +530,7 @@ export class ExplorerChartDistribution extends React.Component {
         });
       }
 
-      if (_.has(marker, 'scheduledEvents')) {
+      if (marker.scheduledEvents !== undefined) {
         marker.scheduledEvents.forEach((scheduledEvent, i) => {
           tooltipData.push({
             label: i18n.translate(

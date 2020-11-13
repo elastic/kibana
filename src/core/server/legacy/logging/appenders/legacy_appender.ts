@@ -18,10 +18,14 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { DisposableAppender } from '../../../logging/appenders/appenders';
-import { LogRecord } from '../../../logging/log_record';
+import { DisposableAppender, LogRecord } from '../../../logging';
 import { LegacyLoggingServer } from '../legacy_logging_server';
 import { LegacyVars } from '../../types';
+
+export interface LegacyAppenderConfig {
+  kind: 'legacy-appender';
+  legacyLoggingConfig?: any;
+}
 
 /**
  * Simple appender that just forwards `LogRecord` to the legacy KbnServer log.

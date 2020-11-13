@@ -14,14 +14,14 @@ import { toLocaleString } from '../../../../util/string_utils';
 import { ResultLinks, actionsMenuContent } from '../job_actions';
 import { JobDescription } from './job_description';
 import { JobIcon } from '../../../../components/job_message_icon';
-import { getJobIdUrl } from '../../../../util/get_job_id_url';
+import { JobSpacesList } from '../../../../components/job_spaces_list';
 import { TIME_FORMAT } from '../../../../../../common/constants/time_format';
 
-import { EuiBadge, EuiBasicTable, EuiButtonIcon, EuiLink, EuiScreenReaderOnly } from '@elastic/eui';
+import { EuiBasicTable, EuiButtonIcon, EuiScreenReaderOnly } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { AnomalyDetectionJobIdLink } from './job_id_link';
 
-const PAGE_SIZE = 10;
 const PAGE_SIZE_OPTIONS = [10, 25, 50];
 
 // 'isManagementTable' bool prop to determine when to configure table for use in Kibana management page
@@ -31,11 +31,7 @@ export class JobsList extends Component {
 
     this.state = {
       jobsSummaryList: props.jobsSummaryList,
-      pageIndex: 0,
-      pageSize: PAGE_SIZE,
       itemIdToExpandedRowMap: {},
-      sortField: 'id',
-      sortDirection: 'asc',
     };
   }
 
@@ -53,7 +49,7 @@ export class JobsList extends Component {
 
     const { field: sortField, direction: sortDirection } = sort;
 
-    this.setState({
+    this.props.onJobsViewStateUpdate({
       pageIndex,
       pageSize,
       sortField,
@@ -71,7 +67,7 @@ export class JobsList extends Component {
       return id;
     }
 
-    return <EuiLink href={getJobIdUrl('jobs', id)}>{id}</EuiLink>;
+    return <AnomalyDetectionJobIdLink key={id} id={id} />;
   }
 
   getPageOfJobs(index, size, sortField, sortDirection) {
@@ -87,7 +83,7 @@ export class JobsList extends Component {
       pageStart = Math.floor((listLength - 1) / size) * size;
       // set the state out of the render cycle
       setTimeout(() => {
-        this.setState({
+        this.props.onJobsViewStateUpdate({
           pageIndex: pageStart / size,
         });
       }, 0);
@@ -189,7 +185,9 @@ export class JobsList extends Component {
         sortable: true,
         field: 'description',
         'data-test-subj': 'mlJobListColumnDescription',
-        render: (description, item) => <JobDescription job={item} />,
+        render: (description, item) => (
+          <JobDescription job={item} isManagementTable={isManagementTable} />
+        ),
         textOnly: true,
         width: '20%',
       },
@@ -239,7 +237,7 @@ export class JobsList extends Component {
         name: i18n.translate('xpack.ml.jobsList.actionsLabel', {
           defaultMessage: 'Actions',
         }),
-        render: (item) => <ResultLinks jobs={[item]} />,
+        render: (item) => <ResultLinks jobs={[item]} isManagementTable={isManagementTable} />,
       },
     ];
 
@@ -249,7 +247,7 @@ export class JobsList extends Component {
         name: i18n.translate('xpack.ml.jobsList.spacesLabel', {
           defaultMessage: 'Spaces',
         }),
-        render: () => <EuiBadge color={'hollow'}>{'all'}</EuiBadge>,
+        render: (item) => <JobSpacesList spaces={item.spaces} />,
       });
       // Remove actions if Ml not enabled in current space
       if (this.props.isMlEnabledInSpace === false) {
@@ -295,7 +293,7 @@ export class JobsList extends Component {
       });
     }
 
-    const { pageIndex, pageSize, sortField, sortDirection } = this.state;
+    const { pageIndex, pageSize, sortField, sortDirection } = this.props.jobsViewState;
 
     const { pageOfItems, totalItemCount } = this.getPageOfJobs(
       pageIndex,
@@ -365,6 +363,8 @@ JobsList.propTypes = {
   refreshJobs: PropTypes.func,
   selectedJobsCount: PropTypes.number.isRequired,
   loading: PropTypes.bool,
+  jobsViewState: PropTypes.object,
+  onJobsViewStateUpdate: PropTypes.func,
 };
 JobsList.defaultProps = {
   isManagementTable: false,

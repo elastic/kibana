@@ -4,17 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { SavedObjectsFindResponse } from 'src/core/server';
-import { AgentEventSOAttributes } from './../../../../ingest_manager/common/types/models/agent';
+import { AgentEventSOAttributes } from './../../../../fleet/common/types/models/agent';
 import {
   AGENT_SAVED_OBJECT_TYPE,
   AGENT_EVENT_SAVED_OBJECT_TYPE,
-} from '../../../../ingest_manager/common/constants/agent';
-import { Agent } from '../../../../ingest_manager/common';
+} from '../../../../fleet/common/constants/agent';
+import { Agent } from '../../../../fleet/common';
 import { FLEET_ENDPOINT_PACKAGE_CONSTANT } from './fleet_saved_objects';
 
 const testAgentId = 'testAgentId';
-const testConfigId = 'testConfigId';
+const testAgentPolicyId = 'testAgentPolicyId';
 const testHostId = 'randoHostId';
+const testHostName = 'testDesktop';
 
 /** Mock OS Platform for endpoint telemetry */
 export const MockOSPlatform = 'somePlatform';
@@ -44,7 +45,7 @@ export const mockFleetObjectsResponse = (
       attributes: {
         active: true,
         id: testAgentId,
-        config_id: 'randoConfigId',
+        policy_id: 'randoAgentPolicyId',
         type: 'PERMANENT',
         user_provided_metadata: {},
         enrolled_at: lastCheckIn,
@@ -56,8 +57,8 @@ export const mockFleetObjectsResponse = (
             },
           },
           host: {
-            hostname: 'testDesktop',
-            name: 'testDesktop',
+            hostname: testHostName,
+            name: testHostName,
             id: testHostId,
           },
           os: {
@@ -81,7 +82,7 @@ export const mockFleetObjectsResponse = (
       attributes: {
         active: true,
         id: 'oldTestAgentId',
-        config_id: 'randoConfigId',
+        policy_id: 'randoAgentPolicyId',
         type: 'PERMANENT',
         user_provided_metadata: {},
         enrolled_at: lastCheckIn,
@@ -93,8 +94,8 @@ export const mockFleetObjectsResponse = (
             },
           },
           host: {
-            hostname: 'testDesktop',
-            name: 'testDesktop',
+            hostname: hasDuplicates ? testHostName : 'oldRandoHostName',
+            name: hasDuplicates ? testHostName : 'oldRandoHostName',
             id: hasDuplicates ? testHostId : 'oldRandoHostId',
           },
           os: {
@@ -249,7 +250,7 @@ export const mockFleetEventsObjectsResponse = (
             running ? 'RUNNING' : 'FAILED'
           }: `,
           payload: running ? mockPolicyPayload(policyStatus, policyMode) : undefined,
-          config_id: testConfigId,
+          policy_id: testAgentPolicyId,
         },
         references: [],
         updated_at: updatedDate,
@@ -266,7 +267,7 @@ export const mockFleetEventsObjectsResponse = (
           subtype: 'STARTING',
           message:
             'Application: endpoint-security--8.0.0[d8f7f6e8-9375-483c-b456-b479f1d7a4f2]: State changed to STARTING: Starting',
-          config_id: testConfigId,
+          policy_id: testAgentPolicyId,
         },
         references: [],
         updated_at: updatedDate,

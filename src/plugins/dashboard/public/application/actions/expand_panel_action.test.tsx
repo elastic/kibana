@@ -28,8 +28,6 @@ import {
   ContactCardEmbeddableInput,
   ContactCardEmbeddableOutput,
 } from '../../embeddable_plugin_test_samples';
-
-// eslint-disable-next-line
 import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
 
 const { setup, doStart } = embeddablePluginMock.createInstance();

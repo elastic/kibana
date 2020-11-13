@@ -9,8 +9,6 @@ import { shallow } from 'enzyme';
 
 import { HeatmapStyleEditor } from './heatmap_style_editor';
 
-jest.mock('ui/new_platform');
-
 describe('HeatmapStyleEditor', () => {
   test('is rendered', () => {
     const component = shallow(

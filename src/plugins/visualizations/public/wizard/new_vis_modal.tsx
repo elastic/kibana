@@ -23,13 +23,20 @@ import { EuiModal, EuiOverlayMask } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { METRIC_TYPE, UiStatsMetricType } from '@kbn/analytics';
-import { ApplicationStart, IUiSettingsClient, SavedObjectsStart } from '../../../../core/public';
+import {
+  ApplicationStart,
+  IUiSettingsClient,
+  SavedObjectsStart,
+  DocLinksStart,
+} from '../../../../core/public';
 import { SearchSelection } from './search_selection';
-import { TypeSelection } from './type_selection';
-import { TypesStart, VisType, VisTypeAlias } from '../vis_types';
+import { GroupSelection } from './group_selection';
+import { AggBasedSelection } from './agg_based_selection';
+import type { TypesStart, VisType, VisTypeAlias } from '../vis_types';
 import { UsageCollectionSetup } from '../../../../plugins/usage_collection/public';
 import { EmbeddableStateTransfer } from '../../../embeddable/public';
 import { VISUALIZE_ENABLE_LABS_SETTING } from '../../common/constants';
+import './dialog.scss';
 
 interface TypeSelectionProps {
   isOpen: boolean;
@@ -38,6 +45,7 @@ interface TypeSelectionProps {
   editorParams?: string[];
   addBasePath: (path: string) => string;
   uiSettings: IUiSettingsClient;
+  docLinks: DocLinksStart;
   savedObjects: SavedObjectsStart;
   usageCollection?: UsageCollectionSetup;
   application: ApplicationStart;
@@ -48,6 +56,7 @@ interface TypeSelectionProps {
 
 interface TypeSelectionState {
   showSearchVisModal: boolean;
+  showGroups: boolean;
   visType?: VisType;
 }
 
@@ -72,6 +81,7 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
 
     this.state = {
       showSearchVisModal: false,
+      showGroups: true,
     };
 
     this.trackUiMetric = this.props.usageCollection?.reportUiStats.bind(
@@ -93,6 +103,8 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
       }
     );
 
+    const WizardComponent = this.state.showGroups ? GroupSelection : AggBasedSelection;
+
     const selectionModal =
       this.state.showSearchVisModal && this.state.visType ? (
         <EuiModal onClose={this.onCloseModal} className="visNewVisSearchDialog">
@@ -101,20 +113,21 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
             visType={this.state.visType}
             uiSettings={this.props.uiSettings}
             savedObjects={this.props.savedObjects}
+            goBack={() => this.setState({ showSearchVisModal: false })}
           />
         </EuiModal>
       ) : (
         <EuiModal
           onClose={this.onCloseModal}
-          className="visNewVisDialog"
+          className={this.state.showGroups ? 'visNewVisDialog' : 'visNewVisDialog--aggbased'}
           aria-label={visNewVisDialogAriaLabel}
-          role="menu"
         >
-          <TypeSelection
+          <WizardComponent
             showExperimental={this.isLabsEnabled}
             onVisTypeSelected={this.onVisTypeSelected}
             visTypesRegistry={this.props.visTypesRegistry}
-            addBasePath={this.props.addBasePath}
+            docLinks={this.props.docLinks}
+            toggleGroups={(flag: boolean) => this.setState({ showGroups: flag })}
           />
         </EuiModal>
       );
@@ -174,7 +187,9 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
     if (this.props.stateTransfer && this.props.originatingApp) {
       this.props.stateTransfer.navigateToEditor(appId, {
         path: params,
-        state: { originatingApp: this.props.originatingApp },
+        state: {
+          originatingApp: this.props.originatingApp,
+        },
       });
     } else {
       this.props.application.navigateToApp(appId, {
@@ -184,4 +199,6 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
   }
 }
 
-export { NewVisModal };
+// Needed for React.lazy
+// eslint-disable-next-line import/no-default-export
+export { NewVisModal as default };

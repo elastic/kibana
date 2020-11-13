@@ -4,16 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { AppMountParameters, CoreStart } from 'kibana/public';
 import { createContext } from 'react';
-import { AppMountContext } from 'kibana/public';
-import { ConfigSchema } from '../..';
+import { ConfigSchema } from '../../';
 import { ApmPluginSetupDeps } from '../../plugin';
 
-export type AppMountContextBasePath = AppMountContext['core']['http']['basePath'];
-
 export interface ApmPluginContextValue {
+  appMountParameters: AppMountParameters;
   config: ConfigSchema;
-  core: AppMountContext['core'];
+  core: CoreStart;
   plugins: ApmPluginSetupDeps;
 }
 

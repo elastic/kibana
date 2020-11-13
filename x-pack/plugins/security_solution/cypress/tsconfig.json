@@ -1,10 +1,11 @@
 {
-  "extends": "../../../../tsconfig.json",
+  "extends": "../../../../tsconfig.base.json",
   "exclude": [],
   "include": [
     "./**/*"
   ],
   "compilerOptions": {
+    "tsBuildInfoFile": "../../../../build/tsbuildinfo/security_solution/cypress",
     "types": [
       "cypress",
       "node"

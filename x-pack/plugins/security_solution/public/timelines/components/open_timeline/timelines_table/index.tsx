@@ -24,7 +24,7 @@ import { getActionsColumns } from './actions_columns';
 import { getCommonColumns } from './common_columns';
 import { getExtendedColumns } from './extended_columns';
 import { getIconHeaderColumns } from './icon_header_columns';
-import { TimelineTypeLiteralWithNull } from '../../../../../common/types/timeline';
+import { TimelineTypeLiteralWithNull, TimelineStatus } from '../../../../../common/types/timeline';
 
 // there are a number of type mismatches across this file
 const EuiBasicTable: any = _EuiBasicTable; // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -159,7 +159,8 @@ export const TimelinesTable = React.memo<TimelinesTableProps>(
     };
 
     const selection = {
-      selectable: (timelineResult: OpenTimelineResult) => timelineResult.savedObjectId != null,
+      selectable: (timelineResult: OpenTimelineResult) =>
+        timelineResult.savedObjectId != null && timelineResult.status !== TimelineStatus.immutable,
       selectableMessage: (selectable: boolean) =>
         !selectable ? i18n.MISSING_SAVED_OBJECT_ID : undefined,
       onSelectionChange,

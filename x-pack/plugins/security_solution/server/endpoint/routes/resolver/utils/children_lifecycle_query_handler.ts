@@ -6,7 +6,7 @@
 
 import { SearchResponse } from 'elasticsearch';
 import { ILegacyScopedClusterClient } from 'kibana/server';
-import { ResolverEvent, ResolverChildren } from '../../../../../common/endpoint/types';
+import { SafeResolverEvent, SafeResolverChildren } from '../../../../../common/endpoint/types';
 import { LifecycleQuery } from '../queries/lifecycle';
 import { QueryInfo } from '../queries/multi_searcher';
 import { SingleQueryHandler } from './fetch';
@@ -16,8 +16,8 @@ import { createChildren } from './node';
 /**
  * Returns the children of a resolver tree.
  */
-export class ChildrenLifecycleQueryHandler implements SingleQueryHandler<ResolverChildren> {
-  private lifecycle: ResolverChildren | undefined;
+export class ChildrenLifecycleQueryHandler implements SingleQueryHandler<SafeResolverChildren> {
+  private lifecycle: SafeResolverChildren | undefined;
   private readonly query: LifecycleQuery;
   constructor(
     private readonly childrenHelper: ChildrenNodesHelper,
@@ -27,7 +27,7 @@ export class ChildrenLifecycleQueryHandler implements SingleQueryHandler<Resolve
     this.query = new LifecycleQuery(indexPattern, legacyEndpointID);
   }
 
-  private handleResponse = (response: SearchResponse<ResolverEvent>) => {
+  private handleResponse = (response: SearchResponse<SafeResolverEvent>) => {
     this.childrenHelper.addLifecycleEvents(this.query.formatResponse(response));
     this.lifecycle = this.childrenHelper.getNodes();
   };
@@ -50,7 +50,7 @@ export class ChildrenLifecycleQueryHandler implements SingleQueryHandler<Resolve
   /**
    * Return the results from the search.
    */
-  getResults(): ResolverChildren | undefined {
+  getResults(): SafeResolverChildren | undefined {
     return this.lifecycle;
   }
 
@@ -66,6 +66,6 @@ export class ChildrenLifecycleQueryHandler implements SingleQueryHandler<Resolve
     }
 
     this.handleResponse(await this.query.search(client, this.childrenHelper.getEntityIDs()));
-    return this.getResults() || createChildren();
+    return this.getResults() ?? createChildren();
   }
 }

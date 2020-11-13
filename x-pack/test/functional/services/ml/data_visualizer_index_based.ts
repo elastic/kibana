@@ -119,6 +119,30 @@ export function MachineLearningDataVisualizerIndexBasedProvider({
       await this.assertFieldsPanelCardCount(panelFieldTypes, expectedCardCount);
     },
 
+    async assertActionsPanelExists() {
+      await testSubjects.existOrFail('mlDataVisualizerActionsPanel');
+    },
+
+    async assertActionsPanelNotExists() {
+      await testSubjects.missingOrFail('mlDataVisualizerActionsPanel');
+    },
+
+    async assertCreateAdvancedJobCardExists() {
+      await testSubjects.existOrFail('mlDataVisualizerCreateAdvancedJobCard');
+    },
+
+    async assertCreateAdvancedJobCardNotExists() {
+      await testSubjects.missingOrFail('mlDataVisualizerCreateAdvancedJobCard');
+    },
+
+    async assertRecognizerCardExists(moduleId: string) {
+      await testSubjects.existOrFail(`mlRecognizerCard ${moduleId}`);
+    },
+
+    async assertRecognizerCardNotExists(moduleId: string) {
+      await testSubjects.missingOrFail(`mlRecognizerCard ${moduleId}`);
+    },
+
     async clickCreateAdvancedJobButton() {
       await testSubjects.clickWhenNotDisabled('mlDataVisualizerCreateAdvancedJobCard');
     },

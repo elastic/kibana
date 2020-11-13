@@ -140,12 +140,12 @@ export const useUrlState = (accessor: Accessor) => {
     if (typeof fullUrlState === 'object') {
       return fullUrlState[accessor];
     }
-    return undefined;
   }, [searchString]);
 
   const setUrlState = useCallback(
-    (attribute: string | Dictionary<any>, value?: any) =>
-      setUrlStateContext(accessor, attribute, value),
+    (attribute: string | Dictionary<any>, value?: any) => {
+      setUrlStateContext(accessor, attribute, value);
+    },
     [accessor, setUrlStateContext]
   );
   return [urlState, setUrlState];

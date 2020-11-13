@@ -24,7 +24,7 @@ import {
   createPromiseFromStreams,
   createSplitStream,
   createMapStream,
-} from '../../../legacy/utils/streams';
+} from '../../../core/server/utils';
 
 // creates a stream that skips empty lines unless they are followed by
 // another line, preventing the empty lines produced by splitStream
@@ -69,13 +69,13 @@ export async function watchStdioForLine(
       }
     }),
     createPromiseFromStreams([
-      proc.stdout,
+      proc.stdout!, // TypeScript note: As long as the proc stdio[1] is 'pipe', then stdout will not be null
       createSplitStream('\n'),
       skipLastEmptyLineStream(),
       createMapStream(onLogLine),
     ]),
     createPromiseFromStreams([
-      proc.stderr,
+      proc.stderr!, // TypeScript note: As long as the proc stdio[1] is 'pipe', then stderr will not be null
       createSplitStream('\n'),
       skipLastEmptyLineStream(),
       createMapStream(onLogLine),

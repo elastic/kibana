@@ -1,0 +1,11 @@
+.documentsTab {
+  &__documentField {
+    position: relative;
+
+    &__button {
+      position: absolute;
+      right: 0;
+      top: 0;
+    }
+  }
+}

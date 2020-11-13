@@ -6,8 +6,10 @@
   "false_positives": [
     "Security testing tools and frameworks may run this command. Some normal use of this command may originate from automation tools and frameworks."
   ],
+  "from": "now-9m",
   "index": [
-    "auditbeat-*"
+    "auditbeat-*",
+    "logs-endpoint.events.*"
   ],
   "language": "kuery",
   "license": "Elastic License",
@@ -18,7 +20,10 @@
   "severity": "low",
   "tags": [
     "Elastic",
-    "Linux"
+    "Host",
+    "Linux",
+    "Threat Detection",
+    "Discovery"
   ],
   "threat": [
     {
@@ -38,5 +43,5 @@
     }
   ],
   "type": "query",
-  "version": 3
+  "version": 5
 }

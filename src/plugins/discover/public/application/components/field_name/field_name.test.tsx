@@ -20,8 +20,6 @@ import React from 'react';
 import { render } from 'enzyme';
 import { FieldName } from './field_name';
 
-jest.mock('ui/new_platform');
-
 // Note that it currently provides just 2 basic tests, there should be more, but
 // the components involved will soon change
 test('FieldName renders a string field by providing fieldType and fieldName', () => {

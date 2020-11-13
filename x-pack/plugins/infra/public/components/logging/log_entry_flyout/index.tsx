@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { LogEntryFlyout } from './log_entry_flyout';
+export * from './log_entry_flyout';

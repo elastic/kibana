@@ -8,14 +8,15 @@
   ],
   "from": "now-60m",
   "index": [
-    "filebeat-*"
+    "filebeat-*",
+    "logs-aws*"
   ],
   "interval": "10m",
   "language": "kuery",
   "license": "Elastic License",
   "name": "AWS Management Console Root Login",
   "note": "The AWS Filebeat module must be enabled to use this rule.",
-  "query": "event.action:ConsoleLogin and event.module:aws and event.dataset:aws.cloudtrail and event.provider:signin.amazonaws.com and aws.cloudtrail.user_identity.type:Root and event.outcome:success",
+  "query": "event.action:ConsoleLogin and event.dataset:aws.cloudtrail and event.provider:signin.amazonaws.com and aws.cloudtrail.user_identity.type:Root and event.outcome:success",
   "references": [
     "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_root-user.html"
   ],
@@ -23,8 +24,12 @@
   "rule_id": "e2a67480-3b79-403d-96e3-fdd2992c50ef",
   "severity": "high",
   "tags": [
+    "Elastic",
+    "Cloud",
     "AWS",
-    "Elastic"
+    "Continuous Monitoring",
+    "SecOps",
+    "Identity and Access"
   ],
   "threat": [
     {
@@ -59,5 +64,5 @@
     }
   ],
   "type": "query",
-  "version": 1
+  "version": 2
 }

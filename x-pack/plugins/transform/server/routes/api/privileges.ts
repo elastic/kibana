@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { APP_CLUSTER_PRIVILEGES, APP_INDEX_PRIVILEGES } from '../../../common/constants';
-import { Privileges } from '../../../common';
+import { Privileges } from '../../../common/types/privileges';
 
 import { RouteDependencies } from '../../types';
 import { addBasePath } from '../index';

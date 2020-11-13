@@ -12,7 +12,7 @@ import {
 import {
   ExceptionListType,
   ExceptionListItemSchema,
-  ExceptionIdentifiers,
+  ExceptionListIdentifiers,
   Pagination,
 } from '../../../../../public/lists_plugin_deps';
 
@@ -36,7 +36,7 @@ export interface State {
 export type Action =
   | {
       type: 'setExceptions';
-      lists: ExceptionIdentifiers[];
+      lists: ExceptionListIdentifiers[];
       exceptions: ExceptionListItemSchema[];
       pagination: Pagination;
     }
@@ -48,7 +48,7 @@ export type Action =
   | { type: 'updateModalOpen'; modalName: ViewerModalName }
   | {
       type: 'updateExceptionToEdit';
-      lists: ExceptionIdentifiers[];
+      lists: ExceptionListIdentifiers[];
       exception: ExceptionListItemSchema;
     }
   | { type: 'updateLoadingItemIds'; items: ExceptionListItemIdentifiers[] }

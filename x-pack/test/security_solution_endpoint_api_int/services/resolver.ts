@@ -9,9 +9,10 @@ import {
   EndpointDocGenerator,
   Event,
 } from '../../../plugins/security_solution/common/endpoint/generate_data';
+import { firstNonNullValue } from '../../../plugins/security_solution/common/endpoint/models/ecs_safety_helpers';
 import { FtrProviderContext } from '../ftr_provider_context';
 
-const processIndex = 'logs-endpoint.events.process-default';
+export const processEventsIndex = 'logs-endpoint.events.process-default';
 
 /**
  * Options for build a resolver tree
@@ -36,7 +37,7 @@ export interface GeneratedTrees {
  * Structure containing the events inserted into ES and the index they live in
  */
 export interface InsertedEvents {
-  events: Event[];
+  eventsInfo: Array<{ _id: string; event: Event }>;
   indices: string[];
 }
 
@@ -46,24 +47,37 @@ interface BulkCreateHeader {
   };
 }
 
+interface BulkResponse {
+  items: Array<{
+    create: {
+      _id: string;
+    };
+  }>;
+}
+
 export function ResolverGeneratorProvider({ getService }: FtrProviderContext) {
   const client = getService('es');
 
   return {
     async insertEvents(
       events: Event[],
-      eventsIndex: string = processIndex
+      eventsIndex: string = processEventsIndex
     ): Promise<InsertedEvents> {
       const body = events.reduce((array: Array<BulkCreateHeader | Event>, doc) => {
         array.push({ create: { _index: eventsIndex } }, doc);
         return array;
       }, []);
-      await client.bulk({ body, refresh: true });
-      return { events, indices: [eventsIndex] };
+      const bulkResp = await client.bulk<BulkResponse>({ body, refresh: true });
+
+      const eventsInfo = events.map((event: Event, i: number) => {
+        return { event, _id: bulkResp.body.items[i].create._id };
+      });
+
+      return { eventsInfo, indices: [eventsIndex] };
     },
     async createTrees(
       options: Options,
-      eventsIndex: string = processIndex,
+      eventsIndex: string = processEventsIndex,
       alertsIndex: string = 'logs-endpoint.alerts-default'
     ): Promise<GeneratedTrees> {
       const seed = options.seed || 'resolver-seed';
@@ -74,7 +88,7 @@ export function ResolverGeneratorProvider({ getService }: FtrProviderContext) {
         const tree = generator.generateTree(options);
         const body = tree.allEvents.reduce((array: Array<BulkCreateHeader | Event>, doc) => {
           let index = eventsIndex;
-          if (doc.event.kind === 'alert') {
+          if (firstNonNullValue(doc.event?.kind) === 'alert') {
             index = alertsIndex;
           }
           /**

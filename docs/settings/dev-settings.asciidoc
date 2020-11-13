@@ -14,7 +14,7 @@ They are enabled by default.
 
 [cols="2*<"]
 |===
-| `xpack.grokdebugger.enabled`
+| `xpack.grokdebugger.enabled` {ess-icon}
   | Set to `true` to enable the <<xpack-grokdebugger,Grok Debugger>>. Defaults to `true`.
 
 |===

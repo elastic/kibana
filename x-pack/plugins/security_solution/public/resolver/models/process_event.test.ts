@@ -6,7 +6,7 @@
 import { eventType, orderByTime, userInfoForProcess } from './process_event';
 
 import { mockProcessEvent } from './process_event_test_helpers';
-import { LegacyEndpointEvent, ResolverEvent } from '../../../common/endpoint/types';
+import { LegacyEndpointEvent, SafeResolverEvent } from '../../../common/endpoint/types';
 
 describe('process event', () => {
   describe('eventType', () => {
@@ -41,8 +41,8 @@ describe('process event', () => {
     });
   });
   describe('orderByTime', () => {
-    let mock: (time: number, eventID: string) => ResolverEvent;
-    let events: ResolverEvent[];
+    let mock: (time: number, eventID: string) => SafeResolverEvent;
+    let events: SafeResolverEvent[];
     beforeEach(() => {
       mock = (time, eventID) => {
         return {
@@ -50,7 +50,7 @@ describe('process event', () => {
           event: {
             id: eventID,
           },
-        } as ResolverEvent;
+        };
       };
       // 2 events each for numbers -1, 0, 1, and NaN
       // each event has a unique id, a through h

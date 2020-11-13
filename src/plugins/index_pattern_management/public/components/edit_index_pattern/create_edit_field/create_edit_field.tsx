@@ -21,7 +21,7 @@ import { withRouter, RouteComponentProps } from 'react-router-dom';
 
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { IndexPattern } from '../../../../../../plugins/data/public';
+import { IndexPattern, IndexPatternField } from '../../../../../../plugins/data/public';
 import { useKibana } from '../../../../../../plugins/kibana_react/public';
 import { IndexPatternManagmentContext } from '../../../types';
 import { IndexHeader } from '../index_header';
@@ -44,24 +44,21 @@ const newFieldPlaceholder = i18n.translate(
 
 export const CreateEditField = withRouter(
   ({ indexPattern, mode, fieldName, history }: CreateEditFieldProps) => {
-    const { data, uiSettings, chrome, notifications } = useKibana<
+    const { uiSettings, chrome, notifications, data } = useKibana<
       IndexPatternManagmentContext
     >().services;
-    const field =
+    const spec =
       mode === 'edit' && fieldName
-        ? indexPattern.fields.getByName(fieldName)
-        : data.indexPatterns.createField(
-            indexPattern,
-            {
-              scripted: true,
-              type: 'number',
-            },
-            false
-          );
+        ? indexPattern.fields.getByName(fieldName)?.spec
+        : (({
+            scripted: true,
+            type: 'number',
+            name: undefined,
+          } as unknown) as IndexPatternField);
 
     const url = `/patterns/${indexPattern.id}`;
 
-    if (mode === 'edit' && !field) {
+    if (mode === 'edit' && !spec) {
       const message = i18n.translate(
         'indexPatternManagement.editIndexPattern.scripted.noFieldLabel',
         {
@@ -74,17 +71,17 @@ export const CreateEditField = withRouter(
       history.push(url);
     }
 
-    const docFieldName = field?.name || newFieldPlaceholder;
+    const docFieldName = spec?.name || newFieldPlaceholder;
 
     chrome.docTitle.change([docFieldName, indexPattern.title]);
 
     const redirectAway = () => {
       history.push(
-        `${url}#/?_a=(tab:${field?.scripted ? TAB_SCRIPTED_FIELDS : TAB_INDEXED_FIELDS})`
+        `${url}#/?_a=(tab:${spec?.scripted ? TAB_SCRIPTED_FIELDS : TAB_INDEXED_FIELDS})`
       );
     };
 
-    if (field) {
+    if (spec) {
       return (
         <EuiPanel paddingSize={'l'}>
           <EuiFlexGroup direction="column">
@@ -97,8 +94,9 @@ export const CreateEditField = withRouter(
             <EuiFlexItem>
               <FieldEditor
                 indexPattern={indexPattern}
-                field={field}
+                spec={spec}
                 services={{
+                  indexPatternService: data.indexPatterns,
                   redirectAway,
                 }}
               />

@@ -5,7 +5,6 @@
  */
 
 import cytoscape from 'cytoscape';
-import { getNormalizedAgentName } from '../../../../common/agent_name';
 import {
   AGENT_NAME,
   SPAN_SUBTYPE,
@@ -13,29 +12,22 @@ import {
 } from '../../../../common/elasticsearch_fieldnames';
 import awsIcon from './icons/aws.svg';
 import cassandraIcon from './icons/cassandra.svg';
-import darkIcon from './icons/dark.svg';
 import databaseIcon from './icons/database.svg';
 import defaultIconImport from './icons/default.svg';
 import documentsIcon from './icons/documents.svg';
-import dotNetIcon from './icons/dot-net.svg';
 import elasticsearchIcon from './icons/elasticsearch.svg';
 import globeIcon from './icons/globe.svg';
-import goIcon from './icons/go.svg';
 import graphqlIcon from './icons/graphql.svg';
 import grpcIcon from './icons/grpc.svg';
 import handlebarsIcon from './icons/handlebars.svg';
-import javaIcon from './icons/java.svg';
 import kafkaIcon from './icons/kafka.svg';
 import mongodbIcon from './icons/mongodb.svg';
 import mysqlIcon from './icons/mysql.svg';
-import nodeJsIcon from './icons/nodejs.svg';
-import phpIcon from './icons/php.svg';
 import postgresqlIcon from './icons/postgresql.svg';
-import pythonIcon from './icons/python.svg';
 import redisIcon from './icons/redis.svg';
-import rubyIcon from './icons/ruby.svg';
-import rumJsIcon from './icons/rumjs.svg';
 import websocketIcon from './icons/websocket.svg';
+import javaIcon from '../../shared/AgentIcon/icons/java.svg';
+import { getAgentIcon } from '../../shared/AgentIcon/get_agent_icon';
 
 export const defaultIcon = defaultIconImport;
 
@@ -74,23 +66,6 @@ const typeIcons: { [key: string]: { [key: string]: string } } = {
   },
 };
 
-const agentIcons: { [key: string]: string } = {
-  dark: darkIcon,
-  dotnet: dotNetIcon,
-  go: goIcon,
-  java: javaIcon,
-  'js-base': rumJsIcon,
-  nodejs: nodeJsIcon,
-  php: phpIcon,
-  python: pythonIcon,
-  ruby: rubyIcon,
-};
-
-function getAgentIcon(agentName?: string) {
-  const normalizedAgentName = getNormalizedAgentName(agentName);
-  return normalizedAgentName && agentIcons[normalizedAgentName];
-}
-
 function getSpanIcon(type?: string, subtype?: string) {
   if (!type) {
     return;
@@ -111,7 +86,7 @@ function getSpanIcon(type?: string, subtype?: string) {
 // This method of detecting IE is from a Stack Overflow answer:
 // https://stackoverflow.com/a/21825207
 //
-// @ts-ignore `documentMode` is not recognized as a valid property of `document`.
+// @ts-expect-error `documentMode` is not recognized as a valid property of `document`.
 const isIE11 = !!window.MSInputMethodContext && !!document.documentMode;
 
 export function iconForNode(node: cytoscape.NodeSingular) {

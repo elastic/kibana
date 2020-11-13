@@ -6,7 +6,7 @@
 
 import React from 'react';
 
-import { TimelineType } from '../../../../../common/types/timeline';
+import { TimelineId, TimelineType } from '../../../../../common/types/timeline';
 
 import { useKibana } from '../../../../common/lib/kibana';
 import { useCreateTimelineButton } from './use_create_timeline';
@@ -22,7 +22,7 @@ export const NewTemplateTimelineComponent: React.FC<OwnProps> = ({
   closeGearMenu,
   outline,
   title,
-  timelineId = 'timeline-1',
+  timelineId = TimelineId.active,
 }) => {
   const uiCapabilities = useKibana().services.application.capabilities;
   const capabilitiesCanUserCRUD: boolean = !!uiCapabilities.siem.crud;

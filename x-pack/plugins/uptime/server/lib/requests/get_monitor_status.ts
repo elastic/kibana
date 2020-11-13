@@ -4,20 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { JsonObject } from 'src/plugins/kibana_utils/public';
 import { UMElasticsearchQueryFn } from '../adapters';
+import { Ping } from '../../../common/runtime_types/ping';
 
 export interface GetMonitorStatusParams {
-  filters?: string;
+  filters?: JsonObject;
   locations: string[];
   numTimes: number;
   timerange: { from: string; to: string };
 }
 
 export interface GetMonitorStatusResult {
-  monitor_id: string;
+  monitorId: string;
   status: string;
   location: string;
   count: number;
+  monitorInfo: Ping;
 }
 
 interface MonitorStatusKey {
@@ -25,15 +28,6 @@ interface MonitorStatusKey {
   status: string;
   location: string;
 }
-
-const formatBuckets = async (
-  buckets: any[],
-  numTimes: number
-): Promise<GetMonitorStatusResult[]> => {
-  return buckets
-    .filter((monitor: any) => monitor?.doc_count > numTimes)
-    .map(({ key, doc_count }: any) => ({ ...key, count: doc_count }));
-};
 
 const getLocationClause = (locations: string[]) => ({
   bool: {
@@ -51,10 +45,10 @@ export const getMonitorStatus: UMElasticsearchQueryFn<
   GetMonitorStatusParams,
   GetMonitorStatusResult[]
 > = async ({ callES, dynamicSettings, filters, locations, numTimes, timerange: { from, to } }) => {
-  const queryResults: Array<Promise<GetMonitorStatusResult[]>> = [];
   let afterKey: MonitorStatusKey | undefined;
 
   const STATUS = 'down';
+  let monitors: any = [];
   do {
     // today this value is hardcoded. In the future we may support
     // multiple status types for this alert, and this will become a parameter
@@ -77,6 +71,8 @@ export const getMonitorStatus: UMElasticsearchQueryFn<
                   },
                 },
               },
+              // append user filters, if defined
+              ...(filters?.bool ? [filters] : []),
             ],
           },
         },
@@ -87,7 +83,7 @@ export const getMonitorStatus: UMElasticsearchQueryFn<
               size: 2000,
               sources: [
                 {
-                  monitor_id: {
+                  monitorId: {
                     terms: {
                       field: 'monitor.id',
                     },
@@ -110,19 +106,17 @@ export const getMonitorStatus: UMElasticsearchQueryFn<
                 },
               ],
             },
+            aggs: {
+              fields: {
+                top_hits: {
+                  size: 1,
+                },
+              },
+            },
           },
         },
       },
     };
-
-    /**
-     * `filters` are an unparsed JSON string. We parse them and append the bool fields of the query
-     * to the bool of the parsed filters.
-     */
-    if (filters) {
-      const parsedFilters = JSON.parse(filters);
-      esParams.body.query.bool = Object.assign({}, esParams.body.query.bool, parsedFilters.bool);
-    }
 
     /**
      * Perform a logical `and` against the selected location filters.
@@ -139,11 +133,17 @@ export const getMonitorStatus: UMElasticsearchQueryFn<
       esParams.body.aggs.monitors.composite.after = afterKey;
     }
 
-    const result = await callES('search', esParams);
+    const { body: result } = await callES.search(esParams);
     afterKey = result?.aggregations?.monitors?.after_key;
 
-    queryResults.push(formatBuckets(result?.aggregations?.monitors?.buckets || [], numTimes));
+    monitors = monitors.concat(result?.aggregations?.monitors?.buckets || []);
   } while (afterKey !== undefined);
 
-  return (await Promise.all(queryResults)).reduce((acc, cur) => acc.concat(cur), []);
+  return monitors
+    .filter((monitor: any) => monitor?.doc_count >= numTimes)
+    .map(({ key, doc_count: count, fields }: any) => ({
+      ...key,
+      count,
+      monitorInfo: fields?.hits?.hits?.[0]?._source,
+    }));
 };

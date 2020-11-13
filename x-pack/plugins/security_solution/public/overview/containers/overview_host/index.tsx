@@ -4,86 +4,162 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getOr } from 'lodash/fp';
-import React from 'react';
-import { Query } from 'react-apollo';
-import { connect, ConnectedProps } from 'react-redux';
+import { noop } from 'lodash/fp';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import deepEqual from 'fast-deep-equal';
 
-import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
-import { GetOverviewHostQuery, OverviewHostData } from '../../../graphql/types';
-import { useUiSetting } from '../../../common/lib/kibana';
-import { inputsModel, inputsSelectors } from '../../../common/store/inputs';
-import { State } from '../../../common/store';
-import { createFilter, getDefaultFetchPolicy } from '../../../common/containers/helpers';
-import { QueryTemplateProps } from '../../../common/containers/query_template';
-
-import { overviewHostQuery } from './index.gql_query';
+import {
+  HostsQueries,
+  HostOverviewRequestOptions,
+  HostsOverviewStrategyResponse,
+} from '../../../../common/search_strategy/security_solution';
+import { useKibana } from '../../../common/lib/kibana';
+import { inputsModel } from '../../../common/store/inputs';
+import { createFilter } from '../../../common/containers/helpers';
+import { ESQuery } from '../../../../common/typed_json';
+import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/plugins/data/common';
+import { AbortError } from '../../../../../../../src/plugins/kibana_utils/common';
+import { getInspectResponse } from '../../../helpers';
+import { InspectResponse } from '../../../types';
+import * as i18n from './translations';
 
 export const ID = 'overviewHostQuery';
 
-export interface OverviewHostArgs {
+export interface HostOverviewArgs {
   id: string;
-  inspect: inputsModel.InspectQuery;
-  loading: boolean;
-  overviewHost: OverviewHostData;
+  inspect: InspectResponse;
+  isInspected: boolean;
+  overviewHost: HostsOverviewStrategyResponse['overviewHost'];
   refetch: inputsModel.Refetch;
 }
 
-export interface OverviewHostProps extends QueryTemplateProps {
-  children: (args: OverviewHostArgs) => React.ReactNode;
-  sourceId: string;
+interface UseHostOverview {
+  filterQuery?: ESQuery | string;
   endDate: string;
+  indexNames: string[];
+  skip?: boolean;
   startDate: string;
 }
 
-const OverviewHostComponentQuery = React.memo<OverviewHostProps & PropsFromRedux>(
-  ({ id = ID, children, filterQuery, isInspected, sourceId, startDate, endDate }) => {
-    return (
-      <Query<GetOverviewHostQuery.Query, GetOverviewHostQuery.Variables>
-        query={overviewHostQuery}
-        fetchPolicy={getDefaultFetchPolicy()}
-        variables={{
-          sourceId,
+export const useHostOverview = ({
+  filterQuery,
+  endDate,
+  indexNames,
+  skip = false,
+  startDate,
+}: UseHostOverview): [boolean, HostOverviewArgs] => {
+  const { data, notifications } = useKibana().services;
+  const refetch = useRef<inputsModel.Refetch>(noop);
+  const abortCtrl = useRef(new AbortController());
+  const [loading, setLoading] = useState(false);
+  const [overviewHostRequest, setHostRequest] = useState<HostOverviewRequestOptions | null>(
+    !skip
+      ? {
+          defaultIndex: indexNames,
+          factoryQueryType: HostsQueries.overview,
+          filterQuery: createFilter(filterQuery),
           timerange: {
             interval: '12h',
             from: startDate,
             to: endDate,
           },
-          filterQuery: createFilter(filterQuery),
-          defaultIndex: useUiSetting<string[]>(DEFAULT_INDEX_KEY),
-          inspect: isInspected,
-        }}
-      >
-        {({ data, loading, refetch }) => {
-          const overviewHost = getOr({}, `source.OverviewHost`, data);
-          return children({
-            id,
-            inspect: getOr(null, 'source.OverviewHost.inspect', data),
-            overviewHost,
-            loading,
-            refetch,
+        }
+      : null
+  );
+
+  const [overviewHostResponse, setHostOverviewResponse] = useState<HostOverviewArgs>({
+    overviewHost: {},
+    id: ID,
+    inspect: {
+      dsl: [],
+      response: [],
+    },
+    isInspected: false,
+    refetch: refetch.current,
+  });
+
+  const overviewHostSearch = useCallback(
+    (request: HostOverviewRequestOptions | null) => {
+      if (request == null) {
+        return;
+      }
+
+      let didCancel = false;
+      const asyncSearch = async () => {
+        abortCtrl.current = new AbortController();
+        setLoading(true);
+
+        const searchSubscription$ = data.search
+          .search<HostOverviewRequestOptions, HostsOverviewStrategyResponse>(request, {
+            strategy: 'securitySolutionSearchStrategy',
+            abortSignal: abortCtrl.current.signal,
+          })
+          .subscribe({
+            next: (response) => {
+              if (isCompleteResponse(response)) {
+                if (!didCancel) {
+                  setLoading(false);
+                  setHostOverviewResponse((prevResponse) => ({
+                    ...prevResponse,
+                    overviewHost: response.overviewHost,
+                    inspect: getInspectResponse(response, prevResponse.inspect),
+                    refetch: refetch.current,
+                  }));
+                }
+                searchSubscription$.unsubscribe();
+              } else if (isErrorResponse(response)) {
+                if (!didCancel) {
+                  setLoading(false);
+                }
+                // TODO: Make response error status clearer
+                notifications.toasts.addWarning(i18n.ERROR_HOST_OVERVIEW);
+                searchSubscription$.unsubscribe();
+              }
+            },
+            error: (msg) => {
+              if (!(msg instanceof AbortError)) {
+                notifications.toasts.addDanger({
+                  title: i18n.FAIL_HOST_OVERVIEW,
+                  text: msg.message,
+                });
+              }
+            },
           });
-        }}
-      </Query>
-    );
-  }
-);
+      };
+      abortCtrl.current.abort();
+      asyncSearch();
+      refetch.current = asyncSearch;
+      return () => {
+        didCancel = true;
+        abortCtrl.current.abort();
+      };
+    },
+    [data.search, notifications.toasts]
+  );
 
-OverviewHostComponentQuery.displayName = 'OverviewHostComponentQuery';
+  useEffect(() => {
+    setHostRequest((prevRequest) => {
+      const myRequest = {
+        ...(prevRequest ?? {}),
+        defaultIndex: indexNames,
+        factoryQueryType: HostsQueries.overview,
+        filterQuery: createFilter(filterQuery),
+        timerange: {
+          interval: '12h',
+          from: startDate,
+          to: endDate,
+        },
+      };
+      if (!skip && !deepEqual(prevRequest, myRequest)) {
+        return myRequest;
+      }
+      return prevRequest;
+    });
+  }, [indexNames, endDate, filterQuery, skip, startDate]);
 
-const makeMapStateToProps = () => {
-  const getQuery = inputsSelectors.globalQueryByIdSelector();
-  const mapStateToProps = (state: State, { id = ID }: OverviewHostProps) => {
-    const { isInspected } = getQuery(state, id);
-    return {
-      isInspected,
-    };
-  };
-  return mapStateToProps;
+  useEffect(() => {
+    overviewHostSearch(overviewHostRequest);
+  }, [overviewHostRequest, overviewHostSearch]);
+
+  return [loading, overviewHostResponse];
 };
-
-const connector = connect(makeMapStateToProps);
-
-type PropsFromRedux = ConnectedProps<typeof connector>;
-
-export const OverviewHostQuery = connector(OverviewHostComponentQuery);

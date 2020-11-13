@@ -2,12 +2,12 @@
 
 exports[`FilterStatusButton renders without errors for valid props 1`] = `
 <button
-  class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--iconRight euiFilterButton euiFilterButton-hasActiveFilters euiFilterButton--withNext"
+  class="euiButtonEmpty euiButtonEmpty--text euiFilterButton euiFilterButton-hasActiveFilters euiFilterButton--withNext"
   data-test-subj="foo"
   type="button"
 >
   <span
-    class="euiButtonEmpty__content"
+    class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
   >
     <span
       class="euiButtonEmpty__text"

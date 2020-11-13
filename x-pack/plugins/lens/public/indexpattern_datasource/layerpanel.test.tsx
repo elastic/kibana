@@ -7,12 +7,130 @@
 import React from 'react';
 import { IndexPatternPrivateState } from './types';
 import { IndexPatternLayerPanelProps, LayerPanel } from './layerpanel';
-import { shallowWithIntl as shallow } from 'test_utils/enzyme_helpers';
+import { shallowWithIntl as shallow } from '@kbn/test/jest';
 import { ShallowWrapper } from 'enzyme';
-import { EuiSelectable, EuiSelectableList } from '@elastic/eui';
+import { EuiSelectable } from '@elastic/eui';
 import { ChangeIndexPattern } from './change_indexpattern';
+import { getFieldByNameFactory } from './pure_helpers';
 
-jest.mock('./state_helpers');
+interface IndexPatternPickerOption {
+  label: string;
+  checked?: 'on' | 'off';
+}
+
+const fieldsOne = [
+  {
+    name: 'timestamp',
+    displayName: 'timestampLabel',
+    type: 'date',
+    aggregatable: true,
+    searchable: true,
+  },
+  {
+    name: 'bytes',
+    displayName: 'bytes',
+    type: 'number',
+    aggregatable: true,
+    searchable: true,
+  },
+  {
+    name: 'memory',
+    displayName: 'memory',
+    type: 'number',
+    aggregatable: true,
+    searchable: true,
+  },
+  {
+    name: 'unsupported',
+    displayName: 'unsupported',
+    type: 'geo',
+    aggregatable: true,
+    searchable: true,
+  },
+  {
+    name: 'source',
+    displayName: 'source',
+    type: 'string',
+    aggregatable: true,
+    searchable: true,
+  },
+];
+
+const fieldsTwo = [
+  {
+    name: 'timestamp',
+    displayName: 'timestampLabel',
+    type: 'date',
+    aggregatable: true,
+    searchable: true,
+    aggregationRestrictions: {
+      date_histogram: {
+        agg: 'date_histogram',
+        fixed_interval: '1d',
+        delay: '7d',
+        time_zone: 'UTC',
+      },
+    },
+  },
+  {
+    name: 'bytes',
+    displayName: 'bytes',
+    type: 'number',
+    aggregatable: true,
+    searchable: true,
+    aggregationRestrictions: {
+      histogram: {
+        agg: 'histogram',
+        interval: 1000,
+      },
+      max: {
+        agg: 'max',
+      },
+      min: {
+        agg: 'min',
+      },
+      sum: {
+        agg: 'sum',
+      },
+    },
+  },
+  {
+    name: 'source',
+    displayName: 'source',
+    type: 'string',
+    aggregatable: true,
+    searchable: true,
+    aggregationRestrictions: {
+      terms: {
+        agg: 'terms',
+      },
+    },
+  },
+];
+
+const fieldsThree = [
+  {
+    name: 'timestamp',
+    displayName: 'timestampLabel',
+    type: 'date',
+    aggregatable: true,
+    searchable: true,
+  },
+  {
+    name: 'memory',
+    displayName: 'memory',
+    type: 'number',
+    aggregatable: true,
+    searchable: true,
+  },
+  {
+    name: 'source',
+    displayName: 'source',
+    type: 'string',
+    aggregatable: true,
+    searchable: true,
+  },
+];
 
 const initialState: IndexPatternPrivateState = {
   indexPatternRefs: [
@@ -57,116 +175,25 @@ const initialState: IndexPatternPrivateState = {
       id: '1',
       title: 'my-fake-index-pattern',
       timeFieldName: 'timestamp',
-      fields: [
-        {
-          name: 'timestamp',
-          type: 'date',
-          aggregatable: true,
-          searchable: true,
-        },
-        {
-          name: 'bytes',
-          type: 'number',
-          aggregatable: true,
-          searchable: true,
-        },
-        {
-          name: 'memory',
-          type: 'number',
-          aggregatable: true,
-          searchable: true,
-        },
-        {
-          name: 'unsupported',
-          type: 'geo',
-          aggregatable: true,
-          searchable: true,
-        },
-        {
-          name: 'source',
-          type: 'string',
-          aggregatable: true,
-          searchable: true,
-        },
-      ],
+      hasRestrictions: false,
+      fields: fieldsOne,
+      getFieldByName: getFieldByNameFactory(fieldsOne),
     },
     '2': {
       id: '2',
       title: 'my-fake-restricted-pattern',
+      hasRestrictions: true,
       timeFieldName: 'timestamp',
-      fields: [
-        {
-          name: 'timestamp',
-          type: 'date',
-          aggregatable: true,
-          searchable: true,
-          aggregationRestrictions: {
-            date_histogram: {
-              agg: 'date_histogram',
-              fixed_interval: '1d',
-              delay: '7d',
-              time_zone: 'UTC',
-            },
-          },
-        },
-        {
-          name: 'bytes',
-          type: 'number',
-          aggregatable: true,
-          searchable: true,
-          aggregationRestrictions: {
-            histogram: {
-              agg: 'histogram',
-              interval: 1000,
-            },
-            max: {
-              agg: 'max',
-            },
-            min: {
-              agg: 'min',
-            },
-            sum: {
-              agg: 'sum',
-            },
-          },
-        },
-        {
-          name: 'source',
-          type: 'string',
-          aggregatable: true,
-          searchable: true,
-          aggregationRestrictions: {
-            terms: {
-              agg: 'terms',
-            },
-          },
-        },
-      ],
+      fields: fieldsTwo,
+      getFieldByName: getFieldByNameFactory(fieldsTwo),
     },
     '3': {
       id: '3',
       title: 'my-compatible-pattern',
       timeFieldName: 'timestamp',
-      fields: [
-        {
-          name: 'timestamp',
-          type: 'date',
-          aggregatable: true,
-          searchable: true,
-        },
-        {
-          name: 'memory',
-          type: 'number',
-          aggregatable: true,
-          searchable: true,
-        },
-        {
-          name: 'source',
-          type: 'string',
-          aggregatable: true,
-          searchable: true,
-        },
-      ],
+      hasRestrictions: false,
+      fields: fieldsThree,
+      getFieldByName: getFieldByNameFactory(fieldsThree),
     },
   },
 };
@@ -187,9 +214,9 @@ describe('Layer Data Panel', () => {
   }
 
   function selectIndexPatternPickerOption(instance: ShallowWrapper, selectedLabel: string) {
-    const options: Array<{ label: string; checked?: 'on' | 'off' }> = getIndexPatternPickerOptions(
+    const options: IndexPatternPickerOption[] = getIndexPatternPickerOptions(
       instance
-    ).map((option) =>
+    ).map((option: IndexPatternPickerOption) =>
       option.label === selectedLabel
         ? { ...option, checked: 'on' }
         : { ...option, checked: undefined }
@@ -198,17 +225,17 @@ describe('Layer Data Panel', () => {
   }
 
   function getIndexPatternPickerOptions(instance: ShallowWrapper) {
-    return getIndexPatternPickerList(instance).dive().find(EuiSelectableList).prop('options');
+    return getIndexPatternPickerList(instance).prop('options');
   }
 
   it('should list all index patterns', () => {
     const instance = shallow(<LayerPanel {...defaultProps} />);
 
-    expect(getIndexPatternPickerOptions(instance)!.map((option) => option.label)).toEqual([
-      'my-fake-index-pattern',
-      'my-fake-restricted-pattern',
-      'my-compatible-pattern',
-    ]);
+    expect(
+      getIndexPatternPickerOptions(instance)!.map(
+        (option: IndexPatternPickerOption) => option.label
+      )
+    ).toEqual(['my-fake-index-pattern', 'my-fake-restricted-pattern', 'my-compatible-pattern']);
   });
 
   it('should switch data panel to target index pattern', () => {

@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint-disable @typescript-eslint/camelcase, @typescript-eslint/no-empty-interface */
-
 import * as runtimeTypes from 'io-ts';
 
 import { stringEnum, unionWithNullType } from '../../utility_types';
@@ -241,6 +239,7 @@ export const SavedTimelineRuntimeType = runtimeTypes.partial({
   excludedRowRendererIds: unionWithNullType(runtimeTypes.array(RowRendererIdRuntimeType)),
   favorite: unionWithNullType(runtimeTypes.array(SavedFavoriteRuntimeType)),
   filters: unionWithNullType(runtimeTypes.array(SavedFilterRuntimeType)),
+  indexNames: unionWithNullType(runtimeTypes.array(runtimeTypes.string)),
   kqlMode: unionWithNullType(runtimeTypes.string),
   kqlQuery: unionWithNullType(SavedFilterQueryQueryRuntimeType),
   title: unionWithNullType(runtimeTypes.string),
@@ -257,9 +256,9 @@ export const SavedTimelineRuntimeType = runtimeTypes.partial({
   updatedBy: unionWithNullType(runtimeTypes.string),
 });
 
-export interface SavedTimeline extends runtimeTypes.TypeOf<typeof SavedTimelineRuntimeType> {}
+export type SavedTimeline = runtimeTypes.TypeOf<typeof SavedTimelineRuntimeType>;
 
-export interface SavedTimelineNote extends runtimeTypes.TypeOf<typeof SavedTimelineRuntimeType> {}
+export type SavedTimelineNote = runtimeTypes.TypeOf<typeof SavedTimelineRuntimeType>;
 
 /*
  *  Timeline IDs
@@ -317,8 +316,9 @@ export const TimelineSavedToReturnObjectRuntimeType = runtimeTypes.intersection(
   }),
 ]);
 
-export interface TimelineSavedObject
-  extends runtimeTypes.TypeOf<typeof TimelineSavedToReturnObjectRuntimeType> {}
+export type TimelineSavedObject = runtimeTypes.TypeOf<
+  typeof TimelineSavedToReturnObjectRuntimeType
+>;
 
 /**
  * All Timeline Saved object type with metadata
@@ -342,9 +342,8 @@ export const TimelineErrorResponseType = runtimeTypes.type({
   message: runtimeTypes.string,
 });
 
-export interface TimelineErrorResponse
-  extends runtimeTypes.TypeOf<typeof TimelineErrorResponseType> {}
-export interface TimelineResponse extends runtimeTypes.TypeOf<typeof TimelineResponseType> {}
+export type TimelineErrorResponse = runtimeTypes.TypeOf<typeof TimelineErrorResponseType>;
+export type TimelineResponse = runtimeTypes.TypeOf<typeof TimelineResponseType>;
 
 /**
  * All Timeline Saved object type with metadata
@@ -355,8 +354,7 @@ export const AllTimelineSavedObjectRuntimeType = runtimeTypes.type({
   data: TimelineSavedToReturnObjectRuntimeType,
 });
 
-export interface AllTimelineSavedObject
-  extends runtimeTypes.TypeOf<typeof AllTimelineSavedObjectRuntimeType> {}
+export type AllTimelineSavedObject = runtimeTypes.TypeOf<typeof AllTimelineSavedObjectRuntimeType>;
 
 /**
  * Import/export timelines
@@ -401,3 +399,5 @@ export const importTimelineResultSchema = runtimeTypes.exact(
 );
 
 export type ImportTimelineResultSchema = runtimeTypes.TypeOf<typeof importTimelineResultSchema>;
+
+export type TimelineEventsType = 'all' | 'raw' | 'alert' | 'signal' | 'custom';

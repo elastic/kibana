@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ILegacyScopedClusterClient, KibanaRequest } from 'kibana/server';
-import { mlLog } from '../../client/log';
+import { KibanaRequest } from 'kibana/server';
+import type { MlClient } from '../../lib/ml_client';
+import { mlLog } from '../../lib/log';
 import {
   MlCapabilities,
   adminMlCapabilities,
@@ -22,12 +23,12 @@ import {
 } from './errors';
 
 export function capabilitiesProvider(
-  mlClusterClient: ILegacyScopedClusterClient,
+  mlClient: MlClient,
   capabilities: MlCapabilities,
   mlLicense: MlLicense,
   isMlEnabledInSpace: () => Promise<boolean>
 ) {
-  const { isUpgradeInProgress } = upgradeCheckProvider(mlClusterClient);
+  const { isUpgradeInProgress } = upgradeCheckProvider(mlClient);
   async function getCapabilities(): Promise<MlCapabilitiesResponse> {
     const upgradeInProgress = await isUpgradeInProgress();
     const isPlatinumOrTrialLicense = mlLicense.isFullLicense();

@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ProcessorEvent } from '../../../common/processor_event';
 import {
-  PROCESSOR_EVENT,
   TRACE_ID,
   PARENT_ID,
   TRANSACTION_DURATION,
@@ -13,8 +13,6 @@ import {
   TRANSACTION_ID,
   ERROR_LOG_LEVEL,
 } from '../../../common/elasticsearch_fieldnames';
-import { Span } from '../../../typings/es_schemas/ui/span';
-import { Transaction } from '../../../typings/es_schemas/ui/transaction';
 import { APMError } from '../../../typings/es_schemas/ui/apm_error';
 import { rangeFilter } from '../../../common/utils/range_filter';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
@@ -28,19 +26,20 @@ export async function getTraceItems(
   traceId: string,
   setup: Setup & SetupTimeRange
 ) {
-  const { start, end, client, config, indices } = setup;
+  const { start, end, apmEventClient, config } = setup;
   const maxTraceItems = config['xpack.apm.ui.maxTraceItems'];
   const excludedLogLevels = ['debug', 'info', 'warning'];
 
-  const errorResponsePromise = client.search({
-    index: indices['apm_oss.errorIndices'],
+  const errorResponsePromise = apmEventClient.search({
+    apm: {
+      events: [ProcessorEvent.error],
+    },
     body: {
       size: maxTraceItems,
       query: {
         bool: {
           filter: [
             { term: { [TRACE_ID]: traceId } },
-            { term: { [PROCESSOR_EVENT]: 'error' } },
             { range: rangeFilter(start, end) },
           ],
           must_not: { terms: { [ERROR_LOG_LEVEL]: excludedLogLevels } },
@@ -59,18 +58,16 @@ export async function getTraceItems(
     },
   });
 
-  const traceResponsePromise = client.search({
-    index: [
-      indices['apm_oss.spanIndices'],
-      indices['apm_oss.transactionIndices'],
-    ],
+  const traceResponsePromise = apmEventClient.search({
+    apm: {
+      events: [ProcessorEvent.span, ProcessorEvent.transaction],
+    },
     body: {
       size: maxTraceItems,
       query: {
         bool: {
           filter: [
             { term: { [TRACE_ID]: traceId } },
-            { terms: { [PROCESSOR_EVENT]: ['span', 'transaction'] } },
             { range: rangeFilter(start, end) },
           ],
           should: {
@@ -91,22 +88,17 @@ export async function getTraceItems(
     // explicit intermediary types to avoid TS "excessively deep" error
     PromiseValueType<typeof errorResponsePromise>,
     PromiseValueType<typeof traceResponsePromise>
-    // @ts-ignore
-  ] = await Promise.all([errorResponsePromise, traceResponsePromise]);
+  ] = (await Promise.all([errorResponsePromise, traceResponsePromise])) as any;
 
   const exceedsMax = traceResponse.hits.total.value > maxTraceItems;
 
-  const items = (traceResponse.hits.hits as Array<{
-    _source: Transaction | Span;
-  }>).map((hit) => hit._source);
+  const items = traceResponse.hits.hits.map((hit) => hit._source);
 
   const errorFrequencies: {
     errorsPerTransaction: ErrorsPerTransaction;
     errorDocs: APMError[];
   } = {
-    errorDocs: errorResponse.hits.hits.map(
-      ({ _source }) => _source as APMError
-    ),
+    errorDocs: errorResponse.hits.hits.map(({ _source }) => _source),
     errorsPerTransaction:
       errorResponse.aggregations?.by_transaction_id.buckets.reduce(
         (acc, current) => {

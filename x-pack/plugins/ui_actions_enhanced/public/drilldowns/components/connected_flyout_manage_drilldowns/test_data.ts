@@ -5,6 +5,7 @@
  */
 
 import uuid from 'uuid';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import {
   UiActionsEnhancedDynamicActionManager as DynamicActionManager,
   UiActionsEnhancedDynamicActionManagerState as DynamicActionManagerState,
@@ -60,7 +61,7 @@ class MockDynamicActionManager implements PublicMethodsOf<DynamicActionManager> 
 
   async updateEvent(
     eventId: string,
-    action: UiActionsEnhancedSerializedAction<unknown>,
+    action: UiActionsEnhancedSerializedAction,
     triggers: Array<keyof TriggerContextMapping>
   ) {
     const state = this.state.get();

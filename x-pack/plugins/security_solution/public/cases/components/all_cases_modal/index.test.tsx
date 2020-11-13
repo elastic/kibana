@@ -5,6 +5,7 @@
  */
 import { mount } from 'enzyme';
 import React from 'react';
+import { waitFor } from '@testing-library/react';
 import '../../../common/mock/match_media';
 import { AllCasesModal } from '.';
 import { TestProviders } from '../../../common/mock';
@@ -96,16 +97,6 @@ describe('AllCasesModal', () => {
     dispatchResetIsUpdated,
     updateBulkStatus,
   };
-  /* eslint-disable no-console */
-  // Silence until enzyme fixed to use ReactTestUtils.act()
-  const originalError = console.error;
-  beforeAll(() => {
-    console.error = jest.fn();
-  });
-  afterAll(() => {
-    console.error = originalError;
-  });
-  /* eslint-enable no-console */
   beforeEach(() => {
     jest.resetAllMocks();
     useUpdateCasesMock.mockImplementation(() => defaultUpdateCases);
@@ -114,41 +105,49 @@ describe('AllCasesModal', () => {
     useGetCasesStatusMock.mockImplementation(() => defaultCasesStatus);
   });
 
-  it('renders with unselectable rows', () => {
+  it('renders with unselectable rows', async () => {
     const wrapper = mount(
       <TestProviders>
         <AllCasesModal {...defaultProps} />
       </TestProviders>
     );
-    expect(wrapper.find(`[data-test-subj='all-cases-modal']`).exists()).toBeTruthy();
-    expect(wrapper.find(EuiTableRow).first().prop('isSelectable')).toBeFalsy();
+    await waitFor(() => {
+      expect(wrapper.find(`[data-test-subj='all-cases-modal']`).exists()).toBeTruthy();
+      expect(wrapper.find(EuiTableRow).first().prop('isSelectable')).toBeFalsy();
+    });
   });
-  it('does not render modal if showCaseModal: false', () => {
+  it('does not render modal if showCaseModal: false', async () => {
     const wrapper = mount(
       <TestProviders>
         <AllCasesModal {...{ ...defaultProps, showCaseModal: false }} />
       </TestProviders>
     );
-    expect(wrapper.find(`[data-test-subj='all-cases-modal']`).exists()).toBeFalsy();
+    await waitFor(() => {
+      expect(wrapper.find(`[data-test-subj='all-cases-modal']`).exists()).toBeFalsy();
+    });
   });
-  it('onRowClick called when row is clicked', () => {
+  it('onRowClick called when row is clicked', async () => {
     const wrapper = mount(
       <TestProviders>
         <AllCasesModal {...defaultProps} />
       </TestProviders>
     );
-    const firstRow = wrapper.find(EuiTableRow).first();
-    firstRow.simulate('click');
-    expect(onRowClick.mock.calls[0][0]).toEqual(basicCaseId);
+    await waitFor(() => {
+      const firstRow = wrapper.find(EuiTableRow).first();
+      firstRow.simulate('click');
+      expect(onRowClick.mock.calls[0][0]).toEqual(basicCaseId);
+    });
   });
-  it('Closing modal calls onCloseCaseModal', () => {
+  it('Closing modal calls onCloseCaseModal', async () => {
     const wrapper = mount(
       <TestProviders>
         <AllCasesModal {...defaultProps} />
       </TestProviders>
     );
-    const modalClose = wrapper.find('.euiModal__closeIcon').first();
-    modalClose.simulate('click');
-    expect(onCloseCaseModal).toBeCalled();
+    await waitFor(() => {
+      const modalClose = wrapper.find('.euiModal__closeIcon').first();
+      modalClose.simulate('click');
+      expect(onCloseCaseModal).toBeCalled();
+    });
   });
 });

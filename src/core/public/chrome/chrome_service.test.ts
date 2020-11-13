@@ -363,6 +363,25 @@ describe('start', () => {
     });
   });
 
+  describe('breadcrumbsAppendExtension$', () => {
+    it('updates the breadcrumbsAppendExtension$', async () => {
+      const { chrome, service } = await start();
+      const promise = chrome.getBreadcrumbsAppendExtension$().pipe(toArray()).toPromise();
+
+      chrome.setBreadcrumbsAppendExtension({ content: (element) => () => {} });
+      service.stop();
+
+      await expect(promise).resolves.toMatchInlineSnapshot(`
+              Array [
+                undefined,
+                Object {
+                  "content": [Function],
+                },
+              ]
+            `);
+    });
+  });
+
   describe('custom nav link', () => {
     it('updates/emits the current custom nav link', async () => {
       const { chrome, service } = await start();
@@ -403,6 +422,59 @@ describe('start', () => {
                 undefined,
               ]
             `);
+    });
+  });
+
+  describe('erase chrome fields', () => {
+    it('while switching an app', async () => {
+      const startDeps = defaultStartDeps([new FakeApp('alpha')]);
+      const { navigateToApp } = startDeps.application;
+      const { chrome, service } = await start({ startDeps });
+
+      const helpExtensionPromise = chrome.getHelpExtension$().pipe(toArray()).toPromise();
+      const breadcrumbsPromise = chrome.getBreadcrumbs$().pipe(toArray()).toPromise();
+      const badgePromise = chrome.getBadge$().pipe(toArray()).toPromise();
+      const docTitleResetSpy = jest.spyOn(chrome.docTitle, 'reset');
+
+      const promises = Promise.all([helpExtensionPromise, breadcrumbsPromise, badgePromise]);
+
+      chrome.setHelpExtension({ appName: 'App name' });
+      chrome.setBreadcrumbs([{ text: 'App breadcrumb' }]);
+      chrome.setBadge({ text: 'App badge', tooltip: 'App tooltip' });
+
+      navigateToApp('alpha');
+
+      service.stop();
+
+      expect(docTitleResetSpy).toBeCalledTimes(1);
+      await expect(promises).resolves.toMatchInlineSnapshot(`
+                      Array [
+                        Array [
+                          undefined,
+                          Object {
+                            "appName": "App name",
+                          },
+                          undefined,
+                        ],
+                        Array [
+                          Array [],
+                          Array [
+                            Object {
+                              "text": "App breadcrumb",
+                            },
+                          ],
+                          Array [],
+                        ],
+                        Array [
+                          undefined,
+                          Object {
+                            "text": "App badge",
+                            "tooltip": "App tooltip",
+                          },
+                          undefined,
+                        ],
+                      ]
+                  `);
     });
   });
 });

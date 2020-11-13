@@ -19,14 +19,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiFlexGroup,
-  EuiToolTip,
-  EuiFlexItem,
-  EuiIcon,
-  EuiTitle,
-  EuiButtonIcon,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiToolTip, EuiFlexItem, EuiTitle, EuiButtonIcon } from '@elastic/eui';
 import { IIndexPattern } from 'src/plugins/data/public';
 
 interface IndexHeaderProps {
@@ -77,22 +70,13 @@ export function IndexHeader({
   return (
     <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
       <EuiFlexItem>
-        <EuiFlexGroup alignItems="center">
-          {defaultIndex === indexPattern.id && (
-            <EuiFlexItem grow={false} style={{ marginRight: 0 }}>
-              <EuiIcon size="xl" type="starFilled" />
-            </EuiFlexItem>
-          )}
-          <EuiFlexItem style={defaultIndex === indexPattern.id ? { marginLeft: 0 } : {}}>
-            <EuiTitle>
-              <h1 data-test-subj="indexPatternTitle">{indexPattern.title}</h1>
-            </EuiTitle>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <EuiTitle>
+          <h1 data-test-subj="indexPatternTitle">{indexPattern.title}</h1>
+        </EuiTitle>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup>
-          {setDefault && (
+        <EuiFlexGroup responsive={false}>
+          {defaultIndex !== indexPattern.id && setDefault && (
             <EuiFlexItem>
               <EuiToolTip content={setDefaultTooltip}>
                 <EuiButtonIcon

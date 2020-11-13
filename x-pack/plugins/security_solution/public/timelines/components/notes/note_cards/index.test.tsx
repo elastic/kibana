@@ -5,9 +5,10 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 import { ThemeProvider } from 'styled-components';
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
+import '../../../../common/mock/formatted_relative';
 
 import { Note } from '../../../../common/lib/note';
 
@@ -82,7 +83,7 @@ describe('NoteCards', () => {
       wrapper
         .find('[data-test-subj="note-card"]')
         .find('[data-test-subj="note-card-body"]')
-        .find('[data-test-subj="markdown-root"]')
+        .find('.euiMarkdownFormat')
         .first()
         .text()
     ).toEqual(getNotesByIds(noteIds)[0].note);

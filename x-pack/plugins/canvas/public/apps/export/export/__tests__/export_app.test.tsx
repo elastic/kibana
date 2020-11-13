@@ -6,8 +6,8 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
-// @ts-expect-error untyped local
-import { ExportApp } from '../export_app';
+import { ExportApp } from '../export_app.component';
+import { CanvasWorkpad } from '../../../../../types';
 
 jest.mock('style-it', () => ({
   it: (css: string, Component: any) => Component,
@@ -23,7 +23,7 @@ jest.mock('../../../../components/link', () => ({
 
 describe('<ExportApp />', () => {
   test('renders as expected', () => {
-    const sampleWorkpad = {
+    const sampleWorkpad = ({
       id: 'my-workpad-abcd',
       css: '',
       pages: [
@@ -34,7 +34,7 @@ describe('<ExportApp />', () => {
           elements: [3, 4, 5, 6],
         },
       ],
-    };
+    } as any) as CanvasWorkpad;
 
     const page1 = mount(
       <ExportApp workpad={sampleWorkpad} selectedPageIndex={0} initializeWorkpad={() => {}} />

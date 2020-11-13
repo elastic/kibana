@@ -10,5 +10,6 @@ export default ({ loadTestFile }: FtrProviderContext) => {
   describe('API Keys app', function () {
     this.tags(['ciGroup7']);
     loadTestFile(require.resolve('./home_page'));
+    loadTestFile(require.resolve('./feature_controls'));
   });
 };

@@ -4,13 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  Setup,
-  SetupTimeRange,
-  SetupUIFilters,
-} from '../helpers/setup_request';
-import { getServiceNodesProjection } from '../../../common/projections/service_nodes';
-import { mergeProjection } from '../../../common/projections/util/merge_projection';
+import { Setup, SetupTimeRange } from '../helpers/setup_request';
+import { getServiceNodesProjection } from '../../projections/service_nodes';
+import { mergeProjection } from '../../projections/util/merge_projection';
 import { SERVICE_NODE_NAME_MISSING } from '../../../common/service_nodes';
 import {
   METRIC_PROCESS_CPU_PERCENT,
@@ -23,10 +19,10 @@ const getServiceNodes = async ({
   setup,
   serviceName,
 }: {
-  setup: Setup & SetupTimeRange & SetupUIFilters;
+  setup: Setup & SetupTimeRange;
   serviceName: string;
 }) => {
-  const { client } = setup;
+  const { apmEventClient } = setup;
 
   const projection = getServiceNodesProjection({ setup, serviceName });
 
@@ -66,7 +62,7 @@ const getServiceNodes = async ({
     },
   });
 
-  const response = await client.search(params);
+  const response = await apmEventClient.search(params);
 
   if (!response.aggregations) {
     return [];

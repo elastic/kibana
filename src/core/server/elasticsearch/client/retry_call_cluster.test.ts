@@ -27,10 +27,10 @@ const createErrorReturn = (err: any) =>
   elasticsearchClientMock.createErrorTransportRequestPromise(err);
 
 describe('retryCallCluster', () => {
-  let client: ReturnType<typeof elasticsearchClientMock.createElasticSearchClient>;
+  let client: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
 
   beforeEach(() => {
-    client = elasticsearchClientMock.createElasticSearchClient();
+    client = elasticsearchClientMock.createElasticsearchClient();
   });
 
   it('returns response from ES API call in case of success', async () => {
@@ -91,11 +91,11 @@ describe('retryCallCluster', () => {
 });
 
 describe('migrationRetryCallCluster', () => {
-  let client: ReturnType<typeof elasticsearchClientMock.createElasticSearchClient>;
+  let client: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
 
   beforeEach(() => {
-    client = elasticsearchClientMock.createElasticSearchClient();
+    client = elasticsearchClientMock.createElasticsearchClient();
     logger = loggingSystemMock.createLogger();
   });
 

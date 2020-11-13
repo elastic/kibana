@@ -91,6 +91,7 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
     requiredFieldsError,
     sourceIndex,
     trainingPercent,
+    useEstimatedMml,
   } = form;
 
   const toastNotifications = getToastNotifications();
@@ -164,7 +165,8 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
 
   const debouncedGetExplainData = debounce(async () => {
     const jobTypeChanged = previousJobType !== jobType;
-    const shouldUpdateModelMemoryLimit = !firstUpdate.current || !modelMemoryLimit;
+    const shouldUpdateModelMemoryLimit =
+      (!firstUpdate.current || !modelMemoryLimit) && useEstimatedMml === true;
     const shouldUpdateEstimatedMml =
       !firstUpdate.current || !modelMemoryLimit || estimatedModelMemoryLimit === '';
 
@@ -209,17 +211,15 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
       let unsupportedFieldsErrorMessage;
       if (
         jobType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION &&
-        errorMessage.includes('status_exception') &&
         (errorMessage.includes('must have at most') || errorMessage.includes('must have at least'))
       ) {
         maxDistinctValuesErrorMessage = errorMessage;
-      }
-
-      if (errorMessage.includes('status_exception') && errorMessage.includes('unsupported type')) {
+      } else if (
+        errorMessage.includes('status_exception') &&
+        errorMessage.includes('unsupported type')
+      ) {
         unsupportedFieldsErrorMessage = errorMessage;
-      }
-
-      if (
+      } else if (
         errorMessage.includes('status_exception') &&
         errorMessage.includes('Unable to estimate memory usage as no documents')
       ) {
@@ -231,6 +231,16 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
             },
           })
         );
+      } else {
+        toastNotifications.addDanger({
+          title: i18n.translate(
+            'xpack.ml.dataframe.analytics.create.unableToFetchExplainDataMessage',
+            {
+              defaultMessage: 'An error occurred fetching analysis fields data.',
+            }
+          ),
+          text: errorMessage,
+        });
       }
 
       const fallbackModelMemoryLimit =
@@ -397,7 +407,9 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
               }
               isClearable={false}
               isInvalid={dependentVariable === ''}
-              data-test-subj="mlAnalyticsCreateJobWizardDependentVariableSelect"
+              data-test-subj={`mlAnalyticsCreateJobWizardDependentVariableSelect${
+                loadingDepVarOptions ? ' loading' : ' loaded'
+              }`}
             />
           </EuiFormRow>
         </Fragment>

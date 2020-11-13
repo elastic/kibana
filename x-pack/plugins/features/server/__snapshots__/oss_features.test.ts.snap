@@ -82,6 +82,7 @@ Array [
           "canvas-workpad",
           "lens",
           "map",
+          "tag",
         ],
       },
       "ui": Array [
@@ -111,9 +112,11 @@ Array [
           "visualization",
           "timelion-sheet",
           "canvas-workpad",
+          "lens",
           "map",
           "dashboard",
           "query",
+          "tag",
         ],
       },
       "ui": Array [
@@ -323,6 +326,7 @@ Array [
         "edit",
         "delete",
         "copyIntoSpace",
+        "shareIntoSpace",
       ],
     },
     "privilegeId": "all",
@@ -435,6 +439,7 @@ Array [
         "read": Array [
           "index-pattern",
           "search",
+          "tag",
         ],
       },
       "ui": Array [
@@ -465,6 +470,7 @@ Array [
           "visualization",
           "query",
           "lens",
+          "tag",
         ],
       },
       "ui": Array [

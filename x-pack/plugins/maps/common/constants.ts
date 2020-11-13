@@ -5,6 +5,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import { FeatureCollection } from 'geojson';
+
 export const EMS_APP_NAME = 'kibana';
 export const EMS_CATALOGUE_PATH = 'ems/catalogue';
 
@@ -26,12 +27,21 @@ export const EMS_TILES_VECTOR_TILE_PATH = 'vector/tile';
 export const MAP_SAVED_OBJECT_TYPE = 'map';
 export const APP_ID = 'maps';
 export const APP_ICON = 'gisApp';
+export const APP_ICON_SOLUTION = 'logoKibana';
+export const INITIAL_LAYERS_KEY = 'initialLayers';
 
 export const MAPS_APP_PATH = `app/${APP_ID}`;
 export const MAP_PATH = 'map';
 export const GIS_API_PATH = `api/${APP_ID}`;
 export const INDEX_SETTINGS_API_PATH = `${GIS_API_PATH}/indexSettings`;
 export const FONTS_API_PATH = `${GIS_API_PATH}/fonts`;
+export const API_ROOT_PATH = `/${GIS_API_PATH}`;
+
+export const MVT_GETTILE_API_PATH = 'mvt/getTile';
+export const MVT_GETGRIDTILE_API_PATH = 'mvt/getGridTile';
+export const MVT_SOURCE_LAYER_NAME = 'source_layer';
+export const KBN_TOO_MANY_FEATURES_PROPERTY = '__kbn_too_many_features__';
+export const KBN_TOO_MANY_FEATURES_IMAGE_ID = '__kbn_too_many_features_image_id__';
 
 const MAP_BASE_URL = `/${MAPS_APP_PATH}/${MAP_PATH}`;
 export function getNewMapPath() {
@@ -48,11 +58,6 @@ export enum LAYER_TYPE {
   HEATMAP = 'HEATMAP',
   BLENDED_VECTOR = 'BLENDED_VECTOR',
   TILED_VECTOR = 'TILED_VECTOR', // similar to a regular vector-layer, but it consumes the data as .mvt tilea iso GeoJson. It supports similar ad-hoc configurations like a regular vector layer (E.g. using IVectorStyle), although there is some loss of functionality  e.g. does not support term joining
-}
-
-export enum SORT_ORDER {
-  ASC = 'asc',
-  DESC = 'desc',
 }
 
 export enum SOURCE_TYPES {
@@ -157,7 +162,12 @@ export enum GRID_RESOLUTION {
   COARSE = 'COARSE',
   FINE = 'FINE',
   MOST_FINE = 'MOST_FINE',
+  SUPER_FINE = 'SUPER_FINE',
 }
+
+export const SUPER_FINE_ZOOM_DELTA = 7; // (2 ^ SUPER_FINE_ZOOM_DELTA) ^ 2 =  number of cells in a given tile
+export const GEOTILE_GRID_AGG_NAME = 'gridSplit';
+export const GEOCENTROID_AGG_NAME = 'gridCentroid';
 
 export const TOP_TERM_PERCENTAGE_SUFFIX = '__percentage';
 
@@ -219,9 +229,13 @@ export enum SCALING_TYPES {
   LIMIT = 'LIMIT',
   CLUSTERS = 'CLUSTERS',
   TOP_HITS = 'TOP_HITS',
+  MVT = 'MVT',
 }
 
-export const RGBA_0000 = 'rgba(0,0,0,0)';
+export enum FORMAT_TYPE {
+  GEOJSON = 'geojson',
+  TOPOJSON = 'topojson',
+}
 
 export enum MVT_FIELD_TYPE {
   STRING = 'String',
@@ -234,6 +248,7 @@ export enum INITIAL_LOCATION {
   LAST_SAVED_LOCATION = 'LAST_SAVED_LOCATION',
   FIXED_LOCATION = 'FIXED_LOCATION',
   BROWSER_LOCATION = 'BROWSER_LOCATION',
+  AUTO_FIT_TO_BOUNDS = 'AUTO_FIT_TO_BOUNDS',
 }
 
 export enum LAYER_WIZARD_CATEGORY {
@@ -253,3 +268,7 @@ export enum MB_LOOKUP_FUNCTION {
   GET = 'get',
   FEATURE_STATE = 'feature-state',
 }
+
+export type RawValue = string | number | boolean | undefined | null;
+
+export type FieldFormatter = (value: RawValue) => string | number;

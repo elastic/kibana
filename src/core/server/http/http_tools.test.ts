@@ -26,11 +26,20 @@ jest.mock('fs', () => {
   };
 });
 
+jest.mock('uuid', () => ({
+  v4: jest.fn().mockReturnValue('xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'),
+}));
+
 import supertest from 'supertest';
-import { Request, ResponseToolkit } from 'hapi';
+import { Request, ResponseToolkit } from '@hapi/hapi';
 import Joi from 'joi';
 
-import { defaultValidationErrorHandler, HapiValidationError, getServerOptions } from './http_tools';
+import {
+  defaultValidationErrorHandler,
+  HapiValidationError,
+  getServerOptions,
+  getRequestId,
+} from './http_tools';
 import { HttpServer } from './http_server';
 import { HttpConfig, config } from './http_config';
 import { Router } from './router';
@@ -94,7 +103,11 @@ describe('timeouts', () => {
       maxPayload: new ByteSizeValue(1024),
       ssl: {},
       compression: { enabled: true },
-    } as HttpConfig);
+      requestId: {
+        allowFromAnyIp: true,
+        ipAllowlist: [],
+      },
+    } as any);
     registerRouter(router);
 
     await server.start();
@@ -130,7 +143,7 @@ describe('getServerOptions', () => {
       Object {
         "ca": undefined,
         "cert": "content-some-certificate-path",
-        "ciphers": "ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA256:ECDHE-RSA-AES256-SHA384:DHE-RSA-AES256-SHA384:ECDHE-RSA-AES256-SHA256:DHE-RSA-AES256-SHA256:HIGH:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!MD5:!PSK:!SRP:!CAMELLIA",
+        "ciphers": "TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256:TLS_AES_128_GCM_SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA256:ECDHE-RSA-AES256-SHA384:DHE-RSA-AES256-SHA384:ECDHE-RSA-AES256-SHA256:DHE-RSA-AES256-SHA256:HIGH:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!MD5:!PSK:!SRP:!CAMELLIA",
         "honorCipherOrder": true,
         "key": "content-some-key-path",
         "passphrase": undefined,
@@ -162,7 +175,7 @@ describe('getServerOptions', () => {
           "content-ca-2",
         ],
         "cert": "content-some-certificate-path",
-        "ciphers": "ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA256:ECDHE-RSA-AES256-SHA384:DHE-RSA-AES256-SHA384:ECDHE-RSA-AES256-SHA256:DHE-RSA-AES256-SHA256:HIGH:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!MD5:!PSK:!SRP:!CAMELLIA",
+        "ciphers": "TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256:TLS_AES_128_GCM_SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA256:ECDHE-RSA-AES256-SHA384:DHE-RSA-AES256-SHA384:ECDHE-RSA-AES256-SHA256:DHE-RSA-AES256-SHA256:HIGH:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!MD5:!PSK:!SRP:!CAMELLIA",
         "honorCipherOrder": true,
         "key": "content-some-key-path",
         "passphrase": undefined,
@@ -171,5 +184,77 @@ describe('getServerOptions', () => {
         "secureOptions": 67108864,
       }
     `);
+  });
+});
+
+describe('getRequestId', () => {
+  describe('when allowFromAnyIp is true', () => {
+    it('generates a UUID if no x-opaque-id header is present', () => {
+      const request = {
+        headers: {},
+        raw: { req: { socket: { remoteAddress: '1.1.1.1' } } },
+      } as any;
+      expect(getRequestId(request, { allowFromAnyIp: true, ipAllowlist: [] })).toEqual(
+        'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'
+      );
+    });
+
+    it('uses x-opaque-id header value if present', () => {
+      const request = {
+        headers: {
+          'x-opaque-id': 'id from header',
+          raw: { req: { socket: { remoteAddress: '1.1.1.1' } } },
+        },
+      } as any;
+      expect(getRequestId(request, { allowFromAnyIp: true, ipAllowlist: [] })).toEqual(
+        'id from header'
+      );
+    });
+  });
+
+  describe('when allowFromAnyIp is false', () => {
+    describe('and ipAllowlist is empty', () => {
+      it('generates a UUID even if x-opaque-id header is present', () => {
+        const request = {
+          headers: { 'x-opaque-id': 'id from header' },
+          raw: { req: { socket: { remoteAddress: '1.1.1.1' } } },
+        } as any;
+        expect(getRequestId(request, { allowFromAnyIp: false, ipAllowlist: [] })).toEqual(
+          'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'
+        );
+      });
+    });
+
+    describe('and ipAllowlist is not empty', () => {
+      it('uses x-opaque-id header if request comes from trusted IP address', () => {
+        const request = {
+          headers: { 'x-opaque-id': 'id from header' },
+          raw: { req: { socket: { remoteAddress: '1.1.1.1' } } },
+        } as any;
+        expect(getRequestId(request, { allowFromAnyIp: false, ipAllowlist: ['1.1.1.1'] })).toEqual(
+          'id from header'
+        );
+      });
+
+      it('generates a UUID if request comes from untrusted IP address', () => {
+        const request = {
+          headers: { 'x-opaque-id': 'id from header' },
+          raw: { req: { socket: { remoteAddress: '5.5.5.5' } } },
+        } as any;
+        expect(getRequestId(request, { allowFromAnyIp: false, ipAllowlist: ['1.1.1.1'] })).toEqual(
+          'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'
+        );
+      });
+
+      it('generates UUID if request comes from trusted IP address but no x-opaque-id header is present', () => {
+        const request = {
+          headers: {},
+          raw: { req: { socket: { remoteAddress: '1.1.1.1' } } },
+        } as any;
+        expect(getRequestId(request, { allowFromAnyIp: false, ipAllowlist: ['1.1.1.1'] })).toEqual(
+          'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'
+        );
+      });
+    });
   });
 });

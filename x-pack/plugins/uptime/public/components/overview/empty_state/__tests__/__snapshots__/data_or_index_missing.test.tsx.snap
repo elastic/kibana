@@ -36,7 +36,7 @@ exports[`DataOrIndexMissing component renders headingMessage 1`] = `
             <EuiFlexItem>
               <EuiButton
                 color="primary"
-                href="/app/uptime#/settings"
+                href="/app/uptime/settings"
               >
                 <FormattedMessage
                   defaultMessage="Update index pattern settings"

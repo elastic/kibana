@@ -5,40 +5,40 @@
  */
 
 import {
-  EuiPanel,
-  EuiSpacer,
-  EuiTitle,
+  EuiCallOut,
+  EuiCode,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
-  EuiCallOut,
-  EuiCode,
+  EuiPage,
+  EuiPanel,
+  EuiSpacer,
+  EuiTitle,
 } from '@elastic/eui';
-import { Location } from 'history';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { Location } from 'history';
 import { first } from 'lodash';
 import React, { useMemo } from 'react';
-import { i18n } from '@kbn/i18n';
-import { EuiFlexGrid } from '@elastic/eui';
-import { useTransactionList } from '../../../hooks/useTransactionList';
-import { useTransactionCharts } from '../../../hooks/useTransactionCharts';
-import { IUrlParams } from '../../../context/UrlParamsContext/types';
-import { TransactionCharts } from '../../shared/charts/TransactionCharts';
-import { ErroneousTransactionsRateChart } from '../../shared/charts/ErroneousTransactionsRateChart';
-import { TransactionBreakdown } from '../../shared/TransactionBreakdown';
-import { TransactionList } from './List';
-import { ElasticDocsLink } from '../../shared/Links/ElasticDocsLink';
-import { useRedirect } from './useRedirect';
-import { history } from '../../../utils/history';
-import { useLocation } from '../../../hooks/useLocation';
-import { ChartsSyncContextProvider } from '../../../context/ChartsSyncContext';
+import { useLocation } from 'react-router-dom';
 import { useTrackPageview } from '../../../../../observability/public';
+import { Projection } from '../../../../common/projections';
+import { TRANSACTION_PAGE_LOAD } from '../../../../common/transaction_types';
+import { IUrlParams } from '../../../context/UrlParamsContext/types';
+import { useServiceTransactionTypes } from '../../../hooks/useServiceTransactionTypes';
+import { useTransactionCharts } from '../../../hooks/useTransactionCharts';
+import { useTransactionList } from '../../../hooks/useTransactionList';
+import { useUrlParams } from '../../../hooks/useUrlParams';
+import { TransactionCharts } from '../../shared/charts/TransactionCharts';
+import { ElasticDocsLink } from '../../shared/Links/ElasticDocsLink';
 import { fromQuery, toQuery } from '../../shared/Links/url_helpers';
 import { LocalUIFilters } from '../../shared/LocalUIFilters';
-import { PROJECTION } from '../../../../common/projections/typings';
-import { useUrlParams } from '../../../hooks/useUrlParams';
-import { useServiceTransactionTypes } from '../../../hooks/useServiceTransactionTypes';
 import { TransactionTypeFilter } from '../../shared/LocalUIFilters/TransactionTypeFilter';
+import { SearchBar } from '../../shared/search_bar';
+import { Correlations } from '../Correlations';
+import { TransactionList } from './TransactionList';
+import { useRedirect } from './useRedirect';
+import { UserExperienceCallout } from './user_experience_callout';
 
 function getRedirectLocation({
   urlParams,
@@ -63,17 +63,20 @@ function getRedirectLocation({
   }
 }
 
-export function TransactionOverview() {
+interface TransactionOverviewProps {
+  serviceName: string;
+}
+
+export function TransactionOverview({ serviceName }: TransactionOverviewProps) {
   const location = useLocation();
   const { urlParams } = useUrlParams();
-  const { serviceName, transactionType } = urlParams;
+  const { transactionType } = urlParams;
 
   // TODO: fetching of transaction types should perhaps be lifted since it is needed in several places. Context?
   const serviceTransactionTypes = useServiceTransactionTypes(urlParams);
 
   // redirect to first transaction type
   useRedirect(
-    history,
     getRedirectLocation({
       urlParams,
       location,
@@ -81,7 +84,10 @@ export function TransactionOverview() {
     })
   );
 
-  const { data: transactionCharts } = useTransactionCharts();
+  const {
+    data: transactionCharts,
+    status: transactionChartsStatus,
+  } = useTransactionCharts();
 
   useTrackPageview({ app: 'apm', path: 'transaction_overview' });
   useTrackPageview({ app: 'apm', path: 'transaction_overview', delay: 15000 });
@@ -103,7 +109,7 @@ export function TransactionOverview() {
         serviceName,
         transactionType,
       },
-      projection: PROJECTION.TRANSACTION_GROUPS,
+      projection: Projection.transactionGroups,
     }),
     [serviceName, transactionType]
   );
@@ -116,88 +122,84 @@ export function TransactionOverview() {
 
   return (
     <>
-      <EuiSpacer />
-      <EuiFlexGroup>
-        <EuiFlexItem grow={1}>
-          <LocalUIFilters {...localFiltersConfig}>
-            <TransactionTypeFilter transactionTypes={serviceTransactionTypes} />
-            <EuiSpacer size="xl" />
-            <EuiHorizontalRule margin="none" />
-          </LocalUIFilters>
-        </EuiFlexItem>
-        <EuiFlexItem grow={7}>
-          <ChartsSyncContextProvider>
-            <EuiFlexGrid columns={2} gutterSize="s">
-              <EuiFlexItem>
-                <TransactionBreakdown />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <ErroneousTransactionsRateChart />
-              </EuiFlexItem>
-            </EuiFlexGrid>
-
-            <EuiSpacer size="s" />
-
+      <SearchBar />
+      <Correlations />
+      <EuiPage>
+        <EuiFlexGroup>
+          <EuiFlexItem grow={1}>
+            <LocalUIFilters {...localFiltersConfig}>
+              <TransactionTypeFilter
+                transactionTypes={serviceTransactionTypes}
+              />
+              <EuiSpacer size="m" />
+              <EuiHorizontalRule margin="none" />
+            </LocalUIFilters>
+          </EuiFlexItem>
+          <EuiFlexItem grow={7}>
+            {transactionType === TRANSACTION_PAGE_LOAD && (
+              <>
+                <UserExperienceCallout />
+                <EuiSpacer size="s" />
+              </>
+            )}
             <TransactionCharts
+              fetchStatus={transactionChartsStatus}
               charts={transactionCharts}
-              location={location}
               urlParams={urlParams}
             />
-          </ChartsSyncContextProvider>
-
-          <EuiSpacer size="s" />
-
-          <EuiPanel>
-            <EuiTitle size="xs">
-              <h3>Transactions</h3>
-            </EuiTitle>
             <EuiSpacer size="s" />
-            {!transactionListData.isAggregationAccurate && (
-              <EuiCallOut
-                title={i18n.translate(
-                  'xpack.apm.transactionCardinalityWarning.title',
-                  {
-                    defaultMessage:
-                      'This view shows a subset of reported transactions.',
-                  }
-                )}
-                color="danger"
-                iconType="alert"
-              >
-                <p>
-                  <FormattedMessage
-                    id="xpack.apm.transactionCardinalityWarning.body"
-                    defaultMessage="The number of unique transaction names exceeds the configured value of {bucketSize}. Try reconfiguring your agents to group similar transactions or increase the value of {codeBlock}"
-                    values={{
-                      bucketSize: transactionListData.bucketSize,
-                      codeBlock: (
-                        <EuiCode>
-                          xpack.apm.ui.transactionGroupBucketSize
-                        </EuiCode>
-                      ),
-                    }}
-                  />
+            <EuiPanel>
+              <EuiTitle size="xs">
+                <h3>Transactions</h3>
+              </EuiTitle>
+              <EuiSpacer size="s" />
+              {!transactionListData.isAggregationAccurate && (
+                <EuiCallOut
+                  title={i18n.translate(
+                    'xpack.apm.transactionCardinalityWarning.title',
+                    {
+                      defaultMessage:
+                        'This view shows a subset of reported transactions.',
+                    }
+                  )}
+                  color="danger"
+                  iconType="alert"
+                >
+                  <p>
+                    <FormattedMessage
+                      id="xpack.apm.transactionCardinalityWarning.body"
+                      defaultMessage="The number of unique transaction names exceeds the configured value of {bucketSize}. Try reconfiguring your agents to group similar transactions or increase the value of {codeBlock}"
+                      values={{
+                        bucketSize: transactionListData.bucketSize,
+                        codeBlock: (
+                          <EuiCode>
+                            xpack.apm.ui.transactionGroupBucketSize
+                          </EuiCode>
+                        ),
+                      }}
+                    />
 
-                  <ElasticDocsLink
-                    section="/kibana"
-                    path="/troubleshooting.html#troubleshooting-too-many-transactions"
-                  >
-                    {i18n.translate(
-                      'xpack.apm.transactionCardinalityWarning.docsLink',
-                      { defaultMessage: 'Learn more in the docs' }
-                    )}
-                  </ElasticDocsLink>
-                </p>
-              </EuiCallOut>
-            )}
-            <EuiSpacer size="s" />
-            <TransactionList
-              isLoading={transactionListStatus === 'loading'}
-              items={transactionListData.items}
-            />
-          </EuiPanel>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+                    <ElasticDocsLink
+                      section="/kibana"
+                      path="/troubleshooting.html#troubleshooting-too-many-transactions"
+                    >
+                      {i18n.translate(
+                        'xpack.apm.transactionCardinalityWarning.docsLink',
+                        { defaultMessage: 'Learn more in the docs' }
+                      )}
+                    </ElasticDocsLink>
+                  </p>
+                </EuiCallOut>
+              )}
+              <EuiSpacer size="s" />
+              <TransactionList
+                isLoading={transactionListStatus === 'loading'}
+                items={transactionListData.items || []}
+              />
+            </EuiPanel>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPage>
     </>
   );
 }

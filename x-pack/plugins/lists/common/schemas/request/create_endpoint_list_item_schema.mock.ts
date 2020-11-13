@@ -7,24 +7,24 @@
 import {
   COMMENTS,
   DESCRIPTION,
-  ENTRIES,
+  ENDPOINT_ENTRIES,
   ITEM_TYPE,
   META,
   NAME,
+  OS_TYPES,
   TAGS,
-  _TAGS,
 } from '../../constants.mock';
 
 import { CreateEndpointListItemSchema } from './create_endpoint_list_item_schema';
 
 export const getCreateEndpointListItemSchemaMock = (): CreateEndpointListItemSchema => ({
-  _tags: _TAGS,
   comments: COMMENTS,
   description: DESCRIPTION,
-  entries: ENTRIES,
+  entries: ENDPOINT_ENTRIES,
   item_id: undefined,
   meta: META,
   name: NAME,
+  os_types: OS_TYPES,
   tags: TAGS,
   type: ITEM_TYPE,
 });

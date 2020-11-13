@@ -5,7 +5,7 @@
  */
 
 import { CoreSetup, PluginInitializerContext } from 'src/core/server';
-import { Server } from 'hapi';
+import { Server } from '@hapi/hapi';
 import { Observable } from 'rxjs';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
@@ -19,7 +19,6 @@ import { InfraElasticsearchSourceStatusAdapter } from './lib/adapters/source_sta
 import { InfraFieldsDomain } from './lib/domains/fields_domain';
 import { InfraLogEntriesDomain } from './lib/domains/log_entries_domain';
 import { InfraMetricsDomain } from './lib/domains/metrics_domain';
-import { InfraSnapshot } from './lib/snapshot';
 import { InfraSourceStatus } from './lib/source_status';
 import { InfraSources } from './lib/sources';
 import { InfraServerPluginDeps } from './lib/adapters/framework';
@@ -105,7 +104,6 @@ export class InfraServerPlugin {
         sources,
       }
     );
-    const snapshot = new InfraSnapshot();
 
     // register saved object types
     core.savedObjects.registerType(infraSourceConfigurationSavedObjectType);
@@ -129,14 +127,13 @@ export class InfraServerPlugin {
     this.libs = {
       configuration: this.config,
       framework,
-      snapshot,
       sources,
       sourceStatus,
       ...domainLibs,
     };
 
-    plugins.features.registerFeature(METRICS_FEATURE);
-    plugins.features.registerFeature(LOGS_FEATURE);
+    plugins.features.registerKibanaFeature(METRICS_FEATURE);
+    plugins.features.registerKibanaFeature(LOGS_FEATURE);
 
     plugins.home.sampleData.addAppLinksToSampleDataset('logs', [
       {
@@ -152,9 +149,11 @@ export class InfraServerPlugin {
     core.http.registerRouteHandlerContext(
       'infra',
       (context, request): InfraRequestHandlerContext => {
-        const mlSystem = context.ml && plugins.ml?.mlSystemProvider(context.ml?.mlClient, request);
-        const mlAnomalyDetectors =
-          context.ml && plugins.ml?.anomalyDetectorsProvider(context.ml?.mlClient, request);
+        const mlSystem = plugins.ml?.mlSystemProvider(request, context.core.savedObjects.client);
+        const mlAnomalyDetectors = plugins.ml?.anomalyDetectorsProvider(
+          request,
+          context.core.savedObjects.client
+        );
         const spaceId = plugins.spaces?.spacesService.getSpaceId(request) || 'default';
 
         return {

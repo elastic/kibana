@@ -4,77 +4,27 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiTitle,
-  EuiButtonEmpty,
-} from '@elastic/eui';
+import { EuiTitle } from '@elastic/eui';
 import React from 'react';
-import { i18n } from '@kbn/i18n';
+import { RouteComponentProps } from 'react-router-dom';
 import { ApmHeader } from '../../shared/ApmHeader';
 import { ServiceDetailTabs } from './ServiceDetailTabs';
-import { useUrlParams } from '../../../hooks/useUrlParams';
-import { AlertIntegrations } from './AlertIntegrations';
-import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
 
-interface Props {
+interface Props extends RouteComponentProps<{ serviceName: string }> {
   tab: React.ComponentProps<typeof ServiceDetailTabs>['tab'];
 }
 
-export function ServiceDetails({ tab }: Props) {
-  const plugin = useApmPluginContext();
-  const { urlParams } = useUrlParams();
-  const { serviceName } = urlParams;
-
-  const canReadAlerts = !!plugin.core.application.capabilities.apm[
-    'alerting:show'
-  ];
-  const canSaveAlerts = !!plugin.core.application.capabilities.apm[
-    'alerting:save'
-  ];
-  const isAlertingPluginEnabled = 'alerts' in plugin.plugins;
-
-  const isAlertingAvailable =
-    isAlertingPluginEnabled && (canReadAlerts || canSaveAlerts);
-
-  const { core } = useApmPluginContext();
-
-  const ADD_DATA_LABEL = i18n.translate('xpack.apm.addDataButtonLabel', {
-    defaultMessage: 'Add data',
-  });
+export function ServiceDetails({ match, tab }: Props) {
+  const { serviceName } = match.params;
 
   return (
     <div>
       <ApmHeader>
-        <EuiFlexGroup alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiTitle size="l">
-              <h1>{serviceName}</h1>
-            </EuiTitle>
-          </EuiFlexItem>
-          {isAlertingAvailable && (
-            <EuiFlexItem grow={false}>
-              <AlertIntegrations
-                canReadAlerts={canReadAlerts}
-                canSaveAlerts={canSaveAlerts}
-              />
-            </EuiFlexItem>
-          )}
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              href={core.http.basePath.prepend('/app/home#/tutorial/apm')}
-              size="s"
-              color="primary"
-              iconType="plusInCircle"
-            >
-              {ADD_DATA_LABEL}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <EuiTitle>
+          <h1>{serviceName}</h1>
+        </EuiTitle>
       </ApmHeader>
-
-      <ServiceDetailTabs tab={tab} />
+      <ServiceDetailTabs serviceName={serviceName} tab={tab} />
     </div>
   );
 }

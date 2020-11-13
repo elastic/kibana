@@ -35,12 +35,6 @@ export class TriggerInternal<T extends TriggerId> {
     const triggerId = this.trigger.id;
     const actions = await this.service.getTriggerCompatibleActions!(triggerId, context);
 
-    if (!actions.length) {
-      throw new Error(
-        `No compatible actions found to execute for trigger [triggerId = ${triggerId}].`
-      );
-    }
-
     await Promise.all([
       actions.map((action) =>
         this.service.executionService.execute({

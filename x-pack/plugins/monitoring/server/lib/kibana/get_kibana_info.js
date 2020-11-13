@@ -41,7 +41,7 @@ export function getKibanaInfo(req, kbnIndexPattern, { clusterUuid, kibanaUuid })
         },
       },
       collapse: { field: 'kibana_stats.kibana.uuid' },
-      sort: [{ timestamp: { order: 'desc' } }],
+      sort: [{ timestamp: { order: 'desc', unmapped_type: 'long' } }],
     },
   };
 

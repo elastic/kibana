@@ -24,14 +24,9 @@ export NODE_OPTIONS="$NODE_OPTIONS --max-old-space-size=4096"
 ###
 export FORCE_COLOR=1
 
+### APM tracking
 ###
-### The @babel/register cache collects the build output from each file in
-### a map, in memory, and then when the process exits it writes that to the
-### babel cache file as a JSON encoded object. Stringifying that object
-### causes OOMs on CI regularly enough that we need to find another solution,
-### and until we do we need to disable the cache
-###
-export BABEL_DISABLE_CACHE=true
+export ELASTIC_APM_ENVIRONMENT=ci
 
 ###
 ### check that we seem to be in a kibana project
@@ -52,6 +47,8 @@ export PARENT_DIR="$parentDir"
 
 kbnBranch="$(jq -r .branch "$KIBANA_DIR/package.json")"
 export KIBANA_PKG_BRANCH="$kbnBranch"
+
+export WORKSPACE="${WORKSPACE:-$PARENT_DIR}"
 
 ###
 ### download node
@@ -162,7 +159,7 @@ export -f checks-reporter-with-killswitch
 
 source "$KIBANA_DIR/src/dev/ci_setup/load_env_keys.sh"
 
-ES_DIR="$PARENT_DIR/elasticsearch"
+ES_DIR="$WORKSPACE/elasticsearch"
 ES_JAVA_PROP_PATH=$ES_DIR/.ci/java-versions.properties
 
 if [[ -d "$ES_DIR" && -f "$ES_JAVA_PROP_PATH" ]]; then

@@ -24,8 +24,9 @@ import getopts from 'getopts';
 
 import { execInProjects } from './exec_in_projects';
 import { filterProjectsByFlag } from './projects';
+import { buildAllRefs } from './build_refs';
 
-export function runTypeCheckCli() {
+export async function runTypeCheckCli() {
   const extraFlags: string[] = [];
   const opts = getopts(process.argv.slice(2), {
     boolean: ['skip-lib-check', 'help'],
@@ -79,7 +80,16 @@ export function runTypeCheckCli() {
     process.exit();
   }
 
-  const tscArgs = ['--noEmit', '--pretty', ...(opts['skip-lib-check'] ? ['--skipLibCheck'] : [])];
+  await buildAllRefs(log);
+
+  const tscArgs = [
+    // composite project cannot be used with --noEmit
+    ...['--composite', 'false'],
+    ...['--emitDeclarationOnly', 'false'],
+    '--noEmit',
+    '--pretty',
+    ...(opts['skip-lib-check'] ? ['--skipLibCheck'] : []),
+  ];
   const projects = filterProjectsByFlag(opts.project).filter((p) => !p.disableTypeCheck);
 
   if (!projects.length) {
@@ -88,7 +98,7 @@ export function runTypeCheckCli() {
   }
 
   execInProjects(log, projects, process.execPath, (project) => [
-    ...(project.name.startsWith('x-pack') ? ['--max-old-space-size=4096'] : []),
+    '--max-old-space-size=5120',
     require.resolve('typescript/bin/tsc'),
     ...['--project', project.tsConfigPath],
     ...tscArgs,

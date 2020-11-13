@@ -127,14 +127,13 @@ describe('KibanaMigrator', () => {
 });
 
 type MockedOptions = KibanaMigratorOptions & {
-  client: ReturnType<typeof elasticsearchClientMock.createElasticSearchClient>;
+  client: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
 };
 
 const mockOptions = () => {
   const options: MockedOptions = {
     logger: loggingSystemMock.create().get(),
     kibanaVersion: '8.2.3',
-    savedObjectValidations: {},
     typeRegistry: createRegistry([
       {
         name: 'testtype',
@@ -170,7 +169,7 @@ const mockOptions = () => {
       scrollDuration: '10m',
       skip: false,
     },
-    client: elasticsearchClientMock.createElasticSearchClient(),
+    client: elasticsearchClientMock.createElasticsearchClient(),
   };
   return options;
 };

@@ -22,9 +22,12 @@
               }
             }
           },
-          "ancestors": {
+          "parents": {
             "properties": {
               "rule": {
+                "type": "keyword"
+              },
+              "index": {
                 "type": "keyword"
               },
               "id": {
@@ -35,6 +38,35 @@
               },
               "depth": {
                 "type": "long"
+              }
+            }
+          },
+          "ancestors": {
+            "properties": {
+              "rule": {
+                "type": "keyword"
+              },
+              "index": {
+                "type": "keyword"
+              },
+              "id": {
+                "type": "keyword"
+              },
+              "type": {
+                "type": "keyword"
+              },
+              "depth": {
+                "type": "long"
+              }
+            }
+          },
+          "group": {
+            "properties": {
+              "id": {
+                "type": "keyword"
+              },
+              "index": {
+                "type": "integer"
               }
             }
           },
@@ -225,6 +257,11 @@
           "original_time": {
             "type": "date"
           },
+          "original_signal": {
+            "type": "object",
+            "dynamic": false,
+            "enabled": false
+          },
           "original_event": {
             "properties": {
               "action": {
@@ -299,6 +336,9 @@
           },
           "threshold_count": {
             "type": "float"
+          },
+          "depth": {
+            "type": "integer"
           }
         }
       }

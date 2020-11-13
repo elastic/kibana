@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { formatHumanReadableDateTime } from '../../../util/date_utils';
+import { formatHumanReadableDateTime } from '../../../../../common/util/date_utils';
 
 import { getDefaultChartsData } from '../../explorer_charts/explorer_charts_container_service';
 import { EXPLORER_ACTION, VIEW_BY_JOB_LABEL } from '../../explorer_constants';

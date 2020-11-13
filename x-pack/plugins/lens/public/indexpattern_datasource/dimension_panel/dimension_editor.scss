@@ -1,0 +1,21 @@
+.lnsIndexPatternDimensionEditor {
+  height: 100%;
+}
+
+.lnsIndexPatternDimensionEditor__section {
+  padding: $euiSizeS;
+}
+
+.lnsIndexPatternDimensionEditor__section--shaded {
+  background-color: $euiColorLightestShade;
+}
+
+.lnsIndexPatternDimensionEditor__columns {
+  column-count: 2;
+  column-gap: $euiSizeXL;
+}
+
+.lnsIndexPatternDimensionEditor__operation > button {
+  padding-top: 0;
+  padding-bottom: 0;
+}

@@ -14,6 +14,7 @@ import { TransformSecurityCommonProvider } from './security_common';
 import { TransformSecurityUIProvider } from './security_ui';
 import { TransformSourceSelectionProvider } from './source_selection';
 import { TransformTableProvider } from './transform_table';
+import { TransformTestExecutionProvider } from './test_execution';
 import { TransformWizardProvider } from './wizard';
 
 import { MachineLearningTestResourcesProvider } from '../ml/test_resources';
@@ -27,6 +28,7 @@ export function TransformProvider(context: FtrProviderContext) {
   const securityUI = TransformSecurityUIProvider(context, securityCommon);
   const sourceSelection = TransformSourceSelectionProvider(context);
   const table = TransformTableProvider(context);
+  const testExecution = TransformTestExecutionProvider(context);
   const testResources = MachineLearningTestResourcesProvider(context);
   const wizard = TransformWizardProvider(context);
 
@@ -39,6 +41,7 @@ export function TransformProvider(context: FtrProviderContext) {
     securityUI,
     sourceSelection,
     table,
+    testExecution,
     testResources,
     wizard,
   };

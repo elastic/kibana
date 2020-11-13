@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mountWithIntl, nextTick } from 'test_utils/enzyme_helpers';
+import { mountWithIntl, nextTick } from '@kbn/test/jest';
 import { actionTypeRegistryMock } from '../../../../../triggers_actions_ui/public/application/action_type_registry.mock';
 import { alertTypeRegistryMock } from '../../../../../triggers_actions_ui/public/application/alert_type_registry.mock';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
@@ -34,6 +34,7 @@ describe('Expression', () => {
       criteria: [],
       groupBy: undefined,
       filterQueryText: '',
+      sourceId: 'default',
     };
 
     const mocks = coreMock.createSetup();
@@ -67,6 +68,7 @@ describe('Expression', () => {
       <Expressions
         alertsContext={context}
         alertInterval="1m"
+        alertThrottle="1m"
         alertParams={alertParams}
         errors={[]}
         setAlertParams={(key, value) => Reflect.set(alertParams, key, value)}

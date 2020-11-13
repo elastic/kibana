@@ -35,6 +35,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardAddPanel = getService('dashboardAddPanel');
   const listingTable = getService('listingTable');
   const esArchiver = getService('esArchiver');
+  const security = getService('security');
 
   let kibanaLegacyBaseUrl: string;
   let kibanaVisualizeBaseUrl: string;
@@ -42,6 +43,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('legacy urls', function describeIndexTests() {
     before(async function () {
+      await security.testUser.setRoles(['kibana_admin', 'animals']);
       await esArchiver.load('dashboard/current/kibana');
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.clickNewDashboard();
@@ -61,6 +63,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     after(async function () {
       await PageObjects.dashboard.gotoDashboardLandingPage();
       await listingTable.deleteItem('legacyTest', testDashboardId);
+      await security.testUser.restoreDefaults();
     });
 
     describe('kibana link redirect', () => {

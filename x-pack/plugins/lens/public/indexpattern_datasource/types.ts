@@ -4,14 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { IFieldType } from 'src/plugins/data/common';
 import { IndexPatternColumn } from './operations';
 import { IndexPatternAggRestrictions } from '../../../../../src/plugins/data/public';
 
 export interface IndexPattern {
   id: string;
   fields: IndexPatternField[];
+  getFieldByName(name: string): IndexPatternField | undefined;
   title: string;
-  timeFieldName?: string | null;
+  timeFieldName?: string;
   fieldFormatMap?: Record<
     string,
     {
@@ -19,17 +21,14 @@ export interface IndexPattern {
       params: unknown;
     }
   >;
+  hasRestrictions: boolean;
 }
 
-export interface IndexPatternField {
-  name: string;
-  type: string;
-  esTypes?: string[];
-  aggregatable: boolean;
-  scripted?: boolean;
-  searchable: boolean;
+export type IndexPatternField = IFieldType & {
+  displayName: string;
   aggregationRestrictions?: Partial<IndexPatternAggRestrictions>;
-}
+  meta?: boolean;
+};
 
 export interface IndexPatternLayer {
   columnOrder: string[];
@@ -39,11 +38,12 @@ export interface IndexPatternLayer {
 }
 
 export interface IndexPatternPersistedState {
-  currentIndexPatternId: string;
-  layers: Record<string, IndexPatternLayer>;
+  layers: Record<string, Omit<IndexPatternLayer, 'indexPatternId'>>;
 }
 
-export type IndexPatternPrivateState = IndexPatternPersistedState & {
+export interface IndexPatternPrivateState {
+  currentIndexPatternId: string;
+  layers: Record<string, IndexPatternLayer>;
   indexPatternRefs: IndexPatternRef[];
   indexPatterns: Record<string, IndexPattern>;
 
@@ -53,7 +53,7 @@ export type IndexPatternPrivateState = IndexPatternPersistedState & {
   existingFields: Record<string, Record<string, boolean>>;
   isFirstExistenceFetch: boolean;
   existenceFetchFailed?: boolean;
-};
+}
 
 export interface IndexPatternRef {
   id: string;

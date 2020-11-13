@@ -18,8 +18,15 @@
  */
 
 import { CoreStart, CoreSetup, Plugin, PluginInitializerContext } from 'src/core/public';
+import { PublicMethodsOf } from '@kbn/utility-types';
 import { UiActionsService } from './service';
-import { selectRangeTrigger, valueClickTrigger, applyFilterTrigger } from './triggers';
+import {
+  selectRangeTrigger,
+  valueClickTrigger,
+  applyFilterTrigger,
+  visualizeFieldTrigger,
+  visualizeGeoFieldTrigger,
+} from './triggers';
 
 export type UiActionsSetup = Pick<
   UiActionsService,
@@ -42,6 +49,8 @@ export class UiActionsPlugin implements Plugin<UiActionsSetup, UiActionsStart> {
     this.service.registerTrigger(selectRangeTrigger);
     this.service.registerTrigger(valueClickTrigger);
     this.service.registerTrigger(applyFilterTrigger);
+    this.service.registerTrigger(visualizeFieldTrigger);
+    this.service.registerTrigger(visualizeGeoFieldTrigger);
     return this.service;
   }
 

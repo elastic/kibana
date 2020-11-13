@@ -41,6 +41,22 @@ describe('utils', () => {
     expect(output).toEqual(['some error 1', 'some error 2']);
   });
 
+  test('it filters out duplicate error messages', () => {
+    const validationError1: t.ValidationError = {
+      value: 'Some existing error 1',
+      context: [],
+      message: 'some error 1',
+    };
+    const validationError2: t.ValidationError = {
+      value: 'Some existing error 1',
+      context: [],
+      message: 'some error 1',
+    };
+    const errors: t.Errors = [validationError1, validationError2];
+    const output = formatErrors(errors);
+    expect(output).toEqual(['some error 1']);
+  });
+
   test('will use message before context if it is set', () => {
     const context: t.Context = ([{ key: 'some string key' }] as unknown) as t.Context;
     const validationError1: t.ValidationError = {

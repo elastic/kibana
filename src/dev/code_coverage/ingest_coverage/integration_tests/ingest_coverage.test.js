@@ -20,6 +20,7 @@
 import { resolve } from 'path';
 import execa from 'execa';
 import expect from '@kbn/expect';
+import shell from 'shelljs';
 
 const ROOT_DIR = resolve(__dirname, '../../../../..');
 const MOCKS_DIR = resolve(__dirname, './mocks');
@@ -35,9 +36,14 @@ const env = {
 };
 
 describe('Ingesting coverage', () => {
+  const teamAssignmentsPath =
+    'src/dev/code_coverage/ingest_coverage/team_assignment/team_assignments.txt';
+
   const verboseArgs = [
     'scripts/ingest_coverage.js',
     '--verbose',
+    '--teamAssignmentsPath',
+    teamAssignmentsPath,
     '--vcsInfoPath',
     'src/dev/code_coverage/ingest_coverage/integration_tests/mocks/VCS_INFO.txt',
     '--path',
@@ -45,6 +51,21 @@ describe('Ingesting coverage', () => {
 
   const summaryPath = 'jest-combined/coverage-summary-manual-mix.json';
   const resolved = resolve(MOCKS_DIR, summaryPath);
+
+  beforeAll(async () => {
+    const params = [
+      'scripts/generate_team_assignments.js',
+      '--src',
+      '.github/CODEOWNERS',
+      '--dest',
+      teamAssignmentsPath,
+    ];
+    await execa(process.execPath, params, { cwd: ROOT_DIR, env });
+  });
+
+  afterAll(() => {
+    shell.rm(teamAssignmentsPath);
+  });
 
   describe(`staticSiteUrl`, () => {
     let actualUrl = '';

@@ -17,17 +17,13 @@
  * under the License.
  */
 
-import { IRouter } from 'kibana/server';
 import { routeValidationConfig } from './validation_config';
-import { createHandler, CreateHandlerDependencies } from './create_handler';
+import { createHandler } from './create_handler';
 
-export const registerProxyRoute = (
-  deps: {
-    router: IRouter;
-  } & CreateHandlerDependencies
-) => {
-  const { router, ...handlerDeps } = deps;
-  router.post(
+import { RouteDependencies } from '../../../';
+
+export const registerProxyRoute = (deps: RouteDependencies) => {
+  deps.router.post(
     {
       path: '/api/console/proxy',
       options: {
@@ -39,6 +35,6 @@ export const registerProxyRoute = (
       },
       validate: routeValidationConfig,
     },
-    createHandler(handlerDeps)
+    createHandler(deps)
   );
 };

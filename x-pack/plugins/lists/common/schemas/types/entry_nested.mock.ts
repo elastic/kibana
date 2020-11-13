@@ -11,7 +11,7 @@ import { getEntryMatchMock } from './entry_match.mock';
 import { getEntryMatchAnyMock } from './entry_match_any.mock';
 
 export const getEntryNestedMock = (): EntryNested => ({
-  entries: [{ ...getEntryMatchMock() }, { ...getEntryMatchAnyMock() }],
+  entries: [getEntryMatchMock(), getEntryMatchAnyMock()],
   field: FIELD,
   type: NESTED,
 });

@@ -24,11 +24,15 @@ import { ExecutionContext } from '../execution/types';
 import {
   ExpressionFunctionClog,
   ExpressionFunctionFont,
-  ExpressionFunctionKibanaContext,
-  ExpressionFunctionKibana,
   ExpressionFunctionVarSet,
   ExpressionFunctionVar,
+  ExpressionFunctionTheme,
+  ExpressionFunctionCumulativeSum,
+  ExpressionFunctionDerivative,
+  ExpressionFunctionMovingAverage,
 } from './specs';
+import { ExpressionAstFunction } from '../ast';
+import { PersistableStateDefinition } from '../../../kibana_utils/common';
 
 /**
  * `ExpressionFunctionDefinition` is the interface plugins have to implement to
@@ -40,11 +44,16 @@ export interface ExpressionFunctionDefinition<
   Arguments extends Record<string, any>,
   Output,
   Context extends ExecutionContext = ExecutionContext
-> {
+> extends PersistableStateDefinition<ExpressionAstFunction['arguments']> {
   /**
    * The name of the function, as will be used in expression.
    */
   name: Name;
+
+  /**
+   * if set to true function will be disabled (but its migrate function will still be available)
+   */
+  disabled?: boolean;
 
   /**
    * Name of type of value this function outputs.
@@ -118,8 +127,10 @@ export type AnyExpressionFunctionDefinition = ExpressionFunctionDefinition<
 export interface ExpressionFunctionDefinitions {
   clog: ExpressionFunctionClog;
   font: ExpressionFunctionFont;
-  kibana_context: ExpressionFunctionKibanaContext;
-  kibana: ExpressionFunctionKibana;
   var_set: ExpressionFunctionVarSet;
   var: ExpressionFunctionVar;
+  theme: ExpressionFunctionTheme;
+  cumulative_sum: ExpressionFunctionCumulativeSum;
+  derivative: ExpressionFunctionDerivative;
+  moving_average: ExpressionFunctionMovingAverage;
 }

@@ -16,24 +16,25 @@ import {
   SEVERITY,
 } from '../screens/alerts_detection_rules';
 import {
-  ABOUT_FALSE_POSITIVES,
-  ABOUT_MITRE,
-  ABOUT_RISK,
+  ABOUT_DETAILS,
   ABOUT_RULE_DESCRIPTION,
-  ABOUT_SEVERITY,
-  ABOUT_STEP,
-  ABOUT_TAGS,
-  ABOUT_URLS,
-  ANOMALY_SCORE,
-  DEFINITION_TIMELINE,
-  DEFINITION_STEP,
+  ADDITIONAL_LOOK_BACK_DETAILS,
+  ANOMALY_SCORE_DETAILS,
+  DEFINITION_DETAILS,
+  FALSE_POSITIVES_DETAILS,
+  getDetails,
   MACHINE_LEARNING_JOB_ID,
   MACHINE_LEARNING_JOB_STATUS,
+  MITRE_ATTACK_DETAILS,
+  REFERENCE_URLS_DETAILS,
+  RISK_SCORE_DETAILS,
   RULE_NAME_HEADER,
-  SCHEDULE_LOOPBACK,
-  SCHEDULE_RUNS,
-  SCHEDULE_STEP,
-  RULE_TYPE,
+  RULE_TYPE_DETAILS,
+  RUNS_EVERY_DETAILS,
+  SCHEDULE_DETAILS,
+  SEVERITY_DETAILS,
+  TAGS_DETAILS,
+  TIMELINE_TEMPLATE_DETAILS,
 } from '../screens/rule_details';
 
 import {
@@ -43,6 +44,7 @@ import {
 } from '../tasks/alerts';
 import {
   changeToThreeHundredRowsPerPage,
+  deleteRule,
   filterByCustomRules,
   goToCreateNewRule,
   goToRuleDetails,
@@ -53,6 +55,7 @@ import {
   createAndActivateRule,
   fillAboutRuleAndContinue,
   fillDefineMachineLearningRuleAndContinue,
+  fillScheduleRuleAndContinue,
   selectMachineLearningRuleType,
 } from '../tasks/create_new_rule';
 import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
@@ -60,12 +63,23 @@ import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 
 import { DETECTIONS_URL } from '../urls/navigation';
 
+const expectedUrls = machineLearningRule.referenceUrls.join('');
+const expectedFalsePositives = machineLearningRule.falsePositivesExamples.join('');
+const expectedTags = machineLearningRule.tags.join('');
+const expectedMitre = machineLearningRule.mitre
+  .map(function (mitre) {
+    return mitre.tactic + mitre.techniques.join('');
+  })
+  .join('');
+const expectedNumberOfRules = totalNumberOfPrebuiltRulesInEsArchive + 1;
+
 describe('Detection rules, machine learning', () => {
   before(() => {
     esArchiverLoad('prebuilt_rules_loaded');
   });
 
   after(() => {
+    deleteRule();
     esArchiverUnload('prebuilt_rules_loaded');
   });
 
@@ -79,6 +93,7 @@ describe('Detection rules, machine learning', () => {
     selectMachineLearningRuleType();
     fillDefineMachineLearningRuleAndContinue(machineLearningRule);
     fillAboutRuleAndContinue(machineLearningRule);
+    fillScheduleRuleAndContinue(machineLearningRule);
     createAndActivateRule();
 
     cy.get(CUSTOM_RULES_BTN).invoke('text').should('eql', 'Custom rules (1)');
@@ -86,7 +101,6 @@ describe('Detection rules, machine learning', () => {
     changeToThreeHundredRowsPerPage();
     waitForRulesToBeLoaded();
 
-    const expectedNumberOfRules = totalNumberOfPrebuiltRulesInEsArchive + 1;
     cy.get(RULES_TABLE).then(($table) => {
       cy.wrap($table.find(RULES_ROW).length).should('eql', expectedNumberOfRules);
     });
@@ -96,66 +110,42 @@ describe('Detection rules, machine learning', () => {
     cy.get(RULES_TABLE).then(($table) => {
       cy.wrap($table.find(RULES_ROW).length).should('eql', 1);
     });
-    cy.get(RULE_NAME).invoke('text').should('eql', machineLearningRule.name);
-    cy.get(RISK_SCORE).invoke('text').should('eql', machineLearningRule.riskScore);
-    cy.get(SEVERITY).invoke('text').should('eql', machineLearningRule.severity);
+    cy.get(RULE_NAME).should('have.text', machineLearningRule.name);
+    cy.get(RISK_SCORE).should('have.text', machineLearningRule.riskScore);
+    cy.get(SEVERITY).should('have.text', machineLearningRule.severity);
     cy.get(RULE_SWITCH).should('have.attr', 'aria-checked', 'true');
 
     goToRuleDetails();
 
-    let expectedUrls = '';
-    machineLearningRule.referenceUrls.forEach((url) => {
-      expectedUrls = expectedUrls + url;
+    cy.get(RULE_NAME_HEADER).should('have.text', `${machineLearningRule.name}`);
+    cy.get(ABOUT_RULE_DESCRIPTION).should('have.text', machineLearningRule.description);
+    cy.get(ABOUT_DETAILS).within(() => {
+      getDetails(SEVERITY_DETAILS).should('have.text', machineLearningRule.severity);
+      getDetails(RISK_SCORE_DETAILS).should('have.text', machineLearningRule.riskScore);
+      getDetails(REFERENCE_URLS_DETAILS).should('have.text', expectedUrls);
+      getDetails(FALSE_POSITIVES_DETAILS).should('have.text', expectedFalsePositives);
+      getDetails(MITRE_ATTACK_DETAILS).should('have.text', expectedMitre);
+      getDetails(TAGS_DETAILS).should('have.text', expectedTags);
     });
-    let expectedFalsePositives = '';
-    machineLearningRule.falsePositivesExamples.forEach((falsePositive) => {
-      expectedFalsePositives = expectedFalsePositives + falsePositive;
+    cy.get(DEFINITION_DETAILS).within(() => {
+      getDetails(ANOMALY_SCORE_DETAILS).should(
+        'have.text',
+        machineLearningRule.anomalyScoreThreshold
+      );
+      getDetails(RULE_TYPE_DETAILS).should('have.text', 'Machine Learning');
+      getDetails(TIMELINE_TEMPLATE_DETAILS).should('have.text', 'None');
+      cy.get(MACHINE_LEARNING_JOB_STATUS).should('have.text', 'Stopped');
+      cy.get(MACHINE_LEARNING_JOB_ID).should('have.text', machineLearningRule.machineLearningJob);
     });
-    let expectedTags = '';
-    machineLearningRule.tags.forEach((tag) => {
-      expectedTags = expectedTags + tag;
+    cy.get(SCHEDULE_DETAILS).within(() => {
+      getDetails(RUNS_EVERY_DETAILS).should(
+        'have.text',
+        `${machineLearningRule.runsEvery.interval}${machineLearningRule.runsEvery.type}`
+      );
+      getDetails(ADDITIONAL_LOOK_BACK_DETAILS).should(
+        'have.text',
+        `${machineLearningRule.lookBack.interval}${machineLearningRule.lookBack.type}`
+      );
     });
-    let expectedMitre = '';
-    machineLearningRule.mitre.forEach((mitre) => {
-      expectedMitre = expectedMitre + mitre.tactic;
-      mitre.techniques.forEach((technique) => {
-        expectedMitre = expectedMitre + technique;
-      });
-    });
-
-    cy.get(RULE_NAME_HEADER).invoke('text').should('eql', `${machineLearningRule.name} Beta`);
-
-    cy.get(ABOUT_RULE_DESCRIPTION).invoke('text').should('eql', machineLearningRule.description);
-    cy.get(ABOUT_STEP)
-      .eq(ABOUT_SEVERITY)
-      .invoke('text')
-      .should('eql', machineLearningRule.severity);
-    cy.get(ABOUT_STEP).eq(ABOUT_RISK).invoke('text').should('eql', machineLearningRule.riskScore);
-    cy.get(ABOUT_STEP).eq(ABOUT_URLS).invoke('text').should('eql', expectedUrls);
-    cy.get(ABOUT_STEP)
-      .eq(ABOUT_FALSE_POSITIVES)
-      .invoke('text')
-      .should('eql', expectedFalsePositives);
-    cy.get(ABOUT_STEP).eq(ABOUT_MITRE).invoke('text').should('eql', expectedMitre);
-    cy.get(ABOUT_STEP).eq(ABOUT_TAGS).invoke('text').should('eql', expectedTags);
-
-    cy.get(DEFINITION_STEP).eq(RULE_TYPE).invoke('text').should('eql', 'Machine Learning');
-    cy.get(DEFINITION_STEP)
-      .eq(ANOMALY_SCORE)
-      .invoke('text')
-      .should('eql', machineLearningRule.anomalyScoreThreshold);
-    cy.get(DEFINITION_STEP)
-      .get(MACHINE_LEARNING_JOB_STATUS)
-      .invoke('text')
-      .should('eql', 'Stopped');
-    cy.get(DEFINITION_STEP)
-      .get(MACHINE_LEARNING_JOB_ID)
-      .invoke('text')
-      .should('eql', machineLearningRule.machineLearningJob);
-
-    cy.get(DEFINITION_STEP).eq(DEFINITION_TIMELINE).invoke('text').should('eql', 'None');
-
-    cy.get(SCHEDULE_STEP).eq(SCHEDULE_RUNS).invoke('text').should('eql', '5m');
-    cy.get(SCHEDULE_STEP).eq(SCHEDULE_LOOPBACK).invoke('text').should('eql', '1m');
   });
 });

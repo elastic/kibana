@@ -1,7 +1,6 @@
 .mlChartTooltip {
   @include euiToolTipStyle('s');
   @include euiFontSizeXS;
-  position: absolute;
   padding: 0;
   transition: opacity $euiAnimSpeedNormal;
   pointer-events: none;

@@ -68,6 +68,7 @@ export default function ({ getService }: FtrProviderContext) {
                       uiCapabilitiesPath: 'visualize.show',
                     },
                     title: 'Count of requests',
+                    namespaceType: 'single',
                   },
                 },
               ],
@@ -118,6 +119,65 @@ export default function ({ getService }: FtrProviderContext) {
                 message: '[request query.searchFields]: definition for this key is missing',
               });
             }));
+      });
+
+      describe('`hasReference` and `hasReferenceOperator` parameters', () => {
+        before(() => esArchiver.load('saved_objects/references'));
+        after(() => esArchiver.unload('saved_objects/references'));
+
+        it('search for a reference', async () => {
+          await supertest
+            .get('/api/kibana/management/saved_objects/_find')
+            .query({
+              type: 'visualization',
+              hasReference: JSON.stringify({ type: 'ref-type', id: 'ref-1' }),
+            })
+            .expect(200)
+            .then((resp) => {
+              const objects = resp.body.saved_objects;
+              expect(objects.map((obj: any) => obj.id)).to.eql(['only-ref-1', 'ref-1-and-ref-2']);
+            });
+        });
+
+        it('search for multiple references with OR operator', async () => {
+          await supertest
+            .get('/api/kibana/management/saved_objects/_find')
+            .query({
+              type: 'visualization',
+              hasReference: JSON.stringify([
+                { type: 'ref-type', id: 'ref-1' },
+                { type: 'ref-type', id: 'ref-2' },
+              ]),
+              hasReferenceOperator: 'OR',
+            })
+            .expect(200)
+            .then((resp) => {
+              const objects = resp.body.saved_objects;
+              expect(objects.map((obj: any) => obj.id)).to.eql([
+                'only-ref-1',
+                'ref-1-and-ref-2',
+                'only-ref-2',
+              ]);
+            });
+        });
+
+        it('search for multiple references with AND operator', async () => {
+          await supertest
+            .get('/api/kibana/management/saved_objects/_find')
+            .query({
+              type: 'visualization',
+              hasReference: JSON.stringify([
+                { type: 'ref-type', id: 'ref-1' },
+                { type: 'ref-type', id: 'ref-2' },
+              ]),
+              hasReferenceOperator: 'AND',
+            })
+            .expect(200)
+            .then((resp) => {
+              const objects = resp.body.saved_objects;
+              expect(objects.map((obj: any) => obj.id)).to.eql(['ref-1-and-ref-2']);
+            });
+        });
       });
     });
 
@@ -225,6 +285,7 @@ export default function ({ getService }: FtrProviderContext) {
                 path: '/app/discover#/view/960372e0-3224-11e8-a572-ffca06da1357',
                 uiCapabilitiesPath: 'discover.show',
               },
+              namespaceType: 'single',
             });
           }));
 
@@ -243,6 +304,7 @@ export default function ({ getService }: FtrProviderContext) {
                 path: '/app/dashboards#/view/b70c7ae0-3224-11e8-a572-ffca06da1357',
                 uiCapabilitiesPath: 'dashboard.show',
               },
+              namespaceType: 'single',
             });
           }));
 
@@ -261,6 +323,7 @@ export default function ({ getService }: FtrProviderContext) {
                 path: '/app/visualize#/edit/a42c0580-3224-11e8-a572-ffca06da1357',
                 uiCapabilitiesPath: 'visualize.show',
               },
+              namespaceType: 'single',
             });
             expect(resp.body.saved_objects[1].meta).to.eql({
               icon: 'visualizeApp',
@@ -271,6 +334,7 @@ export default function ({ getService }: FtrProviderContext) {
                 path: '/app/visualize#/edit/add810b0-3224-11e8-a572-ffca06da1357',
                 uiCapabilitiesPath: 'visualize.show',
               },
+              namespaceType: 'single',
             });
           }));
 
@@ -290,6 +354,7 @@ export default function ({ getService }: FtrProviderContext) {
                   '/app/management/kibana/indexPatterns/patterns/8963ca30-3224-11e8-a572-ffca06da1357',
                 uiCapabilitiesPath: 'management.kibana.indexPatterns',
               },
+              namespaceType: 'single',
             });
           }));
     });

@@ -10,8 +10,9 @@ import { i18n } from '@kbn/i18n';
 
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiPopover, EuiTextColor } from '@elastic/eui';
 
+import { AggName } from '../../../../../../common/types/aggregations';
+
 import {
-  AggName,
   isPivotAggsConfigWithUiSupport,
   PivotAggsConfig,
   PivotAggsConfigWithUiSupportDict,

@@ -4,12 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { EuiDataGridColumn } from '@elastic/eui';
 
 import { CoreSetup } from 'src/core/public';
 
+import { i18n } from '@kbn/i18n';
+import { MlApiServices } from '../../../../../services/ml_api_service';
 import { IndexPattern } from '../../../../../../../../../../src/plugins/data/public';
 
 import { DataLoader } from '../../../../../datavisualizer/index_based/data_loader';
@@ -23,21 +25,31 @@ import {
   UseIndexDataReturnType,
 } from '../../../../../components/data_grid';
 import { SavedSearchQuery } from '../../../../../contexts/ml';
-
 import { getIndexData, getIndexFields, DataFrameAnalyticsConfig } from '../../../../common';
 import {
-  DEFAULT_RESULTS_FIELD,
-  FEATURE_IMPORTANCE,
-  TOP_CLASSES,
-} from '../../../../common/constants';
+  getPredictionFieldName,
+  getDefaultPredictionFieldName,
+  isClassificationAnalysis,
+} from '../../../../../../../common/util/analytics_utils';
+import { FEATURE_IMPORTANCE, TOP_CLASSES } from '../../../../common/constants';
+import { DEFAULT_RESULTS_FIELD } from '../../../../../../../common/constants/data_frame_analytics';
 import { sortExplorationResultsFields, ML__ID_COPY } from '../../../../common/fields';
+import { isRegressionAnalysis } from '../../../../common/analytics';
+import { extractErrorMessage } from '../../../../../../../common/util/errors';
+import { useTrainedModelsApiService } from '../../../../../services/ml_api_service/trained_models';
+import { FeatureImportanceBaseline } from '../../../../../../../common/types/feature_importance';
 
 export const useExplorationResults = (
   indexPattern: IndexPattern | undefined,
   jobConfig: DataFrameAnalyticsConfig | undefined,
   searchQuery: SavedSearchQuery,
-  toastNotifications: CoreSetup['notifications']['toasts']
+  toastNotifications: CoreSetup['notifications']['toasts'],
+  mlApiServices: MlApiServices
 ): UseIndexDataReturnType => {
+  const [baseline, setBaseLine] = useState<FeatureImportanceBaseline | undefined>();
+
+  const trainedModelsApiService = useTrainedModelsApiService();
+
   const needsDestIndexFields =
     indexPattern !== undefined && indexPattern.title === jobConfig?.source.index[0];
 
@@ -52,7 +64,6 @@ export const useExplorationResults = (
       )
     );
   }
-
   const dataGrid = useDataGrid(
     columns,
     25,
@@ -67,10 +78,16 @@ export const useExplorationResults = (
     dataGrid.resetPagination();
   }, [JSON.stringify(searchQuery)]);
 
+  // The pattern using `didCancel` allows us to abort out of date remote request.
+  // We wrap `didCancel` in a object so we can mutate the value as it's being
+  // passed on to `getIndexData`.
   useEffect(() => {
-    getIndexData(jobConfig, dataGrid, searchQuery);
+    const options = { didCancel: false };
+    getIndexData(jobConfig, dataGrid, searchQuery, options);
+    return () => {
+      options.didCancel = true;
+    };
     // custom comparison
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobConfig && jobConfig.id, dataGrid.pagination, searchQuery, dataGrid.sortingColumns]);
 
   const dataLoader = useMemo(
@@ -103,22 +120,72 @@ export const useExplorationResults = (
       fetchColumnChartsData();
     }
     // custom comparison
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     dataGrid.chartsVisible,
     jobConfig?.dest.index,
     JSON.stringify([searchQuery, dataGrid.visibleColumns]),
   ]);
+  const predictionFieldName = useMemo(() => {
+    if (jobConfig) {
+      return (
+        getPredictionFieldName(jobConfig.analysis) ??
+        getDefaultPredictionFieldName(jobConfig.analysis)
+      );
+    }
+    return undefined;
+  }, [jobConfig]);
 
+  const getAnalyticsBaseline = useCallback(async () => {
+    try {
+      if (
+        jobConfig !== undefined &&
+        jobConfig.analysis !== undefined &&
+        (isRegressionAnalysis(jobConfig.analysis) || isClassificationAnalysis(jobConfig.analysis))
+      ) {
+        const jobId = jobConfig.id;
+        const inferenceModels = await trainedModelsApiService.getTrainedModels(`${jobId}*`, {
+          include: 'feature_importance_baseline',
+        });
+        const inferenceModel = inferenceModels.find(
+          (model) => model.metadata?.analytics_config?.id === jobId
+        );
+
+        if (inferenceModel?.metadata?.feature_importance_baseline !== undefined) {
+          setBaseLine(inferenceModel?.metadata?.feature_importance_baseline);
+        }
+      }
+    } catch (e) {
+      const error = extractErrorMessage(e);
+
+      toastNotifications.addDanger({
+        title: i18n.translate(
+          'xpack.ml.dataframe.analytics.explorationResults.baselineErrorMessageToast',
+          {
+            defaultMessage: 'An error occurred getting feature importance baseline',
+          }
+        ),
+        text: error,
+      });
+    }
+  }, [mlApiServices, jobConfig]);
+
+  useEffect(() => {
+    getAnalyticsBaseline();
+  }, [jobConfig]);
+
+  const resultsField = jobConfig?.dest.results_field ?? DEFAULT_RESULTS_FIELD;
   const renderCellValue = useRenderCellValue(
     indexPattern,
     dataGrid.pagination,
     dataGrid.tableItems,
-    jobConfig?.dest.results_field ?? DEFAULT_RESULTS_FIELD
+    resultsField
   );
 
   return {
     ...dataGrid,
     renderCellValue,
+    baseline,
+    predictionFieldName,
+    resultsField,
   };
 };

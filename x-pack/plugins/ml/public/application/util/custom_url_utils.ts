@@ -8,6 +8,7 @@
 
 import { get, flow } from 'lodash';
 import moment from 'moment';
+import rison, { RisonObject, RisonValue } from 'rison-node';
 
 import { parseInterval } from '../../../common/util/parse_interval';
 import { escapeForElasticsearchQuery, replaceStringTokens } from './string_utils';
@@ -34,7 +35,9 @@ export function replaceTokensInUrlValue(
   const urlValue = customUrlConfig.url_value;
   const timestamp = doc[timeFieldName];
   const timeRangeInterval =
-    'time_range' in customUrlConfig ? parseInterval(customUrlConfig.time_range) : null;
+    'time_range' in customUrlConfig && customUrlConfig.time_range
+      ? parseInterval(customUrlConfig.time_range)
+      : null;
   const record = { ...doc } as CustomUrlAnomalyRecordDoc;
   if (urlValue.includes('$earliest$')) {
     const earliestMoment = moment(timestamp);
@@ -76,15 +79,20 @@ export function getUrlForRecord(
 // Opens the specified URL in a new window. The behaviour (for example whether
 // it opens in a new tab or window) is determined from the original configuration
 // object which indicates whether it is opening a Kibana page running on the same server.
-// fullUrl is the complete URL, including the base path, with any dollar delimited tokens
-// from the urlConfig having been substituted with values from an anomaly record.
-export function openCustomUrlWindow(fullUrl: string, urlConfig: UrlConfig) {
+// `url` is the URL with any dollar delimited tokens from the urlConfig
+// having been substituted with values from an anomaly record.
+export function openCustomUrlWindow(url: string, urlConfig: UrlConfig, basePath: string) {
   // Run through a regex to test whether the url_value starts with a protocol scheme.
   if (/^(?:[a-z]+:)?\/\//i.test(urlConfig.url_value) === false) {
-    window.open(fullUrl, '_blank');
+    // If `url` is a relative path, we need to prefix the base path.
+    if (url.charAt(0) !== '/') {
+      url = `${basePath}${isKibanaUrl(urlConfig) ? '/app/' : '/'}${url}`;
+    }
+
+    window.open(url, '_blank');
   } else {
     // Add noopener and noreferrr properties for external URLs.
-    const newWindow = window.open(fullUrl, '_blank', 'noopener,noreferrer');
+    const newWindow = window.open(url, '_blank', 'noopener,noreferrer');
 
     // Expect newWindow to be null, but just in case if not, reset the opener link.
     if (newWindow !== undefined && newWindow !== null) {
@@ -94,13 +102,25 @@ export function openCustomUrlWindow(fullUrl: string, urlConfig: UrlConfig) {
 }
 
 // Returns whether the url_value of the supplied config is for
-// a Kibana Discover or Dashboard page running on the same server as this ML plugin.
+// a Kibana Discover, Dashboard or supported solution page running
+// on the same server as this ML plugin. This is necessary so we can have
+// backwards compatibility with custom URLs created before the move to
+// BrowserRouter and URLs without hashes. If we add another solution to
+// recognize modules or with custom UI in the custom URL builder we'd
+// need to add the solution here. Manually created custom URLs for other
+// solution pages need to be prefixed with `app/` in the custom URL builder.
 function isKibanaUrl(urlConfig: UrlConfig) {
   const urlValue = urlConfig.url_value;
   return (
+    // HashRouter based plugins
     urlValue.startsWith('discover#/') ||
     urlValue.startsWith('dashboards#/') ||
-    urlValue.startsWith('apm#/')
+    urlValue.startsWith('apm#/') ||
+    // BrowserRouter based plugins
+    urlValue.startsWith('metrics/') ||
+    urlValue.startsWith('security/') ||
+    // Legacy links
+    urlValue.startsWith('siem#/')
   );
 }
 
@@ -113,13 +133,70 @@ function escapeForKQL(value: string | number): string {
 
 type GetResultTokenValue = (v: string) => string;
 
+export const isRisonObject = (value: RisonValue): value is RisonObject => {
+  return value !== null && typeof value === 'object';
+};
+
+const getQueryStringResultProvider = (
+  record: CustomUrlAnomalyRecordDoc,
+  getResultTokenValue: GetResultTokenValue
+) => (resultPrefix: string, queryString: string, resultPostfix: string): string => {
+  const URL_LENGTH_LIMIT = 2000;
+
+  let availableCharactersLeft = URL_LENGTH_LIMIT - resultPrefix.length - resultPostfix.length;
+
+  // URL template might contain encoded characters
+  const queryFields = queryString
+    // Split query string by AND operator.
+    .split(/\sand\s/i)
+    // Get property name from `influencerField:$influencerField$` string.
+    .map((v) => String(v.split(/:(.+)?\$/)[0]).trim());
+
+  const queryParts: string[] = [];
+  const joinOperator = ' AND ';
+
+  fieldsLoop: for (let i = 0; i < queryFields.length; i++) {
+    const field = queryFields[i];
+    // Use lodash get to allow nested JSON fields to be retrieved.
+    let tokenValues: string[] | string | null = get(record, field) || null;
+    if (tokenValues === null) {
+      continue;
+    }
+    tokenValues = Array.isArray(tokenValues) ? tokenValues : [tokenValues];
+
+    // Create a pair `influencerField:value`.
+    // In cases where there are multiple influencer field values for an anomaly
+    // combine values with OR operator e.g. `(influencerField:value or influencerField:another_value)`.
+    let result = '';
+    for (let j = 0; j < tokenValues.length; j++) {
+      const part = `${j > 0 ? ' OR ' : ''}${field}:"${getResultTokenValue(tokenValues[j])}"`;
+
+      // Build up a URL string which is not longer than the allowed length and isn't corrupted by invalid query.
+      if (availableCharactersLeft < part.length) {
+        if (result.length > 0) {
+          queryParts.push(j > 0 ? `(${result})` : result);
+        }
+        break fieldsLoop;
+      }
+
+      result += part;
+
+      availableCharactersLeft -= result.length;
+    }
+
+    if (result.length > 0) {
+      queryParts.push(tokenValues.length > 1 ? `(${result})` : result);
+    }
+  }
+  return queryParts.join(joinOperator);
+};
+
 /**
  * Builds a Kibana dashboard or Discover URL from the supplied config, with any
  * dollar delimited tokens substituted from the supplied anomaly record.
  */
 function buildKibanaUrl(urlConfig: UrlConfig, record: CustomUrlAnomalyRecordDoc) {
   const urlValue = urlConfig.url_value;
-  const URL_LENGTH_LIMIT = 2000;
 
   const isLuceneQueryLanguage = urlValue.includes('language:lucene');
 
@@ -127,11 +204,7 @@ function buildKibanaUrl(urlConfig: UrlConfig, record: CustomUrlAnomalyRecordDoc)
     ? escapeForElasticsearchQuery
     : escapeForKQL;
 
-  const commonEscapeCallback = flow(
-    // Kibana URLs used rison encoding, so escape with ! any ! or ' characters
-    (v: string): string => v.replace(/[!']/g, '!$&'),
-    encodeURIComponent
-  );
+  const commonEscapeCallback = flow(encodeURIComponent);
 
   const replaceSingleTokenValues = (str: string) => {
     const getResultTokenValue: GetResultTokenValue = flow(
@@ -154,65 +227,34 @@ function buildKibanaUrl(urlConfig: UrlConfig, record: CustomUrlAnomalyRecordDoc)
   return flow(
     (str: string) => str.replace('$earliest$', record.earliest).replace('$latest$', record.latest),
     // Process query string content of the URL
+    decodeURIComponent,
     (str: string) => {
       const getResultTokenValue: GetResultTokenValue = flow(
         queryLanguageEscapeCallback,
         commonEscapeCallback
       );
+
+      const getQueryStringResult = getQueryStringResultProvider(record, getResultTokenValue);
+
+      const match = str.match(/(.+)(\(.*\blanguage:(?:lucene|kuery)\b.*?\))(.+)/);
+
+      if (match !== null && match[2] !== undefined) {
+        const [, prefix, queryDef, postfix] = match;
+
+        const q = rison.decode(queryDef);
+
+        if (isRisonObject(q) && q.hasOwnProperty('query')) {
+          const [resultPrefix, resultPostfix] = [prefix, postfix].map(replaceSingleTokenValues);
+          const resultQuery = getQueryStringResult(resultPrefix, q.query as string, resultPostfix);
+          return `${resultPrefix}${rison.encode({ ...q, query: resultQuery })}${resultPostfix}`;
+        }
+      }
+
       return str.replace(
-        /(.+query:'|.+&kuery=)([^']*)(['&].+)/,
+        /(.+&kuery=)(.*?)[^!](&.+)/,
         (fullMatch, prefix: string, queryString: string, postfix: string) => {
           const [resultPrefix, resultPostfix] = [prefix, postfix].map(replaceSingleTokenValues);
-
-          let availableCharactersLeft =
-            URL_LENGTH_LIMIT - resultPrefix.length - resultPostfix.length;
-          const queryFields = queryString
-            // Split query string by AND operator.
-            .split(/\sand\s/i)
-            // Get property name from `influencerField:$influencerField$` string.
-            .map((v) => v.split(':')[0]);
-
-          const queryParts: string[] = [];
-          const joinOperator = ' AND ';
-
-          fieldsLoop: for (let i = 0; i < queryFields.length; i++) {
-            const field = queryFields[i];
-            // Use lodash get to allow nested JSON fields to be retrieved.
-            let tokenValues: string[] | string | null = get(record, field) || null;
-            if (tokenValues === null) {
-              continue;
-            }
-            tokenValues = Array.isArray(tokenValues) ? tokenValues : [tokenValues];
-
-            // Create a pair `influencerField:value`.
-            // In cases where there are multiple influencer field values for an anomaly
-            // combine values with OR operator e.g. `(influencerField:value or influencerField:another_value)`.
-            let result = '';
-            for (let j = 0; j < tokenValues.length; j++) {
-              const part = `${j > 0 ? ' OR ' : ''}${field}:"${getResultTokenValue(
-                tokenValues[j]
-              )}"`;
-
-              // Build up a URL string which is not longer than the allowed length and isn't corrupted by invalid query.
-              if (availableCharactersLeft < part.length) {
-                if (result.length > 0) {
-                  queryParts.push(j > 0 ? `(${result})` : result);
-                }
-                break fieldsLoop;
-              }
-
-              result += part;
-
-              availableCharactersLeft -= result.length;
-            }
-
-            if (result.length > 0) {
-              queryParts.push(tokenValues.length > 1 ? `(${result})` : result);
-            }
-          }
-
-          const resultQuery = queryParts.join(joinOperator);
-
+          const resultQuery = getQueryStringResult(resultPrefix, queryString, resultPostfix);
           return `${resultPrefix}${resultQuery}${resultPostfix}`;
         }
       );

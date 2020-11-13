@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SnapshotModel } from '../../../types';
+import { MetricsUIAggregation } from '../../../types';
 
-export const rdsActiveTransactions: SnapshotModel = {
+export const rdsActiveTransactions: MetricsUIAggregation = {
   rdsActiveTransactions: {
     avg: {
       field: 'aws.rds.transactions.active',

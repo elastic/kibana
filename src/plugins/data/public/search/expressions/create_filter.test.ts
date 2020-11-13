@@ -17,11 +17,17 @@
  * under the License.
  */
 
+import {
+  AggConfigs,
+  IAggConfig,
+  TabbedTable,
+  isRangeFilter,
+  BytesFormat,
+  FieldFormatsGetConfigFn,
+} from '../../../common';
+import { mockAggTypesRegistry } from '../../../common/search/aggs/test_helpers';
+
 import { createFilter } from './create_filter';
-import { AggConfigs, IAggConfig } from '../aggs';
-import { TabbedTable } from '../tabify';
-import { isRangeFilter, BytesFormat, FieldFormatsGetConfigFn } from '../../../common';
-import { mockAggTypesRegistry } from '../aggs/test_helpers';
 
 describe('createFilter', () => {
   let table: TabbedTable;
@@ -46,6 +52,7 @@ describe('createFilter', () => {
         getByName: () => field,
         filter: () => [field],
       },
+      getFormatterForField: () => new BytesFormat({}, (() => {}) as FieldFormatsGetConfigFn),
     } as any;
 
     return new AggConfigs(

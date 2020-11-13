@@ -32,11 +32,13 @@ import { TelemetryPluginStart, TelemetryPluginSetup, TelemetryPluginConfig } fro
 
 export interface TelemetryServiceMockOptions {
   reportOptInStatusChange?: boolean;
+  currentKibanaVersion?: string;
   config?: Partial<TelemetryPluginConfig>;
 }
 
 export function mockTelemetryService({
   reportOptInStatusChange,
+  currentKibanaVersion = 'mockKibanaVersion',
   config: configOverride = {},
 }: TelemetryServiceMockOptions = {}) {
   const config = {
@@ -48,6 +50,7 @@ export function mockTelemetryService({
     banner: true,
     allowChangingOptInStatus: true,
     telemetryNotifyUserAboutOptInDefault: true,
+    userCanChangeSettings: true,
     ...configOverride,
   };
 
@@ -55,6 +58,7 @@ export function mockTelemetryService({
     config,
     http: httpServiceMock.createStartContract(),
     notifications: notificationServiceMock.createStartContract(),
+    currentKibanaVersion,
     reportOptInStatusChange,
   });
 

@@ -143,8 +143,9 @@ export const PingType = t.intersection([
       response: t.partial({
         body: HttpResponseBodyType,
         bytes: t.number,
-        redirects: t.string,
+        redirects: t.array(t.string),
         status_code: t.number,
+        headers: t.record(t.string, t.string),
       }),
       version: t.string,
     }),
@@ -180,6 +181,48 @@ export const PingType = t.intersection([
       down: t.number,
       up: t.number,
     }),
+    synthetics: t.partial({
+      index: t.number,
+      journey: t.type({
+        id: t.string,
+        name: t.string,
+      }),
+      error: t.partial({
+        message: t.string,
+        name: t.string,
+        stack: t.string,
+      }),
+      package_version: t.string,
+      step: t.type({
+        index: t.number,
+        name: t.string,
+      }),
+      type: t.string,
+      // ui-related field
+      screenshotLoading: t.boolean,
+      // ui-related field
+      screenshotExists: t.boolean,
+      blob: t.string,
+      blob_mime: t.string,
+      payload: t.partial({
+        duration: t.number,
+        index: t.number,
+        is_navigation_request: t.boolean,
+        message: t.string,
+        method: t.string,
+        name: t.string,
+        params: t.partial({
+          homepage: t.string,
+        }),
+        source: t.string,
+        start: t.number,
+        status: t.string,
+        ts: t.number,
+        type: t.string,
+        url: t.string,
+        end: t.number,
+      }),
+    }),
     tags: t.array(t.string),
     tcp: t.partial({
       rtt: t.partial({
@@ -202,6 +245,13 @@ export const PingType = t.intersection([
   }),
 ]);
 
+export const SyntheticsJourneyApiResponseType = t.type({
+  checkGroup: t.string,
+  steps: t.array(PingType),
+});
+
+export type SyntheticsJourneyApiResponse = t.TypeOf<typeof SyntheticsJourneyApiResponseType>;
+
 export type Ping = t.TypeOf<typeof PingType>;
 
 // Convenience function for tests etc that makes an empty ping
@@ -214,6 +264,9 @@ export const makePing = (f: {
   ip?: string;
   status?: string;
   duration?: number;
+  location?: string;
+  name?: string;
+  url?: string;
 }): Ping => {
   return {
     docId: f.docId || 'myDocId',
@@ -224,7 +277,10 @@ export const makePing = (f: {
       ip: f.ip || '127.0.0.1',
       status: f.status || 'up',
       duration: { us: f.duration || 100000 },
+      name: f.name,
     },
+    ...(f.location ? { observer: { geo: { name: f.location } } } : {}),
+    ...(f.url ? { url: { full: f.url } } : {}),
   };
 };
 

@@ -17,18 +17,14 @@
  * under the License.
  */
 
+import { MouseEvent } from 'react';
 import { getServices } from '../kibana_services';
 
 export const createAppNavigationHandler = (targetUrl: string) => (event: MouseEvent) => {
   if (event.altKey || event.metaKey || event.ctrlKey) {
     return;
   }
-  if (targetUrl.startsWith('/app/')) {
-    const [, appId, path] = /\/app\/(.*?)((\/|\?|#|$).*)/.exec(targetUrl) || [];
-    if (!appId) {
-      return;
-    }
-    event.preventDefault();
-    getServices().application.navigateToApp(appId, { path });
-  }
+  const { application, addBasePath } = getServices();
+  event.preventDefault();
+  application.navigateToUrl(addBasePath(targetUrl));
 };

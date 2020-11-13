@@ -48,12 +48,12 @@ export class SearchProfilerUIPlugin implements Plugin<void, void, AppPublicPlugi
       mount: async (params) => {
         const [coreStart] = await getStartServices();
         const { notifications, i18n: i18nDep } = coreStart;
-        const { boot } = await import('./application/boot');
+        const { renderApp } = await import('./application');
 
         const license = await licensing.license$.pipe(first()).toPromise();
         const initialLicenseStatus = checkLicenseStatus(license);
 
-        return boot({
+        return renderApp({
           http,
           initialLicenseStatus,
           el: params.element,

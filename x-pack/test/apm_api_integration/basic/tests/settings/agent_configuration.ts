@@ -6,6 +6,7 @@
 
 import expect from '@kbn/expect';
 import { omit, orderBy } from 'lodash';
+import { expectSnapshot } from '../../../common/match_snapshot';
 import { AgentConfigurationIntake } from '../../../../../plugins/apm/common/agent_configuration/configuration_types';
 import { AgentConfigSearchParams } from '../../../../../plugins/apm/server/routes/settings/agent_configuration';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
@@ -15,6 +16,8 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
   const supertestWrite = getService('supertestAsApmWriteUser');
   const log = getService('log');
   const esArchiver = getService('esArchiver');
+
+  const archiveName = 'apm_8.0.0';
 
   function getServices() {
     return supertestRead
@@ -125,20 +128,47 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
     });
 
     describe('when data is loaded', () => {
-      before(() => esArchiver.load('8.0.0'));
-      after(() => esArchiver.unload('8.0.0'));
+      before(() => esArchiver.load(archiveName));
+      after(() => esArchiver.unload(archiveName));
 
       it('returns all services', async () => {
         const { body } = await getServices();
-        expect(body).to.eql(['ALL_OPTION_VALUE', 'client', 'opbeans-java', 'opbeans-node']);
+        expectSnapshot(body).toMatchInline(`
+          Array [
+            "ALL_OPTION_VALUE",
+            "elastic-co-frontend",
+            "opbeans-dotnet",
+            "opbeans-go",
+            "opbeans-java",
+            "opbeans-node",
+            "opbeans-python",
+            "opbeans-ruby",
+            "opbeans-rum",
+          ]
+        `);
       });
 
-      it('returns the environments', async () => {
+      it('returns the environments, all unconfigured', async () => {
         const { body } = await getEnvironments('opbeans-node');
-        expect(body).to.eql([
-          { name: 'ALL_OPTION_VALUE', alreadyConfigured: false },
-          { name: 'production', alreadyConfigured: false },
-        ]);
+
+        expect(body.map((item: { name: string }) => item.name)).to.contain('ALL_OPTION_VALUE');
+
+        expect(
+          body.every((item: { alreadyConfigured: boolean }) => item.alreadyConfigured === false)
+        ).to.be(true);
+
+        expectSnapshot(body).toMatchInline(`
+          Array [
+            Object {
+              "alreadyConfigured": false,
+              "name": "ALL_OPTION_VALUE",
+            },
+            Object {
+              "alreadyConfigured": false,
+              "name": "testing",
+            },
+          ]
+        `);
       });
 
       it('returns the agent names', async () => {
@@ -156,7 +186,7 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
           // ensure that `createConfiguration` throws
           expect(true).to.be(false);
         } catch (e) {
-          expect(e.res.statusCode).to.be(404);
+          expect(e.res.statusCode).to.be(403);
         }
       });
 
@@ -171,7 +201,7 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
             // ensure that `updateConfiguration` throws
             expect(true).to.be(false);
           } catch (e) {
-            expect(e.res.statusCode).to.be(404);
+            expect(e.res.statusCode).to.be(403);
           }
         });
 
@@ -182,7 +212,7 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
             // ensure that `deleteConfiguration` throws
             expect(true).to.be(false);
           } catch (e) {
-            expect(e.res.statusCode).to.be(404);
+            expect(e.res.statusCode).to.be(403);
           }
         });
       });

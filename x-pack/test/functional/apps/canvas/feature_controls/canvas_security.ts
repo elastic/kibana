@@ -9,7 +9,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
-  const PageObjects = getPageObjects(['common', 'canvas', 'security', 'spaceSelector']);
+  const PageObjects = getPageObjects(['common', 'canvas', 'error', 'security', 'spaceSelector']);
   const appsMenu = getService('appsMenu');
   const globalNav = getService('globalNav');
 
@@ -66,7 +66,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows canvas navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.eql(['Canvas', 'Stack Management']);
+        expect(navLinks).to.eql(['Overview', 'Canvas']);
       });
 
       it(`landing page shows "Create new workpad" button`, async () => {
@@ -142,7 +142,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows canvas navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.eql(['Canvas', 'Stack Management']);
+        expect(navLinks).to.eql(['Overview', 'Canvas']);
       });
 
       it(`landing page shows disabled "Create new workpad" button`, async () => {
@@ -217,34 +217,20 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await security.user.delete('no_canvas_privileges_user');
       });
 
-      it(`returns a 404`, async () => {
+      it(`returns a 403`, async () => {
         await PageObjects.common.navigateToActualUrl('canvas', '', {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        const messageText = await PageObjects.common.getBodyText();
-        expect(messageText).to.eql(
-          JSON.stringify({
-            statusCode: 404,
-            error: 'Not Found',
-            message: 'Not Found',
-          })
-        );
+        PageObjects.error.expectForbidden();
       });
 
-      it(`create new workpad returns a 404`, async () => {
+      it(`create new workpad returns a 403`, async () => {
         await PageObjects.common.navigateToActualUrl('canvas', 'workpad/create', {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        const messageText = await PageObjects.common.getBodyText();
-        expect(messageText).to.eql(
-          JSON.stringify({
-            statusCode: 404,
-            error: 'Not Found',
-            message: 'Not Found',
-          })
-        );
+        PageObjects.error.expectForbidden();
       });
     });
   });

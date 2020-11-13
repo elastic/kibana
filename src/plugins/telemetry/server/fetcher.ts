@@ -18,11 +18,14 @@
  */
 
 import moment from 'moment';
-import { Observable } from 'rxjs';
+import { Observable, Subscription, timer } from 'rxjs';
 import { take } from 'rxjs/operators';
 // @ts-ignore
 import fetch from 'node-fetch';
-import { TelemetryCollectionManagerPluginStart } from 'src/plugins/telemetry_collection_manager/server';
+import {
+  TelemetryCollectionManagerPluginStart,
+  UsageStatsPayload,
+} from 'src/plugins/telemetry_collection_manager/server';
 import {
   PluginInitializerContext,
   Logger,
@@ -58,7 +61,7 @@ export class FetcherTask {
   private readonly config$: Observable<TelemetryConfigType>;
   private readonly currentKibanaVersion: string;
   private readonly logger: Logger;
-  private intervalId?: NodeJS.Timeout;
+  private intervalId?: Subscription;
   private lastReported?: number;
   private isSending = false;
   private internalRepository?: SavedObjectsClientContract;
@@ -79,19 +82,22 @@ export class FetcherTask {
     this.telemetryCollectionManager = telemetryCollectionManager;
     this.elasticsearchClient = elasticsearch.legacy.createClient('telemetry-fetcher');
 
-    setTimeout(() => {
-      this.sendIfDue();
-      this.intervalId = setInterval(() => this.sendIfDue(), this.checkIntervalMs);
-    }, this.initialCheckDelayMs);
+    this.intervalId = timer(this.initialCheckDelayMs, this.checkIntervalMs).subscribe(() =>
+      this.sendIfDue()
+    );
   }
 
   public stop() {
     if (this.intervalId) {
-      clearInterval(this.intervalId);
+      this.intervalId.unsubscribe();
     }
     if (this.elasticsearchClient) {
       this.elasticsearchClient.close();
     }
+  }
+
+  private async areAllCollectorsReady() {
+    return (await this.telemetryCollectionManager?.areAllCollectorsReady()) ?? false;
   }
 
   private async sendIfDue() {
@@ -103,7 +109,7 @@ export class FetcherTask {
     try {
       telemetryConfig = await this.getCurrentConfigs();
     } catch (err) {
-      this.logger.warn(`Error fetching telemetry configs: ${err}`);
+      this.logger.warn(`Error getting telemetry configs. (${err})`);
       return;
     }
 
@@ -111,9 +117,22 @@ export class FetcherTask {
       return;
     }
 
+    let clusters: Array<UsageStatsPayload | string> = [];
+    this.isSending = true;
+
     try {
-      this.isSending = true;
-      const clusters = await this.fetchTelemetry();
+      const allCollectorsReady = await this.areAllCollectorsReady();
+      if (!allCollectorsReady) {
+        throw new Error('Not all collectors are ready.');
+      }
+      clusters = await this.fetchTelemetry();
+    } catch (err) {
+      this.logger.warn(`Error fetching usage. (${err})`);
+      this.isSending = false;
+      return;
+    }
+
+    try {
       const { telemetryUrl } = telemetryConfig;
       for (const cluster of clusters) {
         await this.sendTelemetry(telemetryUrl, cluster);
@@ -123,7 +142,7 @@ export class FetcherTask {
     } catch (err) {
       await this.updateReportFailure(telemetryConfig);
 
-      this.logger.warn(`Error sending telemetry usage data: ${err}`);
+      this.logger.warn(`Error sending telemetry usage data. (${err})`);
     }
     this.isSending = false;
   }
@@ -194,8 +213,7 @@ export class FetcherTask {
   private async fetchTelemetry() {
     return await this.telemetryCollectionManager!.getStats({
       unencrypted: false,
-      start: moment().subtract(20, 'minutes').toISOString(),
-      end: moment().toISOString(),
+      timestamp: moment().valueOf(),
     });
   }
 
@@ -212,6 +230,7 @@ export class FetcherTask {
     await fetch(url, {
       method: 'post',
       body: cluster,
+      headers: { 'X-Elastic-Stack-Version': this.currentKibanaVersion },
     });
   }
 }

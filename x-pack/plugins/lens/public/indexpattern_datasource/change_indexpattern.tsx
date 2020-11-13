@@ -10,7 +10,7 @@ import { EuiPopover, EuiPopoverTitle, EuiSelectable } from '@elastic/eui';
 import { EuiSelectableProps } from '@elastic/eui/src/components/selectable/selectable';
 import { IndexPatternRef } from './types';
 import { trackUiEvent } from '../lens_ui_telemetry';
-import { ToolbarButtonProps, ToolbarButton } from '../toolbar_button';
+import { ToolbarButtonProps, ToolbarButton } from '../shared_components';
 
 export type ChangeIndexPatternTriggerProps = ToolbarButtonProps & {
   label: string;
@@ -57,7 +57,7 @@ export function ChangeIndexPattern({
         panelPaddingSize="s"
         ownFocus
       >
-        <div style={{ width: 320 }}>
+        <div style={{ width: 320 }} data-test-subj="lnsChangeIndexPatternPopup">
           <EuiPopoverTitle>
             {i18n.translate('xpack.lens.indexPattern.changeIndexPatternTitle', {
               defaultMessage: 'Change index pattern',

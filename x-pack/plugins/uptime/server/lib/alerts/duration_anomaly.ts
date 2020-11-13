@@ -4,20 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { KibanaRequest, SavedObjectsClientContract } from 'kibana/server';
 import moment from 'moment';
 import { schema } from '@kbn/config-schema';
-import { ILegacyScopedClusterClient } from 'kibana/server';
 import { updateState } from './common';
 import { ACTION_GROUP_DEFINITIONS } from '../../../common/constants/alerts';
 import { commonStateTranslations, durationAnomalyTranslations } from './translations';
 import { AnomaliesTableRecord } from '../../../../ml/common/types/anomalies';
 import { getSeverityType } from '../../../../ml/common/util/anomaly_utils';
-import { getLatestMonitor } from '../requests';
-import { savedObjectsAdapter } from '../saved_objects';
 import { UptimeCorePlugins } from '../adapters/framework';
 import { UptimeAlertTypeFactory } from './types';
 import { Ping } from '../../../common/runtime_types/ping';
 import { getMLJobId } from '../../../common/lib';
+import { getLatestMonitor } from '../requests/get_latest_monitor';
+import { uptimeAlertWrapper } from './uptime_alert_wrapper';
 
 const { DURATION_ANOMALY } = ACTION_GROUP_DEFINITIONS;
 
@@ -36,13 +36,15 @@ export const getAnomalySummary = (anomaly: AnomaliesTableRecord, monitorInfo: Pi
 
 const getAnomalies = async (
   plugins: UptimeCorePlugins,
-  mlClusterClient: ILegacyScopedClusterClient,
+  savedObjectsClient: SavedObjectsClientContract,
   params: Record<any, any>,
   lastCheckedAt: string
 ) => {
-  const { getAnomaliesTableData } = plugins.ml.resultsServiceProvider(mlClusterClient, {
-    params: 'DummyKibanaRequest',
-  } as any);
+  const fakeRequest = {} as KibanaRequest;
+  const { getAnomaliesTableData } = plugins.ml.resultsServiceProvider(
+    fakeRequest,
+    savedObjectsClient
+  );
 
   return await getAnomaliesTableData(
     [getMLJobId(params.monitorId)],
@@ -59,71 +61,58 @@ const getAnomalies = async (
   );
 };
 
-export const durationAnomalyAlertFactory: UptimeAlertTypeFactory = (_server, _libs, plugins) => ({
-  id: 'xpack.uptime.alerts.durationAnomaly',
-  name: durationAnomalyTranslations.alertFactoryName,
-  validate: {
-    params: schema.object({
-      monitorId: schema.string(),
-      severity: schema.number(),
-    }),
-  },
-  defaultActionGroupId: DURATION_ANOMALY.id,
-  actionGroups: [
-    {
-      id: DURATION_ANOMALY.id,
-      name: DURATION_ANOMALY.name,
+export const durationAnomalyAlertFactory: UptimeAlertTypeFactory = (_server, _libs, plugins) =>
+  uptimeAlertWrapper({
+    id: 'xpack.uptime.alerts.durationAnomaly',
+    name: durationAnomalyTranslations.alertFactoryName,
+    validate: {
+      params: schema.object({
+        monitorId: schema.string(),
+        severity: schema.number(),
+      }),
     },
-  ],
-  actionVariables: {
-    context: [],
-    state: [...durationAnomalyTranslations.actionVariables, ...commonStateTranslations],
-  },
-  producer: 'uptime',
-  async executor(options) {
-    const {
-      services: {
-        alertInstanceFactory,
-        callCluster,
-        savedObjectsClient,
-        getLegacyScopedClusterClient,
+    defaultActionGroupId: DURATION_ANOMALY.id,
+    actionGroups: [
+      {
+        id: DURATION_ANOMALY.id,
+        name: DURATION_ANOMALY.name,
       },
-      state,
-      params,
-    } = options;
-
-    const { anomalies } =
-      (await getAnomalies(
-        plugins,
-        getLegacyScopedClusterClient(plugins.ml.mlClient),
+    ],
+    actionVariables: {
+      context: [],
+      state: [...durationAnomalyTranslations.actionVariables, ...commonStateTranslations],
+    },
+    async executor({ options, esClient, savedObjectsClient, dynamicSettings }) {
+      const {
+        services: { alertInstanceFactory },
+        state,
         params,
-        state.lastCheckedAt
-      )) ?? {};
+      } = options;
 
-    const foundAnomalies = anomalies?.length > 0;
+      const { anomalies } =
+        (await getAnomalies(plugins, savedObjectsClient, params, state.lastCheckedAt)) ?? {};
 
-    if (foundAnomalies) {
-      const dynamicSettings = await savedObjectsAdapter.getUptimeDynamicSettings(
-        savedObjectsClient
-      );
-      const monitorInfo = await getLatestMonitor({
-        dynamicSettings,
-        callES: callCluster,
-        dateStart: 'now-15m',
-        dateEnd: 'now',
-        monitorId: params.monitorId,
-      });
-      anomalies.forEach((anomaly, index) => {
-        const alertInstance = alertInstanceFactory(DURATION_ANOMALY.id + index);
-        const summary = getAnomalySummary(anomaly, monitorInfo);
-        alertInstance.replaceState({
-          ...updateState(state, false),
-          ...summary,
+      const foundAnomalies = anomalies?.length > 0;
+
+      if (foundAnomalies) {
+        const monitorInfo = await getLatestMonitor({
+          dynamicSettings,
+          callES: esClient,
+          dateStart: 'now-15m',
+          dateEnd: 'now',
+          monitorId: params.monitorId,
         });
-        alertInstance.scheduleActions(DURATION_ANOMALY.id);
-      });
-    }
+        anomalies.forEach((anomaly, index) => {
+          const alertInstance = alertInstanceFactory(DURATION_ANOMALY.id + index);
+          const summary = getAnomalySummary(anomaly, monitorInfo);
+          alertInstance.replaceState({
+            ...updateState(state, false),
+            ...summary,
+          });
+          alertInstance.scheduleActions(DURATION_ANOMALY.id);
+        });
+      }
 
-    return updateState(state, foundAnomalies);
-  },
-});
+      return updateState(state, foundAnomalies);
+    },
+  });

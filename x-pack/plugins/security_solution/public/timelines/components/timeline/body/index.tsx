@@ -6,8 +6,9 @@
 
 import React, { useMemo, useRef } from 'react';
 
+import { inputsModel } from '../../../../common/store';
 import { BrowserFields, DocValueFields } from '../../../../common/containers/source';
-import { TimelineItem, TimelineNonEcsData } from '../../../../graphql/types';
+import { TimelineItem, TimelineNonEcsData } from '../../../../../common/search_strategy';
 import { Note } from '../../../../common/lib/note';
 import { ColumnHeaderOptions } from '../../../../timelines/store/timeline/model';
 import { AddNoteToEvent, UpdateNote } from '../../notes/helpers';
@@ -15,7 +16,6 @@ import {
   OnColumnRemoved,
   OnColumnResized,
   OnColumnSorted,
-  OnFilterChange,
   OnPinEvent,
   OnRowSelected,
   OnSelectAll,
@@ -31,7 +31,7 @@ import { RowRenderer } from './renderers/row_renderer';
 import { Sort } from './sort';
 import { GraphOverlay } from '../../graph_overlay';
 import { DEFAULT_ICON_BUTTON_WIDTH } from '../helpers';
-import { TimelineId, TimelineType } from '../../../../../common/types/timeline';
+import { TimelineEventsType, TimelineId, TimelineType } from '../../../../../common/types/timeline';
 
 export interface BodyProps {
   addNoteToEvent: AddNoteToEvent;
@@ -42,34 +42,37 @@ export interface BodyProps {
   docValueFields: DocValueFields[];
   getNotesByIds: (noteIds: string[]) => Note[];
   graphEventId?: string;
-  height?: number;
-  id: string;
   isEventViewer?: boolean;
   isSelectAllChecked: boolean;
   eventIdToNoteIds: Readonly<Record<string, string[]>>;
+  eventType?: TimelineEventsType;
   loadingEventIds: Readonly<string[]>;
   onColumnRemoved: OnColumnRemoved;
   onColumnResized: OnColumnResized;
   onColumnSorted: OnColumnSorted;
   onRowSelected: OnRowSelected;
   onSelectAll: OnSelectAll;
-  onFilterChange: OnFilterChange;
   onPinEvent: OnPinEvent;
   onUpdateColumns: OnUpdateColumns;
   onUnPinEvent: OnUnPinEvent;
   pinnedEventIds: Readonly<Record<string, boolean>>;
+  refetch: inputsModel.Refetch;
+  onRuleChange?: () => void;
   rowRenderers: RowRenderer[];
   selectedEventIds: Readonly<Record<string, TimelineNonEcsData[]>>;
   show: boolean;
   showCheckboxes: boolean;
   sort: Sort;
+  timelineId: string;
   timelineType: TimelineType;
   toggleColumn: (column: ColumnHeaderOptions) => void;
   updateNote: UpdateNote;
 }
 
-export const hasAdditonalActions = (id: string): boolean =>
-  id === TimelineId.detectionsPage || id === TimelineId.detectionsRulesDetailsPage;
+export const hasAdditionalActions = (id: TimelineId): boolean =>
+  [TimelineId.detectionsPage, TimelineId.detectionsRulesDetailsPage, TimelineId.active].includes(
+    id
+  );
 
 const EXTRA_WIDTH = 4; // px
 
@@ -85,8 +88,6 @@ export const Body = React.memo<BodyProps>(
     eventIdToNoteIds,
     getNotesByIds,
     graphEventId,
-    height,
-    id,
     isEventViewer = false,
     isSelectAllChecked,
     loadingEventIds,
@@ -95,17 +96,19 @@ export const Body = React.memo<BodyProps>(
     onColumnSorted,
     onRowSelected,
     onSelectAll,
-    onFilterChange,
     onPinEvent,
     onUpdateColumns,
     onUnPinEvent,
     pinnedEventIds,
     rowRenderers,
+    refetch,
+    onRuleChange,
     selectedEventIds,
     show,
     showCheckboxes,
     sort,
     toggleColumn,
+    timelineId,
     timelineType,
     updateNote,
   }) => {
@@ -115,9 +118,11 @@ export const Body = React.memo<BodyProps>(
         getActionsColumnWidth(
           isEventViewer,
           showCheckboxes,
-          hasAdditonalActions(id) ? DEFAULT_ICON_BUTTON_WIDTH + EXTRA_WIDTH : 0
+          hasAdditionalActions(timelineId as TimelineId)
+            ? DEFAULT_ICON_BUTTON_WIDTH + EXTRA_WIDTH
+            : 0
         ),
-      [isEventViewer, showCheckboxes, id]
+      [isEventViewer, showCheckboxes, timelineId]
     );
 
     const columnWidths = useMemo(
@@ -130,16 +135,15 @@ export const Body = React.memo<BodyProps>(
       <>
         {graphEventId && (
           <GraphOverlay
-            bodyHeight={height}
             graphEventId={graphEventId}
-            timelineId={id}
+            isEventViewer={isEventViewer}
+            timelineId={timelineId}
             timelineType={timelineType}
           />
         )}
         <TimelineBody
           data-test-subj="timeline-body"
-          data-timeline-id={id}
-          bodyHeight={height}
+          data-timeline-id={timelineId}
           ref={containerElementRef}
           visible={show && !graphEventId}
         >
@@ -153,13 +157,12 @@ export const Body = React.memo<BodyProps>(
               onColumnRemoved={onColumnRemoved}
               onColumnResized={onColumnResized}
               onColumnSorted={onColumnSorted}
-              onFilterChange={onFilterChange}
               onSelectAll={onSelectAll}
               onUpdateColumns={onUpdateColumns}
               showEventsSelect={false}
               showSelectAllCheckbox={showCheckboxes}
               sort={sort}
-              timelineId={id}
+              timelineId={timelineId}
               toggleColumn={toggleColumn}
             />
 
@@ -174,7 +177,7 @@ export const Body = React.memo<BodyProps>(
               docValueFields={docValueFields}
               eventIdToNoteIds={eventIdToNoteIds}
               getNotesByIds={getNotesByIds}
-              id={id}
+              id={timelineId}
               isEventViewer={isEventViewer}
               loadingEventIds={loadingEventIds}
               onColumnResized={onColumnResized}
@@ -183,7 +186,9 @@ export const Body = React.memo<BodyProps>(
               onUpdateColumns={onUpdateColumns}
               onUnPinEvent={onUnPinEvent}
               pinnedEventIds={pinnedEventIds}
+              refetch={refetch}
               rowRenderers={rowRenderers}
+              onRuleChange={onRuleChange}
               selectedEventIds={selectedEventIds}
               showCheckboxes={showCheckboxes}
               toggleColumn={toggleColumn}

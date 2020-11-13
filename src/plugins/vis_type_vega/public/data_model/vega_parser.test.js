@@ -18,6 +18,7 @@
  */
 
 import { cloneDeep } from 'lodash';
+import { euiThemeVars } from '@kbn/ui-shared-deps/theme';
 import { VegaParser } from './vega_parser';
 import { bypassExternalUrlCheck } from '../vega_view/vega_base_view';
 
@@ -27,6 +28,18 @@ jest.mock('../lib/vega', () => ({
   vega: jest.requireActual('vega'),
   vegaLite: jest.requireActual('vega-lite'),
 }));
+
+describe(`VegaParser.parseAsync`, () => {
+  test(`should throw an error in case of $spec is not defined`, async () => {
+    const vp = new VegaParser('{}');
+
+    await vp.parseAsync();
+
+    expect(
+      vp.error.startsWith('Your specification requires a "$schema" field with a valid URL')
+    ).toBeTruthy();
+  });
+});
 
 describe(`VegaParser._setDefaultValue`, () => {
   function check(spec, expected, ...params) {
@@ -58,8 +71,31 @@ describe(`VegaParser._setDefaultColors`, () => {
     `vegalite`,
     check({}, true, {
       config: {
+        axis: {
+          domainColor: euiThemeVars.euiColorChartLines,
+          gridColor: euiThemeVars.euiColorChartLines,
+          tickColor: euiThemeVars.euiColorChartLines,
+        },
+        background: 'transparent',
         range: { category: { scheme: 'elastic' } },
         mark: { color: '#54B399' },
+        style: {
+          'group-title': {
+            fill: euiThemeVars.euiColorDarkestShade,
+          },
+          'guide-label': {
+            fill: euiThemeVars.euiColorDarkShade,
+          },
+          'guide-title': {
+            fill: euiThemeVars.euiColorDarkestShade,
+          },
+          'group-subtitle': {
+            fill: euiThemeVars.euiColorDarkestShade,
+          },
+        },
+        title: {
+          color: euiThemeVars.euiColorDarkestShade,
+        },
       },
     })
   );
@@ -68,6 +104,12 @@ describe(`VegaParser._setDefaultColors`, () => {
     `vega`,
     check({}, false, {
       config: {
+        axis: {
+          domainColor: euiThemeVars.euiColorChartLines,
+          gridColor: euiThemeVars.euiColorChartLines,
+          tickColor: euiThemeVars.euiColorChartLines,
+        },
+        background: 'transparent',
         range: { category: { scheme: 'elastic' } },
         arc: { fill: '#54B399' },
         area: { fill: '#54B399' },
@@ -78,6 +120,23 @@ describe(`VegaParser._setDefaultColors`, () => {
         shape: { stroke: '#54B399' },
         symbol: { fill: '#54B399' },
         trail: { fill: '#54B399' },
+        style: {
+          'group-title': {
+            fill: euiThemeVars.euiColorDarkestShade,
+          },
+          'guide-label': {
+            fill: euiThemeVars.euiColorDarkShade,
+          },
+          'guide-title': {
+            fill: euiThemeVars.euiColorDarkestShade,
+          },
+          'group-subtitle': {
+            fill: euiThemeVars.euiColorDarkestShade,
+          },
+        },
+        title: {
+          color: euiThemeVars.euiColorDarkestShade,
+        },
       },
     })
   );
@@ -87,7 +146,7 @@ describe('VegaParser._resolveEsQueries', () => {
   let searchApiStub;
   const data = [
     {
-      id: 0,
+      name: 'requestId',
       rawResponse: [42],
     },
   ];
@@ -103,12 +162,15 @@ describe('VegaParser._resolveEsQueries', () => {
 
   function check(spec, expected, warnCount) {
     return async () => {
-      const vp = new VegaParser(spec, searchApiStub, 0, 0, {
-        getFileLayers: async () => [{ name: 'file1', url: 'url1' }],
-        getUrlForRegionLayer: async (layer) => {
-          return layer.url;
-        },
-      });
+      const mockGetServiceSettings = async () => {
+        return {
+          getFileLayers: async () => [{ name: 'file1', url: 'url1' }],
+          getUrlForRegionLayer: async (layer) => {
+            return layer.url;
+          },
+        };
+      };
+      const vp = new VegaParser(spec, searchApiStub, 0, 0, mockGetServiceSettings);
       await vp._resolveDataUrls();
 
       expect(vp.spec).toEqual(expected);
@@ -119,16 +181,25 @@ describe('VegaParser._resolveEsQueries', () => {
   test('no data', check({}, {}));
   test('no data2', check({ a: 1 }, { a: 1 }));
   test('non-es data', check({ data: { a: 10 } }, { data: { a: 10 } }));
-  test('es', check({ data: { url: { index: 'a' }, x: 1 } }, { data: { values: [42], x: 1 } }));
+  test(
+    'es',
+    check(
+      { data: { name: 'requestId', url: { index: 'a' }, x: 1 } },
+      { data: { name: 'requestId', values: [42], x: 1 } }
+    )
+  );
   test(
     'es 2',
-    check({ data: { url: { '%type%': 'elasticsearch', index: 'a' } } }, { data: { values: [42] } })
+    check(
+      { data: { name: 'requestId', url: { '%type%': 'elasticsearch', index: 'a' } } },
+      { data: { name: 'requestId', values: [42] } }
+    )
   );
   test(
     'es arr',
     check(
-      { arr: [{ data: { url: { index: 'a' }, x: 1 } }] },
-      { arr: [{ data: { values: [42], x: 1 } }] }
+      { arr: [{ data: { name: 'requestId', url: { index: 'a' }, x: 1 } }] },
+      { arr: [{ data: { name: 'requestId', values: [42], x: 1 } }] }
     )
   );
   test(
@@ -140,22 +211,13 @@ describe('VegaParser._resolveEsQueries', () => {
   );
 });
 
-describe('VegaParser._parseSchema', () => {
-  function check(schema, isVegaLite, warningCount) {
+describe('VegaParser.parseSchema', () => {
+  function check(schema, isVegaLite) {
     return () => {
       const vp = new VegaParser({ $schema: schema });
-      expect(vp._parseSchema()).toBe(isVegaLite);
-      expect(vp.spec).toEqual({ $schema: schema });
-      expect(vp.warnings).toHaveLength(warningCount);
+      expect(vp.parseSchema(vp.spec).isVegaLite).toBe(isVegaLite);
     };
   }
-
-  test('should warn on no vega version specified', () => {
-    const vp = new VegaParser({});
-    expect(vp._parseSchema()).toBe(false);
-    expect(vp.spec).toEqual({ $schema: 'https://vega.github.io/schema/vega/v5.json' });
-    expect(vp.warnings).toHaveLength(1);
-  });
 
   test(
     'should not warn on current vega version',
@@ -181,7 +243,7 @@ describe('VegaParser._parseSchema', () => {
 });
 
 describe('VegaParser._parseTooltips', () => {
-  function check(tooltips, position, padding, centerOnMark) {
+  function check(tooltips, position, padding, centerOnMark, textTruncate = false) {
     return () => {
       const vp = new VegaParser(tooltips !== undefined ? { config: { kibana: { tooltips } } } : {});
       vp._config = vp._parseConfig();
@@ -191,7 +253,7 @@ describe('VegaParser._parseTooltips', () => {
       } else if (position === false) {
         expect(vp._parseTooltips()).toEqual(false);
       } else {
-        expect(vp._parseTooltips()).toEqual({ position, padding, centerOnMark });
+        expect(vp._parseTooltips()).toEqual({ position, padding, centerOnMark, textTruncate });
       }
     };
   }
@@ -205,6 +267,7 @@ describe('VegaParser._parseTooltips', () => {
   test('centerOnMark=10', check({ centerOnMark: 10 }, 'top', 16, 10));
   test('centerOnMark=true', check({ centerOnMark: true }, 'top', 16, Number.MAX_VALUE));
   test('centerOnMark=false', check({ centerOnMark: false }, 'top', 16, -1));
+  test('textTruncate=false', check({ textTruncate: true }, 'top', 16, 50, true));
 
   test('false', check(false, false));
 
@@ -309,43 +372,95 @@ describe('VegaParser._parseConfig', () => {
   test('_hostConfig', check({ _hostConfig: { a: 1 } }, { a: 1 }, {}, 1));
 });
 
-describe('VegaParser._calcSizing', () => {
-  function check(
-    spec,
-    useResize,
-    paddingWidth,
-    paddingHeight,
-    isVegaLite,
-    expectedSpec,
-    warnCount
-  ) {
+describe('VegaParser._compileWithAutosize', () => {
+  function check(spec, useResize, expectedSpec, warnCount) {
     return async () => {
       expectedSpec = expectedSpec || cloneDeep(spec);
       const vp = new VegaParser(spec);
-      vp.isVegaLite = !!isVegaLite;
-      vp._calcSizing();
+      vp._compileWithAutosize();
       expect(vp.useResize).toEqual(useResize);
-      expect(vp.paddingWidth).toEqual(paddingWidth);
-      expect(vp.paddingHeight).toEqual(paddingHeight);
       expect(vp.spec).toEqual(expectedSpec);
       expect(vp.warnings).toHaveLength(warnCount || 0);
     };
   }
 
-  test('no size', check({ autosize: {} }, false, 0, 0));
-  test('fit', check({ autosize: 'fit' }, true, 0, 0));
-  test('fit obj', check({ autosize: { type: 'fit' } }, true, 0, 0));
-  test('padding const', check({ autosize: 'fit', padding: 10 }, true, 20, 20));
   test(
-    'padding obj',
-    check({ autosize: 'fit', padding: { left: 5, bottom: 7, right: 6, top: 8 } }, true, 11, 15)
+    'empty config',
+    check({}, true, {
+      autosize: { type: 'fit', contains: 'padding' },
+      width: 'container',
+      height: 'container',
+    })
   );
   test(
-    'width height',
-    check({ autosize: 'fit', width: 1, height: 2 }, true, 0, 0, false, false, 1)
+    'no warnings for default config',
+    check({ width: 'container', height: 'container' }, true, {
+      autosize: { type: 'fit', contains: 'padding' },
+      width: 'container',
+      height: 'container',
+    })
   );
   test(
-    'VL width height',
-    check({ autosize: 'fit', width: 1, height: 2 }, true, 0, 0, true, { autosize: 'fit' }, 0)
+    'warning when attempting to use invalid setting',
+    check(
+      { width: '300', height: '300' },
+      true,
+      {
+        autosize: { type: 'fit', contains: 'padding' },
+        width: 'container',
+        height: 'container',
+      },
+      1
+    )
   );
+  test(
+    'autosize none',
+    check({ autosize: 'none' }, false, { autosize: { type: 'none', contains: 'padding' } })
+  );
+  test(
+    'autosize=fit',
+    check({ autosize: 'fit' }, true, {
+      autosize: { type: 'fit', contains: 'padding' },
+      width: 'container',
+      height: 'container',
+    })
+  );
+  test(
+    'autosize=pad',
+    check({ autosize: 'pad' }, true, {
+      autosize: { type: 'pad', contains: 'padding' },
+      width: 'container',
+      height: 'container',
+    })
+  );
+  test(
+    'empty autosize object',
+    check({ autosize: {} }, true, {
+      autosize: { type: 'fit', contains: 'padding' },
+      height: 'container',
+      width: 'container',
+    })
+  );
+  test(
+    'warning on falsy arguments',
+    check(
+      { autosize: false },
+      true,
+      {
+        autosize: { type: 'fit', contains: 'padding' },
+        height: 'container',
+        width: 'container',
+      },
+      1
+    )
+  );
+  test(
+    'partial autosize object',
+    check({ autosize: { contains: 'content' } }, true, {
+      autosize: { contains: 'content', type: 'fit' },
+      height: 'container',
+      width: 'container',
+    })
+  );
+  test('autosize signals are ignored', check({ autosize: { signal: 'asdf' } }, undefined));
 });

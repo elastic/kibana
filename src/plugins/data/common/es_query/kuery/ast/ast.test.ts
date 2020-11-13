@@ -350,12 +350,14 @@ describe('kuery AST API', () => {
       expect(toElasticsearchQuery((null as unknown) as KueryNode, undefined)).toEqual(expected);
 
       const noTypeNode = nodeTypes.function.buildNode('exists', 'foo');
+
+      // @ts-expect-error
       delete noTypeNode.type;
       expect(toElasticsearchQuery(noTypeNode)).toEqual(expected);
 
       const unknownTypeNode = nodeTypes.function.buildNode('exists', 'foo');
 
-      // @ts-ignore
+      // @ts-expect-error
       unknownTypeNode.type = 'notValid';
       expect(toElasticsearchQuery(unknownTypeNode)).toEqual(expected);
     });

@@ -8,9 +8,6 @@ import { CoreSetup, IUiSettingsClient } from 'kibana/public';
 import moment from 'moment-timezone';
 import { ExpressionsSetup } from '../../../../../src/plugins/expressions/public';
 import { UI_SETTINGS } from '../../../../../src/plugins/data/public';
-import { xyVisualization } from './xy_visualization';
-import { xyChart, getXyChartRenderer } from './xy_expression';
-import { legendConfig, layerConfig, yAxisConfig } from './types';
 import { EditorFrameSetup, FormatFactory } from '../types';
 import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
 
@@ -37,20 +34,37 @@ export class XyVisualization {
     core: CoreSetup,
     { expressions, formatFactory, editorFrame, charts }: XyVisualizationPluginSetupPlugins
   ) {
-    expressions.registerFunction(() => legendConfig);
-    expressions.registerFunction(() => yAxisConfig);
-    expressions.registerFunction(() => layerConfig);
-    expressions.registerFunction(() => xyChart);
+    editorFrame.registerVisualization(async () => {
+      const {
+        legendConfig,
+        yAxisConfig,
+        tickLabelsConfig,
+        gridlinesConfig,
+        axisTitlesVisibilityConfig,
+        layerConfig,
+        xyChart,
+        getXyChartRenderer,
+        getXyVisualization,
+      } = await import('../async_services');
+      const palettes = await charts.palettes.getPalettes();
+      expressions.registerFunction(() => legendConfig);
+      expressions.registerFunction(() => yAxisConfig);
+      expressions.registerFunction(() => tickLabelsConfig);
+      expressions.registerFunction(() => gridlinesConfig);
+      expressions.registerFunction(() => axisTitlesVisibilityConfig);
+      expressions.registerFunction(() => layerConfig);
+      expressions.registerFunction(() => xyChart);
 
-    expressions.registerRenderer(
-      getXyChartRenderer({
-        formatFactory,
-        chartsThemeService: charts.theme,
-        timeZone: getTimeZone(core.uiSettings),
-        histogramBarTarget: core.uiSettings.get<number>(UI_SETTINGS.HISTOGRAM_BAR_TARGET),
-      })
-    );
-
-    editorFrame.registerVisualization(xyVisualization);
+      expressions.registerRenderer(
+        getXyChartRenderer({
+          formatFactory,
+          chartsThemeService: charts.theme,
+          paletteService: palettes,
+          timeZone: getTimeZone(core.uiSettings),
+          histogramBarTarget: core.uiSettings.get<number>(UI_SETTINGS.HISTOGRAM_BAR_TARGET),
+        })
+      );
+      return getXyVisualization({ paletteService: palettes });
+    });
   }
 }

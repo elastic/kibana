@@ -7,6 +7,7 @@
 import actionCreatorFactory from 'typescript-fsa';
 import { reducerWithInitialState } from 'typescript-fsa-reducers/dist';
 import { i18n } from '@kbn/i18n';
+import { modifyUrl } from '@kbn/std';
 import rison from 'rison-node';
 import { takeEvery, select } from 'redux-saga/effects';
 import { format, parse } from 'url';
@@ -17,7 +18,6 @@ import { setDatasource, IndexpatternDatasource, requestDatasource } from './data
 import { outlinkEncoders } from '../helpers/outlink_encoders';
 import { urlTemplatePlaceholder } from '../helpers/url_template';
 import { matchesOne } from './helpers';
-import { modifyUrl } from '../../../../../src/core/public';
 
 const actionCreator = actionCreatorFactory('x-pack/graph/urlTemplates');
 

@@ -3,12 +3,25 @@
 exports[`transaction group queries fetches top traces 1`] = `
 Array [
   Object {
+    "apm": Object {
+      "events": Array [
+        "transaction",
+      ],
+    },
     "body": Object {
       "aggs": Object {
         "transaction_groups": Object {
           "aggs": Object {
-            "sample": Object {
+            "count": Object {
+              "value_count": Object {
+                "field": "transaction.duration.us",
+              },
+            },
+            "transaction_type": Object {
               "top_hits": Object {
+                "_source": Array [
+                  "transaction.type",
+                ],
                 "size": 1,
               },
             },
@@ -48,12 +61,7 @@ Array [
             },
             Object {
               "term": Object {
-                "processor.event": "transaction",
-              },
-            },
-            Object {
-              "term": Object {
-                "my.custom.ui.filter": "foo-bar",
+                "service.environment": "test",
               },
             },
           ],
@@ -64,30 +72,17 @@ Array [
               },
             },
           ],
-          "should": Array [
-            Object {
-              "term": Object {
-                "transaction.sampled": true,
-              },
-            },
-          ],
         },
       },
-      "sort": Array [
-        Object {
-          "_score": "desc",
-        },
-        Object {
-          "@timestamp": Object {
-            "order": "desc",
-          },
-        },
-      ],
+      "size": 0,
     },
-    "index": "myIndex",
-    "size": 0,
   },
   Object {
+    "apm": Object {
+      "events": Array [
+        "transaction",
+      ],
+    },
     "body": Object {
       "aggs": Object {
         "transaction_groups": Object {
@@ -133,12 +128,7 @@ Array [
             },
             Object {
               "term": Object {
-                "processor.event": "transaction",
-              },
-            },
-            Object {
-              "term": Object {
-                "my.custom.ui.filter": "foo-bar",
+                "service.environment": "test",
               },
             },
           ],
@@ -151,11 +141,15 @@ Array [
           ],
         },
       },
+      "size": 0,
     },
-    "index": "myIndex",
-    "size": 0,
   },
   Object {
+    "apm": Object {
+      "events": Array [
+        "transaction",
+      ],
+    },
     "body": Object {
       "aggs": Object {
         "transaction_groups": Object {
@@ -201,12 +195,7 @@ Array [
             },
             Object {
               "term": Object {
-                "processor.event": "transaction",
-              },
-            },
-            Object {
-              "term": Object {
-                "my.custom.ui.filter": "foo-bar",
+                "service.environment": "test",
               },
             },
           ],
@@ -219,9 +208,8 @@ Array [
           ],
         },
       },
+      "size": 0,
     },
-    "index": "myIndex",
-    "size": 0,
   },
 ]
 `;
@@ -229,12 +217,25 @@ Array [
 exports[`transaction group queries fetches top transactions 1`] = `
 Array [
   Object {
+    "apm": Object {
+      "events": Array [
+        "transaction",
+      ],
+    },
     "body": Object {
       "aggs": Object {
         "transaction_groups": Object {
           "aggs": Object {
-            "sample": Object {
+            "count": Object {
+              "value_count": Object {
+                "field": "transaction.duration.us",
+              },
+            },
+            "transaction_type": Object {
               "top_hits": Object {
+                "_source": Array [
+                  "transaction.type",
+                ],
                 "size": 1,
               },
             },
@@ -259,11 +260,6 @@ Array [
             },
             Object {
               "term": Object {
-                "processor.event": "transaction",
-              },
-            },
-            Object {
-              "term": Object {
                 "transaction.type": "bar",
               },
             },
@@ -274,34 +270,21 @@ Array [
             },
             Object {
               "term": Object {
-                "my.custom.ui.filter": "foo-bar",
-              },
-            },
-          ],
-          "should": Array [
-            Object {
-              "term": Object {
-                "transaction.sampled": true,
+                "service.environment": "test",
               },
             },
           ],
         },
       },
-      "sort": Array [
-        Object {
-          "_score": "desc",
-        },
-        Object {
-          "@timestamp": Object {
-            "order": "desc",
-          },
-        },
-      ],
+      "size": 0,
     },
-    "index": "myIndex",
-    "size": 0,
   },
   Object {
+    "apm": Object {
+      "events": Array [
+        "transaction",
+      ],
+    },
     "body": Object {
       "aggs": Object {
         "transaction_groups": Object {
@@ -332,11 +315,6 @@ Array [
             },
             Object {
               "term": Object {
-                "processor.event": "transaction",
-              },
-            },
-            Object {
-              "term": Object {
                 "transaction.type": "bar",
               },
             },
@@ -347,17 +325,21 @@ Array [
             },
             Object {
               "term": Object {
-                "my.custom.ui.filter": "foo-bar",
+                "service.environment": "test",
               },
             },
           ],
         },
       },
+      "size": 0,
     },
-    "index": "myIndex",
-    "size": 0,
   },
   Object {
+    "apm": Object {
+      "events": Array [
+        "transaction",
+      ],
+    },
     "body": Object {
       "aggs": Object {
         "transaction_groups": Object {
@@ -388,11 +370,6 @@ Array [
             },
             Object {
               "term": Object {
-                "processor.event": "transaction",
-              },
-            },
-            Object {
-              "term": Object {
                 "transaction.type": "bar",
               },
             },
@@ -403,17 +380,21 @@ Array [
             },
             Object {
               "term": Object {
-                "my.custom.ui.filter": "foo-bar",
+                "service.environment": "test",
               },
             },
           ],
         },
       },
+      "size": 0,
     },
-    "index": "myIndex",
-    "size": 0,
   },
   Object {
+    "apm": Object {
+      "events": Array [
+        "transaction",
+      ],
+    },
     "body": Object {
       "aggs": Object {
         "transaction_groups": Object {
@@ -450,11 +431,6 @@ Array [
             },
             Object {
               "term": Object {
-                "processor.event": "transaction",
-              },
-            },
-            Object {
-              "term": Object {
                 "transaction.type": "bar",
               },
             },
@@ -465,15 +441,14 @@ Array [
             },
             Object {
               "term": Object {
-                "my.custom.ui.filter": "foo-bar",
+                "service.environment": "test",
               },
             },
           ],
         },
       },
+      "size": 0,
     },
-    "index": "myIndex",
-    "size": 0,
   },
 ]
 `;

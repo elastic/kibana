@@ -25,6 +25,8 @@ import { ANALYTICS_STEPS } from '../../page';
 import { ml } from '../../../../../services/ml_api_service';
 import { extractErrorMessage } from '../../../../../../../common/util/errors';
 
+const DEFAULT_RESULTS_FIELD = 'ml';
+
 const indexNameExistsMessage = i18n.translate(
   'xpack.ml.dataframe.analytics.create.destinationIndexHelpText',
   {
@@ -44,7 +46,7 @@ export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
   const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = docLinks;
 
   const { setFormState } = actions;
-  const { form, cloneJob, isJobCreated } = state;
+  const { form, cloneJob, hasSwitchedToEditor, isJobCreated } = state;
   const {
     createIndexPattern,
     description,
@@ -61,7 +63,13 @@ export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
     resultsField,
   } = form;
 
-  const [destIndexSameAsId, setDestIndexSameAsId] = useState<boolean>(cloneJob === undefined);
+  const [destIndexSameAsId, setDestIndexSameAsId] = useState<boolean>(
+    cloneJob === undefined && hasSwitchedToEditor === false
+  );
+  const [useResultsFieldDefault, setUseResultsFieldDefault] = useState<boolean>(
+    (cloneJob === undefined && hasSwitchedToEditor === false && resultsField === undefined) ||
+      (cloneJob !== undefined && resultsField === DEFAULT_RESULTS_FIELD)
+  );
 
   const forceInput = useRef<HTMLInputElement | null>(null);
 
@@ -90,7 +98,11 @@ export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
   useEffect(() => {
     if (destinationIndexNameValid === true) {
       debouncedIndexCheck();
-    } else if (destinationIndex.trim() === '' && destinationIndexNameExists === true) {
+    } else if (
+      typeof destinationIndex === 'string' &&
+      destinationIndex.trim() === '' &&
+      destinationIndexNameExists === true
+    ) {
       setFormState({ destinationIndexNameExists: false });
     }
 
@@ -102,7 +114,7 @@ export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
   useEffect(() => {
     if (destIndexSameAsId === true && !jobIdEmpty && jobIdValid) {
       setFormState({ destinationIndex: jobId });
-    } else if (destIndexSameAsId === false) {
+    } else if (destIndexSameAsId === false && hasSwitchedToEditor === false) {
       setFormState({ destinationIndex: '' });
     }
   }, [destIndexSameAsId, jobId]);
@@ -260,22 +272,46 @@ export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
           />
         </EuiFormRow>
       )}
-      <EuiFormRow
-        label={i18n.translate('xpack.ml.dataframe.analytics.create.resultsFieldLabel', {
-          defaultMessage: 'Results field',
-        })}
-        helpText={i18n.translate('xpack.ml.dataframe.analytics.create.resultsFieldHelpText', {
-          defaultMessage:
-            'Defines the name of the field in which to store the results of the analysis. Defaults to ml.',
-        })}
-      >
-        <EuiFieldText
+      <EuiFormRow fullWidth>
+        <EuiSwitch
           disabled={isJobCreated}
-          value={resultsField}
-          onChange={(e) => setFormState({ resultsField: e.target.value })}
-          data-test-subj="mlAnalyticsCreateJobWizardResultsFieldInput"
+          name="mlDataFrameAnalyticsUseResultsFieldDefault"
+          label={i18n.translate('xpack.ml.dataframe.analytics.create.UseResultsFieldDefaultLabel', {
+            defaultMessage: 'Use results field default value "{defaultValue}"',
+            values: { defaultValue: DEFAULT_RESULTS_FIELD },
+          })}
+          checked={useResultsFieldDefault === true}
+          onChange={() => setUseResultsFieldDefault(!useResultsFieldDefault)}
+          data-test-subj="mlAnalyticsCreateJobWizardUseResultsFieldDefault"
         />
       </EuiFormRow>
+      {useResultsFieldDefault === false && (
+        <EuiFormRow
+          fullWidth
+          label={i18n.translate('xpack.ml.dataframe.analytics.create.resultsFieldLabel', {
+            defaultMessage: 'Results field',
+          })}
+          helpText={i18n.translate('xpack.ml.dataframe.analytics.create.resultsFieldHelpText', {
+            defaultMessage:
+              'Defines the name of the field in which to store the results of the analysis. Defaults to ml.',
+          })}
+        >
+          <EuiFieldText
+            disabled={isJobCreated}
+            placeholder="results field"
+            value={resultsField}
+            onChange={(e) => setFormState({ resultsField: e.target.value })}
+            aria-label={i18n.translate(
+              'xpack.ml.dataframe.analytics.create.resultsFieldInputAriaLabel',
+              {
+                defaultMessage:
+                  'The name of the field in which to store the results of the analysis.',
+              }
+            )}
+            data-test-subj="mlAnalyticsCreateJobWizardResultsFieldInput"
+          />
+        </EuiFormRow>
+      )}
       <EuiFormRow
         fullWidth
         isInvalid={

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
@@ -17,6 +17,10 @@ import {
 import { RouteDeps } from '../../types';
 import { wrapError, escapeHatch } from '../../utils';
 import { CASE_CONFIGURE_URL } from '../../../../../common/constants';
+import {
+  transformCaseConnectorToEsConnector,
+  transformESConnectorToCaseConnector,
+} from '../helpers';
 
 export function initPostCaseConfigure({ caseConfigureService, caseService, router }: RouteDeps) {
   router.post(
@@ -43,6 +47,7 @@ export function initPostCaseConfigure({ caseConfigureService, caseService, route
             )
           );
         }
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         const { email, full_name, username } = await caseService.getUser({ request, response });
 
         const creationDate = new Date().toISOString();
@@ -50,6 +55,7 @@ export function initPostCaseConfigure({ caseConfigureService, caseService, route
           client,
           attributes: {
             ...query,
+            connector: transformCaseConnectorToEsConnector(query.connector),
             created_at: creationDate,
             created_by: { email, full_name, username },
             updated_at: null,
@@ -58,7 +64,12 @@ export function initPostCaseConfigure({ caseConfigureService, caseService, route
         });
 
         return response.ok({
-          body: CaseConfigureResponseRt.encode({ ...post.attributes, version: post.version ?? '' }),
+          body: CaseConfigureResponseRt.encode({
+            ...post.attributes,
+            // Reserve for future implementations
+            connector: transformESConnectorToCaseConnector(post.attributes.connector),
+            version: post.version ?? '',
+          }),
         });
       } catch (error) {
         return response.customError(wrapError(error));

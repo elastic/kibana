@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SnapshotModel } from '../../../types';
+import { MetricsUIAggregation } from '../../../types';
 
-export const rdsConnections: SnapshotModel = {
+export const rdsConnections: MetricsUIAggregation = {
   rdsConnections: {
     avg: {
       field: 'aws.rds.database_connections',

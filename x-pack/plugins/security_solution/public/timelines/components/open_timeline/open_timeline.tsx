@@ -8,7 +8,7 @@ import { EuiPanel, EuiBasicTable } from '@elastic/eui';
 import React, { useCallback, useMemo, useRef } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { TimelineType } from '../../../../common/types/timeline';
+import { TimelineType, TimelineStatus } from '../../../../common/types/timeline';
 import { ImportDataModal } from '../../../common/components/import_data_modal';
 import {
   UtilityBarGroup,
@@ -55,6 +55,7 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
     setImportDataModalToggle,
     sortField,
     timelineType = TimelineType.default,
+    timelineStatus,
     timelineFilter,
     templateTimelineFilter,
     totalSearchResultsCount,
@@ -140,22 +141,25 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
     }, [setImportDataModalToggle, refetch, searchResults, totalSearchResultsCount]);
 
     const actionTimelineToShow = useMemo<ActionTimelineToShow[]>(() => {
-      const timelineActions: ActionTimelineToShow[] = [
-        'createFrom',
-        'duplicate',
-        'export',
-        'selectable',
-      ];
+      const timelineActions: ActionTimelineToShow[] = ['createFrom', 'duplicate'];
 
-      if (onDeleteSelected != null && deleteTimelines != null) {
+      if (timelineStatus !== TimelineStatus.immutable) {
+        timelineActions.push('export');
+        timelineActions.push('selectable');
+      }
+
+      if (
+        onDeleteSelected != null &&
+        deleteTimelines != null &&
+        timelineStatus !== TimelineStatus.immutable
+      ) {
         timelineActions.push('delete');
       }
 
       return timelineActions;
-    }, [onDeleteSelected, deleteTimelines]);
+    }, [onDeleteSelected, deleteTimelines, timelineStatus]);
 
     const SearchRowContent = useMemo(() => <>{templateTimelineFilter}</>, [templateTimelineFilter]);
-
     return (
       <>
         <EditOneTimelineAction
@@ -206,20 +210,24 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
                   </>
                 </UtilityBarText>
               </UtilityBarGroup>
-
               <UtilityBarGroup>
-                <UtilityBarText>
-                  {timelineType === TimelineType.template
-                    ? i18n.SELECTED_TEMPLATES(selectedItems.length)
-                    : i18n.SELECTED_TIMELINES(selectedItems.length)}
-                </UtilityBarText>
-                <UtilityBarAction
-                  iconSide="right"
-                  iconType="arrowDown"
-                  popoverContent={getBatchItemsPopoverContent}
-                >
-                  {i18n.BATCH_ACTIONS}
-                </UtilityBarAction>
+                {timelineStatus !== TimelineStatus.immutable && (
+                  <>
+                    <UtilityBarText data-test-subj="selected-count">
+                      {timelineType === TimelineType.template
+                        ? i18n.SELECTED_TEMPLATES(selectedItems.length)
+                        : i18n.SELECTED_TIMELINES(selectedItems.length)}
+                    </UtilityBarText>
+                    <UtilityBarAction
+                      iconSide="right"
+                      iconType="arrowDown"
+                      popoverContent={getBatchItemsPopoverContent}
+                      data-test-subj="utility-bar-action"
+                    >
+                      <span data-test-subj="utility-bar-action-button">{i18n.BATCH_ACTIONS}</span>
+                    </UtilityBarAction>
+                  </>
+                )}
                 <UtilityBarAction iconSide="right" iconType="refresh" onClick={onRefreshBtnClick}>
                   {i18n.REFRESH}
                 </UtilityBarAction>

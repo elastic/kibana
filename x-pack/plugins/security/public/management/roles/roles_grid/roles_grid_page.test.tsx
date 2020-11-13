@@ -5,9 +5,10 @@
  */
 
 import { EuiIcon, EuiBasicTable } from '@elastic/eui';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { ReactWrapper } from 'enzyme';
 import React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 import { RolesAPIClient } from '../roles_api_client';
 import { PermissionDenied } from './permission_denied';
 import { RolesGridPage } from './roles_grid_page';
@@ -15,7 +16,7 @@ import { RolesGridPage } from './roles_grid_page';
 import { coreMock, scopedHistoryMock } from '../../../../../../../src/core/public/mocks';
 import { rolesAPIClientMock } from '../index.mock';
 import { ReservedBadge, DisabledBadge } from '../../badges';
-import { findTestSubject } from 'test_utils/find_test_subject';
+import { findTestSubject } from '@kbn/test/jest';
 
 const mock403 = () => ({ body: { statusCode: 403 } });
 
@@ -65,6 +66,11 @@ describe('<RolesGridPage />', () => {
         elasticsearch: { cluster: [], indices: [], run_as: [] },
         kibana: [{ base: [], spaces: [], feature: {} }],
         transient_metadata: { enabled: false },
+      },
+      {
+        name: 'special%chars%role',
+        elasticsearch: { cluster: [], indices: [], run_as: [] },
+        kibana: [{ base: [], spaces: [], feature: {} }],
       },
     ]);
   });
@@ -121,7 +127,7 @@ describe('<RolesGridPage />', () => {
     expect(wrapper.find(PermissionDenied)).toMatchSnapshot();
   });
 
-  it('renders role actions as appropriate', async () => {
+  it('renders role actions as appropriate, escaping when necessary', async () => {
     const wrapper = mountWithIntl(
       <RolesGridPage
         rolesAPIClient={apiClientMock}
@@ -137,15 +143,25 @@ describe('<RolesGridPage />', () => {
 
     expect(wrapper.find(PermissionDenied)).toHaveLength(0);
 
-    const editButton = wrapper.find('EuiButtonIcon[data-test-subj="edit-role-action-test-role-1"]');
+    let editButton = wrapper.find('EuiButtonIcon[data-test-subj="edit-role-action-test-role-1"]');
     expect(editButton).toHaveLength(1);
     expect(editButton.prop('href')).toBe('/edit/test-role-1');
 
-    const cloneButton = wrapper.find(
-      'EuiButtonIcon[data-test-subj="clone-role-action-test-role-1"]'
+    editButton = wrapper.find(
+      'EuiButtonIcon[data-test-subj="edit-role-action-special%chars%role"]'
     );
+    expect(editButton).toHaveLength(1);
+    expect(editButton.prop('href')).toBe('/edit/special%25chars%25role');
+
+    let cloneButton = wrapper.find('EuiButtonIcon[data-test-subj="clone-role-action-test-role-1"]');
     expect(cloneButton).toHaveLength(1);
     expect(cloneButton.prop('href')).toBe('/clone/test-role-1');
+
+    cloneButton = wrapper.find(
+      'EuiButtonIcon[data-test-subj="clone-role-action-special%chars%role"]'
+    );
+    expect(cloneButton).toHaveLength(1);
+    expect(cloneButton.prop('href')).toBe('/clone/special%25chars%25role');
 
     expect(
       wrapper.find('EuiButtonIcon[data-test-subj="edit-role-action-disabled-role"]')
@@ -183,6 +199,11 @@ describe('<RolesGridPage />', () => {
         metadata: { _reserved: true },
       },
       {
+        name: 'special%chars%role',
+        elasticsearch: { cluster: [], indices: [], run_as: [] },
+        kibana: [{ base: [], spaces: [], feature: {} }],
+      },
+      {
         name: 'test-role-1',
         elasticsearch: { cluster: [], indices: [], run_as: [] },
         kibana: [{ base: [], spaces: [], feature: {} }],
@@ -197,6 +218,11 @@ describe('<RolesGridPage />', () => {
         elasticsearch: { cluster: [], indices: [], run_as: [] },
         kibana: [{ base: [], spaces: [], feature: {} }],
         transient_metadata: { enabled: false },
+      },
+      {
+        name: 'special%chars%role',
+        elasticsearch: { cluster: [], indices: [], run_as: [] },
+        kibana: [{ base: [], spaces: [], feature: {} }],
       },
       {
         name: 'test-role-1',

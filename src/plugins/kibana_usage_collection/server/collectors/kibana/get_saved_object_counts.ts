@@ -39,9 +39,12 @@ const TYPES = [
 ];
 
 export interface KibanaSavedObjectCounts {
-  [pluginName: string]: {
-    total: number;
-  };
+  dashboard: { total: number };
+  visualization: { total: number };
+  search: { total: number };
+  index_pattern: { total: number };
+  graph_workspace: { total: number };
+  timelion_sheet: { total: number };
 }
 
 export async function getSavedObjectsCounts(
@@ -71,7 +74,7 @@ export async function getSavedObjectsCounts(
   // Initialise the object with all zeros for all the types
   const allZeros: KibanaSavedObjectCounts = TYPES.reduce(
     (acc, type) => ({ ...acc, [snakeCase(type)]: { total: 0 } }),
-    {}
+    {} as KibanaSavedObjectCounts
   );
 
   // Add the doc_count from each bucket

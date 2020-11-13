@@ -1,0 +1,259 @@
+[role="xpack"]
+[[drilldowns]]
+== Create custom dashboard actions
+
+Custom dashboard actions, also known as drilldowns, allow you to create
+workflows for analyzing and troubleshooting your data. Drilldowns apply only to the panel that you created the drilldown from, and are not shared across all of the panels. Each panel can have multiple drilldowns. 
+
+Third-party developers can create drilldowns. To learn how to code drilldowns, refer to {kib-repo}blob/{branch}/x-pack/examples/ui_actions_enhanced_examples[this example plugin].
+
+[float]
+[[supported-drilldowns]]
+=== Supported drilldowns
+
+{kib} supports two types of drilldowns.
+
+[NOTE]
+==============================================
+Some drilldowns are paid subscription features, while others are free.
+For a comparison of the Elastic subscription levels,
+refer https://www.elastic.co/subscriptions[the subscription page].
+==============================================
+
+[float]
+[[dashboard-drilldown]]
+==== Dashboard drilldowns
+
+Dashboard drilldowns enable you to open a dashboard from another dashboard,
+taking the time range, filters, and other parameters with you,
+so the context remains the same. Dashboard drilldowns help you to continue your analysis from a new perspective.
+
+For example, if you have a dashboard that shows the overall status of multiple data center, 
+you can create a drilldown that navigates from the overall status dashboard to a dashboard
+that shows a single data center or server.
+
+[float]
+[[url-drilldown]]
+==== URL drilldowns
+
+beta[] URL drilldowns enable you to navigate from a dashboard to internal or external URLs.
+Destination URLs can be dynamic, depending on the dashboard context or user interaction with a panel.
+For example, if you have a dashboard that shows data from a Github repository, you can create a URL drilldown
+that opens Github from the dashboard.
+
+Some panels support multiple interactions, also known as triggers. 
+The <<variables,variables>> you use to create a <<url_templating, URL template>> depends on the trigger you choose. URL drilldowns support these types of triggers:
+
+* *Single click* &mdash; A single data point in the visualization.
+
+* *Range selection* &mdash; A range of values in a visualization.
+
+For example, *Single click* has `{{event.value}}` and *Range selection* has `{{event.from}}` and `{{event.to}}`. 
+
+To disable URL drilldowns on your {kib} instance, disable the plugin:
+
+["source","yml"]
+-----------
+url_drilldown.enabled: false
+-----------
+
+[float]
+[[dashboard-drilldown-supported-panels]]
+=== Supported panels
+
+The following panels support dashboard and URL drilldowns.
+
+[options="header"]
+|===
+
+| Panel | Dashboard drilldown | URL drilldown
+
+| Lens
+^| X
+^| X
+
+| Area
+^| X
+^| X
+
+| Controls
+^| 
+^| 
+
+| Data Table
+^| X
+^| X
+
+| Gauge
+^| 
+^| 
+
+| Goal
+^| 
+^| 
+
+| Heat map
+^| X
+^| X
+
+| Horizontal Bar
+^| X
+^| X
+
+| Line
+^| X
+^| X
+
+| Maps
+^| X
+^| 
+
+| Markdown
+^| 
+^| 
+
+| Metric
+^| 
+^| 
+
+| Pie
+^| X
+^| X
+
+| TSVB
+^| X
+^| 
+
+| Tag Cloud
+^| X
+^| X
+
+| Timelion
+^| X
+^| 
+
+| Vega
+^| X
+^| 
+
+| Vertical Bar
+^| X
+^| X
+
+|===
+
+[float]
+[[drilldowns-example]]
+=== Try it: Create a dashboard drilldown
+
+To create dashboard drilldowns, you create or locate the dashboards you want to connect, then configure the drilldown that allows you to easily open one dashboard from the other dashboard.
+
+image:images/drilldown_on_piechart.gif[Drilldown on pie chart that navigates to another dashboard]
+
+[float]
+==== Create the dashboard
+
+. Add the *Sample web logs* data.
+
+. Create a new dashboard, then add the following panels:
+
+* *[Logs] Heatmap*
+* *[Logs] Host, Visits, and Bytes Table*
+* *[Logs] Total Requests and Bytes*
+* *[Logs] Visitors by OS*
++
+If you don’t see data for a panel, try changing the <<set-time-filter,time filter>>.
+
+. Save the dashboard. In the *Title* field, enter `Host Overview`.
+
+. Open the *[Logs] Web traffic* dashboard.
+
+. Set a search and filter.
++
+[%hardbreaks]
+Search: `extension.keyword: ("gz" or "css" or "deb")`
+Filter: `geo.src: CN`
+
+[float]
+==== Create the drilldown
+
+. In the toolbar, click *Edit*.
+
+. Open the *[Logs] Visitors by OS* panel menu, then select *Create drilldown*.
+
+. Give the drilldown a name, then select *Go to dashboard*.
+
+. From the *Choose a destination dashboard* dropdown, select *Host Overview*.
+
+. To carry over the filter, query, and date range, make sure that *Use filters and query from origin dashboard* and *Use date range from origin dashboard* are selected.
++
+[role="screenshot"]
+image::images/drilldown_create.png[Create drilldown with entries for drilldown name and destination]
+
+. Click *Create drilldown*.
++
+The drilldown is stored as dashboard metadata. 
+
+. Save the dashboard.
++
+If you fail to save the dashboard, the drilldown is lost when you navigate away from the dashboard.
+
+. In the *[Logs] Visitors by OS* panel, click *win 8*, then select the drilldown.
++
+[role="screenshot"]
+image::images/drilldown_on_panel.png[Drilldown on pie chart that navigates to another dashboard]
+
+. On the *Host Overview* dashboard, verify that the search query, filters,
+and date range are carried over.
+
+[float]
+[[create-a-url-drilldown]]
+=== Try it: Create a URL drilldown
+
+beta[] To create URL drilldowns, you add <<variables,variables>> to a URL template, which configures the bahavior of the drilldown.
+
+image:images/url_drilldown_go_to_github.gif[Drilldown on pie chart that navigates to Github]
+
+. Add the *Sample web logs* data.
+
+. Open the *[Logs] Web traffic* dashboard. This isn’t data from Github, but works for demonstration purposes.
+
+. In the toolbar, click *Edit*.
+
+. Open the *[Logs] Visitors by OS* panel menu, then select *Create drilldown*.
+
+.. In the *Name* field, enter `Show on Github`.
+
+.. Select *Go to URL*.
+
+.. Enter the URL template: 
++
+[source, bash]
+----
+https://github.com/elastic/kibana/issues?q=is:issue+is:open+{{event.value}}
+----
++
+The example URL navigates to {kib} issues on Github. `{{event.value}}` is substituted with a value associated with a selected pie slice. In *URL preview*, `{{event.value}}` is substituted with a <<values-in-preview, dummy>> value.
++
+[role="screenshot"]
+image:images/url_drilldown_url_template.png[URL template input]
+
+.. Click *Create drilldown*.
++
+The drilldown is stored as dashboard metadata. 
+
+. Save the dashboard.
++
+If you fail to save the dashboard, the drilldown is lost when you navigate away from the dashboard.
+
+. On the *[Logs] Visitors by OS* panel, click any chart slice, then select *Show on Github*.
++
+[role="screenshot"]
+image:images/url_drilldown_popup.png[URL drilldown popup]
+
+. On the page that lists the issues in the {kib} repository, verify the slice value appears in Github.
++
+[role="screenshot"]
+image:images/url_drilldown_github.png[Github]
+
+include::url-drilldown.asciidoc[]

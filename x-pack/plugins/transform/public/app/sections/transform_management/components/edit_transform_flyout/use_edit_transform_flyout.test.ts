@@ -4,15 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TransformPivotConfig } from '../../../../common';
+import { TransformPivotConfig } from '../../../../../../common/types/transform';
 
 import {
   applyFormFieldsToTransformConfig,
   formReducerFactory,
   frequencyValidator,
   getDefaultState,
-  numberAboveZeroValidator,
-  FormField,
+  integerAboveZeroValidator,
+  stringValidator,
 } from './use_edit_transform_flyout';
 
 const getTransformConfigMock = (): TransformPivotConfig => ({
@@ -45,81 +45,149 @@ const getTransformConfigMock = (): TransformPivotConfig => ({
   description: 'the-description',
 });
 
-const getDescriptionFieldMock = (value = ''): FormField => ({
-  isOptional: true,
-  value,
-  errorMessages: [],
-  validator: 'string',
-});
-
-const getDocsPerSecondFieldMock = (value = ''): FormField => ({
-  isOptional: true,
-  value,
-  errorMessages: [],
-  validator: 'numberAboveZero',
-});
-
-const getFrequencyFieldMock = (value = ''): FormField => ({
-  isOptional: true,
-  value,
-  errorMessages: [],
-  validator: 'frequency',
-});
-
 describe('Transform: applyFormFieldsToTransformConfig()', () => {
-  test('should exclude unchanged form fields', () => {
+  it('should exclude unchanged form fields', () => {
     const transformConfigMock = getTransformConfigMock();
 
-    const updateConfig = applyFormFieldsToTransformConfig(transformConfigMock, {
-      description: getDescriptionFieldMock(transformConfigMock.description),
-      docsPerSecond: getDocsPerSecondFieldMock(),
-      frequency: getFrequencyFieldMock(),
-    });
+    const formState = getDefaultState(transformConfigMock);
+
+    const updateConfig = applyFormFieldsToTransformConfig(
+      transformConfigMock,
+      formState.formFields
+    );
 
     // This case will return an empty object. In the actual UI, this case should not happen
     // because the Update-Button will be disabled when no form field was changed.
     expect(Object.keys(updateConfig)).toHaveLength(0);
     expect(updateConfig.description).toBe(undefined);
+    // Destination index `index` attribute is nested under `dest` so we're just checking against that.
+    expect(updateConfig.dest).toBe(undefined);
     // `docs_per_second` is nested under `settings` so we're just checking against that.
     expect(updateConfig.settings).toBe(undefined);
     expect(updateConfig.frequency).toBe(undefined);
   });
 
-  test('should include previously nonexisting attributes', () => {
-    const transformConfigMock = getTransformConfigMock();
-    delete transformConfigMock.description;
-    delete transformConfigMock.frequency;
+  it('should include previously nonexisting attributes', () => {
+    const { description, frequency, ...transformConfigMock } = getTransformConfigMock();
 
-    const updateConfig = applyFormFieldsToTransformConfig(transformConfigMock, {
-      description: getDescriptionFieldMock('the-new-description'),
-      docsPerSecond: getDocsPerSecondFieldMock('10'),
-      frequency: getFrequencyFieldMock('1m'),
+    const formState = getDefaultState({
+      ...transformConfigMock,
+      description: 'the-new-description',
+      dest: {
+        index: 'the-new-destination-index',
+      },
+      frequency: '10m',
+      settings: {
+        docs_per_second: 10,
+      },
     });
 
-    expect(Object.keys(updateConfig)).toHaveLength(3);
+    const updateConfig = applyFormFieldsToTransformConfig(
+      transformConfigMock,
+      formState.formFields
+    );
+
+    expect(Object.keys(updateConfig)).toHaveLength(4);
     expect(updateConfig.description).toBe('the-new-description');
+    expect(updateConfig.dest?.index).toBe('the-new-destination-index');
     expect(updateConfig.settings?.docs_per_second).toBe(10);
-    expect(updateConfig.frequency).toBe('1m');
+    expect(updateConfig.frequency).toBe('10m');
   });
 
-  test('should only include changed form fields', () => {
+  it('should only include changed form fields', () => {
     const transformConfigMock = getTransformConfigMock();
-    const updateConfig = applyFormFieldsToTransformConfig(transformConfigMock, {
-      description: getDescriptionFieldMock('the-updated-description'),
-      docsPerSecond: getDocsPerSecondFieldMock(),
-      frequency: getFrequencyFieldMock(),
+
+    const formState = getDefaultState({
+      ...transformConfigMock,
+      description: 'the-updated-description',
+      dest: {
+        index: 'the-updated-destination-index',
+        pipeline: 'the-updated-destination-index',
+      },
     });
 
-    expect(Object.keys(updateConfig)).toHaveLength(1);
+    const updateConfig = applyFormFieldsToTransformConfig(
+      transformConfigMock,
+      formState.formFields
+    );
+
+    expect(Object.keys(updateConfig)).toHaveLength(2);
     expect(updateConfig.description).toBe('the-updated-description');
+    expect(updateConfig.dest?.index).toBe('the-updated-destination-index');
     // `docs_per_second` is nested under `settings` so we're just checking against that.
     expect(updateConfig.settings).toBe(undefined);
     expect(updateConfig.frequency).toBe(undefined);
+  });
+
+  it('should include dependent form fields', () => {
+    const transformConfigMock = getTransformConfigMock();
+
+    const formState = getDefaultState({
+      ...transformConfigMock,
+      dest: {
+        ...transformConfigMock.dest,
+        pipeline: 'the-updated-destination-index',
+      },
+    });
+
+    const updateConfig = applyFormFieldsToTransformConfig(
+      transformConfigMock,
+      formState.formFields
+    );
+    expect(Object.keys(updateConfig)).toHaveLength(1);
+    // It should include the dependent unchanged destination index
+    expect(updateConfig.dest?.index).toBe(transformConfigMock.dest.index);
+    expect(updateConfig.dest?.pipeline).toBe('the-updated-destination-index');
+  });
+
+  it('should include the destination index when pipeline is unset', () => {
+    const transformConfigMock = {
+      ...getTransformConfigMock(),
+      dest: {
+        index: 'the-untouched-destination-index',
+        pipeline: 'the-original-pipeline',
+      },
+    };
+
+    const formState = getDefaultState({
+      ...transformConfigMock,
+      dest: {
+        ...transformConfigMock.dest,
+        pipeline: '',
+      },
+    });
+
+    const updateConfig = applyFormFieldsToTransformConfig(
+      transformConfigMock,
+      formState.formFields
+    );
+    expect(Object.keys(updateConfig)).toHaveLength(1);
+    // It should include the dependent unchanged destination index
+    expect(updateConfig.dest?.index).toBe(transformConfigMock.dest.index);
+    expect(typeof updateConfig.dest?.pipeline).toBe('undefined');
+  });
+
+  it('should exclude unrelated dependent form fields', () => {
+    const transformConfigMock = getTransformConfigMock();
+
+    const formState = getDefaultState({
+      ...transformConfigMock,
+      description: 'the-updated-description',
+    });
+
+    const updateConfig = applyFormFieldsToTransformConfig(
+      transformConfigMock,
+      formState.formFields
+    );
+    expect(Object.keys(updateConfig)).toHaveLength(1);
+    // It should exclude the dependent unchanged destination section
+    expect(typeof updateConfig.dest).toBe('undefined');
+    expect(updateConfig.description).toBe('the-updated-description');
   });
 });
 
 describe('Transform: formReducerFactory()', () => {
-  test('field updates should trigger form validation', () => {
+  it('field updates should trigger form validation', () => {
     const transformConfigMock = getTransformConfigMock();
     const reducer = formReducerFactory(transformConfigMock);
 
@@ -152,52 +220,73 @@ describe('Transform: formReducerFactory()', () => {
   });
 });
 
-describe('Transform: frequencyValidator()', () => {
-  test('it should only allow values between 1s and 1h', () => {
-    // frequencyValidator() returns an array of error messages so
-    // an array with a length of 0 means a successful validation.
+describe('Transfom: stringValidator()', () => {
+  it('should allow an empty string for optional fields', () => {
+    expect(stringValidator('')).toHaveLength(0);
+  });
 
-    // invalid
-    expect(frequencyValidator(0)).toHaveLength(1);
-    expect(frequencyValidator('0')).toHaveLength(1);
-    expect(frequencyValidator('0s')).toHaveLength(1);
-    expect(frequencyValidator(1)).toHaveLength(1);
-    expect(frequencyValidator('1')).toHaveLength(1);
-    expect(frequencyValidator('1ms')).toHaveLength(1);
-    expect(frequencyValidator('1d')).toHaveLength(1);
-    expect(frequencyValidator('60s')).toHaveLength(1);
-    expect(frequencyValidator('60m')).toHaveLength(1);
-    expect(frequencyValidator('60h')).toHaveLength(1);
-    expect(frequencyValidator('2h')).toHaveLength(1);
-    expect(frequencyValidator('h2')).toHaveLength(1);
-    expect(frequencyValidator('2h2')).toHaveLength(1);
-    expect(frequencyValidator('h2h')).toHaveLength(1);
-
-    // valid
-    expect(frequencyValidator('1s')).toHaveLength(0);
-    expect(frequencyValidator('1m')).toHaveLength(0);
-    expect(frequencyValidator('1h')).toHaveLength(0);
-    expect(frequencyValidator('10s')).toHaveLength(0);
-    expect(frequencyValidator('10m')).toHaveLength(0);
-    expect(frequencyValidator('59s')).toHaveLength(0);
-    expect(frequencyValidator('59m')).toHaveLength(0);
+  it('should not allow an empty string for required fields', () => {
+    expect(stringValidator('', false)).toHaveLength(1);
   });
 });
 
-describe('Transform: numberValidator()', () => {
-  test('it should only allow numbers', () => {
-    // numberValidator() returns an array of error messages so
+describe('Transform: frequencyValidator()', () => {
+  const transformFrequencyValidator = (arg: string) => frequencyValidator(arg).length === 0;
+
+  it('should fail when the input is not an integer and valid time unit.', () => {
+    expect(transformFrequencyValidator('0')).toBe(false);
+    expect(transformFrequencyValidator('0.1s')).toBe(false);
+    expect(transformFrequencyValidator('1.1m')).toBe(false);
+    expect(transformFrequencyValidator('10.1asdf')).toBe(false);
+  });
+
+  it('should only allow s/m/h as time unit.', () => {
+    expect(transformFrequencyValidator('1ms')).toBe(false);
+    expect(transformFrequencyValidator('1s')).toBe(true);
+    expect(transformFrequencyValidator('1m')).toBe(true);
+    expect(transformFrequencyValidator('1h')).toBe(true);
+    expect(transformFrequencyValidator('1d')).toBe(false);
+  });
+
+  it('should only allow values above 0 and up to 1 hour.', () => {
+    expect(transformFrequencyValidator('0s')).toBe(false);
+    expect(transformFrequencyValidator('1s')).toBe(true);
+    expect(transformFrequencyValidator('3599s')).toBe(true);
+    expect(transformFrequencyValidator('3600s')).toBe(true);
+    expect(transformFrequencyValidator('3601s')).toBe(false);
+    expect(transformFrequencyValidator('10000s')).toBe(false);
+
+    expect(transformFrequencyValidator('0m')).toBe(false);
+    expect(transformFrequencyValidator('1m')).toBe(true);
+    expect(transformFrequencyValidator('59m')).toBe(true);
+    expect(transformFrequencyValidator('60m')).toBe(true);
+    expect(transformFrequencyValidator('61m')).toBe(false);
+    expect(transformFrequencyValidator('100m')).toBe(false);
+
+    expect(transformFrequencyValidator('0h')).toBe(false);
+    expect(transformFrequencyValidator('1h')).toBe(true);
+    expect(transformFrequencyValidator('2h')).toBe(false);
+  });
+});
+
+describe('Transform: integerAboveZeroValidator()', () => {
+  it('should only allow integers above zero', () => {
+    // integerAboveZeroValidator() returns an array of error messages so
     // an array with a length of 0 means a successful validation.
 
     // invalid
-    expect(numberAboveZeroValidator('a-string')).toHaveLength(1);
-    expect(numberAboveZeroValidator('0s')).toHaveLength(1);
-    expect(numberAboveZeroValidator('1m')).toHaveLength(1);
-    expect(numberAboveZeroValidator(-1)).toHaveLength(1);
-    expect(numberAboveZeroValidator(0)).toHaveLength(1);
+    expect(integerAboveZeroValidator('a-string')).toHaveLength(1);
+    expect(integerAboveZeroValidator('0s')).toHaveLength(1);
+    expect(integerAboveZeroValidator('1m')).toHaveLength(1);
+    expect(integerAboveZeroValidator('1.')).toHaveLength(1);
+    expect(integerAboveZeroValidator('1..')).toHaveLength(1);
+    expect(integerAboveZeroValidator('1.0')).toHaveLength(1);
+    expect(integerAboveZeroValidator(-1)).toHaveLength(1);
+    expect(integerAboveZeroValidator(0)).toHaveLength(1);
+    expect(integerAboveZeroValidator(0.1)).toHaveLength(1);
 
     // valid
-    expect(numberAboveZeroValidator(1)).toHaveLength(0);
-    expect(numberAboveZeroValidator('1')).toHaveLength(0);
+    expect(integerAboveZeroValidator(1)).toHaveLength(0);
+    expect(integerAboveZeroValidator('1')).toHaveLength(0);
   });
 });

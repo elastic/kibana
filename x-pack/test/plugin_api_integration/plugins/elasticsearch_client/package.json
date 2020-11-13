@@ -1,0 +1,11 @@
+{
+  "name": "elasticsearch_client_xpack",
+  "version": "1.0.0",
+  "kibana": {
+    "version": "kibana"
+  },
+  "scripts": {
+    "kbn": "node ../../../../../scripts/kbn.js",
+    "build": "rm -rf './target' && ../../../../../node_modules/.bin/tsc"
+  }
+}

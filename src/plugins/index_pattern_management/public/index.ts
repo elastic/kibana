@@ -41,3 +41,7 @@ export {
   IndexPatternCreationOption,
   IndexPatternListConfig,
 } from './service';
+
+export { DefaultFormatEditor } from './components/field_editor/components/field_format_editor';
+
+export { MlCardState } from './types';

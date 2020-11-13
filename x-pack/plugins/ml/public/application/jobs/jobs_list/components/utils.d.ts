@@ -3,5 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-export function getSelectedJobIdFromUrl(str: string): string;
+
+export function getSelectedIdFromUrl(str: string): { groupIds?: string[]; jobId?: string };
 export function clearSelectedJobIdFromUrl(str: string): void;

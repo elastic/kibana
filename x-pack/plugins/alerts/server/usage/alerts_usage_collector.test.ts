@@ -6,8 +6,8 @@
 
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { registerAlertsUsageCollector } from './alerts_usage_collector';
-import { taskManagerMock } from '../../../task_manager/server/task_manager.mock';
-const taskManagerStart = taskManagerMock.start();
+import { taskManagerMock } from '../../../task_manager/server/mocks';
+const taskManagerStart = taskManagerMock.createStart();
 
 beforeEach(() => jest.resetAllMocks());
 

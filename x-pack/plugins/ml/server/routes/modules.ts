@@ -6,7 +6,7 @@
 
 import { TypeOf } from '@kbn/config-schema';
 
-import { RequestHandlerContext, KibanaRequest } from 'kibana/server';
+import { IScopedClusterClient, KibanaRequest, SavedObjectsClientContract } from 'kibana/server';
 import { DatafeedOverride, JobOverride } from '../../common/types/modules';
 import { wrapError } from '../client/error_wrapper';
 import { DataRecognizer } from '../models/data_recognizer';
@@ -17,18 +17,27 @@ import {
   setupModuleBodySchema,
 } from './schemas/modules';
 import { RouteInitialization } from '../types';
+import type { MlClient } from '../lib/ml_client';
 
 function recognize(
-  context: RequestHandlerContext,
+  client: IScopedClusterClient,
+  mlClient: MlClient,
+  savedObjectsClient: SavedObjectsClientContract,
   request: KibanaRequest,
   indexPatternTitle: string
 ) {
-  const dr = new DataRecognizer(context.ml!.mlClient, context.core.savedObjects.client, request);
+  const dr = new DataRecognizer(client, mlClient, savedObjectsClient, request);
   return dr.findMatches(indexPatternTitle);
 }
 
-function getModule(context: RequestHandlerContext, request: KibanaRequest, moduleId: string) {
-  const dr = new DataRecognizer(context.ml!.mlClient, context.core.savedObjects.client, request);
+function getModule(
+  client: IScopedClusterClient,
+  mlClient: MlClient,
+  savedObjectsClient: SavedObjectsClientContract,
+  request: KibanaRequest,
+  moduleId: string
+) {
+  const dr = new DataRecognizer(client, mlClient, savedObjectsClient, request);
   if (moduleId === undefined) {
     return dr.listModules();
   } else {
@@ -37,7 +46,9 @@ function getModule(context: RequestHandlerContext, request: KibanaRequest, modul
 }
 
 function setup(
-  context: RequestHandlerContext,
+  client: IScopedClusterClient,
+  mlClient: MlClient,
+  savedObjectsClient: SavedObjectsClientContract,
   request: KibanaRequest,
   moduleId: string,
   prefix?: string,
@@ -52,7 +63,7 @@ function setup(
   datafeedOverrides?: DatafeedOverride | DatafeedOverride[],
   estimateModelMemory?: boolean
 ) {
-  const dr = new DataRecognizer(context.ml!.mlClient, context.core.savedObjects.client, request);
+  const dr = new DataRecognizer(client, mlClient, savedObjectsClient, request);
   return dr.setup(
     moduleId,
     prefix,
@@ -70,18 +81,20 @@ function setup(
 }
 
 function dataRecognizerJobsExist(
-  context: RequestHandlerContext,
+  client: IScopedClusterClient,
+  mlClient: MlClient,
+  savedObjectsClient: SavedObjectsClientContract,
   request: KibanaRequest,
   moduleId: string
 ) {
-  const dr = new DataRecognizer(context.ml!.mlClient, context.core.savedObjects.client, request);
+  const dr = new DataRecognizer(client, mlClient, savedObjectsClient, request);
   return dr.dataRecognizerJobsExist(moduleId);
 }
 
 /**
  * Recognizer routes.
  */
-export function dataRecognizer({ router, mlLicense }: RouteInitialization) {
+export function dataRecognizer({ router, routeGuard }: RouteInitialization) {
   /**
    * @apiGroup Modules
    *
@@ -119,10 +132,16 @@ export function dataRecognizer({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canCreateJob'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response, context }) => {
       try {
         const { indexPatternTitle } = request.params;
-        const results = await recognize(context, request, indexPatternTitle);
+        const results = await recognize(
+          client,
+          mlClient,
+          context.core.savedObjects.client,
+          request,
+          indexPatternTitle
+        );
 
         return response.ok({ body: results });
       } catch (e) {
@@ -249,7 +268,7 @@ export function dataRecognizer({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canGetJobs'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response, context }) => {
       try {
         let { moduleId } = request.params;
         if (moduleId === '') {
@@ -257,7 +276,13 @@ export function dataRecognizer({ router, mlLicense }: RouteInitialization) {
           // the moduleId will be an empty string.
           moduleId = undefined;
         }
-        const results = await getModule(context, request, moduleId);
+        const results = await getModule(
+          client,
+          mlClient,
+          context.core.savedObjects.client,
+          request,
+          moduleId
+        );
 
         return response.ok({ body: results });
       } catch (e) {
@@ -417,7 +442,7 @@ export function dataRecognizer({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canCreateJob'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response, context }) => {
       try {
         const { moduleId } = request.params;
 
@@ -436,7 +461,10 @@ export function dataRecognizer({ router, mlLicense }: RouteInitialization) {
         } = request.body as TypeOf<typeof setupModuleBodySchema>;
 
         const result = await setup(
-          context,
+          client,
+          mlClient,
+
+          context.core.savedObjects.client,
           request,
           moduleId,
           prefix,
@@ -521,10 +549,17 @@ export function dataRecognizer({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canGetJobs'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response, context }) => {
       try {
         const { moduleId } = request.params;
-        const result = await dataRecognizerJobsExist(context, request, moduleId);
+        const result = await dataRecognizerJobsExist(
+          client,
+          mlClient,
+
+          context.core.savedObjects.client,
+          request,
+          moduleId
+        );
 
         return response.ok({ body: result });
       } catch (e) {

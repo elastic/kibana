@@ -5,10 +5,6 @@ The default behavior is to create 1 endpoint with 1 alert and a moderate number 
 A seed value can be provided as a string for the random number generator for repeatable behavior, useful for demos etc.
 Use the `-d` option if you want to delete and remake the indices, otherwise it will add documents to existing indices.
 
-The sample data generator script depends on ts-node, install with npm:
-
-`npm install -g ts-node`
-
 Example command sequence to get ES and kibana running with sample data after installing ts-node:
 
 `yarn es snapshot` -> starts ES

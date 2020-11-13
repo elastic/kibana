@@ -5,9 +5,9 @@
  */
 
 import { camelCase } from 'lodash';
-import { configBlockSchemas } from '../../../../../legacy/plugins/beats_management/common/config_schemas';
-import { translateConfigSchema } from '../../../../../legacy/plugins/beats_management/common/config_schemas_translations_map';
-import { INDEX_NAMES } from '../../../../../legacy/plugins/beats_management/common/constants/index_names';
+import { configBlockSchemas } from '../../../common/config_schemas';
+import { translateConfigSchema } from '../../../common/config_schemas_translations_map';
+import { INDEX_NAMES } from '../../../common/constants/index_names';
 import { RestBeatsAdapter } from '../adapters/beats/rest_beats_adapter';
 import { RestConfigBlocksAdapter } from '../adapters/configuration_blocks/rest_config_blocks_adapter';
 import { RestElasticsearchAdapter } from '../adapters/elasticsearch/rest';
@@ -20,7 +20,7 @@ import { ConfigBlocksLib } from '../configuration_blocks';
 import { ElasticsearchLib } from '../elasticsearch';
 import { TagsLib } from '../tags';
 import { FrontendLibs } from '../types';
-import { PLUGIN } from '../../../../../legacy/plugins/beats_management/common/constants/plugin';
+import { PLUGIN } from '../../../common/constants/plugin';
 import { FrameworkLib } from './../framework';
 import { ManagementSetup } from '../../../../../../src/plugins/management/public';
 import { SecurityPluginSetup } from '../../../../security/public';

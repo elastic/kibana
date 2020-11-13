@@ -48,7 +48,7 @@ guidelines]
 * Write all new code on
 {kib-repo}blob/{branch}/src/core/README.md[the
 platform], and following
-{kib-repo}blob/{branch}/src/core/CONVENTIONS.md[conventions]
+{kib-repo}blob/{branch}/src/core/CONVENTIONS.md[conventions].
 * _Always_ use the `SavedObjectClient` for reading and writing Saved
 Objects.
 * Add `README`s to all your plugins and services.
@@ -99,7 +99,7 @@ Re-using these services will help create a consistent experience across
 [discrete]
 === Backward compatibility
 
-Eventually we want to garauntee to our plugin developers that their plugins will not break from minor to minor.
+Eventually we want to guarantee to our plugin developers that their plugins will not break from minor to minor.
 
 Any time you create or change a public API, keep this in mind, and consider potential
 backward compatibility issues. While we have a formal
@@ -123,6 +123,14 @@ part of your public contract, keep in mind that you may also need to
 provide backwards compatibility for bookmarked URLs.
 
 [discrete]
+=== Routing, Navigation and URL
+
+The {kib} platform provides a set of tools to help developers build consistent experience around routing and browser navigation.
+Some of that tooling is inside `core`, some is available as part of various plugins.
+
+<<kibana-navigation, Follow this guide>> to get an idea of available tools and common approaches for handling routing and browser navigation.
+
+[discrete]
 === Testing & stability
 
 Review:
@@ -130,7 +138,12 @@ Review:
 * <<development-unit-tests>>
 * <<stability>>
 * <<security-best-practices>>
+* <<typescript>>
+
+include::navigation.asciidoc[leveloffset=+1]
 
 include::stability.asciidoc[leveloffset=+1]
 
 include::security.asciidoc[leveloffset=+1]
+
+include::typescript.asciidoc[leveloffset=+1]

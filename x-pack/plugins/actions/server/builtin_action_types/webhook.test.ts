@@ -4,31 +4,53 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-jest.mock('axios', () => ({
-  request: jest.fn(),
-}));
-
-import { getActionType } from './webhook';
-import { ActionType, Services } from '../types';
+import { Services } from '../types';
 import { validateConfig, validateSecrets, validateParams } from '../lib';
 import { actionsConfigMock } from '../actions_config.mock';
 import { createActionTypeRegistry } from './index.test';
 import { Logger } from '../../../../../src/core/server';
 import { actionsMock } from '../mocks';
 import axios from 'axios';
+import {
+  ActionParamsType,
+  ActionTypeConfigType,
+  ActionTypeSecretsType,
+  getActionType,
+  WebhookActionType,
+  WebhookMethods,
+} from './webhook';
 
-const axiosRequestMock = axios.request as jest.Mock;
+import * as utils from './lib/axios_utils';
+
+jest.mock('axios');
+jest.mock('./lib/axios_utils', () => {
+  const originalUtils = jest.requireActual('./lib/axios_utils');
+  return {
+    ...originalUtils,
+    request: jest.fn(),
+    patch: jest.fn(),
+  };
+});
+
+axios.create = jest.fn(() => axios);
+const requestMock = utils.request as jest.Mock;
+
+axios.create = jest.fn(() => axios);
 
 const ACTION_TYPE_ID = '.webhook';
 
 const services: Services = actionsMock.createServices();
 
-let actionType: ActionType;
+let actionType: WebhookActionType;
 let mockedLogger: jest.Mocked<Logger>;
 
 beforeAll(() => {
   const { logger, actionTypeRegistry } = createActionTypeRegistry();
-  actionType = actionTypeRegistry.get(ACTION_TYPE_ID);
+  actionType = actionTypeRegistry.get<
+    ActionTypeConfigType,
+    ActionTypeSecretsType,
+    ActionParamsType
+  >(ACTION_TYPE_ID);
   mockedLogger = logger;
 });
 
@@ -68,8 +90,9 @@ describe('config validation', () => {
   };
 
   test('config validation passes when only required fields are provided', () => {
-    const config: Record<string, string> = {
+    const config: Record<string, string | boolean> = {
       url: 'http://mylisteningserver:9200/endpoint',
+      hasAuth: true,
     };
     expect(validateConfig(actionType, config)).toEqual({
       ...defaultValues,
@@ -79,9 +102,10 @@ describe('config validation', () => {
 
   test('config validation passes when valid methods are provided', () => {
     ['post', 'put'].forEach((method) => {
-      const config: Record<string, string> = {
+      const config: Record<string, string | boolean> = {
         url: 'http://mylisteningserver:9200/endpoint',
         method,
+        hasAuth: true,
       };
       expect(validateConfig(actionType, config)).toEqual({
         ...defaultValues,
@@ -105,8 +129,9 @@ describe('config validation', () => {
   });
 
   test('config validation passes when a url is specified', () => {
-    const config: Record<string, string> = {
+    const config: Record<string, string | boolean> = {
       url: 'http://mylisteningserver:9200/endpoint',
+      hasAuth: true,
     };
     expect(validateConfig(actionType, config)).toEqual({
       ...defaultValues,
@@ -133,6 +158,7 @@ describe('config validation', () => {
       headers: {
         'Content-Type': 'application/json',
       },
+      hasAuth: true,
     };
     expect(validateConfig(actionType, config)).toEqual({
       ...defaultValues,
@@ -154,7 +180,7 @@ describe('config validation', () => {
 `);
   });
 
-  test('config validation passes when kibana config whitelists the url', () => {
+  test('config validation passes when kibana config url does not present in allowedHosts', () => {
     // any for testing
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const config: Record<string, any> = {
@@ -162,6 +188,7 @@ describe('config validation', () => {
       headers: {
         'Content-Type': 'application/json',
       },
+      hasAuth: true,
     };
 
     expect(validateConfig(actionType, config)).toEqual({
@@ -170,13 +197,13 @@ describe('config validation', () => {
     });
   });
 
-  test('config validation returns an error if the specified URL isnt whitelisted', () => {
+  test('config validation returns an error if the specified URL isnt added to allowedHosts', () => {
     actionType = getActionType({
       logger: mockedLogger,
       configurationUtilities: {
         ...actionsConfigMock.create(),
-        ensureWhitelistedUri: (_) => {
-          throw new Error(`target url is not whitelisted`);
+        ensureUriAllowed: (_) => {
+          throw new Error(`target url is not present in allowedHosts`);
         },
       },
     });
@@ -193,7 +220,7 @@ describe('config validation', () => {
     expect(() => {
       validateConfig(actionType, config);
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type config: error configuring webhook action: target url is not whitelisted"`
+      `"error validating action type config: error configuring webhook action: target url is not present in allowedHosts"`
     );
   });
 });
@@ -216,7 +243,7 @@ describe('params validation', () => {
 
 describe('execute()', () => {
   beforeAll(() => {
-    axiosRequestMock.mockReset();
+    requestMock.mockReset();
     actionType = getActionType({
       logger: mockedLogger,
       configurationUtilities: actionsConfigMock.create(),
@@ -224,8 +251,8 @@ describe('execute()', () => {
   });
 
   beforeEach(() => {
-    axiosRequestMock.mockReset();
-    axiosRequestMock.mockResolvedValue({
+    requestMock.mockReset();
+    requestMock.mockResolvedValue({
       status: 200,
       statusText: '',
       data: '',
@@ -235,58 +262,113 @@ describe('execute()', () => {
   });
 
   test('execute with username/password sends request with basic auth', async () => {
+    const config: ActionTypeConfigType = {
+      url: 'https://abc.def/my-webhook',
+      method: WebhookMethods.POST,
+      headers: {
+        aheader: 'a value',
+      },
+      hasAuth: true,
+    };
     await actionType.executor({
       actionId: 'some-id',
       services,
-      config: {
-        url: 'https://abc.def/my-webhook',
-        method: 'post',
-        headers: {
-          aheader: 'a value',
-        },
-      },
+      config,
       secrets: { user: 'abc', password: '123' },
       params: { body: 'some data' },
     });
 
-    expect(axiosRequestMock.mock.calls[0][0]).toMatchInlineSnapshot(`
+    expect(requestMock.mock.calls[0][0]).toMatchInlineSnapshot(`
           Object {
             "auth": Object {
               "password": "123",
               "username": "abc",
             },
+            "axios": undefined,
             "data": "some data",
             "headers": Object {
               "aheader": "a value",
             },
+            "logger": Object {
+              "context": Array [],
+              "debug": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    "response from webhook action \\"some-id\\": [HTTP 200] ",
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": undefined,
+                  },
+                ],
+              },
+              "error": [MockFunction],
+              "fatal": [MockFunction],
+              "get": [MockFunction],
+              "info": [MockFunction],
+              "log": [MockFunction],
+              "trace": [MockFunction],
+              "warn": [MockFunction],
+            },
             "method": "post",
+            "proxySettings": undefined,
             "url": "https://abc.def/my-webhook",
           }
     `);
   });
 
   test('execute without username/password sends request without basic auth', async () => {
+    const config: ActionTypeConfigType = {
+      url: 'https://abc.def/my-webhook',
+      method: WebhookMethods.POST,
+      headers: {
+        aheader: 'a value',
+      },
+      hasAuth: false,
+    };
+    const secrets: ActionTypeSecretsType = { user: null, password: null };
     await actionType.executor({
       actionId: 'some-id',
       services,
-      config: {
-        url: 'https://abc.def/my-webhook',
-        method: 'post',
-        headers: {
-          aheader: 'a value',
-        },
-      },
-      secrets: {},
+      config,
+      secrets,
       params: { body: 'some data' },
     });
 
-    expect(axiosRequestMock.mock.calls[0][0]).toMatchInlineSnapshot(`
+    expect(requestMock.mock.calls[0][0]).toMatchInlineSnapshot(`
           Object {
+            "axios": undefined,
             "data": "some data",
             "headers": Object {
               "aheader": "a value",
             },
+            "logger": Object {
+              "context": Array [],
+              "debug": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    "response from webhook action \\"some-id\\": [HTTP 200] ",
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": undefined,
+                  },
+                ],
+              },
+              "error": [MockFunction],
+              "fatal": [MockFunction],
+              "get": [MockFunction],
+              "info": [MockFunction],
+              "log": [MockFunction],
+              "trace": [MockFunction],
+              "warn": [MockFunction],
+            },
             "method": "post",
+            "proxySettings": undefined,
             "url": "https://abc.def/my-webhook",
           }
     `);

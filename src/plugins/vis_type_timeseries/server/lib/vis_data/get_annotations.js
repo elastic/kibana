@@ -39,7 +39,6 @@ export async function getAnnotations({
   capabilities,
   series,
 }) {
-  const searchRequest = searchStrategy.getSearchRequest(req);
   const annotations = panel.annotations.filter(validAnnotation);
   const lastSeriesTimestamp = getLastSeriesTimestamp(series);
   const handleAnnotationResponseBy = handleAnnotationResponse(lastSeriesTimestamp);
@@ -47,6 +46,7 @@ export async function getAnnotations({
   const bodiesPromises = annotations.map((annotation) =>
     getAnnotationRequestParams(req, panel, annotation, esQueryConfig, capabilities)
   );
+
   const searches = (await Promise.all(bodiesPromises)).reduce(
     (acc, items) => acc.concat(items),
     []
@@ -55,10 +55,10 @@ export async function getAnnotations({
   if (!searches.length) return { responses: [] };
 
   try {
-    const data = await searchRequest.search(searches);
+    const data = await searchStrategy.search(req, searches);
 
     return annotations.reduce((acc, annotation, index) => {
-      acc[annotation.id] = handleAnnotationResponseBy(data[index], annotation);
+      acc[annotation.id] = handleAnnotationResponseBy(data[index].rawResponse, annotation);
 
       return acc;
     }, {});

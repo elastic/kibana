@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SnapshotModel } from '../../../types';
+import { MetricsUIAggregation } from '../../../types';
 
-export const sqsMessagesSent: SnapshotModel = {
+export const sqsMessagesSent: MetricsUIAggregation = {
   sqsMessagesSent: {
     max: {
       field: 'aws.sqs.messages.sent',

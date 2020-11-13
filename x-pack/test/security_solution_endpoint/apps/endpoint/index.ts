@@ -3,11 +3,11 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { DEFAULT_REGISTRY_URL } from '../../../../plugins/ingest_manager/common';
+import { getRegistryUrl as getRegistryUrlFromIngest } from '../../../../plugins/fleet/server';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import {
   isRegistryEnabled,
-  getRegistryUrl,
+  getRegistryUrlFromTestEnv,
 } from '../../../security_solution_endpoint_api_int/registry';
 
 export default function (providerContext: FtrProviderContext) {
@@ -22,7 +22,7 @@ export default function (providerContext: FtrProviderContext) {
       log.warning('These tests are being run with an external package registry');
     }
 
-    const registryUrl = getRegistryUrl() ?? DEFAULT_REGISTRY_URL;
+    const registryUrl = getRegistryUrlFromTestEnv() ?? getRegistryUrlFromIngest();
     log.info(`Package registry URL for tests: ${registryUrl}`);
 
     before(async () => {
@@ -30,5 +30,8 @@ export default function (providerContext: FtrProviderContext) {
     });
     loadTestFile(require.resolve('./endpoint_list'));
     loadTestFile(require.resolve('./policy_details'));
+    loadTestFile(require.resolve('./resolver'));
+    loadTestFile(require.resolve('./endpoint_telemetry'));
+    loadTestFile(require.resolve('./trusted_apps_list'));
   });
 }

@@ -9,6 +9,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import React, { FC } from 'react';
 
 import { EuiFieldText, EuiFormRow, EuiCheckbox, EuiSpacer } from '@elastic/eui';
+import { CombinedField, CombinedFieldsReadOnlyForm } from '../combined_fields';
 
 interface Props {
   index: string;
@@ -17,6 +18,7 @@ interface Props {
   createIndexPattern: boolean;
   onCreateIndexPatternChange(): void;
   indexNameError: string;
+  combinedFields: CombinedField[];
 }
 
 export const SimpleSettings: FC<Props> = ({
@@ -26,6 +28,7 @@ export const SimpleSettings: FC<Props> = ({
   createIndexPattern,
   onCreateIndexPatternChange,
   indexNameError,
+  combinedFields,
 }) => {
   return (
     <React.Fragment>
@@ -75,6 +78,10 @@ export const SimpleSettings: FC<Props> = ({
         onChange={onCreateIndexPatternChange}
         data-test-subj="mlFileDataVisCreateIndexPatternCheckbox"
       />
+
+      <EuiSpacer size="m" />
+
+      <CombinedFieldsReadOnlyForm combinedFields={combinedFields} />
     </React.Fragment>
   );
 };

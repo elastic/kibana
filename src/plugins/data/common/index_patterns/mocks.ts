@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export * from './fields/fields.mocks.ts';
+export * from './fields/fields.mocks';

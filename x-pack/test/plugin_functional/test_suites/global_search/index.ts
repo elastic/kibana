@@ -7,9 +7,11 @@
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('GlobalSearch API', function () {
+  // See https://github.com/elastic/kibana/issues/81397
+  describe.skip('GlobalSearch API', function () {
     this.tags('ciGroup7');
     loadTestFile(require.resolve('./global_search_api'));
     loadTestFile(require.resolve('./global_search_providers'));
+    loadTestFile(require.resolve('./global_search_bar'));
   });
 }

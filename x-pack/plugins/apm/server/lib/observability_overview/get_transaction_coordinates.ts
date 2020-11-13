@@ -9,30 +9,37 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { rangeFilter } from '../../../common/utils/range_filter';
-import { Coordinates } from '../../../../observability/public';
-import { PROCESSOR_EVENT } from '../../../common/elasticsearch_fieldnames';
+import { Coordinates } from '../../../../observability/typings/common';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
-import { ProcessorEvent } from '../../../common/processor_event';
+import {
+  getProcessorEventForAggregatedTransactions,
+  getTransactionDurationFieldForAggregatedTransactions,
+} from '../helpers/aggregated_transactions';
 
 export async function getTransactionCoordinates({
   setup,
   bucketSize,
+  searchAggregatedTransactions,
 }: {
   setup: Setup & SetupTimeRange;
   bucketSize: string;
+  searchAggregatedTransactions: boolean;
 }): Promise<Coordinates[]> {
-  const { client, indices, start, end } = setup;
+  const { apmEventClient, start, end } = setup;
 
-  const { aggregations } = await client.search({
-    index: indices['apm_oss.transactionIndices'],
+  const { aggregations } = await apmEventClient.search({
+    apm: {
+      events: [
+        getProcessorEventForAggregatedTransactions(
+          searchAggregatedTransactions
+        ),
+      ],
+    },
     body: {
       size: 0,
       query: {
         bool: {
-          filter: [
-            { term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } },
-            { range: rangeFilter(start, end) },
-          ],
+          filter: [{ range: rangeFilter(start, end) }],
         },
       },
       aggs: {
@@ -41,6 +48,15 @@ export async function getTransactionCoordinates({
             field: '@timestamp',
             fixed_interval: bucketSize,
             min_doc_count: 0,
+          },
+          aggs: {
+            count: {
+              value_count: {
+                field: getTransactionDurationFieldForAggregatedTransactions(
+                  searchAggregatedTransactions
+                ),
+              },
+            },
           },
         },
       },
@@ -52,7 +68,7 @@ export async function getTransactionCoordinates({
   return (
     aggregations?.distribution.buckets.map((bucket) => ({
       x: bucket.key,
-      y: bucket.doc_count / deltaAsMinutes,
+      y: bucket.count.value / deltaAsMinutes,
     })) || []
   );
 }

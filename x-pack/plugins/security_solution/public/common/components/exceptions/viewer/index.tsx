@@ -18,7 +18,7 @@ import { ExceptionListItemIdentifiers, Filter } from '../types';
 import { allExceptionItemsReducer, State, ViewerModalName } from './reducer';
 import {
   useExceptionList,
-  ExceptionIdentifiers,
+  ExceptionListIdentifiers,
   ExceptionListTypeEnum,
   ExceptionListItemSchema,
   UseExceptionListSuccess,
@@ -54,7 +54,7 @@ interface ExceptionsViewerProps {
   ruleId: string;
   ruleName: string;
   ruleIndices: string[];
-  exceptionListsMeta: ExceptionIdentifiers[];
+  exceptionListsMeta: ExceptionListIdentifiers[];
   availableListTypes: ExceptionListTypeEnum[];
   commentsAccordionId: string;
   onRuleChange?: () => void;
@@ -322,11 +322,13 @@ const ExceptionsViewerComponent = ({
         exceptionListTypeToEdit != null && (
           <EditExceptionModal
             ruleName={ruleName}
+            ruleId={ruleId}
             ruleIndices={ruleIndices}
             exceptionListType={exceptionListTypeToEdit}
             exceptionItem={exceptionToEdit}
             onCancel={handleOnCancelExceptionModal}
             onConfirm={handleOnConfirmExceptionModal}
+            onRuleChange={onRuleChange}
           />
         )}
 

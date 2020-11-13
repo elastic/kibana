@@ -23,22 +23,44 @@ jest.mock('../../lib/proxy_request', () => ({
 
 import { duration } from 'moment';
 import { ProxyConfigCollection } from '../../lib';
-import { CreateHandlerDependencies } from '../../routes/api/console/proxy/create_handler';
-import { coreMock } from '../../../../../core/server/mocks';
+import { RouteDependencies, ProxyDependencies } from '../../routes';
+import { EsLegacyConfigService, SpecDefinitionsService } from '../../services';
+import { coreMock, httpServiceMock } from '../../../../../core/server/mocks';
 
-export const getProxyRouteHandlerDeps = ({
-  proxyConfigCollection = new ProxyConfigCollection([]),
-  pathFilters = [/.*/],
-  readLegacyESConfig = () => ({
+const defaultProxyValue = Object.freeze({
+  readLegacyESConfig: async () => ({
     requestTimeout: duration(30000),
     customHeaders: {},
     requestHeadersWhitelist: [],
     hosts: ['http://localhost:9200'],
   }),
-  log = coreMock.createPluginInitializerContext().logger.get(),
-}: Partial<CreateHandlerDependencies>): CreateHandlerDependencies => ({
-  proxyConfigCollection,
-  pathFilters,
-  readLegacyESConfig,
-  log,
+  pathFilters: [/.*/],
+  proxyConfigCollection: new ProxyConfigCollection([]),
 });
+
+interface MockDepsArgument extends Partial<Omit<RouteDependencies, 'proxy'>> {
+  proxy?: Partial<ProxyDependencies>;
+}
+
+export const getProxyRouteHandlerDeps = ({
+  proxy,
+  log = coreMock.createPluginInitializerContext().logger.get(),
+  router = httpServiceMock.createSetupContract().createRouter(),
+}: MockDepsArgument): RouteDependencies => {
+  const services: RouteDependencies['services'] = {
+    esLegacyConfigService: new EsLegacyConfigService(),
+    specDefinitionService: new SpecDefinitionsService(),
+  };
+
+  return {
+    services,
+    router,
+    proxy: proxy
+      ? {
+          ...defaultProxyValue,
+          ...proxy,
+        }
+      : defaultProxyValue,
+    log,
+  };
+};

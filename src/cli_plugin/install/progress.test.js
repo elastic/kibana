@@ -18,8 +18,9 @@
  */
 
 import sinon from 'sinon';
-import Progress from './progress';
-import Logger from '../lib/logger';
+
+import { Progress } from './progress';
+import { Logger } from '../lib/logger';
 
 describe('kibana cli', function () {
   describe('plugin installer', function () {

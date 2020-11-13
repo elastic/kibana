@@ -69,7 +69,7 @@ export function getIndexSummary(
     size: 1,
     ignoreUnavailable: true,
     body: {
-      sort: { timestamp: { order: 'desc' } },
+      sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
       query: createQuery({ type: 'index_stats', start, end, clusterUuid, metric, filters }),
     },
   };

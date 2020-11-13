@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AlertType } from '../../../../alerts/server';
 import { UptimeCorePlugins, UptimeCoreSetup } from '../adapters';
 import { UMServerLibs } from '../lib';
+import { AlertType } from '../../../../alerts/server';
 
 export type UptimeAlertTypeFactory = (
   server: UptimeCoreSetup,

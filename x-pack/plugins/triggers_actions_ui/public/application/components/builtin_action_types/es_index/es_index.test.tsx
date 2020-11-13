@@ -72,17 +72,31 @@ describe('index connector validation with minimal config', () => {
 describe('action params validation', () => {
   test('action params validation succeeds when action params is valid', () => {
     const actionParams = {
-      documents: ['test'],
+      documents: [{ test: 1234 }],
     };
 
     expect(actionTypeModel.validateParams(actionParams)).toEqual({
-      errors: {},
+      errors: {
+        documents: [],
+      },
     });
 
     const emptyActionParams = {};
 
     expect(actionTypeModel.validateParams(emptyActionParams)).toEqual({
-      errors: {},
+      errors: {
+        documents: ['Document is required and should be a valid JSON object.'],
+      },
+    });
+
+    const invalidDocumentActionParams = {
+      documents: [{}],
+    };
+
+    expect(actionTypeModel.validateParams(invalidDocumentActionParams)).toEqual({
+      errors: {
+        documents: ['Document is required and should be a valid JSON object.'],
+      },
     });
   });
 });

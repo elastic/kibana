@@ -5,7 +5,7 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
-import { Feature } from '../../../../../features/common';
+import { KibanaFeature } from '../../../../../features/common';
 import { RouteDefinitionParams } from '../../index';
 import { createLicensedRouteHandler } from '../../licensed_route_handler';
 import { wrapIntoCustomErrorResponse } from '../../../errors';
@@ -16,7 +16,7 @@ import {
 } from './model';
 
 const roleGrantsSubFeaturePrivileges = (
-  features: Feature[],
+  features: KibanaFeature[],
   role: TypeOf<ReturnType<typeof getPutPayloadSchema>>
 ) => {
   if (!role.kibana) {
@@ -77,7 +77,7 @@ export function definePutRolesRoutes({
           rawRoles[name] ? rawRoles[name].applications : []
         );
 
-        const [features] = await Promise.all<Feature[]>([
+        const [features] = await Promise.all<KibanaFeature[]>([
           getFeatures(),
           clusterClient
             .asScoped(request)

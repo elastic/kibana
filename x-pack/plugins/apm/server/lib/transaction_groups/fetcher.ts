@@ -3,30 +3,24 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { take, sortBy } from 'lodash';
-import { Unionize } from 'utility-types';
+import { sortBy, take } from 'lodash';
 import moment from 'moment';
-import { joinByKey } from '../../../common/utils/join_by_key';
-import { ESSearchRequest } from '../../../typings/elasticsearch';
+import { Unionize } from 'utility-types';
+import { AggregationOptionsByType } from '../../../../../typings/elasticsearch';
+import { PromiseReturnType } from '../../../../observability/typings/common';
 import {
   SERVICE_NAME,
   TRANSACTION_NAME,
 } from '../../../common/elasticsearch_fieldnames';
-import { getTransactionGroupsProjection } from '../../../common/projections/transaction_groups';
-import { mergeProjection } from '../../../common/projections/util/merge_projection';
-import { PromiseReturnType } from '../../../../observability/typings/common';
-import { AggregationOptionsByType } from '../../../typings/elasticsearch/aggregations';
-import { Transaction } from '../../../typings/es_schemas/ui/transaction';
+import { joinByKey } from '../../../common/utils/join_by_key';
+import { getTransactionGroupsProjection } from '../../projections/transaction_groups';
+import { mergeProjection } from '../../projections/util/merge_projection';
+import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import {
-  Setup,
-  SetupTimeRange,
-  SetupUIFilters,
-} from '../helpers/setup_request';
-import {
-  getSamples,
   getAverages,
-  getSums,
+  getCounts,
   getPercentiles,
+  getSums,
 } from './get_transaction_group_stats';
 
 interface TopTransactionOptions {
@@ -34,18 +28,22 @@ interface TopTransactionOptions {
   serviceName: string;
   transactionType: string;
   transactionName?: string;
+  searchAggregatedTransactions: boolean;
 }
 
 interface TopTraceOptions {
   type: 'top_traces';
   transactionName?: string;
+  searchAggregatedTransactions: boolean;
 }
 
 export type Options = TopTransactionOptions | TopTraceOptions;
 
 export type ESResponse = PromiseReturnType<typeof transactionGroupsFetcher>;
 
-export type TransactionGroupRequestBase = ESSearchRequest & {
+export type TransactionGroupRequestBase = ReturnType<
+  typeof getTransactionGroupsProjection
+> & {
   body: {
     aggs: {
       transaction_groups: Unionize<
@@ -55,17 +53,17 @@ export type TransactionGroupRequestBase = ESSearchRequest & {
   };
 };
 
-export type TransactionGroupSetup = Setup & SetupTimeRange & SetupUIFilters;
+export type TransactionGroupSetup = Setup & SetupTimeRange;
 
 function getItemsWithRelativeImpact(
   setup: TransactionGroupSetup,
   items: Array<{
     sum?: number | null;
-    key: string | Record<string, any>;
+    key: string | Record<'service.name' | 'transaction.name', string>;
     avg?: number | null;
     count?: number | null;
-    p95?: number;
-    sample?: Transaction;
+    transactionType?: string;
+    p95?: number | null;
   }>
 ) {
   const values = items
@@ -78,21 +76,19 @@ function getItemsWithRelativeImpact(
   const duration = moment.duration(setup.end - setup.start);
   const minutes = duration.asMinutes();
 
-  const itemsWithRelativeImpact: TransactionGroup[] = items
-    .map((item) => {
-      return {
-        key: item.key,
-        averageResponseTime: item.avg,
-        transactionsPerMinute: (item.count ?? 0) / minutes,
-        impact:
-          item.sum !== null && item.sum !== undefined
-            ? ((item.sum - min) / (max - min)) * 100 || 0
-            : 0,
-        p95: item.p95,
-        sample: item.sample!,
-      };
-    })
-    .filter((item) => item.sample);
+  const itemsWithRelativeImpact = items.map((item) => {
+    return {
+      key: item.key,
+      averageResponseTime: item.avg,
+      transactionsPerMinute: (item.count ?? 0) / minutes,
+      transactionType: item.transactionType || '',
+      impact:
+        item.sum !== null && item.sum !== undefined
+          ? ((item.sum - min) / (max - min)) * 100 || 0
+          : 0,
+      p95: item.p95,
+    };
+  });
 
   return itemsWithRelativeImpact;
 }
@@ -109,6 +105,7 @@ export async function transactionGroupsFetcher(
 
   const isTopTraces = options.type === 'top_traces';
 
+  // @ts-expect-error
   delete projection.body.aggs;
 
   // traces overview is hardcoded to 10000
@@ -117,8 +114,8 @@ export async function transactionGroupsFetcher(
   const size = isTopTraces ? 10000 : expectedBucketSize + 1;
 
   const request = mergeProjection(projection, {
-    size: 0,
     body: {
+      size: 0,
       aggs: {
         transaction_groups: {
           ...(isTopTraces
@@ -149,18 +146,19 @@ export async function transactionGroupsFetcher(
   const params = {
     request,
     setup,
+    searchAggregatedTransactions: options.searchAggregatedTransactions,
   };
 
-  const [samples, averages, sums, percentiles] = await Promise.all([
-    getSamples(params),
+  const [counts, averages, sums, percentiles] = await Promise.all([
+    getCounts(params),
     getAverages(params),
     getSums(params),
     !isTopTraces ? getPercentiles(params) : Promise.resolve(undefined),
   ]);
 
   const stats = [
-    ...samples,
     ...averages,
+    ...counts,
     ...sums,
     ...(percentiles ? percentiles : []),
   ];
@@ -169,11 +167,35 @@ export async function transactionGroupsFetcher(
 
   const itemsWithRelativeImpact = getItemsWithRelativeImpact(setup, items);
 
+  const defaultServiceName =
+    options.type === 'top_transactions' ? options.serviceName : undefined;
+
+  const itemsWithKeys: TransactionGroup[] = itemsWithRelativeImpact.map(
+    (item) => {
+      let transactionName: string;
+      let serviceName: string;
+
+      if (typeof item.key === 'string') {
+        transactionName = item.key;
+        serviceName = defaultServiceName!;
+      } else {
+        transactionName = item.key[TRANSACTION_NAME];
+        serviceName = item.key[SERVICE_NAME];
+      }
+
+      return {
+        ...item,
+        transactionName,
+        serviceName,
+      };
+    }
+  );
+
   return {
     items: take(
       // sort by impact by default so most impactful services are not cut off
-      sortBy(itemsWithRelativeImpact, 'impact').reverse(),
-      expectedBucketSize
+      sortBy(itemsWithKeys, 'impact').reverse(),
+      bucketSize
     ),
     // The aggregation is considered accurate if the configured bucket size is larger or equal to the number of buckets returned
     // the actual number of buckets retrieved are `bucketsize + 1` to detect whether it's above the limit
@@ -183,10 +205,12 @@ export async function transactionGroupsFetcher(
 }
 
 export interface TransactionGroup {
-  key: Record<string, any> | string;
+  key: string | Record<'service.name' | 'transaction.name', string>;
+  serviceName: string;
+  transactionName: string;
+  transactionType: string;
   averageResponseTime: number | null | undefined;
   transactionsPerMinute: number;
-  p95: number | undefined;
+  p95: number | null | undefined;
   impact: number;
-  sample: Transaction;
 }

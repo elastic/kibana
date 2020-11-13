@@ -145,12 +145,13 @@ export const ComponentTemplates = ({ isLoading, components, listItemProps }: Pro
             />
           </EuiButton>
         }
+        data-test-subj="emptySearchResult"
       />
     );
   };
 
   return (
-    <div className="componentTemplates">
+    <div className="componentTemplates" data-test-subj="componentTemplates">
       <div className="componentTemplates__header">
         <EuiFlexGroup gutterSize="none">
           <EuiFlexItem>
@@ -162,6 +163,7 @@ export const ComponentTemplates = ({ isLoading, components, listItemProps }: Pro
               }}
               aria-label={i18nTexts.searchBoxPlaceholder}
               className="componentTemplates__searchBox"
+              data-test-subj="componentTemplateSearchBox"
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -171,6 +173,7 @@ export const ComponentTemplates = ({ isLoading, components, listItemProps }: Pro
       </div>
       <div
         className={classNames('eui-yScrollWithShadows componentTemplates__listWrapper', {
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           'componentTemplates__listWrapper--is-empty': isSearchResultEmpty,
         })}
       >

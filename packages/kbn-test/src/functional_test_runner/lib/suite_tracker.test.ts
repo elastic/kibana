@@ -21,7 +21,7 @@ import fs from 'fs';
 import { join, resolve } from 'path';
 
 jest.mock('fs');
-jest.mock('@kbn/dev-utils', () => {
+jest.mock('@kbn/utils', () => {
   return { REPO_ROOT: '/dev/null/root' };
 });
 

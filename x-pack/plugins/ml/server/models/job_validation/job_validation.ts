@@ -5,9 +5,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import Boom from 'boom';
-import { ILegacyScopedClusterClient } from 'kibana/server';
-
+import Boom from '@hapi/boom';
+import { IScopedClusterClient } from 'kibana/server';
 import { TypeOf } from '@kbn/config-schema';
 import { fieldsServiceProvider } from '../fields_service';
 import { renderTemplate } from '../../../common/util/string_utils';
@@ -27,6 +26,7 @@ import { validateModelMemoryLimit } from './validate_model_memory_limit';
 import { validateTimeRange, isValidTimeField } from './validate_time_range';
 import { validateJobSchema } from '../../routes/schemas/job_validation_schema';
 import { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
+import type { MlClient } from '../../lib/ml_client';
 
 export type ValidateJobPayload = TypeOf<typeof validateJobSchema>;
 
@@ -35,7 +35,8 @@ export type ValidateJobPayload = TypeOf<typeof validateJobSchema>;
  * @kbn/config-schema has checked the payload {@link validateJobSchema}.
  */
 export async function validateJob(
-  mlClusterClient: ILegacyScopedClusterClient,
+  client: IScopedClusterClient,
+  mlClient: MlClient,
   payload: ValidateJobPayload,
   kbnVersion = 'current',
   isSecurityDisabled?: boolean
@@ -64,8 +65,8 @@ export async function validateJob(
       // if no duration was part of the request, fall back to finding out
       // the time range of the time field of the index, but also check first
       // if the time field is a valid field of type 'date' using isValidTimeField()
-      if (typeof duration === 'undefined' && (await isValidTimeField(mlClusterClient, job))) {
-        const fs = fieldsServiceProvider(mlClusterClient);
+      if (typeof duration === 'undefined' && (await isValidTimeField(client, job))) {
+        const fs = fieldsServiceProvider(client);
         const index = job.datafeed_config.indices.join(',');
         const timeField = job.data_description.time_field;
         const timeRange = await fs.getTimeFieldRange(index, timeField, job.datafeed_config.query);
@@ -80,23 +81,23 @@ export async function validateJob(
 
       // next run only the cardinality tests to find out if they trigger an error
       // so we can decide later whether certain additional tests should be run
-      const cardinalityMessages = await validateCardinality(mlClusterClient, job);
+      const cardinalityMessages = await validateCardinality(client, job);
       validationMessages.push(...cardinalityMessages);
       const cardinalityError = cardinalityMessages.some((m) => {
         return messages[m.id as MessageId].status === VALIDATION_STATUS.ERROR;
       });
 
       validationMessages.push(
-        ...(await validateBucketSpan(mlClusterClient, job, duration, isSecurityDisabled))
+        ...(await validateBucketSpan(client, job, duration, isSecurityDisabled))
       );
-      validationMessages.push(...(await validateTimeRange(mlClusterClient, job, duration)));
+      validationMessages.push(...(await validateTimeRange(client, job, duration)));
 
       // only run the influencer and model memory limit checks
       // if cardinality checks didn't return a message with an error level
       if (cardinalityError === false) {
         validationMessages.push(...(await validateInfluencers(job)));
         validationMessages.push(
-          ...(await validateModelMemoryLimit(mlClusterClient, job, duration))
+          ...(await validateModelMemoryLimit(client, mlClient, job, duration))
         );
       }
     } else {

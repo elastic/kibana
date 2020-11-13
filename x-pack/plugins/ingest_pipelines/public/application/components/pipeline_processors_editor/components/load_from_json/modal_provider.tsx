@@ -5,7 +5,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { FunctionComponent, useRef, useState } from 'react';
+import React, { FunctionComponent, useRef, useState, useCallback } from 'react';
 import { EuiConfirmModal, EuiOverlayMask, EuiSpacer, EuiText, EuiCallOut } from '@elastic/eui';
 
 import { JsonEditor, OnJsonEditorUpdateHandler } from '../../../../../shared_imports';
@@ -66,10 +66,12 @@ export const ModalProvider: FunctionComponent<Props> = ({ onDone, children }) =>
       raw: defaultValueRaw,
     },
   });
-  const onJsonUpdate: OnJsonEditorUpdateHandler = (jsonUpdateData) => {
+
+  const onJsonUpdate: OnJsonEditorUpdateHandler = useCallback((jsonUpdateData) => {
     setIsValidJson(jsonUpdateData.validate());
     jsonContent.current = jsonUpdateData;
-  };
+  }, []);
+
   return (
     <>
       {children(() => setIsModalVisible(true))}

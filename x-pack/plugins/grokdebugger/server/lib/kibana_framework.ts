@@ -4,24 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint-disable @typescript-eslint/array-type */
-
 import { i18n } from '@kbn/i18n';
 
-import {
-  CoreSetup,
-  IRouter,
-  RequestHandlerContext,
-  RouteMethod,
-  RouteConfig,
-  RequestHandler,
-} from 'src/core/server';
+import { CoreSetup, IRouter, RouteMethod, RouteConfig, RequestHandler } from 'src/core/server';
 
 import { ILicense } from '../../../licensing/server';
 
-type GrokDebuggerRouteConfig<params, query, body, method extends RouteMethod> = {
+type GrokDebuggerRouteConfig<Params, Query, Body, Method extends RouteMethod> = {
   method: RouteMethod;
-} & RouteConfig<params, query, body, method>;
+} & RouteConfig<Params, Query, Body, Method>;
 
 export class KibanaFramework {
   public router: IRouter;
@@ -44,12 +35,12 @@ export class KibanaFramework {
     return this.license.isActive;
   }
 
-  public registerRoute<params = any, query = any, body = any, method extends RouteMethod = any>(
-    config: GrokDebuggerRouteConfig<params, query, body, method>,
-    handler: RequestHandler<params, query, body>
+  public registerRoute<Params = any, Query = any, Body = any, Method extends RouteMethod = any>(
+    config: GrokDebuggerRouteConfig<Params, Query, Body, Method>,
+    handler: RequestHandler<Params, Query, Body>
   ) {
     // Automatically wrap all route registrations with license checking
-    const wrappedHandler: RequestHandler<params, query, body> = async (
+    const wrappedHandler: RequestHandler<Params, Query, Body> = async (
       requestContext,
       request,
       response
@@ -84,22 +75,5 @@ export class KibanaFramework {
         this.router.put(routeConfig, wrappedHandler);
         break;
     }
-  }
-
-  callWithRequest(
-    requestContext: RequestHandlerContext,
-    endpoint: 'ingest.simulate',
-    options?: {
-      body: any;
-    }
-  ): Promise<any>;
-
-  public async callWithRequest(
-    requestContext: RequestHandlerContext,
-    endpoint: string,
-    options?: any
-  ) {
-    const { elasticsearch } = requestContext.core;
-    return elasticsearch.legacy.client.callAsCurrentUser(endpoint, options);
   }
 }

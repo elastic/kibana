@@ -6,11 +6,9 @@
 
 import * as t from 'io-ts';
 
-/* eslint-disable @typescript-eslint/camelcase */
 import { queryFilter, fields, sort_field, sort_order, PerPage, Page } from '../common/schemas';
 import { DefaultPerPage } from '../types/default_per_page';
 import { DefaultPage } from '../types/default_page';
-/* eslint-enable @typescript-eslint/camelcase */
 
 export const findRulesSchema = t.exact(
   t.partial({

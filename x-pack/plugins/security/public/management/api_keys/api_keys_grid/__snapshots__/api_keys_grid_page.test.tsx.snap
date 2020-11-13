@@ -31,7 +31,7 @@ exports[`APIKeysGridPage renders a callout when API keys are not enabled 1`] = `
           size="m"
           type="alert"
         >
-          <div
+          <span
             aria-hidden="true"
             className="euiCallOutHeader__icon"
             data-euiicon-type="alert"
@@ -154,7 +154,7 @@ exports[`APIKeysGridPage renders permission denied if user does not have require
                   size="xxl"
                   type="securityApp"
                 >
-                  <div
+                  <span
                     color="subdued"
                     data-euiicon-type="securityApp"
                     size="xxl"

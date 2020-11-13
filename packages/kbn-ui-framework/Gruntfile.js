@@ -17,10 +17,12 @@
  * under the License.
  */
 
+/* eslint-disable import/no-extraneous-dependencies */
 const sass = require('node-sass');
 const postcss = require('postcss');
-const postcssConfig = require('../../src/optimize/postcss.config');
+const postcssConfig = require('@kbn/optimizer/postcss.config.js');
 const chokidar = require('chokidar');
+const path = require('path');
 const { debounce } = require('lodash');
 
 const platform = require('os').platform();
@@ -57,9 +59,12 @@ module.exports = function (grunt) {
     },
   });
 
+  const cwd = process.cwd();
+  grunt.file.setBase(path.resolve(__dirname, '../..'));
   grunt.loadNpmTasks('grunt-babel');
   grunt.loadNpmTasks('grunt-contrib-clean');
   grunt.loadNpmTasks('grunt-contrib-copy');
+  grunt.file.setBase(cwd);
   grunt.registerTask('prodBuild', ['clean:target', 'copy:makeProdBuild', 'babel:prodBuild']);
 
   grunt.registerTask('docSiteBuild', function () {

@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import preset from '@kbn/test/jest-preset';
 import config from './config';
 
 export default {
@@ -26,12 +27,15 @@ export default {
     '**/integration_tests/**/*.test.ts',
     '**/integration_tests/**/*.test.tsx',
   ],
-  testPathIgnorePatterns: config.testPathIgnorePatterns.filter(
+  testPathIgnorePatterns: preset.testPathIgnorePatterns.filter(
     (pattern) => !pattern.includes('integration_tests')
   ),
   reporters: [
     'default',
-    ['<rootDir>/src/dev/jest/junit_reporter.js', { reportName: 'Jest Integration Tests' }],
+    [
+      '<rootDir>/packages/kbn-test/target/jest/junit_reporter',
+      { reportName: 'Jest Integration Tests' },
+    ],
   ],
-  setupFilesAfterEnv: ['<rootDir>/src/dev/jest/setup/after_env.integration.js'],
+  setupFilesAfterEnv: ['<rootDir>/packages/kbn-test/target/jest/setup/after_env.integration.js'],
 };

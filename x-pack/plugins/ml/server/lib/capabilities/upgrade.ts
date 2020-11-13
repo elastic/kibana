@@ -4,17 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ILegacyScopedClusterClient } from 'kibana/server';
-import { mlLog } from '../../client/log';
+import type { MlClient } from '../../lib/ml_client';
+import { mlLog } from '../../lib/log';
 
-export function upgradeCheckProvider({ callAsInternalUser }: ILegacyScopedClusterClient) {
+export function upgradeCheckProvider(mlClient: MlClient) {
   async function isUpgradeInProgress(): Promise<boolean> {
     let upgradeInProgress = false;
     try {
-      const info = await callAsInternalUser('ml.info');
+      const { body } = await mlClient.info();
       // if ml indices are currently being migrated, upgrade_mode will be set to true
       // pass this back with the privileges to allow for the disabling of UI controls.
-      upgradeInProgress = info.upgrade_mode === true;
+      upgradeInProgress = body.upgrade_mode === true;
     } catch (error) {
       // if the ml.info check fails, it could be due to the user having insufficient privileges
       // most likely they do not have the ml_user role and therefore will be blocked from using

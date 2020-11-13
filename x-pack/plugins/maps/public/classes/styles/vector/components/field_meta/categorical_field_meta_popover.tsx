@@ -14,6 +14,7 @@ import { FieldMetaOptions } from '../../../../../../common/descriptor_types';
 type Props = {
   fieldMetaOptions: FieldMetaOptions;
   onChange: (fieldMetaOptions: FieldMetaOptions) => void;
+  switchDisabled: boolean;
 };
 
 export function CategoricalFieldMetaPopover(props: Props) {
@@ -34,6 +35,7 @@ export function CategoricalFieldMetaPopover(props: Props) {
           checked={props.fieldMetaOptions.isEnabled}
           onChange={onIsEnabledChange}
           compressed
+          disabled={props.switchDisabled}
         />
       </EuiFormRow>
     </FieldMetaPopover>

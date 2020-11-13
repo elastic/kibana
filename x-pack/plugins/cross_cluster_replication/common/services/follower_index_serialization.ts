@@ -13,7 +13,7 @@ import {
   FollowerIndexAdvancedSettings,
   FollowerIndexAdvancedSettingsToEs,
 } from '../types';
-
+/* eslint-disable @typescript-eslint/naming-convention */
 export const deserializeShard = ({
   remote_cluster,
   leader_index,
@@ -106,7 +106,7 @@ export const deserializeFollowerIndex = ({
   readPollTimeout: read_poll_timeout,
   shards: shards && shards.map(deserializeShard),
 });
-
+/* eslint-enable @typescript-eslint/naming-convention */
 export const deserializeListFollowerIndices = (
   followerIndices: FollowerIndexFromEs[]
 ): FollowerIndex[] => followerIndices.map(deserializeFollowerIndex);

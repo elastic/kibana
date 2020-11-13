@@ -21,7 +21,6 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common']);
 
@@ -30,13 +29,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     beforeEach(async () => {
       await PageObjects.common.navigateToApp('status_page');
-    });
-
-    it('should show the kibana plugin as ready', async () => {
-      await retry.tryForTime(6000, async () => {
-        const text = await testSubjects.getVisibleText('statusBreakdown');
-        expect(text.indexOf('plugin:kibana')).to.be.above(-1);
-      });
     });
 
     it('should show the build hash and number', async () => {

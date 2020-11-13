@@ -6,27 +6,39 @@
 
 import { TypeOf } from '@kbn/config-schema';
 import { RequestHandler, Logger } from 'kibana/server';
-import { eventsIndexPattern, alertsIndexPattern } from '../../../../common/endpoint/constants';
+import { eventsIndexPattern } from '../../../../common/endpoint/constants';
 import { validateEvents } from '../../../../common/endpoint/schema/resolver';
-import { Fetcher } from './utils/fetch';
-import { EndpointAppContext } from '../../types';
+import { EventsQuery } from './queries/events';
+import { createEvents } from './utils/node';
+import { PaginationBuilder } from './utils/pagination';
 
+/**
+ * This function handles the `/events` api and returns an array of events and a cursor if more events exist than were
+ * requested.
+ * @param log a logger object
+ */
 export function handleEvents(
-  log: Logger,
-  endpointAppContext: EndpointAppContext
-): RequestHandler<TypeOf<typeof validateEvents.params>, TypeOf<typeof validateEvents.query>> {
+  log: Logger
+): RequestHandler<
+  unknown,
+  TypeOf<typeof validateEvents.query>,
+  TypeOf<typeof validateEvents.body>
+> {
   return async (context, req, res) => {
     const {
-      params: { id },
-      query: { events, afterEvent, legacyEndpointID: endpointID },
+      query: { limit, afterEvent },
+      body,
     } = req;
     try {
-      const client = context.core.elasticsearch.legacy.client;
-
-      const fetcher = new Fetcher(client, id, eventsIndexPattern, alertsIndexPattern, endpointID);
+      const client = context.core.elasticsearch.client;
+      const query = new EventsQuery(
+        PaginationBuilder.createBuilder(limit, afterEvent),
+        eventsIndexPattern
+      );
+      const results = await query.search(client, body?.filter);
 
       return res.ok({
-        body: await fetcher.events(events, afterEvent),
+        body: createEvents(results, PaginationBuilder.buildCursorRequestLimit(limit, results)),
       });
     } catch (err) {
       log.warn(err);

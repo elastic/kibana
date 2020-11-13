@@ -15,7 +15,6 @@ import {
   EuiFormRow,
   EuiPanel,
   EuiSpacer,
-  EuiToolTip,
 } from '@elastic/eui';
 import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import styled from 'styled-components';
@@ -190,21 +189,19 @@ export const StatefulEditDataProvider = React.memo<Props>(
       <EuiPanel paddingSize="s">
         <EuiFlexGroup direction="column" gutterSize="none">
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup direction="row" gutterSize="none" justifyContent="spaceBetween">
+            <EuiFlexGroup gutterSize="s" direction="row" justifyContent="spaceBetween">
               <EuiFlexItem grow={false}>
                 <EuiFormRow label={i18n.FIELD}>
-                  <EuiToolTip content={updatedField.length > 0 ? updatedField[0].label : null}>
-                    <EuiComboBox
-                      data-test-subj="field"
-                      isClearable={false}
-                      onChange={onFieldSelected}
-                      options={getCategorizedFieldNames(browserFields)}
-                      placeholder={i18n.FIELD_PLACEHOLDER}
-                      selectedOptions={updatedField}
-                      singleSelection={{ asPlainText: true }}
-                      style={{ width: `${FIELD_COMBO_BOX_WIDTH}px` }}
-                    />
-                  </EuiToolTip>
+                  <EuiComboBox
+                    data-test-subj="field"
+                    isClearable={false}
+                    onChange={onFieldSelected}
+                    options={getCategorizedFieldNames(browserFields)}
+                    placeholder={i18n.FIELD_PLACEHOLDER}
+                    selectedOptions={updatedField}
+                    singleSelection={{ asPlainText: true }}
+                    style={{ width: `${FIELD_COMBO_BOX_WIDTH}px` }}
+                  />
                 </EuiFormRow>
               </EuiFlexItem>
 
@@ -226,7 +223,7 @@ export const StatefulEditDataProvider = React.memo<Props>(
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
-            <EuiSpacer />
+            <EuiSpacer size="m" />
           </EuiFlexItem>
 
           {type !== DataProviderType.template &&
@@ -248,7 +245,7 @@ export const StatefulEditDataProvider = React.memo<Props>(
           ) : null}
 
           <EuiFlexItem grow={false}>
-            <EuiSpacer />
+            <EuiSpacer size="m" />
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
@@ -268,7 +265,7 @@ export const StatefulEditDataProvider = React.memo<Props>(
                     }) || isValueFieldInvalid
                   }
                   onClick={handleSave}
-                  size="s"
+                  size="m"
                 >
                   {i18n.SAVE}
                 </EuiButton>

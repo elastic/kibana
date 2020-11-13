@@ -4,4 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { getPublicUrl } from './get_enterprise_search_url';
+export {
+  externalUrl,
+  getEnterpriseSearchUrl,
+  getAppSearchUrl,
+  getWorkplaceSearchUrl,
+} from './external_url';

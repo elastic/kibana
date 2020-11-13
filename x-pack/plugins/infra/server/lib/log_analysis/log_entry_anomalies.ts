@@ -25,6 +25,7 @@ import {
   InsufficientAnomalyMlJobsConfigured,
   InsufficientLogAnalysisMlJobConfigurationError,
   UnknownCategoryError,
+  isMlPrivilegesError,
 } from './errors';
 import { decodeOrThrow } from '../../../common/runtime_types';
 import {
@@ -65,7 +66,10 @@ async function getCompatibleAnomaliesJobIds(
     jobIds.push(logRateJobId);
     jobSpans = [...jobSpans, ...spans];
   } catch (e) {
-    // Job wasn't found
+    if (isMlPrivilegesError(e)) {
+      throw e;
+    }
+    // An error is also thrown when no jobs are found
   }
 
   try {
@@ -75,7 +79,10 @@ async function getCompatibleAnomaliesJobIds(
     jobIds.push(logCategoriesJobId);
     jobSpans = [...jobSpans, ...spans];
   } catch (e) {
-    // Job wasn't found
+    if (isMlPrivilegesError(e)) {
+      throw e;
+    }
+    // An error is also thrown when no jobs are found
   }
 
   return {
@@ -216,7 +223,8 @@ async function fetchLogEntryAnomalies(
 
   const results = decodeOrThrow(logEntryAnomaliesResponseRT)(
     await mlSystem.mlAnomalySearch(
-      createLogEntryAnomaliesQuery(jobIds, startTime, endTime, sort, expandedPagination, datasets)
+      createLogEntryAnomaliesQuery(jobIds, startTime, endTime, sort, expandedPagination, datasets),
+      jobIds
     )
   );
 
@@ -246,6 +254,7 @@ async function fetchLogEntryAnomalies(
 
   const anomalies = hits.map((result) => {
     const {
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       job_id,
       record_score: anomalyScore,
       typical,
@@ -254,18 +263,18 @@ async function fetchLogEntryAnomalies(
       bucket_span: duration,
       timestamp: anomalyStartTime,
       by_field_value: categoryId,
-    } = result._source;
+    } = result.fields;
 
     return {
       id: result._id,
-      anomalyScore,
-      dataset,
+      anomalyScore: anomalyScore[0],
+      dataset: dataset[0],
       typical: typical[0],
       actual: actual[0],
-      jobId: job_id,
-      startTime: anomalyStartTime,
-      duration: duration * 1000,
-      categoryId,
+      jobId: job_id[0],
+      startTime: parseInt(anomalyStartTime[0], 10),
+      duration: duration[0] * 1000,
+      categoryId: categoryId?.[0],
     };
   });
 
@@ -409,8 +418,8 @@ export async function fetchLogEntryExamples(
   return {
     examples: hits.map((hit) => ({
       id: hit._id,
-      dataset: hit._source.event?.dataset ?? '',
-      message: hit._source.message ?? '',
+      dataset: hit.fields['event.dataset']?.[0] ?? '',
+      message: hit.fields.message?.[0] ?? '',
       timestamp: hit.sort[0],
       tiebreaker: hit.sort[1],
     })),

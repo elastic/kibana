@@ -6,8 +6,8 @@
 import { cloneDeep } from 'lodash';
 import { ISavedObjectsRepository } from 'src/core/server';
 import { SavedObject } from './../../../../../../src/core/types/saved_objects';
-import { Agent, NewAgentEvent } from './../../../../ingest_manager/common/types/models/agent';
-import { AgentMetadata } from '../../../../ingest_manager/common/types/models/agent';
+import { Agent, NewAgentEvent } from './../../../../fleet/common/types/models/agent';
+import { AgentMetadata } from '../../../../fleet/common/types/models/agent';
 import { getFleetSavedObjectsMetadata, getLatestFleetEndpointEvent } from './fleet_saved_objects';
 
 export interface AgentOSMetadataTelemetry {
@@ -33,7 +33,7 @@ export interface EndpointUsage {
   policies: PoliciesTelemetry;
 }
 
-type EndpointOSNames = 'Linux' | 'Windows' | 'macOs';
+type EndpointOSNames = 'Linux' | 'Windows' | 'macOS';
 
 export interface AgentLocalMetadata extends AgentMetadata {
   elastic: {
@@ -42,7 +42,9 @@ export interface AgentLocalMetadata extends AgentMetadata {
     };
   };
   host: {
+    hostname: string;
     id: string;
+    name: string;
   };
   os: {
     name: string;
@@ -78,17 +80,20 @@ export const updateEndpointOSTelemetry = (
   os: AgentLocalMetadata['os'],
   osTracker: OSTracker
 ): OSTracker => {
-  const updatedOSTracker = cloneDeep(osTracker);
-  const { version: osVersion, platform: osPlatform, full: osFullName } = os;
-  if (osFullName && osVersion) {
-    if (updatedOSTracker[osFullName]) updatedOSTracker[osFullName].count += 1;
-    else {
-      updatedOSTracker[osFullName] = {
-        full_name: osFullName,
-        platform: osPlatform,
-        version: osVersion,
-        count: 1,
-      };
+  let updatedOSTracker = osTracker;
+  if (os && typeof os === 'object') {
+    updatedOSTracker = cloneDeep(osTracker);
+    const { version: osVersion, platform: osPlatform, full: osFullName } = os;
+    if (osFullName && osVersion) {
+      if (updatedOSTracker[osFullName]) updatedOSTracker[osFullName].count += 1;
+      else {
+        updatedOSTracker[osFullName] = {
+          full_name: osFullName,
+          platform: osPlatform,
+          version: osVersion,
+          count: 1,
+        };
+      }
     }
   }
 
@@ -124,7 +129,7 @@ export const updateEndpointPolicyTelemetry = (
 ): PoliciesTelemetry => {
   const policyHostTypeToPolicyType = {
     Linux: 'linux',
-    macOs: 'mac',
+    macOS: 'mac',
     Windows: 'windows',
   };
   const enabledMalwarePolicyTypes = ['prevent', 'detect'];
@@ -211,46 +216,53 @@ export const getEndpointTelemetryFromFleet = async (
   if (!endpointAgents || endpointAgentsCount < 1) return endpointTelemetry;
 
   // Use unique hosts to prevent any potential duplicates
-  const uniqueHostIds: Set<string> = new Set();
+  const uniqueHosts: Set<string> = new Set();
   let osTracker: OSTracker = {};
   let dailyActiveCount = 0;
   let policyTracker: PoliciesTelemetry = { malware: { active: 0, inactive: 0, failure: 0 } };
 
   for (let i = 0; i < endpointAgentsCount; i += 1) {
-    const { attributes: metadataAttributes } = endpointAgents[i];
-    const { last_checkin: lastCheckin, local_metadata: localMetadata } = metadataAttributes;
-    const { host, os, elastic } = localMetadata as AgentLocalMetadata; // AgentMetadata is just an empty blob, casting for our  use case
+    try {
+      const { attributes: metadataAttributes } = endpointAgents[i];
+      const { last_checkin: lastCheckin, local_metadata: localMetadata } = metadataAttributes;
+      const { host, os, elastic } = localMetadata as AgentLocalMetadata;
 
-    if (!uniqueHostIds.has(host.id)) {
-      uniqueHostIds.add(host.id);
-      const agentId = elastic?.agent?.id;
-      osTracker = updateEndpointOSTelemetry(os, osTracker);
+      // Although not perfect, the goal is to dedupe hosts to get the most recent data for a host
+      // An agent re-installed on the same host will have the same id and hostname
+      // A cloned VM will have the same id, but "may" have the same hostname, but it's really up to the user.
+      const compoundUniqueId = `${host?.id}-${host?.hostname}`;
+      if (!uniqueHosts.has(compoundUniqueId)) {
+        uniqueHosts.add(compoundUniqueId);
+        const agentId = elastic?.agent?.id;
+        osTracker = updateEndpointOSTelemetry(os, osTracker);
 
-      if (agentId) {
-        let agentEvents;
-        try {
-          const response = await getLatestFleetEndpointEvent(soClient, agentId);
-          agentEvents = response.saved_objects;
-        } catch (error) {
-          // If the request fails we do not obtain `active within last 24 hours for this agent` or policy specifics
-        }
-
-        // AgentEvents will have a max length of 1
-        if (agentEvents && agentEvents.length > 0) {
-          const latestEndpointEvent = agentEvents[0];
-          dailyActiveCount = updateEndpointDailyActiveCount(
-            latestEndpointEvent,
-            lastCheckin,
-            dailyActiveCount
+        if (agentId) {
+          const { saved_objects: agentEvents } = await getLatestFleetEndpointEvent(
+            soClient,
+            agentId
           );
-          policyTracker = updateEndpointPolicyTelemetry(latestEndpointEvent, policyTracker);
+
+          // AgentEvents will have a max length of 1
+          if (agentEvents && agentEvents.length > 0) {
+            const latestEndpointEvent = agentEvents[0];
+            dailyActiveCount = updateEndpointDailyActiveCount(
+              latestEndpointEvent,
+              lastCheckin,
+              dailyActiveCount
+            );
+            policyTracker = updateEndpointPolicyTelemetry(latestEndpointEvent, policyTracker);
+          }
         }
       }
+    } catch (error) {
+      // All errors thrown in the loop would be handled here
+      // Not logging any errors to avoid leaking any potential PII
+      // Depending on when the error is thrown in the loop some specifics may be missing, but it allows the loop to continue
     }
   }
 
   // All unique hosts with an endpoint installed, thus all unique endpoint installs
-  endpointTelemetry.total_installed = uniqueHostIds.size;
+  endpointTelemetry.total_installed = uniqueHosts.size;
   // Set the daily active count for the endpoints
   endpointTelemetry.active_within_last_24_hours = dailyActiveCount;
   // Get the objects to populate our OS Telemetry

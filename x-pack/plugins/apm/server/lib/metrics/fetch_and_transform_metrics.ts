@@ -4,19 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Unionize, Overwrite } from 'utility-types';
-import { ESSearchRequest } from '../../../typings/elasticsearch';
-import {
-  Setup,
-  SetupTimeRange,
-  SetupUIFilters,
-} from '../helpers/setup_request';
+import { Overwrite, Unionize } from 'utility-types';
+import { AggregationOptionsByType } from '../../../../../typings/elasticsearch';
+import { getMetricsProjection } from '../../projections/metrics';
+import { mergeProjection } from '../../projections/util/merge_projection';
+import { APMEventESSearchRequest } from '../helpers/create_es_client/create_apm_event_client';
 import { getMetricsDateHistogramParams } from '../helpers/metrics';
-import { ChartBase } from './types';
+import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { transformDataToMetricsChart } from './transform_metrics_chart';
-import { getMetricsProjection } from '../../../common/projections/metrics';
-import { mergeProjection } from '../../../common/projections/util/merge_projection';
-import { AggregationOptionsByType } from '../../../typings/elasticsearch/aggregations';
+import { ChartBase } from './types';
 
 type MetricsAggregationMap = Unionize<{
   min: AggregationOptionsByType['min'];
@@ -28,7 +24,7 @@ type MetricsAggregationMap = Unionize<{
 type MetricAggs = Record<string, MetricsAggregationMap>;
 
 export type GenericMetricsRequest = Overwrite<
-  ESSearchRequest,
+  APMEventESSearchRequest,
   {
     body: {
       aggs: {
@@ -58,14 +54,14 @@ export async function fetchAndTransformMetrics<T extends MetricAggs>({
   aggs,
   additionalFilters = [],
 }: {
-  setup: Setup & SetupTimeRange & SetupUIFilters;
+  setup: Setup & SetupTimeRange;
   serviceName: string;
   serviceNodeName?: string;
   chartBase: ChartBase;
   aggs: T;
   additionalFilters?: Filter[];
 }) {
-  const { start, end, client } = setup;
+  const { start, end, apmEventClient, config } = setup;
 
   const projection = getMetricsProjection({
     setup,
@@ -83,7 +79,11 @@ export async function fetchAndTransformMetrics<T extends MetricAggs>({
       },
       aggs: {
         timeseriesData: {
-          date_histogram: getMetricsDateHistogramParams(start, end),
+          date_histogram: getMetricsDateHistogramParams(
+            start,
+            end,
+            config['xpack.apm.metricsInterval']
+          ),
           aggs,
         },
         ...aggs,
@@ -91,7 +91,7 @@ export async function fetchAndTransformMetrics<T extends MetricAggs>({
     },
   });
 
-  const response = await client.search(params);
+  const response = await apmEventClient.search(params);
 
   return transformDataToMetricsChart(response, chartBase);
 }

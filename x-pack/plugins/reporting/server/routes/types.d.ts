@@ -5,13 +5,12 @@
  */
 
 import { KibanaRequest, KibanaResponseFactory, RequestHandlerContext } from 'src/core/server';
-import { AuthenticatedUser } from '../../../security/server';
-import { ScheduledTaskParams } from '../types';
+import { BaseParams, BasePayload, ReportingUser } from '../types';
 
 export type HandlerFunction = (
-  user: AuthenticatedUser | null,
+  user: ReportingUser,
   exportType: string,
-  jobParams: object,
+  jobParams: BaseParams,
   context: RequestHandlerContext,
   req: KibanaRequest,
   res: KibanaResponseFactory
@@ -19,11 +18,11 @@ export type HandlerFunction = (
 
 export type HandlerErrorFunction = (res: KibanaResponseFactory, err: Error) => any;
 
-export interface QueuedJobPayload<JobParamsType> {
+export interface QueuedJobPayload {
   error?: boolean;
   source: {
     job: {
-      payload: ScheduledTaskParams<JobParamsType>;
+      payload: BasePayload;
     };
   };
 }

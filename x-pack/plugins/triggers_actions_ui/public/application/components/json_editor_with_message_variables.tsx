@@ -5,8 +5,10 @@
  */
 import React, { useState } from 'react';
 import { EuiCodeEditor, EuiFormRow } from '@elastic/eui';
+import { XJsonMode } from '@kbn/ace';
+
 import './add_message_variables.scss';
-import { useXJsonMode } from '../../../../../../src/plugins/es_ui_shared/static/ace_x_json/hooks';
+import { XJson } from '../../../../../../src/plugins/es_ui_shared/public';
 
 import { AddMessageVariables } from './add_message_variables';
 import { ActionVariable } from '../../types';
@@ -14,13 +16,17 @@ import { ActionVariable } from '../../types';
 interface Props {
   messageVariables?: ActionVariable[];
   paramsProperty: string;
-  inputTargetValue: string;
+  inputTargetValue?: string;
   label: string;
   errors?: string[];
   areaLabel?: string;
   onDocumentsChange: (data: string) => void;
   helpText?: JSX.Element;
+  onBlur?: () => void;
 }
+
+const { useXJsonMode } = XJson;
+const xJsonMode = new XJsonMode();
 
 export const JsonEditorWithMessageVariables: React.FunctionComponent<Props> = ({
   messageVariables,
@@ -31,10 +37,11 @@ export const JsonEditorWithMessageVariables: React.FunctionComponent<Props> = ({
   areaLabel,
   onDocumentsChange,
   helpText,
+  onBlur,
 }) => {
   const [cursorPosition, setCursorPosition] = useState<any>(null);
 
-  const { xJsonMode, convertToJson, setXJson, xJson } = useXJsonMode(inputTargetValue ?? null);
+  const { convertToJson, setXJson, xJson } = useXJsonMode(inputTargetValue ?? null);
 
   const onSelectMessageVariable = (variable: string) => {
     const templatedVar = `{{${variable}}}`;
@@ -84,6 +91,7 @@ export const JsonEditorWithMessageVariables: React.FunctionComponent<Props> = ({
           onDocumentsChange(convertToJson(xjson));
         }}
         onCursorChange={(_value: any) => onClickWithMessageVariable(_value)}
+        onBlur={onBlur}
       />
     </EuiFormRow>
   );

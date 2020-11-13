@@ -46,6 +46,12 @@ function createSortObject(
   }
 }
 
+export function isLegacySort(sort: SortPair[] | SortPair): sort is SortPair {
+  return (
+    sort.length === 2 && typeof sort[0] === 'string' && (sort[1] === 'desc' || sort[1] === 'asc')
+  );
+}
+
 /**
  * Take a sorting array and make it into an object
  * @param {array} sort two dimensional array [[fieldToSort, directionToSort]]
@@ -53,8 +59,12 @@ function createSortObject(
  * @param {object} indexPattern used for determining default sort
  * @returns Array<{object}> an array of sort objects
  */
-export function getSort(sort: SortPair[], indexPattern: IndexPattern): SortPairObj[] {
+export function getSort(sort: SortPair[] | SortPair, indexPattern: IndexPattern): SortPairObj[] {
   if (Array.isArray(sort)) {
+    if (isLegacySort(sort)) {
+      // To stay compatible with legacy sort, which just supported a single sort field
+      return [{ [sort[0]]: sort[1] }];
+    }
     return sort
       .map((sortPair: SortPair) => createSortObject(sortPair, indexPattern))
       .filter((sortPairObj) => typeof sortPairObj === 'object') as SortPairObj[];

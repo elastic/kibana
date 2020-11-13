@@ -16,9 +16,8 @@ import {
   EuiFilterGroup,
   EuiFilterButton,
 } from '@elastic/eui';
-import { isEmpty } from 'lodash/fp';
-import React, { memo, useCallback, useMemo, useState, useEffect } from 'react';
-import { ListProps } from 'react-virtualized';
+import { isEmpty, debounce } from 'lodash/fp';
+import React, { memo, useCallback, useMemo, useState, useEffect, useRef } from 'react';
 import styled from 'styled-components';
 
 import {
@@ -102,7 +101,7 @@ export interface SearchProps {
   placeholder: string;
   onSearch: (arg: string) => void;
   incremental: boolean;
-  inputRef: (arg: HTMLElement) => void;
+  inputRef: (arg: HTMLInputElement | null) => void;
 }
 
 const SelectableTimelineComponent: React.FC<SelectableTimelineProps> = ({
@@ -116,36 +115,37 @@ const SelectableTimelineComponent: React.FC<SelectableTimelineProps> = ({
   const [heightTrigger, setHeightTrigger] = useState(0);
   const [searchTimelineValue, setSearchTimelineValue] = useState<string>('');
   const [onlyFavorites, setOnlyFavorites] = useState(false);
-  const [searchRef, setSearchRef] = useState<HTMLElement | null>(null);
+  const [searchRef, setSearchRef] = useState<HTMLInputElement | null>(null);
   const { fetchAllTimeline, timelines, loading, totalCount: timelineCount } = useGetAllTimeline();
+  const selectableListOuterRef = useRef<HTMLDivElement | null>(null);
+  const selectableListInnerRef = useRef<HTMLDivElement | null>(null);
 
-  const onSearchTimeline = useCallback((val) => {
-    setSearchTimelineValue(val);
-  }, []);
+  const debouncedSetSearchTimelineValue = useMemo(() => debounce(500, setSearchTimelineValue), []);
+
+  const onSearchTimeline = useCallback(
+    (val) => {
+      debouncedSetSearchTimelineValue(val);
+    },
+    [debouncedSetSearchTimelineValue]
+  );
 
   const handleOnToggleOnlyFavorites = useCallback(() => {
     setOnlyFavorites(!onlyFavorites);
   }, [onlyFavorites]);
 
   const handleOnScroll = useCallback(
-    (
-      totalTimelines: number,
-      totalCount: number,
-      {
-        clientHeight,
-        scrollHeight,
-        scrollTop,
-      }: {
-        clientHeight: number;
-        scrollHeight: number;
-        scrollTop: number;
-      }
-    ) => {
-      if (totalTimelines < totalCount) {
+    (totalTimelines: number, totalCount: number, scrollOffset: number) => {
+      if (
+        totalTimelines < totalCount &&
+        selectableListOuterRef.current &&
+        selectableListInnerRef.current
+      ) {
+        const clientHeight = selectableListOuterRef.current!.clientHeight;
+        const scrollHeight = selectableListInnerRef.current!.clientHeight;
         const clientHeightTrigger = clientHeight * 1.2;
         if (
-          scrollTop > 10 &&
-          scrollHeight - scrollTop < clientHeightTrigger &&
+          scrollOffset > 10 &&
+          scrollHeight - scrollOffset < clientHeightTrigger &&
           scrollHeight > heightTrigger
         ) {
           setHeightTrigger(scrollHeight);
@@ -243,9 +243,9 @@ const SelectableTimelineComponent: React.FC<SelectableTimelineProps> = ({
     isLoading: loading,
     placeholder: useMemo(() => i18n.SEARCH_BOX_TIMELINE_PLACEHOLDER(timelineType), [timelineType]),
     onSearch: onSearchTimeline,
-    incremental: false,
-    inputRef: (ref: HTMLElement) => {
-      setSearchRef(ref);
+    incremental: true,
+    inputRef: (node: HTMLInputElement | null) => {
+      setSearchRef(node);
     },
   };
 
@@ -263,7 +263,6 @@ const SelectableTimelineComponent: React.FC<SelectableTimelineProps> = ({
       onlyUserFavorite: onlyFavorites,
       status: null,
       timelineType,
-      templateTimelineType: null,
     });
   }, [fetchAllTimeline, onlyFavorites, pageSize, searchTimelineValue, timelineType]);
 
@@ -276,13 +275,16 @@ const SelectableTimelineComponent: React.FC<SelectableTimelineProps> = ({
         listProps={{
           rowHeight: TIMELINE_ITEM_HEIGHT,
           showIcons: false,
-          virtualizedProps: ({
-            onScroll: handleOnScroll.bind(
-              null,
-              timelines.filter((t) => !hideUntitled || t.title !== '').length,
-              timelineCount
-            ),
-          } as unknown) as ListProps,
+          windowProps: {
+            onScroll: ({ scrollOffset }) =>
+              handleOnScroll(
+                timelines.filter((t) => !hideUntitled || t.title !== '').length,
+                timelineCount,
+                scrollOffset
+              ),
+            outerRef: selectableListOuterRef,
+            innerRef: selectableListInnerRef,
+          },
         }}
         renderOption={renderTimelineOption}
         onChange={handleTimelineChange}

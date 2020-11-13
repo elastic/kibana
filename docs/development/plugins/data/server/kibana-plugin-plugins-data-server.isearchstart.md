@@ -7,13 +7,15 @@
 <b>Signature:</b>
 
 ```typescript
-export interface ISearchStart 
+export interface ISearchStart<SearchStrategyRequest extends IKibanaSearchRequest = IEsSearchRequest, SearchStrategyResponse extends IKibanaSearchResponse = IEsSearchResponse> 
 ```
 
 ## Properties
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [getSearchStrategy](./kibana-plugin-plugins-data-server.isearchstart.getsearchstrategy.md) | <code>(name: string) =&gt; ISearchStrategy</code> | Get other registered search strategies. For example, if a new strategy needs to use the already-registered ES search strategy, it can use this function to accomplish that. |
-|  [search](./kibana-plugin-plugins-data-server.isearchstart.search.md) | <code>(context: RequestHandlerContext, request: IKibanaSearchRequest, options: ISearchOptions) =&gt; Promise&lt;IKibanaSearchResponse&gt;</code> |  |
+|  [aggs](./kibana-plugin-plugins-data-server.isearchstart.aggs.md) | <code>AggsStart</code> |  |
+|  [asScoped](./kibana-plugin-plugins-data-server.isearchstart.asscoped.md) | <code>(request: KibanaRequest) =&gt; ISearchClient</code> |  |
+|  [getSearchStrategy](./kibana-plugin-plugins-data-server.isearchstart.getsearchstrategy.md) | <code>(name?: string) =&gt; ISearchStrategy&lt;SearchStrategyRequest, SearchStrategyResponse&gt;</code> | Get other registered search strategies by name (or, by default, the Elasticsearch strategy). For example, if a new strategy needs to use the already-registered ES search strategy, it can use this function to accomplish that. |
+|  [searchSource](./kibana-plugin-plugins-data-server.isearchstart.searchsource.md) | <code>{</code><br/><code>        asScoped: (request: KibanaRequest) =&gt; Promise&lt;ISearchStartSearchSource&gt;;</code><br/><code>    }</code> |  |
 

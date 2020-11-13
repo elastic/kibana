@@ -160,7 +160,6 @@ export function ConsoleHistory({ close }: Props) {
               const isSelected = viewingReq === req;
               return (
                 // Ignore a11y issues on li's
-                // eslint-disable-next-line
                 <li
                   key={idx}
                   id={`${CHILD_ELEMENT_PREFIX}${idx}`}

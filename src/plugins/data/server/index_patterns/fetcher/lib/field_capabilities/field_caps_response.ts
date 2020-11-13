@@ -93,8 +93,12 @@ export interface FieldCapsResponse {
  */
 export function readFieldCapsResponse(fieldCapsResponse: FieldCapsResponse): FieldDescriptor[] {
   const capsByNameThenType = fieldCapsResponse.fields;
-  const kibanaFormattedCaps: FieldDescriptor[] = Object.keys(capsByNameThenType).map(
-    (fieldName) => {
+
+  const kibanaFormattedCaps = Object.keys(capsByNameThenType).reduce<{
+    array: FieldDescriptor[];
+    hash: Record<string, FieldDescriptor>;
+  }>(
+    (agg, fieldName) => {
       const capsByType = capsByNameThenType[fieldName];
       const types = Object.keys(capsByType);
 
@@ -119,7 +123,7 @@ export function readFieldCapsResponse(fieldCapsResponse: FieldCapsResponse): Fie
       // ignore the conflict and carry on (my wayward son)
       const uniqueKibanaTypes = uniq(types.map(castEsToKbnFieldTypeName));
       if (uniqueKibanaTypes.length > 1) {
-        return {
+        const field = {
           name: fieldName,
           type: 'conflict',
           esTypes: types,
@@ -134,10 +138,14 @@ export function readFieldCapsResponse(fieldCapsResponse: FieldCapsResponse): Fie
             {}
           ),
         };
+        // This is intentionally using a "hash" and a "push" to be highly optimized with very large indexes
+        agg.array.push(field);
+        agg.hash[fieldName] = field;
+        return agg;
       }
 
       const esType = types[0];
-      return {
+      const field = {
         name: fieldName,
         type: castEsToKbnFieldTypeName(esType),
         esTypes: types,
@@ -145,11 +153,19 @@ export function readFieldCapsResponse(fieldCapsResponse: FieldCapsResponse): Fie
         aggregatable: isAggregatable,
         readFromDocValues: shouldReadFieldFromDocValues(isAggregatable, esType),
       };
+      // This is intentionally using a "hash" and a "push" to be highly optimized with very large indexes
+      agg.array.push(field);
+      agg.hash[fieldName] = field;
+      return agg;
+    },
+    {
+      array: [],
+      hash: {},
     }
   );
 
   // Get all types of sub fields. These could be multi fields or children of nested/object types
-  const subFields = kibanaFormattedCaps.filter((field) => {
+  const subFields = kibanaFormattedCaps.array.filter((field) => {
     return field.name.includes('.');
   });
 
@@ -161,9 +177,9 @@ export function readFieldCapsResponse(fieldCapsResponse: FieldCapsResponse): Fie
       .map((_, index, parentFieldNameParts) => {
         return parentFieldNameParts.slice(0, index + 1).join('.');
       });
-    const parentFieldCaps = parentFieldNames.map((parentFieldName) => {
-      return kibanaFormattedCaps.find((caps) => caps.name === parentFieldName);
-    });
+    const parentFieldCaps = parentFieldNames.map(
+      (parentFieldName) => kibanaFormattedCaps.hash[parentFieldName]
+    );
     const parentFieldCapsAscending = parentFieldCaps.reverse();
 
     if (parentFieldCaps && parentFieldCaps.length > 0) {
@@ -188,7 +204,7 @@ export function readFieldCapsResponse(fieldCapsResponse: FieldCapsResponse): Fie
     }
   });
 
-  return kibanaFormattedCaps.filter((field) => {
+  return kibanaFormattedCaps.array.filter((field) => {
     return !['object', 'nested'].includes(field.type);
   });
 }

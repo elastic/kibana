@@ -1,7 +1,7 @@
 [[search]]
 == Search data
 Many Kibana apps embed a query bar for real-time search, including
-*Discover*, *Visualize*, and *Dashboard*.
+*Discover* and *Dashboard*.
 
 [float]
 === Search your data
@@ -28,7 +28,7 @@ configure a refresh interval to periodically resubmit your searches to
 retrieve the latest results.
 
 [role="screenshot"]
-image::images/autorefresh-interval.png[]
+image::images/autorefresh-interval.png[Image showing what refresh interval option looks like. The configurable time interval is located in the dropdown]
 
 You can also manually refresh the search results by
 clicking the *Refresh* button.
@@ -84,7 +84,7 @@ query language you can also submit queries using the {ref}/query-dsl.html[Elasti
 
 [[save-open-search]]
 === Save a search
-A saved search persists your current view of Discover for later retrieval and reuse. You can reload a saved search into Discover, add it to a dashboard, and use it as the basis for a <<visualize, visualization>>.
+A saved search persists your current view of Discover for later retrieval and reuse. You can reload a saved search into Discover, add it to a dashboard, and use it as the basis for a visualization.
 
 A saved search includes the query text, filters, and optionally, the time filter. A saved search also includes the selected columns in the document table, the sort order, and the current index pattern.
 
@@ -104,9 +104,7 @@ To save the current search:
 . Click *Save* in the Kibana toolbar.
 . Enter a name for the search and click *Save*.
 
-To import, export and delete saved searches:
-. Open the menu, then click *Stack Management.
-. From the {kib} menu, click *Saved Ojbects*.
+To import, export, and delete saved searches, open the main menu, then click *Stack Management > Saved Ojbects*.
 
 ==== Open a saved search
 To load a saved search into Discover:
@@ -120,7 +118,7 @@ used for the saved search will also be automatically selected.
 
 [[save-load-delete-query]]
 === Save a query
-A saved query is a portable collection of query text and filters that you can reuse in <<discover, Discover>>, <<visualize, Visualize>>, and <<dashboard, Dashboard>>. Save a query when you want to:
+A saved query is a portable collection of query text and filters that you can reuse in <<discover, Discover>> and <<dashboard, Dashboard>>. Save a query when you want to:
 
 * Retrieve results from the same query at a later time without having to reenter the query text, add the filters or set the time filter
 * View the results of the same query in multiple apps
@@ -148,7 +146,7 @@ image::discover/images/saved-query-save-form-default-filters.png["Example of the
 . Click *Save*.
 
 ==== Load a query
-To load a saved query into Discover, Dashboard, or Visualize:
+To load a saved query into Discover or Dashboard:
 
 . Click *#* in the search bar, next to the query text input.
 . Select the query you want to load. You might need to scroll down to find the query you are looking for.

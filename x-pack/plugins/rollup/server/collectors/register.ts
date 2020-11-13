@@ -5,8 +5,8 @@
  */
 
 import { get } from 'lodash';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
+import { UsageCollectionSetup, CollectorFetchContext } from 'src/plugins/usage_collection/server';
+import { LegacyAPICaller } from 'kibana/server';
 
 interface IdToFlagMap {
   [key: string]: boolean;
@@ -27,7 +27,7 @@ function createIdToFlagMap(ids: string[]) {
   }, {} as any);
 }
 
-async function fetchRollupIndexPatterns(kibanaIndex: string, callCluster: CallCluster) {
+async function fetchRollupIndexPatterns(kibanaIndex: string, callCluster: LegacyAPICaller) {
   const searchParams = {
     size: ES_MAX_RESULT_WINDOW_DEFAULT_VALUE,
     index: kibanaIndex,
@@ -56,7 +56,7 @@ async function fetchRollupIndexPatterns(kibanaIndex: string, callCluster: CallCl
 
 async function fetchRollupSavedSearches(
   kibanaIndex: string,
-  callCluster: CallCluster,
+  callCluster: LegacyAPICaller,
   rollupIndexPatternToFlagMap: IdToFlagMap
 ) {
   const searchParams = {
@@ -104,7 +104,7 @@ async function fetchRollupSavedSearches(
 
 async function fetchRollupVisualizations(
   kibanaIndex: string,
-  callCluster: CallCluster,
+  callCluster: LegacyAPICaller,
   rollupIndexPatternToFlagMap: IdToFlagMap,
   rollupSavedSearchesToFlagMap: IdToFlagMap
 ) {
@@ -211,7 +211,7 @@ export function registerRollupUsageCollector(
         total: { type: 'long' },
       },
     },
-    fetch: async (callCluster: CallCluster) => {
+    fetch: async ({ callCluster }: CollectorFetchContext) => {
       const rollupIndexPatterns = await fetchRollupIndexPatterns(kibanaIndex, callCluster);
       const rollupIndexPatternToFlagMap = createIdToFlagMap(rollupIndexPatterns);
 

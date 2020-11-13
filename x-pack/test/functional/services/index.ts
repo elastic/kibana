@@ -30,6 +30,7 @@ import {
   MonitoringKibanaInstancesProvider,
   MonitoringKibanaInstanceProvider,
   MonitoringKibanaSummaryStatusProvider,
+  MonitoringSetupModeProvider,
   // @ts-ignore not ts yet
 } from './monitoring';
 // @ts-ignore not ts yet
@@ -85,6 +86,7 @@ export const services = {
   monitoringKibanaInstances: MonitoringKibanaInstancesProvider,
   monitoringKibanaInstance: MonitoringKibanaInstanceProvider,
   monitoringKibanaSummaryStatus: MonitoringKibanaSummaryStatusProvider,
+  monitoringSetupMode: MonitoringSetupModeProvider,
   pipelineList: PipelineListProvider,
   pipelineEditor: PipelineEditorProvider,
   random: RandomProvider,

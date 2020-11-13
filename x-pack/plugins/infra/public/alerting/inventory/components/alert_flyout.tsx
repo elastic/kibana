@@ -5,6 +5,8 @@
  */
 
 import React, { useContext } from 'react';
+import { ApplicationStart, DocLinksStart, HttpStart, NotificationsStart } from 'src/core/public';
+
 import { AlertsContextProvider, AlertAdd } from '../../../../../triggers_actions_ui/public';
 import { TriggerActionsContext } from '../../../utils/triggers_actions_context';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
@@ -12,6 +14,7 @@ import { useKibana } from '../../../../../../../src/plugins/kibana_react/public'
 import { METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID } from '../../../../server/lib/alerting/inventory_metric_threshold/types';
 import { InfraWaffleMapOptions } from '../../../lib/lib';
 import { InventoryItemType } from '../../../../common/inventory_models/types';
+import { useAlertPrefillContext } from '../../../alerting/use_alert_prefill';
 
 interface Props {
   visible?: boolean;
@@ -21,16 +24,31 @@ interface Props {
   setVisible: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-export const AlertFlyout = (props: Props) => {
+interface KibanaDeps {
+  notifications: NotificationsStart;
+  http: HttpStart;
+  docLinks: DocLinksStart;
+  application: ApplicationStart;
+}
+
+export const AlertFlyout = ({ options, nodeType, filter, visible, setVisible }: Props) => {
   const { triggersActionsUI } = useContext(TriggerActionsContext);
-  const { services } = useKibana();
+  const { services } = useKibana<KibanaDeps>();
+
+  const { inventoryPrefill } = useAlertPrefillContext();
+  const { customMetrics } = inventoryPrefill;
 
   return (
     <>
       {triggersActionsUI && (
         <AlertsContextProvider
           value={{
-            metadata: { options: props.options, nodeType: props.nodeType, filter: props.filter },
+            metadata: {
+              options,
+              nodeType,
+              filter,
+              customMetrics,
+            },
             toastNotifications: services.notifications?.toasts,
             http: services.http,
             docLinks: services.docLinks,
@@ -40,8 +58,8 @@ export const AlertFlyout = (props: Props) => {
           }}
         >
           <AlertAdd
-            addFlyoutVisible={props.visible!}
-            setAddFlyoutVisibility={props.setVisible}
+            addFlyoutVisible={visible!}
+            setAddFlyoutVisibility={setVisible}
             alertTypeId={METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID}
             canChangeTrigger={false}
             consumer={'infrastructure'}

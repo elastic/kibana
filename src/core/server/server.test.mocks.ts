@@ -41,9 +41,12 @@ jest.mock('./legacy/legacy_service', () => ({
   LegacyService: jest.fn(() => mockLegacyService),
 }));
 
-import { configServiceMock } from './config/config_service.mock';
+const realKbnConfig = jest.requireActual('@kbn/config');
+
+import { configServiceMock } from './config/mocks';
 export const mockConfigService = configServiceMock.create();
-jest.doMock('./config/config_service', () => ({
+jest.doMock('@kbn/config', () => ({
+  ...realKbnConfig,
   ConfigService: jest.fn(() => mockConfigService),
 }));
 
@@ -74,10 +77,10 @@ import { RenderingService, mockRenderingService } from './rendering/__mocks__/re
 export { mockRenderingService };
 jest.doMock('./rendering/rendering_service', () => ({ RenderingService }));
 
-import { uuidServiceMock } from './uuid/uuid_service.mock';
-export const mockUuidService = uuidServiceMock.create();
-jest.doMock('./uuid/uuid_service', () => ({
-  UuidService: jest.fn(() => mockUuidService),
+import { environmentServiceMock } from './environment/environment_service.mock';
+export const mockEnvironmentService = environmentServiceMock.create();
+jest.doMock('./environment/environment_service', () => ({
+  EnvironmentService: jest.fn(() => mockEnvironmentService),
 }));
 
 import { metricsServiceMock } from './metrics/metrics_service.mock';
@@ -98,8 +101,8 @@ jest.doMock('./logging/logging_service', () => ({
   LoggingService: jest.fn(() => mockLoggingService),
 }));
 
-import { auditTrailServiceMock } from './audit_trail/audit_trail_service.mock';
-export const mockAuditTrailService = auditTrailServiceMock.create();
-jest.doMock('./audit_trail/audit_trail_service', () => ({
-  AuditTrailService: jest.fn(() => mockAuditTrailService),
+import { i18nServiceMock } from './i18n/i18n_service.mock';
+export const mockI18nService = i18nServiceMock.create();
+jest.doMock('./i18n/i18n_service', () => ({
+  I18nService: jest.fn(() => mockI18nService),
 }));

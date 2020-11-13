@@ -8,16 +8,18 @@
 #
 # eg. Setting the environment variable:
 #
-#       ELASTICSEARCH_STARTUPTIMEOUT=60
+#       ELASTICSEARCH_LOGQUERIES=true
 #
 # will cause Kibana to be invoked with:
 #
-#       --elasticsearch.startupTimeout=60
+#       --elasticsearch.logQueries=true
 
 kibana_vars=(
     console.enabled
     console.proxyConfig
     console.proxyFilter
+    ops.cGroupOverrides.cpuPath
+    ops.cGroupOverrides.cpuAcctPath
     cpu.cgroup.path.override
     cpuacct.cgroup.path.override
     csp.rules
@@ -28,7 +30,6 @@ kibana_vars=(
     elasticsearch.logQueries
     elasticsearch.password
     elasticsearch.pingTimeout
-    elasticsearch.preserveHost
     elasticsearch.requestHeadersWhitelist
     elasticsearch.requestTimeout
     elasticsearch.shardTimeout
@@ -45,8 +46,11 @@ kibana_vars=(
     elasticsearch.ssl.truststore.path
     elasticsearch.ssl.truststore.password
     elasticsearch.ssl.verificationMode
-    elasticsearch.startupTimeout
     elasticsearch.username
+    enterpriseSearch.accessCheckTimeout
+    enterpriseSearch.accessCheckTimeoutWarning
+    enterpriseSearch.enabled
+    enterpriseSearch.host
     i18n.locale
     interpreter.enableInVisualize
     kibana.autocompleteTerminateAfter
@@ -93,6 +97,7 @@ kibana_vars=(
     path.data
     pid.file
     regionmap
+    security.showInsecureClusterWarning
     server.basePath
     server.customResponseHeaders
     server.compression.enabled
@@ -133,6 +138,7 @@ kibana_vars=(
     tilemap.url
     timelion.enabled
     vega.enableExternalUrls
+    xpack.actions.proxyUrl
     xpack.apm.enabled
     xpack.apm.serviceMapEnabled
     xpack.apm.ui.enabled
@@ -159,6 +165,7 @@ kibana_vars=(
     xpack.code.security.gitHostWhitelist
     xpack.code.security.gitProtocolWhitelist
     xpack.encryptedSavedObjects.encryptionKey
+    xpack.encryptedSavedObjects.keyRotation.decryptionOnlyKeys
     xpack.graph.enabled
     xpack.graph.canEditDrillDownUrls
     xpack.graph.savePolicy
@@ -177,6 +184,8 @@ kibana_vars=(
     xpack.ingestManager.fleet.tlsCheckDisabled
     xpack.ingestManager.registryUrl
     xpack.license_management.enabled
+    xpack.maps.enabled
+    xpack.maps.showMapVisualizationTypes
     xpack.ml.enabled
     xpack.reporting.capture.browser.autoDownload
     xpack.reporting.capture.browser.chromium.disableSandbox
@@ -231,10 +240,12 @@ kibana_vars=(
     xpack.security.cookieName
     xpack.security.enabled
     xpack.security.encryptionKey
+    xpack.security.sameSiteCookies
     xpack.security.secureCookies
     xpack.security.sessionTimeout
     xpack.security.session.idleTimeout
     xpack.security.session.lifespan
+    xpack.security.session.cleanupInterval
     xpack.security.loginAssistanceMessage
     xpack.security.loginHelp
     xpack.spaces.enabled
@@ -276,4 +287,4 @@ umask 0002
 # Therefore, we set this value here so that cgroup statistics are
 # available for the container this process will run in.
 
-exec /usr/share/kibana/bin/kibana --cpu.cgroup.path.override=/ --cpuacct.cgroup.path.override=/ ${longopts} "$@"
+exec /usr/share/kibana/bin/kibana --ops.cGroupOverrides.cpuPath=/ --ops.cGroupOverrides.cpuAcctPath=/ ${longopts} "$@"

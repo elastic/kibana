@@ -3,9 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { first, map } from 'rxjs/operators';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { combineLatest } from 'rxjs';
 import { SecurityPluginSetup } from '../../security/server';
 import {
   EncryptedSavedObjectsPluginSetup,
@@ -30,14 +31,18 @@ import {
   SharedGlobalConfig,
   ElasticsearchServiceStart,
   ILegacyClusterClient,
+  StatusServiceSetup,
+  ServiceStatus,
 } from '../../../../src/core/server';
 
 import {
+  aggregateAlertRoute,
   createAlertRoute,
   deleteAlertRoute,
   findAlertRoute,
   getAlertRoute,
   getAlertStateRoute,
+  getAlertInstanceSummaryRoute,
   listAlertTypesRoute,
   updateAlertRoute,
   enableAlertRoute,
@@ -54,19 +59,27 @@ import {
   PluginSetupContract as ActionsPluginSetupContract,
   PluginStartContract as ActionsPluginStartContract,
 } from '../../actions/server';
-import { Services } from './types';
+import { AlertsHealth, Services } from './types';
 import { registerAlertsUsageCollector } from './usage';
 import { initializeAlertingTelemetry, scheduleAlertingTelemetry } from './usage/task';
-import { IEventLogger, IEventLogService } from '../../event_log/server';
+import { IEventLogger, IEventLogService, IEventLogClientService } from '../../event_log/server';
 import { PluginStartContract as FeaturesPluginStart } from '../../features/server';
 import { setupSavedObjects } from './saved_objects';
+import {
+  getHealthStatusStream,
+  scheduleAlertingHealthCheck,
+  initializeAlertingHealth,
+} from './health';
+import { AlertsConfig } from './config';
+import { getHealth } from './health/get_health';
 
-const EVENT_LOG_PROVIDER = 'alerting';
+export const EVENT_LOG_PROVIDER = 'alerting';
 export const EVENT_LOG_ACTIONS = {
   execute: 'execute',
   executeAction: 'execute-action',
   newInstance: 'new-instance',
   resolvedInstance: 'resolved-instance',
+  activeInstance: 'active-instance',
 };
 
 export interface PluginSetupContract {
@@ -75,6 +88,7 @@ export interface PluginSetupContract {
 export interface PluginStartContract {
   listTypes: AlertTypeRegistry['list'];
   getAlertsClientWithRequest(request: KibanaRequest): PublicMethodsOf<AlertsClient>;
+  getFrameworkHealth: () => Promise<AlertsHealth>;
 }
 
 export interface AlertingPluginsSetup {
@@ -86,15 +100,18 @@ export interface AlertingPluginsSetup {
   spaces?: SpacesPluginSetup;
   usageCollection?: UsageCollectionSetup;
   eventLog: IEventLogService;
+  statusService: StatusServiceSetup;
 }
 export interface AlertingPluginsStart {
   actions: ActionsPluginStartContract;
   taskManager: TaskManagerStartContract;
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   features: FeaturesPluginStart;
+  eventLog: IEventLogClientService;
 }
 
 export class AlertingPlugin {
+  private readonly config: Promise<AlertsConfig>;
   private readonly logger: Logger;
   private alertTypeRegistry?: AlertTypeRegistry;
   private readonly taskRunnerFactory: TaskRunnerFactory;
@@ -106,19 +123,23 @@ export class AlertingPlugin {
   private readonly alertsClientFactory: AlertsClientFactory;
   private readonly telemetryLogger: Logger;
   private readonly kibanaIndex: Promise<string>;
+  private readonly kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
+  private eventLogService?: IEventLogService;
   private eventLogger?: IEventLogger;
 
   constructor(initializerContext: PluginInitializerContext) {
+    this.config = initializerContext.config.create<AlertsConfig>().pipe(first()).toPromise();
     this.logger = initializerContext.logger.get('plugins', 'alerting');
     this.taskRunnerFactory = new TaskRunnerFactory();
     this.alertsClientFactory = new AlertsClientFactory();
-    this.telemetryLogger = initializerContext.logger.get('telemetry');
+    this.telemetryLogger = initializerContext.logger.get('usage');
     this.kibanaIndex = initializerContext.config.legacy.globalConfig$
       .pipe(
         first(),
         map((config: SharedGlobalConfig) => config.kibana.index)
       )
       .toPromise();
+    this.kibanaVersion = initializerContext.env.packageInfo.version;
   }
 
   public async setup(
@@ -148,12 +169,14 @@ export class AlertingPlugin {
       );
     }
 
-    setupSavedObjects(core.savedObjects, plugins.encryptedSavedObjects);
-
-    plugins.eventLog.registerProviderActions(EVENT_LOG_PROVIDER, Object.values(EVENT_LOG_ACTIONS));
     this.eventLogger = plugins.eventLog.getLogger({
       event: { provider: EVENT_LOG_PROVIDER },
     });
+
+    setupSavedObjects(core.savedObjects, plugins.encryptedSavedObjects);
+
+    this.eventLogService = plugins.eventLog;
+    plugins.eventLog.registerProviderActions(EVENT_LOG_PROVIDER, Object.values(EVENT_LOG_ACTIONS));
 
     const alertTypeRegistry = new AlertTypeRegistry({
       taskManager: plugins.taskManager,
@@ -177,16 +200,37 @@ export class AlertingPlugin {
       });
     }
 
+    core.getStartServices().then(async ([, startPlugins]) => {
+      core.status.set(
+        combineLatest([
+          core.status.derivedStatus$,
+          getHealthStatusStream(startPlugins.taskManager),
+        ]).pipe(
+          map(([derivedStatus, healthStatus]) => {
+            if (healthStatus.level > derivedStatus.level) {
+              return healthStatus as ServiceStatus;
+            } else {
+              return derivedStatus;
+            }
+          })
+        )
+      );
+    });
+
+    initializeAlertingHealth(this.logger, plugins.taskManager, core.getStartServices());
+
     core.http.registerRouteHandlerContext('alerting', this.createRouteHandlerContext(core));
 
     // Routes
     const router = core.http.createRouter();
     // Register routes
+    aggregateAlertRoute(router, this.licenseState);
     createAlertRoute(router, this.licenseState);
     deleteAlertRoute(router, this.licenseState);
     findAlertRoute(router, this.licenseState);
     getAlertRoute(router, this.licenseState);
     getAlertStateRoute(router, this.licenseState);
+    getAlertInstanceSummaryRoute(router, this.licenseState);
     listAlertTypesRoute(router, this.licenseState);
     updateAlertRoute(router, this.licenseState);
     enableAlertRoute(router, this.licenseState);
@@ -233,6 +277,8 @@ export class AlertingPlugin {
       },
       actions: plugins.actions,
       features: plugins.features,
+      eventLog: plugins.eventLog,
+      kibanaVersion: this.kibanaVersion,
     });
 
     const getAlertsClientWithRequest = (request: KibanaRequest) => {
@@ -253,13 +299,22 @@ export class AlertingPlugin {
       encryptedSavedObjectsClient,
       getBasePath: this.getBasePath,
       eventLogger: this.eventLogger!,
+      internalSavedObjectsRepository: core.savedObjects.createInternalRepository(['alert']),
+    });
+
+    this.eventLogService!.registerSavedObjectProvider('alert', (request) => {
+      const client = getAlertsClientWithRequest(request);
+      return (type: string, id: string) => client.get({ id });
     });
 
     scheduleAlertingTelemetry(this.telemetryLogger, plugins.taskManager);
+    scheduleAlertingHealthCheck(this.logger, this.config, plugins.taskManager);
 
     return {
       listTypes: alertTypeRegistry!.list.bind(this.alertTypeRegistry!),
       getAlertsClientWithRequest,
+      getFrameworkHealth: async () =>
+        await getHealth(core.savedObjects.createInternalRepository(['alert'])),
     };
   }
 
@@ -274,6 +329,8 @@ export class AlertingPlugin {
           return alertsClientFactory!.create(request, savedObjects);
         },
         listTypes: alertTypeRegistry!.list.bind(alertTypeRegistry!),
+        getFrameworkHealth: async () =>
+          await getHealth(savedObjects.createInternalRepository(['alert'])),
       };
     };
   };
@@ -285,6 +342,7 @@ export class AlertingPlugin {
     return (request) => ({
       callCluster: elasticsearch.legacy.client.asScoped(request).callAsCurrentUser,
       savedObjectsClient: this.getScopedClientWithAlertSavedObjectType(savedObjects, request),
+      scopedClusterClient: elasticsearch.client.asScoped(request).asCurrentUser,
       getLegacyScopedClusterClient(clusterClient: ILegacyClusterClient) {
         return clusterClient.asScoped(request);
       },

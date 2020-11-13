@@ -6,7 +6,7 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 
-import { setupEnvironment, pageHelpers, nextTick } from './helpers';
+import { setupEnvironment, pageHelpers } from './helpers';
 import { PipelinesCreateTestBed } from './helpers/pipelines_create.helpers';
 
 import { nestedProcessorsErrorFixture } from './fixtures';
@@ -43,8 +43,9 @@ describe('<PipelinesCreate />', () => {
     beforeEach(async () => {
       await act(async () => {
         testBed = await setup();
-        await testBed.waitFor('pipelineForm');
       });
+
+      testBed.component.update();
     });
 
     test('should render the correct page header', () => {
@@ -60,28 +61,20 @@ describe('<PipelinesCreate />', () => {
     });
 
     test('should toggle the version field', async () => {
-      const { actions, component, exists } = testBed;
+      const { actions, exists } = testBed;
 
       // Version field should be hidden by default
       expect(exists('versionField')).toBe(false);
 
-      await act(async () => {
-        actions.toggleVersionSwitch();
-        await nextTick();
-        component.update();
-      });
+      actions.toggleVersionSwitch();
 
       expect(exists('versionField')).toBe(true);
     });
 
     test('should show the request flyout', async () => {
-      const { actions, component, find, exists } = testBed;
+      const { actions, find, exists } = testBed;
 
-      await act(async () => {
-        actions.clickShowRequestLink();
-        await nextTick();
-        component.update();
-      });
+      await actions.clickShowRequestLink();
 
       // Verify request flyout opens
       expect(exists('requestFlyout')).toBe(true);
@@ -92,22 +85,17 @@ describe('<PipelinesCreate />', () => {
       test('should prevent form submission if required fields are missing', async () => {
         const { form, actions, component, find } = testBed;
 
-        await act(async () => {
-          actions.clickSubmitButton();
-          await nextTick();
-          component.update();
-        });
+        await actions.clickSubmitButton();
 
         expect(form.getErrorsMessages()).toEqual(['Name is required.']);
         expect(find('submitButton').props().disabled).toEqual(true);
 
-        // Add required fields and verify button is enabled again
-        form.setInputValue('nameField.input', 'my_pipeline');
-
         await act(async () => {
-          await nextTick();
-          component.update();
+          // Add required fields and verify button is enabled again
+          form.setInputValue('nameField.input', 'my_pipeline');
         });
+
+        component.update();
 
         expect(find('submitButton').props().disabled).toEqual(false);
       });
@@ -117,23 +105,27 @@ describe('<PipelinesCreate />', () => {
       beforeEach(async () => {
         await act(async () => {
           testBed = await setup();
-
-          const { waitFor, form } = testBed;
-
-          await waitFor('pipelineForm');
-
-          form.setInputValue('nameField.input', 'my_pipeline');
-          form.setInputValue('descriptionField.input', 'pipeline description');
         });
+
+        testBed.component.update();
+
+        await act(async () => {
+          testBed.form.setInputValue('nameField.input', 'my_pipeline');
+        });
+
+        testBed.component.update();
+
+        await act(async () => {
+          testBed.form.setInputValue('descriptionField.input', 'pipeline description');
+        });
+
+        testBed.component.update();
       });
 
       test('should send the correct payload', async () => {
-        const { actions, waitFor } = testBed;
+        const { actions } = testBed;
 
-        await act(async () => {
-          actions.clickSubmitButton();
-          await waitFor('pipelineForm', 0);
-        });
+        await actions.clickSubmitButton();
 
         const latestRequest = server.requests[server.requests.length - 1];
 
@@ -143,11 +135,11 @@ describe('<PipelinesCreate />', () => {
           processors: [],
         };
 
-        expect(JSON.parse(latestRequest.requestBody)).toEqual(expected);
+        expect(JSON.parse(JSON.parse(latestRequest.requestBody).body)).toEqual(expected);
       });
 
       test('should surface API errors from the request', async () => {
-        const { actions, find, exists, waitFor } = testBed;
+        const { actions, find, exists } = testBed;
 
         const error = {
           status: 409,
@@ -157,57 +149,32 @@ describe('<PipelinesCreate />', () => {
 
         httpRequestsMockHelpers.setCreatePipelineResponse(undefined, { body: error });
 
-        await act(async () => {
-          actions.clickSubmitButton();
-          await waitFor('savePipelineError');
-        });
+        await actions.clickSubmitButton();
 
         expect(exists('savePipelineError')).toBe(true);
         expect(find('savePipelineError').text()).toContain(error.message);
       });
 
       test('displays nested pipeline errors as a flat list', async () => {
-        const { actions, find, exists, waitFor } = testBed;
+        const { actions, find, exists, component } = testBed;
         httpRequestsMockHelpers.setCreatePipelineResponse(undefined, {
           body: nestedProcessorsErrorFixture,
         });
 
-        await act(async () => {
-          actions.clickSubmitButton();
-          await waitFor('savePipelineError');
-        });
+        await actions.clickSubmitButton();
 
         expect(exists('savePipelineError')).toBe(true);
         expect(exists('savePipelineError.showErrorsButton')).toBe(true);
-        find('savePipelineError.showErrorsButton').simulate('click');
+
+        await act(async () => {
+          find('savePipelineError.showErrorsButton').simulate('click');
+        });
+
+        component.update();
+
         expect(exists('savePipelineError.hideErrorsButton')).toBe(true);
         expect(exists('savePipelineError.showErrorsButton')).toBe(false);
         expect(find('savePipelineError').find('li').length).toBe(8);
-      });
-    });
-
-    describe('test pipeline', () => {
-      beforeEach(async () => {
-        await act(async () => {
-          testBed = await setup();
-
-          const { waitFor } = testBed;
-
-          await waitFor('pipelineForm');
-        });
-      });
-
-      test('should open the test pipeline flyout', async () => {
-        const { actions, exists, find, waitFor } = testBed;
-
-        await act(async () => {
-          actions.clickTestPipelineButton();
-          await waitFor('testPipelineFlyout');
-        });
-
-        // Verify test pipeline flyout opens
-        expect(exists('testPipelineFlyout')).toBe(true);
-        expect(find('testPipelineFlyout.title').text()).toBe('Test pipeline');
       });
     });
   });

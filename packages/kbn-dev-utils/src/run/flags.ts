@@ -52,8 +52,8 @@ export function mergeFlagOptions(global: FlagOptions = {}, local: FlagOptions = 
     boolean: [...(global.boolean || []), ...(local.boolean || [])],
     string: [...(global.string || []), ...(local.string || [])],
     default: {
-      ...global.alias,
-      ...local.alias,
+      ...global.default,
+      ...local.default,
     },
 
     help: local.help,

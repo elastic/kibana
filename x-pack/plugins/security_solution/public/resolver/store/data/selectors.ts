@@ -6,6 +6,7 @@
 
 import rbush from 'rbush';
 import { createSelector, defaultMemoize } from 'reselect';
+import { panelViewAndParameters as panelViewAndParametersFromLocationSearchAndResolverComponentInstanceID } from '../panel_view_and_parameters';
 import {
   DataState,
   Vector2,
@@ -14,31 +15,39 @@ import {
   IndexedProcessNode,
   AABB,
   VisibleEntites,
+  TreeFetcherParameters,
+  IsometricTaxiLayout,
 } from '../../types';
-import {
-  isGraphableProcess,
-  isTerminatedProcess,
-  uniquePidForProcess,
-  uniqueParentPidForProcess,
-} from '../../models/process_event';
+import { isGraphableProcess, isTerminatedProcess } from '../../models/process_event';
 import * as indexedProcessTreeModel from '../../models/indexed_process_tree';
-
+import * as eventModel from '../../../../common/endpoint/models/event';
+import * as nodeEventsInCategoryModel from './node_events_in_category_model';
 import {
-  ResolverEvent,
   ResolverTree,
   ResolverNodeStats,
   ResolverRelatedEvents,
+  SafeResolverEvent,
 } from '../../../../common/endpoint/types';
 import * as resolverTreeModel from '../../models/resolver_tree';
+import * as treeFetcherParametersModel from '../../models/tree_fetcher_parameters';
 import * as isometricTaxiLayoutModel from '../../models/indexed_process_tree/isometric_taxi_layout';
-import { allEventCategories } from '../../../../common/endpoint/models/event';
 import * as vector2 from '../../models/vector2';
 
 /**
  * If there is currently a request.
  */
-export function isLoading(state: DataState): boolean {
-  return state.pendingRequestDatabaseDocumentID !== undefined;
+export function isTreeLoading(state: DataState): boolean {
+  return state.tree?.pendingRequestParameters !== undefined;
+}
+
+/**
+ * If a request was made and it threw an error or returned a failure response code.
+ */
+export function hadErrorLoadingTree(state: DataState): boolean {
+  if (state.tree?.lastResponse) {
+    return !state.tree?.lastResponse.successful;
+  }
+  return false;
 }
 
 /**
@@ -49,26 +58,11 @@ export function resolverComponentInstanceID(state: DataState): string {
 }
 
 /**
- * If a request was made and it threw an error or returned a failure response code.
- */
-export function hasError(state: DataState): boolean {
-  if (state.lastResponse && state.lastResponse.successful === false) {
-    return true;
-  } else {
-    return false;
-  }
-}
-
-/**
  * The last ResolverTree we received, if any. It may be stale (it might not be for the same databaseDocumentID that
  * we're currently interested in.
  */
 const resolverTreeResponse = (state: DataState): ResolverTree | undefined => {
-  if (state.lastResponse && state.lastResponse.successful) {
-    return state.lastResponse.result;
-  } else {
-    return undefined;
-  }
+  return state.tree?.lastResponse?.successful ? state.tree?.lastResponse.result : undefined;
 };
 
 /**
@@ -100,7 +94,7 @@ export const terminatedProcesses = createSelector(resolverTreeResponse, function
       .lifecycleEvents(tree)
       .filter(isTerminatedProcess)
       .map((terminatedEvent) => {
-        return uniquePidForProcess(terminatedEvent);
+        return eventModel.entityIDSafeVersion(terminatedEvent);
       })
   );
 });
@@ -113,8 +107,8 @@ export const isProcessTerminated = createSelector(terminatedProcesses, function 
   terminatedProcesses
   /* eslint-enable no-shadow */
 ) {
-  return (entityId: string) => {
-    return terminatedProcesses.has(entityId);
+  return (entityID: string) => {
+    return terminatedProcesses.has(entityID);
   };
 });
 
@@ -123,12 +117,14 @@ export const isProcessTerminated = createSelector(terminatedProcesses, function 
  */
 export const graphableProcesses = createSelector(resolverTreeResponse, function (tree?) {
   // Keep track of the last process event (in array order) for each entity ID
-  const events: Map<string, ResolverEvent> = new Map();
+  const events: Map<string, SafeResolverEvent> = new Map();
   if (tree) {
     for (const event of resolverTreeModel.lifecycleEvents(tree)) {
       if (isGraphableProcess(event)) {
-        const entityID = uniquePidForProcess(event);
-        events.set(entityID, event);
+        const entityID = eventModel.entityIDSafeVersion(event);
+        if (entityID !== undefined) {
+          events.set(entityID, event);
+        }
       }
     }
     return [...events.values()];
@@ -150,6 +146,7 @@ export const tree = createSelector(graphableProcesses, function indexedTree(
 
 /**
  * This returns a map of entity_ids to stats about the related events and alerts.
+ * @deprecated
  */
 export const relatedEventsStats: (
   state: DataState
@@ -166,56 +163,151 @@ export const relatedEventsStats: (
 );
 
 /**
+ * The total number of events related to a node.
+ */
+export const relatedEventTotalCount: (
+  state: DataState
+) => (entityID: string) => number | undefined = createSelector(
+  relatedEventsStats,
+  (relatedStats) => {
+    return (entityID) => {
+      return relatedStats(entityID)?.events?.total;
+    };
+  }
+);
+
+/**
  * returns a map of entity_ids to related event data.
+ * @deprecated
  */
 export function relatedEventsByEntityId(data: DataState): Map<string, ResolverRelatedEvents> {
   return data.relatedEvents;
 }
 
 /**
+ *
+ *
+ * @export
+ * @param {DataState} state
+ * @returns the loading state of the current related event data for the `event_detail` view
+ */
+export function isCurrentRelatedEventLoading(state: DataState) {
+  return state.currentRelatedEvent.loading;
+}
+
+/**
+ *
+ *
+ * @export
+ * @param {DataState} state
+ * @returns {(SafeResolverEvent | null)} the current related event data for the `event_detail` view
+ */
+export function currentRelatedEventData(state: DataState): SafeResolverEvent | null {
+  return state.currentRelatedEvent.data;
+}
+/**
+ * Get an event (from memory) by its `event.id`.
+ * @deprecated Use the API to find events by ID
+ */
+export const eventByID = createSelector(relatedEventsByEntityId, (relatedEvents) => {
+  // A map of nodeID to a map of eventID to events. Lazily populated.
+  const memo = new Map<string, Map<string | number, SafeResolverEvent>>();
+  return ({ eventID, nodeID }: { eventID: string; nodeID: string }) => {
+    // We keep related events in a map by their nodeID.
+    const eventsWrapper = relatedEvents.get(nodeID);
+    if (!eventsWrapper) {
+      return undefined;
+    }
+    // When an event from a nodeID is requested, build a map for all events related to that node.
+    if (!memo.has(nodeID)) {
+      const map = new Map<string | number, SafeResolverEvent>();
+      for (const event of eventsWrapper.events) {
+        const id = eventModel.eventIDSafeVersion(event);
+        if (id !== undefined) {
+          map.set(id, event);
+        }
+      }
+      memo.set(nodeID, map);
+    }
+    const eventMap = memo.get(nodeID);
+    if (!eventMap) {
+      // This shouldn't be possible.
+      return undefined;
+    }
+    return eventMap.get(eventID);
+  };
+});
+
+/**
  * Returns a function that returns a function (when supplied with an entity id for a node)
  * that returns related events for a node that match an event.category (when supplied with the category)
+ * @deprecated
  */
 export const relatedEventsByCategory: (
   state: DataState
-) => (entityID: string) => (ecsCategory: string) => ResolverEvent[] = createSelector(
+) => (node: string, eventCategory: string) => SafeResolverEvent[] = createSelector(
   relatedEventsByEntityId,
-  function provideGettersByCategory(
+  function (
     /* eslint-disable no-shadow */
     relatedEventsByEntityId
     /* eslint-enable no-shadow */
   ) {
-    return defaultMemoize((entityId: string) => {
-      return defaultMemoize((ecsCategory: string) => {
-        const relatedById = relatedEventsByEntityId.get(entityId);
-        // With no related events, we can't return related by category
-        if (!relatedById) {
-          return [];
+    // A map of nodeID -> event category -> SafeResolverEvent[]
+    const nodeMap: Map<string, Map<string, SafeResolverEvent[]>> = new Map();
+    for (const [nodeID, events] of relatedEventsByEntityId) {
+      // A map of eventCategory -> SafeResolverEvent[]
+      let categoryMap = nodeMap.get(nodeID);
+      if (!categoryMap) {
+        categoryMap = new Map();
+        nodeMap.set(nodeID, categoryMap);
+      }
+
+      for (const event of events.events) {
+        for (const category of eventModel.eventCategory(event)) {
+          let eventsInCategory = categoryMap.get(category);
+          if (!eventsInCategory) {
+            eventsInCategory = [];
+            categoryMap.set(category, eventsInCategory);
+          }
+          eventsInCategory.push(event);
         }
-        return relatedById.events.reduce(
-          (eventsByCategory: ResolverEvent[], candidate: ResolverEvent) => {
-            if ([candidate && allEventCategories(candidate)].flat().includes(ecsCategory)) {
-              eventsByCategory.push(candidate);
-            }
-            return eventsByCategory;
-          },
-          []
-        );
-      });
-    });
+      }
+    }
+
+    // Use the same empty array for all values that are missing
+    const emptyArray: SafeResolverEvent[] = [];
+
+    return (entityID: string, category: string): SafeResolverEvent[] => {
+      const categoryMap = nodeMap.get(entityID);
+      if (!categoryMap) {
+        return emptyArray;
+      }
+      const eventsInCategory = categoryMap.get(category);
+      return eventsInCategory ?? emptyArray;
+    };
+  }
+);
+
+export const relatedEventCountByCategory: (
+  state: DataState
+) => (nodeID: string, eventCategory: string) => number | undefined = createSelector(
+  relatedEventsStats,
+  (statsMap) => {
+    return (nodeID: string, eventCategory: string): number | undefined => {
+      const stats = statsMap(nodeID);
+      if (stats) {
+        const value = Object.prototype.hasOwnProperty.call(stats.events.byCategory, eventCategory);
+        if (typeof value === 'number' && Number.isFinite(value)) {
+          return value;
+        }
+      }
+    };
   }
 );
 
 /**
- * returns a map of entity_ids to booleans indicating if it is waiting on related event
- * A value of `undefined` can be interpreted as `not yet requested`
- */
-export function relatedEventsReady(data: DataState): Map<string, boolean> {
-  return data.relatedEventsReady;
-}
-
-/**
  * `true` if there were more children than we got in the last request.
+ * @deprecated
  */
 export function hasMoreChildren(state: DataState): boolean {
   const resolverTree = resolverTreeResponse(state);
@@ -224,137 +316,38 @@ export function hasMoreChildren(state: DataState): boolean {
 
 /**
  * `true` if there were more ancestors than we got in the last request.
+ * @deprecated
  */
 export function hasMoreAncestors(state: DataState): boolean {
   const resolverTree = resolverTreeResponse(state);
   return resolverTree ? resolverTreeModel.hasMoreAncestors(resolverTree) : false;
 }
 
-interface RelatedInfoFunctions {
-  shouldShowLimitForCategory: (category: string) => boolean;
-  numberNotDisplayedForCategory: (category: string) => number;
-  numberActuallyDisplayedForCategory: (category: string) => number;
-}
 /**
- * A map of `entity_id`s to functions that provide information about
- * related events by ECS `.category` Primarily to avoid having business logic
- * in UI components.
+ * If the tree resource needs to be fetched then these are the parameters that should be used.
  */
-export const relatedEventInfoByEntityId: (
-  state: DataState
-) => (entityID: string) => RelatedInfoFunctions | null = createSelector(
-  relatedEventsByEntityId,
-  relatedEventsStats,
-  function selectLineageLimitInfo(
-    /* eslint-disable no-shadow */
-    relatedEventsByEntityId,
-    relatedEventsStats
-    /* eslint-enable no-shadow */
-  ) {
-    return (entityId) => {
-      const stats = relatedEventsStats(entityId);
-      if (!stats) {
-        return null;
-      }
-      const eventsResponseForThisEntry = relatedEventsByEntityId.get(entityId);
-      const hasMoreEvents =
-        eventsResponseForThisEntry && eventsResponseForThisEntry.nextEvent !== null;
-      /**
-       * Get the "aggregate" total for the event category (i.e. _all_ events that would qualify as being "in category")
-       * For a set like `[DNS,File][File,DNS][Registry]` The first and second events would contribute to the aggregate total for DNS being 2.
-       * This is currently aligned with how the backed provides this information.
-       *
-       * @param eventCategory {string} The ECS category like 'file','dns',etc.
-       */
-      const aggregateTotalForCategory = (eventCategory: string): number => {
-        return stats.events.byCategory[eventCategory] || 0;
-      };
-
-      /**
-       * Get all the related events in the category provided.
-       *
-       * @param eventCategory {string} The ECS category like 'file','dns',etc.
-       */
-      const unmemoizedMatchingEventsForCategory = (eventCategory: string): ResolverEvent[] => {
-        if (!eventsResponseForThisEntry) {
-          return [];
-        }
-        return eventsResponseForThisEntry.events.filter((resolverEvent) => {
-          for (const category of [allEventCategories(resolverEvent)].flat()) {
-            if (category === eventCategory) {
-              return true;
-            }
-          }
-          return false;
-        });
-      };
-
-      const matchingEventsForCategory = unmemoizedMatchingEventsForCategory;
-
-      /**
-       * The number of events that occurred before the API limit was reached.
-       * The number of events that came back form the API that have `eventCategory` in their list of categories.
-       *
-       * @param eventCategory {string} The ECS category like 'file','dns',etc.
-       */
-      const numberActuallyDisplayedForCategory = (eventCategory: string): number => {
-        return matchingEventsForCategory(eventCategory)?.length || 0;
-      };
-
-      /**
-       * The total number counted by the backend - the number displayed
-       *
-       * @param eventCategory {string} The ECS category like 'file','dns',etc.
-       */
-      const numberNotDisplayedForCategory = (eventCategory: string): number => {
-        return (
-          aggregateTotalForCategory(eventCategory) -
-          numberActuallyDisplayedForCategory(eventCategory)
-        );
-      };
-
-      /**
-       * `true` when the `nextEvent` cursor appeared in the results and we are short on the number needed to
-       * fullfill the aggregate count.
-       *
-       * @param eventCategory {string} The ECS category like 'file','dns',etc.
-       */
-      const shouldShowLimitForCategory = (eventCategory: string): boolean => {
-        if (hasMoreEvents && numberNotDisplayedForCategory(eventCategory) > 0) {
-          return true;
-        }
-        return false;
-      };
-
-      const entryValue = {
-        shouldShowLimitForCategory,
-        numberNotDisplayedForCategory,
-        numberActuallyDisplayedForCategory,
-      };
-      return entryValue;
-    };
-  }
-);
-
-/**
- * If we need to fetch, this is the ID to fetch.
- */
-export function databaseDocumentIDToFetch(state: DataState): string | null {
-  // If there is an ID, it must match either the last received version, or the pending version.
-  // Otherwise, we need to fetch it
-  // NB: this technique will not allow for refreshing of data.
+export function treeParametersToFetch(state: DataState): TreeFetcherParameters | null {
+  /**
+   * If there are current tree parameters that don't match the parameters used in the pending request (if there is a pending request) and that don't match the parameters used in the last completed request (if there was a last completed request) then we need to fetch the tree resource using the current parameters.
+   */
   if (
-    state.databaseDocumentID !== undefined &&
-    state.databaseDocumentID !== state.pendingRequestDatabaseDocumentID &&
-    state.databaseDocumentID !== state.lastResponse?.databaseDocumentID
+    state.tree?.currentParameters !== undefined &&
+    !treeFetcherParametersModel.equal(
+      state.tree?.currentParameters,
+      state.tree?.lastResponse?.parameters
+    ) &&
+    !treeFetcherParametersModel.equal(
+      state.tree?.currentParameters,
+      state.tree?.pendingRequestParameters
+    )
   ) {
-    return state.databaseDocumentID;
+    return state.tree.currentParameters;
   } else {
     return null;
   }
 }
 
-export const layout = createSelector(
+export const layout: (state: DataState) => IsometricTaxiLayout = createSelector(
   tree,
   originID,
   function processNodePositionsAndEdgeLineSegments(
@@ -380,7 +373,7 @@ export const layout = createSelector(
     }
 
     // Find the position of the origin, we'll center the map on it intrinsically
-    const originPosition = isometricTaxiLayoutModel.nodePosition(taxiLayout, originNode);
+    const originPosition = isometricTaxiLayoutModel.processPosition(taxiLayout, originNode);
     // adjust the position of everything so that the origin node is at `(0, 0)`
 
     if (originPosition === undefined) {
@@ -401,10 +394,11 @@ export const layout = createSelector(
  */
 export const processEventForID: (
   state: DataState
-) => (nodeID: string) => ResolverEvent | null = createSelector(
+) => (nodeID: string) => SafeResolverEvent | null = createSelector(
   tree,
-  (indexedProcessTree) => (nodeID: string) =>
-    indexedProcessTreeModel.processEvent(indexedProcessTree, nodeID)
+  (indexedProcessTree) => (nodeID: string) => {
+    return indexedProcessTreeModel.processEvent(indexedProcessTree, nodeID);
+  }
 );
 
 /**
@@ -450,7 +444,7 @@ export const ariaFlowtoCandidate: (
        * Getting the following sibling of a node has an `O(n)` time complexity where `n` is the number of children the parent of the node has.
        * For this reason, we calculate the following siblings of the node and all of its siblings at once and cache them.
        */
-      const nodeEvent: ResolverEvent | null = eventGetter(nodeID);
+      const nodeEvent: SafeResolverEvent | null = eventGetter(nodeID);
 
       if (!nodeEvent) {
         // this should never happen.
@@ -460,15 +454,19 @@ export const ariaFlowtoCandidate: (
       // nodes with the same parent ID
       const children = indexedProcessTreeModel.children(
         indexedProcessTree,
-        uniqueParentPidForProcess(nodeEvent)
+        eventModel.parentEntityIDSafeVersion(nodeEvent)
       );
 
-      let previousChild: ResolverEvent | null = null;
+      let previousChild: SafeResolverEvent | null = null;
       // Loop over all nodes that have the same parent ID (even if the parent ID is undefined or points to a node that isn't in the tree.)
       for (const child of children) {
         if (previousChild !== null) {
           // Set the `child` as the following sibling of `previousChild`.
-          memo.set(uniquePidForProcess(previousChild), uniquePidForProcess(child));
+          const previousChildEntityID = eventModel.entityIDSafeVersion(previousChild);
+          const followingSiblingEntityID = eventModel.entityIDSafeVersion(child);
+          if (previousChildEntityID !== undefined && followingSiblingEntityID !== undefined) {
+            memo.set(previousChildEntityID, followingSiblingEntityID);
+          }
         }
         // Set the child as the previous child.
         previousChild = child;
@@ -476,7 +474,10 @@ export const ariaFlowtoCandidate: (
 
       if (previousChild) {
         // if there is a previous child, it has no following sibling.
-        memo.set(uniquePidForProcess(previousChild), null);
+        const entityID = eventModel.entityIDSafeVersion(previousChild);
+        if (entityID !== undefined) {
+          memo.set(entityID, null);
+        }
       }
 
       return memoizedGetter(nodeID);
@@ -486,12 +487,7 @@ export const ariaFlowtoCandidate: (
 
 const spatiallyIndexedLayout: (state: DataState) => rbush<IndexedEntity> = createSelector(
   layout,
-  function ({
-    /* eslint-disable no-shadow */
-    processNodePositions,
-    edgeLineSegments,
-    /* eslint-enable no-shadow */
-  }) {
+  function ({ processNodePositions, edgeLineSegments }) {
     const spatialIndex: rbush<IndexedEntity> = new rbush();
     const processesToIndex: IndexedProcessNode[] = [];
     const edgeLineSegmentsToIndex: IndexedEdgeLineSegment[] = [];
@@ -558,7 +554,7 @@ export const nodesAndEdgelines: (
       maxX,
       maxY,
     });
-    const visibleProcessNodePositions = new Map<ResolverEvent, Vector2>(
+    const visibleProcessNodePositions = new Map<SafeResolverEvent, Vector2>(
       entities
         .filter((entity): entity is IndexedProcessNode => entity.type === 'processNode')
         .map((node) => [node.entity, node.position])
@@ -576,15 +572,18 @@ export const nodesAndEdgelines: (
 /**
  * If there is a pending request that's for a entity ID that doesn't matche the `entityID`, then we should cancel it.
  */
-export function databaseDocumentIDToAbort(state: DataState): string | null {
+export function treeRequestParametersToAbort(state: DataState): TreeFetcherParameters | null {
   /**
-   * If there is a pending request, and its not for the current databaseDocumentID (even, if the current databaseDocumentID is undefined) then we should abort the request.
+   * If there is a pending request, and its not for the current parameters (even, if the current parameters are undefined) then we should abort the request.
    */
   if (
-    state.pendingRequestDatabaseDocumentID !== undefined &&
-    state.pendingRequestDatabaseDocumentID !== state.databaseDocumentID
+    state.tree?.pendingRequestParameters !== undefined &&
+    !treeFetcherParametersModel.equal(
+      state.tree?.pendingRequestParameters,
+      state.tree?.currentParameters
+    )
   ) {
-    return state.pendingRequestDatabaseDocumentID;
+    return state.tree.pendingRequestParameters;
   } else {
     return null;
   }
@@ -595,19 +594,146 @@ export function databaseDocumentIDToAbort(state: DataState): string | null {
  */
 export const relatedEventTotalForProcess: (
   state: DataState
-) => (event: ResolverEvent) => number | null = createSelector(
+) => (event: SafeResolverEvent) => number | null = createSelector(
   relatedEventsStats,
   (statsForProcess) => {
-    return (event: ResolverEvent) => {
-      const stats = statsForProcess(uniquePidForProcess(event));
+    return (event: SafeResolverEvent) => {
+      const nodeID = eventModel.entityIDSafeVersion(event);
+      if (nodeID === undefined) {
+        return null;
+      }
+      const stats = statsForProcess(nodeID);
       if (!stats) {
         return null;
       }
-      let total = 0;
-      for (const value of Object.values(stats.events.byCategory)) {
-        total += value;
-      }
-      return total;
+      return stats.events.total;
     };
+  }
+);
+
+/**
+ * Total count of events related to `node`.
+ * Based on `ResolverNodeStats`
+ */
+export const totalRelatedEventCountForNode: (
+  state: DataState
+) => (nodeID: string) => number | undefined = createSelector(
+  relatedEventsStats,
+  (stats) => (nodeID: string) => {
+    const nodeStats = stats(nodeID);
+    return nodeStats === undefined ? undefined : nodeStats.events.total;
+  }
+);
+
+/**
+ * Count of events with `category` related to `nodeID`.
+ * Based on `ResolverNodeStats`
+ */
+export const relatedEventCountOfTypeForNode: (
+  state: DataState
+) => (nodeID: string, category: string) => number | undefined = createSelector(
+  relatedEventsStats,
+  (stats) => (nodeID: string, category: string) => {
+    const nodeStats = stats(nodeID);
+    if (!nodeStats) {
+      return undefined;
+    } else {
+      return nodeStats.events.byCategory[category];
+    }
+  }
+);
+
+/**
+ * Which view should show in the panel, as well as what parameters should be used.
+ * Calculated using the query string
+ */
+export const panelViewAndParameters = createSelector(
+  (state: DataState) => state.locationSearch,
+  resolverComponentInstanceID,
+  /* eslint-disable-next-line no-shadow */
+  (locationSearch, resolverComponentInstanceID) => {
+    return panelViewAndParametersFromLocationSearchAndResolverComponentInstanceID({
+      locationSearch,
+      resolverComponentInstanceID,
+    });
+  }
+);
+
+/**
+ * Events related to the panel node that are in the panel category.
+ * NB: This cannot tell the view loading information. For example, this does not tell the view if data has been requested or if data failed to load.
+ */
+export const nodeEventsInCategory = (state: DataState) => {
+  return state.nodeEventsInCategory?.events ?? [];
+};
+
+export const lastRelatedEventResponseContainsCursor = createSelector(
+  (state: DataState) => state.nodeEventsInCategory,
+  panelViewAndParameters,
+  /* eslint-disable-next-line no-shadow */
+  function (nodeEventsInCategory, panelViewAndParameters) {
+    if (
+      nodeEventsInCategory !== undefined &&
+      nodeEventsInCategoryModel.isRelevantToPanelViewAndParameters(
+        nodeEventsInCategory,
+        panelViewAndParameters
+      )
+    ) {
+      return nodeEventsInCategory.cursor !== null;
+    } else {
+      return false;
+    }
+  }
+);
+
+export const hadErrorLoadingNodeEventsInCategory = createSelector(
+  (state: DataState) => state.nodeEventsInCategory,
+  panelViewAndParameters,
+  /* eslint-disable-next-line no-shadow */
+  function (nodeEventsInCategory, panelViewAndParameters) {
+    if (
+      nodeEventsInCategory !== undefined &&
+      nodeEventsInCategoryModel.isRelevantToPanelViewAndParameters(
+        nodeEventsInCategory,
+        panelViewAndParameters
+      )
+    ) {
+      return nodeEventsInCategory && nodeEventsInCategory.error === true;
+    } else {
+      return false;
+    }
+  }
+);
+
+export const isLoadingNodeEventsInCategory = createSelector(
+  (state: DataState) => state.nodeEventsInCategory,
+  panelViewAndParameters,
+  /* eslint-disable-next-line no-shadow */
+  function (nodeEventsInCategory, panelViewAndParameters) {
+    const { panelView } = panelViewAndParameters;
+    return panelView === 'nodeEventsInCategory' && nodeEventsInCategory === undefined;
+  }
+);
+
+export const isLoadingMoreNodeEventsInCategory = createSelector(
+  (state: DataState) => state.nodeEventsInCategory,
+  panelViewAndParameters,
+  /* eslint-disable-next-line no-shadow */
+  function (nodeEventsInCategory, panelViewAndParameters) {
+    if (
+      nodeEventsInCategory !== undefined &&
+      nodeEventsInCategoryModel.isRelevantToPanelViewAndParameters(
+        nodeEventsInCategory,
+        panelViewAndParameters
+      )
+    ) {
+      return (
+        nodeEventsInCategory &&
+        nodeEventsInCategory.lastCursorRequested !== null &&
+        nodeEventsInCategory.cursor === nodeEventsInCategory.lastCursorRequested
+      );
+    } else {
+      return false;
+    }
   }
 );

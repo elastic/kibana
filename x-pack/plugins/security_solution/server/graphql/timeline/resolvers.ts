@@ -44,18 +44,17 @@ export const createTimelineResolvers = (
 } => ({
   Query: {
     async getOneTimeline(root, args, { req }) {
-      return libs.timeline.getTimeline(req, args.id);
+      return libs.timeline.getTimeline(req, args.id, args.timelineType);
     },
     async getAllTimeline(root, args, { req }) {
       return libs.timeline.getAllTimeline(
         req,
         args.onlyUserFavorite || null,
-        args.pageInfo || null,
+        args.pageInfo,
         args.search || null,
         args.sort || null,
         args.status || null,
-        args.timelineType || null,
-        args.templateTimelineType || null
+        args.timelineType || null
       );
     },
   },

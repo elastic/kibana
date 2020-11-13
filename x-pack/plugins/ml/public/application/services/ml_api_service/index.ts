@@ -14,6 +14,7 @@ import { filters } from './filters';
 import { resultsApiProvider } from './results';
 import { jobsApiProvider } from './jobs';
 import { fileDatavisualizer } from './datavisualizer';
+import { savedObjectsApiProvider } from './saved_objects';
 import { MlServerDefaults, MlServerLimits } from '../../../../common/types/ml_server_info';
 
 import { MlCapabilitiesResponse } from '../../../../common/types/capabilities';
@@ -62,7 +63,7 @@ export interface BucketSpanEstimatorResponse {
   name: string;
   ms: number;
   error?: boolean;
-  message?: { msg: string } | string;
+  message?: string;
 }
 
 export interface GetTimeFieldRangeResponse {
@@ -485,7 +486,7 @@ export function mlApiServicesProvider(httpService: HttpService) {
       earliest?: number;
       latest?: number;
       samplerShardSize?: number;
-      interval?: string;
+      interval?: number;
       fields?: FieldRequestConfig[];
       maxExamples?: number;
     }) {
@@ -765,5 +766,6 @@ export function mlApiServicesProvider(httpService: HttpService) {
     results: resultsApiProvider(httpService),
     jobs: jobsApiProvider(httpService),
     fileDatavisualizer,
+    savedObjects: savedObjectsApiProvider(httpService),
   };
 }

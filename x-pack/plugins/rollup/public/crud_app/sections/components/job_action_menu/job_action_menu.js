@@ -264,7 +264,6 @@ class JobActionMenuUi extends Component {
           isOpen={this.state.isPopoverOpen}
           closePopover={this.closePopover}
           panelPaddingSize="none"
-          withTitle
           anchorPosition={anchorPosition}
           repositionOnScroll
         >

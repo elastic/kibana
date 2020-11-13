@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ILegacyScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from 'kibana/server';
 import { cloneDeep } from 'lodash';
 import { SavedObjectsClientContract } from 'kibana/server';
 import {
@@ -27,6 +27,7 @@ const supportedTypes: string[] = [
   ES_FIELD_TYPES.INTEGER,
   ES_FIELD_TYPES.FLOAT,
   ES_FIELD_TYPES.LONG,
+  ES_FIELD_TYPES.UNSIGNED_LONG,
   ES_FIELD_TYPES.BYTE,
   ES_FIELD_TYPES.HALF_FLOAT,
   ES_FIELD_TYPES.SCALED_FLOAT,
@@ -40,35 +41,36 @@ const supportedTypes: string[] = [
 export function fieldServiceProvider(
   indexPattern: string,
   isRollup: boolean,
-  mlClusterClient: ILegacyScopedClusterClient,
+  client: IScopedClusterClient,
   savedObjectsClient: SavedObjectsClientContract
 ) {
-  return new FieldsService(indexPattern, isRollup, mlClusterClient, savedObjectsClient);
+  return new FieldsService(indexPattern, isRollup, client, savedObjectsClient);
 }
 
 class FieldsService {
   private _indexPattern: string;
   private _isRollup: boolean;
-  private _mlClusterClient: ILegacyScopedClusterClient;
+  private _mlClusterClient: IScopedClusterClient;
   private _savedObjectsClient: SavedObjectsClientContract;
 
   constructor(
     indexPattern: string,
     isRollup: boolean,
-    mlClusterClient: ILegacyScopedClusterClient,
+    client: IScopedClusterClient,
     savedObjectsClient: SavedObjectsClientContract
   ) {
     this._indexPattern = indexPattern;
     this._isRollup = isRollup;
-    this._mlClusterClient = mlClusterClient;
+    this._mlClusterClient = client;
     this._savedObjectsClient = savedObjectsClient;
   }
 
   private async loadFieldCaps(): Promise<any> {
-    return this._mlClusterClient.callAsCurrentUser('fieldCaps', {
+    const { body } = await this._mlClusterClient.asCurrentUser.fieldCaps({
       index: this._indexPattern,
       fields: '*',
     });
+    return body;
   }
 
   // create field object from the results from _field_caps
@@ -244,6 +246,7 @@ function getNumericalFields(fields: Field[]): Field[] {
   return fields.filter(
     (f) =>
       f.type === ES_FIELD_TYPES.LONG ||
+      f.type === ES_FIELD_TYPES.UNSIGNED_LONG ||
       f.type === ES_FIELD_TYPES.INTEGER ||
       f.type === ES_FIELD_TYPES.SHORT ||
       f.type === ES_FIELD_TYPES.BYTE ||

@@ -1,0 +1,39 @@
+{
+  "job_type": "anomaly_detector",
+  "description": "Metrics: Kubernetes - Identify unusual spikes in inbound traffic across Kubernetes pods.",
+  "groups": [
+    "k8s",
+    "metrics"
+  ],
+  "analysis_config": {
+    "bucket_span": "15m",
+    "detectors": [
+      {
+        "detector_description": "max(bytes_in_derivative)",
+        "function": "max",
+        "field_name": "bytes_in_derivative",
+        "partition_field_name": "kubernetes.namespace"
+      }
+    ],
+    "influencers": [
+      "kubernetes.namespace",
+      "kubernetes.pod.uid"
+    ],
+    "summary_count_field_name": "doc_count"
+  },
+  "data_description": {
+    "time_field": "@timestamp"
+  },
+  "analysis_limits": {
+    "model_memory_limit": "32mb"
+  },
+  "custom_settings": {
+    "created_by": "ml-module-metrics-ui-k8s",
+    "custom_urls": [
+      {
+        "url_name": "Pod Metrics",
+        "url_value": "metrics/detail/pod/$kubernetes.pod.uid$?metricTime=(autoReload:!f,refreshInterval:5000,time:(from:%27$earliest$%27,interval:%3E%3D1m,to:%27$latest$%27))"
+      }
+    ]
+  }
+}

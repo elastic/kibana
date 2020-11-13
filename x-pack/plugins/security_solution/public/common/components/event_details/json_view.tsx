@@ -9,11 +9,11 @@ import { set } from '@elastic/safer-lodash-set/fp';
 import React from 'react';
 import styled from 'styled-components';
 
-import { DetailItem } from '../../../graphql/types';
+import { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
 import { omitTypenameAndEmpty } from '../../../timelines/components/timeline/body/helpers';
 
 interface Props {
-  data: DetailItem[];
+  data: TimelineEventsDetailsItem[];
 }
 
 const JsonEditor = styled.div`
@@ -40,5 +40,5 @@ export const JsonView = React.memo<Props>(({ data }) => (
 
 JsonView.displayName = 'JsonView';
 
-export const buildJsonView = (data: DetailItem[]) =>
+export const buildJsonView = (data: TimelineEventsDetailsItem[]) =>
   data.reduce((accumulator, item) => set(item.field, item.originalValue, accumulator), {});

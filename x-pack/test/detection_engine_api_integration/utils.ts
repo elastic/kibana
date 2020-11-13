@@ -4,26 +4,47 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Client } from '@elastic/elasticsearch';
+import { ApiResponse, Client } from '@elastic/elasticsearch';
 import { SuperTest } from 'supertest';
 import supertestAsPromised from 'supertest-as-promised';
+import { Context } from '@elastic/elasticsearch/lib/Transport';
+import { SearchResponse } from 'elasticsearch';
+import {
+  CreateRulesSchema,
+  UpdateRulesSchema,
+  FullResponseSchema,
+  QueryCreateSchema,
+} from '../../plugins/security_solution/common/detection_engine/schemas/request';
+import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '../../plugins/lists/common/constants';
+import {
+  CreateExceptionListItemSchema,
+  CreateExceptionListSchema,
+  ExceptionListItemSchema,
+  ExceptionListSchema,
+} from '../../plugins/lists/common';
+import { Signal } from '../../plugins/security_solution/server/lib/detection_engine/signals/types';
 import {
   Status,
   SignalIds,
 } from '../../plugins/security_solution/common/detection_engine/schemas/common/schemas';
-import { CreateRulesSchema } from '../../plugins/security_solution/common/detection_engine/schemas/request/create_rules_schema';
-import { UpdateRulesSchema } from '../../plugins/security_solution/common/detection_engine/schemas/request/update_rules_schema';
 import { RulesSchema } from '../../plugins/security_solution/common/detection_engine/schemas/response/rules_schema';
-import { DETECTION_ENGINE_INDEX_URL } from '../../plugins/security_solution/common/constants';
+import {
+  DETECTION_ENGINE_INDEX_URL,
+  DETECTION_ENGINE_PREPACKAGED_URL,
+  DETECTION_ENGINE_QUERY_SIGNALS_URL,
+  DETECTION_ENGINE_RULES_URL,
+  INTERNAL_RULE_ID_KEY,
+} from '../../plugins/security_solution/common/constants';
 
 /**
  * This will remove server generated properties such as date times, etc...
  * @param rule Rule to pass in to remove typical server generated properties
  */
 export const removeServerGeneratedProperties = (
-  rule: Partial<RulesSchema>
-): Partial<RulesSchema> => {
+  rule: FullResponseSchema
+): Partial<FullResponseSchema> => {
   const {
+    /* eslint-disable @typescript-eslint/naming-convention */
     created_at,
     updated_at,
     id,
@@ -33,6 +54,7 @@ export const removeServerGeneratedProperties = (
     last_success_message,
     status,
     status_date,
+    /* eslint-enable @typescript-eslint/naming-convention */
     ...removedProperties
   } = rule;
   return removedProperties;
@@ -43,9 +65,10 @@ export const removeServerGeneratedProperties = (
  * @param rule Rule to pass in to remove typical server generated properties
  */
 export const removeServerGeneratedPropertiesIncludingRuleId = (
-  rule: Partial<RulesSchema>
-): Partial<RulesSchema> => {
+  rule: FullResponseSchema
+): Partial<FullResponseSchema> => {
   const ruleWithRemovedProperties = removeServerGeneratedProperties(rule);
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   const { rule_id, ...additionalRuledIdRemoved } = ruleWithRemovedProperties;
   return additionalRuledIdRemoved;
 };
@@ -53,10 +76,12 @@ export const removeServerGeneratedPropertiesIncludingRuleId = (
 /**
  * This is a typical simple rule for testing that is easy for most basic testing
  * @param ruleId
+ * @param enabled Enables the rule on creation or not. Defaulted to false to enable it on import
  */
-export const getSimpleRule = (ruleId = 'rule-1'): CreateRulesSchema => ({
+export const getSimpleRule = (ruleId = 'rule-1', enabled = true): QueryCreateSchema => ({
   name: 'Simple Rule Query',
   description: 'Simple Rule Query',
+  enabled,
   risk_score: 1,
   rule_id: ruleId,
   severity: 'high',
@@ -122,6 +147,19 @@ export const getQuerySignalIds = (signalIds: SignalIds) => ({
   },
 });
 
+/**
+ * Given an array of ruleIds for a test this will get the signals
+ * created from that rule_id.
+ * @param ruleIds The rule_id to search for signals
+ */
+export const getQuerySignalsRuleId = (ruleIds: string[]) => ({
+  query: {
+    terms: {
+      'signal.rule.rule_id': ruleIds,
+    },
+  },
+});
+
 export const setSignalStatus = ({
   signalIds,
   status,
@@ -153,6 +191,7 @@ export const getSignalStatusEmptyResponse = () => ({
  */
 export const getSimpleRuleWithoutRuleId = (): CreateRulesSchema => {
   const simpleRule = getSimpleRule();
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   const { rule_id, ...ruleWithoutId } = simpleRule;
   return ruleWithoutId;
 };
@@ -215,6 +254,7 @@ export const getSimpleRuleOutput = (ruleId = 'rule-1'): Partial<RulesSchema> => 
  */
 export const getSimpleRuleOutputWithoutRuleId = (ruleId = 'rule-1'): Partial<RulesSchema> => {
   const rule = getSimpleRuleOutput(ruleId);
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   const { rule_id, ...ruleWithoutRuleId } = rule;
   return ruleWithoutRuleId;
 };
@@ -238,25 +278,38 @@ export const getSimpleMlRuleOutput = (ruleId = 'rule-1'): Partial<RulesSchema> =
  * This will retry 20 times before giving up and hopefully still not interfere with other tests
  * @param es The ElasticSearch handle
  */
-export const deleteAllAlerts = async (es: Client, retryCount = 20): Promise<void> => {
-  if (retryCount > 0) {
-    try {
-      await es.deleteByQuery({
-        index: '.kibana',
-        q: 'type:alert',
-        wait_for_completion: true,
-        refresh: true,
-        body: {},
-      });
-    } catch (err) {
-      // eslint-disable-next-line no-console
-      console.log(`Failure trying to deleteAllAlerts, retries left are: ${retryCount - 1}`, err);
-      await deleteAllAlerts(es, retryCount - 1);
-    }
-  } else {
-    // eslint-disable-next-line no-console
-    console.log('Could not deleteAllAlerts, no retries are left');
-  }
+export const deleteAllAlerts = async (es: Client): Promise<void> => {
+  return countDownES(async () => {
+    return es.deleteByQuery({
+      index: '.kibana',
+      q: 'type:alert',
+      wait_for_completion: true,
+      refresh: true,
+      conflicts: 'proceed',
+      body: {},
+    });
+  }, 'deleteAllAlerts');
+};
+
+export const downgradeImmutableRule = async (es: Client, ruleId: string): Promise<void> => {
+  return countDownES(async () => {
+    return es.updateByQuery({
+      index: '.kibana',
+      refresh: true,
+      wait_for_completion: true,
+      body: {
+        script: {
+          lang: 'painless',
+          source: 'ctx._source.alert.params.version--',
+        },
+        query: {
+          term: {
+            'alert.tags': `${INTERNAL_RULE_ID_KEY}:${ruleId}`,
+          },
+        },
+      },
+    });
+  }, 'downgradeImmutableRule');
 };
 
 /**
@@ -279,27 +332,15 @@ export const deleteAllTimelines = async (es: Client): Promise<void> => {
  * @param es The ElasticSearch handle
  */
 export const deleteAllRulesStatuses = async (es: Client, retryCount = 20): Promise<void> => {
-  if (retryCount > 0) {
-    try {
-      await es.deleteByQuery({
-        index: '.kibana',
-        q: 'type:siem-detection-engine-rule-status',
-        wait_for_completion: true,
-        refresh: true,
-        body: {},
-      });
-    } catch (err) {
-      // eslint-disable-next-line no-console
-      console.log(
-        `Failure trying to deleteAllRulesStatuses, retries left are: ${retryCount - 1}`,
-        err
-      );
-      await deleteAllRulesStatuses(es, retryCount - 1);
-    }
-  } else {
-    // eslint-disable-next-line no-console
-    console.log('Could not deleteAllRulesStatuses, no retries are left');
-  }
+  return countDownES(async () => {
+    return es.deleteByQuery({
+      index: '.kibana',
+      q: 'type:siem-detection-engine-rule-status',
+      wait_for_completion: true,
+      refresh: true,
+      body: {},
+    });
+  }, 'deleteAllRulesStatuses');
 };
 
 /**
@@ -308,24 +349,12 @@ export const deleteAllRulesStatuses = async (es: Client, retryCount = 20): Promi
  * @param supertest The supertest client library
  */
 export const createSignalsIndex = async (
-  supertest: SuperTest<supertestAsPromised.Test>,
-  retryCount = 20
+  supertest: SuperTest<supertestAsPromised.Test>
 ): Promise<void> => {
-  if (retryCount > 0) {
-    try {
-      await supertest.post(DETECTION_ENGINE_INDEX_URL).set('kbn-xsrf', 'true').send();
-    } catch (err) {
-      // eslint-disable-next-line no-console
-      console.log(
-        `Failure trying to create the signals index, retries left are: ${retryCount - 1}`,
-        err
-      );
-      await createSignalsIndex(supertest, retryCount - 1);
-    }
-  } else {
-    // eslint-disable-next-line no-console
-    console.log('Could not createSignalsIndex, no retries are left');
-  }
+  await countDownTest(async () => {
+    await supertest.post(DETECTION_ENGINE_INDEX_URL).set('kbn-xsrf', 'true').send();
+    return true;
+  }, 'createSignalsIndex');
 };
 
 /**
@@ -333,21 +362,12 @@ export const createSignalsIndex = async (
  * @param supertest The supertest client library
  */
 export const deleteSignalsIndex = async (
-  supertest: SuperTest<supertestAsPromised.Test>,
-  retryCount = 20
+  supertest: SuperTest<supertestAsPromised.Test>
 ): Promise<void> => {
-  if (retryCount > 0) {
-    try {
-      await supertest.delete(DETECTION_ENGINE_INDEX_URL).set('kbn-xsrf', 'true').send();
-    } catch (err) {
-      // eslint-disable-next-line no-console
-      console.log(`Failure trying to deleteSignalsIndex, retries left are: ${retryCount - 1}`, err);
-      await deleteSignalsIndex(supertest, retryCount - 1);
-    }
-  } else {
-    // eslint-disable-next-line no-console
-    console.log('Could not deleteSignalsIndex, no retries are left');
-  }
+  await countDownTest(async () => {
+    await supertest.delete(DETECTION_ENGINE_INDEX_URL).set('kbn-xsrf', 'true').send();
+    return true;
+  }, 'deleteSignalsIndex');
 };
 
 /**
@@ -355,9 +375,9 @@ export const deleteSignalsIndex = async (
  * for testing uploads.
  * @param ruleIds Array of strings of rule_ids
  */
-export const getSimpleRuleAsNdjson = (ruleIds: string[]): Buffer => {
+export const getSimpleRuleAsNdjson = (ruleIds: string[], enabled = false): Buffer => {
   const stringOfRules = ruleIds.map((ruleId) => {
-    const simpleRule = getSimpleRule(ruleId);
+    const simpleRule = getSimpleRule(ruleId, enabled);
     return JSON.stringify(simpleRule);
   });
   return Buffer.from(stringOfRules.join('\n'));
@@ -368,7 +388,7 @@ export const getSimpleRuleAsNdjson = (ruleIds: string[]): Buffer => {
  * testing upload features.
  * @param rule The rule to convert to ndjson
  */
-export const ruleToNdjson = (rule: Partial<CreateRulesSchema>): Buffer => {
+export const ruleToNdjson = (rule: CreateRulesSchema): Buffer => {
   const stringified = JSON.stringify(rule);
   return Buffer.from(`${stringified}\n`);
 };
@@ -552,12 +572,55 @@ export const getComplexRuleOutput = (ruleId = 'rule-1'): Partial<RulesSchema> =>
   exceptions_list: [],
 });
 
+export const getWebHookAction = () => ({
+  actionTypeId: '.webhook',
+  config: {
+    method: 'post',
+    url: 'http://localhost',
+  },
+  secrets: {
+    user: 'example',
+    password: 'example',
+  },
+  name: 'Some connector',
+});
+
+export const getRuleWithWebHookAction = (id: string): CreateRulesSchema => ({
+  ...getSimpleRule(),
+  throttle: 'rule',
+  actions: [
+    {
+      group: 'default',
+      id,
+      params: {
+        body: '{}',
+      },
+      action_type_id: '.webhook',
+    },
+  ],
+});
+
+export const getSimpleRuleOutputWithWebHookAction = (actionId: string): Partial<RulesSchema> => ({
+  ...getSimpleRuleOutput(),
+  throttle: 'rule',
+  actions: [
+    {
+      action_type_id: '.webhook',
+      group: 'default',
+      id: actionId,
+      params: {
+        body: '{}',
+      },
+    },
+  ],
+});
+
 // Similar to ReactJs's waitFor from here: https://testing-library.com/docs/dom-testing-library/api-async#waitfor
 export const waitFor = async (
   functionToTest: () => Promise<boolean>,
   maxTimeout: number = 5000,
   timeoutWait: number = 10
-) => {
+): Promise<void> => {
   await new Promise(async (resolve, reject) => {
     let found = false;
     let numberOfTries = 0;
@@ -576,4 +639,236 @@ export const waitFor = async (
       reject(new Error('timed out waiting for function condition to be true'));
     }
   });
+};
+
+/**
+ * Does a plain countdown and checks against es queries for either conflicts in the error
+ * or for any over the wire issues such as timeouts or temp 404's to make the tests more
+ * reliant.
+ * @param esFunction The function to test against
+ * @param esFunctionName The name of the function to print if we encounter errors
+ * @param retryCount The number of times to retry before giving up (has default)
+ * @param timeoutWait Time to wait before trying again (has default)
+ */
+export const countDownES = async (
+  esFunction: () => Promise<ApiResponse<Record<string, any>, Context>>,
+  esFunctionName: string,
+  retryCount: number = 20,
+  timeoutWait = 250
+): Promise<void> => {
+  await countDownTest(
+    async () => {
+      const result = await esFunction();
+      if (result.body.version_conflicts !== 0) {
+        // eslint-disable-next-line no-console
+        console.log(`Version conflicts for ${result.body.version_conflicts}`);
+        return false;
+      } else {
+        return true;
+      }
+    },
+    esFunctionName,
+    retryCount,
+    timeoutWait
+  );
+};
+
+/**
+ * Does a plain countdown and checks against a boolean to determine if to wait and try again.
+ * This is useful for over the wire things that can cause issues such as conflict or timeouts
+ * for testing resiliency.
+ * @param functionToTest The function to test against
+ * @param name The name of the function to print if we encounter errors
+ * @param retryCount The number of times to retry before giving up (has default)
+ * @param timeoutWait Time to wait before trying again (has default)
+ */
+export const countDownTest = async (
+  functionToTest: () => Promise<boolean>,
+  name: string,
+  retryCount: number = 20,
+  timeoutWait = 250,
+  ignoreThrow: boolean = false
+) => {
+  if (retryCount > 0) {
+    try {
+      const passed = await functionToTest();
+      if (!passed) {
+        // eslint-disable-next-line no-console
+        console.log(`Failure trying to ${name}, retries left are: ${retryCount - 1}`);
+        // retry, counting down, and delay a bit before
+        await new Promise((resolve) => setTimeout(resolve, timeoutWait));
+        await countDownTest(functionToTest, name, retryCount - 1, timeoutWait, ignoreThrow);
+      }
+    } catch (err) {
+      if (ignoreThrow) {
+        throw err;
+      } else {
+        // eslint-disable-next-line no-console
+        console.log(
+          `Failure trying to ${name}, with exception message of:`,
+          err.message,
+          `retries left are: ${retryCount - 1}`
+        );
+        // retry, counting down, and delay a bit before
+        await new Promise((resolve) => setTimeout(resolve, timeoutWait));
+        await countDownTest(functionToTest, name, retryCount - 1, timeoutWait, ignoreThrow);
+      }
+    }
+  } else {
+    // eslint-disable-next-line no-console
+    console.log(`Could not ${name}, no retries are left`);
+  }
+};
+
+/**
+ * Helper to cut down on the noise in some of the tests. This checks for
+ * an expected 200 still and does not try to any retries.
+ * @param supertest The supertest deps
+ * @param rule The rule to create
+ */
+export const createRule = async (
+  supertest: SuperTest<supertestAsPromised.Test>,
+  rule: CreateRulesSchema
+): Promise<FullResponseSchema> => {
+  const { body } = await supertest
+    .post(DETECTION_ENGINE_RULES_URL)
+    .set('kbn-xsrf', 'true')
+    .send(rule)
+    .expect(200);
+  return body;
+};
+
+/**
+ * Helper to cut down on the noise in some of the tests. This checks for
+ * an expected 200 still and does not try to any retries. Creates exception lists
+ * @param supertest The supertest deps
+ * @param rule The rule to create
+ */
+export const createExceptionList = async (
+  supertest: SuperTest<supertestAsPromised.Test>,
+  exceptionList: CreateExceptionListSchema
+): Promise<ExceptionListSchema> => {
+  const { body } = await supertest
+    .post(EXCEPTION_LIST_URL)
+    .set('kbn-xsrf', 'true')
+    .send(exceptionList)
+    .expect(200);
+  return body;
+};
+
+/**
+ * Helper to cut down on the noise in some of the tests. This checks for
+ * an expected 200 still and does not try to any retries. Creates exception lists
+ * @param supertest The supertest deps
+ * @param rule The rule to create
+ */
+export const createExceptionListItem = async (
+  supertest: SuperTest<supertestAsPromised.Test>,
+  exceptionListItem: CreateExceptionListItemSchema
+): Promise<ExceptionListItemSchema> => {
+  const { body } = await supertest
+    .post(EXCEPTION_LIST_ITEM_URL)
+    .set('kbn-xsrf', 'true')
+    .send(exceptionListItem)
+    .expect(200);
+  return body;
+};
+
+/**
+ * Helper to cut down on the noise in some of the tests. This gets
+ * a particular rule.
+ * @param supertest The supertest deps
+ * @param rule The rule to create
+ */
+export const getRule = async (
+  supertest: SuperTest<supertestAsPromised.Test>,
+  ruleId: string
+): Promise<RulesSchema> => {
+  const { body } = await supertest
+    .get(`${DETECTION_ENGINE_RULES_URL}?rule_id=${ruleId}`)
+    .set('kbn-xsrf', 'true')
+    .expect(200);
+  return body;
+};
+
+/**
+ * Waits for the rule in find status to be succeeded before continuing
+ * @param supertest Deps
+ */
+export const waitForRuleSuccess = async (
+  supertest: SuperTest<supertestAsPromised.Test>,
+  id: string
+): Promise<void> => {
+  // wait for Task Manager to finish executing the rule
+  await waitFor(async () => {
+    const { body } = await supertest
+      .post(`${DETECTION_ENGINE_RULES_URL}/_find_statuses`)
+      .set('kbn-xsrf', 'true')
+      .send({ ids: [id] })
+      .expect(200);
+    return body[id]?.current_status?.status === 'succeeded';
+  });
+};
+
+/**
+ * Waits for the signal hits to be greater than the supplied number
+ * before continuing with a default of at least one signal
+ * @param supertest Deps
+ * @param numberOfSignals The number of signals to wait for, default is 1
+ */
+export const waitForSignalsToBePresent = async (
+  supertest: SuperTest<supertestAsPromised.Test>,
+  numberOfSignals = 1
+): Promise<void> => {
+  await waitFor(async () => {
+    const {
+      body: signalsOpen,
+    }: { body: SearchResponse<{ signal: Signal }> } = await supertest
+      .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
+      .set('kbn-xsrf', 'true')
+      .send(getQueryAllSignals())
+      .expect(200);
+    return signalsOpen.hits.hits.length >= numberOfSignals;
+  });
+};
+
+/**
+ * Returns all signals both closed and opened
+ * @param supertest Deps
+ */
+export const getAllSignals = async (
+  supertest: SuperTest<supertestAsPromised.Test>
+): Promise<
+  SearchResponse<{
+    signal: Signal;
+  }>
+> => {
+  const { body: signalsOpen }: { body: SearchResponse<{ signal: Signal }> } = await supertest
+    .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
+    .set('kbn-xsrf', 'true')
+    .send(getQueryAllSignals())
+    .expect(200);
+  return signalsOpen;
+};
+
+export const getSignalsByRuleIds = async (
+  supertest: SuperTest<supertestAsPromised.Test>,
+  ruleIds: string[]
+): Promise<
+  SearchResponse<{
+    signal: Signal;
+  }>
+> => {
+  const { body: signalsOpen }: { body: SearchResponse<{ signal: Signal }> } = await supertest
+    .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
+    .set('kbn-xsrf', 'true')
+    .send(getQuerySignalsRuleId(ruleIds))
+    .expect(200);
+  return signalsOpen;
+};
+
+export const installPrePackagedRules = async (
+  supertest: SuperTest<supertestAsPromised.Test>
+): Promise<void> => {
+  await supertest.put(DETECTION_ENGINE_PREPACKAGED_URL).set('kbn-xsrf', 'true').send().expect(200);
 };

@@ -9,6 +9,7 @@
 import { EuiButton, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { MouseEvent } from 'react';
+import { useApmPluginContext } from '../../../../hooks/useApmPluginContext';
 import { useUrlParams } from '../../../../hooks/useUrlParams';
 import { getAPMHref } from '../../../shared/Links/apm/APMLink';
 import { APMQueryParams } from '../../../shared/Links/url_helpers';
@@ -22,22 +23,20 @@ export function Buttons({
   onFocusClick = () => {},
   selectedNodeServiceName,
 }: ButtonsProps) {
-  // The params may contain the service name. We want to use the selected node's
-  // service name in the button URLs, so make a copy and set the
-  // `serviceName` property.
-  const urlParams = { ...useUrlParams().urlParams } as APMQueryParams;
-  urlParams.serviceName = selectedNodeServiceName;
+  const { core } = useApmPluginContext();
+  const { basePath } = core.http;
+  const urlParams = useUrlParams().urlParams as APMQueryParams;
 
-  const detailsUrl = getAPMHref(
-    `/services/${selectedNodeServiceName}/transactions`,
-    '',
-    urlParams
-  );
-  const focusUrl = getAPMHref(
-    `/services/${selectedNodeServiceName}/service-map`,
-    '',
-    urlParams
-  );
+  const detailsUrl = getAPMHref({
+    basePath,
+    path: `/services/${selectedNodeServiceName}/transactions`,
+    query: urlParams,
+  });
+  const focusUrl = getAPMHref({
+    basePath,
+    path: `/services/${selectedNodeServiceName}/service-map`,
+    query: urlParams,
+  });
 
   return (
     <>

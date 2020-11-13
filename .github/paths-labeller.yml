@@ -11,8 +11,15 @@
   - "Team:apm":
     - "x-pack/plugins/apm/**/*.*"
   - "Team:Ingest Management":
-    - "x-pack/plugins/ingest_manager/**/*.*"
-    - "x-pack/test/api_integration/apis/fleet/**/*.*"
-    - "x-pack/test/epm_api_integration/**/*.*"
+    - "x-pack/plugins/fleet/**/*.*"
+    - "x-pack/test/fleet_api_integration/**/*.*"
   - "Team:uptime":
     - "x-pack/plugins/uptime/**/*.*"
+    - "x-pack/plugins/apm/e2e/cypress/support/step_definitions/csm/*.*"
+    - "x-pack/plugins/apm/public/application/csmApp.tsx"
+    - "x-pack/plugins/apm/public/components/app/RumDashboard/**/*.*"
+    - "x-pack/plugins/apm/public/components/app/RumDashboard/*.*"
+    - "x-pack/plugins/apm/server/lib/rum_client/**/*.*"
+    - "x-pack/plugins/apm/server/lib/rum_client/*.*"
+    - "x-pack/plugins/apm/server/routes/rum_client.ts"
+    - "x-pack/plugins/apm/server/projections/rum_overview.ts"

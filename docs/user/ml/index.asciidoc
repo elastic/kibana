@@ -20,15 +20,11 @@ image::user/ml/images/ml-data-visualizer-sample.jpg[{data-viz} for sample flight
 experimental[] You can also upload a CSV, NDJSON, or log file. The *{data-viz}*
 identifies the file format and field mappings. You can then optionally import
 that data into an {es} index. To change the default file size limit, see
-<<kibana-ml-settings>>.
+<<kibana-ml-settings,Machine learning advanced settings>>.
 
-You need the following permissions to use the {data-viz} with file upload:
-
-* cluster privileges: `monitor`, `manage_ingest_pipelines`
-* index privileges: `read`, `manage`, `index`
-
-For more information, see {ref}/security-privileges.html[Security privileges] 
-and {ml-docs}/setup.html[Set up {ml-features}].
+If {stack-security-features} are enabled, users must have the necessary
+privileges to use {ml-features}. Refer to 
+{ml-docs}/setup.html#setup-privileges[Set up {ml-features}].
 
 --
 

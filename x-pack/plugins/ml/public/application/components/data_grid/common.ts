@@ -24,7 +24,9 @@ import {
   KBN_FIELD_TYPES,
 } from '../../../../../../../src/plugins/data/public';
 
+import { DEFAULT_RESULTS_FIELD } from '../../../../common/constants/data_frame_analytics';
 import { extractErrorMessage } from '../../../../common/util/errors';
+import { FeatureImportance, TopClasses } from '../../../../common/types/feature_importance';
 
 import {
   BASIC_NUMERICAL_TYPES,
@@ -33,11 +35,10 @@ import {
 
 import {
   FEATURE_IMPORTANCE,
-  FEATURE_INFLUENCE,
   OUTLIER_SCORE,
   TOP_CLASSES,
 } from '../../data_frame_analytics/common/constants';
-import { formatHumanReadableDateTimeSeconds } from '../../util/date_utils';
+import { formatHumanReadableDateTimeSeconds } from '../../../../common/util/date_utils';
 import { getNestedProperty } from '../../util/object_utils';
 import { mlFieldFormatService } from '../../services/field_format_service';
 
@@ -112,18 +113,16 @@ export const getDataGridSchemasFromFieldTypes = (fieldTypes: FieldTypes, results
         schema = NON_AGGREGATABLE;
     }
 
-    if (
-      field === `${resultsField}.${OUTLIER_SCORE}` ||
-      field.includes(`${resultsField}.${FEATURE_INFLUENCE}`)
-    ) {
+    if (field === `${resultsField}.${OUTLIER_SCORE}`) {
       schema = 'numeric';
     }
 
-    if (
-      field.includes(`${resultsField}.${FEATURE_IMPORTANCE}`) ||
-      field.includes(`${resultsField}.${TOP_CLASSES}`)
-    ) {
+    if (field.includes(`${resultsField}.${TOP_CLASSES}`)) {
       schema = 'json';
+    }
+
+    if (field.includes(`${resultsField}.${FEATURE_IMPORTANCE}`)) {
+      schema = 'featureImportance';
     }
 
     return { id: field, schema, isSortable };
@@ -159,6 +158,90 @@ export const getDataGridSchemaFromKibanaFieldType = (
   }
 
   return schema;
+};
+
+const getClassName = (className: string, isClassTypeBoolean: boolean) => {
+  if (isClassTypeBoolean) {
+    return className === 'true';
+  }
+
+  return className;
+};
+/**
+ * Helper to transform feature importance flattened fields with arrays back to object structure
+ *
+ * @param row - EUI data grid data row
+ * @param mlResultsField - Data frame analytics results field
+ * @returns nested object structure of feature importance values
+ */
+export const getFeatureImportance = (
+  row: Record<string, any>,
+  mlResultsField: string,
+  isClassTypeBoolean = false
+): FeatureImportance[] => {
+  const featureNames: string[] | undefined =
+    row[`${mlResultsField}.feature_importance.feature_name`];
+  const classNames: string[] | undefined =
+    row[`${mlResultsField}.feature_importance.classes.class_name`];
+  const classImportance: number[] | undefined =
+    row[`${mlResultsField}.feature_importance.classes.importance`];
+
+  if (featureNames === undefined) {
+    return [];
+  }
+
+  // return object structure for classification job
+  if (classNames !== undefined && classImportance !== undefined) {
+    const overallClassNames = classNames?.slice(0, classNames.length / featureNames.length);
+
+    return featureNames.map((fName, index) => {
+      const offset = overallClassNames.length * index;
+      const featureClassImportance = classImportance.slice(
+        offset,
+        offset + overallClassNames.length
+      );
+      return {
+        feature_name: fName,
+        classes: overallClassNames.map((fClassName, fIndex) => {
+          return {
+            class_name: getClassName(fClassName, isClassTypeBoolean),
+            importance: featureClassImportance[fIndex],
+          };
+        }),
+      };
+    });
+  }
+
+  // return object structure for regression job
+  const importance: number[] = row[`${mlResultsField}.feature_importance.importance`];
+  return featureNames.map((fName, index) => ({
+    feature_name: fName,
+    importance: importance[index],
+  }));
+};
+
+/**
+ * Helper to transforms top classes flattened fields with arrays back to object structure
+ *
+ * @param row - EUI data grid data row
+ * @param mlResultsField - Data frame analytics results field
+ * @returns nested object structure of feature importance values
+ */
+export const getTopClasses = (row: Record<string, any>, mlResultsField: string): TopClasses => {
+  const classNames: string[] | undefined = row[`${mlResultsField}.top_classes.class_name`];
+  const classProbabilities: number[] | undefined =
+    row[`${mlResultsField}.top_classes.class_probability`];
+  const classScores: number[] | undefined = row[`${mlResultsField}.top_classes.class_score`];
+
+  if (classNames === undefined || classProbabilities === undefined || classScores === undefined) {
+    return [];
+  }
+
+  return classNames.map((className, index) => ({
+    class_name: className,
+    class_probability: classProbabilities[index],
+    class_score: classScores[index],
+  }));
 };
 
 export const useRenderCellValue = (
@@ -202,19 +285,33 @@ export const useRenderCellValue = (
       }
 
       function getCellValue(cId: string) {
-        if (cId.includes(`.${FEATURE_INFLUENCE}.`) && resultsField !== undefined) {
-          const results = getNestedProperty(tableItems[adjustedRowIndex], resultsField, null);
-          return results[cId.replace(`${resultsField}.`, '')];
+        if (tableItems.hasOwnProperty(adjustedRowIndex)) {
+          const item = tableItems[adjustedRowIndex];
+
+          // Try if the field name is available as is.
+          if (item.hasOwnProperty(cId)) {
+            return item[cId];
+          }
+
+          // For classification and regression results, we need to treat some fields with a custom transform.
+          if (cId === `${resultsField}.feature_importance`) {
+            return getFeatureImportance(fullItem, resultsField ?? DEFAULT_RESULTS_FIELD);
+          }
+
+          if (cId === `${resultsField}.top_classes`) {
+            return getTopClasses(fullItem, resultsField ?? DEFAULT_RESULTS_FIELD);
+          }
+
+          // Try if the field name is available as a nested field.
+          return getNestedProperty(tableItems[adjustedRowIndex], cId, null);
         }
 
-        return tableItems.hasOwnProperty(adjustedRowIndex)
-          ? getNestedProperty(tableItems[adjustedRowIndex], cId, null)
-          : null;
+        return null;
       }
 
       const cellValue = getCellValue(columnId);
 
-      // React by default doesn't all us to use a hook in a callback.
+      // React by default doesn't allow us to use a hook in a callback.
       // However, this one will be passed on to EuiDataGrid and its docs
       // recommend wrapping `setCellProps` in a `useEffect()` hook
       // so we're ignoring the linting rule here.
@@ -248,10 +345,6 @@ export const useRenderCellValue = (
 
       if (typeof cellValue === 'boolean') {
         return cellValue ? 'true' : 'false';
-      }
-
-      if (typeof cellValue === 'object' && cellValue !== null) {
-        return JSON.stringify(cellValue);
       }
 
       return cellValue;
@@ -317,4 +410,26 @@ export const showDataGridColumnChartErrorMessageToast = (
       values: { error: error !== '' ? error : e },
     })
   );
+};
+
+// helper function to transform { [key]: [val] } => { [key]: val }
+// for when `fields` is used in es.search since response is always an array of values
+// since response always returns an array of values for each field
+export const getProcessedFields = (originalObj: object, omitBy?: (key: string) => boolean) => {
+  const obj: { [key: string]: any } = { ...originalObj };
+  for (const key of Object.keys(obj)) {
+    // if no conditional is included, process everything
+    if (omitBy === undefined) {
+      if (Array.isArray(obj[key]) && obj[key].length === 1) {
+        obj[key] = obj[key][0];
+      }
+    } else {
+      // else only process the fields for things users don't want to omit
+      if (omitBy(key) === false)
+        if (Array.isArray(obj[key]) && obj[key].length === 1) {
+          obj[key] = obj[key][0];
+        }
+    }
+  }
+  return obj;
 };

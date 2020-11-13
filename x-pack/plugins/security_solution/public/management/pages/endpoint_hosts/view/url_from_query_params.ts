@@ -7,11 +7,11 @@
 // eslint-disable-next-line import/no-nodejs-modules
 import querystring from 'querystring';
 
-import { HostIndexUIQueryParams } from '../types';
+import { EndpointIndexUIQueryParams } from '../types';
 import { AppLocation } from '../../../../../common/endpoint/types';
 
-export function urlFromQueryParams(queryParams: HostIndexUIQueryParams): Partial<AppLocation> {
-  const search = querystring.stringify(queryParams);
+export function urlFromQueryParams(queryParams: EndpointIndexUIQueryParams): Partial<AppLocation> {
+  const search = querystring.stringify(queryParams as Record<string, string>);
   return {
     search,
   };

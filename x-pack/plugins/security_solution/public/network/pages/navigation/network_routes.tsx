@@ -8,7 +8,7 @@ import React, { useCallback } from 'react';
 import { Route, Switch } from 'react-router-dom';
 import { EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
-import { FlowTargetSourceDest } from '../../../graphql/types';
+import { FlowTargetSourceDest } from '../../../../common/search_strategy/security_solution/network';
 import { scoreIntervalToDateTime } from '../../../common/components/ml/score/score_interval_to_datetime';
 
 import { IPsQueryTabBody } from './ips_query_tab_body';
@@ -33,6 +33,7 @@ export const NetworkRoutes = React.memo<NetworkRoutesProps>(
     isInitializing,
     from,
     indexPattern,
+    indexNames,
     setQuery,
     setAbsoluteRangeDatePicker,
   }) => {
@@ -83,6 +84,7 @@ export const NetworkRoutes = React.memo<NetworkRoutesProps>(
     const commonProps = {
       startDate: from,
       endDate: to,
+      indexNames,
       skip: isInitializing,
       type,
       narrowDateRange,

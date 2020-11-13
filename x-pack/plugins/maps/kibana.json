@@ -7,22 +7,21 @@
     "licensing",
     "features",
     "inspector",
-    "home",
     "data",
     "fileUpload",
     "uiActions",
     "navigation",
     "visualizations",
+    "dashboard",
     "embeddable",
     "mapsLegacy",
-    "usageCollection"
+    "usageCollection",
+    "savedObjects",
+    "share"
   ],
+  "optionalPlugins": ["home"],
   "ui": true,
   "server": true,
   "extraPublicDirs": ["common/constants"],
-  "requiredBundles": [
-    "kibanaReact",
-    "kibanaUtils",
-    "savedObjects"
-  ]
+  "requiredBundles": ["kibanaReact", "kibanaUtils", "home", "mapsOss"]
 }

@@ -36,13 +36,14 @@ import { VisType } from '../vis_types';
 
 export interface ExprVisState {
   title?: string;
-  type: VisType | string;
+  type: VisType<unknown> | string;
   params?: VisParams;
 }
 
 export interface ExprVisAPIEvents {
   filter: (data: any) => void;
   brush: (data: any) => void;
+  applyFilter: (data: any) => void;
 }
 
 export interface ExprVisAPI {
@@ -51,7 +52,7 @@ export interface ExprVisAPI {
 
 export class ExprVis extends EventEmitter {
   public title: string = '';
-  public type: VisType;
+  public type: VisType<unknown>;
   public params: VisParams = {};
   public sessionState: Record<string, any> = {};
   public API: ExprVisAPI;
@@ -83,11 +84,15 @@ export class ExprVis extends EventEmitter {
           if (!this.eventsSubject) return;
           this.eventsSubject.next({ name: 'brush', data });
         },
+        applyFilter: (data: any) => {
+          if (!this.eventsSubject) return;
+          this.eventsSubject.next({ name: 'applyFilter', data });
+        },
       },
     };
   }
 
-  private getType(type: string | VisType) {
+  private getType(type: string | VisType<unknown>) {
     if (_.isString(type)) {
       const newType = getTypes().get(type);
       if (!newType) {

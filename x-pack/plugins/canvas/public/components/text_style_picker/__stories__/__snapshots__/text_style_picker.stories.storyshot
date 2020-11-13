@@ -48,11 +48,9 @@ exports[`Storyshots components/TextStylePicker default 1`] = `
                 <button
                   aria-haspopup="true"
                   aria-labelledby="undefined generated-id"
-                  aria-selected={true}
                   className="euiSuperSelectControl euiSuperSelectControl--compressed"
                   onClick={[Function]}
                   onKeyDown={[Function]}
-                  role="option"
                   type="button"
                 />
                 <div
@@ -61,7 +59,7 @@ exports[`Storyshots components/TextStylePicker default 1`] = `
                   <span
                     className="euiFormControlLayoutCustomIcon"
                   >
-                    <div
+                    <span
                       aria-hidden="true"
                       className="euiFormControlLayoutCustomIcon__icon"
                       data-euiicon-type="arrowDown"
@@ -190,7 +188,7 @@ exports[`Storyshots components/TextStylePicker default 1`] = `
               <span
                 className="euiFormControlLayoutCustomIcon"
               >
-                <div
+                <span
                   aria-hidden="true"
                   className="euiFormControlLayoutCustomIcon__icon"
                   data-euiicon-type="arrowDown"
@@ -217,7 +215,6 @@ exports[`Storyshots components/TextStylePicker default 1`] = `
       >
         <div
           className="euiPopover euiPopover--anchorDownCenter"
-          container={null}
           id="color-picker-popover"
           onKeyDown={[Function]}
           onMouseDown={[Function]}
@@ -258,113 +255,98 @@ exports[`Storyshots components/TextStylePicker default 1`] = `
         className="euiFlexItem euiFlexItem--flexGrowZero"
       >
         <fieldset
-          className="euiButtonGroup__fieldset"
+          className="euiButtonGroup euiButtonGroup--compressed euiButtonGroup--text canvasSidebar__buttonGroup"
+          disabled={false}
         >
-          <div
-            className="euiButtonGroup euiButtonGroup--compressed canvasSidebar__buttonGroup"
+          <legend
+            className="euiScreenReaderOnly"
           >
-            <div
-              className="euiToggle euiButtonToggle__wrapper euiButtonGroup__toggle"
+            Style options
+          </legend>
+          <div
+            className="euiButtonGroup__buttons"
+          >
+            <button
+              aria-pressed={false}
+              className="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small euiButtonGroupButton-isIconOnly"
+              disabled={false}
+              id="bold"
+              onClick={[Function]}
+              style={
+                Object {
+                  "minWidth": undefined,
+                }
+              }
             >
-              <input
-                aria-label="Bold"
-                checked={false}
-                className="euiToggle__input euiButtonToggle__input"
-                onChange={[Function]}
-                title="Bold"
-                type="checkbox"
-              />
-              <button
-                className="euiButton euiButton--text euiButton--small euiButtonToggle euiButtonToggle--isIconOnly euiButtonGroup__button"
-                id="bold"
-                tabIndex={-1}
-                type="button"
+              <span
+                className="euiButtonContent euiButton__content"
               >
                 <span
-                  className="euiButton__content"
+                  className="euiButtonContent__icon"
+                  data-euiicon-type="editorBold"
+                  size="m"
+                />
+                <span
+                  className="euiButton__text euiScreenReaderOnly"
                 >
-                  <div
-                    aria-hidden="true"
-                    className="euiButton__icon"
-                    data-euiicon-type="editorBold"
-                    size="m"
-                  />
-                  <span
-                    className="euiButton__text"
-                  >
-                    
-                  </span>
+                  Bold
                 </span>
-              </button>
-            </div>
-            <div
-              className="euiToggle euiButtonToggle__wrapper euiButtonGroup__toggle"
+              </span>
+            </button>
+            <button
+              aria-pressed={false}
+              className="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small euiButtonGroupButton-isIconOnly"
+              disabled={false}
+              id="italic"
+              onClick={[Function]}
+              style={
+                Object {
+                  "minWidth": undefined,
+                }
+              }
             >
-              <input
-                aria-label="Italic"
-                checked={false}
-                className="euiToggle__input euiButtonToggle__input"
-                onChange={[Function]}
-                title="Italic"
-                type="checkbox"
-              />
-              <button
-                className="euiButton euiButton--text euiButton--small euiButtonToggle euiButtonToggle--isIconOnly euiButtonGroup__button"
-                id="italic"
-                tabIndex={-1}
-                type="button"
+              <span
+                className="euiButtonContent euiButton__content"
               >
                 <span
-                  className="euiButton__content"
+                  className="euiButtonContent__icon"
+                  data-euiicon-type="editorItalic"
+                  size="m"
+                />
+                <span
+                  className="euiButton__text euiScreenReaderOnly"
                 >
-                  <div
-                    aria-hidden="true"
-                    className="euiButton__icon"
-                    data-euiicon-type="editorItalic"
-                    size="m"
-                  />
-                  <span
-                    className="euiButton__text"
-                  >
-                    
-                  </span>
+                  Italic
                 </span>
-              </button>
-            </div>
-            <div
-              className="euiToggle euiButtonToggle__wrapper euiButtonGroup__toggle"
+              </span>
+            </button>
+            <button
+              aria-pressed={false}
+              className="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small euiButtonGroupButton-isIconOnly"
+              disabled={false}
+              id="underline"
+              onClick={[Function]}
+              style={
+                Object {
+                  "minWidth": undefined,
+                }
+              }
             >
-              <input
-                aria-label="Underline"
-                checked={false}
-                className="euiToggle__input euiButtonToggle__input"
-                onChange={[Function]}
-                title="Underline"
-                type="checkbox"
-              />
-              <button
-                className="euiButton euiButton--text euiButton--small euiButtonToggle euiButtonToggle--isIconOnly euiButtonGroup__button"
-                id="underline"
-                tabIndex={-1}
-                type="button"
+              <span
+                className="euiButtonContent euiButton__content"
               >
                 <span
-                  className="euiButton__content"
+                  className="euiButtonContent__icon"
+                  data-euiicon-type="editorUnderline"
+                  size="m"
+                />
+                <span
+                  className="euiButton__text euiScreenReaderOnly"
                 >
-                  <div
-                    aria-hidden="true"
-                    className="euiButton__icon"
-                    data-euiicon-type="editorUnderline"
-                    size="m"
-                  />
-                  <span
-                    className="euiButton__text"
-                  >
-                    
-                  </span>
+                  Underline
                 </span>
-              </button>
-            </div>
+              </span>
+            </button>
           </div>
         </fieldset>
       </div>
@@ -372,113 +354,122 @@ exports[`Storyshots components/TextStylePicker default 1`] = `
         className="euiFlexItem euiFlexItem--flexGrowZero"
       >
         <fieldset
-          className="euiButtonGroup__fieldset"
+          className="euiButtonGroup euiButtonGroup--compressed euiButtonGroup--text canvasSidebar__buttonGroup"
+          disabled={false}
         >
-          <div
-            className="euiButtonGroup euiButtonGroup--compressed canvasSidebar__buttonGroup"
+          <legend
+            className="euiScreenReaderOnly"
           >
-            <div
-              className="euiToggle euiToggle--checked euiButtonToggle__wrapper euiButtonGroup__toggle"
+            Alignment options
+          </legend>
+          <div
+            className="euiButtonGroup__buttons"
+          >
+            <label
+              className="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small euiButtonGroupButton-isSelected euiButtonGroupButton-isIconOnly"
+              disabled={false}
+              htmlFor="left"
+              onClick={[Function]}
+              style={
+                Object {
+                  "minWidth": undefined,
+                }
+              }
             >
-              <input
-                aria-label="Align left"
-                checked={true}
-                className="euiToggle__input euiButtonToggle__input"
-                onChange={[Function]}
-                title="Align left"
-                type="radio"
-              />
-              <button
-                className="euiButton euiButton--text euiButton--small euiButtonToggle euiButtonToggle--isIconOnly euiButtonGroup__button euiButtonGroup__button--selected"
-                id="left"
-                tabIndex={-1}
-                type="button"
+              <span
+                className="euiButtonContent euiButton__content"
               >
                 <span
-                  className="euiButton__content"
+                  className="euiButtonContent__icon"
+                  data-euiicon-type="editorAlignLeft"
+                  size="m"
+                />
+                <span
+                  className="euiButton__text euiScreenReaderOnly"
                 >
-                  <div
-                    aria-hidden="true"
-                    className="euiButton__icon"
-                    data-euiicon-type="editorAlignLeft"
-                    size="m"
+                  <input
+                    checked={true}
+                    className="euiScreenReaderOnly"
+                    disabled={false}
+                    id="left"
+                    name="generated-id"
+                    onChange={[Function]}
+                    type="radio"
                   />
-                  <span
-                    className="euiButton__text"
-                  >
-                    
-                  </span>
+                  Align left
                 </span>
-              </button>
-            </div>
-            <div
-              className="euiToggle euiButtonToggle__wrapper euiButtonGroup__toggle"
+              </span>
+            </label>
+            <label
+              className="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small euiButtonGroupButton-isIconOnly"
+              disabled={false}
+              htmlFor="center"
+              onClick={[Function]}
+              style={
+                Object {
+                  "minWidth": undefined,
+                }
+              }
             >
-              <input
-                aria-label="Align center"
-                checked={false}
-                className="euiToggle__input euiButtonToggle__input"
-                onChange={[Function]}
-                title="Align center"
-                type="radio"
-              />
-              <button
-                className="euiButton euiButton--text euiButton--small euiButtonToggle euiButtonToggle--isIconOnly euiButtonGroup__button"
-                id="center"
-                tabIndex={-1}
-                type="button"
+              <span
+                className="euiButtonContent euiButton__content"
               >
                 <span
-                  className="euiButton__content"
+                  className="euiButtonContent__icon"
+                  data-euiicon-type="editorAlignCenter"
+                  size="m"
+                />
+                <span
+                  className="euiButton__text euiScreenReaderOnly"
                 >
-                  <div
-                    aria-hidden="true"
-                    className="euiButton__icon"
-                    data-euiicon-type="editorAlignCenter"
-                    size="m"
+                  <input
+                    checked={false}
+                    className="euiScreenReaderOnly"
+                    disabled={false}
+                    id="center"
+                    name="generated-id"
+                    onChange={[Function]}
+                    type="radio"
                   />
-                  <span
-                    className="euiButton__text"
-                  >
-                    
-                  </span>
+                  Align center
                 </span>
-              </button>
-            </div>
-            <div
-              className="euiToggle euiButtonToggle__wrapper euiButtonGroup__toggle"
+              </span>
+            </label>
+            <label
+              className="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small euiButtonGroupButton-isIconOnly"
+              disabled={false}
+              htmlFor="right"
+              onClick={[Function]}
+              style={
+                Object {
+                  "minWidth": undefined,
+                }
+              }
             >
-              <input
-                aria-label="Align right"
-                checked={false}
-                className="euiToggle__input euiButtonToggle__input"
-                onChange={[Function]}
-                title="Align right"
-                type="radio"
-              />
-              <button
-                className="euiButton euiButton--text euiButton--small euiButtonToggle euiButtonToggle--isIconOnly euiButtonGroup__button"
-                id="right"
-                tabIndex={-1}
-                type="button"
+              <span
+                className="euiButtonContent euiButton__content"
               >
                 <span
-                  className="euiButton__content"
+                  className="euiButtonContent__icon"
+                  data-euiicon-type="editorAlignRight"
+                  size="m"
+                />
+                <span
+                  className="euiButton__text euiScreenReaderOnly"
                 >
-                  <div
-                    aria-hidden="true"
-                    className="euiButton__icon"
-                    data-euiicon-type="editorAlignRight"
-                    size="m"
+                  <input
+                    checked={false}
+                    className="euiScreenReaderOnly"
+                    disabled={false}
+                    id="right"
+                    name="generated-id"
+                    onChange={[Function]}
+                    type="radio"
                   />
-                  <span
-                    className="euiButton__text"
-                  >
-                    
-                  </span>
+                  Align right
                 </span>
-              </button>
-            </div>
+              </span>
+            </label>
           </div>
         </fieldset>
       </div>
@@ -535,11 +526,9 @@ exports[`Storyshots components/TextStylePicker interactive 1`] = `
                 <button
                   aria-haspopup="true"
                   aria-labelledby="undefined generated-id"
-                  aria-selected={true}
                   className="euiSuperSelectControl euiSuperSelectControl--compressed"
                   onClick={[Function]}
                   onKeyDown={[Function]}
-                  role="option"
                   type="button"
                 />
                 <div
@@ -548,7 +537,7 @@ exports[`Storyshots components/TextStylePicker interactive 1`] = `
                   <span
                     className="euiFormControlLayoutCustomIcon"
                   >
-                    <div
+                    <span
                       aria-hidden="true"
                       className="euiFormControlLayoutCustomIcon__icon"
                       data-euiicon-type="arrowDown"
@@ -677,7 +666,7 @@ exports[`Storyshots components/TextStylePicker interactive 1`] = `
               <span
                 className="euiFormControlLayoutCustomIcon"
               >
-                <div
+                <span
                   aria-hidden="true"
                   className="euiFormControlLayoutCustomIcon__icon"
                   data-euiicon-type="arrowDown"
@@ -704,7 +693,6 @@ exports[`Storyshots components/TextStylePicker interactive 1`] = `
       >
         <div
           className="euiPopover euiPopover--anchorDownCenter"
-          container={null}
           id="color-picker-popover"
           onKeyDown={[Function]}
           onMouseDown={[Function]}
@@ -745,113 +733,98 @@ exports[`Storyshots components/TextStylePicker interactive 1`] = `
         className="euiFlexItem euiFlexItem--flexGrowZero"
       >
         <fieldset
-          className="euiButtonGroup__fieldset"
+          className="euiButtonGroup euiButtonGroup--compressed euiButtonGroup--text canvasSidebar__buttonGroup"
+          disabled={false}
         >
-          <div
-            className="euiButtonGroup euiButtonGroup--compressed canvasSidebar__buttonGroup"
+          <legend
+            className="euiScreenReaderOnly"
           >
-            <div
-              className="euiToggle euiButtonToggle__wrapper euiButtonGroup__toggle"
+            Style options
+          </legend>
+          <div
+            className="euiButtonGroup__buttons"
+          >
+            <button
+              aria-pressed={false}
+              className="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small euiButtonGroupButton-isIconOnly"
+              disabled={false}
+              id="bold"
+              onClick={[Function]}
+              style={
+                Object {
+                  "minWidth": undefined,
+                }
+              }
             >
-              <input
-                aria-label="Bold"
-                checked={false}
-                className="euiToggle__input euiButtonToggle__input"
-                onChange={[Function]}
-                title="Bold"
-                type="checkbox"
-              />
-              <button
-                className="euiButton euiButton--text euiButton--small euiButtonToggle euiButtonToggle--isIconOnly euiButtonGroup__button"
-                id="bold"
-                tabIndex={-1}
-                type="button"
+              <span
+                className="euiButtonContent euiButton__content"
               >
                 <span
-                  className="euiButton__content"
+                  className="euiButtonContent__icon"
+                  data-euiicon-type="editorBold"
+                  size="m"
+                />
+                <span
+                  className="euiButton__text euiScreenReaderOnly"
                 >
-                  <div
-                    aria-hidden="true"
-                    className="euiButton__icon"
-                    data-euiicon-type="editorBold"
-                    size="m"
-                  />
-                  <span
-                    className="euiButton__text"
-                  >
-                    
-                  </span>
+                  Bold
                 </span>
-              </button>
-            </div>
-            <div
-              className="euiToggle euiButtonToggle__wrapper euiButtonGroup__toggle"
+              </span>
+            </button>
+            <button
+              aria-pressed={false}
+              className="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small euiButtonGroupButton-isIconOnly"
+              disabled={false}
+              id="italic"
+              onClick={[Function]}
+              style={
+                Object {
+                  "minWidth": undefined,
+                }
+              }
             >
-              <input
-                aria-label="Italic"
-                checked={false}
-                className="euiToggle__input euiButtonToggle__input"
-                onChange={[Function]}
-                title="Italic"
-                type="checkbox"
-              />
-              <button
-                className="euiButton euiButton--text euiButton--small euiButtonToggle euiButtonToggle--isIconOnly euiButtonGroup__button"
-                id="italic"
-                tabIndex={-1}
-                type="button"
+              <span
+                className="euiButtonContent euiButton__content"
               >
                 <span
-                  className="euiButton__content"
+                  className="euiButtonContent__icon"
+                  data-euiicon-type="editorItalic"
+                  size="m"
+                />
+                <span
+                  className="euiButton__text euiScreenReaderOnly"
                 >
-                  <div
-                    aria-hidden="true"
-                    className="euiButton__icon"
-                    data-euiicon-type="editorItalic"
-                    size="m"
-                  />
-                  <span
-                    className="euiButton__text"
-                  >
-                    
-                  </span>
+                  Italic
                 </span>
-              </button>
-            </div>
-            <div
-              className="euiToggle euiButtonToggle__wrapper euiButtonGroup__toggle"
+              </span>
+            </button>
+            <button
+              aria-pressed={false}
+              className="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small euiButtonGroupButton-isIconOnly"
+              disabled={false}
+              id="underline"
+              onClick={[Function]}
+              style={
+                Object {
+                  "minWidth": undefined,
+                }
+              }
             >
-              <input
-                aria-label="Underline"
-                checked={false}
-                className="euiToggle__input euiButtonToggle__input"
-                onChange={[Function]}
-                title="Underline"
-                type="checkbox"
-              />
-              <button
-                className="euiButton euiButton--text euiButton--small euiButtonToggle euiButtonToggle--isIconOnly euiButtonGroup__button"
-                id="underline"
-                tabIndex={-1}
-                type="button"
+              <span
+                className="euiButtonContent euiButton__content"
               >
                 <span
-                  className="euiButton__content"
+                  className="euiButtonContent__icon"
+                  data-euiicon-type="editorUnderline"
+                  size="m"
+                />
+                <span
+                  className="euiButton__text euiScreenReaderOnly"
                 >
-                  <div
-                    aria-hidden="true"
-                    className="euiButton__icon"
-                    data-euiicon-type="editorUnderline"
-                    size="m"
-                  />
-                  <span
-                    className="euiButton__text"
-                  >
-                    
-                  </span>
+                  Underline
                 </span>
-              </button>
-            </div>
+              </span>
+            </button>
           </div>
         </fieldset>
       </div>
@@ -859,113 +832,122 @@ exports[`Storyshots components/TextStylePicker interactive 1`] = `
         className="euiFlexItem euiFlexItem--flexGrowZero"
       >
         <fieldset
-          className="euiButtonGroup__fieldset"
+          className="euiButtonGroup euiButtonGroup--compressed euiButtonGroup--text canvasSidebar__buttonGroup"
+          disabled={false}
         >
-          <div
-            className="euiButtonGroup euiButtonGroup--compressed canvasSidebar__buttonGroup"
+          <legend
+            className="euiScreenReaderOnly"
           >
-            <div
-              className="euiToggle euiToggle--checked euiButtonToggle__wrapper euiButtonGroup__toggle"
+            Alignment options
+          </legend>
+          <div
+            className="euiButtonGroup__buttons"
+          >
+            <label
+              className="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small euiButtonGroupButton-isSelected euiButtonGroupButton-isIconOnly"
+              disabled={false}
+              htmlFor="left"
+              onClick={[Function]}
+              style={
+                Object {
+                  "minWidth": undefined,
+                }
+              }
             >
-              <input
-                aria-label="Align left"
-                checked={true}
-                className="euiToggle__input euiButtonToggle__input"
-                onChange={[Function]}
-                title="Align left"
-                type="radio"
-              />
-              <button
-                className="euiButton euiButton--text euiButton--small euiButtonToggle euiButtonToggle--isIconOnly euiButtonGroup__button euiButtonGroup__button--selected"
-                id="left"
-                tabIndex={-1}
-                type="button"
+              <span
+                className="euiButtonContent euiButton__content"
               >
                 <span
-                  className="euiButton__content"
+                  className="euiButtonContent__icon"
+                  data-euiicon-type="editorAlignLeft"
+                  size="m"
+                />
+                <span
+                  className="euiButton__text euiScreenReaderOnly"
                 >
-                  <div
-                    aria-hidden="true"
-                    className="euiButton__icon"
-                    data-euiicon-type="editorAlignLeft"
-                    size="m"
+                  <input
+                    checked={true}
+                    className="euiScreenReaderOnly"
+                    disabled={false}
+                    id="left"
+                    name="generated-id"
+                    onChange={[Function]}
+                    type="radio"
                   />
-                  <span
-                    className="euiButton__text"
-                  >
-                    
-                  </span>
+                  Align left
                 </span>
-              </button>
-            </div>
-            <div
-              className="euiToggle euiButtonToggle__wrapper euiButtonGroup__toggle"
+              </span>
+            </label>
+            <label
+              className="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small euiButtonGroupButton-isIconOnly"
+              disabled={false}
+              htmlFor="center"
+              onClick={[Function]}
+              style={
+                Object {
+                  "minWidth": undefined,
+                }
+              }
             >
-              <input
-                aria-label="Align center"
-                checked={false}
-                className="euiToggle__input euiButtonToggle__input"
-                onChange={[Function]}
-                title="Align center"
-                type="radio"
-              />
-              <button
-                className="euiButton euiButton--text euiButton--small euiButtonToggle euiButtonToggle--isIconOnly euiButtonGroup__button"
-                id="center"
-                tabIndex={-1}
-                type="button"
+              <span
+                className="euiButtonContent euiButton__content"
               >
                 <span
-                  className="euiButton__content"
+                  className="euiButtonContent__icon"
+                  data-euiicon-type="editorAlignCenter"
+                  size="m"
+                />
+                <span
+                  className="euiButton__text euiScreenReaderOnly"
                 >
-                  <div
-                    aria-hidden="true"
-                    className="euiButton__icon"
-                    data-euiicon-type="editorAlignCenter"
-                    size="m"
+                  <input
+                    checked={false}
+                    className="euiScreenReaderOnly"
+                    disabled={false}
+                    id="center"
+                    name="generated-id"
+                    onChange={[Function]}
+                    type="radio"
                   />
-                  <span
-                    className="euiButton__text"
-                  >
-                    
-                  </span>
+                  Align center
                 </span>
-              </button>
-            </div>
-            <div
-              className="euiToggle euiButtonToggle__wrapper euiButtonGroup__toggle"
+              </span>
+            </label>
+            <label
+              className="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small euiButtonGroupButton-isIconOnly"
+              disabled={false}
+              htmlFor="right"
+              onClick={[Function]}
+              style={
+                Object {
+                  "minWidth": undefined,
+                }
+              }
             >
-              <input
-                aria-label="Align right"
-                checked={false}
-                className="euiToggle__input euiButtonToggle__input"
-                onChange={[Function]}
-                title="Align right"
-                type="radio"
-              />
-              <button
-                className="euiButton euiButton--text euiButton--small euiButtonToggle euiButtonToggle--isIconOnly euiButtonGroup__button"
-                id="right"
-                tabIndex={-1}
-                type="button"
+              <span
+                className="euiButtonContent euiButton__content"
               >
                 <span
-                  className="euiButton__content"
+                  className="euiButtonContent__icon"
+                  data-euiicon-type="editorAlignRight"
+                  size="m"
+                />
+                <span
+                  className="euiButton__text euiScreenReaderOnly"
                 >
-                  <div
-                    aria-hidden="true"
-                    className="euiButton__icon"
-                    data-euiicon-type="editorAlignRight"
-                    size="m"
+                  <input
+                    checked={false}
+                    className="euiScreenReaderOnly"
+                    disabled={false}
+                    id="right"
+                    name="generated-id"
+                    onChange={[Function]}
+                    type="radio"
                   />
-                  <span
-                    className="euiButton__text"
-                  >
-                    
-                  </span>
+                  Align right
                 </span>
-              </button>
-            </div>
+              </span>
+            </label>
           </div>
         </fieldset>
       </div>

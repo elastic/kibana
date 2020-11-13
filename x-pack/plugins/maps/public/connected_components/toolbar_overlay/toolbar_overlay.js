@@ -12,14 +12,18 @@ import { FitToData } from './fit_to_data';
 
 export class ToolbarOverlay extends React.Component {
   _renderToolsControl() {
-    const { addFilters, geoFields } = this.props;
+    const { addFilters, geoFields, getFilterActions, getActionContext } = this.props;
     if (!addFilters || !geoFields.length) {
       return null;
     }
 
     return (
       <EuiFlexItem>
-        <ToolsControl geoFields={geoFields} />
+        <ToolsControl
+          geoFields={geoFields}
+          getFilterActions={getFilterActions}
+          getActionContext={getActionContext}
+        />
       </EuiFlexItem>
     );
   }

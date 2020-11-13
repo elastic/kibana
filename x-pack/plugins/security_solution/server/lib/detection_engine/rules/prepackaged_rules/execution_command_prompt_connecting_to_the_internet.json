@@ -6,19 +6,24 @@
   "false_positives": [
     "Administrators may use the command prompt for regular administrative tasks. It's important to baseline your environment for network connections being made from the command prompt to determine any abnormal use of this tool."
   ],
+  "from": "now-9m",
   "index": [
-    "winlogbeat-*"
+    "winlogbeat-*",
+    "logs-endpoint.events.*"
   ],
-  "language": "kuery",
+  "language": "eql",
   "license": "Elastic License",
   "name": "Command Prompt Network Connection",
-  "query": "event.category:network and event.type:connection and process.name:cmd.exe and not destination.ip:(10.0.0.0/8 or 172.16.0.0/12 or 192.168.0.0/16)",
+  "query": "sequence by process.entity_id\n  [process where process.name : \"cmd.exe\" and event.type == \"start\"]\n  [network where process.name : \"cmd.exe\" and\n     not cidrmatch(destination.ip, \"10.0.0.0/8\", \"172.16.0.0/12\", \"192.168.0.0/16\")]\n",
   "risk_score": 21,
   "rule_id": "89f9a4b0-9f8f-4ee0-8823-c4751a6d6696",
   "severity": "low",
   "tags": [
     "Elastic",
-    "Windows"
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Execution"
   ],
   "threat": [
     {
@@ -31,7 +36,7 @@
       "technique": [
         {
           "id": "T1059",
-          "name": "Command-Line Interface",
+          "name": "Command and Scripting Interpreter",
           "reference": "https://attack.mitre.org/techniques/T1059/"
         }
       ]
@@ -46,12 +51,12 @@
       "technique": [
         {
           "id": "T1105",
-          "name": "Remote File Copy",
+          "name": "Ingress Tool Transfer",
           "reference": "https://attack.mitre.org/techniques/T1105/"
         }
       ]
     }
   ],
-  "type": "query",
-  "version": 3
+  "type": "eql",
+  "version": 5
 }

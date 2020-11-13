@@ -27,13 +27,13 @@ import { loggingSystemMock } from '../../../logging/logging_system.mock';
 
 describe('IndexMigrator', () => {
   let testOpts: jest.Mocked<MigrationOpts> & {
-    client: ReturnType<typeof elasticsearchClientMock.createElasticSearchClient>;
+    client: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
   };
 
   beforeEach(() => {
     testOpts = {
       batchSize: 10,
-      client: elasticsearchClientMock.createElasticSearchClient(),
+      client: elasticsearchClientMock.createElasticsearchClient(),
       index: '.kibana',
       log: loggingSystemMock.create().get(),
       mappingProperties: {},
@@ -66,6 +66,7 @@ describe('IndexMigrator', () => {
               migrationVersion: '4a1746014a75ade3a714e1db5763276f',
               namespace: '2f4316de49999235636386fe51dc06c1',
               namespaces: '2f4316de49999235636386fe51dc06c1',
+              originId: '2f4316de49999235636386fe51dc06c1',
               references: '7997cf5a56cc02bdc9c93361bde732b0',
               type: '2f4316de49999235636386fe51dc06c1',
               updated_at: '00da57df13e94e9d98437d13ace4bfe0',
@@ -76,6 +77,7 @@ describe('IndexMigrator', () => {
             migrationVersion: { dynamic: 'true', type: 'object' },
             namespace: { type: 'keyword' },
             namespaces: { type: 'keyword' },
+            originId: { type: 'keyword' },
             type: { type: 'keyword' },
             updated_at: { type: 'date' },
             references: {
@@ -185,6 +187,7 @@ describe('IndexMigrator', () => {
               migrationVersion: '4a1746014a75ade3a714e1db5763276f',
               namespace: '2f4316de49999235636386fe51dc06c1',
               namespaces: '2f4316de49999235636386fe51dc06c1',
+              originId: '2f4316de49999235636386fe51dc06c1',
               references: '7997cf5a56cc02bdc9c93361bde732b0',
               type: '2f4316de49999235636386fe51dc06c1',
               updated_at: '00da57df13e94e9d98437d13ace4bfe0',
@@ -196,6 +199,7 @@ describe('IndexMigrator', () => {
             migrationVersion: { dynamic: 'true', type: 'object' },
             namespace: { type: 'keyword' },
             namespaces: { type: 'keyword' },
+            originId: { type: 'keyword' },
             type: { type: 'keyword' },
             updated_at: { type: 'date' },
             references: {
@@ -244,6 +248,7 @@ describe('IndexMigrator', () => {
               migrationVersion: '4a1746014a75ade3a714e1db5763276f',
               namespace: '2f4316de49999235636386fe51dc06c1',
               namespaces: '2f4316de49999235636386fe51dc06c1',
+              originId: '2f4316de49999235636386fe51dc06c1',
               references: '7997cf5a56cc02bdc9c93361bde732b0',
               type: '2f4316de49999235636386fe51dc06c1',
               updated_at: '00da57df13e94e9d98437d13ace4bfe0',
@@ -255,6 +260,7 @@ describe('IndexMigrator', () => {
             migrationVersion: { dynamic: 'true', type: 'object' },
             namespace: { type: 'keyword' },
             namespaces: { type: 'keyword' },
+            originId: { type: 'keyword' },
             type: { type: 'keyword' },
             updated_at: { type: 'date' },
             references: {
@@ -363,10 +369,34 @@ describe('IndexMigrator', () => {
       ],
     });
   });
+
+  test('rejects when the migration function throws an error', async () => {
+    const { client } = testOpts;
+    const migrateDoc = jest.fn((doc: SavedObjectUnsanitizedDoc) => {
+      throw new Error('error migrating document');
+    });
+
+    testOpts.documentMigrator = {
+      migrationVersion: { foo: '1.2.3' },
+      migrate: migrateDoc,
+    };
+
+    withIndex(client, {
+      numOutOfDate: 1,
+      docs: [
+        [{ _id: 'foo:1', _source: { type: 'foo', foo: { name: 'Bar' } } }],
+        [{ _id: 'foo:2', _source: { type: 'foo', foo: { name: 'Baz' } } }],
+      ],
+    });
+
+    await expect(new IndexMigrator(testOpts).migrate()).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"error migrating document"`
+    );
+  });
 });
 
 function withIndex(
-  client: ReturnType<typeof elasticsearchClientMock.createElasticSearchClient>,
+  client: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>,
   opts: any = {}
 ) {
   const defaultIndex = {

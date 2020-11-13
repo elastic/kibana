@@ -5,15 +5,16 @@
  */
 
 import { useCallback, useState, useEffect, useMemo } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 
+import { useShallowEqualSelector } from '../../hooks/use_selector';
 import { inputsSelectors } from '../../store';
 import { inputsActions } from '../../store/actions';
 import { SetQuery, DeleteQuery } from './types';
 
-export const useGlobalTime = () => {
+export const useGlobalTime = (clearAllQuery: boolean = true) => {
   const dispatch = useDispatch();
-  const { from, to } = useSelector(inputsSelectors.globalTimeRangeSelector);
+  const { from, to } = useShallowEqualSelector(inputsSelectors.globalTimeRangeSelector);
   const [isInitializing, setIsInitializing] = useState(true);
 
   const setQuery = useCallback(
@@ -32,9 +33,11 @@ export const useGlobalTime = () => {
       setIsInitializing(false);
     }
     return () => {
-      dispatch(inputsActions.deleteAllQuery({ id: 'global' }));
+      if (clearAllQuery) {
+        dispatch(inputsActions.deleteAllQuery({ id: 'global' }));
+      }
     };
-  }, [dispatch, isInitializing]);
+  }, [clearAllQuery, dispatch, isInitializing]);
 
   const memoizedReturn = useMemo(
     () => ({

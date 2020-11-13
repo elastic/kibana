@@ -11,7 +11,7 @@
 
 import PropTypes from 'prop-types';
 import React, { Component, Fragment } from 'react';
-import _ from 'lodash';
+import { get, pick } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -26,7 +26,7 @@ import {
   EuiTabbedContent,
   EuiText,
 } from '@elastic/eui';
-import { formatHumanReadableDateTimeSeconds } from '../../util/date_utils';
+import { formatHumanReadableDateTimeSeconds } from '../../../../common/util/date_utils';
 
 import { EntityCell } from '../entity_cell';
 import {
@@ -38,6 +38,7 @@ import {
 import { MULTI_BUCKET_IMPACT } from '../../../../common/constants/multi_bucket_impact';
 import { formatValue } from '../../formatters/format_value';
 import { MAX_CHARS } from './anomalies_table_constants';
+import { ML_JOB_AGGREGATION } from '../../../../common/constants/aggregation_types';
 
 const TIME_FIELD_NAME = 'timestamp';
 
@@ -63,16 +64,12 @@ function getDetailsItems(anomaly, examples, filter) {
     }
   } else {
     causes = sourceCauses.map((cause) => {
-      const simplified = _.pick(cause, 'typical', 'actual', 'probability');
+      const simplified = pick(cause, 'typical', 'actual', 'probability');
       // Get the 'entity field name/value' to display in the cause -
       // For by and over, use by_field_name/value (over_field_name/value are in the top level fields)
       // For just an 'over' field - the over_field_name/value appear in both top level and cause.
-      simplified.entityName = _.has(cause, 'by_field_name')
-        ? cause.by_field_name
-        : cause.over_field_name;
-      simplified.entityValue = _.has(cause, 'by_field_value')
-        ? cause.by_field_value
-        : cause.over_field_value;
+      simplified.entityName = cause.by_field_name ? cause.by_field_name : cause.over_field_name;
+      simplified.entityValue = cause.by_field_value ? cause.by_field_value : cause.over_field_value;
       return simplified;
     });
   }
@@ -134,7 +131,8 @@ function getDetailsItems(anomaly, examples, filter) {
     title: i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.functionTitle', {
       defaultMessage: 'function',
     }),
-    description: source.function !== 'metric' ? source.function : source.function_description,
+    description:
+      source.function !== ML_JOB_AGGREGATION.METRIC ? source.function : source.function_description,
   });
 
   if (source.field_name !== undefined) {
@@ -471,7 +469,7 @@ export class AnomalyDetails extends Component {
 
   renderDetails() {
     const detailItems = getDetailsItems(this.props.anomaly, this.props.examples, this.props.filter);
-    const isInterimResult = _.get(this.props.anomaly, 'source.is_interim', false);
+    const isInterimResult = get(this.props.anomaly, 'source.is_interim', false);
     return (
       <React.Fragment>
         <EuiText size="xs">

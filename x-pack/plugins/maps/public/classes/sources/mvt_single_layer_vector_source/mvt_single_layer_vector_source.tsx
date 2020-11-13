@@ -28,6 +28,7 @@ import {
 import { MVTField } from '../../fields/mvt_field';
 import { UpdateSourceEditor } from './update_source_editor';
 import { ITooltipProperty, TooltipProperty } from '../../tooltips/tooltip_property';
+import { Adapters } from '../../../../../../../src/plugins/inspector/common/adapters';
 
 export const sourceTitle = i18n.translate(
   'xpack.maps.source.MVTSingleLayerVectorSource.sourceTitle',
@@ -36,7 +37,8 @@ export const sourceTitle = i18n.translate(
   }
 );
 
-export class MVTSingleLayerVectorSource extends AbstractSource
+export class MVTSingleLayerVectorSource
+  extends AbstractSource
   implements ITiledSingleLayerVectorSource {
   static createDescriptor({
     urlTemplate,
@@ -65,7 +67,7 @@ export class MVTSingleLayerVectorSource extends AbstractSource
 
   constructor(
     sourceDescriptor: TiledSingleLayerVectorSourceDescriptor,
-    inspectorAdapters?: object
+    inspectorAdapters?: Adapters
   ) {
     super(sourceDescriptor, inspectorAdapters);
     this._descriptor = MVTSingleLayerVectorSource.createDescriptor(sourceDescriptor);
@@ -164,22 +166,22 @@ export class MVTSingleLayerVectorSource extends AbstractSource
     return [VECTOR_SHAPE_TYPE.POINT, VECTOR_SHAPE_TYPE.LINE, VECTOR_SHAPE_TYPE.POLYGON];
   }
 
-  canFormatFeatureProperties() {
+  canFormatFeatureProperties(): boolean {
     return !!this._tooltipFields.length;
   }
 
-  getMinZoom() {
+  getMinZoom(): number {
     return this._descriptor.minSourceZoom;
   }
 
-  getMaxZoom() {
+  getMaxZoom(): number {
     return this._descriptor.maxSourceZoom;
   }
 
-  getBoundsForFilters(
+  async getBoundsForFilters(
     boundsFilters: BoundsFilters,
-    registerCancelCallback: (requestToken: symbol, callback: () => void) => void
-  ): MapExtent | null {
+    registerCancelCallback: (callback: () => void) => void
+  ): Promise<MapExtent | null> {
     return null;
   }
 
@@ -187,11 +189,19 @@ export class MVTSingleLayerVectorSource extends AbstractSource
     return null;
   }
 
-  getApplyGlobalQuery(): boolean {
+  isBoundsAware() {
     return false;
   }
 
-  async filterAndFormatPropertiesToHtml(
+  getSourceTooltipContent() {
+    return { tooltipContent: null, areResultsTrimmed: false };
+  }
+
+  async getLeftJoinFields() {
+    return [];
+  }
+
+  async getTooltipProperties(
     properties: GeoJsonProperties,
     featureId?: string | number
   ): Promise<ITooltipProperty[]> {

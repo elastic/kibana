@@ -19,7 +19,6 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
-// eslint-disable-next-line import/no-default-export
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const filterBar = getService('filterBar');
@@ -48,7 +47,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should create a visualization from a saved search', async () => {
-        await PageObjects.visualize.navigateToNewVisualization();
+        await PageObjects.visualize.navigateToNewAggBasedVisualization();
         await PageObjects.visualize.clickDataTable();
         await PageObjects.visualize.clickSavedSearch(savedSearchName);
         await PageObjects.timePicker.setDefaultAbsoluteRange();

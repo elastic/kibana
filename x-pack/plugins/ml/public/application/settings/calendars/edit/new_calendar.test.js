@@ -4,6 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+jest.mock('../../../contexts/kibana/use_create_url', () => ({
+  useCreateAndNavigateToMlLink: jest.fn(),
+}));
+
 jest.mock('../../../components/navigation_menu', () => ({
   NavigationMenu: () => <div id="mockNavigationMenu" />,
 }));
@@ -53,7 +57,7 @@ jest.mock('../../../../../../../../src/plugins/kibana_react/public', () => ({
   },
 }));
 
-import { shallowWithIntl, mountWithIntl } from 'test_utils/enzyme_helpers';
+import { shallowWithIntl, mountWithIntl } from '@kbn/test/jest';
 import React from 'react';
 import { NewCalendar } from './new_calendar';
 
@@ -117,7 +121,7 @@ describe('NewCalendar', () => {
   test('Import modal shown on Import Events button click', () => {
     const wrapper = mountWithIntl(<NewCalendar {...props} />);
 
-    const importButton = wrapper.find('[data-test-subj="mlImportEvents"]');
+    const importButton = wrapper.find('[data-test-subj="mlCalendarImportEventsButton"]');
     const button = importButton.find('EuiButton');
     button.simulate('click');
 
@@ -127,7 +131,7 @@ describe('NewCalendar', () => {
   test('New event modal shown on New event button click', () => {
     const wrapper = mountWithIntl(<NewCalendar {...props} />);
 
-    const importButton = wrapper.find('[data-test-subj="mlNewEvent"]');
+    const importButton = wrapper.find('[data-test-subj="mlCalendarNewEventButton"]');
     const button = importButton.find('EuiButton');
     button.simulate('click');
 

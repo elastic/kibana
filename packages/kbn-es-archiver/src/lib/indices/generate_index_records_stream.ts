@@ -37,6 +37,10 @@ export function createGenerateIndexRecordsStream(client: Client, stats: Stats) {
             '-*.settings.index.uuid',
             '-*.settings.index.version',
             '-*.settings.index.provided_name',
+            '-*.settings.index.frozen',
+            '-*.settings.index.search.throttled',
+            '-*.settings.index.query',
+            '-*.settings.index.routing',
           ],
         })) as Record<string, any>;
 

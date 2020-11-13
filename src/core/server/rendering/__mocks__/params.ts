@@ -20,19 +20,16 @@
 import { mockCoreContext } from '../../core_context.mock';
 import { httpServiceMock } from '../../http/http_service.mock';
 import { pluginServiceMock } from '../../plugins/plugins_service.mock';
-import { legacyServiceMock } from '../../legacy/legacy_service.mock';
 import { statusServiceMock } from '../../status/status_service.mock';
 
 const context = mockCoreContext.create();
 const http = httpServiceMock.createInternalSetupContract();
 const uiPlugins = pluginServiceMock.createUiPlugins();
-const legacyPlugins = legacyServiceMock.createDiscoverPlugins();
 const status = statusServiceMock.createInternalSetupContract();
 
 export const mockRenderingServiceParams = context;
 export const mockRenderingSetupDeps = {
   http,
-  legacyPlugins,
   uiPlugins,
   status,
 };

@@ -34,6 +34,7 @@ exports[`EventsTable Renders events table with no search bar 1`] = `
         },
       ]
     }
+    data-test-subj="mlCalendarEventsTable"
     itemId="event_id"
     items={
       Array [
@@ -56,6 +57,7 @@ exports[`EventsTable Renders events table with no search bar 1`] = `
       }
     }
     responsive={true}
+    rowProps={[Function]}
     sorting={
       Object {
         "sort": Object {
@@ -103,6 +105,7 @@ exports[`EventsTable Renders events table with search bar 1`] = `
         },
       ]
     }
+    data-test-subj="mlCalendarEventsTable"
     itemId="event_id"
     items={
       Array [
@@ -125,6 +128,7 @@ exports[`EventsTable Renders events table with search bar 1`] = `
       }
     }
     responsive={true}
+    rowProps={[Function]}
     search={
       Object {
         "box": Object {
@@ -133,7 +137,7 @@ exports[`EventsTable Renders events table with search bar 1`] = `
         "filters": Array [],
         "toolsRight": Array [
           <EuiButton
-            data-test-subj="mlNewEvent"
+            data-test-subj="mlCalendarNewEventButton"
             iconType="plusInCircle"
             isDisabled={false}
             onClick={[MockFunction]}
@@ -146,7 +150,7 @@ exports[`EventsTable Renders events table with search bar 1`] = `
             />
           </EuiButton>,
           <EuiButton
-            data-test-subj="mlImportEvents"
+            data-test-subj="mlCalendarImportEventsButton"
             iconType="importAction"
             isDisabled={false}
             onClick={[MockFunction]}

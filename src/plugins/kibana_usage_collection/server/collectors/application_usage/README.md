@@ -28,10 +28,10 @@ This collection occurs by default for every application registered via the menti
 
 ## Developer notes
 
-In order to keep the count of the events, this collector uses 2 Saved Objects:
+In order to keep the count of the events, this collector uses 3 Saved Objects:
 
-1. `application_usage_transactional`: It stores each individually reported event (up to 90 days old). Grouped by `timestamp` and `appId`.
-2. `application_usage_totals`: It stores the sum of all the events older than 90 days old per `appId`.
+1. `application_usage_transactional`: It stores each individually reported event. Grouped by `timestamp` and `appId`. The reason for having these documents instead of editing `application_usage_daily` documents on very report is to provide faster response to the requests to `/api/ui_metric/report` (creating new documents instead of finding and editing existing ones) and to avoid conflicts when multiple users reach to the API concurrently.
+2. `application_usage_daily`: Periodically, documents from `application_usage_transactional` are aggregated to daily summaries and deleted. Also grouped by `timestamp` and `appId`.
+3. `application_usage_totals`: It stores the sum of all the events older than 90 days old, grouped by `appId`.
 
-Both of them use the shared fields `appId: 'keyword'`, `numberOfClicks: 'long'` and `minutesOnScreen: 'float'`. `application_usage_transactional` also stores `timestamp: { type: 'date' }`.
-but they are currently not added in the mappings because we don't use them for search purposes, and we need to be thoughtful with the number of mapped fields in the SavedObjects index ([#43673](https://github.com/elastic/kibana/issues/43673)).
+All the types use the shared fields `appId: 'keyword'`, `numberOfClicks: 'long'` and `minutesOnScreen: 'float'`, but they are currently not added in the mappings because we don't use them for search purposes, and we need to be thoughtful with the number of mapped fields in the SavedObjects index ([#43673](https://github.com/elastic/kibana/issues/43673)). `application_usage_transactional` and `application_usage_daily` also store `timestamp: { type: 'date' }`.

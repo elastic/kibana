@@ -25,7 +25,7 @@ export class IngestPipelinesPlugin implements Plugin<void, void, any, any> {
     this.apiRoutes = new ApiRoutes();
   }
 
-  public setup({ http }: CoreSetup, { licensing, security }: Dependencies) {
+  public setup({ http }: CoreSetup, { licensing, security, features }: Dependencies) {
     this.logger.debug('ingest_pipelines: setup');
 
     const router = http.createRouter();
@@ -43,6 +43,19 @@ export class IngestPipelinesPlugin implements Plugin<void, void, any, any> {
         logger: this.logger,
       }
     );
+
+    features.registerElasticsearchFeature({
+      id: 'ingest_pipelines',
+      management: {
+        ingest: ['ingest_pipelines'],
+      },
+      privileges: [
+        {
+          ui: [],
+          requiredClusterPrivileges: ['manage_pipeline', 'cluster:monitor/nodes/info'],
+        },
+      ],
+    });
 
     this.apiRoutes.setup({
       router,

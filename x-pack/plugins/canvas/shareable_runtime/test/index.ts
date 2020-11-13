@@ -11,4 +11,11 @@ import test from './workpads/test.json';
 export * from './utils';
 
 export type WorkpadNames = keyof typeof sharedWorkpads;
-export const sharedWorkpads = { hello, austin, test };
+export const sharedWorkpads = {
+  // TODO: the automatic types for these JSON files are insufficient, and "austin" is so massive
+  // that Typescript refuses to type it. These should be converted to TypeScript and typed to fit
+  // the requirements. "austin" should also be reduced to the necessary data
+  hello: hello as any,
+  austin: austin as any,
+  test: test as any,
+};

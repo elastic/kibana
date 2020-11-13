@@ -4,7 +4,7 @@
 
 ## PluginManifest.configPath property
 
-Root [configuration path](./kibana-plugin-core-server.configpath.md) used by the plugin, defaults to "id" in snake\_case format.
+Root  used by the plugin, defaults to "id" in snake\_case format.
 
 <b>Signature:</b>
 

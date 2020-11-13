@@ -5,8 +5,14 @@
  */
 
 export {
-  EnhancedSearchParams,
-  IEnhancedEsSearchRequest,
+  ENHANCED_ES_SEARCH_STRATEGY,
+  EQL_SEARCH_STRATEGY,
+  EqlRequestParams,
+  EqlSearchStrategyRequest,
+  EqlSearchStrategyResponse,
   IAsyncSearchRequest,
-  IAsyncSearchResponse,
+  IEnhancedEsSearchRequest,
+  IAsyncSearchOptions,
+  doPartialSearch,
+  throwOnEsError,
 } from './search';

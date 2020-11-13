@@ -23,7 +23,7 @@ describe('callApi', () => {
       }),
     } as unknown) as HttpMock;
 
-    // @ts-ignore
+    // @ts-expect-error
     global.sessionStorage = new SessionStorageMock();
   });
 

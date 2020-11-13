@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { ReactNode, Fragment, MouseEventHandler } from 'react';
+import React, { ReactNode, MouseEventHandler } from 'react';
 import PropTypes from 'prop-types';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon } from '@elastic/eui';
 
@@ -18,7 +18,7 @@ interface Props {
 
 export const Tray = ({ children, done }: Props) => {
   return (
-    <Fragment>
+    <>
       <EuiFlexGroup className="canvasTray__toggle" justifyContent="spaceAround">
         <EuiFlexItem grow={false}>
           <EuiButtonIcon
@@ -29,13 +29,12 @@ export const Tray = ({ children, done }: Props) => {
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-
       <div className="canvasTray">{children}</div>
-    </Fragment>
+    </>
   );
 };
 
 Tray.propTypes = {
-  children: PropTypes.node,
-  done: PropTypes.func,
+  children: PropTypes.node.isRequired,
+  done: PropTypes.func.isRequired,
 };

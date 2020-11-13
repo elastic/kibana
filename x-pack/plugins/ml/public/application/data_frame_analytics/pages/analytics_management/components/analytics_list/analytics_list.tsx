@@ -4,27 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, useState, useEffect } from 'react';
-
+import React, { FC, useCallback, useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-
 import {
-  Direction,
-  EuiButtonEmpty,
   EuiCallOut,
-  EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
   EuiInMemoryTable,
+  EuiSearchBar,
   EuiSearchBarProps,
   EuiSpacer,
 } from '@elastic/eui';
-
-import {
-  DataFrameAnalyticsId,
-  useRefreshAnalyticsList,
-  ANALYSIS_CONFIG_TYPE,
-} from '../../../../common';
+import { ANALYSIS_CONFIG_TYPE } from '../../../../../../../common/constants/data_frame_analytics';
+import { DataFrameAnalyticsId, useRefreshAnalyticsList } from '../../../../common';
 import { checkPermission } from '../../../../../capabilities/check_capabilities';
 
 import {
@@ -38,8 +30,42 @@ import { getTaskStateBadge, getJobTypeBadge, useColumns } from './use_columns';
 import { ExpandedRow } from './expanded_row';
 import { AnalyticStatsBarStats, StatsBar } from '../../../../../components/stats_bar';
 import { CreateAnalyticsButton } from '../create_analytics_button';
-import { getSelectedJobIdFromUrl } from '../../../../../jobs/jobs_list/components/utils';
+import { getSelectedIdFromUrl } from '../../../../../jobs/jobs_list/components/utils';
 import { SourceSelection } from '../source_selection';
+import { filterAnalytics } from '../../../../common/search_bar_filters';
+import { AnalyticsEmptyPrompt } from './empty_prompt';
+import { useTableSettings } from './use_table_settings';
+import { RefreshAnalyticsListButton } from '../refresh_analytics_list_button';
+import { getGroupQueryText } from '../../../../../../../common/util/string_utils';
+
+const filters: EuiSearchBarProps['filters'] = [
+  {
+    type: 'field_value_selection',
+    field: 'job_type',
+    name: i18n.translate('xpack.ml.dataframe.analyticsList.typeFilter', {
+      defaultMessage: 'Type',
+    }),
+    multiSelect: 'or',
+    options: Object.values(ANALYSIS_CONFIG_TYPE).map((val) => ({
+      value: val,
+      name: val,
+      view: getJobTypeBadge(val),
+    })),
+  },
+  {
+    type: 'field_value_selection',
+    field: 'state',
+    name: i18n.translate('xpack.ml.dataframe.analyticsList.statusFilter', {
+      defaultMessage: 'Status',
+    }),
+    multiSelect: 'or',
+    options: Object.values(DATA_FRAME_TASK_STATE).map((val) => ({
+      value: val,
+      name: val,
+      view: getTaskStateBadge(val),
+    })),
+  },
+];
 
 function getItemIdToExpandedRowMap(
   itemIds: DataFrameAnalyticsId[],
@@ -67,23 +93,18 @@ export const DataFrameAnalyticsList: FC<Props> = ({
   const [isInitialized, setIsInitialized] = useState(false);
   const [isSourceIndexModalVisible, setIsSourceIndexModalVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-
+  const [filteredAnalytics, setFilteredAnalytics] = useState<DataFrameAnalyticsListRow[]>([]);
   const [searchQueryText, setSearchQueryText] = useState('');
-
+  const [searchError, setSearchError] = useState<string | undefined>();
   const [analytics, setAnalytics] = useState<DataFrameAnalyticsListRow[]>([]);
   const [analyticsStats, setAnalyticsStats] = useState<AnalyticStatsBarStats | undefined>(
     undefined
   );
   const [expandedRowItemIds, setExpandedRowItemIds] = useState<DataFrameAnalyticsId[]>([]);
-
   const [errorMessage, setErrorMessage] = useState<any>(undefined);
-  const [searchError, setSearchError] = useState<any>(undefined);
-
-  const [pageIndex, setPageIndex] = useState(0);
-  const [pageSize, setPageSize] = useState(10);
-
-  const [sortField, setSortField] = useState<string>(DataFrameAnalyticsListColumn.id);
-  const [sortDirection, setSortDirection] = useState<Direction>('asc');
+  // Query text/job_id based on url but only after getAnalytics is done first
+  // selectedJobIdFromUrlInitialized makes sure the query is only run once since analytics is being refreshed constantly
+  const [selectedIdFromUrlInitialized, setSelectedIdFromUrlInitialized] = useState(false);
 
   const disabled =
     !checkPermission('canCreateDataFrameAnalytics') ||
@@ -94,27 +115,65 @@ export const DataFrameAnalyticsList: FC<Props> = ({
     setAnalyticsStats,
     setErrorMessage,
     setIsInitialized,
-    blockRefresh
+    blockRefresh,
+    isManagementTable
   );
 
-  // Query text/job_id based on url but only after getAnalytics is done first
-  // selectedJobIdFromUrlInitialized makes sure the query is only run once since analytics is being refreshed constantly
-  const [selectedJobIdFromUrlInitialized, setSelectedJobIdFromUrlInitialized] = useState(false);
-  useEffect(() => {
-    if (selectedJobIdFromUrlInitialized === false && analytics.length > 0) {
-      const selectedJobIdFromUrl = getSelectedJobIdFromUrl(window.location.href);
-      if (selectedJobIdFromUrl !== undefined) {
-        setSelectedJobIdFromUrlInitialized(true);
-        setSearchQueryText(selectedJobIdFromUrl);
-      }
+  const updateFilteredItems = (queryClauses: any) => {
+    if (queryClauses.length) {
+      const filtered = filterAnalytics(analytics, queryClauses);
+      setFilteredAnalytics(filtered);
+    } else {
+      setFilteredAnalytics(analytics);
     }
-  }, [selectedJobIdFromUrlInitialized, analytics]);
+  };
+
+  const filterList = () => {
+    if (searchQueryText !== '' && selectedIdFromUrlInitialized === true) {
+      // trigger table filtering with query for job id to trigger table filter
+      const query = EuiSearchBar.Query.parse(searchQueryText);
+      let clauses: any = [];
+      if (query && query.ast !== undefined && query.ast.clauses !== undefined) {
+        clauses = query.ast.clauses;
+      }
+      updateFilteredItems(clauses);
+    } else {
+      updateFilteredItems([]);
+    }
+  };
+
+  useEffect(() => {
+    if (selectedIdFromUrlInitialized === false && analytics.length > 0) {
+      const { jobId, groupIds } = getSelectedIdFromUrl(window.location.href);
+      let queryText = '';
+
+      if (groupIds !== undefined) {
+        queryText = getGroupQueryText(groupIds);
+      } else if (jobId !== undefined) {
+        queryText = jobId;
+      }
+
+      setSelectedIdFromUrlInitialized(true);
+      setSearchQueryText(queryText);
+    } else {
+      filterList();
+    }
+  }, [selectedIdFromUrlInitialized, analytics]);
+
+  useEffect(() => {
+    filterList();
+  }, [selectedIdFromUrlInitialized, searchQueryText]);
+
+  const getAnalyticsCallback = useCallback(() => getAnalytics(true), []);
 
   // Subscribe to the refresh observable to trigger reloading the analytics list.
-  useRefreshAnalyticsList({
-    isLoading: setIsLoading,
-    onRefresh: () => getAnalytics(true),
-  });
+  useRefreshAnalyticsList(
+    {
+      isLoading: setIsLoading,
+      onRefresh: getAnalyticsCallback,
+    },
+    isManagementTable
+  );
 
   const { columns, modals } = useColumns(
     expandedRowItemIds,
@@ -122,6 +181,22 @@ export const DataFrameAnalyticsList: FC<Props> = ({
     isManagementTable,
     isMlEnabledInSpace
   );
+
+  const { onTableChange, pagination, sorting } = useTableSettings<DataFrameAnalyticsListRow>(
+    DataFrameAnalyticsListColumn.id,
+    filteredAnalytics
+  );
+
+  const handleSearchOnChange: EuiSearchBarProps['onChange'] = (search) => {
+    if (search.error !== null) {
+      setSearchError(search.error.message);
+      return false;
+    }
+
+    setSearchError(undefined);
+    setSearchQueryText(search.queryText);
+    return true;
+  };
 
   // Before the analytics have been loaded for the first time, display the loading indicator only.
   // Otherwise a user would see 'No data frame analytics found' during the initial loading.
@@ -145,127 +220,53 @@ export const DataFrameAnalyticsList: FC<Props> = ({
 
   if (analytics.length === 0) {
     return (
-      <>
-        <EuiEmptyPrompt
-          title={
-            <h2>
-              {i18n.translate('xpack.ml.dataFrame.analyticsList.emptyPromptTitle', {
-                defaultMessage: 'No data frame analytics jobs found',
-              })}
-            </h2>
-          }
-          actions={
-            !isManagementTable
-              ? [
-                  <EuiButtonEmpty
-                    onClick={() => setIsSourceIndexModalVisible(true)}
-                    isDisabled={disabled}
-                    data-test-subj="mlAnalyticsCreateFirstButton"
-                  >
-                    {i18n.translate('xpack.ml.dataFrame.analyticsList.emptyPromptButtonText', {
-                      defaultMessage: 'Create your first data frame analytics job',
-                    })}
-                  </EuiButtonEmpty>,
-                ]
-              : []
-          }
-          data-test-subj="mlNoDataFrameAnalyticsFound"
+      <div data-test-subj="mlAnalyticsJobList">
+        <AnalyticsEmptyPrompt
+          isManagementTable={isManagementTable}
+          disabled={disabled}
+          onCreateFirstJobClick={() => setIsSourceIndexModalVisible(true)}
         />
         {isSourceIndexModalVisible === true && (
           <SourceSelection onClose={() => setIsSourceIndexModalVisible(false)} />
         )}
-      </>
+      </div>
     );
   }
 
-  const sorting = {
-    sort: {
-      field: sortField,
-      direction: sortDirection,
-    },
-  };
-
   const itemIdToExpandedRowMap = getItemIdToExpandedRowMap(expandedRowItemIds, analytics);
 
-  const pagination = {
-    initialPageIndex: pageIndex,
-    initialPageSize: pageSize,
-    totalItemCount: analytics.length,
-    pageSizeOptions: [10, 20, 50],
-    hidePerPageOptions: false,
-  };
+  const stats = analyticsStats && (
+    <EuiFlexItem grow={false}>
+      <StatsBar stats={analyticsStats} dataTestSub={'mlAnalyticsStatsBar'} />
+    </EuiFlexItem>
+  );
 
-  const handleSearchOnChange: EuiSearchBarProps['onChange'] = (search) => {
-    if (search.error !== null) {
-      setSearchError(search.error.message);
-      return false;
-    }
-
-    setSearchError(undefined);
-    setSearchQueryText(search.queryText);
-    return true;
-  };
-
+  const managementStats = (
+    <EuiFlexItem>
+      <EuiFlexGroup justifyContent="spaceBetween">
+        {stats}
+        <EuiFlexItem grow={false}>
+          <RefreshAnalyticsListButton />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiFlexItem>
+  );
   const search: EuiSearchBarProps = {
     query: searchQueryText,
     onChange: handleSearchOnChange,
     box: {
       incremental: true,
     },
-    filters: [
-      {
-        type: 'field_value_selection',
-        field: 'job_type',
-        name: i18n.translate('xpack.ml.dataframe.analyticsList.typeFilter', {
-          defaultMessage: 'Type',
-        }),
-        multiSelect: 'or',
-        options: Object.values(ANALYSIS_CONFIG_TYPE).map((val) => ({
-          value: val,
-          name: val,
-          view: getJobTypeBadge(val),
-        })),
-      },
-      {
-        type: 'field_value_selection',
-        field: 'state',
-        name: i18n.translate('xpack.ml.dataframe.analyticsList.statusFilter', {
-          defaultMessage: 'Status',
-        }),
-        multiSelect: 'or',
-        options: Object.values(DATA_FRAME_TASK_STATE).map((val) => ({
-          value: val,
-          name: val,
-          view: getTaskStateBadge(val),
-        })),
-      },
-    ],
-  };
-
-  const onTableChange: EuiInMemoryTable<DataFrameAnalyticsListRow>['onTableChange'] = ({
-    page = { index: 0, size: 10 },
-    sort = { field: DataFrameAnalyticsListColumn.id, direction: 'asc' },
-  }) => {
-    const { index, size } = page;
-    setPageIndex(index);
-    setPageSize(size);
-
-    const { field, direction } = sort;
-    setSortField(field);
-    setSortDirection(direction);
+    filters,
   };
 
   return (
-    <>
+    <div data-test-subj="mlAnalyticsJobList">
       {modals}
+      {!isManagementTable && <EuiSpacer size="m" />}
       <EuiFlexGroup justifyContent="spaceBetween">
-        <EuiFlexItem grow={false}>
-          {analyticsStats && (
-            <EuiFlexItem grow={false}>
-              <StatsBar stats={analyticsStats} dataTestSub={'mlAnalyticsStatsBar'} />
-            </EuiFlexItem>
-          )}
-        </EuiFlexItem>
+        {!isManagementTable && stats}
+        {isManagementTable && managementStats}
         <EuiFlexItem grow={false}>
           <EuiFlexGroup alignItems="center" gutterSize="s">
             {!isManagementTable && (
@@ -281,9 +282,9 @@ export const DataFrameAnalyticsList: FC<Props> = ({
       </EuiFlexGroup>
       <EuiSpacer size="m" />
       <div data-test-subj="mlAnalyticsTableContainer">
-        <EuiInMemoryTable
+        <EuiInMemoryTable<DataFrameAnalyticsListRow>
           allowNeutralSort={false}
-          className="mlAnalyticsTable"
+          className="mlAnalyticsInMemoryTable"
           columns={columns}
           error={searchError}
           hasActions={false}
@@ -307,6 +308,6 @@ export const DataFrameAnalyticsList: FC<Props> = ({
       {isSourceIndexModalVisible === true && (
         <SourceSelection onClose={() => setIsSourceIndexModalVisible(false)} />
       )}
-    </>
+    </div>
   );
 };

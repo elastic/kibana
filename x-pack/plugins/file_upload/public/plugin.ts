@@ -4,38 +4,34 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore
+import React from 'react';
 import { CoreSetup, CoreStart, Plugin } from 'kibana/server';
-// @ts-ignore
-import { JsonUploadAndParse } from './components/json_upload_and_parse';
+import { FileUploadComponentProps, getFileUploadComponent } from './get_file_upload_component';
 // @ts-ignore
 import { setupInitServicesAndConstants, startInitServicesAndConstants } from './kibana_services';
 import { IDataPluginServices } from '../../../../src/plugins/data/public';
 
-/**
- * These are the interfaces with your public contracts. You should export these
- * for other plugins to use in _their_ `SetupDeps`/`StartDeps` interfaces.
- * @public
- */
-
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface FileUploadPluginSetupDependencies {}
-export interface FileUploadPluginStartDependencies {
+export interface SetupDependencies {}
+export interface StartDependencies {
   data: IDataPluginServices;
 }
 
-export type FileUploadPluginSetup = ReturnType<FileUploadPlugin['setup']>;
-export type FileUploadPluginStart = ReturnType<FileUploadPlugin['start']>;
+export type SetupContract = ReturnType<FileUploadPlugin['setup']>;
+export interface StartContract {
+  getFileUploadComponent: () => Promise<React.ComponentType<FileUploadComponentProps>>;
+}
 
-export class FileUploadPlugin implements Plugin<FileUploadPluginSetup, FileUploadPluginStart> {
-  public setup(core: CoreSetup, plugins: FileUploadPluginSetupDependencies) {
+export class FileUploadPlugin
+  implements Plugin<SetupContract, StartContract, SetupDependencies, StartDependencies> {
+  public setup(core: CoreSetup, plugins: SetupDependencies) {
     setupInitServicesAndConstants(core);
   }
 
-  public start(core: CoreStart, plugins: FileUploadPluginStartDependencies) {
+  public start(core: CoreStart, plugins: StartDependencies) {
     startInitServicesAndConstants(core, plugins);
     return {
-      JsonUploadAndParse,
+      getFileUploadComponent,
     };
   }
 }

@@ -67,7 +67,6 @@ export default function ({ getService }: FtrProviderContext) {
               'value',
               '242fddb9d376bbf0e38025d81764847ee5ec0308adfa095918fd3266f9d06c6a'
             );
-            expect(first(firstNode.path)).to.have.property('label', 'docker-autodiscovery_nginx_1');
             expect(firstNode).to.have.property('metrics');
             expect(firstNode.metrics).to.eql([
               {
@@ -136,7 +135,7 @@ export default function ({ getService }: FtrProviderContext) {
           expect(snapshot).to.have.property('nodes');
           if (snapshot) {
             const { nodes } = snapshot;
-            expect(nodes.length).to.equal(136);
+            expect(nodes.length).to.equal(135);
             const firstNode = first(nodes) as any;
             expect(firstNode).to.have.property('path');
             expect(firstNode.path.length).to.equal(1);
@@ -295,7 +294,7 @@ export default function ({ getService }: FtrProviderContext) {
           expect(firstNode).to.have.property('metrics');
           expect(firstNode.metrics).to.eql([
             {
-              name: 'custom',
+              name: 'custom_0',
               value: 0.0016,
               max: 0.0018333333333333333,
               avg: 0.0013666666666666669,

@@ -7,13 +7,14 @@
     "Consider adding exceptions to this rule to filter false positives if administrator privileges are regularly assigned to Okta groups in your organization."
   ],
   "index": [
-    "filebeat-*"
+    "filebeat-*",
+    "logs-okta*"
   ],
   "language": "kuery",
   "license": "Elastic License",
   "name": "Administrator Privileges Assigned to Okta Group",
   "note": "The Okta Filebeat module must be enabled to use this rule.",
-  "query": "event.module:okta and event.dataset:okta.system and event.action:group.privilege.grant",
+  "query": "event.dataset:okta.system and event.action:group.privilege.grant",
   "references": [
     "https://developer.okta.com/docs/reference/api/system-log/",
     "https://developer.okta.com/docs/reference/api/event-types/"
@@ -23,7 +24,11 @@
   "severity": "low",
   "tags": [
     "Elastic",
-    "Okta"
+    "Identity",
+    "Okta",
+    "Continuous Monitoring",
+    "SecOps",
+    "Monitoring"
   ],
   "threat": [
     {
@@ -43,5 +48,5 @@
     }
   ],
   "type": "query",
-  "version": 1
+  "version": 2
 }

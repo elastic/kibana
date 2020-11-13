@@ -22,13 +22,14 @@ import { ManagementRoutePolicyDetailsParams } from '../../../../types';
 export const policyDetails = (state: Immutable<PolicyDetailsState>) => state.policyItem;
 
 /**
- * Given a Policy Data (package config) object, return back a new object with only the field
+ * Given a Policy Data (package policy) object, return back a new object with only the field
  * needed for an Update/Create API action
  * @param policy
  */
 export const getPolicyDataForUpdate = (
   policy: PolicyData | Immutable<PolicyData>
 ): NewPolicyData | Immutable<NewPolicyData> => {
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   const { id, revision, created_by, created_at, updated_by, updated_at, ...newPolicy } = policy;
   return newPolicy;
 };
@@ -102,19 +103,29 @@ export const policyConfig: (s: PolicyDetailsState) => UIPolicyConfig = createSel
   (windows, mac, linux) => {
     return {
       windows: {
+        advanced: windows.advanced,
         events: windows.events,
         malware: windows.malware,
+        popup: windows.popup,
+        antivirus_registration: windows.antivirus_registration,
       },
       mac: {
+        advanced: mac.advanced,
         events: mac.events,
         malware: mac.malware,
+        popup: mac.popup,
       },
       linux: {
+        advanced: linux.advanced,
         events: linux.events,
       },
     };
   }
 );
+
+export const isAntivirusRegistrationEnabled = createSelector(policyConfig, (uiPolicyConfig) => {
+  return uiPolicyConfig.windows.antivirus_registration.enabled;
+});
 
 /** Returns the total number of possible windows eventing configurations */
 export const totalWindowsEvents = (state: PolicyDetailsState): number => {

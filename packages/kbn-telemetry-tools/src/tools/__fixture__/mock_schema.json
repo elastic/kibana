@@ -5,13 +5,29 @@
         "flat": {
           "type": "keyword"
         },
+        "my_index_signature_prop": {
+          "properties": {
+            "avg": {
+              "type": "float"
+            },
+            "count": {
+              "type": "long"
+            },
+            "max": {
+              "type": "long"
+            },
+            "min": {
+              "type": "long"
+            }
+          }
+        },
         "my_str": {
           "type": "text"
         },
         "my_objects": {
           "properties": {
             "total": {
-              "type": "number"
+              "type": "long"
             },
             "type": {
               "type": "boolean"
@@ -19,16 +35,19 @@
           }
         },
         "my_array": {
-          "properties": {
-            "total": {
-              "type": "number"
-            },
-            "type": {
-              "type": "boolean"
+          "type": "array",
+          "items": {
+            "properties": {
+              "total": {
+                "type": "long"
+              },
+              "type": {
+                "type": "boolean"
+              }
             }
           }
         },
-        "my_str_array": { "type": "keyword" }
+        "my_str_array": { "type": "array", "items": { "type": "keyword" } }
       }
     }
   }

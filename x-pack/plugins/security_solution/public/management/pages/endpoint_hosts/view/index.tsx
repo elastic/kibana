@@ -4,30 +4,37 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useMemo, useCallback, memo } from 'react';
+import React, { useMemo, useCallback, memo, useState } from 'react';
 import {
   EuiHorizontalRule,
   EuiBasicTable,
   EuiBasicTableColumn,
   EuiText,
-  EuiTitle,
-  EuiSpacer,
   EuiLink,
   EuiHealth,
   EuiToolTip,
   EuiSelectableProps,
-  EuiBetaBadge,
+  EuiSuperDatePicker,
+  EuiSpacer,
+  EuiPopover,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
+  EuiContextMenuPanelProps,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiCallOut,
 } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { createStructuredSelector } from 'reselect';
 import { useDispatch } from 'react-redux';
-import { HostDetailsFlyout } from './details';
+import { EuiContextMenuItemProps } from '@elastic/eui/src/components/context_menu/context_menu_item';
+import { NavigateToAppOptions } from 'kibana/public';
+import { EndpointDetailsFlyout } from './details';
 import * as selectors from '../store/selectors';
-import { useHostSelector } from './hooks';
+import { useEndpointSelector } from './hooks';
 import {
   HOST_STATUS_TO_HEALTH_COLOR,
   POLICY_STATUS_TO_HEALTH_COLOR,
@@ -36,22 +43,29 @@ import {
 import { useNavigateByRouterEventHandler } from '../../../../common/hooks/endpoint/use_navigate_by_router_event_handler';
 import { CreateStructuredSelector } from '../../../../common/store';
 import { Immutable, HostInfo } from '../../../../../common/endpoint/types';
-import { SpyRoute } from '../../../../common/utils/route/spy_routes';
-import { ManagementPageView } from '../../../components/management_page_view';
+import { DEFAULT_POLL_INTERVAL, MANAGEMENT_PAGE_SIZE_OPTIONS } from '../../../common/constants';
 import { PolicyEmptyState, HostsEmptyState } from '../../../components/management_empty_state';
 import { FormattedDate } from '../../../../common/components/formatted_date';
 import { useNavigateToAppEventHandler } from '../../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
 import {
-  CreatePackageConfigRouteState,
-  AgentConfigDetailsDeployAgentAction,
-} from '../../../../../../ingest_manager/public';
+  CreatePackagePolicyRouteState,
+  AgentPolicyDetailsDeployAgentAction,
+  pagePathGetters,
+} from '../../../../../../fleet/public';
 import { SecurityPageName } from '../../../../app/types';
-import { getHostListPath, getHostDetailsPath } from '../../../common/routing';
+import { getEndpointListPath, getEndpointDetailsPath } from '../../../common/routing';
 import { useFormatUrl } from '../../../../common/components/link_to';
-import { HostAction } from '../store/action';
-import { HostPolicyLink } from './components/host_policy_link';
+import { EndpointAction } from '../store/action';
+import { EndpointPolicyLink } from './components/endpoint_policy_link';
+import { AdminSearchBar } from './components/search_bar';
+import { AdministrationListPage } from '../../../components/administration_list_page';
+import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
+import { APP_ID } from '../../../../../common/constants';
+import { LinkToApp } from '../../../../common/components/endpoint/link_to_app';
 
-const HostListNavLink = memo<{
+const MAX_PAGINATED_ITEM = 9999;
+
+const EndpointListNavLink = memo<{
   name: string;
   href: string;
   route: string;
@@ -71,11 +85,42 @@ const HostListNavLink = memo<{
     </EuiLink>
   );
 });
-HostListNavLink.displayName = 'HostListNavLink';
+EndpointListNavLink.displayName = 'EndpointListNavLink';
+
+const TableRowActions = memo<{
+  items: EuiContextMenuPanelProps['items'];
+}>(({ items }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const handleCloseMenu = useCallback(() => setIsOpen(false), [setIsOpen]);
+  const handleToggleMenu = useCallback(() => setIsOpen(!isOpen), [isOpen]);
+
+  return (
+    <EuiPopover
+      anchorPosition="downRight"
+      panelPaddingSize="none"
+      button={
+        <EuiButtonIcon
+          data-test-subj="endpointTableRowActions"
+          iconType="boxesHorizontal"
+          onClick={handleToggleMenu}
+          aria-label={i18n.translate('xpack.securitySolution.endpoint.list.actionmenu', {
+            defaultMessage: 'Open',
+          })}
+        />
+      }
+      isOpen={isOpen}
+      closePopover={handleCloseMenu}
+    >
+      <EuiContextMenuPanel items={items} />
+    </EuiPopover>
+  );
+});
+TableRowActions.displayName = 'EndpointTableRowActions';
 
 const selector = (createStructuredSelector as CreateStructuredSelector)(selectors);
-export const HostList = () => {
+export const EndpointList = () => {
   const history = useHistory();
+  const { services } = useKibana();
   const {
     listData,
     pageIndex,
@@ -84,33 +129,44 @@ export const HostList = () => {
     listLoading: loading,
     listError,
     uiQueryParams: queryParams,
-    hasSelectedHost,
+    hasSelectedEndpoint,
     policyItems,
     selectedPolicyId,
     policyItemsLoading,
     endpointPackageVersion,
-  } = useHostSelector(selector);
+    endpointsExist,
+    agentPolicies,
+    autoRefreshInterval,
+    isAutoRefreshEnabled,
+    patternsError,
+    areEndpointsEnrolling,
+    agentsWithEndpointsTotalError,
+    endpointsTotalError,
+    isTransformEnabled,
+  } = useEndpointSelector(selector);
   const { formatUrl, search } = useFormatUrl(SecurityPageName.administration);
 
-  const dispatch = useDispatch<(a: HostAction) => void>();
+  const dispatch = useDispatch<(a: EndpointAction) => void>();
+  // cap ability to page at 10k records. (max_result_window)
+  const maxPageCount = totalItemCount > MAX_PAGINATED_ITEM ? MAX_PAGINATED_ITEM : totalItemCount;
 
   const paginationSetup = useMemo(() => {
     return {
       pageIndex,
       pageSize,
-      totalItemCount,
-      pageSizeOptions: [10, 20, 50],
+      totalItemCount: maxPageCount,
+      pageSizeOptions: [...MANAGEMENT_PAGE_SIZE_OPTIONS],
       hidePerPageOptions: false,
     };
-  }, [pageIndex, pageSize, totalItemCount]);
+  }, [pageIndex, pageSize, maxPageCount]);
 
   const onTableChange = useCallback(
     ({ page }: { page: { index: number; size: number } }) => {
       const { index, size } = page;
-      // FIXME: PT: if host details is open, table is not displaying correct number of rows
+      // FIXME: PT: if endpoint details is open, table is not displaying correct number of rows
       history.push(
-        getHostListPath({
-          name: 'hostList',
+        getEndpointListPath({
+          name: 'endpointList',
           ...queryParams,
           page_index: JSON.stringify(index),
           page_size: JSON.stringify(size),
@@ -120,7 +176,7 @@ export const HostList = () => {
     [history, queryParams]
   );
 
-  const handleCreatePolicyClick = useNavigateToAppEventHandler<CreatePackageConfigRouteState>(
+  const handleCreatePolicyClick = useNavigateToAppEventHandler<CreatePackagePolicyRouteState>(
     'ingestManager',
     {
       path: `#/integrations${
@@ -129,25 +185,46 @@ export const HostList = () => {
       state: {
         onCancelNavigateTo: [
           'securitySolution:administration',
-          { path: getHostListPath({ name: 'hostList' }) },
+          { path: getEndpointListPath({ name: 'endpointList' }) },
         ],
-        onCancelUrl: formatUrl(getHostListPath({ name: 'hostList' })),
+        onCancelUrl: formatUrl(getEndpointListPath({ name: 'endpointList' })),
         onSaveNavigateTo: [
           'securitySolution:administration',
-          { path: getHostListPath({ name: 'hostList' }) },
+          { path: getEndpointListPath({ name: 'endpointList' }) },
         ],
       },
     }
   );
 
+  const onRefresh = useCallback(() => {
+    dispatch({
+      type: 'appRequestedEndpointList',
+    });
+  }, [dispatch]);
+
+  const onRefreshChange = useCallback(
+    (evt) => {
+      dispatch({
+        type: 'userUpdatedEndpointListRefreshOptions',
+        payload: {
+          isAutoRefreshEnabled: !evt.isPaused,
+          autoRefreshInterval: evt.refreshInterval,
+        },
+      });
+    },
+    [dispatch]
+  );
+
+  const NOOP = useCallback(() => {}, []);
+
   const handleDeployEndpointsClick = useNavigateToAppEventHandler<
-    AgentConfigDetailsDeployAgentAction
+    AgentPolicyDetailsDeployAgentAction
   >('ingestManager', {
-    path: `#/configs/${selectedPolicyId}?openEnrollmentFlyout=true`,
+    path: `#/policies/${selectedPolicyId}?openEnrollmentFlyout=true`,
     state: {
       onDoneNavigateTo: [
         'securitySolution:administration',
-        { path: getHostListPath({ name: 'hostList' }) },
+        { path: getEndpointListPath({ name: 'endpointList' }) },
       ],
     },
   });
@@ -155,9 +232,9 @@ export const HostList = () => {
   const selectionOptions = useMemo<EuiSelectableProps['options']>(() => {
     return policyItems.map((item) => {
       return {
-        key: item.config_id,
+        key: item.policy_id,
         label: item.name,
-        checked: selectedPolicyId === item.config_id ? 'on' : undefined,
+        checked: selectedPolicyId === item.policy_id ? 'on' : undefined,
       };
     });
   }, [policyItems, selectedPolicyId]);
@@ -182,40 +259,43 @@ export const HostList = () => {
   );
 
   const columns: Array<EuiBasicTableColumn<Immutable<HostInfo>>> = useMemo(() => {
-    const lastActiveColumnName = i18n.translate('xpack.securitySolution.endpointList.lastActive', {
+    const lastActiveColumnName = i18n.translate('xpack.securitySolution.endpoint.list.lastActive', {
       defaultMessage: 'Last Active',
     });
 
     return [
       {
-        field: 'metadata.host',
-        name: i18n.translate('xpack.securitySolution.endpointList.hostname', {
+        field: 'metadata',
+        name: i18n.translate('xpack.securitySolution.endpoint.list.hostname', {
           defaultMessage: 'Hostname',
         }),
-        render: ({ hostname, id }: HostInfo['metadata']['host']) => {
-          const toRoutePath = getHostDetailsPath(
+        render: ({ host: { hostname }, agent: { id } }: HostInfo['metadata']) => {
+          const toRoutePath = getEndpointDetailsPath(
             {
               ...queryParams,
-              name: 'hostDetails',
-              selected_host: id,
+              name: 'endpointDetails',
+              selected_endpoint: id,
             },
             search
           );
           const toRouteUrl = formatUrl(toRoutePath);
           return (
-            <HostListNavLink
-              name={hostname}
-              href={toRouteUrl}
-              route={toRoutePath}
-              dataTestSubj="hostnameCellLink"
-            />
+            <EuiToolTip content={hostname} anchorClassName="eui-textTruncate">
+              <EndpointListNavLink
+                name={hostname}
+                href={toRouteUrl}
+                route={toRoutePath}
+                dataTestSubj="hostnameCellLink"
+              />
+            </EuiToolTip>
           );
         },
       },
       {
         field: 'host_status',
-        name: i18n.translate('xpack.securitySolution.endpointList.hostStatus', {
-          defaultMessage: 'Host Status',
+        width: '9%',
+        name: i18n.translate('xpack.securitySolution.endpoint.list.hostStatus', {
+          defaultMessage: 'Agent Status',
         }),
         // eslint-disable-next-line react/display-name
         render: (hostStatus: HostInfo['host_status']) => {
@@ -226,7 +306,7 @@ export const HostList = () => {
               className="eui-textTruncate"
             >
               <FormattedMessage
-                id="xpack.securitySolution.endpointList.hostStatusValue"
+                id="xpack.securitySolution.endpoint.list.hostStatusValue"
                 defaultMessage="{hostStatus, select, online {Online} error {Error} unenrolling {Unenrolling} other {Offline}}"
                 values={{ hostStatus }}
               />
@@ -236,33 +316,37 @@ export const HostList = () => {
       },
       {
         field: 'metadata.Endpoint.policy.applied',
-        name: i18n.translate('xpack.securitySolution.endpointList.policy', {
-          defaultMessage: 'Integration',
+        width: '15%',
+        name: i18n.translate('xpack.securitySolution.endpoint.list.policy', {
+          defaultMessage: 'Integration Policy',
         }),
         truncateText: true,
         // eslint-disable-next-line react/display-name
         render: (policy: HostInfo['metadata']['Endpoint']['policy']['applied']) => {
           return (
-            <HostPolicyLink
-              policyId={policy.id}
-              className="eui-textTruncate"
-              data-test-subj="policyNameCellLink"
-            >
-              {policy.name}
-            </HostPolicyLink>
+            <EuiToolTip content={policy.name} anchorClassName="eui-textTruncate">
+              <EndpointPolicyLink
+                policyId={policy.id}
+                className="eui-textTruncate"
+                data-test-subj="policyNameCellLink"
+              >
+                {policy.name}
+              </EndpointPolicyLink>
+            </EuiToolTip>
           );
         },
       },
       {
         field: 'metadata.Endpoint.policy.applied',
-        name: i18n.translate('xpack.securitySolution.endpointList.policyStatus', {
-          defaultMessage: 'Configuration Status',
+        width: '9%',
+        name: i18n.translate('xpack.securitySolution.endpoint.list.policyStatus', {
+          defaultMessage: 'Policy Status',
         }),
-        // eslint-disable-next-line react/display-name
         render: (policy: HostInfo['metadata']['Endpoint']['policy']['applied'], item: HostInfo) => {
-          const toRoutePath = getHostDetailsPath({
-            name: 'hostPolicyResponse',
-            selected_host: item.metadata.host.id,
+          const toRoutePath = getEndpointDetailsPath({
+            name: 'endpointPolicyResponse',
+            ...queryParams,
+            selected_endpoint: item.metadata.agent.id,
           });
           const toRouteUrl = formatUrl(toRoutePath);
           return (
@@ -271,7 +355,7 @@ export const HostList = () => {
               className="eui-textTruncate"
               data-test-subj="rowPolicyStatus"
             >
-              <HostListNavLink
+              <EndpointListNavLink
                 name={POLICY_STATUS_TO_TEXT[policy.status]}
                 href={toRouteUrl}
                 route={toRoutePath}
@@ -283,14 +367,15 @@ export const HostList = () => {
       },
       {
         field: 'metadata.host.os.name',
-        name: i18n.translate('xpack.securitySolution.endpointList.os', {
+        width: '10%',
+        name: i18n.translate('xpack.securitySolution.endpoint.list.os', {
           defaultMessage: 'Operating System',
         }),
         truncateText: true,
       },
       {
         field: 'metadata.host.ip',
-        name: i18n.translate('xpack.securitySolution.endpointList.ip', {
+        name: i18n.translate('xpack.securitySolution.endpoint.list.ip', {
           defaultMessage: 'IP Address',
         }),
         // eslint-disable-next-line react/display-name
@@ -308,7 +393,8 @@ export const HostList = () => {
       },
       {
         field: 'metadata.agent.version',
-        name: i18n.translate('xpack.securitySolution.endpointList.endpointVersion', {
+        width: '5%',
+        name: i18n.translate('xpack.securitySolution.endpoint.list.endpointVersion', {
           defaultMessage: 'Version',
         }),
       },
@@ -325,19 +411,100 @@ export const HostList = () => {
           );
         },
       },
+      {
+        field: '',
+        width: '5%',
+        name: i18n.translate('xpack.securitySolution.endpoint.list.actions', {
+          defaultMessage: 'Actions',
+        }),
+        actions: [
+          {
+            // eslint-disable-next-line react/display-name
+            render: (item: HostInfo) => {
+              return (
+                <TableRowActions
+                  items={[
+                    <EuiContextMenuItemNavByRouter
+                      data-test-subj="hostLink"
+                      icon="logoSecurity"
+                      key="hostDetailsLink"
+                      navigateAppId={APP_ID}
+                      navigateOptions={{ path: `hosts/${item.metadata.host.hostname}` }}
+                      href={`${services?.application?.getUrlForApp('securitySolution')}/hosts/${
+                        item.metadata.host.hostname
+                      }`}
+                    >
+                      <FormattedMessage
+                        id="xpack.securitySolution.endpoint.list.actions.hostDetails"
+                        defaultMessage="View Host Details"
+                      />
+                    </EuiContextMenuItemNavByRouter>,
+                    <EuiContextMenuItemNavByRouter
+                      icon="logoObservability"
+                      key="agentConfigLink"
+                      data-test-subj="agentPolicyLink"
+                      navigateAppId="ingestManager"
+                      navigateOptions={{
+                        path: `#${pagePathGetters.policy_details({
+                          policyId: agentPolicies[item.metadata.Endpoint.policy.applied.id],
+                        })}`,
+                      }}
+                      href={`${services?.application?.getUrlForApp(
+                        'ingestManager'
+                      )}#${pagePathGetters.policy_details({
+                        policyId: agentPolicies[item.metadata.Endpoint.policy.applied.id],
+                      })}`}
+                      disabled={
+                        agentPolicies[item.metadata.Endpoint.policy.applied.id] === undefined
+                      }
+                    >
+                      <FormattedMessage
+                        id="xpack.securitySolution.endpoint.list.actions.agentPolicy"
+                        defaultMessage="View Agent Policy"
+                      />
+                    </EuiContextMenuItemNavByRouter>,
+                    <EuiContextMenuItemNavByRouter
+                      icon="logoObservability"
+                      key="agentDetailsLink"
+                      data-test-subj="agentDetailsLink"
+                      navigateAppId="ingestManager"
+                      navigateOptions={{
+                        path: `#${pagePathGetters.fleet_agent_details({
+                          agentId: item.metadata.elastic.agent.id,
+                        })}`,
+                      }}
+                      href={`${services?.application?.getUrlForApp(
+                        'ingestManager'
+                      )}#${pagePathGetters.fleet_agent_details({
+                        agentId: item.metadata.elastic.agent.id,
+                      })}`}
+                    >
+                      <FormattedMessage
+                        id="xpack.securitySolution.endpoint.list.actions.agentDetails"
+                        defaultMessage="View Agent Details"
+                      />
+                    </EuiContextMenuItemNavByRouter>,
+                  ]}
+                />
+              );
+            },
+          },
+        ],
+      },
     ];
-  }, [formatUrl, queryParams, search]);
+  }, [formatUrl, queryParams, search, agentPolicies, services?.application?.getUrlForApp]);
 
   const renderTableOrEmptyState = useMemo(() => {
-    if (!loading && listData && listData.length > 0) {
+    if (endpointsExist || areEndpointsEnrolling) {
       return (
         <EuiBasicTable
-          data-test-subj="hostListTable"
+          data-test-subj="endpointListTable"
           items={[...listData]}
           columns={columns}
           error={listError?.message}
           pagination={paginationSetup}
           onChange={onTableChange}
+          loading={loading}
         />
       );
     } else if (!policyItemsLoading && policyItems && policyItems.length > 0) {
@@ -356,73 +523,153 @@ export const HostList = () => {
       );
     }
   }, [
-    listData,
-    policyItems,
-    columns,
     loading,
+    endpointsExist,
+    policyItemsLoading,
+    policyItems,
+    listData,
+    columns,
+    listError?.message,
     paginationSetup,
     onTableChange,
-    listError?.message,
-    handleCreatePolicyClick,
     handleDeployEndpointsClick,
-    handleSelectableOnChange,
     selectedPolicyId,
+    handleSelectableOnChange,
     selectionOptions,
-    policyItemsLoading,
+    handleCreatePolicyClick,
+    areEndpointsEnrolling,
   ]);
 
+  const hasListData = listData && listData.length > 0;
+
+  const refreshStyle = useMemo(() => {
+    return { display: endpointsExist && isTransformEnabled ? 'flex' : 'none', maxWidth: 200 };
+  }, [endpointsExist, isTransformEnabled]);
+
+  const refreshIsPaused = useMemo(() => {
+    return !endpointsExist ? false : hasSelectedEndpoint ? true : !isAutoRefreshEnabled;
+  }, [endpointsExist, hasSelectedEndpoint, isAutoRefreshEnabled]);
+
+  const refreshInterval = useMemo(() => {
+    return !endpointsExist ? DEFAULT_POLL_INTERVAL : autoRefreshInterval;
+  }, [endpointsExist, autoRefreshInterval]);
+
+  const hasErrorFindingTotals = useMemo(() => {
+    return endpointsTotalError || agentsWithEndpointsTotalError ? true : false;
+  }, [endpointsTotalError, agentsWithEndpointsTotalError]);
+
+  const shouldShowKQLBar = useMemo(() => {
+    return endpointsExist && !patternsError && isTransformEnabled;
+  }, [endpointsExist, patternsError, isTransformEnabled]);
+
   return (
-    <ManagementPageView
-      viewType="list"
-      data-test-subj="hostPage"
-      headerLeft={
-        <>
-          <EuiFlexGroup alignItems="center" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiTitle size="l">
-                <h1 data-test-subj="pageViewHeaderLeftTitle">
-                  <FormattedMessage
-                    id="xpack.securitySolution.hostList.pageTitle"
-                    defaultMessage="Hosts"
-                  />
-                </h1>
-              </EuiTitle>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiBetaBadge
-                label={i18n.translate('xpack.securitySolution.endpoint.hostList.beta', {
-                  defaultMessage: 'Beta',
-                })}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiSpacer size="s" />
-          <EuiText size="s" color="subdued">
-            <p>
-              <FormattedMessage
-                id="xpack.securitySolution.hostList.pageSubTitle"
-                defaultMessage="Hosts running Elastic Endpoint Security"
-              />
-            </p>
-          </EuiText>
-        </>
+    <AdministrationListPage
+      data-test-subj="endpointPage"
+      beta={false}
+      title={
+        <FormattedMessage
+          id="xpack.securitySolution.endpoint.list.pageTitle"
+          defaultMessage="Endpoints"
+        />
+      }
+      subtitle={
+        <FormattedMessage
+          id="xpack.securitySolution.endpoint.list.pageSubTitle"
+          defaultMessage="Hosts running Endpoint Security"
+        />
       }
     >
-      {hasSelectedHost && <HostDetailsFlyout />}
-      {listData && listData.length > 0 && (
-        <>
-          <EuiText color="subdued" size="xs" data-test-subj="hostListTableTotal">
-            <FormattedMessage
-              id="xpack.securitySolution.endpointList.totalCount"
-              defaultMessage="{totalItemCount, plural, one {# Host} other {# Hosts}}"
-              values={{ totalItemCount }}
+      {hasSelectedEndpoint && <EndpointDetailsFlyout />}
+      <>
+        {areEndpointsEnrolling && !hasErrorFindingTotals && (
+          <>
+            <EuiCallOut size="s" data-test-subj="endpointsEnrollingNotification">
+              <FormattedMessage
+                id="xpack.securitySolution.endpoint.list.endpointsEnrolling"
+                defaultMessage="Endpoints are enrolling. {agentsLink} to track progress."
+                values={{
+                  agentsLink: (
+                    <LinkToApp
+                      appId="ingestManager"
+                      appPath={`#${pagePathGetters.fleet_agent_list({
+                        kuery: 'fleet-agents.packages : "endpoint"',
+                      })}`}
+                      href={`${services?.application?.getUrlForApp(
+                        'ingestManager'
+                      )}#${pagePathGetters.fleet_agent_list({
+                        kuery: 'fleet-agents.packages : "endpoint"',
+                      })}`}
+                    >
+                      <FormattedMessage
+                        id="xpack.securitySolution.endpoint.list.endpointsEnrolling.viewAgentsLink"
+                        defaultMessage="View agents"
+                      />
+                    </LinkToApp>
+                  ),
+                }}
+              />
+            </EuiCallOut>
+            <EuiSpacer size="m" />
+          </>
+        )}
+        <EuiFlexGroup>
+          {shouldShowKQLBar && (
+            <EuiFlexItem>
+              <AdminSearchBar />
+            </EuiFlexItem>
+          )}
+          <EuiFlexItem grow={false} style={refreshStyle}>
+            <EuiSuperDatePicker
+              onTimeChange={NOOP}
+              isDisabled={hasSelectedEndpoint}
+              onRefresh={onRefresh}
+              isPaused={refreshIsPaused}
+              refreshInterval={refreshInterval}
+              onRefreshChange={onRefreshChange}
+              isAutoRefreshOnly={true}
             />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer size="m" />
+      </>
+      {hasListData && (
+        <>
+          <EuiText color="subdued" size="xs" data-test-subj="endpointListTableTotal">
+            {totalItemCount > MAX_PAGINATED_ITEM + 1 ? (
+              <FormattedMessage
+                id="xpack.securitySolution.endpoint.list.totalCount.limited"
+                defaultMessage="Showing {limit} of {totalItemCount, plural, one {# Host} other {# Hosts}}"
+                values={{ totalItemCount, limit: MAX_PAGINATED_ITEM + 1 }}
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.securitySolution.endpoint.list.totalCount"
+                defaultMessage="{totalItemCount, plural, one {# Host} other {# Hosts}}"
+                values={{ totalItemCount }}
+              />
+            )}
           </EuiText>
           <EuiHorizontalRule margin="xs" />
         </>
       )}
       {renderTableOrEmptyState}
-      <SpyRoute pageName={SecurityPageName.administration} />
-    </ManagementPageView>
+    </AdministrationListPage>
   );
 };
+
+const EuiContextMenuItemNavByRouter = memo<
+  Omit<EuiContextMenuItemProps, 'onClick'> & {
+    navigateAppId: string;
+    navigateOptions: NavigateToAppOptions;
+    children: React.ReactNode;
+  }
+>(({ navigateAppId, navigateOptions, children, ...otherMenuItemProps }) => {
+  const handleOnClick = useNavigateToAppEventHandler(navigateAppId, navigateOptions);
+
+  return (
+    <EuiContextMenuItem {...otherMenuItemProps} onClick={handleOnClick}>
+      {children}
+    </EuiContextMenuItem>
+  );
+});
+EuiContextMenuItemNavByRouter.displayName = 'EuiContextMenuItemNavByRouter';

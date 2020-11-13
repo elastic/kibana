@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import {
   ILegacyScopedClusterClient,
   SavedObjectsClientContract,
@@ -13,6 +13,7 @@ import {
 } from 'src/core/server';
 
 import { i18n } from '@kbn/i18n';
+import { omitBy, isUndefined } from 'lodash';
 import { ActionTypeRegistry } from './action_type_registry';
 import { validateConfig, validateSecrets, ActionExecutorContract } from './lib';
 import {
@@ -30,6 +31,10 @@ import {
 } from './create_execute_function';
 import { ActionsAuthorization } from './authorization/actions_authorization';
 import { ActionType } from '../common';
+import {
+  getAuthorizationModeBySource,
+  AuthorizationMode,
+} from './authorization/get_authorization_mode_by_source';
 
 // We are assuming there won't be many actions. This is why we will load
 // all the actions in advance and assume the total count to not go over 10000.
@@ -150,8 +155,10 @@ export class ActionsClient {
         'update'
       );
     }
-    const existingObject = await this.unsecuredSavedObjectsClient.get<RawAction>('action', id);
-    const { actionTypeId } = existingObject.attributes;
+    const { attributes, references, version } = await this.unsecuredSavedObjectsClient.get<
+      RawAction
+    >('action', id);
+    const { actionTypeId } = attributes;
     const { name, config, secrets } = action;
     const actionType = this.actionTypeRegistry.get(actionTypeId);
     const validatedActionTypeConfig = validateConfig(actionType, config);
@@ -159,12 +166,25 @@ export class ActionsClient {
 
     this.actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
 
-    const result = await this.unsecuredSavedObjectsClient.update<RawAction>('action', id, {
-      actionTypeId,
-      name,
-      config: validatedActionTypeConfig as SavedObjectAttributes,
-      secrets: validatedActionTypeSecrets as SavedObjectAttributes,
-    });
+    const result = await this.unsecuredSavedObjectsClient.create<RawAction>(
+      'action',
+      {
+        ...attributes,
+        actionTypeId,
+        name,
+        config: validatedActionTypeConfig as SavedObjectAttributes,
+        secrets: validatedActionTypeSecrets as SavedObjectAttributes,
+      },
+      omitBy(
+        {
+          id,
+          overwrite: true,
+          references,
+          version,
+        },
+        isUndefined
+      )
+    );
 
     return {
       id,
@@ -298,18 +318,37 @@ export class ActionsClient {
   public async execute({
     actionId,
     params,
-  }: Omit<ExecuteOptions, 'request'>): Promise<ActionTypeExecutorResult> {
-    await this.authorization.ensureAuthorized('execute');
-    return this.actionExecutor.execute({ actionId, params, request: this.request });
+    source,
+  }: Omit<ExecuteOptions, 'request'>): Promise<ActionTypeExecutorResult<unknown>> {
+    if (
+      (await getAuthorizationModeBySource(this.unsecuredSavedObjectsClient, source)) ===
+      AuthorizationMode.RBAC
+    ) {
+      await this.authorization.ensureAuthorized('execute');
+    }
+    return this.actionExecutor.execute({ actionId, params, source, request: this.request });
   }
 
   public async enqueueExecution(options: EnqueueExecutionOptions): Promise<void> {
-    await this.authorization.ensureAuthorized('execute');
+    const { source } = options;
+    if (
+      (await getAuthorizationModeBySource(this.unsecuredSavedObjectsClient, source)) ===
+      AuthorizationMode.RBAC
+    ) {
+      await this.authorization.ensureAuthorized('execute');
+    }
     return this.executionEnqueuer(this.unsecuredSavedObjectsClient, options);
   }
 
   public async listTypes(): Promise<ActionType[]> {
     return this.actionTypeRegistry.list();
+  }
+
+  public isActionTypeEnabled(
+    actionTypeId: string,
+    options: { notifyUsage: boolean } = { notifyUsage: false }
+  ) {
+    return this.actionTypeRegistry.isActionTypeEnabled(actionTypeId, options);
   }
 }
 

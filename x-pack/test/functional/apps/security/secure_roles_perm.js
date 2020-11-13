@@ -21,7 +21,6 @@ export default function ({ getService, getPageObjects }) {
   const browser = getService('browser');
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
-  const retry = getService('retry');
 
   describe('secure roles and permissions', function () {
     before(async () => {
@@ -74,12 +73,9 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.security.login('Rashmi', 'changeme');
     });
 
-    it('Kibana User navigating to Management gets permission denied', async function () {
+    it('Kibana User does not have link to user management', async function () {
       await PageObjects.settings.navigateTo();
-      await PageObjects.security.clickElasticsearchUsers();
-      await retry.tryForTime(2000, async () => {
-        await testSubjects.find('permissionDeniedMessage');
-      });
+      await testSubjects.missingOrFail('users');
     });
 
     it('Kibana User navigating to Discover and trying to generate CSV gets - Authorization Error ', async function () {

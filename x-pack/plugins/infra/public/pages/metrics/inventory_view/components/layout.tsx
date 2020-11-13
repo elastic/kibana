@@ -5,9 +5,10 @@
  */
 
 import React, { useCallback, useEffect } from 'react';
-import { useInterval } from 'react-use';
+import useInterval from 'react-use/lib/useInterval';
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { AutoSizer } from '../../../../components/auto_sizer';
 import { convertIntervalToString } from '../../../../utils/convert_interval_to_string';
 import { NodesOverview } from './nodes_overview';
 import { calculateBoundsFromNodes } from '../lib/calculate_bounds_from_nodes';
@@ -22,12 +23,13 @@ import { euiStyled } from '../../../../../../observability/public';
 import { Toolbar } from './toolbars/toolbar';
 import { ViewSwitcher } from './waffle/view_switcher';
 import { IntervalLabel } from './waffle/interval_label';
-import { Legend } from './waffle/legend';
 import { createInventoryMetricFormatter } from '../lib/create_inventory_metric_formatter';
 import { createLegend } from '../lib/create_legend';
 import { useSavedViewContext } from '../../../../containers/saved_view/saved_view';
 import { useWaffleViewState } from '../hooks/use_waffle_view_state';
 import { SavedViewsToolbarControls } from '../../../../components/saved_views/toolbar_control';
+import { BottomDrawer } from './bottom_drawer';
+import { Legend } from './waffle/legend';
 
 export const Layout = () => {
   const { sourceId, source } = useSourceContext();
@@ -102,45 +104,60 @@ export const Layout = () => {
     <>
       <PageContent>
         <MainContainer>
-          <TopActionContainer>
-            <EuiFlexGroup justifyContent="spaceBetween" gutterSize="m">
-              <Toolbar nodeType={nodeType} />
-              <EuiFlexItem grow={false}>
-                <ViewSwitcher view={view} onChange={changeView} />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </TopActionContainer>
-          <NodesOverview
-            nodes={nodes}
-            options={options}
-            nodeType={nodeType}
-            loading={loading}
-            reload={reload}
-            onDrilldown={applyFilterQuery}
-            currentTime={currentTime}
-            view={view}
-            autoBounds={autoBounds}
-            boundsOverride={boundsOverride}
-            formatter={formatter}
-          />
-          <BottomActionContainer>
-            <EuiFlexGroup justifyContent="spaceBetween">
-              <EuiFlexItem grow={false}>
-                <SavedViewsToolbarControls viewState={viewState} />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false} style={{ position: 'relative', minWidth: 400 }}>
-                <Legend
-                  formatter={formatter}
-                  bounds={bounds}
-                  dataBounds={dataBounds}
-                  legend={options.legend}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <IntervalLabel intervalAsString={intervalAsString} />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </BottomActionContainer>
+          <AutoSizer bounds>
+            {({ measureRef: topActionMeasureRef, bounds: { height: topActionHeight = 0 } }) => (
+              <>
+                <TopActionContainer ref={topActionMeasureRef}>
+                  <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="m">
+                    <Toolbar nodeType={nodeType} />
+                    <EuiFlexItem grow={false}>
+                      <IntervalLabel intervalAsString={intervalAsString} />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <ViewSwitcher view={view} onChange={changeView} />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                  <EuiSpacer />
+                  <SavedViewContainer>
+                    <SavedViewsToolbarControls viewState={viewState} />
+                  </SavedViewContainer>
+                </TopActionContainer>
+                <AutoSizer bounds>
+                  {({ measureRef, bounds: { height = 0 } }) => (
+                    <>
+                      <NodesOverview
+                        nodes={nodes}
+                        options={options}
+                        nodeType={nodeType}
+                        loading={loading}
+                        reload={reload}
+                        onDrilldown={applyFilterQuery}
+                        currentTime={currentTime}
+                        view={view}
+                        autoBounds={autoBounds}
+                        boundsOverride={boundsOverride}
+                        formatter={formatter}
+                        bottomMargin={height}
+                        topMargin={topActionHeight}
+                      />
+                      <BottomDrawer
+                        measureRef={measureRef}
+                        interval={interval}
+                        formatter={formatter}
+                      >
+                        <Legend
+                          formatter={formatter}
+                          bounds={bounds}
+                          dataBounds={dataBounds}
+                          legend={options.legend}
+                        />
+                      </BottomDrawer>
+                    </>
+                  )}
+                </AutoSizer>
+              </>
+            )}
+          </AutoSizer>
         </MainContainer>
       </PageContent>
     </>
@@ -156,12 +173,8 @@ const TopActionContainer = euiStyled.div`
   padding: ${(props) => `12px ${props.theme.eui.paddingSizes.m}`};
 `;
 
-const BottomActionContainer = euiStyled.div`
-  background-color: ${(props) => props.theme.eui.euiPageBackgroundColor};
-  padding: ${(props) => props.theme.eui.paddingSizes.m} ${(props) =>
-  props.theme.eui.paddingSizes.m} ${(props) => props.theme.eui.paddingSizes.s};
-  position: absolute;
-  left: 0;
-  bottom: 4px;
-  right: 0;
+const SavedViewContainer = euiStyled.div`
+  position: relative;
+  z-index: 1;
+  padding-left: ${(props) => props.theme.eui.paddingSizes.m};
 `;

@@ -9,7 +9,10 @@
 import React, { useCallback, useMemo } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 
-import { UncommonProcessesEdges, UncommonProcessItem } from '../../../graphql/types';
+import {
+  HostsUncommonProcessesEdges,
+  HostsUncommonProcessItem,
+} from '../../../../common/search_strategy';
 import { State } from '../../../common/store';
 import { hostsActions, hostsModel, hostsSelectors } from '../../store';
 import { defaultToEmptyTag, getEmptyValue } from '../../../common/components/empty_value';
@@ -21,7 +24,7 @@ import { getRowItemDraggables } from '../../../common/components/tables/helpers'
 import { HostsType } from '../../store/model';
 const tableType = hostsModel.HostsTableType.uncommonProcesses;
 interface OwnProps {
-  data: UncommonProcessesEdges[];
+  data: HostsUncommonProcessesEdges[];
   fakeTotalCount: number;
   id: string;
   isInspect: boolean;
@@ -33,12 +36,12 @@ interface OwnProps {
 }
 
 export type UncommonProcessTableColumns = [
-  Columns<UncommonProcessesEdges>,
-  Columns<UncommonProcessesEdges>,
-  Columns<UncommonProcessesEdges>,
-  Columns<UncommonProcessesEdges>,
-  Columns<UncommonProcessesEdges>,
-  Columns<UncommonProcessesEdges>
+  Columns<HostsUncommonProcessesEdges>,
+  Columns<HostsUncommonProcessesEdges>,
+  Columns<HostsUncommonProcessesEdges>,
+  Columns<HostsUncommonProcessesEdges>,
+  Columns<HostsUncommonProcessesEdges>,
+  Columns<HostsUncommonProcessesEdges>
 ];
 
 type UncommonProcessTableProps = OwnProps & PropsFromRedux;
@@ -212,7 +215,7 @@ const getUncommonColumns = (): UncommonProcessTableColumns => [
   },
 ];
 
-export const getHostNames = (node: UncommonProcessItem): string[] => {
+export const getHostNames = (node: HostsUncommonProcessItem): string[] => {
   if (node.hosts != null) {
     return node.hosts
       .filter((host) => host.name != null && host.name[0] != null)

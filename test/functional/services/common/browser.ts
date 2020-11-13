@@ -22,9 +22,9 @@ import { Key, Origin } from 'selenium-webdriver';
 // @ts-ignore internal modules are not typed
 import { LegacyActionSequence } from 'selenium-webdriver/lib/actions';
 import { ProvidedType } from '@kbn/test/types/ftr';
+import { modifyUrl } from '@kbn/std';
 
 import Jimp from 'jimp';
-import { modifyUrl } from '../../../../src/core/utils';
 import { WebElementWrapper } from '../lib/web_element_wrapper';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { Browsers } from '../remote/browsers';
@@ -164,6 +164,14 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
     }
 
     /**
+     * Gets the page/document title of the focused window/frame.
+     * https://www.selenium.dev/selenium/docs/api/javascript/module/selenium-webdriver/chrome_exports_Driver.html#getTitle
+     */
+    public async getTitle() {
+      return await driver.getTitle();
+    }
+
+    /**
      * Navigates the focused window/frame to a new URL.
      * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/chrome_exports_Driver.html#get
      *
@@ -208,13 +216,17 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      * Does a drag-and-drop action from one point to another
      * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/input_exports_Actions.html#dragAndDrop
      *
-     * @param {{element: WebElementWrapper | {x: number, y: number}, offset: {x: number, y: number}}} from
-     * @param {{element: WebElementWrapper | {x: number, y: number}, offset: {x: number, y: number}}} to
      * @return {Promise<void>}
      */
     public async dragAndDrop(
-      from: { offset?: { x: any; y: any }; location: any },
-      to: { offset?: { x: any; y: any }; location: any }
+      from: {
+        location: WebElementWrapper | { x?: number; y?: number };
+        offset?: { x?: number; y?: number };
+      },
+      to: {
+        location: WebElementWrapper | { x?: number; y?: number };
+        offset?: { x?: number; y?: number };
+      }
     ) {
       // The offset should be specified in pixels relative to the center of the element's bounding box
       const getW3CPoint = (data: any) => {
@@ -222,7 +234,11 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
           data.offset = {};
         }
         return data.location instanceof WebElementWrapper
-          ? { x: data.offset.x || 0, y: data.offset.y || 0, origin: data.location._webElement }
+          ? {
+              x: data.offset.x || 0,
+              y: data.offset.y || 0,
+              origin: data.location._webElement,
+            }
           : { x: data.location.x, y: data.location.y, origin: Origin.POINTER };
       };
 
@@ -230,6 +246,62 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
       const endPoint = getW3CPoint(to);
       await this.getActions().move({ x: 0, y: 0 }).perform();
       return await this.getActions().move(startPoint).press().move(endPoint).release().perform();
+    }
+
+    /**
+     * Performs drag and drop for html5 native drag and drop implementation
+     * There's a bug in Chromedriver for html5 dnd that doesn't allow to use the method `dragAndDrop` defined above
+     * https://github.com/SeleniumHQ/selenium/issues/6235
+     * This implementation simulates user's action by calling the drag and drop specific events directly.
+     *
+     * @param {string} from html selector
+     * @param {string} to html selector
+     * @return {Promise<void>}
+     */
+    public async html5DragAndDrop(from: string, to: string) {
+      await this.execute(
+        `
+          function createEvent(typeOfEvent) {
+            const event = document.createEvent("CustomEvent");
+            event.initCustomEvent(typeOfEvent, true, true, null);
+            event.dataTransfer = {
+              data: {},
+              setData: function (key, value) {
+                this.data[key] = value;
+              },
+              getData: function (key) {
+                return this.data[key];
+              }
+            };
+            return event;
+          }
+          function dispatchEvent(element, event, transferData) {
+            if (transferData !== undefined) {
+              event.dataTransfer = transferData;
+            }
+            if (element.dispatchEvent) {
+              element.dispatchEvent(event);
+            } else if (element.fireEvent) {
+              element.fireEvent("on" + event.type, event);
+            }
+          }
+
+          const origin = document.querySelector(arguments[0]);
+          const target = document.querySelector(arguments[1]);
+
+          const dragStartEvent = createEvent('dragstart');
+          dispatchEvent(origin, dragStartEvent);
+
+          setTimeout(() => {
+            const dropEvent = createEvent('drop');
+            dispatchEvent(target, dropEvent, dragStartEvent.dataTransfer);
+            const dragEndEvent = createEvent('dragend');
+            dispatchEvent(origin, dragEndEvent, dropEvent.dataTransfer);
+          }, 50);
+      `,
+        from,
+        to
+      );
     }
 
     /**
@@ -466,10 +538,20 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
       return parseInt(scrollSize, 10);
     }
 
+    public async scrollTop() {
+      await driver.executeScript('document.documentElement.scrollTop = 0');
+    }
+
     // return promise with REAL scroll position
     public async setScrollTop(scrollSize: number | string) {
       await driver.executeScript('document.body.scrollTop = ' + scrollSize);
       return this.getScrollTop();
+    }
+
+    public async setScrollToById(elementId: string, xCoord: number, yCoord: number) {
+      await driver.executeScript(
+        `document.getElementById("${elementId}").scrollTo(${xCoord},${yCoord})`
+      );
     }
 
     public async setScrollLeft(scrollSize: number | string) {
@@ -480,6 +562,18 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
     public async switchToFrame(idOrElement: number | WebElementWrapper) {
       const _id = idOrElement instanceof WebElementWrapper ? idOrElement._webElement : idOrElement;
       await driver.switchTo().frame(_id);
+    }
+
+    public async checkBrowserPermission(permission: string): Promise<boolean> {
+      const result: any = await driver.executeAsyncScript(
+        `navigator.permissions.query({name:'${permission}'}).then(arguments[0])`
+      );
+
+      return Boolean(result?.state === 'granted');
+    }
+
+    public getClipboardValue(): Promise<string> {
+      return driver.executeAsyncScript('navigator.clipboard.readText().then(arguments[0])');
     }
   })();
 }

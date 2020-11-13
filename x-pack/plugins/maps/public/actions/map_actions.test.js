@@ -10,8 +10,15 @@ jest.mock('./data_request_actions', () => {
     syncDataForAllLayers: () => {},
   };
 });
+jest.mock('../kibana_services', () => {
+  return {
+    getMapsCapabilities() {
+      return { save: true };
+    },
+  };
+});
 
-import { mapExtentChanged, setMouseCoordinates } from './map_actions';
+import { mapExtentChanged, setMouseCoordinates, setQuery } from './map_actions';
 
 const getStoreMock = jest.fn();
 const dispatchMock = jest.fn();
@@ -26,6 +33,10 @@ describe('map_actions', () => {
       beforeEach(() => {
         require('../selectors/map_selectors').getDataFilters = () => {
           return {};
+        };
+
+        require('../selectors/map_selectors').getLayerList = () => {
+          return [];
         };
       });
 
@@ -224,6 +235,97 @@ describe('map_actions', () => {
         lat: 10,
         lon: 170,
       });
+    });
+  });
+
+  describe('setQuery', () => {
+    const query = {
+      language: 'kuery',
+      query: '',
+      queryLastTriggeredAt: '2020-08-14T15:07:12.276Z',
+    };
+    const timeFilters = { from: 'now-1y', to: 'now' };
+    const filters = [
+      {
+        meta: {
+          index: '90943e30-9a47-11e8-b64d-95841ca0b247',
+          alias: null,
+          negate: false,
+          disabled: false,
+          type: 'phrase',
+          key: 'extension',
+          params: { query: 'png' },
+        },
+        query: { match_phrase: { extension: 'png' } },
+        $state: { store: 'appState' },
+      },
+    ];
+
+    beforeEach(() => {
+      //Mocks the "previous" state
+      require('../selectors/map_selectors').getQuery = () => {
+        return query;
+      };
+      require('../selectors/map_selectors').getTimeFilters = () => {
+        return timeFilters;
+      };
+      require('../selectors/map_selectors').getFilters = () => {
+        return filters;
+      };
+      require('../selectors/map_selectors').getMapSettings = () => {
+        return {
+          autoFitToDataBounds: false,
+        };
+      };
+    });
+
+    it('should dispatch query action and resync when query changes', async () => {
+      const newQuery = {
+        language: 'kuery',
+        query: 'foobar',
+        queryLastTriggeredAt: '2020-08-14T15:07:12.276Z',
+      };
+      const setQueryAction = await setQuery({
+        query: newQuery,
+        filters,
+      });
+      await setQueryAction(dispatchMock, getStoreMock);
+
+      expect(dispatchMock.mock.calls).toEqual([
+        [
+          {
+            timeFilters,
+            query: newQuery,
+            filters,
+            type: 'SET_QUERY',
+          },
+        ],
+        [undefined], // dispatch(syncDataForAllLayers());
+      ]);
+    });
+
+    it('should not dispatch query action when nothing changes', async () => {
+      const setQueryAction = await setQuery({
+        timeFilters,
+        query,
+        filters,
+      });
+      await setQueryAction(dispatchMock, getStoreMock);
+
+      expect(dispatchMock.mock.calls.length).toEqual(0);
+    });
+
+    it('should dispatch query action when nothing changes and force refresh', async () => {
+      const setQueryAction = await setQuery({
+        timeFilters,
+        query,
+        filters,
+        forceRefresh: true,
+      });
+      await setQueryAction(dispatchMock, getStoreMock);
+
+      // Only checking calls length instead of calls because queryLastTriggeredAt changes on this run
+      expect(dispatchMock.mock.calls.length).toEqual(2);
     });
   });
 });

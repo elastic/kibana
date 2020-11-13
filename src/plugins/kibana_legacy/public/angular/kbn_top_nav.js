@@ -74,6 +74,7 @@ export function createTopNavDirective() {
 export const createTopNavHelper = ({ TopNavMenu }) => (reactDirective) => {
   return reactDirective(TopNavMenu, [
     ['config', { watchDepth: 'value' }],
+    ['setMenuMountPoint', { watchDepth: 'reference' }],
     ['disabledButtons', { watchDepth: 'reference' }],
 
     ['query', { watchDepth: 'reference' }],

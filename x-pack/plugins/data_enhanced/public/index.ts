@@ -9,3 +9,5 @@ import { DataEnhancedPlugin, DataEnhancedSetup, DataEnhancedStart } from './plug
 export const plugin = () => new DataEnhancedPlugin();
 
 export { DataEnhancedSetup, DataEnhancedStart };
+
+export { ENHANCED_ES_SEARCH_STRATEGY, EQL_SEARCH_STRATEGY } from '../common';

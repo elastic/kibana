@@ -7,7 +7,6 @@ import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import { IRouter } from 'src/core/server';
 
-import { INDEX_NAMES } from '../../../common/constants';
 import { Pipeline } from '../../models/pipeline';
 import { wrapRouteWithLicenseCheck } from '../../../../licensing/server';
 import { SecurityPluginSetup } from '../../../../security/server';
@@ -22,8 +21,7 @@ export function registerPipelineSaveRoute(router: IRouter, security?: SecurityPl
           id: schema.string(),
         }),
         body: schema.object({
-          id: schema.string(),
-          description: schema.string(),
+          description: schema.maybe(schema.string()),
           pipeline: schema.string(),
           settings: schema.maybe(schema.object({}, { unknowns: 'allow' })),
         }),
@@ -42,11 +40,10 @@ export function registerPipelineSaveRoute(router: IRouter, security?: SecurityPl
           const client = context.logstash!.esClient;
           const pipeline = Pipeline.fromDownstreamJSON(request.body, request.params.id, username);
 
-          await client.callAsCurrentUser('index', {
-            index: INDEX_NAMES.PIPELINES,
-            id: pipeline.id,
+          await client.callAsCurrentUser('transport.request', {
+            path: '/_logstash/pipeline/' + encodeURIComponent(pipeline.id),
+            method: 'PUT',
             body: pipeline.upstreamJSON,
-            refresh: 'wait_for',
           });
 
           return response.noContent();

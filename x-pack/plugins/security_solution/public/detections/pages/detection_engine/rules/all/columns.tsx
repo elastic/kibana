@@ -7,7 +7,6 @@
 /* eslint-disable react/display-name */
 
 import {
-  EuiBadge,
   EuiBasicTableColumn,
   EuiTableActionsColumnType,
   EuiText,
@@ -24,7 +23,6 @@ import { getEmptyTagValue } from '../../../../../common/components/empty_value';
 import { FormattedDate } from '../../../../../common/components/formatted_date';
 import { getRuleDetailsUrl } from '../../../../../common/components/link_to/redirect_to_detection_engine';
 import { ActionToaster } from '../../../../../common/components/toasters';
-import { TruncatableText } from '../../../../../common/components/truncatable_text';
 import { getStatusColor } from '../../../../components/rules/rule_status/helpers';
 import { RuleSwitch } from '../../../../components/rules/rule_switch';
 import { SeverityBadge } from '../../../../components/rules/severity_badge';
@@ -37,25 +35,46 @@ import {
 } from './actions';
 import { Action } from './reducer';
 import { LocalizedDateTooltip } from '../../../../../common/components/localized_date_tooltip';
-import * as detectionI18n from '../../translations';
 import { LinkAnchor } from '../../../../../common/components/links';
+import { getToolTipContent, canEditRuleWithActions } from '../../../../../common/utils/privileges';
+import { TagsDisplay } from './tag_display';
 
 export const getActions = (
   dispatch: React.Dispatch<Action>,
   dispatchToaster: Dispatch<ActionToaster>,
   history: H.History,
-  reFetchRules: (refreshPrePackagedRule?: boolean) => void
+  reFetchRules: (refreshPrePackagedRule?: boolean) => void,
+  actionsPrivileges:
+    | boolean
+    | Readonly<{
+        [x: string]: boolean;
+      }>
 ) => [
   {
+    'data-test-subj': 'editRuleAction',
     description: i18n.EDIT_RULE_SETTINGS,
+    name: !actionsPrivileges ? (
+      <EuiToolTip position="left" content={i18n.EDIT_RULE_SETTINGS_TOOLTIP}>
+        <>{i18n.EDIT_RULE_SETTINGS}</>
+      </EuiToolTip>
+    ) : (
+      i18n.EDIT_RULE_SETTINGS
+    ),
     icon: 'controlsHorizontal',
-    name: i18n.EDIT_RULE_SETTINGS,
     onClick: (rowItem: Rule) => editRuleAction(rowItem, history),
+    enabled: (rowItem: Rule) => canEditRuleWithActions(rowItem, actionsPrivileges),
   },
   {
     description: i18n.DUPLICATE_RULE,
     icon: 'copy',
-    name: i18n.DUPLICATE_RULE,
+    name: !actionsPrivileges ? (
+      <EuiToolTip position="left" content={i18n.EDIT_RULE_SETTINGS_TOOLTIP}>
+        <>{i18n.DUPLICATE_RULE}</>
+      </EuiToolTip>
+    ) : (
+      i18n.DUPLICATE_RULE
+    ),
+    enabled: (rowItem: Rule) => canEditRuleWithActions(rowItem, actionsPrivileges),
     onClick: async (rowItem: Rule) => {
       await duplicateRulesAction([rowItem], [rowItem.id], dispatch, dispatchToaster);
       await reFetchRules(true);
@@ -97,9 +116,13 @@ interface GetColumns {
   hasNoPermissions: boolean;
   loadingRuleIds: string[];
   reFetchRules: (refreshPrePackagedRule?: boolean) => void;
+  hasReadActionsPrivileges:
+    | boolean
+    | Readonly<{
+        [x: string]: boolean;
+      }>;
 }
 
-// Michael: Are we able to do custom, in-table-header filters, as shown in my wireframes?
 export const getColumns = ({
   dispatch,
   dispatchToaster,
@@ -109,6 +132,7 @@ export const getColumns = ({
   hasNoPermissions,
   loadingRuleIds,
   reFetchRules,
+  hasReadActionsPrivileges,
 }: GetColumns): RulesColumns[] => {
   const cols: RulesColumns[] = [
     {
@@ -127,7 +151,8 @@ export const getColumns = ({
         </LinkAnchor>
       ),
       truncateText: true,
-      width: '24%',
+      width: '20%',
+      sortable: true,
     },
     {
       field: 'risk_score',
@@ -138,14 +163,14 @@ export const getColumns = ({
         </EuiText>
       ),
       truncateText: true,
-      width: '14%',
+      width: '10%',
     },
     {
       field: 'severity',
       name: i18n.COLUMN_SEVERITY,
       render: (value: Rule['severity']) => <SeverityBadge value={value} />,
       truncateText: true,
-      width: '16%',
+      width: '12%',
     },
     {
       field: 'status_date',
@@ -160,7 +185,7 @@ export const getColumns = ({
         );
       },
       truncateText: true,
-      width: '20%',
+      width: '14%',
     },
     {
       field: 'status',
@@ -174,21 +199,49 @@ export const getColumns = ({
           </>
         );
       },
-      width: '16%',
+      width: '12%',
       truncateText: true,
+    },
+    {
+      field: 'updated_at',
+      name: i18n.COLUMN_LAST_UPDATE,
+      render: (value: Rule['updated_at']) => {
+        return value == null ? (
+          getEmptyTagValue()
+        ) : (
+          <LocalizedDateTooltip fieldName={i18n.COLUMN_LAST_UPDATE} date={new Date(value)}>
+            <FormattedDate value={value} fieldName={'last rule update date'} />
+          </LocalizedDateTooltip>
+        );
+      },
+      sortable: true,
+      truncateText: true,
+      width: '14%',
+    },
+    {
+      field: 'version',
+      name: i18n.COLUMN_VERSION,
+      render: (value: Rule['version']) => {
+        return value == null ? (
+          getEmptyTagValue()
+        ) : (
+          <EuiText data-test-subj="version" size="s">
+            {value}
+          </EuiText>
+        );
+      },
+      truncateText: true,
+      width: '8%',
     },
     {
       field: 'tags',
       name: i18n.COLUMN_TAGS,
-      render: (value: Rule['tags']) => (
-        <TruncatableText data-test-subj="tags">
-          {value.map((tag, i) => (
-            <EuiBadge color="hollow" key={`${tag}-${i}`}>
-              {tag}
-            </EuiBadge>
-          ))}
-        </TruncatableText>
-      ),
+      render: (value: Rule['tags']) => {
+        if (value.length > 0) {
+          return <TagsDisplay tags={value} />;
+        }
+        return getEmptyTagValue();
+      },
       truncateText: true,
       width: '20%',
     },
@@ -199,11 +252,7 @@ export const getColumns = ({
       render: (value: Rule['enabled'], item: Rule) => (
         <EuiToolTip
           position="top"
-          content={
-            isMlRule(item.type) && !hasMlPermissions
-              ? detectionI18n.ML_RULES_DISABLED_MESSAGE
-              : undefined
-          }
+          content={getToolTipContent(item, hasMlPermissions, hasReadActionsPrivileges)}
         >
           <RuleSwitch
             data-test-subj="enabled"
@@ -211,7 +260,9 @@ export const getColumns = ({
             id={item.id}
             enabled={item.enabled}
             isDisabled={
-              hasNoPermissions || (isMlRule(item.type) && !hasMlPermissions && !item.enabled)
+              !canEditRuleWithActions(item, hasReadActionsPrivileges) ||
+              hasNoPermissions ||
+              (isMlRule(item.type) && !hasMlPermissions && !item.enabled)
             }
             isLoading={loadingRuleIds.includes(item.id)}
           />
@@ -223,7 +274,13 @@ export const getColumns = ({
   ];
   const actions: RulesColumns[] = [
     {
-      actions: getActions(dispatch, dispatchToaster, history, reFetchRules),
+      actions: getActions(
+        dispatch,
+        dispatchToaster,
+        history,
+        reFetchRules,
+        hasReadActionsPrivileges
+      ),
       width: '40px',
     } as EuiTableActionsColumnType<Rule>,
   ];

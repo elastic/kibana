@@ -4,57 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HeadlessChromiumDriver } from '../../browsers';
 import { LevelLogger } from '../';
+import { LayoutSelectorDictionary, Size } from '../../../common/types';
+import { HeadlessChromiumDriver } from '../../browsers';
 import { Layout } from './layout';
 
+export {
+  LayoutParams,
+  LayoutSelectorDictionary,
+  PageSizeParams,
+  PdfImageSize,
+  Size,
+} from '../../../common/types';
 export { createLayout } from './create_layout';
 export { Layout } from './layout';
 export { PreserveLayout } from './preserve_layout';
 export { PrintLayout } from './print_layout';
-
-export const LayoutTypes = {
-  PRESERVE_LAYOUT: 'preserve_layout',
-  PRINT: 'print',
-};
-
-export const getDefaultLayoutSelectors = (): LayoutSelectorDictionary => ({
-  screenshot: '[data-shared-items-container]',
-  renderComplete: '[data-shared-item]',
-  itemsCountAttribute: 'data-shared-items-count',
-  timefilterDurationAttribute: 'data-shared-timefilter-duration',
-});
-
-export interface PageSizeParams {
-  pageMarginTop: number;
-  pageMarginBottom: number;
-  pageMarginWidth: number;
-  tableBorderWidth: number;
-  headingHeight: number;
-  subheadingHeight: number;
-}
-
-export interface LayoutSelectorDictionary {
-  screenshot: string;
-  renderComplete: string;
-  itemsCountAttribute: string;
-  timefilterDurationAttribute: string;
-}
-
-export interface PdfImageSize {
-  width: number;
-  height?: number;
-}
-
-export interface Size {
-  width: number;
-  height: number;
-}
-
-export interface LayoutParams {
-  id: string;
-  dimensions: Size;
-}
 
 interface LayoutSelectors {
   // Fields that are not part of Layout: the instances
@@ -63,4 +28,4 @@ interface LayoutSelectors {
   positionElements?: (browser: HeadlessChromiumDriver, logger: LevelLogger) => Promise<void>;
 }
 
-export type LayoutInstance = Layout & LayoutSelectors & Size;
+export type LayoutInstance = Layout & LayoutSelectors & Partial<Size>;

@@ -7,20 +7,23 @@
 import { combineLatest } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 import { TypeOf } from '@kbn/config-schema';
+import { deepFreeze } from '@kbn/std';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { SecurityOssPluginSetup } from 'src/plugins/security_oss/server';
 import {
-  deepFreeze,
-  ILegacyCustomClusterClient,
   CoreSetup,
   CoreStart,
   Logger,
   PluginInitializerContext,
 } from '../../../../src/core/server';
 import { SpacesPluginSetup } from '../../spaces/server';
+import { PluginSetupContract as FeaturesSetupContract } from '../../features/server';
 import {
   PluginSetupContract as FeaturesPluginSetup,
   PluginStartContract as FeaturesPluginStart,
 } from '../../features/server';
 import { LicensingPluginSetup, LicensingPluginStart } from '../../licensing/server';
+import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
 
 import { Authentication, setupAuthentication } from './authentication';
 import { AuthorizationService, AuthorizationServiceSetup } from './authorization';
@@ -29,12 +32,20 @@ import { defineRoutes } from './routes';
 import { SecurityLicenseService, SecurityLicense } from '../common/licensing';
 import { setupSavedObjects } from './saved_objects';
 import { AuditService, SecurityAuditLogger, AuditServiceSetup } from './audit';
-import { elasticsearchClientPlugin } from './elasticsearch_client_plugin';
 import { SecurityFeatureUsageService, SecurityFeatureUsageServiceStart } from './feature_usage';
+import { securityFeatures } from './features';
+import { ElasticsearchService } from './elasticsearch';
+import { SessionManagementService } from './session_management';
+import { registerSecurityUsageCollector } from './usage_collector';
 
 export type SpacesService = Pick<
   SpacesPluginSetup['spacesService'],
   'getSpaceId' | 'namespaceToSpaceId'
+>;
+
+export type FeaturesService = Pick<
+  FeaturesSetupContract,
+  'getKibanaFeatures' | 'getElasticsearchFeatures'
 >;
 
 /**
@@ -56,7 +67,7 @@ export interface SecurityPluginSetup {
     'actions' | 'checkPrivilegesDynamicallyWithRequest' | 'checkPrivilegesWithRequest' | 'mode'
   >;
   license: SecurityLicense;
-  audit: Pick<AuditServiceSetup, 'getLogger'>;
+  audit: AuditServiceSetup;
 
   /**
    * If Spaces plugin is available it's supposed to register its SpacesService with Security plugin
@@ -72,11 +83,15 @@ export interface SecurityPluginSetup {
 export interface PluginSetupDependencies {
   features: FeaturesPluginSetup;
   licensing: LicensingPluginSetup;
+  taskManager: TaskManagerSetupContract;
+  usageCollection?: UsageCollectionSetup;
+  securityOss?: SecurityOssPluginSetup;
 }
 
 export interface PluginStartDependencies {
   features: FeaturesPluginStart;
   licensing: LicensingPluginStart;
+  taskManager: TaskManagerStartContract;
 }
 
 /**
@@ -84,9 +99,9 @@ export interface PluginStartDependencies {
  */
 export class Plugin {
   private readonly logger: Logger;
-  private clusterClient?: ILegacyCustomClusterClient;
   private spacesService?: SpacesService | symbol = Symbol('not accessed');
   private securityLicenseService?: SecurityLicenseService;
+  private authc?: Authentication;
 
   private readonly featureUsageService = new SecurityFeatureUsageService();
   private featureUsageServiceStart?: SecurityFeatureUsageServiceStart;
@@ -99,6 +114,12 @@ export class Plugin {
 
   private readonly auditService = new AuditService(this.initializerContext.logger.get('audit'));
   private readonly authorizationService = new AuthorizationService();
+  private readonly elasticsearchService = new ElasticsearchService(
+    this.initializerContext.logger.get('elasticsearch')
+  );
+  private readonly sessionManagementService = new SessionManagementService(
+    this.initializerContext.logger.get('session')
+  );
 
   private readonly getSpacesService = () => {
     // Changing property value from Symbol to undefined denotes the fact that property was accessed.
@@ -115,7 +136,7 @@ export class Plugin {
 
   public async setup(
     core: CoreSetup<PluginStartDependencies>,
-    { features, licensing }: PluginSetupDependencies
+    { features, licensing, taskManager, usageCollection, securityOss }: PluginSetupDependencies
   ) {
     const [config, legacyConfig] = await combineLatest([
       this.initializerContext.config.create<TypeOf<typeof ConfigSchema>>().pipe(
@@ -130,45 +151,79 @@ export class Plugin {
       .pipe(first())
       .toPromise();
 
-    this.clusterClient = core.elasticsearch.legacy.createClient('security', {
-      plugins: [elasticsearchClientPlugin],
-    });
-
     this.securityLicenseService = new SecurityLicenseService();
     const { license } = this.securityLicenseService.setup({
       license$: licensing.license$,
     });
 
+    if (securityOss) {
+      license.features$.subscribe(({ allowRbac }) => {
+        const showInsecureClusterWarning = !allowRbac;
+        securityOss.showInsecureClusterWarning$.next(showInsecureClusterWarning);
+      });
+    }
+
+    securityFeatures.forEach((securityFeature) =>
+      features.registerElasticsearchFeature(securityFeature)
+    );
+
+    const { clusterClient } = this.elasticsearchService.setup({
+      elasticsearch: core.elasticsearch,
+      license,
+      status: core.status,
+    });
+
     this.featureUsageService.setup({ featureUsage: licensing.featureUsage });
 
-    const audit = this.auditService.setup({ license, config: config.audit });
-    const auditLogger = new SecurityAuditLogger(audit.getLogger());
+    registerSecurityUsageCollector({ usageCollection, config, license });
 
-    const authc = await setupAuthentication({
-      auditLogger,
+    const audit = this.auditService.setup({
+      license,
+      config: config.audit,
+      logging: core.logging,
+      http: core.http,
+      getSpaceId: (request) => this.getSpacesService()?.getSpaceId(request),
+      getCurrentUser: (request) => this.authc?.getCurrentUser(request),
+    });
+    const legacyAuditLogger = new SecurityAuditLogger(audit.getLogger());
+
+    const { session } = this.sessionManagementService.setup({
+      config,
+      clusterClient,
+      http: core.http,
+      kibanaIndexName: legacyConfig.kibana.index,
+      taskManager,
+    });
+
+    this.authc = await setupAuthentication({
+      legacyAuditLogger,
+      audit,
       getFeatureUsageService: this.getFeatureUsageService,
       http: core.http,
-      clusterClient: this.clusterClient,
+      clusterClient,
       config,
       license,
       loggers: this.initializerContext.logger,
+      session,
     });
 
     const authz = this.authorizationService.setup({
       http: core.http,
       capabilities: core.capabilities,
-      status: core.status,
-      clusterClient: this.clusterClient,
+      clusterClient,
       license,
       loggers: this.initializerContext.logger,
       kibanaIndexName: legacyConfig.kibana.index,
       packageVersion: this.initializerContext.env.packageInfo.version,
+      buildNumber: this.initializerContext.env.packageInfo.buildNum,
       getSpacesService: this.getSpacesService,
       features,
+      getCurrentUser: this.authc.getCurrentUser,
     });
 
     setupSavedObjects({
-      auditLogger,
+      legacyAuditLogger,
+      audit,
       authz,
       savedObjects: core.savedObjects,
       getSpacesService: this.getSpacesService,
@@ -179,31 +234,33 @@ export class Plugin {
       basePath: core.http.basePath,
       httpResources: core.http.resources,
       logger: this.initializerContext.logger.get('routes'),
-      clusterClient: this.clusterClient,
+      clusterClient,
       config,
-      authc,
+      authc: this.authc,
       authz,
       license,
+      session,
       getFeatures: () =>
         core
           .getStartServices()
-          .then(([, { features: featuresStart }]) => featuresStart.getFeatures()),
+          .then(([, { features: featuresStart }]) => featuresStart.getKibanaFeatures()),
       getFeatureUsageService: this.getFeatureUsageService,
     });
 
     return deepFreeze<SecurityPluginSetup>({
       audit: {
+        asScoped: audit.asScoped,
         getLogger: audit.getLogger,
       },
 
       authc: {
-        isAuthenticated: authc.isAuthenticated,
-        getCurrentUser: authc.getCurrentUser,
-        areAPIKeysEnabled: authc.areAPIKeysEnabled,
-        createAPIKey: authc.createAPIKey,
-        invalidateAPIKey: authc.invalidateAPIKey,
-        grantAPIKeyAsInternalUser: authc.grantAPIKeyAsInternalUser,
-        invalidateAPIKeyAsInternalUser: authc.invalidateAPIKeyAsInternalUser,
+        isAuthenticated: this.authc.isAuthenticated,
+        getCurrentUser: this.authc.getCurrentUser,
+        areAPIKeysEnabled: this.authc.areAPIKeysEnabled,
+        createAPIKey: this.authc.createAPIKey,
+        invalidateAPIKey: this.authc.invalidateAPIKey,
+        grantAPIKeyAsInternalUser: this.authc.grantAPIKeyAsInternalUser,
+        invalidateAPIKeyAsInternalUser: this.authc.invalidateAPIKeyAsInternalUser,
       },
 
       authz: {
@@ -225,21 +282,21 @@ export class Plugin {
     });
   }
 
-  public start(core: CoreStart, { features, licensing }: PluginStartDependencies) {
+  public start(core: CoreStart, { features, licensing, taskManager }: PluginStartDependencies) {
     this.logger.debug('Starting plugin');
+
     this.featureUsageServiceStart = this.featureUsageService.start({
       featureUsage: licensing.featureUsage,
     });
-    this.authorizationService.start({ features, clusterClient: this.clusterClient! });
+
+    const { clusterClient, watchOnlineStatus$ } = this.elasticsearchService.start();
+
+    this.sessionManagementService.start({ online$: watchOnlineStatus$(), taskManager });
+    this.authorizationService.start({ features, clusterClient, online$: watchOnlineStatus$() });
   }
 
   public stop() {
     this.logger.debug('Stopping plugin');
-
-    if (this.clusterClient) {
-      this.clusterClient.close();
-      this.clusterClient = undefined;
-    }
 
     if (this.securityLicenseService) {
       this.securityLicenseService.stop();
@@ -249,8 +306,11 @@ export class Plugin {
     if (this.featureUsageServiceStart) {
       this.featureUsageServiceStart = undefined;
     }
+
     this.auditService.stop();
     this.authorizationService.stop();
+    this.elasticsearchService.stop();
+    this.sessionManagementService.stop();
   }
 
   private wasSpacesServiceAccessed() {

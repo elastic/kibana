@@ -6,8 +6,6 @@
 
 import { validateAutoFollowPattern } from './auto_follow_pattern_validators';
 
-jest.mock('ui/new_platform');
-
 describe('Auto-follow pattern validators', () => {
   describe('validateAutoFollowPattern()', () => {
     it('returns empty object when autoFollowPattern is undefined', () => {

@@ -11,12 +11,14 @@ import { KibanaRequest, CoreStart, IBasePath } from 'src/core/server';
 import { GlobalSearchProviderResult, GlobalSearchBatchedResults } from '../../common/types';
 import { GlobalSearchFindError } from '../../common/errors';
 import { takeInArray } from '../../common/operators';
+import { defaultMaxProviderResults } from '../../common/constants';
 import { ILicenseChecker } from '../../common/license_checker';
 
 import { processProviderResult } from '../../common/process_result';
 import { GlobalSearchConfigType } from '../config';
 import { getContextFactory, GlobalSearchContextFactory } from './context';
 import { GlobalSearchResultProvider, GlobalSearchFindOptions } from '../types';
+import { getRequestBasePath } from './utils';
 
 /** @public */
 export interface SearchServiceSetup {
@@ -79,7 +81,6 @@ interface StartDeps {
   licenseChecker: ILicenseChecker;
 }
 
-const defaultMaxProviderResults = 20;
 const mapToUndefined = () => undefined;
 
 /** @internal */
@@ -132,6 +133,7 @@ export class SearchService {
     }
 
     const context = this.contextFactory!(request);
+    const basePath = getRequestBasePath(request, this.basePath!);
 
     const timeout$ = timer(this.config!.search_timeout.asMilliseconds()).pipe(map(mapToUndefined));
     const aborted$ = options.aborted$ ? merge(options.aborted$, timeout$) : timeout$;
@@ -143,7 +145,7 @@ export class SearchService {
     };
 
     const processResult = (result: GlobalSearchProviderResult) =>
-      processProviderResult(result, this.basePath!);
+      processProviderResult(result, basePath);
 
     const providersResults$ = [...this.providers.values()].map((provider) =>
       provider.find(term, providerOptions, context).pipe(

@@ -7,23 +7,22 @@
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import {
   IRouter,
-  LegacyCallAPIOptions,
   SavedObjectsClientContract,
   ISavedObjectsRepository,
+  IScopedClusterClient,
+  ElasticsearchClient,
 } from 'src/core/server';
 import { UMKibanaRoute } from '../../../rest_api';
 import { PluginSetupContract } from '../../../../../features/server';
 import { DynamicSettings } from '../../../../common/runtime_types';
 import { MlPluginSetup as MlSetup } from '../../../../../ml/server';
 
-export type APICaller = (
-  endpoint: string,
-  clientParams: Record<string, any>,
-  options?: LegacyCallAPIOptions
-) => Promise<any>;
-
 export type UMElasticsearchQueryFn<P, R = any> = (
-  params: { callES: APICaller; dynamicSettings: DynamicSettings } & P
+  params: {
+    callES: ElasticsearchClient;
+    esClient?: IScopedClusterClient;
+    dynamicSettings: DynamicSettings;
+  } & P
 ) => Promise<R>;
 
 export type UMSavedObjectsQueryFn<T = any, P = undefined> = (

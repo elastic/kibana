@@ -23,25 +23,30 @@ import { BookSavedObjectAttributes, BOOK_SAVED_OBJECT } from '../../common';
 import { toMountPoint } from '../../../../src/plugins/kibana_react/public';
 import {
   EmbeddableFactoryDefinition,
-  EmbeddableStart,
   IContainer,
-  AttributeService,
   EmbeddableFactory,
+  EmbeddableStart,
+  AttributeService,
 } from '../../../../src/plugins/embeddable/public';
 import {
   BookEmbeddable,
   BOOK_EMBEDDABLE,
   BookEmbeddableInput,
   BookEmbeddableOutput,
-  BookByValueInput,
-  BookByReferenceInput,
 } from './book_embeddable';
 import { CreateEditBookComponent } from './create_edit_book_component';
-import { OverlayStart } from '../../../../src/core/public';
+import {
+  OverlayStart,
+  SavedObjectsClientContract,
+  SimpleSavedObject,
+} from '../../../../src/core/public';
+import { checkForDuplicateTitle, OnSaveProps } from '../../../../src/plugins/saved_objects/public';
 
 interface StartServices {
   getAttributeService: EmbeddableStart['getAttributeService'];
   openModal: OverlayStart['openModal'];
+  savedObjectsClient: SavedObjectsClientContract;
+  overlays: OverlayStart;
 }
 
 export type BookEmbeddableFactory = EmbeddableFactory<
@@ -67,11 +72,7 @@ export class BookEmbeddableFactoryDefinition
     getIconForSavedObject: () => 'pencil',
   };
 
-  private attributeService?: AttributeService<
-    BookSavedObjectAttributes,
-    BookByValueInput,
-    BookByReferenceInput
-  >;
+  private attributeService?: AttributeService<BookSavedObjectAttributes>;
 
   constructor(private getStartServices: () => Promise<StartServices>) {}
 
@@ -83,6 +84,16 @@ export class BookEmbeddableFactoryDefinition
     return new BookEmbeddable(input, await this.getAttributeService(), {
       parent,
     });
+  }
+
+  // This is currently required due to the distinction in container.ts and the
+  // default error implementation in default_embeddable_factory_provider.ts
+  public async createFromSavedObject(
+    savedObjectId: string,
+    input: BookEmbeddableInput,
+    parent?: IContainer
+  ) {
+    return this.create(input, parent);
   }
 
   public getDisplayName() {
@@ -114,14 +125,52 @@ export class BookEmbeddableFactoryDefinition
     });
   }
 
+  private async unwrapMethod(savedObjectId: string): Promise<BookSavedObjectAttributes> {
+    const { savedObjectsClient } = await this.getStartServices();
+    const savedObject: SimpleSavedObject<BookSavedObjectAttributes> = await savedObjectsClient.get<
+      BookSavedObjectAttributes
+    >(this.type, savedObjectId);
+    return { ...savedObject.attributes };
+  }
+
+  private async saveMethod(attributes: BookSavedObjectAttributes, savedObjectId?: string) {
+    const { savedObjectsClient } = await this.getStartServices();
+    if (savedObjectId) {
+      return savedObjectsClient.update(this.type, savedObjectId, attributes);
+    }
+    return savedObjectsClient.create(this.type, attributes);
+  }
+
+  private async checkForDuplicateTitleMethod(props: OnSaveProps): Promise<true> {
+    const start = await this.getStartServices();
+    const { savedObjectsClient, overlays } = start;
+    return checkForDuplicateTitle(
+      {
+        title: props.newTitle,
+        copyOnSave: false,
+        lastSavedTitle: '',
+        getEsType: () => this.type,
+        getDisplayName: this.getDisplayName || (() => this.type),
+      },
+      props.isTitleDuplicateConfirmed,
+      props.onTitleDuplicate,
+      {
+        savedObjectsClient,
+        overlays,
+      }
+    );
+  }
+
   private async getAttributeService() {
     if (!this.attributeService) {
-      this.attributeService = await (await this.getStartServices()).getAttributeService<
-        BookSavedObjectAttributes,
-        BookByValueInput,
-        BookByReferenceInput
-      >(this.type);
+      this.attributeService = (await this.getStartServices()).getAttributeService<
+        BookSavedObjectAttributes
+      >(this.type, {
+        saveMethod: this.saveMethod.bind(this),
+        unwrapMethod: this.unwrapMethod.bind(this),
+        checkForDuplicateTitle: this.checkForDuplicateTitleMethod.bind(this),
+      });
     }
-    return this.attributeService;
+    return this.attributeService!;
   }
 }

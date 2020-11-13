@@ -12,6 +12,7 @@ import { coreMock } from 'src/core/public/mocks';
 import { uiActionsPluginMock } from '../../../../../../src/plugins/ui_actions/public/mocks';
 import { dataPluginMock } from '../../../../../../src/plugins/data/public/mocks';
 import { expressionsPluginMock } from '../../../../../../src/plugins/expressions/public/mocks';
+import { chartPluginMock } from 'src/plugins/charts/public/mocks';
 
 describe('editor_frame state management', () => {
   describe('initialization', () => {
@@ -31,7 +32,9 @@ describe('editor_frame state management', () => {
           uiActions: uiActionsPluginMock.createStartContract(),
           data: dataPluginMock.createStartContract(),
           expressions: expressionsPluginMock.createStartContract(),
+          charts: chartPluginMock.createStartContract(),
         },
+        palettes: chartPluginMock.createPaletteRegistry(),
         dateRange: { fromDate: 'now-7d', toDate: 'now' },
         query: { query: '', language: 'lucene' },
         filters: [],
@@ -57,19 +60,16 @@ describe('editor_frame state management', () => {
       const initialState = getInitialState({
         ...props,
         doc: {
-          expression: '',
           state: {
             datasourceStates: {
               testDatasource: { internalState1: '' },
               testDatasource2: { internalState2: '' },
             },
             visualization: {},
-            datasourceMetaData: {
-              filterableIndexPatterns: [],
-            },
             query: { query: '', language: 'lucene' },
             filters: [],
           },
+          references: [],
           title: '',
           visualizationType: 'testVis',
         },
@@ -379,10 +379,8 @@ describe('editor_frame state management', () => {
         {
           type: 'VISUALIZATION_LOADED',
           doc: {
-            id: 'b',
-            expression: '',
+            savedObjectId: 'b',
             state: {
-              datasourceMetaData: { filterableIndexPatterns: [] },
               datasourceStates: { a: { foo: 'c' } },
               visualization: { bar: 'd' },
               query: { query: '', language: 'lucene' },
@@ -392,6 +390,7 @@ describe('editor_frame state management', () => {
             description: 'My lens',
             type: 'lens',
             visualizationType: 'line',
+            references: [],
           },
         }
       );

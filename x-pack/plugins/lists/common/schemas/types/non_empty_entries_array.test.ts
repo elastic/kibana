@@ -7,7 +7,7 @@
 import { pipe } from 'fp-ts/lib/pipeable';
 import { left } from 'fp-ts/lib/Either';
 
-import { foldLeftRight, getPaths } from '../../siem_common_deps';
+import { foldLeftRight, getPaths } from '../../shared_imports';
 
 import { getEntryMatchMock } from './entry_match.mock';
 import { getEntryMatchAnyMock } from './entry_match_any.mock';
@@ -22,7 +22,7 @@ import { nonEmptyEntriesArray } from './non_empty_entries_array';
 import { EntriesArray } from './entries';
 
 describe('non_empty_entries_array', () => {
-  test('it should NOT validate an empty array', () => {
+  test('it should FAIL validation when given an empty array', () => {
     const payload: EntriesArray = [];
     const decoded = nonEmptyEntriesArray.decode(payload);
     const message = pipe(decoded, foldLeftRight);
@@ -33,7 +33,7 @@ describe('non_empty_entries_array', () => {
     expect(message.schema).toEqual({});
   });
 
-  test('it should NOT validate "undefined"', () => {
+  test('it should FAIL validation when given "undefined"', () => {
     const payload = undefined;
     const decoded = nonEmptyEntriesArray.decode(payload);
     const message = pipe(decoded, foldLeftRight);
@@ -44,7 +44,7 @@ describe('non_empty_entries_array', () => {
     expect(message.schema).toEqual({});
   });
 
-  test('it should NOT validate "null"', () => {
+  test('it should FAIL validation when given "null"', () => {
     const payload = null;
     const decoded = nonEmptyEntriesArray.decode(payload);
     const message = pipe(decoded, foldLeftRight);
@@ -56,7 +56,7 @@ describe('non_empty_entries_array', () => {
   });
 
   test('it should validate an array of "match" entries', () => {
-    const payload: EntriesArray = [{ ...getEntryMatchMock() }, { ...getEntryMatchMock() }];
+    const payload: EntriesArray = [getEntryMatchMock(), getEntryMatchMock()];
     const decoded = nonEmptyEntriesArray.decode(payload);
     const message = pipe(decoded, foldLeftRight);
 
@@ -65,7 +65,7 @@ describe('non_empty_entries_array', () => {
   });
 
   test('it should validate an array of "match_any" entries', () => {
-    const payload: EntriesArray = [{ ...getEntryMatchAnyMock() }, { ...getEntryMatchAnyMock() }];
+    const payload: EntriesArray = [getEntryMatchAnyMock(), getEntryMatchAnyMock()];
     const decoded = nonEmptyEntriesArray.decode(payload);
     const message = pipe(decoded, foldLeftRight);
 
@@ -74,7 +74,7 @@ describe('non_empty_entries_array', () => {
   });
 
   test('it should validate an array of "exists" entries', () => {
-    const payload: EntriesArray = [{ ...getEntryExistsMock() }, { ...getEntryExistsMock() }];
+    const payload: EntriesArray = [getEntryExistsMock(), getEntryExistsMock()];
     const decoded = nonEmptyEntriesArray.decode(payload);
     const message = pipe(decoded, foldLeftRight);
 
@@ -92,7 +92,7 @@ describe('non_empty_entries_array', () => {
   });
 
   test('it should validate an array of "nested" entries', () => {
-    const payload: EntriesArray = [{ ...getEntryNestedMock() }, { ...getEntryNestedMock() }];
+    const payload: EntriesArray = [getEntryNestedMock(), getEntryNestedMock()];
     const decoded = nonEmptyEntriesArray.decode(payload);
     const message = pipe(decoded, foldLeftRight);
 
@@ -109,7 +109,7 @@ describe('non_empty_entries_array', () => {
     expect(message.schema).toEqual(payload);
   });
 
-  test('it should NOT validate an array of entries of value list and non-value list entries', () => {
+  test('it should FAIL validation when given an array of entries of value list and non-value list entries', () => {
     const payload: EntriesArray = [...getListAndNonListEntriesArrayMock()];
     const decoded = nonEmptyEntriesArray.decode(payload);
     const message = pipe(decoded, foldLeftRight);
@@ -118,16 +118,12 @@ describe('non_empty_entries_array', () => {
     expect(message.schema).toEqual({});
   });
 
-  test('it should NOT validate an array of non entries', () => {
+  test('it should FAIL validation when given an array of non entries', () => {
     const payload = [1];
     const decoded = nonEmptyEntriesArray.decode(payload);
     const message = pipe(decoded, foldLeftRight);
 
     expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "1" supplied to "NonEmptyEntriesArray"',
-      'Invalid value "1" supplied to "NonEmptyEntriesArray"',
-      'Invalid value "1" supplied to "NonEmptyEntriesArray"',
-      'Invalid value "1" supplied to "NonEmptyEntriesArray"',
       'Invalid value "1" supplied to "NonEmptyEntriesArray"',
     ]);
     expect(message.schema).toEqual({});

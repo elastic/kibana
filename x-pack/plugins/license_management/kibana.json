@@ -3,7 +3,7 @@
   "version": "kibana",
   "server": true,
   "ui": true,
-  "requiredPlugins": ["home", "licensing", "management"],
+  "requiredPlugins": ["home", "licensing", "management", "features"],
   "optionalPlugins": ["telemetry"],
   "configPath": ["xpack", "license_management"],
   "extraPublicDirs": ["common/constants"],

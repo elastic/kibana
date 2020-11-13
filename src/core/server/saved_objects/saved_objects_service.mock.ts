@@ -18,25 +18,25 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-
-import {
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import type {
   SavedObjectsService,
   InternalSavedObjectsServiceSetup,
   InternalSavedObjectsServiceStart,
   SavedObjectsServiceSetup,
   SavedObjectsServiceStart,
 } from './saved_objects_service';
-import { mockKibanaMigrator } from './migrations/kibana/kibana_migrator.mock';
-import { savedObjectsClientProviderMock } from './service/lib/scoped_client_provider.mock';
+
 import { savedObjectsRepositoryMock } from './service/lib/repository.mock';
 import { savedObjectsClientMock } from './service/saved_objects_client.mock';
 import { typeRegistryMock } from './saved_objects_type_registry.mock';
 import { migrationMocks } from './migrations/mocks';
 import { ServiceStatusLevels } from '../status';
+import { ISavedObjectTypeRegistry } from './saved_objects_type_registry';
 
 type SavedObjectsServiceContract = PublicMethodsOf<SavedObjectsService>;
 
-const createStartContractMock = () => {
+const createStartContractMock = (typeRegistry?: jest.Mocked<ISavedObjectTypeRegistry>) => {
   const startContrat: jest.Mocked<SavedObjectsServiceStart> = {
     getScopedClient: jest.fn(),
     createInternalRepository: jest.fn(),
@@ -48,17 +48,15 @@ const createStartContractMock = () => {
   startContrat.getScopedClient.mockReturnValue(savedObjectsClientMock.create());
   startContrat.createInternalRepository.mockReturnValue(savedObjectsRepositoryMock.create());
   startContrat.createScopedRepository.mockReturnValue(savedObjectsRepositoryMock.create());
-  startContrat.getTypeRegistry.mockReturnValue(typeRegistryMock.create());
+  startContrat.getTypeRegistry.mockReturnValue(typeRegistry ?? typeRegistryMock.create());
 
   return startContrat;
 };
 
-const createInternalStartContractMock = () => {
-  const internalStartContract: jest.Mocked<InternalSavedObjectsServiceStart> = {
-    ...createStartContractMock(),
-    clientProvider: savedObjectsClientProviderMock.create(),
-    migrator: mockKibanaMigrator.create(),
-  };
+const createInternalStartContractMock = (typeRegistry?: jest.Mocked<ISavedObjectTypeRegistry>) => {
+  const internalStartContract: jest.Mocked<InternalSavedObjectsServiceStart> = createStartContractMock(
+    typeRegistry
+  );
 
   return internalStartContract;
 };

@@ -21,14 +21,14 @@ import { schema } from '@kbn/config-schema';
 import { IRouter, SavedObject } from 'src/core/server';
 import { importDashboards } from '../lib';
 
-export const registerImportRoute = (router: IRouter) => {
+export const registerImportRoute = (router: IRouter, maxImportPayloadBytes: number) => {
   router.post(
     {
       path: '/api/kibana/dashboards/import',
       validate: {
         body: schema.object({
           objects: schema.arrayOf(schema.recordOf(schema.string(), schema.any())),
-          version: schema.string(),
+          version: schema.maybe(schema.string()),
         }),
         query: schema.object({
           force: schema.boolean({ defaultValue: false }),
@@ -39,6 +39,9 @@ export const registerImportRoute = (router: IRouter) => {
       },
       options: {
         tags: ['api'],
+        body: {
+          maxBytes: maxImportPayloadBytes,
+        },
       },
     },
     async (ctx, req, res) => {

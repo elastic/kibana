@@ -58,12 +58,10 @@ export function getTpmBuckets({
   const buckets = transactionResultBuckets.map(
     ({ key: resultKey, timeseries }) => {
       const dataPoints = timeseries.buckets.map((bucket) => {
-        // calculate request/minute. Avoid up-scaling numbers if bucketSize is below 60s (1 minute).
-        // Eg. 1 request during a 10 second window should be displayed as "1 rpm" instead of "6 rpm".
-        const tmpValue = bucket.doc_count * (60 / Math.max(60, bucketSize));
         return {
           x: bucket.key,
-          y: tmpValue,
+          // divide by minutes
+          y: bucket.count.value / (bucketSize / 60),
         };
       });
 
@@ -72,7 +70,7 @@ export function getTpmBuckets({
         resultKey === '' ? NOT_AVAILABLE_LABEL : (resultKey as string);
 
       const docCountTotal = timeseries.buckets
-        .map((bucket) => bucket.doc_count)
+        .map((bucket) => bucket.count.value)
         .reduce((a, b) => a + b, 0);
 
       // calculate request/minute

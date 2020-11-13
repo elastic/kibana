@@ -51,7 +51,7 @@ const LogsApp: React.FC<{
     <CoreProviders core={core} plugins={plugins}>
       <CommonInfraProviders
         apolloClient={apolloClient}
-        triggersActionsUI={plugins.triggers_actions_ui}
+        triggersActionsUI={plugins.triggersActionsUi}
       >
         <Router history={history}>
           <Switch>

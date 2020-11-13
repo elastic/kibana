@@ -17,7 +17,7 @@ import {
 
 import { REPOSITORY_TYPES } from '../../../../../../common';
 import { Repository, RepositoryType } from '../../../../../../common/types';
-import { Error, SendRequestResponse } from '../../../../../shared_imports';
+import { UseRequestResponse } from '../../../../../shared_imports';
 import { RepositoryDeleteProvider } from '../../../../components';
 import { UIM_REPOSITORY_SHOW_DETAILS_CLICK } from '../../../../constants';
 import { useServices } from '../../../../app_context';
@@ -29,7 +29,7 @@ import { reactRouterNavigate } from '../../../../../../../../../src/plugins/kiba
 interface Props {
   repositories: Repository[];
   managedRepository?: string;
-  reload: () => Promise<SendRequestResponse<any, Error>>;
+  reload: UseRequestResponse['resendRequest'];
   openRepositoryDetailsUrl: (name: Repository['name']) => string;
   onRepositoryDeleted: (repositoriesDeleted: Array<Repository['name']>) => void;
 }
@@ -55,7 +55,6 @@ export const RepositoryTable: React.FunctionComponent<Props> = ({
       render: (name: Repository['name']) => {
         return (
           <Fragment>
-            {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
             <EuiLink
               {...reactRouterNavigate(history, openRepositoryDetailsUrl(name), () =>
                 uiMetricService.trackUiMetric(UIM_REPOSITORY_SHOW_DETAILS_CLICK)

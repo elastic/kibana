@@ -79,6 +79,11 @@ describe('buildExpressionFunction()', () => {
     `);
   });
 
+  test('ignores any args in initial state which value is undefined', () => {
+    const fn = buildExpressionFunction('hello', { world: undefined });
+    expect(fn.arguments).not.toHaveProperty('world');
+  });
+
   test('returns all expected properties', () => {
     const fn = buildExpressionFunction('hello', { world: [true] });
     expect(Object.keys(fn)).toMatchInlineSnapshot(`
@@ -257,6 +262,18 @@ describe('buildExpressionFunction()', () => {
           "foo": Array [
             "bar",
           ],
+          "world": Array [
+            true,
+          ],
+        }
+      `);
+    });
+
+    test('does not add new argument if the value is undefined', () => {
+      const fn = buildExpressionFunction('hello', { world: [true] });
+      fn.addArgument('foo', undefined);
+      expect(fn.toAst().arguments).toMatchInlineSnapshot(`
+        Object {
           "world": Array [
             true,
           ],

@@ -4,15 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
 import { render } from '@testing-library/react';
+import React, { ReactNode } from 'react';
+import { MemoryRouter } from 'react-router-dom';
 import { MetadataTable } from '..';
+import { MockApmPluginContextWrapper } from '../../../../context/ApmPluginContext/MockApmPluginContext';
 import { expectTextsInDocument } from '../../../../utils/testHelpers';
 import { SectionsWithRows } from '../helper';
-import { MockApmPluginContextWrapper } from '../../../../context/ApmPluginContext/MockApmPluginContext';
+
+function Wrapper({ children }: { children?: ReactNode }) {
+  return (
+    <MemoryRouter>
+      <MockApmPluginContextWrapper>{children}</MockApmPluginContextWrapper>
+    </MemoryRouter>
+  );
+}
 
 const renderOptions = {
-  wrapper: MockApmPluginContextWrapper,
+  wrapper: Wrapper,
 };
 
 describe('MetadataTable', () => {

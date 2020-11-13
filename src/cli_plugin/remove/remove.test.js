@@ -17,13 +17,15 @@
  * under the License.
  */
 
+import { join } from 'path';
+import { writeFileSync, existsSync, mkdirSync } from 'fs';
+
 import sinon from 'sinon';
 import glob from 'glob-all';
 import del from 'del';
-import Logger from '../lib/logger';
-import remove from './remove';
-import { join } from 'path';
-import { writeFileSync, existsSync, mkdirSync } from 'fs';
+
+import { Logger } from '../lib/logger';
+import { remove } from './remove';
 
 describe('kibana cli', function () {
   describe('plugin remover', function () {

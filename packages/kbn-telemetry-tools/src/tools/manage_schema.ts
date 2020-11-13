@@ -19,16 +19,11 @@
 
 import { ParsedUsageCollection } from './ts_parser';
 
-export type AllowedSchemaTypes =
-  | 'keyword'
-  | 'text'
-  | 'number'
-  | 'boolean'
-  | 'long'
-  | 'date'
-  | 'float';
+export type AllowedSchemaNumberTypes = 'long' | 'integer' | 'short' | 'byte' | 'double' | 'float';
 
-export function compatibleSchemaTypes(type: AllowedSchemaTypes) {
+export type AllowedSchemaTypes = AllowedSchemaNumberTypes | 'keyword' | 'text' | 'boolean' | 'date';
+
+export function compatibleSchemaTypes(type: AllowedSchemaTypes | 'array') {
   switch (type) {
     case 'keyword':
     case 'text':
@@ -36,10 +31,15 @@ export function compatibleSchemaTypes(type: AllowedSchemaTypes) {
       return 'string';
     case 'boolean':
       return 'boolean';
-    case 'number':
-    case 'float':
     case 'long':
+    case 'integer':
+    case 'short':
+    case 'byte':
+    case 'double':
+    case 'float':
       return 'number';
+    case 'array':
+      return 'array';
     default:
       throw new Error(`Unknown schema type ${type}`);
   }
@@ -66,10 +66,22 @@ export function isObjectMapping(entity: any) {
   return false;
 }
 
+function isArrayMapping(entity: any): entity is { type: 'array'; items: object } {
+  return typeof entity === 'object' && entity.type === 'array' && typeof entity.items === 'object';
+}
+
+function getValueMapping(value: any) {
+  return isObjectMapping(value) ? transformToEsMapping(value) : value;
+}
+
 function transformToEsMapping(usageMappingValue: any) {
   const fieldMapping: any = { properties: {} };
   for (const [key, value] of Object.entries(usageMappingValue)) {
-    fieldMapping.properties[key] = isObjectMapping(value) ? transformToEsMapping(value) : value;
+    if (isArrayMapping(value)) {
+      fieldMapping.properties[key] = { ...value, items: getValueMapping(value.items) };
+    } else {
+      fieldMapping.properties[key] = getValueMapping(value);
+    }
   }
   return fieldMapping;
 }

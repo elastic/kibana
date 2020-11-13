@@ -7,26 +7,32 @@
 import React from 'react';
 import { mount } from 'enzyme';
 
-import { AddComment } from '.';
+import { AddComment, AddCommentRefObject } from '.';
 import { TestProviders } from '../../../common/mock';
 import { getFormMock } from '../__mock__/form';
 import { Router, routeData, mockHistory, mockLocation } from '../__mock__/router';
 
+import { CommentRequest, CommentType } from '../../../../../case/common/api';
 import { useInsertTimeline } from '../../../timelines/components/timeline/insert_timeline_popover/use_insert_timeline';
 import { usePostComment } from '../../containers/use_post_comment';
 import { useForm } from '../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/hooks/use_form';
+import { useFormData } from '../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/hooks/use_form_data';
 
-// we don't have the types for waitFor just yet, so using "as waitFor" until when we do
-import { wait as waitFor } from '@testing-library/react';
+import { waitFor } from '@testing-library/react';
 
 jest.mock(
   '../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/hooks/use_form'
 );
 
+jest.mock(
+  '../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/hooks/use_form_data'
+);
+
 jest.mock('../../../timelines/components/timeline/insert_timeline_popover/use_insert_timeline');
 jest.mock('../../containers/use_post_comment');
 
-export const useFormMock = useForm as jest.Mock;
+const useFormMock = useForm as jest.Mock;
+const useFormDataMock = useFormData as jest.Mock;
 
 const useInsertTimelineMock = useInsertTimeline as jest.Mock;
 const usePostCommentMock = usePostComment as jest.Mock;
@@ -60,9 +66,12 @@ const defaultPostCommment = {
   isError: false,
   postComment,
 };
-const sampleData = {
+
+const sampleData: CommentRequest = {
   comment: 'what a cool comment',
+  type: CommentType.user,
 };
+
 describe('AddComment ', () => {
   const formHookMock = getFormMock(sampleData);
 
@@ -71,6 +80,7 @@ describe('AddComment ', () => {
     useInsertTimelineMock.mockImplementation(() => defaultInsertTimeline);
     usePostCommentMock.mockImplementation(() => defaultPostCommment);
     useFormMock.mockImplementation(() => ({ form: formHookMock }));
+    useFormDataMock.mockImplementation(() => [{ comment: sampleData.comment }]);
     jest.spyOn(routeData, 'useLocation').mockReturnValue(mockLocation);
   });
 
@@ -122,16 +132,18 @@ describe('AddComment ', () => {
     ).toBeTruthy();
   });
 
-  it('should insert a quote if one is available', () => {
+  it('should insert a quote', () => {
     const sampleQuote = 'what a cool quote';
+    const ref = React.createRef<AddCommentRefObject>();
     mount(
       <TestProviders>
         <Router history={mockHistory}>
-          <AddComment {...{ ...addCommentProps, insertQuote: sampleQuote }} />
+          <AddComment {...{ ...addCommentProps }} ref={ref} />
         </Router>
       </TestProviders>
     );
 
+    ref.current!.addQuote(sampleQuote);
     expect(formHookMock.setFieldValue).toBeCalledWith(
       'comment',
       `${sampleData.comment}\n\n${sampleQuote}`

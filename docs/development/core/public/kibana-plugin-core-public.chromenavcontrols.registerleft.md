@@ -4,7 +4,7 @@
 
 ## ChromeNavControls.registerLeft() method
 
-Register a nav control to be presented on the left side of the chrome header.
+Register a nav control to be presented on the bottom-left side of the chrome header.
 
 <b>Signature:</b>
 

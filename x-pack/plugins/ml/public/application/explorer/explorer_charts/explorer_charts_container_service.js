@@ -11,10 +11,11 @@
  * and manages the layout of the charts in the containing div.
  */
 
-import _ from 'lodash';
+import { get, each, find, sortBy, map, reduce } from 'lodash';
 
 import { buildConfig } from './explorer_chart_config_builder';
 import { chartLimits, getChartType } from '../../util/chart_utils';
+import { getTimefilter } from '../../util/dependency_cache';
 
 import { getEntityFieldList } from '../../../../common/util/anomaly_utils';
 import {
@@ -45,13 +46,11 @@ const ML_TIME_FIELD_NAME = 'timestamp';
 const USE_OVERALL_CHART_LIMITS = false;
 const MAX_CHARTS_PER_ROW = 4;
 
-// callback(getDefaultChartsData());
-
 export const anomalyDataChange = function (
   chartsContainerWidth,
   anomalyRecords,
-  earliestMs,
-  latestMs,
+  selectedEarliestMs,
+  selectedLatestMs,
   severity = 0
 ) {
   const data = getDefaultChartsData();
@@ -83,8 +82,8 @@ export const anomalyDataChange = function (
   const chartWidth = Math.floor(chartsContainerWidth / chartsPerRow);
   const { chartRange, tooManyBuckets } = calculateChartRange(
     seriesConfigs,
-    earliestMs,
-    latestMs,
+    selectedEarliestMs,
+    selectedLatestMs,
     chartWidth,
     recordsToPlot,
     data.timeFieldName
@@ -106,33 +105,33 @@ export const anomalyDataChange = function (
 
   // Query 1 - load the raw metric data.
   function getMetricData(config, range) {
-    const { jobId, detectorIndex, entityFields, interval } = config;
+    const { jobId, detectorIndex, entityFields, bucketSpanSeconds } = config;
 
     const job = mlJobService.getJob(jobId);
 
     // If source data can be plotted, use that, otherwise model plot will be available.
     const useSourceData = isSourceDataChartableForDetector(job, detectorIndex);
     if (useSourceData === true) {
-      const datafeedQuery = _.get(config, 'datafeedConfig.query', null);
+      const datafeedQuery = get(config, 'datafeedConfig.query', null);
       return mlResultsService
         .getMetricData(
           config.datafeedConfig.indices,
-          config.entityFields,
+          entityFields,
           datafeedQuery,
           config.metricFunction,
           config.metricFieldName,
           config.timeField,
           range.min,
           range.max,
-          config.interval
+          bucketSpanSeconds * 1000
         )
         .toPromise();
     } else {
       // Extract the partition, by, over fields on which to filter.
       const criteriaFields = [];
       const detector = job.analysis_config.detectors[detectorIndex];
-      if (_.has(detector, 'partition_field_name')) {
-        const partitionEntity = _.find(entityFields, {
+      if (detector.partition_field_name !== undefined) {
+        const partitionEntity = find(entityFields, {
           fieldName: detector.partition_field_name,
         });
         if (partitionEntity !== undefined) {
@@ -143,8 +142,8 @@ export const anomalyDataChange = function (
         }
       }
 
-      if (_.has(detector, 'over_field_name')) {
-        const overEntity = _.find(entityFields, { fieldName: detector.over_field_name });
+      if (detector.over_field_name !== undefined) {
+        const overEntity = find(entityFields, { fieldName: detector.over_field_name });
         if (overEntity !== undefined) {
           criteriaFields.push(
             { fieldName: 'over_field_name', fieldValue: overEntity.fieldName },
@@ -153,8 +152,8 @@ export const anomalyDataChange = function (
         }
       }
 
-      if (_.has(detector, 'by_field_name')) {
-        const byEntity = _.find(entityFields, { fieldName: detector.by_field_name });
+      if (detector.by_field_name !== undefined) {
+        const byEntity = find(entityFields, { fieldName: detector.by_field_name });
         if (byEntity !== undefined) {
           criteriaFields.push(
             { fieldName: 'by_field_name', fieldValue: byEntity.fieldName },
@@ -170,7 +169,14 @@ export const anomalyDataChange = function (
         };
 
         return mlResultsService
-          .getModelPlotOutput(jobId, detectorIndex, criteriaFields, range.min, range.max, interval)
+          .getModelPlotOutput(
+            jobId,
+            detectorIndex,
+            criteriaFields,
+            range.min,
+            range.max,
+            bucketSpanSeconds * 1000
+          )
           .toPromise()
           .then((resp) => {
             // Return data in format required by the explorer charts.
@@ -213,7 +219,7 @@ export const anomalyDataChange = function (
         [config.jobId],
         range.min,
         range.max,
-        config.interval,
+        config.bucketSpanSeconds * 1000,
         1,
         MAX_SCHEDULED_EVENTS
       )
@@ -236,7 +242,7 @@ export const anomalyDataChange = function (
       filterField = config.entityFields.find((f) => f.fieldType === 'partition');
     }
 
-    const datafeedQuery = _.get(config, 'datafeedConfig.query', null);
+    const datafeedQuery = get(config, 'datafeedConfig.query', null);
     return mlResultsService.getEventDistributionData(
       config.datafeedConfig.indices,
       splitField,
@@ -247,7 +253,7 @@ export const anomalyDataChange = function (
       config.timeField,
       range.min,
       range.max,
-      config.interval
+      config.bucketSpanSeconds * 1000
     );
   }
 
@@ -285,7 +291,7 @@ export const anomalyDataChange = function (
       if (eventDistribution.length > 0 && records.length > 0) {
         const filterField = records[0].by_field_value || records[0].over_field_value;
         chartData = eventDistribution.filter((d) => d.entity !== filterField);
-        _.map(metricData, (value, time) => {
+        map(metricData, (value, time) => {
           // The filtering for rare/event_distribution charts needs to be handled
           // differently because of how the source data is structured.
           // For rare chart values we are only interested wether a value is either `0` or not,
@@ -304,7 +310,7 @@ export const anomalyDataChange = function (
           }
         });
       } else {
-        chartData = _.map(metricData, (value, time) => ({
+        chartData = map(metricData, (value, time) => ({
           date: +time,
           value: value,
         }));
@@ -314,7 +320,7 @@ export const anomalyDataChange = function (
     // Iterate through the anomaly records, adding anomalyScore properties
     // to the chartData entries for anomalous buckets.
     const chartDataForPointSearch = getChartDataForPointSearch(chartData, records[0], chartType);
-    _.each(records, (record) => {
+    each(records, (record) => {
       // Look for a chart point with the same time as the record.
       // If none found, insert a point for anomalies due to a gap in the data.
       const recordTime = record[ML_TIME_FIELD_NAME];
@@ -330,13 +336,13 @@ export const anomalyDataChange = function (
         chartPoint.actual = record.actual;
         chartPoint.typical = record.typical;
       } else {
-        const causes = _.get(record, 'causes', []);
+        const causes = get(record, 'causes', []);
         if (causes.length > 0) {
           chartPoint.byFieldName = record.by_field_name;
           chartPoint.numberOfCauses = causes.length;
           if (causes.length === 1) {
             // If only a single cause, copy actual and typical values to the top level.
-            const cause = _.first(record.causes);
+            const cause = record.causes[0];
             chartPoint.actual = cause.actual;
             chartPoint.typical = cause.typical;
           }
@@ -351,7 +357,7 @@ export const anomalyDataChange = function (
     // Add a scheduledEvents property to any points in the chart data set
     // which correspond to times of scheduled events for the job.
     if (scheduledEvents !== undefined) {
-      _.each(scheduledEvents, (events, time) => {
+      each(scheduledEvents, (events, time) => {
         const chartPoint = findChartPointForTime(chartDataForPointSearch, Number(time));
         if (chartPoint !== undefined) {
           // Note if the scheduled event coincides with an absence of the underlying metric data,
@@ -385,10 +391,10 @@ export const anomalyDataChange = function (
     .then((response) => {
       // calculate an overall min/max for all series
       const processedData = response.map(processChartData);
-      const allDataPoints = _.reduce(
+      const allDataPoints = reduce(
         processedData,
         (datapoints, series) => {
-          _.each(series, (d) => datapoints.push(d));
+          each(series, (d) => datapoints.push(d));
           return datapoints;
         },
         []
@@ -401,8 +407,8 @@ export const anomalyDataChange = function (
         chartData: processedData[i],
         plotEarliest: chartRange.min,
         plotLatest: chartRange.max,
-        selectedEarliest: earliestMs,
-        selectedLatest: latestMs,
+        selectedEarliest: selectedEarliestMs,
+        selectedLatest: selectedLatestMs,
         chartLimits: USE_OVERALL_CHART_LIMITS ? overallChartLimits : chartLimits(processedData[i]),
       }));
       explorerService.setCharts({ ...data });
@@ -420,7 +426,7 @@ function processRecordsForDisplay(anomalyRecords) {
 
   // Aggregate by job, detector, and analysis fields (partition, by, over).
   const aggregatedData = {};
-  _.each(anomalyRecords, (record) => {
+  each(anomalyRecords, (record) => {
     // Check if we can plot a chart for this record, depending on whether the source data
     // is chartable, and if model plot is enabled for the job.
     const job = mlJobService.getJob(record.job_id);
@@ -524,20 +530,20 @@ function processRecordsForDisplay(anomalyRecords) {
 
   let recordsForSeries = [];
   // Convert to an array of the records with the highest record_score per unique series.
-  _.each(aggregatedData, (detectorsForJob) => {
-    _.each(detectorsForJob, (groupsForDetector) => {
+  each(aggregatedData, (detectorsForJob) => {
+    each(detectorsForJob, (groupsForDetector) => {
       if (groupsForDetector.maxScoreRecord !== undefined) {
         // Detector with no partition / by field.
         recordsForSeries.push(groupsForDetector.maxScoreRecord);
       } else {
-        _.each(groupsForDetector, (valuesForGroup) => {
-          _.each(valuesForGroup, (dataForGroupValue) => {
+        each(groupsForDetector, (valuesForGroup) => {
+          each(valuesForGroup, (dataForGroupValue) => {
             if (dataForGroupValue.maxScoreRecord !== undefined) {
               recordsForSeries.push(dataForGroupValue.maxScoreRecord);
             } else {
               // Second level of aggregation for partition and by/over.
-              _.each(dataForGroupValue, (splitsForGroup) => {
-                _.each(splitsForGroup, (dataForSplitValue) => {
+              each(dataForGroupValue, (splitsForGroup) => {
+                each(splitsForGroup, (dataForSplitValue) => {
                   recordsForSeries.push(dataForSplitValue.maxScoreRecord);
                 });
               });
@@ -547,15 +553,15 @@ function processRecordsForDisplay(anomalyRecords) {
       }
     });
   });
-  recordsForSeries = _.sortBy(recordsForSeries, 'record_score').reverse();
+  recordsForSeries = sortBy(recordsForSeries, 'record_score').reverse();
 
   return recordsForSeries;
 }
 
 function calculateChartRange(
   seriesConfigs,
-  earliestMs,
-  latestMs,
+  selectedEarliestMs,
+  selectedLatestMs,
   chartWidth,
   recordsToPlot,
   timeFieldName
@@ -563,10 +569,15 @@ function calculateChartRange(
   let tooManyBuckets = false;
   // Calculate the time range for the charts.
   // Fit in as many points in the available container width plotted at the job bucket span.
-  const midpointMs = Math.ceil((earliestMs + latestMs) / 2);
-  const maxBucketSpanMs = Math.max.apply(null, _.map(seriesConfigs, 'bucketSpanSeconds')) * 1000;
+  // Look for the chart with the shortest bucket span as this determines
+  // the length of the time range that can be plotted.
+  const midpointMs = Math.ceil((selectedEarliestMs + selectedLatestMs) / 2);
+  const minBucketSpanMs = Math.min.apply(null, map(seriesConfigs, 'bucketSpanSeconds')) * 1000;
+  const maxBucketSpanMs = Math.max.apply(null, map(seriesConfigs, 'bucketSpanSeconds')) * 1000;
 
-  const pointsToPlotFullSelection = Math.ceil((latestMs - earliestMs) / maxBucketSpanMs);
+  const pointsToPlotFullSelection = Math.ceil(
+    (selectedLatestMs - selectedEarliestMs) / minBucketSpanMs
+  );
 
   // Optimally space points 5px apart.
   const optimumPointSpacing = 5;
@@ -576,19 +587,22 @@ function calculateChartRange(
   // at optimal point spacing.
   const plotPoints = Math.max(optimumNumPoints, pointsToPlotFullSelection);
   const halfPoints = Math.ceil(plotPoints / 2);
+  const timefilter = getTimefilter();
+  const bounds = timefilter.getActiveBounds();
+  const boundsMin = bounds.min.valueOf();
+
   let chartRange = {
-    min: midpointMs - halfPoints * maxBucketSpanMs,
-    max: midpointMs + halfPoints * maxBucketSpanMs,
+    min: Math.max(midpointMs - halfPoints * minBucketSpanMs, boundsMin),
+    max: Math.min(midpointMs + halfPoints * minBucketSpanMs, bounds.max.valueOf()),
   };
 
   if (plotPoints > CHART_MAX_POINTS) {
-    tooManyBuckets = true;
     // For each series being plotted, display the record with the highest score if possible.
-    const maxTimeSpan = maxBucketSpanMs * CHART_MAX_POINTS;
+    const maxTimeSpan = minBucketSpanMs * CHART_MAX_POINTS;
     let minMs = recordsToPlot[0][timeFieldName];
     let maxMs = recordsToPlot[0][timeFieldName];
 
-    _.each(recordsToPlot, (record) => {
+    each(recordsToPlot, (record) => {
       const diffMs = maxMs - minMs;
       if (diffMs < maxTimeSpan) {
         const recordTime = record[timeFieldName];
@@ -607,12 +621,31 @@ function calculateChartRange(
     });
 
     if (maxMs - minMs < maxTimeSpan) {
-      // Expand out to cover as much as the requested time span as possible.
-      minMs = Math.max(earliestMs, minMs - maxTimeSpan);
-      maxMs = Math.min(latestMs, maxMs + maxTimeSpan);
+      // Expand out before and after the span with the highest scoring anomalies,
+      // covering as much as the requested time span as possible.
+      // Work out if the high scoring region is nearer the start or end of the selected time span.
+      const diff = maxTimeSpan - (maxMs - minMs);
+      if (minMs - 0.5 * diff <= selectedEarliestMs) {
+        minMs = Math.max(selectedEarliestMs, minMs - 0.5 * diff);
+        maxMs = minMs + maxTimeSpan;
+      } else {
+        maxMs = Math.min(selectedLatestMs, maxMs + 0.5 * diff);
+        minMs = maxMs - maxTimeSpan;
+      }
     }
 
     chartRange = { min: minMs, max: maxMs };
+  }
+
+  // Elasticsearch aggregation returns points at start of bucket,
+  // so align the min to the length of the longest bucket.
+  chartRange.min = Math.floor(chartRange.min / maxBucketSpanMs) * maxBucketSpanMs;
+  if (chartRange.min < boundsMin) {
+    chartRange.min = chartRange.min + maxBucketSpanMs;
+  }
+
+  if (chartRange.min > selectedEarliestMs || chartRange.max < selectedLatestMs) {
+    tooManyBuckets = true;
   }
 
   return {

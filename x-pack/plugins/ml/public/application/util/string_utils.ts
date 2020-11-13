@@ -7,7 +7,6 @@
 /*
  * Contains utility functions for performing operations on Strings.
  */
-import _ from 'lodash';
 import d3 from 'd3';
 import he from 'he';
 
@@ -28,7 +27,8 @@ export function replaceStringTokens(
 ) {
   return String(str).replace(/\$([^?&$\'"]+)\$/g, (match, name) => {
     // Use lodash get to allow nested JSON fields to be retrieved.
-    let tokenValue = _.get(valuesByTokenName, name, null);
+    let tokenValue =
+      valuesByTokenName && valuesByTokenName[name] !== undefined ? valuesByTokenName[name] : null;
     if (encodeForURI === true && tokenValue !== null) {
       tokenValue = encodeURIComponent(tokenValue);
     }

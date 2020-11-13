@@ -5,12 +5,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { IndexPatternField } from './types';
 
 /**
  * This is a special-case field which allows us to perform
  * document-level operations such as count.
  */
-export const documentField = {
+export const documentField: IndexPatternField = {
+  displayName: i18n.translate('xpack.lens.indexPattern.records', {
+    defaultMessage: 'Records',
+  }),
   name: i18n.translate('xpack.lens.indexPattern.records', {
     defaultMessage: 'Records',
   }),

@@ -19,7 +19,7 @@ class ProtectedApplications {
     if (this.applications == null) {
       this.applications = new Set(
         this.featuresService
-          .getFeatures()
+          .getKibanaFeatures()
           .map((feature) => feature.app)
           .flat()
       );
@@ -63,7 +63,7 @@ export function initAppAuthorization(
 
     const checkPrivileges = checkPrivilegesDynamicallyWithRequest(request);
     const appAction = actions.app.get(appId);
-    const checkPrivilegesResponse = await checkPrivileges(appAction);
+    const checkPrivilegesResponse = await checkPrivileges({ kibana: appAction });
 
     logger.debug(`authorizing access to "${appId}"`);
     // we've actually authorized the request
@@ -73,6 +73,6 @@ export function initAppAuthorization(
     }
 
     logger.debug(`not authorized for "${appId}"`);
-    return response.notFound();
+    return response.forbidden();
   });
 }

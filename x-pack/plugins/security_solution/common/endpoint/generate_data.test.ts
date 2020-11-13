@@ -13,6 +13,12 @@ import {
   ECSCategory,
   ANCESTRY_LIMIT,
 } from './generate_data';
+import { firstNonNullValue, values } from './models/ecs_safety_helpers';
+import {
+  entityIDSafeVersion,
+  parentEntityIDSafeVersion,
+  timestampSafeVersion,
+} from './models/event';
 
 interface Node {
   events: Event[];
@@ -20,10 +26,64 @@ interface Node {
   parent_entity_id?: string;
 }
 
+describe('data generator data streams', () => {
+  // these tests cast the result of the generate methods so that we can specifically compare the `data_stream` fields
+  it('creates a generator with default data streams', () => {
+    const generator = new EndpointDocGenerator('seed');
+    expect(generator.generateHostMetadata().data_stream).toEqual({
+      type: 'metrics',
+      dataset: 'endpoint.metadata',
+      namespace: 'default',
+    });
+    expect(generator.generatePolicyResponse().data_stream).toEqual({
+      type: 'metrics',
+      dataset: 'endpoint.policy',
+      namespace: 'default',
+    });
+    expect(generator.generateEvent().data_stream).toEqual({
+      type: 'logs',
+      dataset: 'endpoint.events.process',
+      namespace: 'default',
+    });
+    expect(generator.generateAlert().data_stream).toEqual({
+      type: 'logs',
+      dataset: 'endpoint.alerts',
+      namespace: 'default',
+    });
+  });
+
+  it('creates a generator with custom data streams', () => {
+    const metadataDataStream = { type: 'meta', dataset: 'dataset', namespace: 'name' };
+    const policyDataStream = { type: 'policy', dataset: 'fake', namespace: 'something' };
+    const eventsDataStream = { type: 'events', dataset: 'events stuff', namespace: 'name' };
+    const alertsDataStream = { type: 'alerts', dataset: 'alerts stuff', namespace: 'name' };
+    const generator = new EndpointDocGenerator('seed');
+    expect(generator.generateHostMetadata(0, metadataDataStream).data_stream).toStrictEqual(
+      metadataDataStream
+    );
+    expect(generator.generatePolicyResponse({ policyDataStream }).data_stream).toStrictEqual(
+      policyDataStream
+    );
+    expect(generator.generateEvent({ eventsDataStream }).data_stream).toStrictEqual(
+      eventsDataStream
+    );
+    expect(generator.generateAlert({ alertsDataStream }).data_stream).toStrictEqual(
+      alertsDataStream
+    );
+  });
+});
+
 describe('data generator', () => {
   let generator: EndpointDocGenerator;
   beforeEach(() => {
     generator = new EndpointDocGenerator('seed');
+  });
+
+  it('creates events with a numerically increasing sequence value', () => {
+    const event1 = generator.generateEvent();
+    const event2 = generator.generateEvent();
+
+    expect(event2.event?.sequence).toBe((firstNonNullValue(event1.event?.sequence) ?? 0) + 1);
   });
 
   it('creates the same documents with same random seed', () => {
@@ -56,7 +116,7 @@ describe('data generator', () => {
 
   it('creates policy response documents', () => {
     const timestamp = new Date().getTime();
-    const hostPolicyResponse = generator.generatePolicyResponse(timestamp);
+    const hostPolicyResponse = generator.generatePolicyResponse({ ts: timestamp });
     expect(hostPolicyResponse['@timestamp']).toEqual(timestamp);
     expect(hostPolicyResponse.event.created).toEqual(timestamp);
     expect(hostPolicyResponse.Endpoint).not.toBeNull();
@@ -67,39 +127,39 @@ describe('data generator', () => {
 
   it('creates alert event documents', () => {
     const timestamp = new Date().getTime();
-    const alert = generator.generateAlert(timestamp);
+    const alert = generator.generateAlert({ ts: timestamp });
     expect(alert['@timestamp']).toEqual(timestamp);
-    expect(alert.event.action).not.toBeNull();
+    expect(alert.event?.action).not.toBeNull();
     expect(alert.Endpoint).not.toBeNull();
     expect(alert.agent).not.toBeNull();
     expect(alert.host).not.toBeNull();
-    expect(alert.process.entity_id).not.toBeNull();
+    expect(alert.process?.entity_id).not.toBeNull();
   });
 
   it('creates process event documents', () => {
     const timestamp = new Date().getTime();
     const processEvent = generator.generateEvent({ timestamp });
     expect(processEvent['@timestamp']).toEqual(timestamp);
-    expect(processEvent.event.category).toEqual(['process']);
-    expect(processEvent.event.kind).toEqual('event');
-    expect(processEvent.event.type).toEqual(['start']);
+    expect(processEvent.event?.category).toEqual(['process']);
+    expect(processEvent.event?.kind).toEqual('event');
+    expect(processEvent.event?.type).toEqual(['start']);
     expect(processEvent.agent).not.toBeNull();
     expect(processEvent.host).not.toBeNull();
-    expect(processEvent.process.entity_id).not.toBeNull();
-    expect(processEvent.process.name).not.toBeNull();
+    expect(processEvent.process?.entity_id).not.toBeNull();
+    expect(processEvent.process?.name).not.toBeNull();
   });
 
   it('creates other event documents', () => {
     const timestamp = new Date().getTime();
     const processEvent = generator.generateEvent({ timestamp, eventCategory: 'dns' });
     expect(processEvent['@timestamp']).toEqual(timestamp);
-    expect(processEvent.event.category).toEqual('dns');
-    expect(processEvent.event.kind).toEqual('event');
-    expect(processEvent.event.type).toEqual(['start']);
+    expect(processEvent.event?.category).toEqual('dns');
+    expect(processEvent.event?.kind).toEqual('event');
+    expect(processEvent.event?.type).toEqual(['start']);
     expect(processEvent.agent).not.toBeNull();
     expect(processEvent.host).not.toBeNull();
-    expect(processEvent.process.entity_id).not.toBeNull();
-    expect(processEvent.process.name).not.toBeNull();
+    expect(processEvent.process?.entity_id).not.toBeNull();
+    expect(processEvent.process?.name).not.toBeNull();
   });
 
   describe('creates events with an empty ancestry array', () => {
@@ -121,7 +181,7 @@ describe('data generator', () => {
 
     it('creates all events with an empty ancestry array', () => {
       for (const event of tree.allEvents) {
-        expect(event.process.Ext!.ancestry!.length).toEqual(0);
+        expect(event.process?.Ext?.ancestry?.length).toEqual(0);
       }
     });
   });
@@ -162,6 +222,7 @@ describe('data generator', () => {
     const childrenPerNode = 3;
     const generations = 3;
     const relatedAlerts = 4;
+
     beforeEach(() => {
       tree = generator.generateTree({
         alwaysGenMaxChildrenPerNode: true,
@@ -175,6 +236,7 @@ describe('data generator', () => {
           { category: RelatedEventCategory.File, count: 2 },
           { category: RelatedEventCategory.Network, count: 1 },
         ],
+        relatedEventsOrdered: true,
         relatedAlerts,
         ancestryArraySize: ANCESTRY_LIMIT,
       });
@@ -185,28 +247,38 @@ describe('data generator', () => {
       const inRelated = node.relatedEvents.includes(event);
       const inRelatedAlerts = node.relatedAlerts.includes(event);
 
-      return (inRelated || inRelatedAlerts || inLifecycle) && event.process.entity_id === node.id;
+      return (inRelated || inRelatedAlerts || inLifecycle) && event.process?.entity_id === node.id;
     };
 
     const verifyAncestry = (event: Event, genTree: Tree) => {
-      if (event.process.Ext!.ancestry!.length > 0) {
-        expect(event.process.parent?.entity_id).toBe(event.process.Ext!.ancestry![0]);
+      const ancestry = values(event.process?.Ext?.ancestry);
+      if (ancestry.length > 0) {
+        expect(event.process?.parent?.entity_id).toBe(ancestry[0]);
       }
-      for (let i = 0; i < event.process.Ext!.ancestry!.length; i++) {
-        const ancestor = event.process.Ext!.ancestry![i];
+      for (let i = 0; i < ancestry.length; i++) {
+        const ancestor = ancestry[i];
         const parent = genTree.children.get(ancestor) || genTree.ancestry.get(ancestor);
-        expect(ancestor).toBe(parent?.lifecycle[0].process.entity_id);
+        expect(ancestor).toBe(parent?.lifecycle[0].process?.entity_id);
 
         // the next ancestor should be the grandparent
-        if (i + 1 < event.process.Ext!.ancestry!.length) {
-          const grandparent = event.process.Ext!.ancestry![i + 1];
-          expect(grandparent).toBe(parent?.lifecycle[0].process.parent?.entity_id);
+        if (i + 1 < ancestry.length) {
+          const grandparent = ancestry[i + 1];
+          expect(grandparent).toBe(parent?.lifecycle[0].process?.parent?.entity_id);
         }
       }
     };
 
+    it('creates related events in ascending order', () => {
+      // the order should not change since it should already be in ascending order
+      const relatedEventsAsc = _.cloneDeep(tree.origin.relatedEvents).sort(
+        (event1, event2) =>
+          (timestampSafeVersion(event1) ?? 0) - (timestampSafeVersion(event2) ?? 0)
+      );
+      expect(tree.origin.relatedEvents).toStrictEqual(relatedEventsAsc);
+    });
+
     it('has ancestry array defined', () => {
-      expect(tree.origin.lifecycle[0].process.Ext!.ancestry!.length).toBe(ANCESTRY_LIMIT);
+      expect(values(tree.origin.lifecycle[0].process?.Ext?.ancestry).length).toBe(ANCESTRY_LIMIT);
       for (const event of tree.allEvents) {
         verifyAncestry(event, tree);
       }
@@ -235,12 +307,9 @@ describe('data generator', () => {
 
         const counts: Record<string, number> = {};
         for (const event of node.relatedEvents) {
-          if (Array.isArray(event.event.category)) {
-            for (const cat of event.event.category) {
-              counts[cat] = counts[cat] + 1 || 1;
-            }
-          } else {
-            counts[event.event.category] = counts[event.event.category] + 1 || 1;
+          const categories = values(event.event?.category);
+          for (const cat of categories) {
+            counts[cat] = counts[cat] + 1 || 1;
           }
         }
         expect(counts[ECSCategory.Driver]).toEqual(1);
@@ -299,15 +368,18 @@ describe('data generator', () => {
       expect(tree.allEvents.length).toBeGreaterThan(0);
 
       tree.allEvents.forEach((event) => {
-        const ancestor = tree.ancestry.get(event.process.entity_id);
-        if (ancestor) {
-          expect(eventInNode(event, ancestor)).toBeTruthy();
-          return;
-        }
+        const entityID = entityIDSafeVersion(event);
+        if (entityID) {
+          const ancestor = tree.ancestry.get(entityID);
+          if (ancestor) {
+            expect(eventInNode(event, ancestor)).toBeTruthy();
+            return;
+          }
 
-        const children = tree.children.get(event.process.entity_id);
-        if (children) {
-          expect(eventInNode(event, children)).toBeTruthy();
+          const children = tree.children.get(entityID);
+          if (children) {
+            expect(eventInNode(event, children)).toBeTruthy();
+          }
         }
       });
     });
@@ -334,9 +406,8 @@ describe('data generator', () => {
     let events: Event[];
 
     const isCategoryProcess = (event: Event) => {
-      return (
-        _.isEqual(event.event.category, ['process']) || _.isEqual(event.event.category, 'process')
-      );
+      const category = values(event.event?.category);
+      return _.isEqual(category, ['process']);
     };
 
     beforeEach(() => {
@@ -349,12 +420,16 @@ describe('data generator', () => {
 
     it('with n-1 process events', () => {
       for (let i = events.length - 2; i > 0; ) {
-        const parentEntityIdOfChild = events[i].process.parent?.entity_id;
-        for (; --i >= -1 && (events[i].event.kind !== 'event' || !isCategoryProcess(events[i])); ) {
+        const parentEntityIdOfChild = parentEntityIDSafeVersion(events[i]);
+        for (
+          ;
+          --i >= -1 && (events[i].event?.kind !== 'event' || !isCategoryProcess(events[i]));
+
+        ) {
           // related event - skip it
         }
         expect(i).toBeGreaterThanOrEqual(0);
-        expect(parentEntityIdOfChild).toEqual(events[i].process.entity_id);
+        expect(parentEntityIdOfChild).toEqual(entityIDSafeVersion(events[i]));
       }
     });
 
@@ -363,7 +438,7 @@ describe('data generator', () => {
       for (
         ;
         previousProcessEventIndex >= -1 &&
-        (events[previousProcessEventIndex].event.kind !== 'event' ||
+        (events[previousProcessEventIndex].event?.kind !== 'event' ||
           !isCategoryProcess(events[previousProcessEventIndex]));
         previousProcessEventIndex--
       ) {
@@ -371,14 +446,14 @@ describe('data generator', () => {
       }
       expect(previousProcessEventIndex).toBeGreaterThanOrEqual(0);
       // The alert should be last and have the same entity_id as the previous process event
-      expect(events[events.length - 1].process.entity_id).toEqual(
-        events[previousProcessEventIndex].process.entity_id
+      expect(events[events.length - 1].process?.entity_id).toEqual(
+        events[previousProcessEventIndex].process?.entity_id
       );
-      expect(events[events.length - 1].process.parent?.entity_id).toEqual(
-        events[previousProcessEventIndex].process.parent?.entity_id
+      expect(events[events.length - 1].process?.parent?.entity_id).toEqual(
+        events[previousProcessEventIndex].process?.parent?.entity_id
       );
-      expect(events[events.length - 1].event.kind).toEqual('alert');
-      expect(events[events.length - 1].event.category).toEqual('malware');
+      expect(events[events.length - 1].event?.kind).toEqual('alert');
+      expect(events[events.length - 1].event?.category).toEqual('malware');
     });
   });
 
@@ -386,14 +461,17 @@ describe('data generator', () => {
     // First pass we gather up all the events by entity_id
     const tree: Record<string, Node> = {};
     events.forEach((event) => {
-      if (event.process.entity_id in tree) {
-        tree[event.process.entity_id].events.push(event);
-      } else {
-        tree[event.process.entity_id] = {
-          events: [event],
-          children: [],
-          parent_entity_id: event.process.parent?.entity_id,
-        };
+      const entityID = entityIDSafeVersion(event);
+      if (entityID) {
+        if (entityID in tree) {
+          tree[entityID].events.push(event);
+        } else {
+          tree[entityID] = {
+            events: [event],
+            children: [],
+            parent_entity_id: parentEntityIDSafeVersion(event),
+          };
+        }
       }
     });
     // Second pass add child references to each node
@@ -402,8 +480,14 @@ describe('data generator', () => {
         tree[value.parent_entity_id].children.push(value);
       }
     }
+
+    const entityID = entityIDSafeVersion(events[0]);
+    if (!entityID) {
+      throw new Error('entity id was invalid');
+    }
+
     // The root node must be first in the array or this fails
-    return tree[events[0].process.entity_id];
+    return tree[entityID];
   }
 
   function countResolverEvents(rootNode: Node, generations: number): number {

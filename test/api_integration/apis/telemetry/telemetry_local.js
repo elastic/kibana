@@ -38,8 +38,12 @@ function flatKeys(source) {
 export default function ({ getService }) {
   const supertest = getService('supertest');
   const es = getService('es');
+  const esArchiver = getService('esArchiver');
 
   describe('/api/telemetry/v2/clusters/_stats', () => {
+    before('make sure there are some saved objects', () => esArchiver.load('saved_objects/basic'));
+    after('cleanup saved objects changes', () => esArchiver.unload('saved_objects/basic'));
+
     before('create some telemetry-data tracked indices', async () => {
       return es.indices.create({ index: 'filebeat-telemetry_tests_logs' });
     });
@@ -49,15 +53,12 @@ export default function ({ getService }) {
     });
 
     it('should pull local stats and validate data types', async () => {
-      const timeRange = {
-        min: '2018-07-23T22:07:00Z',
-        max: '2018-07-23T22:13:00Z',
-      };
+      const timestamp = '2018-07-23T22:13:00Z';
 
       const { body } = await supertest
         .post('/api/telemetry/v2/clusters/_stats')
         .set('kbn-xsrf', 'xxx')
-        .send({ timeRange, unencrypted: true })
+        .send({ timestamp, unencrypted: true })
         .expect(200);
 
       expect(body.length).to.be(1);
@@ -90,19 +91,16 @@ export default function ({ getService }) {
       expect(stats.stack_stats.data[0].index_count).to.be(1);
       expect(stats.stack_stats.data[0].doc_count).to.be(0);
       expect(stats.stack_stats.data[0].ecs_index_count).to.be(0);
-      expect(stats.stack_stats.data[0].size_in_bytes).to.be.greaterThan(0);
+      expect(stats.stack_stats.data[0].size_in_bytes).to.be.a('number');
     });
 
     it('should pull local stats and validate fields', async () => {
-      const timeRange = {
-        min: '2018-07-23T22:07:00Z',
-        max: '2018-07-23T22:13:00Z',
-      };
+      const timestamp = '2018-07-23T22:13:00Z';
 
       const { body } = await supertest
         .post('/api/telemetry/v2/clusters/_stats')
         .set('kbn-xsrf', 'xxx')
-        .send({ timeRange, unencrypted: true })
+        .send({ timestamp, unencrypted: true })
         .expect(200);
 
       const stats = body[0];
@@ -149,6 +147,111 @@ export default function ({ getService }) {
       ];
 
       expect(expected.every((m) => actual.includes(m))).to.be.ok();
+    });
+
+    describe('application usage limits', () => {
+      const timestamp = '2018-07-23T22:13:00Z';
+
+      function createSavedObject() {
+        return supertest
+          .post('/api/saved_objects/application_usage_transactional')
+          .send({
+            attributes: {
+              appId: 'test-app',
+              minutesOnScreen: 10.99,
+              numberOfClicks: 10,
+              timestamp: new Date().toISOString(),
+            },
+          })
+          .expect(200)
+          .then((resp) => resp.body.id);
+      }
+
+      describe('basic behaviour', () => {
+        let savedObjectId;
+        before('create 1 entry', async () => {
+          return createSavedObject().then((id) => (savedObjectId = id));
+        });
+        after('cleanup', () => {
+          return supertest
+            .delete(`/api/saved_objects/application_usage_transactional/${savedObjectId}`)
+            .expect(200);
+        });
+
+        it('should return application_usage data', async () => {
+          const { body } = await supertest
+            .post('/api/telemetry/v2/clusters/_stats')
+            .set('kbn-xsrf', 'xxx')
+            .send({ timestamp, unencrypted: true })
+            .expect(200);
+
+          expect(body.length).to.be(1);
+          const stats = body[0];
+          expect(stats.stack_stats.kibana.plugins.application_usage).to.eql({
+            'test-app': {
+              clicks_total: 10,
+              clicks_7_days: 10,
+              clicks_30_days: 10,
+              clicks_90_days: 10,
+              minutes_on_screen_total: 10.99,
+              minutes_on_screen_7_days: 10.99,
+              minutes_on_screen_30_days: 10.99,
+              minutes_on_screen_90_days: 10.99,
+            },
+          });
+        });
+      });
+
+      describe('10k + 1', () => {
+        const savedObjectIds = [];
+        before('create 10k + 1 entries for application usage', async () => {
+          await supertest
+            .post('/api/saved_objects/_bulk_create')
+            .send(
+              new Array(10001).fill(0).map(() => ({
+                type: 'application_usage_transactional',
+                attributes: {
+                  appId: 'test-app',
+                  minutesOnScreen: 1,
+                  numberOfClicks: 1,
+                  timestamp: new Date().toISOString(),
+                },
+              }))
+            )
+            .expect(200)
+            .then((resp) => resp.body.saved_objects.forEach(({ id }) => savedObjectIds.push(id)));
+        });
+        after('clean them all', async () => {
+          // The SavedObjects API does not allow bulk deleting, and deleting one by one takes ages and the tests timeout
+          await es.deleteByQuery({
+            index: '.kibana',
+            body: { query: { term: { type: 'application_usage_transactional' } } },
+          });
+        });
+
+        it("should only use the first 10k docs for the application_usage data (they'll be rolled up in a later process)", async () => {
+          const { body } = await supertest
+            .post('/api/telemetry/v2/clusters/_stats')
+            .set('kbn-xsrf', 'xxx')
+            .send({ timestamp, unencrypted: true })
+            .expect(200);
+
+          expect(body.length).to.be(1);
+          const stats = body[0];
+          expect(stats.stack_stats.kibana.plugins.application_usage).to.eql({
+            'test-app': {
+              clicks_total: 10000,
+              clicks_7_days: 10000,
+              clicks_30_days: 10000,
+              clicks_90_days: 10000,
+              minutes_on_screen_total: 10000,
+              minutes_on_screen_7_days: 10000,
+              minutes_on_screen_30_days: 10000,
+              minutes_on_screen_90_days: 10000,
+            },
+          });
+        });
+      });
     });
   });
 }

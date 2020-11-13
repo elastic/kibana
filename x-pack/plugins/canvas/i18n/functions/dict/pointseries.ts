@@ -35,10 +35,10 @@ export const help: FunctionHelp<FunctionFactory<typeof pointseries>> = {
       defaultMessage: 'The text to show on the mark. Only applicable to supported elements.',
     }),
     x: i18n.translate('xpack.canvas.functions.pointseries.args.xHelpText', {
-      defaultMessage: 'The values along the x-axis.',
+      defaultMessage: 'The values along the X-axis.',
     }),
     y: i18n.translate('xpack.canvas.functions.pointseries.args.yHelpText', {
-      defaultMessage: 'The values along the y-axis.',
+      defaultMessage: 'The values along the Y-axis.',
     }),
   },
 };

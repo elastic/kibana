@@ -4,11 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { PIVOT_SUPPORTED_AGGS } from '../../../common/types/pivot_aggs';
+
 import {
-  getPreviewRequestBody,
+  getPreviewTransformRequestBody,
   PivotAggsConfig,
   PivotGroupByConfig,
-  PIVOT_SUPPORTED_AGGS,
   PIVOT_SUPPORTED_GROUP_BY_AGGS,
   SimpleQuery,
 } from '../common';
@@ -35,7 +36,12 @@ describe('Transform: Data Grid', () => {
       aggName: 'the-agg-agg-name',
       dropDownName: 'the-agg-drop-down-name',
     };
-    const request = getPreviewRequestBody('the-index-pattern-title', query, [groupBy], [agg]);
+    const request = getPreviewTransformRequestBody(
+      'the-index-pattern-title',
+      query,
+      [groupBy],
+      [agg]
+    );
     const pivotPreviewDevConsoleStatement = getPivotPreviewDevConsoleStatement(request);
 
     expect(pivotPreviewDevConsoleStatement).toBe(`POST _transform/_preview

@@ -24,10 +24,10 @@ import {
 
 import { BehaviorSubject } from 'rxjs';
 
+import { REPO_ROOT } from '@kbn/dev-utils';
 import { Env } from '../config';
-import { getEnvOptions } from '../config/__mocks__/env';
+import { configServiceMock, getEnvOptions } from '../config/mocks';
 import { CoreContext } from '../core_context';
-import { configServiceMock } from '../config/config_service.mock';
 import { loggingSystemMock } from '../logging/logging_system.mock';
 
 import { PluginWrapper } from './plugin';
@@ -74,7 +74,7 @@ const setupDeps = coreMock.createInternalSetup();
 const startDeps = coreMock.createInternalStart();
 
 beforeEach(() => {
-  env = Env.createDefault(getEnvOptions());
+  env = Env.createDefault(REPO_ROOT, getEnvOptions());
 
   coreContext = { coreId: Symbol(), env, logger, configService: configService as any };
 
@@ -92,6 +92,15 @@ test('can be setup even without plugins', async () => {
   expect(pluginsSetup.size).toBe(0);
 });
 
+test('getPlugins returns the list of plugins', () => {
+  const pluginA = createPlugin('plugin-a');
+  const pluginB = createPlugin('plugin-b');
+  pluginsSystem.addPlugin(pluginA);
+  pluginsSystem.addPlugin(pluginB);
+
+  expect(pluginsSystem.getPlugins()).toEqual([pluginA, pluginB]);
+});
+
 test('getPluginDependencies returns dependency tree of symbols', () => {
   pluginsSystem.addPlugin(createPlugin('plugin-a', { required: ['no-dep'] }));
   pluginsSystem.addPlugin(
@@ -100,15 +109,27 @@ test('getPluginDependencies returns dependency tree of symbols', () => {
   pluginsSystem.addPlugin(createPlugin('no-dep'));
 
   expect(pluginsSystem.getPluginDependencies()).toMatchInlineSnapshot(`
-    Map {
-      Symbol(plugin-a) => Array [
-        Symbol(no-dep),
-      ],
-      Symbol(plugin-b) => Array [
-        Symbol(plugin-a),
-        Symbol(no-dep),
-      ],
-      Symbol(no-dep) => Array [],
+    Object {
+      "asNames": Map {
+        "plugin-a" => Array [
+          "no-dep",
+        ],
+        "plugin-b" => Array [
+          "plugin-a",
+          "no-dep",
+        ],
+        "no-dep" => Array [],
+      },
+      "asOpaqueIds": Map {
+        Symbol(plugin-a) => Array [
+          Symbol(no-dep),
+        ],
+        Symbol(plugin-b) => Array [
+          Symbol(plugin-a),
+          Symbol(no-dep),
+        ],
+        Symbol(no-dep) => Array [],
+      },
     }
   `);
 });

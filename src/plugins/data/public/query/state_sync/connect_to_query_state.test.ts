@@ -24,7 +24,7 @@ import { Filter, FilterStateStore, UI_SETTINGS } from '../../../common';
 import { coreMock } from '../../../../../core/public/mocks';
 import { BaseStateContainer, createStateContainer, Storage } from '../../../../kibana_utils/public';
 import { QueryService, QueryStart } from '../query_service';
-import { StubBrowserStorage } from '../../../../../test_utils/public/stub_browser_storage';
+import { StubBrowserStorage } from '@kbn/test/jest';
 import { connectToQueryState } from './connect_to_query_state';
 import { TimefilterContract } from '../timefilter';
 import { QueryState } from './types';
@@ -50,7 +50,7 @@ setupMock.uiSettings.get.mockImplementation((key: string) => {
       return true;
     case UI_SETTINGS.SEARCH_QUERY_LANGUAGE:
       return 'kuery';
-    case 'timepicker:timeDefaults':
+    case UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS:
       return { from: 'now-15m', to: 'now' };
     case UI_SETTINGS.TIMEPICKER_REFRESH_INTERVAL_DEFAULTS:
       return { pause: false, value: 0 };

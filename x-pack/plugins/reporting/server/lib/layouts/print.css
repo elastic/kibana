@@ -35,7 +35,7 @@ filter-bar,
 /* hide unusable controls */
 discover-app .dscTimechart,
 discover-app .dscSidebar__container,
-discover-app .kbnCollapsibleSidebar__collapseButton,
+discover-app .dscCollapsibleSidebar__collapseButton,
 discover-app .discover-table-footer {
   display: none;
 }

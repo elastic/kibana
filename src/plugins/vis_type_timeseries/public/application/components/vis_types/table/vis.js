@@ -20,6 +20,7 @@
 import _, { isArray, last, get } from 'lodash';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import { RedirectAppLinks } from '../../../../../../kibana_react/public';
 import { createTickFormatter } from '../../lib/tick_formatter';
 import { calculateLabel } from '../../../../../../../plugins/vis_type_timeseries/common/calculate_label';
 import { isSortable } from './is_sortable';
@@ -27,7 +28,7 @@ import { EuiToolTip, EuiIcon } from '@elastic/eui';
 import { replaceVars } from '../../lib/replace_vars';
 import { fieldFormats } from '../../../../../../../plugins/data/public';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { getFieldFormats } from '../../../../services';
+import { getFieldFormats, getCoreStart } from '../../../../services';
 
 import { METRIC_TYPES } from '../../../../../../../plugins/vis_type_timeseries/common/metric_types';
 
@@ -231,12 +232,16 @@ export class TableVis extends Component {
       );
     }
     return (
-      <div className="tvbVis" data-test-subj="tableView">
+      <RedirectAppLinks
+        application={getCoreStart().application}
+        className="tvbVis"
+        data-test-subj="tableView"
+      >
         <table className="table">
           <thead>{header}</thead>
           <tbody>{rows}</tbody>
         </table>
-      </div>
+      </RedirectAppLinks>
     );
   }
 }

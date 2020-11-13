@@ -6,47 +6,40 @@
 
 import { ProcessorEvent } from '../../../common/processor_event';
 import { rangeFilter } from '../../../common/utils/range_filter';
-import {
-  SERVICE_NAME,
-  PROCESSOR_EVENT,
-} from '../../../common/elasticsearch_fieldnames';
+import { SERVICE_NAME } from '../../../common/elasticsearch_fieldnames';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
+import { getProcessorEventForAggregatedTransactions } from '../helpers/aggregated_transactions';
 
 export async function getServiceCount({
   setup,
+  searchAggregatedTransactions,
 }: {
   setup: Setup & SetupTimeRange;
+  searchAggregatedTransactions: boolean;
 }) {
-  const { client, indices, start, end } = setup;
+  const { apmEventClient, start, end } = setup;
 
   const params = {
-    index: [
-      indices['apm_oss.transactionIndices'],
-      indices['apm_oss.errorIndices'],
-      indices['apm_oss.metricsIndices'],
-    ],
+    apm: {
+      events: [
+        getProcessorEventForAggregatedTransactions(
+          searchAggregatedTransactions
+        ),
+        ProcessorEvent.error,
+        ProcessorEvent.metric,
+      ],
+    },
     body: {
       size: 0,
       query: {
         bool: {
-          filter: [
-            { range: rangeFilter(start, end) },
-            {
-              terms: {
-                [PROCESSOR_EVENT]: [
-                  ProcessorEvent.error,
-                  ProcessorEvent.transaction,
-                  ProcessorEvent.metric,
-                ],
-              },
-            },
-          ],
+          filter: [{ range: rangeFilter(start, end) }],
         },
       },
       aggs: { serviceCount: { cardinality: { field: SERVICE_NAME } } },
     },
   };
 
-  const { aggregations } = await client.search(params);
+  const { aggregations } = await apmEventClient.search(params);
   return aggregations?.serviceCount.value || 0;
 }

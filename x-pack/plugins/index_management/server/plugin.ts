@@ -59,7 +59,7 @@ export class IndexMgmtServerPlugin implements Plugin<IndexManagementPluginSetup,
 
   setup(
     { http, getStartServices }: CoreSetup,
-    { licensing, security }: Dependencies
+    { features, licensing, security }: Dependencies
   ): IndexManagementPluginSetup {
     const router = http.createRouter();
 
@@ -76,6 +76,21 @@ export class IndexMgmtServerPlugin implements Plugin<IndexManagementPluginSetup,
         logger: this.logger,
       }
     );
+
+    features.registerElasticsearchFeature({
+      id: PLUGIN.id,
+      management: {
+        data: ['index_management'],
+      },
+      privileges: [
+        {
+          // manage_index_templates is also required, but we will disable specific parts of the
+          // UI if this privilege is missing.
+          requiredClusterPrivileges: ['monitor'],
+          ui: [],
+        },
+      ],
+    });
 
     http.registerRouteHandlerContext('dataManagement', async (ctx, request) => {
       this.dataManagementESClient =

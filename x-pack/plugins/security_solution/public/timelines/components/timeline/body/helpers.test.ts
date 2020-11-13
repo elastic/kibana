@@ -4,15 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Ecs } from '../../../../graphql/types';
-
 import {
   eventHasNotes,
   eventIsPinned,
+  getPinOnClick,
   getPinTooltip,
   stringifyEvent,
   isInvestigateInResolverActionEnabled,
 } from './helpers';
+import { Ecs } from '../../../../../common/ecs';
 import { TimelineType } from '../../../../../common/types/timeline';
 
 describe('helpers', () => {
@@ -144,11 +144,7 @@ describe('helpers', () => {
       };
       const toStringify: Ecs = {
         _id: '4',
-        timestamp: null,
-        host: {
-          name: null,
-          ip: null,
-        },
+        host: {},
         event: {
           id: ['4'],
           category: ['theory'],
@@ -296,6 +292,74 @@ describe('helpers', () => {
       };
 
       expect(isInvestigateInResolverActionEnabled(data)).toBeFalsy();
+    });
+  });
+
+  describe('getPinOnClick', () => {
+    const eventId = 'abcd';
+
+    test('it invokes `onPinEvent` with the expected eventId when the event is NOT pinned, and allowUnpinning is true', () => {
+      const isEventPinned = false; // the event is NOT pinned
+      const allowUnpinning = true;
+      const onPinEvent = jest.fn();
+
+      getPinOnClick({
+        allowUnpinning,
+        eventId,
+        onPinEvent,
+        onUnPinEvent: jest.fn(),
+        isEventPinned,
+      });
+
+      expect(onPinEvent).toBeCalledWith(eventId);
+    });
+
+    test('it does NOT invoke `onPinEvent` when the event is NOT pinned, and allowUnpinning is false', () => {
+      const isEventPinned = false; // the event is NOT pinned
+      const allowUnpinning = false;
+      const onPinEvent = jest.fn();
+
+      getPinOnClick({
+        allowUnpinning,
+        eventId,
+        onPinEvent,
+        onUnPinEvent: jest.fn(),
+        isEventPinned,
+      });
+
+      expect(onPinEvent).not.toBeCalled();
+    });
+
+    test('it invokes `onUnPinEvent` with the expected eventId when the event is pinned, and allowUnpinning is true', () => {
+      const isEventPinned = true; // the event is pinned
+      const allowUnpinning = true;
+      const onUnPinEvent = jest.fn();
+
+      getPinOnClick({
+        allowUnpinning,
+        eventId,
+        onPinEvent: jest.fn(),
+        onUnPinEvent,
+        isEventPinned,
+      });
+
+      expect(onUnPinEvent).toBeCalledWith(eventId);
+    });
+
+    test('it does NOT invoke `onUnPinEvent` when the event is pinned, and allowUnpinning is false', () => {
+      const isEventPinned = true; // the event is pinned
+      const allowUnpinning = false;
+      const onUnPinEvent = jest.fn();
+
+      getPinOnClick({
+        allowUnpinning,
+        eventId,
+        onPinEvent: jest.fn(),
+        onUnPinEvent,
+        isEventPinned,
+      });
+
+      expect(onUnPinEvent).not.toBeCalled();
     });
   });
 });

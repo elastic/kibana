@@ -8,7 +8,7 @@ import { IRouter } from 'kibana/server';
 
 import { EXCEPTION_LIST_ITEM_URL } from '../../common/constants';
 import { buildRouteValidation, buildSiemResponse, transformError } from '../siem_server_deps';
-import { validate } from '../../common/siem_common_deps';
+import { validate } from '../../common/shared_imports';
 import {
   CreateExceptionListItemSchemaDecoded,
   createExceptionListItemSchema,
@@ -17,7 +17,7 @@ import {
 
 import { getExceptionListClient } from './utils/get_exception_list_client';
 import { endpointDisallowedFields } from './endpoint_disallowed_fields';
-import { validateExceptionListSize } from './validate';
+import { validateEndpointExceptionItemEntries, validateExceptionListSize } from './validate';
 
 export const createExceptionListItemRoute = (router: IRouter): void => {
   router.post(
@@ -39,7 +39,6 @@ export const createExceptionListItemRoute = (router: IRouter): void => {
         const {
           namespace_type: namespaceType,
           name,
-          _tags,
           tags,
           meta,
           comments,
@@ -47,6 +46,7 @@ export const createExceptionListItemRoute = (router: IRouter): void => {
           entries,
           item_id: itemId,
           list_id: listId,
+          os_types: osTypes,
           type,
         } = request.body;
         const exceptionLists = getExceptionListClient(context);
@@ -57,7 +57,7 @@ export const createExceptionListItemRoute = (router: IRouter): void => {
         });
         if (exceptionList == null) {
           return siemResponse.error({
-            body: `list id: "${listId}" does not exist`,
+            body: `exception list id: "${listId}" does not exist`,
             statusCode: 404,
           });
         } else {
@@ -73,13 +73,11 @@ export const createExceptionListItemRoute = (router: IRouter): void => {
             });
           } else {
             if (exceptionList.type === 'endpoint') {
+              const error = validateEndpointExceptionItemEntries(request.body.entries);
+              if (error != null) {
+                return siemResponse.error(error);
+              }
               for (const entry of entries) {
-                if (entry.type === 'list') {
-                  return siemResponse.error({
-                    body: `cannot add exception item with entry of type "list" to endpoint exception list`,
-                    statusCode: 400,
-                  });
-                }
                 if (endpointDisallowedFields.includes(entry.field)) {
                   return siemResponse.error({
                     body: `cannot add endpoint exception item on field ${entry.field}`,
@@ -89,7 +87,6 @@ export const createExceptionListItemRoute = (router: IRouter): void => {
               }
             }
             const createdList = await exceptionLists.createExceptionListItem({
-              _tags,
               comments,
               description,
               entries,
@@ -98,6 +95,7 @@ export const createExceptionListItemRoute = (router: IRouter): void => {
               meta,
               name,
               namespaceType,
+              osTypes,
               tags,
               type,
             });

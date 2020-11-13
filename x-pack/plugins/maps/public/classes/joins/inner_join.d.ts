@@ -4,17 +4,41 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IESTermSource } from '../sources/es_term_source';
+import { Feature, GeoJsonProperties } from 'geojson';
+import { ESTermSource } from '../sources/es_term_source';
 import { IJoin } from './join';
 import { JoinDescriptor } from '../../../common/descriptor_types';
 import { ISource } from '../sources/source';
+import { ITooltipProperty } from '../tooltips/tooltip_property';
+import { IField } from '../fields/field';
+import { PropertiesMap } from '../../../common/elasticsearch_util';
 
 export class InnerJoin implements IJoin {
   constructor(joinDescriptor: JoinDescriptor, leftSource: ISource);
 
-  getRightJoinSource(): IESTermSource;
+  destroy: () => void;
+
+  getRightJoinSource(): ESTermSource;
 
   toDescriptor(): JoinDescriptor;
 
+  getJoinFields: () => IField[];
+
+  getLeftField: () => IField;
+
+  getIndexPatternIds: () => string[];
+
+  getQueryableIndexPatternIds: () => string[];
+
+  getSourceDataRequestId: () => string;
+
   getSourceMetaDataRequestId(): string;
+
+  getSourceFormattersDataRequestId(): string;
+
+  getTooltipProperties(properties: GeoJsonProperties): Promise<ITooltipProperty[]>;
+
+  hasCompleteConfig: () => boolean;
+
+  joinPropertiesToFeature: (feature: Feature, propertiesMap?: PropertiesMap) => boolean;
 }
