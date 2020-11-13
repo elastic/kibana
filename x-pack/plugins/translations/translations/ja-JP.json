@@ -4925,7 +4925,6 @@
     "xpack.apm.jvmsTable.noJvmsLabel": "JVM が見つかりませんでした",
     "xpack.apm.jvmsTable.nonHeapMemoryColumnLabel": "非ヒープ領域の平均",
     "xpack.apm.jvmsTable.threadCountColumnLabel": "最大スレッド数",
-    "xpack.apm.kueryBar.disabledPlaceholder": "ここでは検索は利用できません",
     "xpack.apm.license.betaBadge": "ベータ",
     "xpack.apm.license.betaTooltipMessage": "現在、この機能はベータです。不具合を見つけた場合やご意見がある場合、サポートに問い合わせるか、またはディスカッションフォーラムにご報告ください。",
     "xpack.apm.license.button": "トライアルを開始",

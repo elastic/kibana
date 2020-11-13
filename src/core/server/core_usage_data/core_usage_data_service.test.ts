@@ -145,6 +145,9 @@ describe('CoreUsageDataService', () => {
                   "certificateAuthoritiesConfigured": false,
                   "certificateConfigured": false,
                   "cipherSuites": Array [
+                    "TLS_AES_256_GCM_SHA384",
+                    "TLS_CHACHA20_POLY1305_SHA256",
+                    "TLS_AES_128_GCM_SHA256",
                     "ECDHE-RSA-AES128-GCM-SHA256",
                     "ECDHE-ECDSA-AES128-GCM-SHA256",
                     "ECDHE-RSA-AES256-GCM-SHA384",
@@ -174,6 +177,7 @@ describe('CoreUsageDataService', () => {
                   "supportedProtocols": Array [
                     "TLSv1.1",
                     "TLSv1.2",
+                    "TLSv1.3",
                   ],
                   "truststoreConfigured": false,
                 },
