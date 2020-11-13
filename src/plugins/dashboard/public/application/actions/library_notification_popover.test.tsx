@@ -19,7 +19,7 @@
 
 import React from 'react';
 import { DashboardContainer } from '..';
-import { mountWithIntl } from '../../../../../test_utils/public/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 import { embeddablePluginMock } from '../../../../embeddable/public/mocks';
 import { getSampleDashboardInput } from '../test_helpers';
 import {

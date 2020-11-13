@@ -30,7 +30,6 @@ import { migrateLegacyQuery } from './lib/migrate_legacy_query';
 
 import { ViewMode } from '../../../../plugins/embeddable/public';
 import { getAppStateDefaults, migrateAppState, getDashboardIdFromUrl } from './lib';
-import { convertPanelStateToSavedDashboardPanel } from './lib/embeddable_saved_object_converters';
 import { FilterUtils } from './lib/filter_utils';
 import {
   DashboardAppState,
@@ -48,6 +47,7 @@ import {
 } from '../../../kibana_utils/public';
 import { DashboardSavedObject } from '../saved_dashboards';
 import { DashboardContainer } from './embeddable';
+import { convertPanelStateToSavedDashboardPanel } from '../../common/embeddable/embeddable_saved_object_converters';
 
 /**
  * Dashboard state manager handles connecting angular and redux state between the angular and react portions of the

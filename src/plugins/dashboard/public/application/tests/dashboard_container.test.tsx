@@ -20,7 +20,7 @@
 import { findTestSubject } from '@elastic/eui/lib/test';
 import React from 'react';
 import { mount } from 'enzyme';
-import { nextTick } from 'test_utils/enzyme_helpers';
+import { nextTick } from '@kbn/test/jest';
 import { I18nProvider } from '@kbn/i18n/react';
 
 import { DashboardContainer, DashboardContainerOptions } from '../embeddable/dashboard_container';
