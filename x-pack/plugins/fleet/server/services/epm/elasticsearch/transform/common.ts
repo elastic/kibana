@@ -4,8 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as Registry from '../../registry';
-
-export const getAsset = (path: string): Buffer => {
-  return Registry.getAsset(path);
-};
+export { getAsset } from '../../archive';
