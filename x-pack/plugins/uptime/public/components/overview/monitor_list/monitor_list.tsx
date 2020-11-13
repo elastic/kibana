@@ -33,18 +33,13 @@ import { MonitorListHeader } from './monitor_list_header';
 import { URL_LABEL } from '../../common/translations';
 import { EnableMonitorAlert } from './columns/enable_alert';
 import { STATUS_ALERT_COLUMN } from './translations';
+import { MonitorTags } from './columns/monitor_tags';
 
 interface Props extends MonitorListProps {
   pageSize: number;
   setPageSize: (val: number) => void;
   monitorList: MonitorList;
 }
-
-const TruncatedEuiLink = styled(EuiLink)`
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-`;
 
 export const noItemsMessage = (loading: boolean, filters?: string) => {
   if (loading) return labels.LOADING;
@@ -121,9 +116,12 @@ export const MonitorListComponent: ({
       field: 'state.url.full',
       name: URL_LABEL,
       render: (url: string, summary: MonitorSummary) => (
-        <TruncatedEuiLink href={url} target="_blank" color="text">
-          {url} <EuiIcon size="s" type="popout" color="subbdued" />
-        </TruncatedEuiLink>
+        <span>
+          <EuiLink href={url} target="_blank" color="text" external>
+            {url}
+          </EuiLink>
+          <MonitorTags summary={summary} />
+        </span>
       ),
     },
     {
@@ -196,6 +194,7 @@ export const MonitorListComponent: ({
         items={items}
         noItemsMessage={noItemsMessage(loading, filters)}
         columns={columns}
+        tableLayout="auto"
       />
       <EuiSpacer size="m" />
       <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
