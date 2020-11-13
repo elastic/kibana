@@ -672,6 +672,7 @@ export const AlertsList: React.FunctionComponent = () => {
           capabilities,
           dataUi: dataPlugin.ui,
           dataIndexPatterns: dataPlugin.indexPatterns,
+          kibanaFeatures,
         }}
       >
         <AlertAdd

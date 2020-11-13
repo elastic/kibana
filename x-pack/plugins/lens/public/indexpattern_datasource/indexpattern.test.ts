@@ -12,9 +12,111 @@ import { IndexPatternPersistedState, IndexPatternPrivateState } from './types';
 import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
 import { Ast } from '@kbn/interpreter/common';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
+import { getFieldByNameFactory } from './pure_helpers';
 
 jest.mock('./loader');
 jest.mock('../id_generator');
+
+const fieldsOne = [
+  {
+    name: 'timestamp',
+    displayName: 'timestampLabel',
+    type: 'date',
+    aggregatable: true,
+    searchable: true,
+  },
+  {
+    name: 'start_date',
+    displayName: 'start_date',
+    type: 'date',
+    aggregatable: true,
+    searchable: true,
+  },
+  {
+    name: 'bytes',
+    displayName: 'bytes',
+    type: 'number',
+    aggregatable: true,
+    searchable: true,
+  },
+  {
+    name: 'memory',
+    displayName: 'memory',
+    type: 'number',
+    aggregatable: true,
+    searchable: true,
+  },
+  {
+    name: 'source',
+    displayName: 'source',
+    type: 'string',
+    aggregatable: true,
+    searchable: true,
+  },
+  {
+    name: 'dest',
+    displayName: 'dest',
+    type: 'string',
+    aggregatable: true,
+    searchable: true,
+  },
+];
+
+const fieldsTwo = [
+  {
+    name: 'timestamp',
+    displayName: 'timestampLabel',
+    type: 'date',
+    aggregatable: true,
+    searchable: true,
+    aggregationRestrictions: {
+      date_histogram: {
+        agg: 'date_histogram',
+        fixed_interval: '1d',
+        delay: '7d',
+        time_zone: 'UTC',
+      },
+    },
+  },
+  {
+    name: 'bytes',
+    displayName: 'bytes',
+    type: 'number',
+    aggregatable: true,
+    searchable: true,
+    aggregationRestrictions: {
+      // Ignored in the UI
+      histogram: {
+        agg: 'histogram',
+        interval: 1000,
+      },
+      avg: {
+        agg: 'avg',
+      },
+      max: {
+        agg: 'max',
+      },
+      min: {
+        agg: 'min',
+      },
+      sum: {
+        agg: 'sum',
+      },
+    },
+  },
+  {
+    name: 'source',
+    displayName: 'source',
+    type: 'string',
+    aggregatable: true,
+    searchable: true,
+    aggregationRestrictions: {
+      terms: {
+        agg: 'terms',
+      },
+    },
+  },
+];
 
 const expectedIndexPatterns = {
   1: {
@@ -22,111 +124,16 @@ const expectedIndexPatterns = {
     title: 'my-fake-index-pattern',
     timeFieldName: 'timestamp',
     hasRestrictions: false,
-    fields: [
-      {
-        name: 'timestamp',
-        displayName: 'timestampLabel',
-        type: 'date',
-        aggregatable: true,
-        searchable: true,
-      },
-      {
-        name: 'start_date',
-        displayName: 'start_date',
-        type: 'date',
-        aggregatable: true,
-        searchable: true,
-      },
-      {
-        name: 'bytes',
-        displayName: 'bytes',
-        type: 'number',
-        aggregatable: true,
-        searchable: true,
-      },
-      {
-        name: 'memory',
-        displayName: 'memory',
-        type: 'number',
-        aggregatable: true,
-        searchable: true,
-      },
-      {
-        name: 'source',
-        displayName: 'source',
-        type: 'string',
-        aggregatable: true,
-        searchable: true,
-      },
-      {
-        name: 'dest',
-        displayName: 'dest',
-        type: 'string',
-        aggregatable: true,
-        searchable: true,
-      },
-    ],
+    fields: fieldsOne,
+    getFieldByName: getFieldByNameFactory(fieldsOne),
   },
   2: {
     id: '2',
     title: 'my-fake-restricted-pattern',
     timeFieldName: 'timestamp',
     hasRestrictions: true,
-    fields: [
-      {
-        name: 'timestamp',
-        displayName: 'timestampLabel',
-        type: 'date',
-        aggregatable: true,
-        searchable: true,
-        aggregationRestrictions: {
-          date_histogram: {
-            agg: 'date_histogram',
-            fixed_interval: '1d',
-            delay: '7d',
-            time_zone: 'UTC',
-          },
-        },
-      },
-      {
-        name: 'bytes',
-        displayName: 'bytes',
-        type: 'number',
-        aggregatable: true,
-        searchable: true,
-        aggregationRestrictions: {
-          // Ignored in the UI
-          histogram: {
-            agg: 'histogram',
-            interval: 1000,
-          },
-          avg: {
-            agg: 'avg',
-          },
-          max: {
-            agg: 'max',
-          },
-          min: {
-            agg: 'min',
-          },
-          sum: {
-            agg: 'sum',
-          },
-        },
-      },
-      {
-        name: 'source',
-        displayName: 'source',
-        type: 'string',
-        aggregatable: true,
-        searchable: true,
-        aggregationRestrictions: {
-          terms: {
-            agg: 'terms',
-          },
-        },
-      },
-    ],
+    fields: fieldsTwo,
+    getFieldByName: getFieldByNameFactory(fieldsTwo),
   },
 };
 
@@ -612,6 +619,180 @@ describe('IndexPattern Data Source', () => {
       it('should return null for non-existant columns', () => {
         expect(publicAPI.getOperationForColumnId('col2')).toBe(null);
       });
+    });
+  });
+
+  describe('#getErrorMessages', () => {
+    it('should detect a missing reference in a layer', () => {
+      const state = {
+        indexPatternRefs: [],
+        existingFields: {},
+        isFirstExistenceFetch: false,
+        indexPatterns: expectedIndexPatterns,
+        layers: {
+          first: {
+            indexPatternId: '1',
+            columnOrder: ['col1'],
+            columns: {
+              col1: {
+                dataType: 'number',
+                isBucketed: false,
+                label: 'Foo',
+                operationType: 'count', // <= invalid
+                sourceField: 'bytes',
+              },
+            },
+          },
+        },
+        currentIndexPatternId: '1',
+      };
+      const messages = indexPatternDatasource.getErrorMessages(state as IndexPatternPrivateState);
+      expect(messages).toHaveLength(1);
+      expect(messages![0]).toEqual({
+        shortMessage: 'Invalid reference.',
+        longMessage: 'Field "bytes" has an invalid reference.',
+      });
+    });
+
+    it('should detect and batch missing references in a layer', () => {
+      const state = {
+        indexPatternRefs: [],
+        existingFields: {},
+        isFirstExistenceFetch: false,
+        indexPatterns: expectedIndexPatterns,
+        layers: {
+          first: {
+            indexPatternId: '1',
+            columnOrder: ['col1', 'col2'],
+            columns: {
+              col1: {
+                dataType: 'number',
+                isBucketed: false,
+                label: 'Foo',
+                operationType: 'count', // <= invalid
+                sourceField: 'bytes',
+              },
+              col2: {
+                dataType: 'number',
+                isBucketed: false,
+                label: 'Foo',
+                operationType: 'count', // <= invalid
+                sourceField: 'memory',
+              },
+            },
+          },
+        },
+        currentIndexPatternId: '1',
+      };
+      const messages = indexPatternDatasource.getErrorMessages(state as IndexPatternPrivateState);
+      expect(messages).toHaveLength(1);
+      expect(messages![0]).toEqual({
+        shortMessage: 'Invalid references.',
+        longMessage: 'Fields "bytes", "memory" have invalid reference.',
+      });
+    });
+
+    it('should detect and batch missing references in multiple layers', () => {
+      const state = {
+        indexPatternRefs: [],
+        existingFields: {},
+        isFirstExistenceFetch: false,
+        indexPatterns: expectedIndexPatterns,
+        layers: {
+          first: {
+            indexPatternId: '1',
+            columnOrder: ['col1', 'col2'],
+            columns: {
+              col1: {
+                dataType: 'number',
+                isBucketed: false,
+                label: 'Foo',
+                operationType: 'count', // <= invalid
+                sourceField: 'bytes',
+              },
+              col2: {
+                dataType: 'number',
+                isBucketed: false,
+                label: 'Foo',
+                operationType: 'count', // <= invalid
+                sourceField: 'memory',
+              },
+            },
+          },
+          second: {
+            indexPatternId: '1',
+            columnOrder: ['col1'],
+            columns: {
+              col1: {
+                dataType: 'string',
+                isBucketed: false,
+                label: 'Foo',
+                operationType: 'count', // <= invalid
+                sourceField: 'source',
+              },
+            },
+          },
+        },
+        currentIndexPatternId: '1',
+      };
+      const messages = indexPatternDatasource.getErrorMessages(state as IndexPatternPrivateState);
+      expect(messages).toHaveLength(2);
+      expect(messages).toEqual([
+        {
+          shortMessage: 'Invalid references on Layer 1.',
+          longMessage: 'Layer 1 has invalid references in fields "bytes", "memory".',
+        },
+        {
+          shortMessage: 'Invalid reference on Layer 2.',
+          longMessage: 'Layer 2 has an invalid reference in field "source".',
+        },
+      ]);
+    });
+
+    it('should return no errors if all references are satified', () => {
+      const state = {
+        indexPatternRefs: [],
+        existingFields: {},
+        isFirstExistenceFetch: false,
+        indexPatterns: expectedIndexPatterns,
+        layers: {
+          first: {
+            indexPatternId: '1',
+            columnOrder: ['col1'],
+            columns: {
+              col1: {
+                dataType: 'number',
+                isBucketed: false,
+                label: 'Foo',
+                operationType: 'document',
+                sourceField: 'bytes',
+              },
+            },
+          },
+        },
+        currentIndexPatternId: '1',
+      };
+      expect(
+        indexPatternDatasource.getErrorMessages(state as IndexPatternPrivateState)
+      ).not.toBeDefined();
+    });
+
+    it('should return no errors with layers with no columns', () => {
+      const state: IndexPatternPrivateState = {
+        indexPatternRefs: [],
+        existingFields: {},
+        isFirstExistenceFetch: false,
+        indexPatterns: expectedIndexPatterns,
+        layers: {
+          first: {
+            indexPatternId: '1',
+            columnOrder: [],
+            columns: {},
+          },
+        },
+        currentIndexPatternId: '1',
+      };
+      expect(indexPatternDatasource.getErrorMessages(state)).not.toBeDefined();
     });
   });
 });

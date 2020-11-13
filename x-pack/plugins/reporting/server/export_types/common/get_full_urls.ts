@@ -50,9 +50,9 @@ export function getFullUrls(config: ReportingConfig, job: TaskPayloadPDF | TaskP
   const urls = relativeUrls.map((relativeUrl) => {
     const parsedRelative: UrlWithStringQuery = urlParse(relativeUrl);
     const jobUrl = getAbsoluteUrl({
-      path: parsedRelative.pathname,
-      hash: parsedRelative.hash,
-      search: parsedRelative.search,
+      path: parsedRelative.pathname === null ? undefined : parsedRelative.pathname,
+      hash: parsedRelative.hash === null ? undefined : parsedRelative.hash,
+      search: parsedRelative.search === null ? undefined : parsedRelative.search,
     });
 
     // capture the route to the visualization

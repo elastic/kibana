@@ -32,8 +32,7 @@ import {
 
 interface ConnectorAddModalProps {
   actionType: ActionType;
-  addModalVisible: boolean;
-  setAddModalVisibility: React.Dispatch<React.SetStateAction<boolean>>;
+  onClose: () => void;
   postSaveEventHandler?: (savedAction: ActionConnector) => void;
   http: HttpSetup;
   actionTypeRegistry: ActionTypeRegistryContract;
@@ -48,8 +47,7 @@ interface ConnectorAddModalProps {
 
 export const ConnectorAddModal = ({
   actionType,
-  addModalVisible,
-  setAddModalVisibility,
+  onClose,
   postSaveEventHandler,
   http,
   toastNotifications,
@@ -79,14 +77,11 @@ export const ConnectorAddModal = ({
   >(undefined);
 
   const closeModal = useCallback(() => {
-    setAddModalVisibility(false);
     setConnector(initialConnector);
     setServerError(undefined);
-  }, [initialConnector, setAddModalVisibility]);
+    onClose();
+  }, [initialConnector, onClose]);
 
-  if (!addModalVisible) {
-    return null;
-  }
   const actionTypeModel = actionTypeRegistry.get(actionType.id);
   const errors = {
     ...actionTypeModel?.validateConnector(connector).errors,

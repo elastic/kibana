@@ -7,7 +7,7 @@
 import React, { ReactElement } from 'react';
 import { ReactWrapper } from 'enzyme';
 import { EuiPanel, EuiToolTip } from '@elastic/eui';
-import { mountWithIntl as mount } from 'test_utils/enzyme_helpers';
+import { mountWithIntl as mount } from '@kbn/test/jest';
 import { EditorFrame } from './editor_frame';
 import { DatasourcePublicAPI, DatasourceSuggestion, Visualization } from '../../types';
 import { act } from 'react-dom/test-utils';
@@ -23,6 +23,7 @@ import { DragDrop } from '../../drag_drop';
 import { FrameLayout } from './frame_layout';
 import { uiActionsPluginMock } from '../../../../../../src/plugins/ui_actions/public/mocks';
 import { dataPluginMock } from '../../../../../../src/plugins/data/public/mocks';
+import { chartPluginMock } from '../../../../../../src/plugins/charts/public/mocks';
 import { expressionsPluginMock } from '../../../../../../src/plugins/expressions/public/mocks';
 
 function generateSuggestion(state = {}): DatasourceSuggestion {
@@ -55,7 +56,9 @@ function getDefaultProps() {
       uiActions: uiActionsPluginMock.createStartContract(),
       data: dataPluginMock.createStartContract(),
       expressions: expressionsPluginMock.createStartContract(),
+      charts: chartPluginMock.createStartContract(),
     },
+    palettes: chartPluginMock.createPaletteRegistry(),
     showNoDataPopover: jest.fn(),
   };
 }
@@ -233,10 +236,11 @@ describe('editor_frame', () => {
     });
 
     it('should pass the public frame api into visualization initialize', async () => {
+      const defaultProps = getDefaultProps();
       await act(async () => {
         mount(
           <EditorFrame
-            {...getDefaultProps()}
+            {...defaultProps}
             visualizationMap={{
               testVis: mockVisualization,
             }}
@@ -259,6 +263,7 @@ describe('editor_frame', () => {
         query: { query: '', language: 'lucene' },
         filters: [],
         dateRange: { fromDate: 'now-7d', toDate: 'now' },
+        availablePalettes: defaultProps.palettes,
       });
     });
 
@@ -596,7 +601,8 @@ describe('editor_frame', () => {
         setDatasourceState(updatedState);
       });
 
-      expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(2);
+      // validation requires to calls this getConfiguration API
+      expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(6);
       expect(mockVisualization.getConfiguration).toHaveBeenLastCalledWith(
         expect.objectContaining({
           state: updatedState,
@@ -675,7 +681,8 @@ describe('editor_frame', () => {
         setDatasourceState({});
       });
 
-      expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(2);
+      // validation requires to calls this getConfiguration API
+      expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(6);
       expect(mockVisualization.getConfiguration).toHaveBeenLastCalledWith(
         expect.objectContaining({
           frame: expect.objectContaining({
@@ -963,6 +970,7 @@ describe('editor_frame', () => {
         expect.objectContaining({
           datasourceLayers: expect.objectContaining({ first: mockDatasource.publicAPIMock }),
         }),
+        undefined,
         undefined
       );
       expect(mockVisualization2.getConfiguration).toHaveBeenCalledWith(
@@ -1187,7 +1195,8 @@ describe('editor_frame', () => {
         instance.find('[data-test-subj="lnsSuggestion"]').at(2).simulate('click');
       });
 
-      expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(1);
+      // validation requires to calls this getConfiguration API
+      expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(4);
       expect(mockVisualization.getConfiguration).toHaveBeenCalledWith(
         expect.objectContaining({
           state: suggestionVisState,

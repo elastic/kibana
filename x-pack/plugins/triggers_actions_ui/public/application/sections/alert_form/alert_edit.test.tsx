@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import * as React from 'react';
-import { mountWithIntl, nextTick } from 'test_utils/enzyme_helpers';
+import { mountWithIntl, nextTick } from '@kbn/test/jest';
 import { act } from 'react-dom/test-utils';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
@@ -52,6 +52,7 @@ describe('alert_edit', () => {
       iconClass: 'test',
       name: 'test-alert',
       description: 'test',
+      documentationUrl: null,
       validate: (): ValidationResult => {
         return { errors: {} };
       },

@@ -10,16 +10,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import { APMLink, APMLinkExtendProps } from './APMLink';
-import { useUrlParams } from '../../../../hooks/useUrlParams';
 import { pickKeys } from '../../../../../common/utils/pick_keys';
+import { useUrlParams } from '../../../../hooks/useUrlParams';
+import { APMQueryParams } from '../url_helpers';
+import { APMLink, APMLinkExtendProps, useAPMHref } from './APMLink';
 
-function ServiceInventoryLink(props: APMLinkExtendProps) {
-  const { urlParams } = useUrlParams();
+const persistedFilters: Array<keyof APMQueryParams> = ['host', 'agentName'];
 
-  const persistedFilters = pickKeys(urlParams, 'host', 'agentName');
-
-  return <APMLink path="/services" query={persistedFilters} {...props} />;
+export function useServiceInventoryHref() {
+  return useAPMHref('/services', persistedFilters);
 }
 
-export { ServiceInventoryLink };
+export function ServiceInventoryLink(props: APMLinkExtendProps) {
+  const { urlParams } = useUrlParams();
+
+  const query = pickKeys(urlParams as APMQueryParams, ...persistedFilters);
+
+  return <APMLink path="/services" query={query} {...props} />;
+}

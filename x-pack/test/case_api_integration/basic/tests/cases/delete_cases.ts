@@ -27,7 +27,8 @@ export default ({ getService }: FtrProviderContext): void => {
       const { body: postedCase } = await supertest
         .post(CASES_URL)
         .set('kbn-xsrf', 'true')
-        .send(postCaseReq);
+        .send(postCaseReq)
+        .expect(200);
 
       const { body } = await supertest
         .delete(`${CASES_URL}?ids=["${postedCase.id}"]`)
@@ -42,29 +43,34 @@ export default ({ getService }: FtrProviderContext): void => {
       const { body: postedCase } = await supertest
         .post(CASES_URL)
         .set('kbn-xsrf', 'true')
-        .send(postCaseReq);
+        .send(postCaseReq)
+        .expect(200);
 
       const { body: patchedCase } = await supertest
         .post(`${CASES_URL}/${postedCase.id}/comments`)
         .set('kbn-xsrf', 'true')
-        .send(postCommentReq);
+        .send(postCommentReq)
+        .expect(200);
 
       await supertest
         .get(`${CASES_URL}/${postedCase.id}/comments/${patchedCase.comments[0].id}`)
         .set('kbn-xsrf', 'true')
         .send()
         .expect(200);
+
       await supertest
         .delete(`${CASES_URL}?ids=["${postedCase.id}"]`)
         .set('kbn-xsrf', 'true')
         .send()
         .expect(204);
+
       await supertest
         .get(`${CASES_URL}/${postedCase.id}/comments/${patchedCase.comments[0].id}`)
         .set('kbn-xsrf', 'true')
         .send()
         .expect(404);
     });
+
     it('unhappy path - 404s when case is not there', async () => {
       await supertest
         .delete(`${CASES_URL}?ids=["fake-id"]`)

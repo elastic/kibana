@@ -40,7 +40,6 @@ Cypress.Commands.add('stubSecurityApi', function (dataFileName) {
 });
 
 Cypress.Commands.add('stubSearchStrategyApi', function (
-  queryId,
   dataFileName,
   searchStrategyName = 'securitySolutionSearchStrategy'
 ) {
@@ -49,7 +48,7 @@ Cypress.Commands.add('stubSearchStrategyApi', function (
   });
   cy.server();
   cy.fixture(dataFileName).as(`${dataFileName}JSON`);
-  cy.route('POST', `internal/search/${searchStrategyName}/${queryId}`, `@${dataFileName}JSON`);
+  cy.route('POST', `internal/search/${searchStrategyName}`, `@${dataFileName}JSON`);
 });
 
 Cypress.Commands.add(
@@ -59,7 +58,7 @@ Cypress.Commands.add(
   },
   (input, fileName, fileType = 'text/plain') => {
     cy.fixture(fileName).then((content) => {
-      const blob = Cypress.Blob.base64StringToBlob(content, fileType);
+      const blob = Cypress.Blob.base64StringToBlob(btoa(content), fileType);
       const testFile = new File([blob], fileName, { type: fileType });
       const dataTransfer = new DataTransfer();
 

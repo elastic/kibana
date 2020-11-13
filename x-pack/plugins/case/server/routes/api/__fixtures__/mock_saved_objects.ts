@@ -10,6 +10,7 @@ import {
   CommentAttributes,
   ESCaseAttributes,
   ConnectorTypes,
+  CommentType,
 } from '../../../../common/api';
 
 export const mockCases: Array<SavedObject<ESCaseAttributes>> = [
@@ -207,6 +208,7 @@ export const mockCaseComments: Array<SavedObject<CommentAttributes>> = [
     id: 'mock-comment-1',
     attributes: {
       comment: 'Wow, good luck catching that bad meanie!',
+      type: CommentType.user,
       created_at: '2019-11-25T21:55:00.177Z',
       created_by: {
         full_name: 'elastic',
@@ -237,6 +239,7 @@ export const mockCaseComments: Array<SavedObject<CommentAttributes>> = [
     id: 'mock-comment-2',
     attributes: {
       comment: 'Well I decided to update my comment. So what? Deal with it.',
+      type: CommentType.user,
       created_at: '2019-11-25T21:55:14.633Z',
       created_by: {
         full_name: 'elastic',
@@ -268,6 +271,7 @@ export const mockCaseComments: Array<SavedObject<CommentAttributes>> = [
     id: 'mock-comment-3',
     attributes: {
       comment: 'Wow, good luck catching that bad meanie!',
+      type: CommentType.user,
       created_at: '2019-11-25T22:32:30.608Z',
       created_by: {
         full_name: 'elastic',

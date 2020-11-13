@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { pickBy, mapValues, without } from 'lodash';
+import { Dictionary, pickBy, mapValues, without, cloneDeep } from 'lodash';
 import { Logger, KibanaRequest } from '../../../../../src/core/server';
 import { TaskRunnerContext } from './task_runner_factory';
 import { ConcreteTaskInstance, throwUnrecoverableError } from '../../../task_manager/server';
@@ -28,6 +28,7 @@ import {
   AlertExecutorOptions,
   SanitizedAlert,
   AlertExecutionStatus,
+  AlertExecutionStatusErrorReasons,
 } from '../types';
 import { promiseResult, map, Resultable, asOk, asErr, resolveErr } from '../lib/result_type';
 import { taskInstanceToAlertTaskInstance } from './alert_task_instance';
@@ -38,6 +39,8 @@ import { AlertsClient } from '../alerts_client';
 import { partiallyUpdateAlert } from '../saved_objects';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
+
+type Event = Exclude<IEvent, undefined>;
 
 interface AlertTaskRunResult {
   state: AlertTaskState;
@@ -152,7 +155,8 @@ export class TaskRunner {
     alert: SanitizedAlert,
     params: AlertExecutorOptions['params'],
     executionHandler: ReturnType<typeof createExecutionHandler>,
-    spaceId: string
+    spaceId: string,
+    event: Event
   ): Promise<AlertTaskState> {
     const { throttle, muteAll, mutedInstanceIds, name, tags, createdBy, updatedBy } = alert;
     const {
@@ -165,24 +169,10 @@ export class TaskRunner {
       alertRawInstances,
       (rawAlertInstance) => new AlertInstance(rawAlertInstance)
     );
+    const originalAlertInstances = cloneDeep(alertInstances);
 
-    const originalAlertInstanceIds = Object.keys(alertInstances);
     const eventLogger = this.context.eventLogger;
     const alertLabel = `${this.alertType.id}:${alertId}: '${name}'`;
-    const event: IEvent = {
-      event: { action: EVENT_LOG_ACTIONS.execute },
-      kibana: {
-        saved_objects: [
-          {
-            rel: SAVED_OBJECT_REL_PRIMARY,
-            type: 'alert',
-            id: alertId,
-            namespace,
-          },
-        ],
-      },
-    };
-    eventLogger.startTiming(event);
 
     let updatedAlertTypeState: void | Record<string, unknown>;
     try {
@@ -204,31 +194,26 @@ export class TaskRunner {
         updatedBy,
       });
     } catch (err) {
-      eventLogger.stopTiming(event);
       event.message = `alert execution failure: ${alertLabel}`;
       event.error = event.error || {};
       event.error.message = err.message;
       event.event = event.event || {};
       event.event.outcome = 'failure';
-      eventLogger.logEvent(event);
-      throw new ErrorWithReason('execute', err);
+      throw new ErrorWithReason(AlertExecutionStatusErrorReasons.Execute, err);
     }
 
-    eventLogger.stopTiming(event);
     event.message = `alert executed: ${alertLabel}`;
     event.event = event.event || {};
     event.event.outcome = 'success';
-    eventLogger.logEvent(event);
 
     // Cleanup alert instances that are no longer scheduling actions to avoid over populating the alertInstances object
     const instancesWithScheduledActions = pickBy(alertInstances, (alertInstance: AlertInstance) =>
       alertInstance.hasScheduledActions()
     );
-    const currentAlertInstanceIds = Object.keys(instancesWithScheduledActions);
     generateNewAndResolvedInstanceEvents({
       eventLogger,
-      originalAlertInstanceIds,
-      currentAlertInstanceIds,
+      originalAlertInstances,
+      currentAlertInstances: instancesWithScheduledActions,
       alertId,
       alertLabel,
       namespace,
@@ -261,7 +246,8 @@ export class TaskRunner {
   async validateAndExecuteAlert(
     services: Services,
     apiKey: RawAlert['apiKey'],
-    alert: SanitizedAlert
+    alert: SanitizedAlert,
+    event: Event
   ) {
     const {
       params: { alertId, spaceId },
@@ -278,10 +264,17 @@ export class TaskRunner {
       alert.actions,
       alert.params
     );
-    return this.executeAlertInstances(services, alert, validatedParams, executionHandler, spaceId);
+    return this.executeAlertInstances(
+      services,
+      alert,
+      validatedParams,
+      executionHandler,
+      spaceId,
+      event
+    );
   }
 
-  async loadAlertAttributesAndRun(): Promise<Resultable<AlertTaskRunResult, Error>> {
+  async loadAlertAttributesAndRun(event: Event): Promise<Resultable<AlertTaskRunResult, Error>> {
     const {
       params: { alertId, spaceId },
     } = this.taskInstance;
@@ -289,7 +282,7 @@ export class TaskRunner {
     try {
       apiKey = await this.getApiKeyForAlertPermissions(alertId, spaceId);
     } catch (err) {
-      throw new ErrorWithReason('decrypt', err);
+      throw new ErrorWithReason(AlertExecutionStatusErrorReasons.Decrypt, err);
     }
     const [services, alertsClient] = this.getServicesWithSpaceLevelPermissions(spaceId, apiKey);
 
@@ -299,12 +292,12 @@ export class TaskRunner {
     try {
       alert = await alertsClient.get({ id: alertId });
     } catch (err) {
-      throw new ErrorWithReason('read', err);
+      throw new ErrorWithReason(AlertExecutionStatusErrorReasons.Read, err);
     }
 
     return {
       state: await promiseResult<AlertTaskState, Error>(
-        this.validateAndExecuteAlert(services, apiKey, alert)
+        this.validateAndExecuteAlert(services, apiKey, alert, event)
       ),
       schedule: asOk(
         // fetch the alert again to ensure we return the correct schedule as it may have
@@ -322,17 +315,64 @@ export class TaskRunner {
       schedule: taskSchedule,
     } = this.taskInstance;
 
-    const { state, schedule } = await errorAsAlertTaskRunResult(this.loadAlertAttributesAndRun());
-    const namespace = spaceId === 'default' ? undefined : spaceId;
+    const namespace = this.context.spaceIdToNamespace(spaceId);
+    const eventLogger = this.context.eventLogger;
+    const event: IEvent = {
+      // explicitly set execute timestamp so it will be before other events
+      // generated here (new-instance, schedule-action, etc)
+      '@timestamp': new Date().toISOString(),
+      event: { action: EVENT_LOG_ACTIONS.execute },
+      kibana: {
+        saved_objects: [
+          {
+            rel: SAVED_OBJECT_REL_PRIMARY,
+            type: 'alert',
+            id: alertId,
+            namespace,
+          },
+        ],
+      },
+    };
+    eventLogger.startTiming(event);
+
+    const { state, schedule } = await errorAsAlertTaskRunResult(
+      this.loadAlertAttributesAndRun(event)
+    );
 
     const executionStatus: AlertExecutionStatus = map(
       state,
       (alertTaskState: AlertTaskState) => executionStatusFromState(alertTaskState),
       (err: Error) => executionStatusFromError(err)
     );
+
+    // set the executionStatus date to same as event, if it's set
+    if (event.event?.start) {
+      executionStatus.lastExecutionDate = new Date(event.event.start);
+    }
+
     this.logger.debug(
       `alertExecutionStatus for ${this.alertType.id}:${alertId}: ${JSON.stringify(executionStatus)}`
     );
+
+    eventLogger.stopTiming(event);
+    event.kibana = event.kibana || {};
+    event.kibana.alerting = event.kibana.alerting || {};
+    event.kibana.alerting.status = executionStatus.status;
+
+    // if executionStatus indicates an error, fill in fields in
+    // event from it
+    if (executionStatus.error) {
+      event.event = event.event || {};
+      event.event.reason = executionStatus.error?.reason || 'unknown';
+      event.event.outcome = 'failure';
+      event.error = event.error || {};
+      event.error.message = event.error.message || executionStatus.error.message;
+      if (!event.message) {
+        event.message = `${this.alertType.id}:${alertId}: execution failed`;
+      }
+    }
+
+    eventLogger.logEvent(event);
 
     const client = this.context.internalSavedObjectsRepository;
     const attributes = {
@@ -381,41 +421,40 @@ export class TaskRunner {
 
 interface GenerateNewAndResolvedInstanceEventsParams {
   eventLogger: IEventLogger;
-  originalAlertInstanceIds: string[];
-  currentAlertInstanceIds: string[];
+  originalAlertInstances: Dictionary<AlertInstance>;
+  currentAlertInstances: Dictionary<AlertInstance>;
   alertId: string;
   alertLabel: string;
   namespace: string | undefined;
 }
 
 function generateNewAndResolvedInstanceEvents(params: GenerateNewAndResolvedInstanceEventsParams) {
-  const {
-    eventLogger,
-    alertId,
-    namespace,
-    currentAlertInstanceIds,
-    originalAlertInstanceIds,
-  } = params;
+  const { eventLogger, alertId, namespace, currentAlertInstances, originalAlertInstances } = params;
+  const originalAlertInstanceIds = Object.keys(originalAlertInstances);
+  const currentAlertInstanceIds = Object.keys(currentAlertInstances);
 
   const newIds = without(currentAlertInstanceIds, ...originalAlertInstanceIds);
   const resolvedIds = without(originalAlertInstanceIds, ...currentAlertInstanceIds);
 
   for (const id of resolvedIds) {
+    const actionGroup = originalAlertInstances[id].getLastScheduledActions()?.group;
     const message = `${params.alertLabel} resolved instance: '${id}'`;
-    logInstanceEvent(id, EVENT_LOG_ACTIONS.resolvedInstance, message);
+    logInstanceEvent(id, EVENT_LOG_ACTIONS.resolvedInstance, message, actionGroup);
   }
 
   for (const id of newIds) {
+    const actionGroup = currentAlertInstances[id].getScheduledActionOptions()?.actionGroup;
     const message = `${params.alertLabel} created new instance: '${id}'`;
-    logInstanceEvent(id, EVENT_LOG_ACTIONS.newInstance, message);
+    logInstanceEvent(id, EVENT_LOG_ACTIONS.newInstance, message, actionGroup);
   }
 
   for (const id of currentAlertInstanceIds) {
-    const message = `${params.alertLabel} active instance: '${id}'`;
-    logInstanceEvent(id, EVENT_LOG_ACTIONS.activeInstance, message);
+    const actionGroup = currentAlertInstances[id].getScheduledActionOptions()?.actionGroup;
+    const message = `${params.alertLabel} active instance: '${id}' in actionGroup: '${actionGroup}'`;
+    logInstanceEvent(id, EVENT_LOG_ACTIONS.activeInstance, message, actionGroup);
   }
 
-  function logInstanceEvent(instanceId: string, action: string, message: string) {
+  function logInstanceEvent(instanceId: string, action: string, message: string, group?: string) {
     const event: IEvent = {
       event: {
         action,
@@ -423,6 +462,7 @@ function generateNewAndResolvedInstanceEvents(params: GenerateNewAndResolvedInst
       kibana: {
         alerting: {
           instance_id: instanceId,
+          ...(group ? { action_group_id: group } : {}),
         },
         saved_objects: [
           {
