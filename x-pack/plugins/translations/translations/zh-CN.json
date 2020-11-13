@@ -12295,7 +12295,6 @@
     "xpack.ml.datavisualizer.page.fieldsPanelTitle": "字段",
     "xpack.ml.datavisualizer.page.metricsPanelTitle": "指标",
     "xpack.ml.datavisualizer.searchPanel.allOptionLabel": "搜索全部",
-    "xpack.ml.datavisualizer.searchPanel.documentsPerShardLabel": "文档总数：{wrappedTotalCount}",
     "xpack.ml.datavisualizer.searchPanel.invalidKuerySyntaxErrorMessageQueryBar": "无效查询",
     "xpack.ml.datavisualizer.searchPanel.queryBarPlaceholder": "选择较小的样例大小将减少查询运行时间和集群上的负载。",
     "xpack.ml.datavisualizer.searchPanel.queryBarPlaceholderText": "搜索……（例如，status:200 AND extension:\"PHP\"）",
