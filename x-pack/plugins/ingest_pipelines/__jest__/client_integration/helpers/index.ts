@@ -9,7 +9,7 @@ import { setup as pipelinesCreateSetup } from './pipelines_create.helpers';
 import { setup as pipelinesCloneSetup } from './pipelines_clone.helpers';
 import { setup as pipelinesEditSetup } from './pipelines_edit.helpers';
 
-export { nextTick, getRandomString, findTestSubject } from '../../../../../test_utils';
+export { nextTick, getRandomString, findTestSubject } from '@kbn/test/jest';
 
 export { setupEnvironment } from './setup_environment';
 
