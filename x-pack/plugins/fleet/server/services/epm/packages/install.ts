@@ -27,12 +27,7 @@ import {
   KibanaAssetType,
 } from '../../../types';
 import * as Registry from '../registry';
-import {
-  addEntriesToMemoryStore,
-  setArchiveFilelist,
-  parseAndVerifyArchiveEntries,
-  unpackBufferEntries,
-} from '../archive';
+import { setPackageInfo, parseAndVerifyArchiveEntries, unpackBufferToCache } from '../archive';
 import {
   getInstallation,
   getInstallationObject,
@@ -249,17 +244,14 @@ async function installPackageFromRegistry({
 }: InstallRegistryPackageParams): Promise<AssetReference[]> {
   // TODO: change epm API to /packageName/version so we don't need to do this
   const { pkgName, pkgVersion } = Registry.splitPkgKey(pkgkey);
-  // TODO: calls to getInstallationObject, Registry.fetchInfo, and Registry.fetchFindLatestPackge
-  // and be replaced by getPackageInfo after adjusting for it to not group/use archive assets
-  const latestPackage = await Registry.fetchFindLatestPackage(pkgName);
   // get the currently installed package
   const installedPkg = await getInstallationObject({ savedObjectsClient, pkgName });
-
   const installType = getInstallType({ pkgVersion, installedPkg });
-
   // let the user install if using the force flag or needing to reinstall or install a previous version due to failed update
   const installOutOfDateVersionOk =
     installType === 'reinstall' || installType === 'reupdate' || installType === 'rollback';
+
+  const latestPackage = await Registry.fetchFindLatestPackage(pkgName);
   if (semver.lt(pkgVersion, latestPackage.version) && !force && !installOutOfDateVersionOk) {
     throw new PackageOutdatedError(`${pkgkey} is out-of-date and cannot be installed or updated`);
   }
@@ -294,21 +286,35 @@ async function installPackageByUpload({
   archiveBuffer,
   contentType,
 }: InstallUploadedArchiveParams): Promise<AssetReference[]> {
-  const entries = await unpackBufferEntries(archiveBuffer, contentType);
-  const { packageInfo } = await parseAndVerifyArchiveEntries(entries);
-  const paths = addEntriesToMemoryStore(entries);
-  setArchiveFilelist(packageInfo.name, packageInfo.version, paths);
+  const { packageInfo } = await parseAndVerifyArchiveEntries(archiveBuffer, contentType);
 
   const installedPkg = await getInstallationObject({
     savedObjectsClient,
     pkgName: packageInfo.name,
   });
+
   const installType = getInstallType({ pkgVersion: packageInfo.version, installedPkg });
   if (installType !== 'install') {
     throw new PackageOperationNotSupportedError(
       `Package upload only supports fresh installations. Package ${packageInfo.name} is already installed, please uninstall first.`
     );
   }
+
+  const installSource = 'upload';
+  const paths = await unpackBufferToCache({
+    name: packageInfo.name,
+    version: packageInfo.version,
+    installSource,
+    archiveBuffer,
+    contentType,
+  });
+
+  setPackageInfo({
+    name: packageInfo.name,
+    version: packageInfo.version,
+    installSource,
+    packageInfo,
+  });
 
   return _installPackage({
     savedObjectsClient,
@@ -317,7 +323,7 @@ async function installPackageByUpload({
     paths,
     packageInfo,
     installType,
-    installSource: 'upload',
+    installSource,
   });
 }
 

@@ -4,35 +4,42 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AssetParts } from '../../../../common/types';
+import { AssetParts, InstallSource } from '../../../../common/types';
 import { PackageInvalidArchiveError, PackageUnsupportedMediaTypeError } from '../../../errors';
 import {
+  SharedKey,
   getArchiveEntry,
   setArchiveEntry,
   deleteArchiveEntry,
   getArchiveFilelist,
+  setArchiveFilelist,
   deleteArchiveFilelist,
 } from './cache';
 import { getBufferExtractor } from './extract';
 
 export * from './cache';
-export { untarBuffer, unzipBuffer, getBufferExtractor } from './extract';
-export { parseAndVerifyArchiveEntries } from './validation';
+export { getBufferExtractor, untarBuffer, unzipBuffer } from './extract';
+export { parseAndVerifyArchiveBuffer as parseAndVerifyArchiveEntries } from './validation';
 
 export interface ArchiveEntry {
   path: string;
   buffer?: Buffer;
 }
 
-export async function unpackBufferToCache(
-  archiveBuffer: Buffer,
-  contentType: string
-): Promise<string[]> {
+export async function unpackBufferToCache({
+  name,
+  version,
+  contentType,
+  archiveBuffer,
+  installSource,
+}: {
+  name: string;
+  version: string;
+  contentType: string;
+  archiveBuffer: Buffer;
+  installSource: InstallSource;
+}): Promise<string[]> {
   const entries = await unpackBufferEntries(archiveBuffer, contentType);
-  return addEntriesToMemoryStore(entries);
-}
-
-export function addEntriesToMemoryStore(entries: ArchiveEntry[]) {
   const paths: string[] = [];
   entries.forEach((entry) => {
     const { path, buffer } = entry;
@@ -41,6 +48,7 @@ export function addEntriesToMemoryStore(entries: ArchiveEntry[]) {
       paths.push(path);
     }
   });
+  setArchiveFilelist({ name, version, installSource }, paths);
 
   return paths;
 }
@@ -76,15 +84,15 @@ export async function unpackBufferEntries(
   return entries;
 }
 
-export const deletePackageCache = (name: string, version: string) => {
+export const deletePackageCache = ({ name, version, installSource }: SharedKey) => {
   // get cached archive filelist
-  const paths = getArchiveFilelist(name, version);
+  const paths = getArchiveFilelist({ name, version, installSource });
 
   // delete cached archive filelist
-  deleteArchiveFilelist(name, version);
+  deleteArchiveFilelist({ name, version, installSource });
 
   // delete cached archive files
-  // this has been populated in unpackArchiveToCache()
+  // this has been populated in unpackBufferToCache()
   paths?.forEach((path) => deleteArchiveEntry(path));
 };
 

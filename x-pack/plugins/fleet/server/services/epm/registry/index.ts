@@ -20,7 +20,6 @@ import {
 import {
   getArchiveFilelist,
   getPathParts,
-  setArchiveFilelist,
   unpackBufferToCache,
   getPackageInfo,
   setPackageInfo,
@@ -139,24 +138,33 @@ export async function getInfo(name: string, version: string) {
 }
 
 export async function getRegistryPackage(
-  pkgName: string,
-  pkgVersion: string
+  name: string,
+  version: string
 ): Promise<{ paths: string[]; packageInfo: RegistryPackage }> {
-  let paths = getArchiveFilelist(pkgName, pkgVersion);
+  const installSource = 'registry';
+  let paths = getArchiveFilelist({ name, version, installSource });
   if (!paths || paths.length === 0) {
-    const { archiveBuffer, archivePath } = await fetchArchiveBuffer(pkgName, pkgVersion);
-    const contentType = mime.lookup(archivePath);
-    if (!contentType) {
-      throw new Error(`Unknown compression format for '${archivePath}'. Please use .zip or .gz`);
-    }
-    paths = await unpackBufferToCache(archiveBuffer, contentType);
-    setArchiveFilelist(pkgName, pkgVersion, paths);
+    const { archiveBuffer, archivePath } = await fetchArchiveBuffer(name, version);
+    paths = await unpackBufferToCache({
+      name,
+      version,
+      installSource: 'registry',
+      archiveBuffer,
+      contentType: ensureContentType(archivePath),
+    });
   }
 
-  // TODO: cache this as well?
-  const packageInfo = await getInfo(pkgName, pkgVersion);
+  const packageInfo = await getInfo(name, version);
 
   return { paths, packageInfo };
+}
+
+function ensureContentType(archivePath: string) {
+  const contentType = mime.lookup(archivePath);
+  if (!contentType) {
+    throw new Error(`Unknown compression format for '${archivePath}'. Please use .zip or .gz`);
+  }
+  return contentType;
 }
 
 export async function ensureCachedArchiveInfo(
@@ -164,7 +172,7 @@ export async function ensureCachedArchiveInfo(
   version: string,
   installSource: InstallSource = 'registry'
 ) {
-  const paths = getArchiveFilelist(name, version);
+  const paths = getArchiveFilelist({ name, version, installSource });
   if (!paths || paths.length === 0) {
     if (installSource === 'registry') {
       await getRegistryPackage(name, version);
