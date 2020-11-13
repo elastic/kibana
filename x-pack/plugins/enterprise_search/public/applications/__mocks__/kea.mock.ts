@@ -13,6 +13,7 @@
 import { mockKibanaValues } from './kibana_logic.mock';
 import { mockLicensingValues } from './licensing_logic.mock';
 import { mockHttpValues } from './http_logic.mock';
+import { mockTelemetryActions } from './telemetry_logic.mock';
 import { mockFlashMessagesValues, mockFlashMessagesActions } from './flash_messages_logic.mock';
 
 export const mockAllValues = {
@@ -22,6 +23,7 @@ export const mockAllValues = {
   ...mockFlashMessagesValues,
 };
 export const mockAllActions = {
+  ...mockTelemetryActions,
   ...mockFlashMessagesActions,
 };
 

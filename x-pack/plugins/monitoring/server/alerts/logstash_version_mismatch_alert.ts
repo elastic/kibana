@@ -13,22 +13,25 @@ import {
   AlertMessage,
   AlertInstanceState,
   LegacyAlert,
-} from './types';
+  CommonAlertParams,
+} from '../../common/types/alerts';
 import { AlertInstance } from '../../../alerts/server';
-import { INDEX_ALERTS, ALERT_LOGSTASH_VERSION_MISMATCH } from '../../common/constants';
+import {
+  INDEX_ALERTS,
+  ALERT_LOGSTASH_VERSION_MISMATCH,
+  LEGACY_ALERT_DETAILS,
+} from '../../common/constants';
 import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
 import { AlertSeverity } from '../../common/enums';
-import { CommonAlertParams } from '../../common/types';
 import { fetchLegacyAlerts } from '../lib/alerts/fetch_legacy_alerts';
-import { AlertingDefaults } from './alerts_common';
+import { AlertingDefaults } from './alert_helpers';
 
 const WATCH_NAME = 'logstash_version_mismatch';
 
 export class LogstashVersionMismatchAlert extends BaseAlert {
   public type = ALERT_LOGSTASH_VERSION_MISMATCH;
-  public label = i18n.translate('xpack.monitoring.alerts.logstashVersionMismatch.label', {
-    defaultMessage: 'Logstash version mismatch',
-  });
+  public label = LEGACY_ALERT_DETAILS[ALERT_LOGSTASH_VERSION_MISMATCH].label;
+  public description = LEGACY_ALERT_DETAILS[ALERT_LOGSTASH_VERSION_MISMATCH].description;
   public isLegacy = true;
 
   protected actionVariables = [

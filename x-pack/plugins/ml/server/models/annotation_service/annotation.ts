@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { each, get } from 'lodash';
 import { IScopedClusterClient } from 'kibana/server';
 

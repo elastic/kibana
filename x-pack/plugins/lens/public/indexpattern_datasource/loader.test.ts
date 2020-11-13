@@ -117,6 +117,7 @@ const indexPattern2 = ({
   title: 'my-fake-restricted-pattern',
   timeFieldName: 'timestamp',
   hasRestrictions: true,
+  fieldFormatMap: { bytes: { id: 'bytes', params: { pattern: '0.0' } } },
   fields: [
     {
       name: 'timestamp',
@@ -284,15 +285,10 @@ describe('loader', () => {
         } as unknown) as Pick<IndexPatternsContract, 'get'>,
       });
 
-      expect(
-        cache.foo.fields.find((f: IndexPatternField) => f.name === 'bytes')!.aggregationRestrictions
-      ).toEqual({
+      expect(cache.foo.getFieldByName('bytes')!.aggregationRestrictions).toEqual({
         sum: { agg: 'sum' },
       });
-      expect(
-        cache.foo.fields.find((f: IndexPatternField) => f.name === 'timestamp')!
-          .aggregationRestrictions
-      ).toEqual({
+      expect(cache.foo.getFieldByName('timestamp')!.aggregationRestrictions).toEqual({
         date_histogram: { agg: 'date_histogram', fixed_interval: 'm' },
       });
     });
@@ -341,9 +337,7 @@ describe('loader', () => {
         } as unknown) as Pick<IndexPatternsContract, 'get'>,
       });
 
-      expect(cache.foo.fields.find((f: IndexPatternField) => f.name === 'timestamp')!.meta).toEqual(
-        true
-      );
+      expect(cache.foo.getFieldByName('timestamp')!.meta).toEqual(true);
     });
   });
 

@@ -20,7 +20,9 @@
   "severity": "low",
   "tags": [
     "Elastic",
+    "Host",
     "Linux",
+    "Threat Detection",
     "ML"
   ],
   "threat": [

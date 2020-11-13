@@ -20,13 +20,16 @@ import {
 } from '@elastic/eui';
 import { ScopedHistory } from 'kibana/public';
 
-import { reactRouterNavigate, extractQueryParams } from '../../../../shared_imports';
+import {
+  reactRouterNavigate,
+  extractQueryParams,
+  attemptToURIDecode,
+} from '../../../../shared_imports';
 import { useAppContext } from '../../../app_context';
 import { SectionError, SectionLoading, Error } from '../../../components';
 import { useLoadDataStreams } from '../../../services/api';
-import { encodePathForReactRouter, decodePathFromReactRouter } from '../../../services/routing';
 import { documentationService } from '../../../services/documentation';
-import { Section } from '../../home';
+import { Section } from '../home';
 import { DataStreamTable } from './data_stream_table';
 import { DataStreamDetailPanel } from './data_stream_detail_panel';
 
@@ -206,7 +209,7 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
         <DataStreamTable
           filters={
             isDeepLink && dataStreamName !== undefined
-              ? `name=${decodePathFromReactRouter(dataStreamName)}`
+              ? `name="${attemptToURIDecode(dataStreamName)}"`
               : ''
           }
           dataStreams={dataStreams}
@@ -228,13 +231,7 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
       */}
       {dataStreamName && (
         <DataStreamDetailPanel
-          dataStreamName={decodePathFromReactRouter(dataStreamName)}
-          backingIndicesLink={reactRouterNavigate(history, {
-            pathname: '/indices',
-            search: `includeHiddenIndices=true&filter=data_stream=${encodePathForReactRouter(
-              dataStreamName
-            )}`,
-          })}
+          dataStreamName={attemptToURIDecode(dataStreamName)!}
           onClose={(shouldReload?: boolean) => {
             history.push(`/${Section.DataStreams}`);
 

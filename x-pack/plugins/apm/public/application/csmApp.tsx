@@ -28,6 +28,7 @@ import { ConfigSchema } from '../index';
 import { ApmPluginSetupDeps, ApmPluginStartDeps } from '../plugin';
 import { createCallApmApi } from '../services/rest/createCallApmApi';
 import { px, units } from '../style/variables';
+import { createStaticIndexPattern } from '../services/rest/index_pattern';
 
 const CsmMainContainer = styled.div`
   padding: ${px(units.plus)};
@@ -65,21 +66,23 @@ function CsmApp() {
 }
 
 export function CsmAppRoot({
+  appMountParameters,
   core,
   deps,
-  history,
   config,
   corePlugins: { embeddable },
 }: {
+  appMountParameters: AppMountParameters;
   core: CoreStart;
   deps: ApmPluginSetupDeps;
-  history: AppMountParameters['history'];
   config: ConfigSchema;
   corePlugins: ApmPluginStartDeps;
 }) {
+  const { history } = appMountParameters;
   const i18nCore = core.i18n;
   const plugins = deps;
   const apmPluginContextValue = {
+    appMountParameters,
     config,
     core,
     plugins,
@@ -108,17 +111,25 @@ export function CsmAppRoot({
 export const renderApp = (
   core: CoreStart,
   deps: ApmPluginSetupDeps,
-  { element, history }: AppMountParameters,
+  appMountParameters: AppMountParameters,
   config: ConfigSchema,
   corePlugins: ApmPluginStartDeps
 ) => {
+  const { element } = appMountParameters;
+
   createCallApmApi(core.http);
+
+  // Automatically creates static index pattern and stores as saved object
+  createStaticIndexPattern().catch((e) => {
+    // eslint-disable-next-line no-console
+    console.log('Error creating static index pattern', e);
+  });
 
   ReactDOM.render(
     <CsmAppRoot
+      appMountParameters={appMountParameters}
       core={core}
       deps={deps}
-      history={history}
       config={config}
       corePlugins={corePlugins}
     />,

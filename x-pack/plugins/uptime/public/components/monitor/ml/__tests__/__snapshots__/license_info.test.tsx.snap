@@ -26,24 +26,21 @@ Array [
       <p>
         In order to access duration anomaly detection, you have to be subscribed to an Elastic Platinum license.
       </p>
-      <span>
-        <a
-          class="euiButton euiButton--primary"
-          href="/app/management/stack/license_management/home"
-          rel="noopener noreferrer"
-          target="_blank"
+      <a
+        class="euiButton euiButton--primary"
+        href="/app/management/stack/license_management/home"
+        rel="noreferrer"
+      >
+        <span
+          class="euiButtonContent euiButton__content"
         >
           <span
-            class="euiButtonContent euiButton__content"
+            class="euiButton__text"
           >
-            <span
-              class="euiButton__text"
-            >
-              Start free 14-day trial
-            </span>
+            Start free 14-day trial
           </span>
-        </a>
-      </span>
+        </span>
+      </a>
     </div>
   </div>,
   <div
@@ -64,19 +61,12 @@ exports[`ShowLicenseInfo shallow renders without errors 1`] = `
     <p>
       In order to access duration anomaly detection, you have to be subscribed to an Elastic Platinum license.
     </p>
-    <span
-      onClick={[Function]}
-      onKeyDown={[Function]}
+    <EuiButton
+      color="primary"
+      href="/app/management/stack/license_management/home"
     >
-      <EuiButton
-        color="primary"
-        href="/app/management/stack/license_management/home"
-        isLoading={false}
-        target="_blank"
-      >
-        Start free 14-day trial
-      </EuiButton>
-    </span>
+      Start free 14-day trial
+    </EuiButton>
   </EuiCallOut>
   <EuiSpacer />
 </Fragment>

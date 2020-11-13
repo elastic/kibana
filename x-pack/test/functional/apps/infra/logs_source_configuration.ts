@@ -118,10 +118,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           .set(COMMON_REQUEST_HEADERS)
           .set('Accept', 'application/json')
           .send({
-            timeRange: {
-              min: moment().subtract(1, 'hour').toISOString(),
-              max: moment().toISOString(),
-            },
+            timestamp: moment().toISOString(),
             unencrypted: true,
           })
           .expect(200)

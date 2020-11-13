@@ -6,6 +6,7 @@
 
 import { reject, isUndefined } from 'lodash';
 import { SearchResponse, Client } from 'elasticsearch';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { Logger, LegacyClusterClient } from 'src/core/server';
 
 import { IValidatedEvent, SAVED_OBJECT_REL_PRIMARY } from '../types';

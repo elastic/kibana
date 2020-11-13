@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import * as t from 'io-ts';
 import { pick } from 'lodash';
 import { INVALID_LICENSE } from '../../../common/custom_link';

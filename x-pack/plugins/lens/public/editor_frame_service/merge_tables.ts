@@ -6,14 +6,15 @@
 
 import { i18n } from '@kbn/i18n';
 import {
+  ExecutionContext,
   Datatable,
   ExpressionFunctionDefinition,
-  ExpressionValueSearchContext,
 } from 'src/plugins/expressions/public';
-import { search } from '../../../../../src/plugins/data/public';
+import { ExpressionValueSearchContext, search } from '../../../../../src/plugins/data/public';
 const { toAbsoluteDates } = search.aggs;
 
 import { LensMultiTable } from '../types';
+import { LensInspectorAdapters } from './types';
 
 interface MergeTables {
   layerIds: string[];
@@ -24,12 +25,14 @@ export const mergeTables: ExpressionFunctionDefinition<
   'lens_merge_tables',
   ExpressionValueSearchContext | null,
   MergeTables,
-  LensMultiTable
+  LensMultiTable,
+  ExecutionContext<LensInspectorAdapters, ExpressionValueSearchContext>
 > = {
   name: 'lens_merge_tables',
   type: 'lens_multitable',
   help: i18n.translate('xpack.lens.functions.mergeTables.help', {
-    defaultMessage: 'A helper to merge any number of kibana tables into a single table',
+    defaultMessage:
+      'A helper to merge any number of kibana tables into a single table and expose it via inspector adapter',
   }),
   args: {
     layerIds: {
@@ -44,10 +47,18 @@ export const mergeTables: ExpressionFunctionDefinition<
     },
   },
   inputTypes: ['kibana_context', 'null'],
-  fn(input, { layerIds, tables }) {
+  fn(input, { layerIds, tables }, context) {
+    if (!context.inspectorAdapters) {
+      context.inspectorAdapters = {};
+    }
+    if (!context.inspectorAdapters.tables) {
+      context.inspectorAdapters.tables = {};
+    }
     const resultTables: Record<string, Datatable> = {};
     tables.forEach((table, index) => {
       resultTables[layerIds[index]] = table;
+      // adapter is always defined at that point because we make sure by the beginning of the function
+      context.inspectorAdapters.tables![layerIds[index]] = table;
     });
     return {
       type: 'lens_multitable',

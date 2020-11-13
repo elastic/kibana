@@ -5,7 +5,7 @@
  */
 
 import { get } from 'lodash';
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { INDEX_PATTERN } from '../../../common/constants';
 
 /*

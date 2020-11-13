@@ -18,6 +18,7 @@ export interface SavedObjectsExportOptions
 |  --- | --- | --- |
 |  [excludeExportDetails](./kibana-plugin-core-server.savedobjectsexportoptions.excludeexportdetails.md) | <code>boolean</code> | flag to not append [export details](./kibana-plugin-core-server.savedobjectsexportresultdetails.md) to the end of the export stream. |
 |  [exportSizeLimit](./kibana-plugin-core-server.savedobjectsexportoptions.exportsizelimit.md) | <code>number</code> | the maximum number of objects to export. |
+|  [hasReference](./kibana-plugin-core-server.savedobjectsexportoptions.hasreference.md) | <code>SavedObjectsFindOptionsReference[]</code> | optional array of references to search object for when exporting by types |
 |  [includeReferencesDeep](./kibana-plugin-core-server.savedobjectsexportoptions.includereferencesdeep.md) | <code>boolean</code> | flag to also include all related saved objects in the export stream. |
 |  [namespace](./kibana-plugin-core-server.savedobjectsexportoptions.namespace.md) | <code>string</code> | optional namespace to override the namespace used by the savedObjectsClient. |
 |  [objects](./kibana-plugin-core-server.savedobjectsexportoptions.objects.md) | <code>Array&lt;{</code><br/><code>        id: string;</code><br/><code>        type: string;</code><br/><code>    }&gt;</code> | optional array of objects to export. |

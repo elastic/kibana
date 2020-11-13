@@ -18,14 +18,16 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 import { InspectorPanel } from './inspector_panel';
 import { InspectorViewDescription } from '../types';
 import { Adapters } from '../../common';
+import type { IUiSettingsClient } from 'kibana/public';
 
 describe('InspectorPanel', () => {
   let adapters: Adapters;
   let views: InspectorViewDescription[];
+  const uiSettings: IUiSettingsClient = {} as IUiSettingsClient;
 
   beforeEach(() => {
     adapters = {
@@ -62,12 +64,16 @@ describe('InspectorPanel', () => {
   });
 
   it('should render as expected', () => {
-    const component = mountWithIntl(<InspectorPanel adapters={adapters} views={views} />);
+    const component = mountWithIntl(
+      <InspectorPanel adapters={adapters} views={views} dependencies={{ uiSettings }} />
+    );
     expect(component).toMatchSnapshot();
   });
 
   it('should not allow updating adapters', () => {
-    const component = mountWithIntl(<InspectorPanel adapters={adapters} views={views} />);
+    const component = mountWithIntl(
+      <InspectorPanel adapters={adapters} views={views} dependencies={{ uiSettings }} />
+    );
     adapters.notAllowed = {};
     expect(() => component.setProps({ adapters })).toThrow();
   });

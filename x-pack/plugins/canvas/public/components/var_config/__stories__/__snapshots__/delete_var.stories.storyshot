@@ -64,6 +64,11 @@ Array [
           <button
             className="euiButton euiButton--danger euiButton--small euiButton--fill"
             onClick={[Function]}
+            style={
+              Object {
+                "minWidth": undefined,
+              }
+            }
             type="button"
           >
             <span

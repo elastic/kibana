@@ -11,7 +11,6 @@ import { FieldVisConfig } from '../../../../../plugins/ml/public/application/dat
 interface TestData {
   suiteTitle: string;
   sourceIndexOrSavedSearch: string;
-  advancedJobWizardDatafeedQuery: string;
   metricFieldsFilter: string;
   nonMetricFieldsFilter: string;
   nonMetricFieldsTypeFilter: string;
@@ -45,15 +44,6 @@ export default function ({ getService }: FtrProviderContext) {
   const farequoteIndexPatternTestData: TestData = {
     suiteTitle: 'index pattern',
     sourceIndexOrSavedSearch: 'ft_farequote',
-    advancedJobWizardDatafeedQuery: `{
-  "bool": {
-    "must": [
-      {
-        "match_all": {}
-      }
-    ]
-  }
-}`,
     metricFieldsFilter: 'document',
     nonMetricFieldsFilter: 'airline',
     nonMetricFieldsTypeFilter: 'keyword',
@@ -128,15 +118,6 @@ export default function ({ getService }: FtrProviderContext) {
   const farequoteKQLSearchTestData: TestData = {
     suiteTitle: 'KQL saved search',
     sourceIndexOrSavedSearch: 'ft_farequote_kuery',
-    advancedJobWizardDatafeedQuery: `{
-  "bool": {
-    "must": [
-      {
-        "match_all": {}
-      }
-    ]
-  }
-}`, // Note query is not currently passed to the wizard
     metricFieldsFilter: 'responsetime',
     nonMetricFieldsFilter: 'airline',
     nonMetricFieldsTypeFilter: 'keyword',
@@ -211,15 +192,6 @@ export default function ({ getService }: FtrProviderContext) {
   const farequoteLuceneSearchTestData: TestData = {
     suiteTitle: 'lucene saved search',
     sourceIndexOrSavedSearch: 'ft_farequote_lucene',
-    advancedJobWizardDatafeedQuery: `{
-  "bool": {
-    "must": [
-      {
-        "match_all": {}
-      }
-    ]
-  }
-}`, // Note query is not currently passed to the wizard
     metricFieldsFilter: 'responsetime',
     nonMetricFieldsFilter: 'version',
     nonMetricFieldsTypeFilter: 'keyword',
@@ -425,17 +397,6 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       runTests(farequoteLuceneSearchTestData);
-
-      // Test the Create advanced job button.
-      // Note the search is not currently passed to the wizard, just the index.
-      it(`${farequoteLuceneSearchTestData.suiteTitle} opens the advanced job wizard`, async () => {
-        await ml.dataVisualizerIndexBased.clickCreateAdvancedJobButton();
-        await ml.jobTypeSelection.assertAdvancedJobWizardOpen();
-        await ml.jobWizardAdvanced.assertDatafeedQueryEditorExists();
-        await ml.jobWizardAdvanced.assertDatafeedQueryEditorValue(
-          farequoteLuceneSearchTestData.advancedJobWizardDatafeedQuery
-        );
-      });
     });
   });
 }

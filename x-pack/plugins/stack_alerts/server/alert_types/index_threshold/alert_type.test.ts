@@ -3,20 +3,18 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import type { Writable } from '@kbn/utility-types';
 import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
 import { getAlertType } from './alert_type';
 import { Params } from './alert_type_params';
 
 describe('alertType', () => {
-  const service = {
-    indexThreshold: {
-      timeSeriesQuery: jest.fn(),
-    },
-    logger: loggingSystemMock.create().get(),
+  const logger = loggingSystemMock.create().get();
+  const data = {
+    timeSeriesQuery: jest.fn(),
   };
 
-  const alertType = getAlertType(service);
+  const alertType = getAlertType(logger, Promise.resolve(data));
 
   it('alert type creation structure is the expected value', async () => {
     expect(alertType.id).toBe('.index-threshold');
@@ -45,6 +43,10 @@ describe('alertType', () => {
           Object {
             "description": "The value that exceeded the threshold.",
             "name": "value",
+          },
+          Object {
+            "description": "A string describing the threshold comparator and threshold",
+            "name": "function",
           },
         ],
         "params": Array [

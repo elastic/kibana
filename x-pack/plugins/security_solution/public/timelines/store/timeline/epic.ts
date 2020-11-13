@@ -78,6 +78,7 @@ import {
   createTimeline,
   addTimeline,
   showCallOutUnauthorizedMsg,
+  saveTimeline,
 } from './actions';
 import { ColumnHeaderOptions, TimelineModel } from './model';
 import { epicPersistNote, timelineNoteActionsType } from './epic_note';
@@ -95,6 +96,7 @@ const timelineActionsType = [
   dataProviderEdited.type,
   removeColumn.type,
   removeProvider.type,
+  saveTimeline.type,
   setExcludedRowRendererIds.type,
   setFilters.type,
   setSavedQueryId.type,
@@ -179,11 +181,11 @@ export const createTimelineEpic = <State>(): Epic<
         } else if (
           timelineActionsType.includes(action.type) &&
           !timelineObj.isLoading &&
-          isItAtimelineAction(timelineId)
+          isItAtimelineAction(timelineId) &&
+          !get('payload.disableAutoSave', action)
         ) {
           return true;
         }
-        return false;
       }),
       debounceTime(500),
       mergeMap(([action]) => {

@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { set } from '@elastic/safer-lodash-set/fp';
 import { keyBy, pick, isEmpty, isEqual, isUndefined } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -19,7 +18,7 @@ import {
   BrowserField,
   BrowserFields,
 } from '../../../../common/search_strategy/index_fields';
-import { AbortError } from '../../../../../../../src/plugins/data/common';
+import { AbortError } from '../../../../../../../src/plugins/kibana_utils/common';
 import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import * as i18n from './translations';
 import { SourcererScopeName } from '../../store/sourcerer/model';
@@ -55,15 +54,31 @@ export const getIndexFields = memoizeOne(
   (newArgs, lastArgs) => newArgs[0] === lastArgs[0] && newArgs[1].length === lastArgs[1].length
 );
 
+/**
+ * HOT Code path where the fields can be 16087 in length or larger. This is
+ * VERY mutatious on purpose to improve the performance of the transform.
+ */
 export const getBrowserFields = memoizeOne(
-  (_title: string, fields: IndexField[]): BrowserFields =>
-    fields && fields.length > 0
-      ? fields.reduce<BrowserFields>(
-          (accumulator: BrowserFields, field: IndexField) =>
-            set([field.category, 'fields', field.name], field, accumulator),
-          {}
-        )
-      : {},
+  (_title: string, fields: IndexField[]): BrowserFields => {
+    // Adds two dangerous casts to allow for mutations within this function
+    type DangerCastForMutation = Record<string, {}>;
+    type DangerCastForBrowserFieldsMutation = Record<
+      string,
+      Omit<BrowserField, 'fields'> & { fields: Record<string, BrowserField> }
+    >;
+
+    // We mutate this instead of using lodash/set to keep this as fast as possible
+    return fields.reduce<DangerCastForBrowserFieldsMutation>((accumulator, field) => {
+      if (accumulator[field.category] == null) {
+        (accumulator as DangerCastForMutation)[field.category] = {};
+      }
+      if (accumulator[field.category].fields == null) {
+        accumulator[field.category].fields = {};
+      }
+      accumulator[field.category].fields[field.name] = (field as unknown) as BrowserField;
+      return accumulator;
+    }, {});
+  },
   // Update the value only if _title has changed
   (newArgs, lastArgs) => newArgs[0] === lastArgs[0]
 );
@@ -194,15 +209,14 @@ export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
   const { data, notifications } = useKibana().services;
   const abortCtrl = useRef(new AbortController());
   const dispatch = useDispatch();
-  const previousIndexesName = useRef<string[]>([]);
-
   const indexNamesSelectedSelector = useMemo(
     () => sourcererSelectors.getIndexNamesSelectedSelector(),
     []
   );
-  const indexNames = useShallowEqualSelector<string[]>((state) =>
-    indexNamesSelectedSelector(state, sourcererScopeName)
-  );
+  const { indexNames, previousIndexNames } = useShallowEqualSelector<{
+    indexNames: string[];
+    previousIndexNames: string;
+  }>((state) => indexNamesSelectedSelector(state, sourcererScopeName));
 
   const setLoading = useCallback(
     (loading: boolean) => {
@@ -230,7 +244,6 @@ export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
               if (!response.isPartial && !response.isRunning) {
                 if (!didCancel) {
                   const stringifyIndices = response.indicesExist.sort().join();
-                  previousIndexesName.current = response.indicesExist;
                   dispatch(
                     sourcererActions.setSource({
                       id: sourcererScopeName,
@@ -279,8 +292,8 @@ export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
   );
 
   useEffect(() => {
-    if (!isEmpty(indexNames) && !isEqual(previousIndexesName.current, indexNames)) {
+    if (!isEmpty(indexNames) && previousIndexNames !== indexNames.sort().join()) {
       indexFieldsSearch(indexNames);
     }
-  }, [indexNames, indexFieldsSearch, previousIndexesName]);
+  }, [indexNames, indexFieldsSearch, previousIndexNames]);
 };

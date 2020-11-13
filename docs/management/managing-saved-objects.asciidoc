@@ -10,6 +10,16 @@ To get started, open the main menu, then click *Stack Management > Saved Objects
 [role="screenshot"]
 image::images/management-saved-objects.png[Saved Objects]
 
+[float]
+=== Required permissions
+
+The `Saved Objects Management` {kib} privilege is required to access the *Saved Objects* UI.
+
+To add the privilege, open the menu, then click *Stack Management > Roles*.
+
+NOTE:
+Granting access to Saved Objects Management will authorize users to manage all saved objects in {kib}, including objects that are managed by applications they may not otherwise be authorized to access.
+
 
 [float]
 [[managing-saved-objects-view]]

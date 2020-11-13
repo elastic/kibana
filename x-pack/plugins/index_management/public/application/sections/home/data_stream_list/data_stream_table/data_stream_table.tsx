@@ -12,9 +12,8 @@ import { ScopedHistory } from 'kibana/public';
 
 import { DataStream } from '../../../../../../common/types';
 import { UseRequestResponse, reactRouterNavigate } from '../../../../../shared_imports';
-import { encodePathForReactRouter } from '../../../../services/routing';
+import { getDataStreamDetailsLink, getIndexListUri } from '../../../../services/routing';
 import { DataHealth } from '../../../../components';
-import { Section } from '../../../home';
 import { DeleteDataStreamConfirmationModal } from '../delete_data_stream_confirmation_modal';
 import { humanizeTimeStamp } from '../humanize_time_stamp';
 
@@ -45,13 +44,11 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
     }),
     truncateText: true,
     sortable: true,
-    render: (name: DataStream['name'], item: DataStream) => {
+    render: (name: DataStream['name']) => {
       return (
         <EuiLink
           data-test-subj="nameLink"
-          {...reactRouterNavigate(history, {
-            pathname: `/${Section.DataStreams}/${encodePathForReactRouter(name)}`,
-          })}
+          {...reactRouterNavigate(history, getDataStreamDetailsLink(name))}
         >
           {name}
         </EuiLink>
@@ -108,12 +105,7 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
     render: (indices: DataStream['indices'], dataStream) => (
       <EuiLink
         data-test-subj="indicesLink"
-        {...reactRouterNavigate(history, {
-          pathname: '/indices',
-          search: `includeHiddenIndices=true&filter=data_stream=${encodePathForReactRouter(
-            dataStream.name
-          )}`,
-        })}
+        {...reactRouterNavigate(history, getIndexListUri(`data_stream="${dataStream.name}"`, true))}
       >
         {indices.length}
       </EuiLink>

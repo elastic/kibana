@@ -5,12 +5,12 @@
  */
 
 import { IField, AbstractField } from './field';
-import { IKibanaRegionSource } from '../sources/kibana_regionmap_source/kibana_regionmap_source';
+import { KibanaRegionmapSource } from '../sources/kibana_regionmap_source/kibana_regionmap_source';
 import { FIELD_ORIGIN } from '../../../common/constants';
 import { IVectorSource } from '../sources/vector_source';
 
 export class KibanaRegionField extends AbstractField implements IField {
-  private readonly _source: IKibanaRegionSource;
+  private readonly _source: KibanaRegionmapSource;
 
   constructor({
     fieldName,
@@ -18,7 +18,7 @@ export class KibanaRegionField extends AbstractField implements IField {
     origin,
   }: {
     fieldName: string;
-    source: IKibanaRegionSource;
+    source: KibanaRegionmapSource;
     origin: FIELD_ORIGIN;
   }) {
     super({ fieldName, origin });

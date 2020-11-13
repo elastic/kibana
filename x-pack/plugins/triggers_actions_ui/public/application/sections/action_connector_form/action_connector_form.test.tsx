@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import * as React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import { ValidationResult, UserConfiguredActionConnector } from '../../../types';
@@ -22,7 +22,7 @@ describe('action_connector_form', () => {
     ] = await mocks.getStartServices();
     deps = {
       http: mocks.http,
-      actionTypeRegistry: actionTypeRegistry as any,
+      actionTypeRegistry,
       docLinks: { ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' },
       capabilities,
     };

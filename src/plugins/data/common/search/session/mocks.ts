@@ -23,6 +23,7 @@ export function getSessionServiceMock(): jest.Mocked<ISessionService> {
   return {
     clear: jest.fn(),
     start: jest.fn(),
+    restore: jest.fn(),
     getSessionId: jest.fn(),
     getSession$: jest.fn(),
   };

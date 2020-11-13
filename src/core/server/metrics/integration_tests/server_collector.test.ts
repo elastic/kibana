@@ -20,7 +20,7 @@
 import { BehaviorSubject, Subject } from 'rxjs';
 import { take, filter } from 'rxjs/operators';
 import supertest from 'supertest';
-import { Server as HapiServer } from 'hapi';
+import { Server as HapiServer } from '@hapi/hapi';
 import { createHttpServer } from '../../http/test_utils';
 import { HttpService, IRouter } from '../../http';
 import { contextServiceMock } from '../../context/context_service.mock';

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, useEffect, useState, Dispatch, SetStateAction } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import styled, { css } from 'styled-components';
 
 import { EuiCallOut } from '@elastic/eui';
@@ -93,19 +93,13 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
     setEditFlyoutVisibility(true);
   }, []);
 
-  const handleSetAddFlyoutVisibility = useCallback(
-    (isVisible: boolean) => {
-      setAddFlyoutVisibility(isVisible);
-    },
-    [setAddFlyoutVisibility]
-  );
+  const onCloseAddFlyout = useCallback(() => setAddFlyoutVisibility(false), [
+    setAddFlyoutVisibility,
+  ]);
 
-  const handleSetEditFlyoutVisibility = useCallback(
-    (isVisible: boolean) => {
-      setEditFlyoutVisibility(isVisible);
-    },
-    [setEditFlyoutVisibility]
-  );
+  const onCloseEditFlyout = useCallback(() => setEditFlyoutVisibility(false), [
+    setEditFlyoutVisibility,
+  ]);
 
   const onChangeConnector = useCallback(
     (id: string) => {
@@ -204,19 +198,14 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
           consumer: 'case',
         }}
       >
-        <ConnectorAddFlyout
-          addFlyoutVisible={addFlyoutVisible}
-          setAddFlyoutVisibility={handleSetAddFlyoutVisibility as Dispatch<SetStateAction<boolean>>}
-          actionTypes={actionTypes}
-        />
-        {editedConnectorItem && (
+        {addFlyoutVisible && (
+          <ConnectorAddFlyout onClose={onCloseAddFlyout} actionTypes={actionTypes} />
+        )}
+        {editedConnectorItem && editFlyoutVisible && (
           <ConnectorEditFlyout
             key={editedConnectorItem.id}
             initialConnector={editedConnectorItem}
-            editFlyoutVisible={editFlyoutVisible}
-            setEditFlyoutVisibility={
-              handleSetEditFlyoutVisibility as Dispatch<SetStateAction<boolean>>
-            }
+            onClose={onCloseEditFlyout}
           />
         )}
       </ActionsConnectorsContextProvider>

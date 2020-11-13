@@ -1,8 +1,8 @@
 # Documentation for APM UI developers
 
-### Setup local environment
+## Local environment setup
 
-#### Kibana
+### Kibana
 
 ```
 git clone git@github.com:elastic/kibana.git
@@ -11,15 +11,15 @@ yarn kbn bootstrap
 yarn start --no-base-path
 ```
 
-#### APM Server, Elasticsearch and data
+### APM Server, Elasticsearch and data
 
 To access an elasticsearch instance that has live data you have two options:
 
-##### A. Connect to Elasticsearch on Cloud (internal devs only)
+#### A. Connect to Elasticsearch on Cloud (internal devs only)
 
 Find the credentials for the cluster [here](https://github.com/elastic/apm-dev/blob/master/docs/credentials/apm-ui-clusters.md#apmelstcco)
 
-##### B. Start Elastic Stack and APM data generators
+#### B. Start Elastic Stack and APM data generators
 
 ```
 git clone git@github.com:elastic/apm-integration-testing.git
@@ -28,6 +28,8 @@ cd apm-integration-testing/
 ```
 
 _Docker Compose is required_
+
+## Testing
 
 ### E2E (Cypress) tests
 
@@ -109,23 +111,23 @@ The API tests for "trial" are located in `x-pack/test/apm_api_integration/trial/
 
 For debugging access Elasticsearch on http://localhost:9220` (elastic/changeme)
 
-### Linting
+## Linting
 
 _Note: Run the following commands from `kibana/`._
 
-#### Prettier
+### Prettier
 
 ```
 yarn prettier  "./x-pack/plugins/apm/**/*.{tsx,ts,js}" --write
 ```
 
-#### ESLint
+### ESLint
 
 ```
 yarn eslint ./x-pack/plugins/apm --fix
 ```
 
-### Setup default APM users
+## Setup default APM users
 
 APM behaves differently depending on which the role and permissions a logged in user has.
 For testing purposes APM uses 3 custom users:
@@ -144,20 +146,35 @@ node x-pack/plugins/apm/scripts/setup-kibana-security.js --role-suffix <github-u
 
 The users will be created with the password specified in kibana.dev.yml for `elasticsearch.password`
 
-### Debugging Elasticsearch queries
+## Debugging Elasticsearch queries
 
 All APM api endpoints accept `_debug=true` as a query param that will result in the underlying ES query being outputted in the Kibana backend process.
 
 Example:
 `/api/apm/services/my_service?_debug=true`
 
-#### Storybook
+## Storybook
 
 Start the [Storybook](https://storybook.js.org/) development environment with
 `yarn storybook apm`. All files with a .stories.tsx extension will be loaded.
 You can access the development environment at http://localhost:9001.
 
-#### Further resources
+## Experimental features settings
+
+To set up a flagged feature, add the name of the feature key (`apm:myFeature`) to [commmon/ui_settings_keys.ts](./common/ui_settings_keys.ts) and the feature parameters to [server/ui_settings.ts](./server/ui_settings.ts).
+
+Test for the feature like:
+
+```js
+import { myFeatureEnabled } from '../ui_settings_keys';
+if (core.uiSettings.get(myFeatureEnabled)) {
+  doStuff();
+}
+```
+
+Settings can be managed in Kibana under Stack Management > Advanced Settings > Observability.
+
+## Further resources
 
 - [Cypress integration tests](./e2e/README.md)
 - [VSCode setup instructions](./dev_docs/vscode_setup.md)

@@ -22,22 +22,27 @@ import { EuiCodeBlock, EuiSpacer } from '@elastic/eui';
 import { ApplicationStart } from 'kibana/public';
 import { KbnError } from '../../../../kibana_utils/common';
 import { IEsError } from './types';
-import { getRootCause } from './utils';
+import { getRootCause, getTopLevelCause } from './utils';
 
 export class EsError extends KbnError {
+  readonly body: IEsError['body'];
+
   constructor(protected readonly err: IEsError) {
     super('EsError');
+    this.body = err.body;
   }
 
   public getErrorMessage(application: ApplicationStart) {
     const rootCause = getRootCause(this.err)?.reason;
+    const topLevelCause = getTopLevelCause(this.err)?.reason;
+    const cause = rootCause ?? topLevelCause;
 
     return (
       <>
         <EuiSpacer size="s" />
-        {rootCause ? (
+        {cause ? (
           <EuiCodeBlock data-test-subj="errMessage" isCopyable={true} paddingSize="s">
-            {rootCause}
+            {cause}
           </EuiCodeBlock>
         ) : null}
       </>

@@ -79,6 +79,7 @@ export const ExecutedJourney: FC<ExecutedJourneyProps> = ({ journey }) => (
       {journey.steps.filter(isStepEnd).map((step, index) => (
         <ExecutedStep key={index} index={index} step={step} />
       ))}
+      <EuiSpacer size="s" />
     </EuiFlexGroup>
   </div>
 );

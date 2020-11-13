@@ -13,7 +13,7 @@ import { UseRequestResponse, reactRouterNavigate } from '../../../../../../share
 import { TemplateListItem } from '../../../../../../../common';
 import { UIM_TEMPLATE_SHOW_DETAILS_CLICK } from '../../../../../../../common/constants';
 import { TemplateDeleteModal } from '../../../../../components';
-import { encodePathForReactRouter } from '../../../../../services/routing';
+import { getTemplateDetailsLink } from '../../../../../services/routing';
 import { useServices } from '../../../../../app_context';
 import { TemplateContentIndicator } from '../../../../../components/shared';
 import { TemplateTypeIndicator } from '../../components';
@@ -53,10 +53,7 @@ export const LegacyTemplateTable: React.FunctionComponent<Props> = ({
             <EuiLink
               {...reactRouterNavigate(
                 history,
-                {
-                  pathname: `/templates/${encodePathForReactRouter(name)}`,
-                  search: `legacy=${Boolean(item._kbnMeta.isLegacy)}`,
-                },
+                getTemplateDetailsLink(name, Boolean(item._kbnMeta.isLegacy)),
                 () => uiMetricService.trackMetric('click', UIM_TEMPLATE_SHOW_DETAILS_CLICK)
               )}
               data-test-subj="templateDetailsLink"

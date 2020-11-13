@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { shallowWithIntl } from '@kbn/test/jest';
 import { AlertMonitorStatusComponent, AlertMonitorStatusProps } from '../alert_monitor_status';
 
 describe('alert monitor status component', () => {

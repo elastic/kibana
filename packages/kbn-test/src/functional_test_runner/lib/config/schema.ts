@@ -38,14 +38,7 @@ const urlPartsSchema = () =>
       password: Joi.string(),
       pathname: Joi.string().regex(/^\//, 'start with a /'),
       hash: Joi.string().regex(/^\//, 'start with a /'),
-      ssl: Joi.object()
-        .keys({
-          enabled: Joi.boolean().default(false),
-          certificate: Joi.string().optional(),
-          certificateAuthorities: Joi.string().optional(),
-          key: Joi.string().optional(),
-        })
-        .default(),
+      certificateAuthorities: Joi.array().items(Joi.binary()).optional(),
     })
     .default();
 

@@ -10,7 +10,13 @@ import { Option, map as mapOptional, getOrElse } from 'fp-ts/lib/Option';
 
 import { Logger } from '../../../../src/core/server';
 import { asOk, either, map, mapErr, promiseResult } from './lib/result_type';
-import { isTaskRunEvent, isTaskClaimEvent, isTaskRunRequestEvent } from './task_events';
+import {
+  isTaskRunEvent,
+  isTaskClaimEvent,
+  isTaskRunRequestEvent,
+  RanTask,
+  ErroredTask,
+} from './task_events';
 import { Middleware } from './lib/middleware';
 import {
   ConcreteTaskInstance,
@@ -23,6 +29,7 @@ import {
 import { TaskStore } from './task_store';
 import { ensureDeprecatedFieldsAreCorrected } from './lib/correct_deprecated_fields';
 import { TaskLifecycleEvent, TaskPollingLifecycle } from './polling_lifecycle';
+import { FillPoolResult } from './lib/fill_pool';
 
 const VERSION_CONFLICT_STATUS = 409;
 
@@ -118,16 +125,19 @@ export class TaskScheduling {
               return reject(await this.identifyTaskFailureReason(taskId, error));
             }, taskEvent.event);
           } else {
-            either<ConcreteTaskInstance, Error | Option<ConcreteTaskInstance>>(
+            either<
+              RanTask | ConcreteTaskInstance | FillPoolResult,
+              Error | ErroredTask | Option<ConcreteTaskInstance>
+            >(
               taskEvent.event,
-              (taskInstance: ConcreteTaskInstance) => {
+              (taskInstance: RanTask | ConcreteTaskInstance | FillPoolResult) => {
                 // resolve if the task has run sucessfully
                 if (isTaskRunEvent(taskEvent)) {
                   subscription.unsubscribe();
-                  resolve({ id: taskInstance.id });
+                  resolve({ id: (taskInstance as RanTask).task.id });
                 }
               },
-              async (error: Error | Option<ConcreteTaskInstance>) => {
+              async (errorResult: Error | ErroredTask | Option<ConcreteTaskInstance>) => {
                 // reject if any error event takes place for the requested task
                 subscription.unsubscribe();
                 return reject(
@@ -135,7 +145,9 @@ export class TaskScheduling {
                     `Failed to run task "${taskId}": ${
                       isTaskRunRequestEvent(taskEvent)
                         ? `Task Manager is at capacity, please try again later`
-                        : error
+                        : isTaskRunEvent(taskEvent)
+                        ? `${(errorResult as ErroredTask).error}`
+                        : `${errorResult}`
                     }`
                   )
                 );
