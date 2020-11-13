@@ -4,17 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  CoreSetup,
-  CoreStart,
-  Plugin as CorePlugin,
-  PluginInitializerContext,
-} from 'src/core/public';
+import { CoreSetup, CoreStart, Plugin as CorePlugin } from 'src/core/public';
 
 import { i18n } from '@kbn/i18n';
 import { FeaturesPluginStart } from '../../features/public';
 import { registerBuiltInActionTypes } from './application/components/builtin_action_types';
-import { registerBuiltInAlertTypes } from './application/components/builtin_alert_types';
 import { ActionTypeModel, AlertTypeModel } from './types';
 import { TypeRegistry } from './application/type_registry';
 import {
@@ -28,10 +22,6 @@ import {
 import { ChartsPluginStart } from '../../../../src/plugins/charts/public';
 import { PluginStartContract as AlertingStart } from '../../alerts/public';
 import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
-
-export interface TriggersActionsUiConfigType {
-  enableGeoTrackingThresholdAlert: boolean;
-}
 
 export interface TriggersAndActionsUIPublicPluginSetup {
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
@@ -66,14 +56,10 @@ export class Plugin
     > {
   private actionTypeRegistry: TypeRegistry<ActionTypeModel>;
   private alertTypeRegistry: TypeRegistry<AlertTypeModel>;
-  private initializerContext: PluginInitializerContext;
 
-  constructor(initializerContext: PluginInitializerContext) {
+  constructor() {
     this.actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
-
     this.alertTypeRegistry = new TypeRegistry<AlertTypeModel>();
-
-    this.initializerContext = initializerContext;
   }
 
   public setup(core: CoreSetup, plugins: PluginsSetup): TriggersAndActionsUIPublicPluginSetup {
@@ -136,11 +122,6 @@ export class Plugin
 
     registerBuiltInActionTypes({
       actionTypeRegistry: this.actionTypeRegistry,
-    });
-
-    registerBuiltInAlertTypes({
-      alertTypeRegistry: this.alertTypeRegistry,
-      triggerActionsUiConfig: this.initializerContext.config.get<TriggersActionsUiConfigType>(),
     });
 
     return {

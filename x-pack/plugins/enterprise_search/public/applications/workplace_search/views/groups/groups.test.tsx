@@ -16,7 +16,7 @@ import { shallow } from 'enzyme';
 import { Groups } from './groups';
 
 import { ViewContentHeader } from '../../components/shared/view_content_header';
-import { Loading } from '../../components/shared/loading';
+import { Loading } from '../../../shared/loading';
 import { FlashMessages } from '../../../shared/flash_messages';
 
 import { AddGroupModal } from './components/add_group_modal';
