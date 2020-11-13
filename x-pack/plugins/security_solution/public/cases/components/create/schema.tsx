@@ -44,4 +44,5 @@ export const schema: FormSchema<FormProps> = {
     label: i18n.CONNECTORS,
     defaultValue: 'none',
   },
+  fields: {},
 };

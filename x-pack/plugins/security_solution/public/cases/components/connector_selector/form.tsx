@@ -14,7 +14,6 @@ import { ActionConnector } from '../../../../../case/common/api/cases';
 interface ConnectorSelectorProps {
   connectors: ActionConnector[];
   dataTestSubj: string;
-  defaultValue?: ActionConnector;
   disabled: boolean;
   field: FieldHook;
   idAria: string;
@@ -24,7 +23,6 @@ interface ConnectorSelectorProps {
 export const ConnectorSelector = ({
   connectors,
   dataTestSubj,
-  defaultValue,
   disabled = false,
   field,
   idAria,
@@ -32,18 +30,6 @@ export const ConnectorSelector = ({
   isLoading = false,
 }: ConnectorSelectorProps) => {
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
-
-  useEffect(() => {
-    field.setValue(defaultValue);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [defaultValue]);
-
-  const handleContentChange = useCallback(
-    (newConnector: string) => {
-      field.setValue(newConnector);
-    },
-    [field]
-  );
 
   return isEdit ? (
     <EuiFormRow
@@ -60,7 +46,7 @@ export const ConnectorSelector = ({
         connectors={connectors}
         disabled={disabled}
         isLoading={isLoading}
-        onChange={handleContentChange}
+        onChange={field.setValue}
         selectedConnector={(field.value as string) ?? 'none'}
       />
     </EuiFormRow>

@@ -4,33 +4,48 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { ConnectorFields } from '../../../../../case/common/api/connectors';
-import { UseField } from '../../../shared_imports';
+import { UseField, useFormData } from '../../../shared_imports';
 import { ConnectorSelector } from '../connector_selector/form';
 import { SettingFieldsForm } from '../settings/fields_form';
 import { ActionConnector } from '../../containers/types';
+import {
+  normalizeCaseConnector,
+  getConnectorById,
+  getNoneConnector,
+  normalizeActionConnector,
+} from '../configure_cases/utils';
 
 interface Props {
   isLoading: boolean;
   currentConnectorId: string | null;
   connectors: ActionConnector[];
-  connector: ActionConnector | null;
-  fields: ConnectorFields;
-  onChangeFields: (fields: ConnectorFields) => void;
-  onChangeConnector: (id: string) => void;
 }
 
-const ConnectorComponent: React.FC<Props> = ({
-  isLoading,
-  connectors,
-  connector,
-  currentConnectorId,
-  onChangeConnector,
-  fields,
-  onChangeFields,
-}) => (
+const SettingsField = ({ currentConnectorId, connectors, isEdit, field }) => {
+  const [{ connectorId }] = useFormData({ watch: ['connectorId'] });
+  const { setValue } = field;
+  const connector = getConnectorById(connectorId, connectors) ?? null;
+
+  useEffect(() => {
+    if (connectorId) {
+      setValue(null);
+    }
+  }, [setValue, connectorId]);
+
+  return (
+    <SettingFieldsForm
+      connector={connector}
+      fields={field.value}
+      isEdit={isEdit}
+      onChange={setValue}
+    />
+  );
+};
+
+const ConnectorComponent: React.FC<Props> = ({ isLoading, connectors, currentConnectorId }) => (
   <EuiFlexGroup>
     <EuiFlexItem>
       <UseField
@@ -44,15 +59,17 @@ const ConnectorComponent: React.FC<Props> = ({
           idAria: 'caseConnectors',
           isLoading,
         }}
-        onChange={onChangeConnector}
       />
     </EuiFlexItem>
     <EuiFlexItem>
-      <SettingFieldsForm
-        connector={connector}
-        fields={fields}
-        isEdit={true}
-        onChange={onChangeFields}
+      <UseField
+        path="fields"
+        component={SettingsField}
+        componentProps={{
+          currentConnectorId,
+          connectors,
+          isEdit: true,
+        }}
       />
     </EuiFlexItem>
   </EuiFlexGroup>
