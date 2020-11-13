@@ -48,6 +48,7 @@ export const IGNORE_FILE_GLOBS = [
   'Dockerfile*',
   'vars/*',
   '.ci/pipeline-library/**/*',
+  'packages/kbn-test/jest-preset.js',
 
   // filename must match language code which requires capital letters
   '**/translations/*.json',

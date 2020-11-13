@@ -9,7 +9,7 @@ import { ReactWrapper } from 'enzyme';
 import React from 'react';
 import { wait } from '@testing-library/react';
 
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 import { ConfirmAlterActiveSpaceModal } from './confirm_alter_active_space_modal';
 import { ManageSpacePage } from './manage_space_page';
 import { spacesManagerMock } from '../../spaces_manager/mocks';
