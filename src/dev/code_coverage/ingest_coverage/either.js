@@ -57,7 +57,9 @@ export function left(x) {
 }
 
 export const fromNullable = (x) =>
-  x !== null && x !== undefined && x !== false && x !== 'undefined' ? Right(x) : Left(null);
+  x !== null && x !== undefined && x !== false && x !== 'undefined' && x !== ''
+    ? Right(x)
+    : Left(null);
 
 export const tryCatch = (f) => {
   try {

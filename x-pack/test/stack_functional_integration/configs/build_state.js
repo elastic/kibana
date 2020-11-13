@@ -7,12 +7,16 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 import dotEnv from 'dotenv';
 import testsList from './tests_list';
+import { fromNullable } from '../../../../src/dev/code_coverage/ingest_coverage/either';
 
 // envObj :: path -> {}
 const envObj = (path) => dotEnv.config({ path });
 
+const maybeUseExternalList = (obj) =>
+  fromNullable(obj.TESTS_LIST).fold(
+    () => ({ tests: testsList(obj), ...obj }), // Define in this repo
+    (xs) => ({ tests: xs, ...obj }) // Use defs from external repo
+  );
+
 // default fn :: path -> {}
-export default (path) => {
-  const obj = envObj(path).parsed;
-  return { tests: testsList(obj), ...obj };
-};
+export default (path) => maybeUseExternalList(envObj(path).parsed);
