@@ -6,25 +6,26 @@
 
 import React, { memo, useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { ConnectorFields } from '../../../../../case/common/api/connectors';
-import { UseField, useFormData } from '../../../shared_imports';
+
+import { ConnectorTypeFields } from '../../../../../case/common/api/connectors';
+import { UseField, useFormData, FieldHook } from '../../../shared_imports';
+import { useConnectors } from '../../containers/configure/use_connectors';
 import { ConnectorSelector } from '../connector_selector/form';
 import { SettingFieldsForm } from '../settings/fields_form';
 import { ActionConnector } from '../../containers/types';
-import {
-  normalizeCaseConnector,
-  getConnectorById,
-  getNoneConnector,
-  normalizeActionConnector,
-} from '../configure_cases/utils';
+import { getConnectorById } from '../configure_cases/utils';
 
 interface Props {
   isLoading: boolean;
-  currentConnectorId: string | null;
-  connectors: ActionConnector[];
 }
 
-const SettingsField = ({ currentConnectorId, connectors, isEdit, field }) => {
+interface SettingsFieldProps {
+  connectors: ActionConnector[];
+  field: FieldHook;
+  isEdit: boolean;
+}
+
+const SettingsField = ({ connectors, isEdit, field }: SettingsFieldProps) => {
   const [{ connectorId }] = useFormData({ watch: ['connectorId'] });
   const { setValue } = field;
   const connector = getConnectorById(connectorId, connectors) ?? null;
@@ -38,41 +39,43 @@ const SettingsField = ({ currentConnectorId, connectors, isEdit, field }) => {
   return (
     <SettingFieldsForm
       connector={connector}
-      fields={field.value}
+      fields={field.value as ConnectorTypeFields['fields']}
       isEdit={isEdit}
       onChange={setValue}
     />
   );
 };
 
-const ConnectorComponent: React.FC<Props> = ({ isLoading, connectors, currentConnectorId }) => (
-  <EuiFlexGroup>
-    <EuiFlexItem>
-      <UseField
-        path="connectorId"
-        component={ConnectorSelector}
-        componentProps={{
-          connectors,
-          dataTestSubj: 'caseConnectors',
-          defaultValue: currentConnectorId,
-          disabled: isLoading,
-          idAria: 'caseConnectors',
-          isLoading,
-        }}
-      />
-    </EuiFlexItem>
-    <EuiFlexItem>
-      <UseField
-        path="fields"
-        component={SettingsField}
-        componentProps={{
-          currentConnectorId,
-          connectors,
-          isEdit: true,
-        }}
-      />
-    </EuiFlexItem>
-  </EuiFlexGroup>
-);
+const ConnectorComponent: React.FC<Props> = ({ isLoading }) => {
+  const { loading: isLoadingConnectors, connectors } = useConnectors();
+
+  return (
+    <EuiFlexGroup>
+      <EuiFlexItem>
+        <UseField
+          path="connectorId"
+          component={ConnectorSelector}
+          componentProps={{
+            connectors,
+            dataTestSubj: 'caseConnectors',
+            disabled: isLoading || isLoadingConnectors,
+            idAria: 'caseConnectors',
+            isLoading: isLoading || isLoadingConnectors,
+          }}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <UseField
+          path="fields"
+          component={SettingsField}
+          componentProps={{
+            connectors,
+            isEdit: true,
+          }}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
 
 export const Connector = memo(ConnectorComponent);

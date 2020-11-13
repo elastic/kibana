@@ -4,33 +4,37 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect } from 'react';
 
 import { schema, FormProps } from './schema';
-import { Form, useForm, useFormData } from '../../../shared_imports';
+import { Form, useForm } from '../../../shared_imports';
 import {
-  normalizeCaseConnector,
   getConnectorById,
   getNoneConnector,
   normalizeActionConnector,
 } from '../configure_cases/utils';
 import { usePostCase } from '../../containers/use_post_case';
 import { useConnectors } from '../../containers/configure/use_connectors';
+import { Case } from '../../containers/types';
 
 const initialCaseValue: FormProps = {
   description: '',
   tags: [],
   title: '',
   connectorId: 'none',
+  fields: null,
 };
 
-export const FormContext = ({ children, onSuccess }) => {
+interface Props {
+  onSuccess?: (theCase: Case) => void;
+}
+
+export const FormContext: React.FC<Props> = ({ children, onSuccess }) => {
   const { loading: isLoadingConnectors, connectors } = useConnectors();
   const { caseData, isLoading, postCase } = usePostCase();
 
   const submitCase = useCallback(
     async ({ connectorId: dataConnectorId, fields, ...dataWithoutConnectorId }, isValid) => {
-      console.error('submitCase', fields);
       if (isValid) {
         const caseConnector = getConnectorById(dataConnectorId, connectors);
         const connectorToUpdate = caseConnector
@@ -50,25 +54,17 @@ export const FormContext = ({ children, onSuccess }) => {
     onSubmit: submitCase,
   });
 
-  // useEffect(() => {
-  //   const subscription = form.subscribe(async ({ isValid, validate, data }) => {
-  //     console.error('formData', data);
-  //     // const isFormValid = isValid ?? (await validate());
-  //     // if (isFormValid) {
-  //     //   setFormData(data.format() as Pipeline);
-  //     // }
-  //   });
-
-  //   return subscription.unsubscribe;
-  // }, [form]);
-
   useEffect(() => {
-    if (caseData) {
+    if (caseData && onSuccess) {
       onSuccess(caseData);
     }
   }, [caseData, onSuccess]);
 
-  return <Form form={form}>{children}</Form>;
+  return (
+    <Form form={form} isLoading={isLoading || isLoadingConnectors}>
+      {children}
+    </Form>
+  );
 };
 
 FormContext.displayName = 'FormContext';

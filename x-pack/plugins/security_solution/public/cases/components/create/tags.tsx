@@ -6,7 +6,6 @@
 
 import React, { memo, useEffect, useState } from 'react';
 import { isEqual } from 'lodash/fp';
-import { EuiComboBoxOptionOption } from '@elastic/eui';
 
 import { useGetTags } from '../../containers/use_get_tags';
 import { Field, getUseField, FormDataProvider } from '../../../shared_imports';

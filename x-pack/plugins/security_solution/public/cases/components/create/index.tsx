@@ -9,7 +9,6 @@ import styled, { css } from 'styled-components';
 import { useHistory } from 'react-router-dom';
 
 import { Field, getUseField, useFormContext } from '../../../shared_imports';
-import { usePostCase } from '../../containers/use_post_case';
 import { getCaseDetailsUrl } from '../../../common/components/link_to';
 import * as i18n from './translations';
 import { CreateCaseForm } from './form';
@@ -28,15 +27,15 @@ const Container = styled.div.attrs((props) => props)<ContainerProps>`
 `;
 
 const SubmitButton = () => {
-  const { submit } = useFormContext();
+  const { submit, isSubmitting } = useFormContext();
 
   return (
     <EuiButton
       data-test-subj="create-case-submit"
       fill
       iconType="plusInCircle"
-      // isDisabled={isLoading}
-      // isLoading={isLoading}
+      isDisabled={isSubmitting}
+      isLoading={isSubmitting}
       onClick={submit}
     >
       {i18n.CREATE_CASE}
@@ -81,16 +80,6 @@ export const Create = React.memo(() => {
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <SubmitButton />
-              {/* <EuiButton
-                data-test-subj="create-case-submit"
-                fill
-                iconType="plusInCircle"
-                isDisabled={isLoading}
-                isLoading={isLoading}
-                onClick={onSubmit}
-              >
-                {i18n.CREATE_CASE}
-              </EuiButton> */}
             </EuiFlexItem>
           </EuiFlexGroup>
         </Container>

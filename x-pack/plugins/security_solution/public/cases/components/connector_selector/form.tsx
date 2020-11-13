@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React from 'react';
 import { EuiFormRow } from '@elastic/eui';
-import React, { useCallback, useEffect } from 'react';
 
 import { FieldHook, getFieldValidityAndErrorMessage } from '../../../shared_imports';
 import { ConnectorsDropdown } from '../configure_cases/connectors_dropdown';

@@ -8,9 +8,7 @@ import React, { useMemo } from 'react';
 import { EuiLoadingSpinner, EuiSteps } from '@elastic/eui';
 import styled, { css } from 'styled-components';
 
-import { useConnectors } from '../../containers/configure/use_connectors';
-import { useCaseConfigure } from '../../containers/configure/use_configure';
-import { normalizeCaseConnector } from '../configure_cases/utils';
+import { useFormContext } from '../../../shared_imports';
 
 import { Title } from './title';
 import { Description } from './description';
@@ -40,36 +38,24 @@ interface Props {
 }
 
 export const CreateCaseForm: React.FC<Props> = React.memo(({ withSteps = true }) => {
-  const { loading: isLoadingConnectors, connectors } = useConnectors();
-  const { connector: configureConnector, loading: isLoadingCaseConfigure } = useCaseConfigure();
-
-  // const { isLoading, postCase } = usePostCase();
-  const isLoading = false;
-
-  const currentConnectorId = useMemo(
-    () =>
-      !isLoadingCaseConfigure
-        ? normalizeCaseConnector(connectors, configureConnector)?.id ?? 'none'
-        : null,
-    [configureConnector, connectors, isLoadingCaseConfigure]
-  );
+  const { isSubmitting } = useFormContext();
 
   const firstStep = useMemo(
     () => ({
       title: i18n.STEP_ONE_TITLE,
       children: (
         <>
-          <Title isLoading={isLoading} />
+          <Title isLoading={isSubmitting} />
           <Container>
-            <Tags isLoading={isLoading} />
+            <Tags isLoading={isSubmitting} />
           </Container>
           <Container big>
-            <Description isLoading={isLoading} />
+            <Description isLoading={isSubmitting} />
           </Container>
         </>
       ),
     }),
-    [isLoading]
+    [isSubmitting]
   );
 
   const secondStep = useMemo(
@@ -77,22 +63,18 @@ export const CreateCaseForm: React.FC<Props> = React.memo(({ withSteps = true })
       title: i18n.STEP_TWO_TITLE,
       children: (
         <Container>
-          <Connector
-            connectors={connectors}
-            currentConnectorId={currentConnectorId}
-            isLoading={isLoading || isLoadingConnectors || isLoadingCaseConfigure}
-          />
+          <Connector isLoading={isSubmitting} />
         </Container>
       ),
     }),
-    [connectors, currentConnectorId, isLoading, isLoadingConnectors, isLoadingCaseConfigure]
+    [isSubmitting]
   );
 
   const allSteps = useMemo(() => [firstStep, secondStep], [firstStep, secondStep]);
 
   return (
     <>
-      {isLoading && <MySpinner data-test-subj="create-case-loading-spinner" size="xl" />}
+      {isSubmitting && <MySpinner data-test-subj="create-case-loading-spinner" size="xl" />}
       {withSteps ? (
         <EuiSteps headingElement="h2" steps={allSteps} />
       ) : (
