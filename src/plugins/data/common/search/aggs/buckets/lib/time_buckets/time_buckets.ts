@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { isString, isObject as isObjectLodash, isPlainObject, sortBy } from 'lodash';
+import { isString, isObject as isObjectLodash, isPlainObject, sortBy, find } from 'lodash';
 import moment, { Moment } from 'moment';
 
 import { parseInterval } from '../../../utils';
@@ -28,7 +28,7 @@ import {
   convertIntervalToEsInterval,
   EsInterval,
 } from './calc_es_interval';
-import { autoInterval } from '../../_interval_options';
+import { autoInterval, intervalOptions } from '../../_interval_options';
 
 interface TimeBucketsInterval extends moment.Duration {
   // TODO double-check whether all of these are needed
@@ -200,7 +200,12 @@ export class TimeBuckets {
 
       // Preserve the original units because they're lost when the interval is converted to a
       // moment duration object.
-      this._originalInterval = input;
+      // for interval options we should add '1' so that we didn't get error in converter function (for example 'day' -> '1day')
+      if (find(intervalOptions, { val: interval })) {
+        this._originalInterval = 1 + input;
+      } else {
+        this._originalInterval = input;
+      }
 
       interval = parseInterval(interval);
       if (interval === null || +interval === 0) {
