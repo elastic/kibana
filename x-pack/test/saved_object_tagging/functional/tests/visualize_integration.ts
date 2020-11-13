@@ -105,7 +105,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         // //// TODO: remove, here for screenshot
         const foo = await listingTable.getAllItemsNames();
-        expect(foo).to.contain('vis-with-new-tag');
+        expect(foo).to.contain('My new markdown viz');
         //////
 
         await selectFilterTags('tag-1');
