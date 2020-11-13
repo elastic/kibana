@@ -94,6 +94,7 @@ export const FieldsPane = React.memo<Props>(
       },
       [columnHeaders, dispatch, timelineId]
     );
+
     return (
       <>
         {Object.keys(filteredBrowserFields).length > 0 ? (

@@ -10,14 +10,7 @@ import { inputsModel } from '../../../../common/store';
 import { BrowserFields, DocValueFields } from '../../../../common/containers/source';
 import { TimelineItem, TimelineNonEcsData } from '../../../../../common/search_strategy';
 import { ColumnHeaderOptions } from '../../../store/timeline/model';
-import {
-  OnColumnRemoved,
-  OnColumnResized,
-  OnColumnSorted,
-  OnRowSelected,
-  OnSelectAll,
-  OnUpdateColumns,
-} from '../events';
+import { OnRowSelected, OnSelectAll, OnUpdateColumns } from '../events';
 import { EventsTable, TimelineBody, TimelineBodyGlobalStyle } from '../styles';
 import { ColumnHeaders } from './column_headers';
 import { getActionsColumnWidth } from './column_headers/helpers';
@@ -42,9 +35,6 @@ export interface BodyProps {
   eventIdToNoteIds: Readonly<Record<string, string[]>>;
   eventType?: TimelineEventsType;
   loadingEventIds: Readonly<string[]>;
-  onColumnRemoved: OnColumnRemoved;
-  onColumnResized: OnColumnResized;
-  onColumnSorted: OnColumnSorted;
   onEventToggled: (event: TimelineItem) => void;
   onRowSelected: OnRowSelected;
   onSelectAll: OnSelectAll;
@@ -80,9 +70,6 @@ export const Body = React.memo<BodyProps>(
     isEventViewer = false,
     isSelectAllChecked,
     loadingEventIds,
-    onColumnRemoved,
-    onColumnResized,
-    onColumnSorted,
     onEventToggled,
     onRowSelected,
     onSelectAll,
@@ -129,9 +116,6 @@ export const Body = React.memo<BodyProps>(
               columnHeaders={columnHeaders}
               isEventViewer={isEventViewer}
               isSelectAllChecked={isSelectAllChecked}
-              onColumnRemoved={onColumnRemoved}
-              onColumnResized={onColumnResized}
-              onColumnSorted={onColumnSorted}
               onSelectAll={onSelectAll}
               onUpdateColumns={onUpdateColumns}
               showEventsSelect={false}

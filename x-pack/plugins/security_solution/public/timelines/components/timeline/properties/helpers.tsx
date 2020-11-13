@@ -145,7 +145,6 @@ export const Description = React.memo<DescriptionProps>(
           <EuiTextArea
             data-test-subj="timeline-description-textarea"
             aria-label={i18n.TIMELINE_DESCRIPTION}
-            fullWidth={true}
             onChange={onDescriptionChanged}
             placeholder={i18n.DESCRIPTION}
             value={description}
@@ -155,7 +154,6 @@ export const Description = React.memo<DescriptionProps>(
           <EuiFieldText
             aria-label={i18n.TIMELINE_DESCRIPTION}
             data-test-subj="timeline-description"
-            fullWidth={true}
             onChange={onDescriptionChanged}
             placeholder={i18n.DESCRIPTION}
             spellCheck={true}
@@ -191,8 +189,6 @@ interface NameProps {
   timelineType: TimelineType;
   title: string;
   updateTitle: UpdateTitle;
-  width?: string;
-  marginRight?: number;
 }
 
 export const Name = React.memo<NameProps>(
@@ -205,8 +201,6 @@ export const Name = React.memo<NameProps>(
     timelineType,
     title,
     updateTitle,
-    width,
-    marginRight,
   }) => {
     const timelineNameRef = useRef<HTMLInputElement>(null);
 
@@ -233,12 +227,10 @@ export const Name = React.memo<NameProps>(
           }
           spellCheck={true}
           value={title}
-          width={width}
-          marginRight={marginRight}
           inputRef={timelineNameRef}
         />
       ),
-      [handleChange, marginRight, timelineType, title, width, disabled]
+      [handleChange, timelineType, title, disabled]
     );
 
     return (

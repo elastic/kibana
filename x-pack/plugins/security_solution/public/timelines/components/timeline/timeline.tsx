@@ -22,6 +22,7 @@ import {
 import { isEmpty } from 'lodash/fp';
 import React, { useCallback, useState, useMemo, useEffect } from 'react';
 import styled from 'styled-components';
+import { useDispatch } from 'react-redux';
 
 import { ActionCreator } from 'typescript-fsa';
 import { FlyoutHeaderWithCloseButton } from '../flyout/header_with_close_button';
@@ -34,7 +35,6 @@ import { defaultHeaders } from './body/column_headers/default_headers';
 import { Sort } from './body/sort';
 import { StatefulBody } from './body/stateful_body';
 import { DataProvider } from './data_providers/data_provider';
-import { OnChangeItemsPerPage } from './events';
 import { TimelineKqlFetch } from './fetch_kql_timeline';
 import { Footer, footerHeight } from './footer';
 import { TimelineHeader } from './header';
@@ -48,7 +48,11 @@ import {
   IIndexPattern,
 } from '../../../../../../../src/plugins/data/public';
 import { useManageTimeline } from '../manage_timeline';
-import { TimelineType, TimelineStatusLiteral } from '../../../../common/types/timeline';
+import {
+  TimelineType,
+  TimelineStatusLiteral,
+  TimelineEventsType,
+} from '../../../../common/types/timeline';
 import { requiredFieldsForActions } from '../../../detections/components/alerts_table/default_config';
 import { ExpandableEvent } from './expandable_event';
 import {
@@ -59,6 +63,11 @@ import { GraphOverlay } from '../graph_overlay';
 import { NotesTabContent } from '../notes';
 import { SuperDatePicker } from '../../../common/components/super_date_picker';
 import { InputsModelId } from '../../../common/store/inputs/constants';
+import { EventDetailsWidthProvider } from '../../../common/components/events_viewer/event_details_width_context';
+import { PickEventType } from './search_or_filter/pick_events';
+import { timelineActions } from '../../store/timeline';
+import { sourcererActions } from '../../../common/store/sourcerer';
+import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 
 const TimelineContainer = styled.div`
   height: 100%;
@@ -75,7 +84,7 @@ const TimelineHeaderContainer = styled.div`
 TimelineHeaderContainer.displayName = 'TimelineHeaderContainer';
 
 const StyledEuiFlyoutHeader = styled(EuiFlyoutHeader)`
-  align-items: center;
+  align-items: stretch;
   box-shadow: none;
   display: flex;
   flex-direction: column;
@@ -129,12 +138,29 @@ export const DatePicker = styled(EuiFlexItem)`
 
 DatePicker.displayName = 'DatePicker';
 
+const StyledEuiTabbedContent = styled(EuiTabbedContent)`
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+
+  > [role='tabpanel'] {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    overflow: hidden;
+  }
+`;
+
+StyledEuiTabbedContent.displayName = 'StyledEuiTabbedContent';
+
 export interface Props {
   browserFields: BrowserFields;
   columns: ColumnHeaderOptions[];
   dataProviders: DataProvider[];
   docValueFields: DocValueFields[];
   end: string;
+  eventType: TimelineEventsType;
   filters: Filter[];
   graphEventId?: string;
   id: string;
@@ -149,7 +175,6 @@ export interface Props {
   kqlQueryExpression: string;
   loadingSourcerer: boolean;
   noteIds: string[];
-  onChangeItemsPerPage: OnChangeItemsPerPage;
   onClose: () => void;
   show: boolean;
   showCallOutUnauthorizedMsg: boolean;
@@ -169,6 +194,7 @@ export const TimelineComponent: React.FC<Props> = ({
   dataProviders,
   docValueFields,
   end,
+  eventType,
   filters,
   graphEventId,
   id,
@@ -183,7 +209,6 @@ export const TimelineComponent: React.FC<Props> = ({
   kqlMode,
   kqlQueryExpression,
   noteIds,
-  onChangeItemsPerPage,
   onClose,
   show,
   showCallOutUnauthorizedMsg,
@@ -195,6 +220,7 @@ export const TimelineComponent: React.FC<Props> = ({
   toggleLock,
   usersViewing,
 }) => {
+  const dispatch = useDispatch();
   const [expanded, setExpanded] = useState<ActiveTimelineExpandedEvent>(
     activeTimeline.getExpandedEvent()
   );
@@ -245,6 +271,7 @@ export const TimelineComponent: React.FC<Props> = ({
       !isEmpty(end),
     [loadingSourcerer, combinedQueries, start, end]
   );
+
   const columnsHeader = isEmpty(columns) ? defaultHeaders : columns;
   const timelineQueryFields = useMemo(() => {
     const columnFields = columnsHeader.map((c) => c.id);
@@ -257,6 +284,21 @@ export const TimelineComponent: React.FC<Props> = ({
     }),
     [sort.columnId, sort.sortDirection]
   );
+
+  const handleUpdateEventTypeAndIndexesName = useCallback(
+    (newEventType: TimelineEventsType, newIndexNames: string[]) => {
+      dispatch(timelineActions.updateEventType({ id, eventType: newEventType }));
+      dispatch(timelineActions.updateIndexNames({ id, indexNames: newIndexNames }));
+      dispatch(
+        sourcererActions.setSelectedIndexPatterns({
+          id: SourcererScopeName.timeline,
+          selectedPatterns: newIndexNames,
+        })
+      );
+    },
+    [dispatch, id]
+  );
+
   const [isQueryLoading, setIsQueryLoading] = useState(false);
   const { initializeTimeline, setIsTimelineLoading } = useManageTimeline();
   useEffect(() => {
@@ -298,38 +340,37 @@ export const TimelineComponent: React.FC<Props> = ({
       content: (
         <>
           <TimelineKqlFetch id={id} indexPattern={indexPattern} inputId="timeline" />
-          {canQueryTimeline ? (
-            <>
-              <TimelineRefetch
-                id={id}
-                inputId="timeline"
-                inspect={inspect}
-                loading={loading}
-                refetch={refetch}
+          {/* {canQueryTimeline ? ( */}
+          <>
+            <TimelineRefetch
+              id={id}
+              inputId="timeline"
+              inspect={inspect}
+              loading={loading}
+              refetch={refetch}
+            />
+            {graphEventId && (
+              <GraphOverlay
+                graphEventId={graphEventId}
+                isEventViewer={false}
+                timelineId={id}
+                timelineType={timelineType}
               />
-              {graphEventId && (
-                <GraphOverlay
-                  graphEventId={graphEventId}
-                  isEventViewer={false}
-                  timelineId={id}
-                  timelineType={timelineType}
-                />
-              )}
-              <FullWidthFlexGroup $visible={!graphEventId}>
-                <ScrollableFlexItem grow={2}>
-                  <div>
-                    {/* <EuiFlexGroup
-                    grow={0}
-                    alignItems="center"
-                    gutterSize="none"
-                    data-test-subj="timeline-date-picker-container"
-                  >
-                    <EuiFlexItem> */}
-                    {/* </EuiFlexItem> */}
+            )}
+            <FullWidthFlexGroup $visible={!graphEventId}>
+              <ScrollableFlexItem grow={2}>
+                <StyledEuiFlyoutHeader data-test-subj="eui-flyout-header" hasBorder={false}>
+                  <EuiFlexGroup gutterSize="s" data-test-subj="timeline-date-picker-container">
                     <DatePicker grow={1}>
                       <SuperDatePicker id="timeline" timelineId={id} />
                     </DatePicker>
-                  </div>
+                    <EuiFlexItem grow={false}>
+                      <PickEventType
+                        eventType={eventType}
+                        onChangeEventTypeAndIndexesName={handleUpdateEventTypeAndIndexesName}
+                      />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
                   <div>
                     <EuiToolTip
                       data-test-subj="timeline-date-picker-lock-tooltip"
@@ -355,22 +396,21 @@ export const TimelineComponent: React.FC<Props> = ({
                       />
                     </EuiToolTip>
                   </div>
-                  {/* </EuiFlexGroup> */}
-                  <StyledEuiFlyoutHeader data-test-subj="eui-flyout-header" hasBorder={false}>
-                    <TimelineHeaderContainer data-test-subj="timelineHeader">
-                      <TimelineHeader
-                        browserFields={browserFields}
-                        indexPattern={indexPattern}
-                        dataProviders={dataProviders}
-                        filterManager={filterManager}
-                        graphEventId={graphEventId}
-                        show={show}
-                        showCallOutUnauthorizedMsg={showCallOutUnauthorizedMsg}
-                        timelineId={id}
-                        status={status}
-                      />
-                    </TimelineHeaderContainer>
-                  </StyledEuiFlyoutHeader>
+                  <TimelineHeaderContainer data-test-subj="timelineHeader">
+                    <TimelineHeader
+                      browserFields={browserFields}
+                      indexPattern={indexPattern}
+                      dataProviders={dataProviders}
+                      filterManager={filterManager}
+                      graphEventId={graphEventId}
+                      show={show}
+                      showCallOutUnauthorizedMsg={showCallOutUnauthorizedMsg}
+                      timelineId={id}
+                      status={status}
+                    />
+                  </TimelineHeaderContainer>
+                </StyledEuiFlyoutHeader>
+                <EventDetailsWidthProvider>
                   <StyledEuiFlyoutBody
                     data-test-subj="eui-flyout-body"
                     className="timeline-flyout-body"
@@ -401,23 +441,26 @@ export const TimelineComponent: React.FC<Props> = ({
                       itemsCount={events.length}
                       itemsPerPage={itemsPerPage}
                       itemsPerPageOptions={itemsPerPageOptions}
-                      onChangeItemsPerPage={onChangeItemsPerPage}
                       onChangePage={loadPage}
                       totalCount={totalCount}
                     />
                   </StyledEuiFlyoutFooter>
-                </ScrollableFlexItem>
-                <ScrollableFlexItem grow={1}>
-                  <ExpandableEvent
-                    browserFields={browserFields}
-                    docValueFields={docValueFields}
-                    event={expanded}
-                    timelineId={id}
-                  />
-                </ScrollableFlexItem>
-              </FullWidthFlexGroup>
-            </>
-          ) : null}
+                </EventDetailsWidthProvider>
+              </ScrollableFlexItem>
+              <ScrollableFlexItem grow={1}>
+                <EuiTitle>
+                  <h3>{'Event details'}</h3>
+                </EuiTitle>
+                <ExpandableEvent
+                  browserFields={browserFields}
+                  docValueFields={docValueFields}
+                  event={expanded}
+                  timelineId={id}
+                />
+              </ScrollableFlexItem>
+            </FullWidthFlexGroup>
+          </>
+          {/* ) : null} */}
         </>
       ),
     },
@@ -466,7 +509,7 @@ export const TimelineComponent: React.FC<Props> = ({
 
       <FlyoutHeaderWithCloseButton onClose={onClose} timelineId={id} usersViewing={usersViewing} />
 
-      <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[0]} autoFocus="selected" />
+      <StyledEuiTabbedContent tabs={tabs} initialSelectedTab={tabs[0]} autoFocus="selected" />
     </TimelineContainer>
   );
 };

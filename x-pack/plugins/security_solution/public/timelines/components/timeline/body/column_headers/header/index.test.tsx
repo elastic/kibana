@@ -29,13 +29,7 @@ describe('Header', () => {
 
   test('renders correctly against snapshot', () => {
     const wrapper = shallow(
-      <HeaderComponent
-        header={columnHeader}
-        onColumnRemoved={jest.fn()}
-        onColumnSorted={jest.fn()}
-        sort={sort}
-        timelineId={timelineId}
-      />
+      <HeaderComponent header={columnHeader} sort={sort} timelineId={timelineId} />
     );
     expect(wrapper).toMatchSnapshot();
   });
@@ -44,13 +38,7 @@ describe('Header', () => {
     test('it renders the header text', () => {
       const wrapper = mount(
         <TestProviders>
-          <HeaderComponent
-            header={columnHeader}
-            onColumnRemoved={jest.fn()}
-            onColumnSorted={jest.fn()}
-            sort={sort}
-            timelineId={timelineId}
-          />
+          <HeaderComponent header={columnHeader} sort={sort} timelineId={timelineId} />
         </TestProviders>
       );
 
@@ -64,13 +52,7 @@ describe('Header', () => {
       const headerWithLabel = { ...columnHeader, label };
       const wrapper = mount(
         <TestProviders>
-          <HeaderComponent
-            header={headerWithLabel}
-            onColumnRemoved={jest.fn()}
-            onColumnSorted={jest.fn()}
-            sort={sort}
-            timelineId={timelineId}
-          />
+          <HeaderComponent header={headerWithLabel} sort={sort} timelineId={timelineId} />
         </TestProviders>
       );
 
@@ -83,13 +65,7 @@ describe('Header', () => {
       const headerSortable = { ...columnHeader, aggregatable: true };
       const wrapper = mount(
         <TestProviders>
-          <HeaderComponent
-            header={headerSortable}
-            onColumnRemoved={jest.fn()}
-            onColumnSorted={jest.fn()}
-            sort={sort}
-            timelineId={timelineId}
-          />
+          <HeaderComponent header={headerSortable} sort={sort} timelineId={timelineId} />
         </TestProviders>
       );
 
@@ -106,13 +82,7 @@ describe('Header', () => {
 
       const wrapper = mount(
         <TestProviders>
-          <HeaderComponent
-            header={columnWithFilter}
-            onColumnRemoved={jest.fn()}
-            onColumnSorted={jest.fn()}
-            sort={sort}
-            timelineId={timelineId}
-          />
+          <HeaderComponent header={columnWithFilter} sort={sort} timelineId={timelineId} />
         </TestProviders>
       );
 
@@ -128,13 +98,7 @@ describe('Header', () => {
       const headerSortable = { ...columnHeader, aggregatable: true };
       const wrapper = mount(
         <TestProviders>
-          <HeaderComponent
-            header={headerSortable}
-            onColumnRemoved={jest.fn()}
-            onColumnSorted={mockOnColumnSorted}
-            sort={sort}
-            timelineId={timelineId}
-          />
+          <HeaderComponent header={headerSortable} sort={sort} timelineId={timelineId} />
         </TestProviders>
       );
 
@@ -147,17 +111,10 @@ describe('Header', () => {
     });
 
     test('it does NOT render the header sort button when aggregatable is false', () => {
-      const mockOnColumnSorted = jest.fn();
       const headerSortable = { ...columnHeader, aggregatable: false };
       const wrapper = mount(
         <TestProviders>
-          <HeaderComponent
-            header={headerSortable}
-            onColumnRemoved={jest.fn()}
-            onColumnSorted={mockOnColumnSorted}
-            sort={sort}
-            timelineId={timelineId}
-          />
+          <HeaderComponent header={headerSortable} sort={sort} timelineId={timelineId} />
         </TestProviders>
       );
 
@@ -165,17 +122,10 @@ describe('Header', () => {
     });
 
     test('it does NOT render the header sort button when aggregatable is missing', () => {
-      const mockOnColumnSorted = jest.fn();
       const headerSortable = { ...columnHeader };
       const wrapper = mount(
         <TestProviders>
-          <HeaderComponent
-            header={headerSortable}
-            onColumnRemoved={jest.fn()}
-            onColumnSorted={mockOnColumnSorted}
-            sort={sort}
-            timelineId={timelineId}
-          />
+          <HeaderComponent header={headerSortable} sort={sort} timelineId={timelineId} />
         </TestProviders>
       );
 
@@ -187,13 +137,7 @@ describe('Header', () => {
       const headerSortable = { ...columnHeader, aggregatable: undefined };
       const wrapper = mount(
         <TestProviders>
-          <HeaderComponent
-            header={headerSortable}
-            onColumnRemoved={jest.fn()}
-            onColumnSorted={mockOnColumnSorted}
-            sort={sort}
-            timelineId={timelineId}
-          />
+          <HeaderComponent header={headerSortable} sort={sort} timelineId={timelineId} />
         </TestProviders>
       );
 
@@ -292,13 +236,7 @@ describe('Header', () => {
     test('truncates the header text with an ellipsis', () => {
       const wrapper = mount(
         <TestProviders>
-          <HeaderComponent
-            header={columnHeader}
-            onColumnRemoved={jest.fn()}
-            onColumnSorted={jest.fn()}
-            sort={sort}
-            timelineId={timelineId}
-          />
+          <HeaderComponent header={columnHeader} sort={sort} timelineId={timelineId} />
         </TestProviders>
       );
 
@@ -312,13 +250,7 @@ describe('Header', () => {
     test('it has a tooltip to display the properties of the field', () => {
       const wrapper = mount(
         <TestProviders>
-          <HeaderComponent
-            header={columnHeader}
-            onColumnRemoved={jest.fn()}
-            onColumnSorted={jest.fn()}
-            sort={sort}
-            timelineId={timelineId}
-          />
+          <HeaderComponent header={columnHeader} sort={sort} timelineId={timelineId} />
         </TestProviders>
       );
 

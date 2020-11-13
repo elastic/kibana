@@ -21,13 +21,7 @@ import { EXIT_FULL_SCREEN } from '../../../../../common/components/exit_full_scr
 import { FULL_SCREEN_TOGGLED_CLASS_NAME } from '../../../../../../common/constants';
 import { useFullScreen } from '../../../../../common/containers/use_full_screen';
 import { TimelineId } from '../../../../../../common/types/timeline';
-import {
-  OnColumnRemoved,
-  OnColumnResized,
-  OnColumnSorted,
-  OnSelectAll,
-  OnUpdateColumns,
-} from '../../events';
+import { OnSelectAll, OnUpdateColumns } from '../../events';
 import { DEFAULT_ICON_BUTTON_WIDTH } from '../../helpers';
 import { StatefulFieldsBrowser } from '../../../fields_browser';
 import { StatefulRowRenderersBrowser } from '../../../row_renderers_browser';
@@ -52,9 +46,6 @@ interface Props {
   columnHeaders: ColumnHeaderOptions[];
   isEventViewer?: boolean;
   isSelectAllChecked: boolean;
-  onColumnRemoved: OnColumnRemoved;
-  onColumnResized: OnColumnResized;
-  onColumnSorted: OnColumnSorted;
   onSelectAll: OnSelectAll;
   onUpdateColumns: OnUpdateColumns;
   showEventsSelect: boolean;
@@ -102,9 +93,6 @@ export const ColumnHeadersComponent = ({
   columnHeaders,
   isEventViewer = false,
   isSelectAllChecked,
-  onColumnRemoved,
-  onColumnResized,
-  onColumnSorted,
   onSelectAll,
   onUpdateColumns,
   showEventsSelect,
@@ -176,21 +164,10 @@ export const ColumnHeadersComponent = ({
           timelineId={timelineId}
           header={header}
           isDragging={draggingIndex === draggableIndex}
-          onColumnRemoved={onColumnRemoved}
-          onColumnSorted={onColumnSorted}
-          onColumnResized={onColumnResized}
           sort={sort}
         />
       )),
-    [
-      columnHeaders,
-      timelineId,
-      draggingIndex,
-      onColumnRemoved,
-      onColumnSorted,
-      onColumnResized,
-      sort,
-    ]
+    [columnHeaders, timelineId, draggingIndex, sort]
   );
 
   const fullScreen = useMemo(
@@ -301,9 +278,6 @@ export const ColumnHeaders = React.memo(
     prevProps.actionsColumnWidth === nextProps.actionsColumnWidth &&
     prevProps.isEventViewer === nextProps.isEventViewer &&
     prevProps.isSelectAllChecked === nextProps.isSelectAllChecked &&
-    prevProps.onColumnRemoved === nextProps.onColumnRemoved &&
-    prevProps.onColumnResized === nextProps.onColumnResized &&
-    prevProps.onColumnSorted === nextProps.onColumnSorted &&
     prevProps.onSelectAll === nextProps.onSelectAll &&
     prevProps.onUpdateColumns === nextProps.onUpdateColumns &&
     prevProps.showEventsSelect === nextProps.showEventsSelect &&

@@ -6,9 +6,11 @@
 
 import { noop } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
+import { useDispatch } from 'react-redux';
 
+import { timelineActions } from '../../../../../store/timeline';
 import { ColumnHeaderOptions } from '../../../../../../timelines/store/timeline/model';
-import { OnColumnRemoved, OnColumnSorted, OnFilterChange } from '../../../events';
+import { OnFilterChange } from '../../../events';
 import { Sort } from '../../sort';
 import { Actions } from '../actions';
 import { Filter } from '../filter';
@@ -18,8 +20,6 @@ import { useManageTimeline } from '../../../../manage_timeline';
 
 interface Props {
   header: ColumnHeaderOptions;
-  onColumnRemoved: OnColumnRemoved;
-  onColumnSorted: OnColumnSorted;
   onFilterChange?: OnFilterChange;
   sort: Sort;
   timelineId: string;
@@ -27,26 +27,39 @@ interface Props {
 
 export const HeaderComponent: React.FC<Props> = ({
   header,
-  onColumnRemoved,
-  onColumnSorted,
   onFilterChange = noop,
   sort,
   timelineId,
 }) => {
+  const dispatch = useDispatch();
+
   const onClick = useCallback(() => {
-    onColumnSorted!({
-      columnId: header.id,
-      sortDirection: getNewSortDirectionOnClick({
-        clickedHeader: header,
-        currentSort: sort,
-      }),
-    });
-  }, [onColumnSorted, header, sort]);
+    dispatch(
+      timelineActions.updateSort!({
+        id: timelineId,
+        sort: {
+          columnId: header.id,
+          sortDirection: getNewSortDirectionOnClick({
+            clickedHeader: header,
+            currentSort: sort,
+          }),
+        },
+      })
+    );
+  }, [dispatch, header, timelineId, sort]);
+
+  const onColumnRemoved = useCallback(
+    (columnId) => dispatch(timelineActions.removeColumn({ id: timelineId, columnId })),
+    [dispatch, timelineId]
+  );
+
   const { getManageTimelineById } = useManageTimeline();
+
   const isLoading = useMemo(() => getManageTimelineById(timelineId).isLoading, [
     getManageTimelineById,
     timelineId,
   ]);
+
   return (
     <>
       <HeaderContent

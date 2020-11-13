@@ -108,7 +108,6 @@ describe('Timeline', () => {
       kqlMode: 'search' as TimelineComponentProps['kqlMode'],
       kqlQueryExpression: '',
       loadingSourcerer: false,
-      onChangeItemsPerPage: jest.fn(),
       onClose: jest.fn(),
       show: true,
       showCallOutUnauthorizedMsg: false,
@@ -117,7 +116,6 @@ describe('Timeline', () => {
       status: TimelineStatus.active,
       timelineType: TimelineType.default,
       timerangeKind: 'absolute',
-      toggleColumn: jest.fn(),
       usersViewing: ['elastic'],
     };
   });

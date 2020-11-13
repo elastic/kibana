@@ -70,7 +70,6 @@ const eventsViewerDefaultProps = {
   itemsPerPage: 10,
   itemsPerPageOptions: [],
   kqlMode: 'filter' as KqlMode,
-  onChangeItemsPerPage: jest.fn(),
   query: {
     query: '',
     language: 'kql',

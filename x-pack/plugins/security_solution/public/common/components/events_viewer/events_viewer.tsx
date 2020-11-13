@@ -28,7 +28,6 @@ import { defaultHeaders } from '../../../timelines/components/timeline/body/colu
 import { Sort } from '../../../timelines/components/timeline/body/sort';
 import { StatefulBody } from '../../../timelines/components/timeline/body/stateful_body';
 import { DataProvider } from '../../../timelines/components/timeline/data_providers/data_provider';
-import { OnChangeItemsPerPage } from '../../../timelines/components/timeline/events';
 import { Footer, footerHeight } from '../../../timelines/components/timeline/footer';
 import { combineQueries, resolverIsShowing } from '../../../timelines/components/timeline/helpers';
 import { TimelineRefetch } from '../../../timelines/components/timeline/refetch_timeline';
@@ -127,7 +126,6 @@ interface Props {
   itemsPerPage: number;
   itemsPerPageOptions: number[];
   kqlMode: KqlMode;
-  onChangeItemsPerPage: OnChangeItemsPerPage;
   query: Query;
   onRuleChange?: () => void;
   start: string;
@@ -154,7 +152,6 @@ const EventsViewerComponent: React.FC<Props> = ({
   itemsPerPage,
   itemsPerPageOptions,
   kqlMode,
-  onChangeItemsPerPage,
   query,
   onRuleChange,
   start,
@@ -352,7 +349,6 @@ const EventsViewerComponent: React.FC<Props> = ({
                       itemsCount={nonDeletedEvents.length}
                       itemsPerPage={itemsPerPage}
                       itemsPerPageOptions={itemsPerPageOptions}
-                      onChangeItemsPerPage={onChangeItemsPerPage}
                       onChangePage={loadPage}
                       totalCount={totalCountMinusDeleted}
                     />

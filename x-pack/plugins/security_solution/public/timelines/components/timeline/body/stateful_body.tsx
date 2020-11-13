@@ -17,14 +17,7 @@ import { useManageTimeline } from '../../manage_timeline';
 import { ColumnHeaderOptions, TimelineModel } from '../../../store/timeline/model';
 import { timelineDefaults } from '../../../store/timeline/defaults';
 import { timelineActions, timelineSelectors } from '../../../store/timeline';
-import {
-  OnColumnRemoved,
-  OnColumnResized,
-  OnColumnSorted,
-  OnRowSelected,
-  OnSelectAll,
-  OnUpdateColumns,
-} from '../events';
+import { OnRowSelected, OnSelectAll, OnUpdateColumns } from '../events';
 import { getColumnHeaders } from './column_headers/helpers';
 import { getEventIdToDataMapping } from './helpers';
 import { Body } from './index';
@@ -52,7 +45,6 @@ export const emptyColumnHeaders: ColumnHeaderOptions[] = [];
 
 const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
   ({
-    applyDeltaToColumnWidth,
     browserFields,
     columnHeaders,
     data,
@@ -65,7 +57,6 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
     isSelectAllChecked,
     loadingEventIds,
     pinnedEventIds,
-    removeColumn,
     selectedEventIds,
     setSelected,
     clearSelected,
@@ -77,7 +68,6 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
     refetch,
     sort,
     updateColumns,
-    updateSort,
   }) => {
     const { getManageTimelineById } = useManageTimeline();
     const { queryFields, selectAll } = useMemo(() => getManageTimelineById(id), [
@@ -113,23 +103,6 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
             })
           : clearSelected!({ id }),
       [setSelected, clearSelected, id, data, queryFields]
-    );
-
-    const onColumnSorted: OnColumnSorted = useCallback(
-      (sorted) => {
-        updateSort!({ id, sort: sorted });
-      },
-      [id, updateSort]
-    );
-
-    const onColumnRemoved: OnColumnRemoved = useCallback(
-      (columnId) => removeColumn!({ id, columnId }),
-      [id, removeColumn]
-    );
-
-    const onColumnResized: OnColumnResized = useCallback(
-      ({ columnId, delta }) => applyDeltaToColumnWidth!({ id, columnId, delta }),
-      [applyDeltaToColumnWidth, id]
     );
 
     const onUpdateColumns: OnUpdateColumns = useCallback(
@@ -169,9 +142,6 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
         isEventViewer={isEventViewer}
         isSelectAllChecked={isSelectAllChecked}
         loadingEventIds={loadingEventIds}
-        onColumnRemoved={onColumnRemoved}
-        onColumnResized={onColumnResized}
-        onColumnSorted={onColumnSorted}
         onEventToggled={onEventToggled}
         onRowSelected={onRowSelected}
         onSelectAll={onSelectAll}
@@ -251,13 +221,10 @@ const makeMapStateToProps = () => {
 };
 
 const mapDispatchToProps = {
-  applyDeltaToColumnWidth: timelineActions.applyDeltaToColumnWidth,
   clearSelected: timelineActions.clearSelected,
-  removeColumn: timelineActions.removeColumn,
   removeProvider: timelineActions.removeProvider,
   setSelected: timelineActions.setSelected,
   updateColumns: timelineActions.updateColumns,
-  updateSort: timelineActions.updateSort,
 };
 
 const connector = connect(makeMapStateToProps, mapDispatchToProps);

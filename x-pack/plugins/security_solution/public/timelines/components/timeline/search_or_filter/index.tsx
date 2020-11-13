@@ -24,14 +24,11 @@ import {
   inputsModel,
   inputsSelectors,
 } from '../../../../common/store';
-import { TimelineEventsType } from '../../../../../common/types/timeline';
 import { timelineActions, timelineSelectors } from '../../../store/timeline';
 import { KqlMode, TimelineModel } from '../../../../timelines/store/timeline/model';
 import { timelineDefaults } from '../../../../timelines/store/timeline/defaults';
 import { dispatchUpdateReduxTime } from '../../../../common/components/super_date_picker';
 import { SearchOrFilter } from './search_or_filter';
-import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
-import { sourcererActions } from '../../../../common/store/sourcerer';
 
 interface OwnProps {
   browserFields: BrowserFields;
@@ -47,7 +44,6 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
     applyKqlFilterQuery,
     browserFields,
     dataProviders,
-    eventType,
     filters,
     filterManager,
     filterQuery,
@@ -65,7 +61,6 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
     timelineId,
     to,
     toStr,
-    updateEventTypeAndIndexesName,
     updateKqlMode,
     updateReduxTime,
   }) => {
@@ -114,22 +109,11 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
       [timelineId, setSavedQueryId]
     );
 
-    const handleUpdateEventTypeAndIndexesName = useCallback(
-      (newEventType: TimelineEventsType, indexNames: string[]) =>
-        updateEventTypeAndIndexesName({
-          id: timelineId,
-          eventType: newEventType,
-          indexNames,
-        }),
-      [timelineId, updateEventTypeAndIndexesName]
-    );
-
     return (
       <SearchOrFilter
         applyKqlFilterQuery={applyFilterQueryFromKueryExpression}
         browserFields={browserFields}
         dataProviders={dataProviders}
-        eventType={eventType}
         filters={filters}
         filterManager={filterManager}
         filterQuery={filterQuery}
@@ -147,7 +131,6 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
         timelineId={timelineId}
         to={to}
         toStr={toStr}
-        updateEventTypeAndIndexesName={handleUpdateEventTypeAndIndexesName}
         updateKqlMode={updateKqlMode!}
         updateReduxTime={updateReduxTime}
       />
@@ -155,7 +138,6 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
   },
   (prevProps, nextProps) => {
     return (
-      prevProps.eventType === nextProps.eventType &&
       prevProps.filterManager === nextProps.filterManager &&
       prevProps.from === nextProps.from &&
       prevProps.fromStr === nextProps.fromStr &&
@@ -190,7 +172,6 @@ const makeMapStateToProps = () => {
     const policy: inputsModel.Policy = getInputsPolicy(state);
     return {
       dataProviders: timeline.dataProviders,
-      eventType: timeline.eventType ?? 'raw',
       filterQuery: getKqlFilterQuery(state, timelineId)!,
       filterQueryDraft: getKqlFilterQueryDraft(state, timelineId)!,
       filters: timeline.filters!,
@@ -215,24 +196,6 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
         filterQuery,
       })
     ),
-  updateEventTypeAndIndexesName: ({
-    id,
-    eventType,
-    indexNames,
-  }: {
-    id: string;
-    eventType: TimelineEventsType;
-    indexNames: string[];
-  }) => {
-    dispatch(timelineActions.updateEventType({ id, eventType }));
-    dispatch(timelineActions.updateIndexNames({ id, indexNames }));
-    dispatch(
-      sourcererActions.setSelectedIndexPatterns({
-        id: SourcererScopeName.timeline,
-        selectedPatterns: indexNames,
-      })
-    );
-  },
   updateKqlMode: ({ id, kqlMode }: { id: string; kqlMode: KqlMode }) =>
     dispatch(timelineActions.updateKqlMode({ id, kqlMode })),
   setKqlFilterQueryDraft: ({

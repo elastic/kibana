@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
 import {
   EuiFlexGroup,
@@ -62,13 +62,7 @@ Avatar.displayName = 'Avatar';
 interface PropertiesRightComponentProps {
   graphEventId?: string;
   isDataInTimeline: boolean;
-  onButtonClick: () => void;
-  onClosePopover: () => void;
-  onCloseTimelineModal: () => void;
   onOpenCaseModal: () => void;
-  onOpenTimelineModal: () => void;
-  showActions: boolean;
-  showTimelineModal: boolean;
   showUsersView: boolean;
   status: TimelineStatusLiteral;
   timelineId: string;
@@ -80,13 +74,7 @@ interface PropertiesRightComponentProps {
 const PropertiesRightComponent: React.FC<PropertiesRightComponentProps> = ({
   graphEventId,
   isDataInTimeline,
-  onButtonClick,
-  onClosePopover,
-  onCloseTimelineModal,
   onOpenCaseModal,
-  onOpenTimelineModal,
-  showActions,
-  showTimelineModal,
   showUsersView,
   status,
   timelineType,
@@ -94,6 +82,17 @@ const PropertiesRightComponent: React.FC<PropertiesRightComponentProps> = ({
   title,
   usersViewing,
 }) => {
+  const [showActions, setShowActions] = useState(false);
+  const [showTimelineModal, setShowTimelineModal] = useState(false);
+
+  const onButtonClick = useCallback(() => setShowActions(!showActions), [showActions]);
+  const onClosePopover = useCallback(() => setShowActions(false), []);
+  const onCloseTimelineModal = useCallback(() => setShowTimelineModal(false), []);
+  const onOpenTimelineModal = useCallback(() => {
+    onClosePopover();
+    setShowTimelineModal(true);
+  }, [onClosePopover]);
+
   return (
     <PropertiesRightStyle alignItems="flexStart" data-test-subj="properties-right" gutterSize="s">
       <EuiFlexItem grow={false}>

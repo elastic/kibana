@@ -5,7 +5,7 @@
  */
 
 import { isEmpty } from 'lodash/fp';
-import React, { useEffect, useCallback } from 'react';
+import React, { useEffect } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 
@@ -14,7 +14,6 @@ import { timelineActions, timelineSelectors } from '../../store/timeline';
 import { TimelineModel } from '../../../timelines/store/timeline/model';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 import { defaultHeaders } from './body/column_headers/default_headers';
-import { OnChangeItemsPerPage } from './events';
 import { Timeline } from './timeline';
 import { useSourcererScope } from '../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
@@ -39,6 +38,7 @@ const StatefulTimelineComponent = React.memo<Props>(
     createTimeline,
     dataProviders,
     end,
+    eventType,
     filters,
     graphEventId,
     id,
@@ -60,7 +60,6 @@ const StatefulTimelineComponent = React.memo<Props>(
     timelineType,
     timerangeKind,
     toggleLock,
-    updateItemsPerPage,
     usersViewing,
   }) => {
     const {
@@ -70,11 +69,6 @@ const StatefulTimelineComponent = React.memo<Props>(
       indexPattern,
       selectedPatterns,
     } = useSourcererScope(SourcererScopeName.timeline);
-
-    const onChangeItemsPerPage: OnChangeItemsPerPage = useCallback(
-      (itemsChangedPerPage) => updateItemsPerPage!({ id, itemsPerPage: itemsChangedPerPage }),
-      [id, updateItemsPerPage]
-    );
 
     useEffect(() => {
       if (createTimeline != null && !isTimelineExists) {
@@ -90,6 +84,7 @@ const StatefulTimelineComponent = React.memo<Props>(
         dataProviders={dataProviders!}
         docValueFields={docValueFields}
         end={end}
+        eventType={eventType}
         filters={filters}
         graphEventId={graphEventId}
         id={id}
@@ -104,7 +99,6 @@ const StatefulTimelineComponent = React.memo<Props>(
         kqlQueryExpression={kqlQueryExpression}
         loadingSourcerer={loading}
         noteIds={noteIds}
-        onChangeItemsPerPage={onChangeItemsPerPage}
         onClose={onClose}
         show={show!}
         showCallOutUnauthorizedMsg={showCallOutUnauthorizedMsg}
@@ -121,6 +115,7 @@ const StatefulTimelineComponent = React.memo<Props>(
   // eslint-disable-next-line complexity
   (prevProps, nextProps) =>
     isTimerangeSame(prevProps, nextProps) &&
+    prevProps.eventType === nextProps.eventType &&
     prevProps.graphEventId === nextProps.graphEventId &&
     prevProps.id === nextProps.id &&
     prevProps.isDatePickerLocked === nextProps.isDatePickerLocked &&
@@ -212,8 +207,6 @@ const mapDispatchToProps = {
   createTimeline: timelineActions.createTimeline,
   toggleLock: inputsActions.toggleTimelineLinkTo,
   updateColumns: timelineActions.updateColumns,
-  updateItemsPerPage: timelineActions.updateItemsPerPage,
-  updateItemsPerPageOptions: timelineActions.updateItemsPerPageOptions,
   updateSort: timelineActions.updateSort,
 };
 

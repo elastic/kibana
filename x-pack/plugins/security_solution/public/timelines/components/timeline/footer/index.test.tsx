@@ -13,7 +13,6 @@ import { FooterComponent, PagingControlComponent } from './index';
 
 describe('Footer Timeline Component', () => {
   const loadMore = jest.fn();
-  const onChangeItemsPerPage = jest.fn();
   const updatedAt = 1546878704036;
   const serverSideEventCount = 15546;
   const itemsCount = 2;
@@ -31,7 +30,6 @@ describe('Footer Timeline Component', () => {
           itemsCount={itemsCount}
           itemsPerPage={2}
           itemsPerPageOptions={[1, 5, 10, 20]}
-          onChangeItemsPerPage={onChangeItemsPerPage}
           onChangePage={loadMore}
           totalCount={serverSideEventCount}
         />
@@ -52,7 +50,6 @@ describe('Footer Timeline Component', () => {
           itemsCount={itemsCount}
           itemsPerPage={2}
           itemsPerPageOptions={[1, 5, 10, 20]}
-          onChangeItemsPerPage={onChangeItemsPerPage}
           onChangePage={loadMore}
           totalCount={serverSideEventCount}
         />
@@ -74,7 +71,6 @@ describe('Footer Timeline Component', () => {
             itemsCount={itemsCount}
             itemsPerPage={2}
             itemsPerPageOptions={[1, 5, 10, 20]}
-            onChangeItemsPerPage={onChangeItemsPerPage}
             onChangePage={loadMore}
             totalCount={serverSideEventCount}
           />
@@ -126,7 +122,6 @@ describe('Footer Timeline Component', () => {
           itemsCount={itemsCount}
           itemsPerPage={2}
           itemsPerPageOptions={[1, 5, 10, 20]}
-          onChangeItemsPerPage={onChangeItemsPerPage}
           onChangePage={loadMore}
           totalCount={serverSideEventCount}
         />
@@ -148,7 +143,6 @@ describe('Footer Timeline Component', () => {
             itemsCount={itemsCount}
             itemsPerPage={1}
             itemsPerPageOptions={[1, 5, 10, 20]}
-            onChangeItemsPerPage={onChangeItemsPerPage}
             onChangePage={loadMore}
             totalCount={serverSideEventCount}
           />
@@ -174,7 +168,6 @@ describe('Footer Timeline Component', () => {
             itemsCount={itemsCount}
             itemsPerPage={2}
             itemsPerPageOptions={[1, 5, 10, 20]}
-            onChangeItemsPerPage={onChangeItemsPerPage}
             onChangePage={loadMore}
             totalCount={serverSideEventCount}
           />
@@ -224,7 +217,6 @@ describe('Footer Timeline Component', () => {
             itemsCount={itemsCount}
             itemsPerPage={2}
             itemsPerPageOptions={[1, 5, 10, 20]}
-            onChangeItemsPerPage={onChangeItemsPerPage}
             onChangePage={loadMore}
             totalCount={serverSideEventCount}
           />
@@ -248,7 +240,6 @@ describe('Footer Timeline Component', () => {
             itemsCount={itemsCount}
             itemsPerPage={2}
             itemsPerPageOptions={[1, 5, 10, 20]}
-            onChangeItemsPerPage={onChangeItemsPerPage}
             onChangePage={loadMore}
             totalCount={serverSideEventCount}
           />

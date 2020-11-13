@@ -40,10 +40,7 @@ export const DatePicker = styled(EuiFlexItem).attrs<WidthProp>(({ width }) => ({
 `;
 DatePicker.displayName = 'DatePicker';
 
-export const NameField = styled(({ width, marginRight, ...rest }) => <EuiFieldText {...rest} />)`
-  width: ${({ width = '150px' }) => width};
-  margin-right: ${({ marginRight = 10 }) => marginRight} px;
-
+export const NameField = styled(EuiFieldText)`
   .euiToolTipAnchor {
     display: block;
   }

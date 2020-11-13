@@ -8,7 +8,6 @@ import { EuiFlyout } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
 
-import { EventDetailsWidthProvider } from '../../../../common/components/events_viewer/event_details_width_context';
 import { StatefulTimeline } from '../../timeline';
 import * as i18n from './translations';
 
@@ -41,9 +40,7 @@ const FlyoutPaneComponent: React.FC<FlyoutPaneComponentProps> = ({
       onClose={onClose}
       size="l"
     >
-      <EventDetailsWidthProvider>
-        <StatefulTimeline onClose={onClose} usersViewing={usersViewing} id={timelineId} />
-      </EventDetailsWidthProvider>
+      <StatefulTimeline onClose={onClose} usersViewing={usersViewing} id={timelineId} />
     </EuiFlyout>
   </EuiFlyoutContainer>
 );

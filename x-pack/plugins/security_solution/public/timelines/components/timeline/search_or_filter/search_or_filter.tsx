@@ -15,7 +15,6 @@ import {
 } from '../../../../../../../../src/plugins/data/public';
 import { BrowserFields } from '../../../../common/containers/source';
 import { KueryFilterQuery, KueryFilterQueryKind } from '../../../../common/store';
-import { TimelineEventsType } from '../../../../../common/types/timeline';
 import { KqlMode } from '../../../../timelines/store/timeline/model';
 import { DispatchUpdateReduxTime } from '../../../../common/components/super_date_picker';
 import { DataProvider } from '../data_providers/data_provider';
@@ -23,7 +22,6 @@ import { QueryBarTimeline } from '../query_bar';
 
 import { options } from './helpers';
 import * as i18n from './translations';
-import { PickEventType } from './pick_events';
 
 const timelineSelectModeItemsClassName = 'timelineSelectModeItemsClassName';
 const searchOrFilterPopoverClassName = 'searchOrFilterPopover';
@@ -48,7 +46,6 @@ interface Props {
   applyKqlFilterQuery: (expression: string, kind: KueryFilterQueryKind) => void;
   browserFields: BrowserFields;
   dataProviders: DataProvider[];
-  eventType: TimelineEventsType;
   filterManager: FilterManager;
   filterQuery: KueryFilterQuery;
   filterQueryDraft: KueryFilterQuery;
@@ -67,7 +64,6 @@ interface Props {
   savedQueryId: string | null;
   to: string;
   toStr: string;
-  updateEventTypeAndIndexesName: (eventType: TimelineEventsType, indexNames: string[]) => void;
   updateReduxTime: DispatchUpdateReduxTime;
 }
 
@@ -97,7 +93,6 @@ export const SearchOrFilter = React.memo<Props>(
     applyKqlFilterQuery,
     browserFields,
     dataProviders,
-    eventType,
     indexPattern,
     isRefreshPaused,
     filters,
@@ -115,7 +110,6 @@ export const SearchOrFilter = React.memo<Props>(
     setSavedQueryId,
     to,
     toStr,
-    updateEventTypeAndIndexesName,
     updateKqlMode,
     updateReduxTime,
   }) => {
@@ -165,12 +159,6 @@ export const SearchOrFilter = React.memo<Props>(
                 to={to}
                 toStr={toStr}
                 updateReduxTime={updateReduxTime}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <PickEventType
-                eventType={eventType}
-                onChangeEventTypeAndIndexesName={updateEventTypeAndIndexesName}
               />
             </EuiFlexItem>
           </EuiFlexGroup>

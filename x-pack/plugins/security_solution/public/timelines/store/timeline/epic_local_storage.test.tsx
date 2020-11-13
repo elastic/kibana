@@ -94,7 +94,6 @@ describe('epicLocalStorage', () => {
       kqlMode: 'search' as TimelineComponentProps['kqlMode'],
       kqlQueryExpression: '',
       loadingSourcerer: false,
-      onChangeItemsPerPage: jest.fn(),
       onClose: jest.fn(),
       show: true,
       showCallOutUnauthorizedMsg: false,
@@ -103,7 +102,6 @@ describe('epicLocalStorage', () => {
       sort,
       timelineType: TimelineType.default,
       timerangeKind: 'absolute',
-      toggleColumn: jest.fn(),
       usersViewing: ['elastic'],
     };
   });

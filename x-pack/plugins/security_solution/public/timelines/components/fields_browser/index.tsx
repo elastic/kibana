@@ -10,7 +10,6 @@ import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react'
 import styled from 'styled-components';
 
 import { BrowserFields } from '../../../common/containers/source';
-import { ColumnHeaderOptions } from '../../../timelines/store/timeline/model';
 import { DEFAULT_CATEGORY_NAME } from '../timeline/body/column_headers/default_headers';
 import { FieldsBrowser } from './field_browser';
 import { filterBrowserFieldsByFieldName, mergeBrowserFieldsWithDefaultCategory } from './helpers';
@@ -108,24 +107,6 @@ export const StatefulFieldsBrowserComponent: React.FC<FieldBrowserProps> = ({
     [browserFields, filterInput, inputTimeoutId.current]
   );
 
-  /**
-   * Invoked when the user clicks a category name in the left-hand side of
-   * the field browser
-   */
-  const updateSelectedCategoryId = useCallback((categoryId: string) => {
-    setSelectedCategoryId(categoryId);
-  }, []);
-
-  /**
-   * Invoked when the user clicks on the context menu to view a category's
-   * columns in the timeline, this function dispatches the action that
-   * causes the timeline display those columns.
-   */
-  const updateColumnsAndSelectCategoryId = useCallback((columns: ColumnHeaderOptions[]) => {
-    onUpdateColumns(columns); // show the category columns in the timeline
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   /** Invoked when the field browser should be hidden */
   const hideFieldBrowser = useCallback(() => {
     setFilterInput('');
@@ -135,6 +116,7 @@ export const StatefulFieldsBrowserComponent: React.FC<FieldBrowserProps> = ({
     setSelectedCategoryId(DEFAULT_CATEGORY_NAME);
     setShow(false);
   }, []);
+
   // only merge in the default category if the field browser is visible
   const browserFieldsWithDefaultCategory = useMemo(() => {
     return show ? mergeBrowserFieldsWithDefaultCategory(browserFields) : {};
@@ -163,12 +145,12 @@ export const StatefulFieldsBrowserComponent: React.FC<FieldBrowserProps> = ({
           }
           height={height}
           isSearching={isSearching}
-          onCategorySelected={updateSelectedCategoryId}
+          onCategorySelected={setSelectedCategoryId}
           onFieldSelected={onFieldSelected}
           onHideFieldBrowser={hideFieldBrowser}
           onOutsideClick={show ? hideFieldBrowser : noop}
           onSearchInputChange={updateFilter}
-          onUpdateColumns={updateColumnsAndSelectCategoryId}
+          onUpdateColumns={onUpdateColumns}
           searchInput={filterInput}
           selectedCategoryId={selectedCategoryId}
           timelineId={timelineId}

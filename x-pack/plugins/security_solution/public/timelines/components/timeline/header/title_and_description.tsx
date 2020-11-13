@@ -159,8 +159,6 @@ export const TimelineTitleAndDescription = React.memo<TimelineTitleAndDescriptio
                 timelineType={timelineType}
                 title={title}
                 updateTitle={updateTitle}
-                width="100%"
-                marginRight={10}
               />
             </EuiFormRow>
             <EuiSpacer />
