@@ -45,6 +45,8 @@ import {
   // API_LOGS_TITLE,
 } from './constants';
 
+import { Loading } from '../../../shared/loading';
+
 import { EngineLogic } from './';
 
 export const EngineRouter: React.FC = () => {
@@ -86,7 +88,7 @@ export const EngineRouter: React.FC = () => {
     return <Redirect to={ENGINES_PATH} />;
   }
 
-  if (dataLoading) return null;
+  if (dataLoading) return <Loading />;
 
   return (
     <Switch>
