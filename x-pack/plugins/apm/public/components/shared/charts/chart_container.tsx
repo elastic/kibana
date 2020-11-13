@@ -10,17 +10,13 @@ import React from 'react';
 import { FETCH_STATUS } from '../../../hooks/useFetcher';
 
 interface Props {
-  hasData: boolean;
   status: FETCH_STATUS;
   height: number;
   children: React.ReactNode;
 }
 
-export function ChartContainer({ children, height, status, hasData }: Props) {
-  if (
-    !hasData &&
-    (status === FETCH_STATUS.LOADING || status === FETCH_STATUS.PENDING)
-  ) {
+export function ChartContainer({ children, height, status }: Props) {
+  if (status === FETCH_STATUS.LOADING || status === FETCH_STATUS.PENDING) {
     return <LoadingChartPlaceholder height={height} />;
   }
 

@@ -31,6 +31,7 @@ import { onBrushEnd } from '../helper/helper';
 interface Props {
   id: string;
   fetchStatus: FETCH_STATUS;
+  height?: number;
   onToggleLegend?: LegendItemListener;
   timeseries: TimeSeries[];
   /**
@@ -44,10 +45,9 @@ interface Props {
   showAnnotations?: boolean;
 }
 
-const XY_HEIGHT = unit * 16;
-
 export function LineChart({
   id,
+  height = unit * 16,
   fetchStatus,
   onToggleLegend,
   timeseries,
@@ -88,7 +88,7 @@ export function LineChart({
     );
 
   return (
-    <ChartContainer status={fetchStatus} hasData={!isEmpty} height={XY_HEIGHT}>
+    <ChartContainer status={fetchStatus} height={height}>
       <Chart ref={chartRef} id={id}>
         <Settings
           onBrushEnd={({ x }) => onBrushEnd({ x, history })}
