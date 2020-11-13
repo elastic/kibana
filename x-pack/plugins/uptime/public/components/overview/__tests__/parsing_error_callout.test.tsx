@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { shallowWithIntl } from '@kbn/test/jest';
 import { ParsingErrorCallout } from '../parsing_error_callout';
 
 describe('OverviewPageParsingErrorCallout', () => {
