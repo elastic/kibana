@@ -17,7 +17,8 @@
  * under the License.
  */
 
-import config from './config.common';
+import config from './config';
+import preset from '@kbn/test/jest-preset';
 
 export default {
   ...config,
@@ -26,7 +27,7 @@ export default {
     '**/integration_tests/**/*.test.ts',
     '**/integration_tests/**/*.test.tsx',
   ],
-  testPathIgnorePatterns: config.testPathIgnorePatterns.filter(
+  testPathIgnorePatterns: preset.testPathIgnorePatterns.filter(
     (pattern) => !pattern.includes('integration_tests')
   ),
   testRunner: 'jasmine2',
@@ -37,5 +38,5 @@ export default {
       { reportName: 'Jest Integration Tests' },
     ],
   ],
-  setupFilesAfterEnv: ['<rootDir>/src/dev/jest/setup/after_env.integration.js'],
+  setupFilesAfterEnv: ['<rootDir>/packages/kbn-test/target/jest/setup/after_env.integration.js'],
 };

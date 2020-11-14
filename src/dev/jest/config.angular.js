@@ -17,12 +17,12 @@
  * under the License.
  */
 
-import config from './config.common';
 import { ANGULAR_PATHS } from '../constants';
 
 export default {
-  ...config,
-  displayName: 'Angular',
+  preset: '@kbn/test',
+  rootDir: '../../..',
   roots: ANGULAR_PATHS,
+  displayName: 'ang',
   testRunner: 'jasmine2',
 };

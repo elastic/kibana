@@ -21,7 +21,7 @@
 import sizeMe from 'react-sizeme';
 
 import React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 import { skip } from 'rxjs/operators';
 import { DashboardGrid, DashboardGridProps } from './dashboard_grid';
 import { DashboardContainer, DashboardContainerOptions } from '../dashboard_container';
