@@ -55,3 +55,5 @@ export const setPackageInfo = ({
   const key = sharedKey({ name, version, installSource });
   return packageInfoCache.set(key, packageInfo);
 };
+
+export const deletePackageInfo = (args: SharedKey) => packageInfoCache.delete(sharedKey(args));

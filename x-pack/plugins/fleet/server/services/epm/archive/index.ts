@@ -14,6 +14,7 @@ import {
   getArchiveFilelist,
   setArchiveFilelist,
   deleteArchiveFilelist,
+  deletePackageInfo,
 } from './cache';
 import { getBufferExtractor } from './extract';
 
@@ -93,7 +94,9 @@ export const deletePackageCache = ({ name, version, installSource }: SharedKey) 
 
   // delete cached archive files
   // this has been populated in unpackBufferToCache()
-  paths?.forEach((path) => deleteArchiveEntry(path));
+  paths?.forEach(deleteArchiveEntry);
+
+  deletePackageInfo({ name, version, installSource });
 };
 
 export function getPathParts(path: string): AssetParts {

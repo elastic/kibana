@@ -148,7 +148,7 @@ export async function getRegistryPackage(
     paths = await unpackBufferToCache({
       name,
       version,
-      installSource: 'registry',
+      installSource,
       archiveBuffer,
       contentType: ensureContentType(archivePath),
     });
