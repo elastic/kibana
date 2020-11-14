@@ -56,21 +56,26 @@ function DefaultEditorAggAdd({
     addSchema(schema);
   };
 
+  const groupNameLabel =
+    groupName === AggGroupNames.Buckets
+      ? i18n.translate('visDefaultEditor.aggAdd.bucketLabel', { defaultMessage: 'bucket' })
+      : i18n.translate('visDefaultEditor.aggAdd.metricLabel', { defaultMessage: 'metric' });
+
   const addButton = (
     <EuiButtonEmpty
       size="xs"
       iconType="plusInCircleFilled"
       data-test-subj={`visEditorAdd_${groupName}`}
       onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+      aria-label={i18n.translate('visDefaultEditor.aggAdd.addGroupButtonLabel', {
+        defaultMessage: 'Add {groupNameLabel}',
+        values: { groupNameLabel },
+      })}
     >
       <FormattedMessage id="visDefaultEditor.aggAdd.addButtonLabel" defaultMessage="Add" />
     </EuiButtonEmpty>
   );
 
-  const groupNameLabel =
-    groupName === AggGroupNames.Buckets
-      ? i18n.translate('visDefaultEditor.aggAdd.bucketLabel', { defaultMessage: 'bucket' })
-      : i18n.translate('visDefaultEditor.aggAdd.metricLabel', { defaultMessage: 'metric' });
   const isMaxedCount = (schema: Schema): boolean => {
     const count = group.filter((agg) => agg.schema === schema.name).length;
     return count >= schema.max;

@@ -102,10 +102,6 @@ export class KibanaRegionmapSource extends AbstractVectorSource {
     return this._descriptor.name;
   }
 
-  async isTimeAware() {
-    return false;
-  }
-
   canFormatFeatureProperties() {
     return true;
   }

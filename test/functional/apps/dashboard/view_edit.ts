@@ -136,6 +136,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           await dashboardAddPanel.ensureAddPanelIsShowing();
           await dashboardAddPanel.clickAddNewEmbeddableLink('visualization');
+          await PageObjects.visualize.clickAggBasedVisualizations();
           await PageObjects.visualize.clickAreaChart();
           await PageObjects.visualize.clickNewSearch();
           await PageObjects.visualize.saveVisualizationExpectSuccess('new viz panel', {

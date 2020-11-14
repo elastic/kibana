@@ -80,6 +80,7 @@ import { TransportRequestParams } from '@elastic/elasticsearch/lib/Transport';
 import { TransportRequestPromise } from '@elastic/elasticsearch/lib/Transport';
 import { TypeOf } from '@kbn/config-schema';
 import { UiComponent } from 'src/plugins/kibana_utils/public';
+import { UiStatsMetricType } from '@kbn/analytics';
 import { UnregisterCallback } from 'history';
 import { UserProvidedValues } from 'src/core/server/types';
 
@@ -278,6 +279,8 @@ export abstract class Embeddable<TEmbeddableInput extends EmbeddableInput = Embe
     constructor(input: TEmbeddableInput, output: TEmbeddableOutput, parent?: IContainer);
     destroy(): void;
     // (undocumented)
+    fatalError?: Error;
+    // (undocumented)
     getInput$(): Readonly<Rx.Observable<TEmbeddableInput>>;
     // (undocumented)
     getInput(): Readonly<TEmbeddableInput>;
@@ -297,6 +300,8 @@ export abstract class Embeddable<TEmbeddableInput extends EmbeddableInput = Embe
     protected input: TEmbeddableInput;
     // (undocumented)
     readonly isContainer: boolean;
+    // (undocumented)
+    protected onFatalError(e: Error): void;
     // (undocumented)
     protected output: TEmbeddableOutput;
     // (undocumented)
@@ -678,6 +683,7 @@ export interface IContainer<Inherited extends {} = {}, I extends ContainerInput<
 export interface IEmbeddable<I extends EmbeddableInput = EmbeddableInput, O extends EmbeddableOutput = EmbeddableOutput> {
     destroy(): void;
     enhancements?: object;
+    fatalError?: Error;
     getInput$(): Readonly<Observable<I>>;
     getInput(): Readonly<I>;
     getInspectorAdapters(): Adapters | undefined;

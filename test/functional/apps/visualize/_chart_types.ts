@@ -34,10 +34,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.visualize.navigateToNewVisualization();
     });
 
-    it('should show the correct chart types', async function () {
+    it('should show the promoted vis types for the first step', async function () {
+      const expectedChartTypes = ['Custom visualization', 'Lens', 'Maps', 'TSVB'];
+      log.debug('oss= ' + isOss);
+
+      // find all the chart types and make sure there all there
+      const chartTypes = (await PageObjects.visualize.getPromotedVisTypes()).sort();
+      log.debug('returned chart types = ' + chartTypes);
+      log.debug('expected chart types = ' + expectedChartTypes);
+      expect(chartTypes).to.eql(expectedChartTypes);
+    });
+
+    it('should show the correct agg based chart types', async function () {
+      await PageObjects.visualize.clickAggBasedVisualizations();
       let expectedChartTypes = [
         'Area',
-        'Controls',
         'Coordinate Map',
         'Data Table',
         'Gauge',
@@ -45,18 +56,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'Heat Map',
         'Horizontal Bar',
         'Line',
-        'Markdown',
         'Metric',
         'Pie',
         'Region Map',
-        'TSVB',
         'Tag Cloud',
         'Timelion',
-        'Vega',
         'Vertical Bar',
       ];
       if (!isOss) {
-        expectedChartTypes.push('Maps', 'Lens');
         expectedChartTypes = _.remove(expectedChartTypes, function (n) {
           return n !== 'Coordinate Map';
         });

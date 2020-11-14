@@ -47,7 +47,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('area charts', function indexPatternCreation() {
     const initAreaChart = async () => {
       log.debug('navigateToApp visualize');
-      await PageObjects.visualize.navigateToNewVisualization();
+      await PageObjects.visualize.navigateToNewAggBasedVisualization();
       log.debug('clickAreaChart');
       await PageObjects.visualize.clickAreaChart();
       log.debug('clickNewSearch');
@@ -391,7 +391,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should render a yearly area with 12 svg paths', async () => {
         log.debug('navigateToApp visualize');
-        await PageObjects.visualize.navigateToNewVisualization();
+        await PageObjects.visualize.navigateToNewAggBasedVisualization();
         log.debug('clickAreaChart');
         await PageObjects.visualize.clickAreaChart();
         log.debug('clickNewSearch');
@@ -414,7 +414,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
       it('should render monthly areas with 168 svg paths', async () => {
         log.debug('navigateToApp visualize');
-        await PageObjects.visualize.navigateToNewVisualization();
+        await PageObjects.visualize.navigateToNewAggBasedVisualization();
         log.debug('clickAreaChart');
         await PageObjects.visualize.clickAreaChart();
         log.debug('clickNewSearch');

@@ -103,6 +103,7 @@ describe('ESSearchSource', () => {
         },
         sourceMeta: null,
         applyGlobalQuery: true,
+        applyGlobalTime: true,
       };
 
       it('Should only include required props', async () => {

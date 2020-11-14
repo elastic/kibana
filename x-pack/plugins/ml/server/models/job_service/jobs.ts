@@ -414,17 +414,21 @@ export function jobsProvider(client: IScopedClusterClient, mlClient: MlClient) {
   // Checks if each of the jobs in the specified list of IDs exist.
   // Job IDs in supplied array may contain wildcard '*' characters
   // e.g. *_low_request_rate_ecs
-  async function jobsExist(jobIds: string[] = []) {
+  async function jobsExist(jobIds: string[] = [], allSpaces: boolean = false) {
     const results: { [id: string]: boolean } = {};
     for (const jobId of jobIds) {
       try {
-        const { body } = await mlClient.getJobs<MlJobsResponse>({
-          job_id: jobId,
-        });
+        const { body } = allSpaces
+          ? await client.asInternalUser.ml.getJobs<MlJobsResponse>({
+              job_id: jobId,
+            })
+          : await mlClient.getJobs<MlJobsResponse>({
+              job_id: jobId,
+            });
         results[jobId] = body.count > 0;
       } catch (e) {
         // if a non-wildcarded job id is supplied, the get jobs endpoint will 404
-        if (e.body?.status !== 404) {
+        if (e.statusCode !== 404) {
           throw e;
         }
         results[jobId] = false;

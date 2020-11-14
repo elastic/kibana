@@ -43,10 +43,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('add new visualization link', () => {
-      it('adds new visualiztion via the top nav link', async () => {
+      it('adds new visualization via the top nav link', async () => {
         const originalPanelCount = await PageObjects.dashboard.getPanelCount();
         await PageObjects.dashboard.switchToEditMode();
         await dashboardAddPanel.clickCreateNewLink();
+        await PageObjects.visualize.clickAggBasedVisualizations();
         await PageObjects.visualize.clickAreaChart();
         await PageObjects.visualize.clickNewSearch();
         await PageObjects.visualize.saveVisualizationExpectSuccess(
@@ -64,6 +65,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const originalPanelCount = await PageObjects.dashboard.getPanelCount();
         await dashboardAddPanel.ensureAddPanelIsShowing();
         await dashboardAddPanel.clickAddNewEmbeddableLink('visualization');
+        await PageObjects.visualize.clickAggBasedVisualizations();
         await PageObjects.visualize.clickAreaChart();
         await PageObjects.visualize.clickNewSearch();
         await PageObjects.visualize.saveVisualizationExpectSuccess(

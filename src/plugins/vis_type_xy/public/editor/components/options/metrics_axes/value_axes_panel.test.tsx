@@ -19,12 +19,13 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
-import { ValueAxesPanel, ValueAxesPanelProps } from './value_axes_panel';
-import { ValueAxis, SeriesParam } from '../../../../types';
-import { valueAxis, seriesParam, vis } from './mocks';
+import { mountWithIntl } from '@kbn/test/jest';
 import { Position } from '@elastic/charts';
+
+import { ValueAxis, SeriesParam } from '../../../../types';
+import { ValueAxesPanel, ValueAxesPanelProps } from './value_axes_panel';
+import { valueAxis, seriesParam, vis } from './mocks';
 
 describe('ValueAxesPanel component', () => {
   let setParamByIndex: jest.Mock;

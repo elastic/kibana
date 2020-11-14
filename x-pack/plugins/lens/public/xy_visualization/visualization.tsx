@@ -145,6 +145,7 @@ export const getXyVisualization = ({
       state || {
         title: 'Empty XY chart',
         legend: { isVisible: true, position: Position.Right },
+        valueLabels: 'hide',
         preferredSeriesType: defaultSeriesType,
         layers: [
           {
@@ -177,7 +178,6 @@ export const getXyVisualization = ({
           groupLabel: getAxisName('x', { isHorizontal }),
           accessors: layer.xAccessor ? [layer.xAccessor] : [],
           filterOperations: isBucketed,
-          suggestedPriority: 1,
           supportsMoreColumns: !layer.xAccessor,
           dataTestSubj: 'lnsXY_xDimensionPanel',
         },
@@ -198,7 +198,6 @@ export const getXyVisualization = ({
           }),
           accessors: layer.splitAccessor ? [layer.splitAccessor] : [],
           filterOperations: isBucketed,
-          suggestedPriority: 0,
           supportsMoreColumns: !layer.splitAccessor,
           dataTestSubj: 'lnsXY_splitDimensionPanel',
           required: layer.seriesType.includes('percentage'),
