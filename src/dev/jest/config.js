@@ -18,5 +18,5 @@
  */
 
 export default {
-  projects: ['<rootDir>/config.react.js', '<rootDir>/config.angular.js'],
+  projects: ['<rootDir>/config.default.js', '<rootDir>/config.angular.js'],
 };
