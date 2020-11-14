@@ -6,7 +6,6 @@
 
 import { Plugin, PluginInitializerContext, Logger, CoreSetup } from 'src/core/server';
 import { VisTypeTimeseriesSetup } from 'src/plugins/vis_type_timeseries/server';
-import { RollupPluginSetup } from '../../rollup/server';
 import { RollupSearchStrategy } from './search_strategies/rollup_search_strategy';
 
 interface VisTypeTimeseriesEnhancedSetupDependencies {

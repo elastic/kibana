@@ -7,6 +7,7 @@ import { keyBy, isString } from 'lodash';
 import {
   AbstractSearchStrategy,
   ReqFacade,
+  VisPayload,
 } from '../../../../../src/plugins/vis_type_timeseries/server';
 
 import {
@@ -24,7 +25,7 @@ const isIndexPatternValid = (indexPattern: string) =>
 export class RollupSearchStrategy extends AbstractSearchStrategy {
   name = 'rollup';
 
-  async search(req: ReqFacade, bodies: any[]) {
+  async search(req: ReqFacade<VisPayload>, bodies: any[]) {
     return super.search(req, bodies, 'rollup');
   }
 
