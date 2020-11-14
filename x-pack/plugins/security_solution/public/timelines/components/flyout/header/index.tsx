@@ -12,15 +12,12 @@ import {
   EuiButton,
   EuiButtonIcon,
 } from '@elastic/eui';
-import React from 'react';
-import { connect, ConnectedProps } from 'react-redux';
-import { Dispatch } from 'redux';
+import React, { useMemo } from 'react';
 import { isEmpty, get } from 'lodash/fp';
 
+import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { TimelineType } from '../../../../../common/types/timeline';
-import { State } from '../../../../common/store';
-import { timelineActions, timelineSelectors } from '../../../store/timeline';
-import { TimelineModel } from '../../../../timelines/store/timeline/model';
+import { timelineSelectors } from '../../../store/timeline';
 import { timelineDefaults } from '../../../../timelines/store/timeline/defaults';
 import { Description, Name, StarIcon } from '../../timeline/properties/helpers';
 import { UNTITLED_TIMELINE, UNTITLED_TEMPLATE } from '../../timeline/properties/translations';
@@ -31,13 +28,15 @@ import { SaveTimelineButton } from '../../timeline/header/save_timeline_button';
 import { InspectButton } from '../../../../common/components/inspect';
 import * as i18n from './translations';
 
-interface OwnProps {
+interface FlyoutHeaderProps {
+  timelineId: string;
+}
+
+interface FlyoutHeaderPanelProps {
   timelineId: string;
   onClose: () => void;
   usersViewing: string[];
 }
-
-type Props = OwnProps & PropsFromRedux;
 
 interface ActiveTimelinesProps {
   timelineId: string;
@@ -69,179 +68,122 @@ const ActiveTimelines: React.FC<ActiveTimelinesProps> = ({
   );
 };
 
-const StatefulFlyoutHeader = React.memo<Props>(
-  ({
-    description,
-    isDataInTimeline,
-    isFavorite,
-    onClose,
-    timelineId,
-    timelineType,
-    title,
-    updateDescription,
-    updateIsFavorite,
-    updateTitle,
-    usersViewing,
-  }) => {
-    return (
-      <>
-        <EuiPanel grow={false} paddingSize="s" hasShadow={false}>
-          <EuiFlexGroup alignItems="center" gutterSize="m">
-            <AddTimelineButton
-              showUsersView={title.length > 0}
-              timelineId={timelineId}
-              usersViewing={usersViewing}
-            />
-            <EuiFlexItem grow>
-              <ActiveTimelines
-                timelineId={timelineId}
-                timelineType={timelineType}
-                timelineTitle={title}
+const FlyoutHeaderPanelComponent: React.FC<FlyoutHeaderPanelProps> = ({
+  timelineId,
+  usersViewing,
+  onClose,
+}) => {
+  const getTimeline = timelineSelectors.getTimelineByIdSelector();
+  const { dataProviders, kqlQuery, title, timelineType } = useDeepEqualSelector(
+    (state) => getTimeline(state, timelineId) ?? timelineDefaults
+  );
+  const isDataInTimeline = useMemo(
+    () => !isEmpty(dataProviders) || !isEmpty(get('filterQuery.kuery.expression', kqlQuery)),
+    [dataProviders, kqlQuery]
+  );
+
+  return (
+    <EuiPanel grow={false} paddingSize="s" hasShadow={false}>
+      <EuiFlexGroup alignItems="center" gutterSize="m">
+        <AddTimelineButton timelineId={timelineId} usersViewing={usersViewing} />
+        <EuiFlexItem grow>
+          <ActiveTimelines
+            timelineId={timelineId}
+            timelineType={timelineType}
+            timelineTitle={title}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup gutterSize="s">
+            <EuiFlexItem grow={false}>
+              <InspectButton
+                compact
+                queryId={timelineId}
+                inputId="timeline"
+                inspectIndex={0}
+                isDisabled={!isDataInTimeline}
+                title={i18n.INSPECT_TIMELINE_TITLE}
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiFlexGroup gutterSize="s">
-                <EuiFlexItem grow={false}>
-                  <InspectButton
-                    compact
-                    queryId={timelineId}
-                    inputId="timeline"
-                    inspectIndex={0}
-                    isDisabled={!isDataInTimeline}
-                    title={i18n.INSPECT_TIMELINE_TITLE}
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiToolTip content={i18n.CLOSE_TIMELINE}>
-                    <EuiButtonIcon
-                      aria-label={i18n.CLOSE_TIMELINE}
-                      data-test-subj="close-timeline"
-                      iconType="cross"
-                      onClick={onClose}
-                    />
-                  </EuiToolTip>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiPanel>
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup alignItems="center" gutterSize="none">
-            <EuiFlexItem>
-              <EuiPanel hasShadow={false}>
-                <EuiFlexGroup direction="column" data-test-subj="properties-left" gutterSize="s">
-                  <EuiFlexItem>
-                    <EuiFlexGroup direction="row" alignItems="center" gutterSize="s">
-                      <EuiFlexItem grow={false}>
-                        <Name
-                          timelineId={timelineId}
-                          timelineType={timelineType}
-                          title={title}
-                          updateTitle={updateTitle}
-                        />
-                      </EuiFlexItem>
-                      <EuiFlexItem>
-                        <SaveTimelineButton timelineId={timelineId} />
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  </EuiFlexItem>
-
-                  <EuiFlexItem>
-                    <EuiFlexGroup direction="row" alignItems="center" gutterSize="s">
-                      <EuiFlexItem grow={false}>
-                        <Description
-                          description={description}
-                          timelineId={timelineId}
-                          updateDescription={updateDescription}
-                        />
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <SaveTimelineButton timelineId={timelineId} />
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-                <EuiFlexGroup>
-                  <EuiFlexItem>{/* KPIs PLACEHOLDER */}</EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiPanel>
-            </EuiFlexItem>
-
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup>
-                <EuiFlexItem grow={false}>
-                  <StarIcon
-                    isFavorite={isFavorite}
-                    timelineId={timelineId}
-                    updateIsFavorite={updateIsFavorite}
-                  />
-                </EuiFlexItem>
-                {timelineType === TimelineType.default && (
-                  <EuiFlexItem grow={false}>
-                    <AddToCaseButton timelineId={timelineId} />
-                  </EuiFlexItem>
-                )}
-              </EuiFlexGroup>
+              <EuiToolTip content={i18n.CLOSE_TIMELINE}>
+                <EuiButtonIcon
+                  aria-label={i18n.CLOSE_TIMELINE}
+                  data-test-subj="close-timeline"
+                  iconType="cross"
+                  onClick={onClose}
+                />
+              </EuiToolTip>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
-      </>
-    );
-  }
-);
-
-StatefulFlyoutHeader.displayName = 'StatefulFlyoutHeader';
-
-const makeMapStateToProps = () => {
-  const getTimeline = timelineSelectors.getTimelineByIdSelector();
-  const mapStateToProps = (state: State, { timelineId }: OwnProps) => {
-    const timeline: TimelineModel = getTimeline(state, timelineId) ?? timelineDefaults;
-    const {
-      dataProviders,
-      description = '',
-      isFavorite = false,
-      kqlQuery,
-      title = '',
-      timelineType = TimelineType.default,
-    } = timeline;
-
-    return {
-      description,
-      isDataInTimeline:
-        !isEmpty(dataProviders) || !isEmpty(get('filterQuery.kuery.expression', kqlQuery)),
-      isFavorite,
-      title,
-      timelineType,
-    };
-  };
-  return mapStateToProps;
+      </EuiFlexGroup>
+    </EuiPanel>
+  );
 };
 
-const mapDispatchToProps = (dispatch: Dispatch, { timelineId }: OwnProps) => ({
-  updateDescription: ({
-    id,
-    description,
-    disableAutoSave,
-  }: {
-    id: string;
-    description: string;
-    disableAutoSave?: boolean;
-  }) => dispatch(timelineActions.updateDescription({ id, description, disableAutoSave })),
-  updateIsFavorite: ({ id, isFavorite }: { id: string; isFavorite: boolean }) =>
-    dispatch(timelineActions.updateIsFavorite({ id, isFavorite })),
-  updateTitle: ({
-    id,
-    title,
-    disableAutoSave,
-  }: {
-    id: string;
-    title: string;
-    disableAutoSave?: boolean;
-  }) => dispatch(timelineActions.updateTitle({ id, title, disableAutoSave })),
-});
+export const FlyoutHeaderPanel = React.memo(FlyoutHeaderPanelComponent);
 
-const connector = connect(makeMapStateToProps, mapDispatchToProps);
+const FlyoutHeaderComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }) => {
+  const getTimeline = timelineSelectors.getTimelineByIdSelector();
 
-type PropsFromRedux = ConnectedProps<typeof connector>;
+  const { timelineType } = useDeepEqualSelector(
+    (state) => getTimeline(state, timelineId) ?? timelineDefaults
+  );
 
-export const FlyoutHeader = connector(StatefulFlyoutHeader);
+  return (
+    <>
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup alignItems="center" gutterSize="none">
+          <EuiFlexItem>
+            <EuiPanel hasShadow={false}>
+              <EuiFlexGroup direction="column" data-test-subj="properties-left" gutterSize="s">
+                <EuiFlexItem>
+                  <EuiFlexGroup direction="row" alignItems="center" gutterSize="s">
+                    <EuiFlexItem grow={false}>
+                      <Name timelineId={timelineId} />
+                    </EuiFlexItem>
+                    <EuiFlexItem>
+                      <SaveTimelineButton timelineId={timelineId} />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+
+                <EuiFlexItem>
+                  <EuiFlexGroup direction="row" alignItems="center" gutterSize="s">
+                    <EuiFlexItem grow={false}>
+                      <Description timelineId={timelineId} />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <SaveTimelineButton timelineId={timelineId} />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+              <EuiFlexGroup>
+                <EuiFlexItem>{/* KPIs PLACEHOLDER */}</EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiPanel>
+          </EuiFlexItem>
+
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup>
+              <EuiFlexItem grow={false}>
+                <StarIcon timelineId={timelineId} />
+              </EuiFlexItem>
+              {timelineType === TimelineType.default && (
+                <EuiFlexItem grow={false}>
+                  <AddToCaseButton timelineId={timelineId} />
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+    </>
+  );
+};
+
+FlyoutHeaderComponent.displayName = 'FlyoutHeaderComponent';
+
+export const FlyoutHeader = React.memo(FlyoutHeaderComponent);

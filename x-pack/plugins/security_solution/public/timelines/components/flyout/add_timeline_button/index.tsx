@@ -48,13 +48,11 @@ const Avatar = styled(EuiAvatar)`
 Avatar.displayName = 'Avatar';
 
 interface AddTimelineButtonComponentProps {
-  showUsersView: boolean;
   timelineId: string;
   usersViewing: string[];
 }
 
 const AddTimelineButtonComponent: React.FC<AddTimelineButtonComponentProps> = ({
-  showUsersView,
   timelineId,
   usersViewing,
 }) => {
@@ -111,21 +109,6 @@ const AddTimelineButtonComponent: React.FC<AddTimelineButtonComponentProps> = ({
           </EuiFlexGroup>
         </EuiPopover>
       </EuiFlexItem>
-
-      {showUsersView
-        ? usersViewing.map((user) => (
-            // Hide the hard-coded elastic user avatar as the 7.2 release does not implement
-            // support for multi-user-collaboration as proposed in elastic/ingest-dev#395
-            <HiddenFlexItem key={user}>
-              <EuiToolTip
-                data-test-subj="timeline-action-pin-tool-tip"
-                content={`${user} ${i18n.IS_VIEWING}`}
-              >
-                <Avatar data-test-subj="avatar" size="s" name={user} />
-              </EuiToolTip>
-            </HiddenFlexItem>
-          ))
-        : null}
 
       {showTimelineModal ? <OpenTimelineModal onClose={onCloseTimelineModal} /> : null}
     </>

@@ -31,7 +31,7 @@ import {
   TimelineId,
 } from '../../../../../common/types/timeline';
 import { SecurityPageName } from '../../../../app/types';
-import { timelineSelectors } from '../../../../timelines/store/timeline';
+import { timelineActions, timelineSelectors } from '../../../../timelines/store/timeline';
 import { getCreateCaseUrl } from '../../../../common/components/link_to';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useShallowEqualSelector } from '../../../../common/hooks/use_selector';
@@ -44,6 +44,7 @@ import { ButtonContainer, DescriptionContainer, LabelText, NameField, NameWrappe
 import * as i18n from './translations';
 import { setInsertTimeline, showTimeline, TimelineInput } from '../../../store/timeline/actions';
 import { useCreateTimelineButton } from './use_create_timeline';
+import { timelineDefaults } from '../../../store/timeline/defaults';
 
 export const historyToolTip = 'The chronological history of actions related to this timeline';
 export const streamLiveToolTip = 'Update the Timeline as new data arrives';
@@ -56,46 +57,22 @@ const NotesCountBadge = (styled(EuiBadge)`
 
 NotesCountBadge.displayName = 'NotesCountBadge';
 
-type CreateTimeline = ({
-  id,
-  show,
-  timelineType,
-}: {
-  id: string;
-  show?: boolean;
-  timelineType?: TimelineTypeLiteral;
-}) => void;
-type UpdateIsFavorite = ({ id, isFavorite }: { id: string; isFavorite: boolean }) => void;
-export type UpdateTitle = ({
-  id,
-  title,
-  disableAutoSave,
-}: {
-  id: string;
-  title: string;
-  disableAutoSave?: boolean;
-}) => void;
-export type UpdateDescription = ({
-  id,
-  description,
-  disableAutoSave,
-}: {
-  id: string;
-  description: string;
-  disableAutoSave?: boolean;
-}) => void;
 export type SaveTimeline = (args: TimelineInput) => void;
 
 export const StarIcon = React.memo<{
-  isFavorite: boolean;
   timelineId: string;
-  updateIsFavorite: UpdateIsFavorite;
-}>(({ isFavorite, timelineId: id, updateIsFavorite }) => {
-  const handleClick = useCallback(() => updateIsFavorite({ id, isFavorite: !isFavorite }), [
-    id,
-    isFavorite,
-    updateIsFavorite,
-  ]);
+}>(({ timelineId }) => {
+  const getTimeline = timelineSelectors.getTimelineByIdSelector();
+  const dispatch = useDispatch();
+
+  const { isFavorite } = useShallowEqualSelector(
+    (state) => getTimeline(state, timelineId) ?? timelineDefaults
+  );
+
+  const handleClick = useCallback(
+    () => dispatch(timelineActions.updateIsFavorite({ id: timelineId, isFavorite: !isFavorite })),
+    [dispatch, timelineId, isFavorite]
+  );
 
   return (
     <EuiButton
@@ -111,9 +88,7 @@ export const StarIcon = React.memo<{
 StarIcon.displayName = 'StarIcon';
 
 interface DescriptionProps {
-  description: string;
   timelineId: string;
-  updateDescription: UpdateDescription;
   isTextArea?: boolean;
   disableAutoSave?: boolean;
   disableTooltip?: boolean;
@@ -123,20 +98,31 @@ interface DescriptionProps {
 
 export const Description = React.memo<DescriptionProps>(
   ({
-    description,
     timelineId,
-    updateDescription,
     isTextArea = false,
     disableAutoSave = false,
     disableTooltip = false,
     disabled = false,
     marginRight,
   }) => {
+    const getTimeline = timelineSelectors.getTimelineByIdSelector();
+    const dispatch = useDispatch();
+
+    const { description } = useShallowEqualSelector(
+      (state) => getTimeline(state, timelineId) ?? timelineDefaults
+    );
+
     const onDescriptionChanged = useCallback(
       (e) => {
-        updateDescription({ id: timelineId, description: e.target.value, disableAutoSave });
+        dispatch(
+          timelineActions.updateDescription({
+            id: timelineId,
+            description: e.target.value,
+            disableAutoSave,
+          })
+        );
       },
-      [updateDescription, disableAutoSave, timelineId]
+      [dispatch, disableAutoSave, timelineId]
     );
 
     const inputField = useMemo(
@@ -186,9 +172,6 @@ interface NameProps {
   disableTooltip?: boolean;
   disabled?: boolean;
   timelineId: string;
-  timelineType: TimelineType;
-  title: string;
-  updateTitle: UpdateTitle;
 }
 
 export const Name = React.memo<NameProps>(
@@ -198,15 +181,21 @@ export const Name = React.memo<NameProps>(
     disableTooltip = false,
     disabled = false,
     timelineId,
-    timelineType,
-    title,
-    updateTitle,
   }) => {
     const timelineNameRef = useRef<HTMLInputElement>(null);
+    const getTimeline = timelineSelectors.getTimelineByIdSelector();
+    const dispatch = useDispatch();
+
+    const { title, timelineType } = useShallowEqualSelector(
+      (state) => getTimeline(state, timelineId) ?? timelineDefaults
+    );
 
     const handleChange = useCallback(
-      (e) => updateTitle({ id: timelineId, title: e.target.value, disableAutoSave }),
-      [timelineId, updateTitle, disableAutoSave]
+      (e) =>
+        dispatch(
+          timelineActions.updateTitle({ id: timelineId, title: e.target.value, disableAutoSave })
+        ),
+      [dispatch, timelineId, disableAutoSave]
     );
 
     useEffect(() => {
@@ -364,7 +353,6 @@ export const ExistingCase = React.memo<ExistingCaseProps>(
 ExistingCase.displayName = 'ExistingCase';
 
 export interface NewTimelineProps {
-  createTimeline?: CreateTimeline;
   closeGearMenu?: () => void;
   outline?: boolean;
   timelineId: string;

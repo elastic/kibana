@@ -107,10 +107,10 @@ export const NotesTabContent = React.memo<NotesTabContentPros>(
           search={search}
           sorting={true}
         />
+        <EuiSpacer size="s" />
         {!isImmutable && (
           <AddNote associateNote={associateNote} newNote={newNote} updateNewNote={setNewNote} />
         )}
-        <EuiSpacer size="s" />
       </>
     );
   }

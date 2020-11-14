@@ -22,7 +22,7 @@ import { TimelineType } from '../../../../../common/types/timeline';
 import { useShallowEqualSelector } from '../../../../common/hooks/use_selector';
 import { timelineActions, timelineSelectors } from '../../../../timelines/store/timeline';
 import { TimelineInput } from '../../../store/timeline/actions';
-import { Description, Name, UpdateTitle, UpdateDescription } from '../properties/helpers';
+import { Description, Name } from '../properties/helpers';
 import { TIMELINE_TITLE, DESCRIPTION, OPTIONAL } from '../properties/translations';
 import { useCreateTimelineButton } from '../properties/use_create_timeline';
 import * as i18n from './translations';
@@ -31,8 +31,6 @@ interface TimelineTitleAndDescriptionProps {
   showWarning?: boolean;
   timelineId: string;
   toggleSaveTimeline: () => void;
-  updateTitle: UpdateTitle;
-  updateDescription: UpdateDescription;
 }
 
 const Wrapper = styled(EuiModalBody)`
@@ -63,12 +61,12 @@ const usePrevious = (value: unknown) => {
 // the modal is used as a reminder for users to save / discard
 // the unsaved timeline / template
 export const TimelineTitleAndDescription = React.memo<TimelineTitleAndDescriptionProps>(
-  ({ timelineId, toggleSaveTimeline, updateTitle, updateDescription, showWarning }) => {
+  ({ timelineId, toggleSaveTimeline, showWarning }) => {
     const timeline = useShallowEqualSelector((state) =>
       timelineSelectors.selectTimeline(state, timelineId)
     );
 
-    const { description, isSaving, savedObjectId, title, timelineType } = timeline;
+    const { isSaving, savedObjectId, title, timelineType } = timeline;
 
     const prevIsSaving = usePrevious(isSaving);
     const dispatch = useDispatch();
@@ -156,9 +154,6 @@ export const TimelineTitleAndDescription = React.memo<TimelineTitleAndDescriptio
                 disabled={isSaving}
                 data-test-subj="save-timeline-name"
                 timelineId={timelineId}
-                timelineType={timelineType}
-                title={title}
-                updateTitle={updateTitle}
               />
             </EuiFormRow>
             <EuiSpacer />
@@ -167,12 +162,10 @@ export const TimelineTitleAndDescription = React.memo<TimelineTitleAndDescriptio
             <EuiFormRow label={descriptionLabel}>
               <Description
                 data-test-subj="save-timeline-description"
-                description={description}
                 disableTooltip={true}
                 disableAutoSave={true}
                 disabled={isSaving}
                 timelineId={timelineId}
-                updateDescription={updateDescription}
                 isTextArea={true}
                 marginRight={0}
               />

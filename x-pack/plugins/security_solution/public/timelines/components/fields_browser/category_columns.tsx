@@ -62,7 +62,7 @@ const ToolTip = React.memo<ToolTipProps>(
           category: categoryId,
         })
       );
-    }, []);
+    }, [browserFields, categoryId, onUpdateColumns]);
 
     return (
       <EuiToolTip content={i18n.VIEW_CATEGORY(categoryId)}>

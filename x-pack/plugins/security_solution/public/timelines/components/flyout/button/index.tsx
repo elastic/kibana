@@ -14,6 +14,7 @@ import { IS_DRAGGING_CLASS_NAME } from '../../../../common/components/drag_and_d
 import { DataProvider } from '../../timeline/data_providers/data_provider';
 import { flattenIntoAndGroups } from '../../timeline/data_providers/helpers';
 import { DataProviders } from '../../timeline/data_providers';
+import { FlyoutHeaderPanel } from '../header';
 import * as i18n from './translations';
 import { useSourcererScope } from '../../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
@@ -23,16 +24,15 @@ export const FLYOUT_BUTTON_CLASS_NAME = 'timeline-flyout-button';
 export const getBadgeCount = (dataProviders: DataProvider[]): number =>
   flattenIntoAndGroups(dataProviders).reduce((total, group) => total + group.length, 0);
 
-const SHOW_HIDE_TRANSLATE_X = 501; // px
+const SHOW_HIDE_TRANSLATE_X = 50; // px
 
 const Container = styled.div`
-  padding-top: 8px;
   position: fixed;
-  right: 0px;
-  top: 40%;
-  transform: translateX(${SHOW_HIDE_TRANSLATE_X}px);
+  left: 0;
+  bottom: 0;
+  transform: translateY(calc(100% - ${SHOW_HIDE_TRANSLATE_X}px));
   user-select: none;
-  width: 500px;
+  width: 100%;
   z-index: ${({ theme }) => theme.eui.euiZLevel9};
 
   .${IS_DRAGGING_CLASS_NAME} & {
@@ -85,20 +85,7 @@ interface FlyoutButtonProps {
 
 export const FlyoutButton = React.memo<FlyoutButtonProps>(
   ({ onOpen, show, dataProviders, timelineId }) => {
-    const badgeCount = useMemo(() => getBadgeCount(dataProviders), [dataProviders]);
     const { browserFields } = useSourcererScope(SourcererScopeName.timeline);
-
-    const badgeStyles: React.CSSProperties = useMemo(
-      () => ({
-        left: '-9px',
-        position: 'relative',
-        top: '-6px',
-        transform: 'rotate(90deg)',
-        visibility: dataProviders.length !== 0 ? 'inherit' : 'hidden',
-        zIndex: 10,
-      }),
-      [dataProviders.length]
-    );
 
     if (!show) {
       return null;
@@ -106,24 +93,7 @@ export const FlyoutButton = React.memo<FlyoutButtonProps>(
 
     return (
       <Container>
-        <BadgeButtonContainer
-          className="flyout-overlay"
-          data-test-subj="flyoutOverlay"
-          onClick={onOpen}
-        >
-          <EuiButton
-            className={FLYOUT_BUTTON_CLASS_NAME}
-            data-test-subj="flyout-button-not-ready-to-drop"
-            fill={false}
-            iconSide="right"
-            iconType="arrowUp"
-          >
-            {i18n.FLYOUT_BUTTON}
-          </EuiButton>
-          <EuiNotificationBadge color="accent" data-test-subj="badge" style={badgeStyles}>
-            {badgeCount}
-          </EuiNotificationBadge>
-        </BadgeButtonContainer>
+        <FlyoutHeaderPanel timelineId={timelineId} />
         <DataProvidersPanel paddingSize="none">
           <DataProviders
             browserFields={browserFields}
@@ -136,6 +106,7 @@ export const FlyoutButton = React.memo<FlyoutButtonProps>(
   },
   (prevProps, nextProps) =>
     prevProps.show === nextProps.show &&
+    prevProps.onOpen === nextProps.onOpen &&
     deepEqual(prevProps.dataProviders, nextProps.dataProviders) &&
     prevProps.timelineId === nextProps.timelineId
 );

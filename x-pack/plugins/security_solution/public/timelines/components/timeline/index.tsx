@@ -16,7 +16,7 @@ import { defaultHeaders } from './body/column_headers/default_headers';
 import { useSourcererScope } from '../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { TimelineQueryTabContent } from './query_tab_content';
-import { FlyoutHeader } from '../flyout/header';
+import { FlyoutHeader, FlyoutHeaderPanel } from '../flyout/header';
 import { NotesTabContent } from '../notes';
 import { TimelineType } from '../../../../common/types/timeline';
 import * as i18n from './translations';
@@ -114,7 +114,8 @@ const StatefulTimelineComponent = React.memo<Props>(({ timelineId, onClose, user
         <TimelineTemplateBadge>{i18n.TIMELINE_TEMPLATE}</TimelineTemplateBadge>
       )}
 
-      <FlyoutHeader onClose={onClose} timelineId={timelineId} usersViewing={usersViewing} />
+      <FlyoutHeaderPanel onClose={onClose} timelineId={timelineId} usersViewing={usersViewing} />
+      <FlyoutHeader timelineId={timelineId} />
 
       <StyledEuiTabbedContent tabs={tabs} initialSelectedTab={tabs[0]} autoFocus="selected" />
     </TimelineContainer>

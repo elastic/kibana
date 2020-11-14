@@ -33,20 +33,22 @@ export const HeaderComponent: React.FC<Props> = ({
 }) => {
   const dispatch = useDispatch();
 
-  const onClick = useCallback(() => {
-    dispatch(
-      timelineActions.updateSort!({
-        id: timelineId,
-        sort: {
-          columnId: header.id,
-          sortDirection: getNewSortDirectionOnClick({
-            clickedHeader: header,
-            currentSort: sort,
-          }),
-        },
-      })
-    );
-  }, [dispatch, header, timelineId, sort]);
+  const onClick = useCallback(
+    () =>
+      dispatch(
+        timelineActions.updateSort!({
+          id: timelineId,
+          sort: {
+            columnId: header.id,
+            sortDirection: getNewSortDirectionOnClick({
+              clickedHeader: header,
+              currentSort: sort,
+            }),
+          },
+        })
+      ),
+    [dispatch, header, timelineId, sort]
+  );
 
   const onColumnRemoved = useCallback(
     (columnId) => dispatch(timelineActions.removeColumn({ id: timelineId, columnId })),
