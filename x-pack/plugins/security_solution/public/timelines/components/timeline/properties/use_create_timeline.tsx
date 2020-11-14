@@ -20,7 +20,7 @@ import { inputsActions, inputsSelectors } from '../../../../common/store/inputs'
 import { sourcererActions, sourcererSelectors } from '../../../../common/store/sourcerer';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 
-export const useCreateTimelineButton = ({
+export const useCreateTimeline = ({
   timelineId,
   timelineType,
   closeGearMenu,
@@ -85,12 +85,30 @@ export const useCreateTimelineButton = ({
     ]
   );
 
-  const handleButtonClick = useCallback(() => {
+  const handleCreateNewTimeline = useCallback(() => {
     createTimeline({ id: timelineId, show: true, timelineType });
     if (typeof closeGearMenu === 'function') {
       closeGearMenu();
     }
   }, [createTimeline, timelineId, timelineType, closeGearMenu]);
+
+  return { handleCreateNewTimeline };
+};
+
+export const useCreateTimelineButton = ({
+  timelineId,
+  timelineType,
+  closeGearMenu,
+}: {
+  timelineId?: string;
+  timelineType: TimelineTypeLiteral;
+  closeGearMenu?: () => void;
+}) => {
+  const { handleCreateNewTimeline } = useCreateTimeline({
+    timelineId,
+    timelineType,
+    closeGearMenu,
+  });
 
   const getButton = useCallback(
     ({
@@ -108,7 +126,7 @@ export const useCreateTimelineButton = ({
     }) => {
       const buttonProps = {
         iconType,
-        onClick: handleButtonClick,
+        onClick: handleCreateNewTimeline,
         fill,
       };
       const dataTestSubjPrefix =
@@ -123,7 +141,7 @@ export const useCreateTimelineButton = ({
         </EuiButtonEmpty>
       );
     },
-    [handleButtonClick, timelineType]
+    [handleCreateNewTimeline, timelineType]
   );
 
   return { getButton };

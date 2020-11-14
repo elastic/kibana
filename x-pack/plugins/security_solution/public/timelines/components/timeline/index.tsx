@@ -4,214 +4,127 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isEmpty } from 'lodash/fp';
+import { EuiTabbedContent, EuiSpacer, EuiTitle, EuiProgress } from '@elastic/eui';
 import React, { useEffect } from 'react';
-import { connect, ConnectedProps } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
+import styled from 'styled-components';
 
-import { inputsModel, inputsSelectors, State } from '../../../common/store';
 import { timelineActions, timelineSelectors } from '../../store/timeline';
-import { TimelineModel } from '../../../timelines/store/timeline/model';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 import { defaultHeaders } from './body/column_headers/default_headers';
-import { Timeline } from './timeline';
 import { useSourcererScope } from '../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
-import { inputsActions } from '../../../common/store/inputs';
+import { TimelineQueryTabContent } from './query_tab_content';
+import { FlyoutHeader } from '../flyout/header';
+import { NotesTabContent } from '../notes';
+import { TimelineType } from '../../../../common/types/timeline';
+import * as i18n from './translations';
+import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
+
+const TimelineContainer = styled.div`
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+`;
+
+const TimelineTemplateBadge = styled.div`
+  background: ${({ theme }) => theme.eui.euiColorVis3_behindText};
+  color: #fff;
+  padding: 10px 15px;
+  font-size: 0.8em;
+`;
+
+const StyledEuiTabbedContent = styled(EuiTabbedContent)`
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+
+  > [role='tabpanel'] {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    overflow: hidden;
+  }
+`;
 
 export interface OwnProps {
-  id: string;
+  timelineId: string;
   onClose: () => void;
   usersViewing: string[];
 }
 
-export type Props = OwnProps & PropsFromRedux;
+export type Props = OwnProps;
 
-const isTimerangeSame = (prevProps: Props, nextProps: Props) =>
-  prevProps.end === nextProps.end &&
-  prevProps.start === nextProps.start &&
-  prevProps.timerangeKind === nextProps.timerangeKind;
+const StatefulTimelineComponent = React.memo<Props>(({ timelineId, onClose, usersViewing }) => {
+  const getTimeline = timelineSelectors.getTimelineByIdSelector();
+  const dispatch = useDispatch();
+  const { selectedPatterns } = useSourcererScope(SourcererScopeName.timeline);
+  const { status, noteIds, isSaving, savedObjectId, timelineType } = useDeepEqualSelector(
+    (state) => getTimeline(state, timelineId) ?? timelineDefaults
+  );
 
-const StatefulTimelineComponent = React.memo<Props>(
-  ({
-    columns,
-    createTimeline,
-    dataProviders,
-    end,
-    eventType,
-    filters,
-    graphEventId,
-    id,
-    isDatePickerLocked,
-    isLive,
-    isSaving,
-    isTimelineExists,
-    itemsPerPage,
-    itemsPerPageOptions,
-    kqlMode,
-    kqlQueryExpression,
-    onClose,
-    noteIds,
-    show,
-    showCallOutUnauthorizedMsg,
-    sort,
-    start,
-    status,
-    timelineType,
-    timerangeKind,
-    toggleLock,
-    usersViewing,
-  }) => {
-    const {
-      browserFields,
-      docValueFields,
-      loading,
-      indexPattern,
-      selectedPatterns,
-    } = useSourcererScope(SourcererScopeName.timeline);
+  useEffect(() => {
+    if (!savedObjectId) {
+      dispatch(
+        timelineActions.createTimeline({
+          id: timelineId,
+          columns: defaultHeaders,
+          indexNames: selectedPatterns,
+          show: false,
+        })
+      );
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-    useEffect(() => {
-      if (createTimeline != null && !isTimelineExists) {
-        createTimeline({ id, columns: defaultHeaders, indexNames: selectedPatterns, show: false });
-      }
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+  const tabs = [
+    {
+      id: 'query',
+      name: 'Query',
+      content: <TimelineQueryTabContent timelineId={timelineId} />,
+    },
+    {
+      id: 'notes',
+      name: 'Notes',
+      content: (
+        <>
+          <EuiSpacer />
+          <EuiTitle>
+            <h3>{'Notes'}</h3>
+          </EuiTitle>
+          <NotesTabContent timelineStatus={status} timelineId={timelineId} noteIds={noteIds} />
+        </>
+      ),
+    },
+    {
+      id: 'pinned',
+      name: 'Pinned',
+      disabled: true,
+      content: <></>,
+    },
+  ];
 
-    return (
-      <Timeline
-        browserFields={browserFields}
-        columns={columns}
-        dataProviders={dataProviders!}
-        docValueFields={docValueFields}
-        end={end}
-        eventType={eventType}
-        filters={filters}
-        graphEventId={graphEventId}
-        id={id}
-        indexPattern={indexPattern}
-        indexNames={selectedPatterns}
-        isDatePickerLocked={isDatePickerLocked}
-        isLive={isLive}
-        isSaving={isSaving}
-        itemsPerPage={itemsPerPage!}
-        itemsPerPageOptions={itemsPerPageOptions!}
-        kqlMode={kqlMode}
-        kqlQueryExpression={kqlQueryExpression}
-        loadingSourcerer={loading}
-        noteIds={noteIds}
-        onClose={onClose}
-        show={show!}
-        showCallOutUnauthorizedMsg={showCallOutUnauthorizedMsg}
-        sort={sort!}
-        start={start}
-        status={status}
-        timelineType={timelineType}
-        timerangeKind={timerangeKind}
-        toggleLock={toggleLock}
-        usersViewing={usersViewing}
-      />
-    );
-  },
-  // eslint-disable-next-line complexity
+  return (
+    <TimelineContainer data-test-subj="timeline">
+      {isSaving && <EuiProgress size="s" color="primary" position="absolute" />}
+      {timelineType === TimelineType.template && (
+        <TimelineTemplateBadge>{i18n.TIMELINE_TEMPLATE}</TimelineTemplateBadge>
+      )}
+
+      <FlyoutHeader onClose={onClose} timelineId={timelineId} usersViewing={usersViewing} />
+
+      <StyledEuiTabbedContent tabs={tabs} initialSelectedTab={tabs[0]} autoFocus="selected" />
+    </TimelineContainer>
+  );
+});
+
+export const StatefulTimeline = React.memo(
+  StatefulTimelineComponent,
   (prevProps, nextProps) =>
-    isTimerangeSame(prevProps, nextProps) &&
-    prevProps.eventType === nextProps.eventType &&
-    prevProps.graphEventId === nextProps.graphEventId &&
-    prevProps.id === nextProps.id &&
-    prevProps.isDatePickerLocked === nextProps.isDatePickerLocked &&
-    prevProps.isLive === nextProps.isLive &&
-    prevProps.isSaving === nextProps.isSaving &&
-    prevProps.isTimelineExists === nextProps.isTimelineExists &&
-    prevProps.itemsPerPage === nextProps.itemsPerPage &&
-    prevProps.kqlMode === nextProps.kqlMode &&
-    prevProps.kqlQueryExpression === nextProps.kqlQueryExpression &&
-    prevProps.show === nextProps.show &&
-    prevProps.showCallOutUnauthorizedMsg === nextProps.showCallOutUnauthorizedMsg &&
-    prevProps.timelineType === nextProps.timelineType &&
-    prevProps.status === nextProps.status &&
-    deepEqual(prevProps.noteIds, nextProps.noteIds) &&
-    deepEqual(prevProps.columns, nextProps.columns) &&
-    deepEqual(prevProps.dataProviders, nextProps.dataProviders) &&
-    deepEqual(prevProps.filters, nextProps.filters) &&
-    deepEqual(prevProps.itemsPerPageOptions, nextProps.itemsPerPageOptions) &&
-    deepEqual(prevProps.sort, nextProps.sort) &&
+    prevProps.timelineId === nextProps.timelineId &&
+    prevProps.onClose === nextProps.onClose &&
     deepEqual(prevProps.usersViewing, nextProps.usersViewing)
 );
-
-StatefulTimelineComponent.displayName = 'StatefulTimelineComponent';
-
-const makeMapStateToProps = () => {
-  const getShowCallOutUnauthorizedMsg = timelineSelectors.getShowCallOutUnauthorizedMsg();
-  const getTimeline = timelineSelectors.getTimelineByIdSelector();
-  const getKqlQueryTimeline = timelineSelectors.getKqlFilterQuerySelector();
-  const getInputsTimeline = inputsSelectors.getTimelineSelector();
-  const getGlobalInput = inputsSelectors.globalSelector();
-  const mapStateToProps = (state: State, { id }: OwnProps) => {
-    const timeline: TimelineModel = getTimeline(state, id) ?? timelineDefaults;
-    const input: inputsModel.InputsRange = getInputsTimeline(state);
-    const globalInput: inputsModel.InputsRange = getGlobalInput(state);
-    const {
-      columns,
-      dataProviders,
-      eventType,
-      filters,
-      graphEventId,
-      itemsPerPage,
-      itemsPerPageOptions,
-      isSaving,
-      kqlMode,
-      noteIds,
-      show,
-      sort,
-      status,
-      timelineType,
-    } = timeline;
-    const kqlQueryTimeline = getKqlQueryTimeline(state, id)!;
-    const timelineFilter = kqlMode === 'filter' ? filters || [] : [];
-
-    // return events on empty search
-    const kqlQueryExpression =
-      isEmpty(dataProviders) && isEmpty(kqlQueryTimeline) && timelineType === 'template'
-        ? ' '
-        : kqlQueryTimeline;
-    return {
-      columns,
-      dataProviders,
-      eventType,
-      end: input.timerange.to,
-      filters: timelineFilter,
-      graphEventId,
-      id,
-      isDatePickerLocked: globalInput.linkTo.includes('timeline'),
-      isLive: input.policy.kind === 'interval',
-      isSaving,
-      isTimelineExists: getTimeline(state, id) != null,
-      itemsPerPage,
-      itemsPerPageOptions,
-      kqlMode,
-      kqlQueryExpression,
-      noteIds,
-      show,
-      showCallOutUnauthorizedMsg: getShowCallOutUnauthorizedMsg(state),
-      sort,
-      start: input.timerange.from,
-      status,
-      timelineType,
-      timerangeKind: input.timerange.kind,
-    };
-  };
-  return mapStateToProps;
-};
-
-const mapDispatchToProps = {
-  createTimeline: timelineActions.createTimeline,
-  toggleLock: inputsActions.toggleTimelineLinkTo,
-  updateColumns: timelineActions.updateColumns,
-  updateSort: timelineActions.updateSort,
-};
-
-const connector = connect(makeMapStateToProps, mapDispatchToProps);
-
-type PropsFromRedux = ConnectedProps<typeof connector>;
-
-export const StatefulTimeline = connector(StatefulTimelineComponent);

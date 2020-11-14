@@ -24,7 +24,7 @@ const Wrapper = styled.div`
   }
 
   &.siemWrapperPage--withTimeline {
-    padding-right: ${gutterTimeline};
+    padding-bottom: ${gutterTimeline};
   }
 
   &.siemWrapperPage--noPadding {

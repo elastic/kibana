@@ -178,31 +178,30 @@ describe('Footer Timeline Component', () => {
       expect(loadMore).toBeCalled();
     });
 
-    test('Should call onChangeItemsPerPage when you pick a new limit', () => {
-      const wrapper = mount(
-        <TestProviders>
-          <FooterComponent
-            activePage={0}
-            updatedAt={updatedAt}
-            height={100}
-            id={'timeline-id'}
-            isLive={false}
-            isLoading={false}
-            itemsCount={itemsCount}
-            itemsPerPage={1}
-            itemsPerPageOptions={[1, 5, 10, 20]}
-            onChangeItemsPerPage={onChangeItemsPerPage}
-            onChangePage={loadMore}
-            totalCount={serverSideEventCount}
-          />
-        </TestProviders>
-      );
+    // test('Should call onChangeItemsPerPage when you pick a new limit', () => {
+    //   const wrapper = mount(
+    //     <TestProviders>
+    //       <FooterComponent
+    //         activePage={0}
+    //         updatedAt={updatedAt}
+    //         height={100}
+    //         id={'timeline-id'}
+    //         isLive={false}
+    //         isLoading={false}
+    //         itemsCount={itemsCount}
+    //         itemsPerPage={1}
+    //         itemsPerPageOptions={[1, 5, 10, 20]}
+    //         onChangePage={loadMore}
+    //         totalCount={serverSideEventCount}
+    //       />
+    //     </TestProviders>
+    //   );
 
-      wrapper.find('[data-test-subj="timelineSizeRowPopover"] button').first().simulate('click');
-      wrapper.update();
-      wrapper.find('[data-test-subj="timelinePickSizeRow"] button').first().simulate('click');
-      expect(onChangeItemsPerPage).toBeCalled();
-    });
+    //   wrapper.find('[data-test-subj="timelineSizeRowPopover"] button').first().simulate('click');
+    //   wrapper.update();
+    //   wrapper.find('[data-test-subj="timelinePickSizeRow"] button').first().simulate('click');
+    //   expect(onChangeItemsPerPage).toBeCalled();
+    // });
 
     test('it does render the auto-refresh message instead of load more button when stream live is on', () => {
       const wrapper = mount(

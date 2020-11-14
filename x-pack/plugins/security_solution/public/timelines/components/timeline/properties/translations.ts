@@ -130,6 +130,13 @@ export const ATTACH_TIMELINE_TO_NEW_CASE = i18n.translate(
   }
 );
 
+export const ATTACH_TO_CASE = i18n.translate(
+  'xpack.securitySolution.timeline.properties.attachToCaseButtonLabel',
+  {
+    defaultMessage: 'Attach to case',
+  }
+);
+
 export const ATTACH_TO_NEW_CASE = i18n.translate(
   'xpack.securitySolution.timeline.properties.attachToNewCaseButtonLabel',
   {

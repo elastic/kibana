@@ -7,7 +7,7 @@
 import { mount, ReactWrapper } from 'enzyme';
 import React from 'react';
 
-import { PropertiesRight } from './properties_right';
+import { AddTimelineButton } from './';
 import { useKibana } from '../../../../common/lib/kibana';
 import { TimelineStatus, TimelineType } from '../../../../../common/types/timeline';
 
@@ -41,7 +41,7 @@ jest.mock('../../../../common/components/inspect', () => {
   };
 });
 
-describe('Properties Right', () => {
+describe('AddTimelineButton', () => {
   let wrapper: ReactWrapper;
   const props = {
     onButtonClick: jest.fn(),
@@ -83,7 +83,7 @@ describe('Properties Right', () => {
             },
           },
         });
-        wrapper = mount(<PropertiesRight {...props} />);
+        wrapper = mount(<AddTimelineButton {...props} />);
       });
 
       afterAll(() => {
@@ -126,7 +126,7 @@ describe('Properties Right', () => {
             },
           },
         });
-        wrapper = mount(<PropertiesRight {...props} />);
+        wrapper = mount(<AddTimelineButton {...props} />);
       });
 
       afterAll(() => {

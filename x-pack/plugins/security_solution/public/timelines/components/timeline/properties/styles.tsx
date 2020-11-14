@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import { EuiFieldText, EuiFlexItem, EuiIcon } from '@elastic/eui';
+import { EuiFieldText, EuiFlexItem } from '@elastic/eui';
 import styled, { keyframes } from 'styled-components';
 
 const fadeInEffect = keyframes`
@@ -91,8 +90,3 @@ export const Facet = styled.div`
   user-select: none;
 `;
 Facet.displayName = 'Facet';
-
-export const LockIconContainer = styled(EuiFlexItem)`
-  margin-right: 2px;
-`;
-LockIconContainer.displayName = 'LockIconContainer';
