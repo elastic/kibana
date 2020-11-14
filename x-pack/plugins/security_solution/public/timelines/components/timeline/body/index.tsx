@@ -10,7 +10,7 @@ import { inputsModel } from '../../../../common/store';
 import { BrowserFields, DocValueFields } from '../../../../common/containers/source';
 import { TimelineItem, TimelineNonEcsData } from '../../../../../common/search_strategy';
 import { ColumnHeaderOptions } from '../../../store/timeline/model';
-import { OnRowSelected, OnSelectAll, OnUpdateColumns } from '../events';
+import { OnRowSelected, OnSelectAll } from '../events';
 import { EventsTable, TimelineBody, TimelineBodyGlobalStyle } from '../styles';
 import { ColumnHeaders } from './column_headers';
 import { getActionsColumnWidth } from './column_headers/helpers';
@@ -38,7 +38,6 @@ export interface BodyProps {
   onEventToggled: (event: TimelineItem) => void;
   onRowSelected: OnRowSelected;
   onSelectAll: OnSelectAll;
-  onUpdateColumns: OnUpdateColumns;
   pinnedEventIds: Readonly<Record<string, boolean>>;
   refetch: inputsModel.Refetch;
   onRuleChange?: () => void;
@@ -73,7 +72,6 @@ export const Body = React.memo<BodyProps>(
     onEventToggled,
     onRowSelected,
     onSelectAll,
-    onUpdateColumns,
     pinnedEventIds,
     rowRenderers,
     refetch,
@@ -117,7 +115,6 @@ export const Body = React.memo<BodyProps>(
               isEventViewer={isEventViewer}
               isSelectAllChecked={isSelectAllChecked}
               onSelectAll={onSelectAll}
-              onUpdateColumns={onUpdateColumns}
               showEventsSelect={false}
               showSelectAllCheckbox={showCheckboxes}
               sort={sort}

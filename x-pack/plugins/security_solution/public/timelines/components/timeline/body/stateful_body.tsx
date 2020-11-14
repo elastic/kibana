@@ -17,7 +17,7 @@ import { useManageTimeline } from '../../manage_timeline';
 import { ColumnHeaderOptions, TimelineModel } from '../../../store/timeline/model';
 import { timelineDefaults } from '../../../store/timeline/defaults';
 import { timelineActions, timelineSelectors } from '../../../store/timeline';
-import { OnRowSelected, OnSelectAll, OnUpdateColumns } from '../events';
+import { OnRowSelected, OnSelectAll } from '../events';
 import { getColumnHeaders } from './column_headers/helpers';
 import { getEventIdToDataMapping } from './helpers';
 import { Body } from './index';
@@ -67,7 +67,6 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
     graphEventId,
     refetch,
     sort,
-    updateColumns,
   }) => {
     const { getManageTimelineById } = useManageTimeline();
     const { queryFields, selectAll } = useMemo(() => getManageTimelineById(id), [
@@ -105,11 +104,6 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
       [setSelected, clearSelected, id, data, queryFields]
     );
 
-    const onUpdateColumns: OnUpdateColumns = useCallback(
-      (columns) => updateColumns!({ id, columns }),
-      [id, updateColumns]
-    );
-
     // Sync to selectAll so parent components can select all events
     useEffect(() => {
       if (selectAll && !isSelectAllChecked) {
@@ -145,7 +139,6 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
         onEventToggled={onEventToggled}
         onRowSelected={onRowSelected}
         onSelectAll={onSelectAll}
-        onUpdateColumns={onUpdateColumns}
         pinnedEventIds={pinnedEventIds}
         refetch={refetch}
         onRuleChange={onRuleChange}
@@ -222,9 +215,7 @@ const makeMapStateToProps = () => {
 
 const mapDispatchToProps = {
   clearSelected: timelineActions.clearSelected,
-  removeProvider: timelineActions.removeProvider,
   setSelected: timelineActions.setSelected,
-  updateColumns: timelineActions.updateColumns,
 };
 
 const connector = connect(makeMapStateToProps, mapDispatchToProps);

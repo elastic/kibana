@@ -8,6 +8,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiOutsideClickDetector } from '@elastic/eui
 import React, { useEffect, useCallback } from 'react';
 import { noop } from 'lodash/fp';
 import styled from 'styled-components';
+import { useDispatch } from 'react-redux';
 
 import { BrowserFields } from '../../../common/containers/source';
 import { ColumnHeaderOptions } from '../../../timelines/store/timeline/model';
@@ -23,6 +24,7 @@ import {
   PANES_FLEX_GROUP_WIDTH,
 } from './helpers';
 import { FieldBrowserProps, OnHideFieldBrowser } from './types';
+import { timelineActions } from '../../store/timeline';
 
 const FieldsBrowserContainer = styled.div<{ width: number }>`
   background-color: ${({ theme }) => theme.eui.euiColorLightestShade};
@@ -102,12 +104,18 @@ const FieldsBrowserComponent: React.FC<Props> = ({
   onHideFieldBrowser,
   onSearchInputChange,
   onOutsideClick,
-  onUpdateColumns,
   searchInput,
   selectedCategoryId,
   timelineId,
   width,
 }) => {
+  const dispatch = useDispatch();
+
+  const onUpdateColumns = useCallback(
+    (columns) => dispatch(timelineActions.updateColumns({ id: timelineId, columns })),
+    [dispatch, timelineId]
+  );
+
   /** Focuses the input that filters the field browser */
   const focusInput = () => {
     const elements = document.getElementsByClassName(

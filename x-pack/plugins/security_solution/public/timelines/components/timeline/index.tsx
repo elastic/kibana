@@ -5,7 +5,7 @@
  */
 
 import { EuiTabbedContent, EuiSpacer, EuiTitle, EuiProgress } from '@elastic/eui';
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 import styled from 'styled-components';
@@ -50,15 +50,13 @@ const StyledEuiTabbedContent = styled(EuiTabbedContent)`
   }
 `;
 
-export interface OwnProps {
+export interface Props {
   timelineId: string;
   onClose: () => void;
   usersViewing: string[];
 }
 
-export type Props = OwnProps;
-
-const StatefulTimelineComponent = React.memo<Props>(({ timelineId, onClose, usersViewing }) => {
+const StatefulTimelineComponent: React.FC<Props> = ({ timelineId, onClose, usersViewing }) => {
   const getTimeline = timelineSelectors.getTimelineByIdSelector();
   const dispatch = useDispatch();
   const { selectedPatterns } = useSourcererScope(SourcererScopeName.timeline);
@@ -80,32 +78,35 @@ const StatefulTimelineComponent = React.memo<Props>(({ timelineId, onClose, user
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const tabs = [
-    {
-      id: 'query',
-      name: 'Query',
-      content: <TimelineQueryTabContent timelineId={timelineId} />,
-    },
-    {
-      id: 'notes',
-      name: 'Notes',
-      content: (
-        <>
-          <EuiSpacer />
-          <EuiTitle>
-            <h3>{'Notes'}</h3>
-          </EuiTitle>
-          <NotesTabContent timelineStatus={status} timelineId={timelineId} noteIds={noteIds} />
-        </>
-      ),
-    },
-    {
-      id: 'pinned',
-      name: 'Pinned',
-      disabled: true,
-      content: <></>,
-    },
-  ];
+  const tabs = useMemo(
+    () => [
+      {
+        id: 'query',
+        name: 'Query',
+        content: <TimelineQueryTabContent timelineId={timelineId} />,
+      },
+      {
+        id: 'notes',
+        name: 'Notes',
+        content: (
+          <>
+            <EuiSpacer />
+            <EuiTitle>
+              <h3>{'Notes'}</h3>
+            </EuiTitle>
+            <NotesTabContent timelineStatus={status} timelineId={timelineId} noteIds={noteIds} />
+          </>
+        ),
+      },
+      {
+        id: 'pinned',
+        name: 'Pinned',
+        disabled: true,
+        content: <></>,
+      },
+    ],
+    [noteIds, status, timelineId]
+  );
 
   return (
     <TimelineContainer data-test-subj="timeline">
@@ -120,7 +121,9 @@ const StatefulTimelineComponent = React.memo<Props>(({ timelineId, onClose, user
       <StyledEuiTabbedContent tabs={tabs} initialSelectedTab={tabs[0]} autoFocus="selected" />
     </TimelineContainer>
   );
-});
+};
+
+StatefulTimelineComponent.displayName = 'StatefulTimelineComponent';
 
 export const StatefulTimeline = React.memo(
   StatefulTimelineComponent,

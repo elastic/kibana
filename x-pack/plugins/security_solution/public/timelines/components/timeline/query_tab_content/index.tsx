@@ -13,7 +13,7 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiToolTip,
-  EuiButtonIcon,
+  EuiSwitch,
 } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React, { useCallback, useState, useMemo, useEffect } from 'react';
@@ -150,6 +150,7 @@ const TimelineQueryTabContentComponent: React.FC<Props> = ({
   itemsPerPageOptions,
   kqlMode,
   kqlQueryExpression,
+  show,
   showCallOutUnauthorizedMsg,
   start,
   status,
@@ -186,11 +187,9 @@ const TimelineQueryTabContentComponent: React.FC<Props> = ({
     activeTimeline.toggleExpandedEvent({ eventId, indexName: event._index! });
   }, []);
 
-  const kibana = useKibana();
-  const [filterManager] = useState<FilterManager>(new FilterManager(kibana.services.uiSettings));
-  const esQueryConfig = useMemo(() => esQuery.getEsQueryConfig(kibana.services.uiSettings), [
-    kibana.services.uiSettings,
-  ]);
+  const { uiSettings } = useKibana().services;
+  const [filterManager] = useState<FilterManager>(new FilterManager(uiSettings));
+  const esQueryConfig = useMemo(() => esQuery.getEsQueryConfig(uiSettings), [uiSettings]);
   const kqlQuery = useMemo(() => ({ query: kqlQueryExpression, language: 'kuery' }), [
     kqlQueryExpression,
   ]);
@@ -323,13 +322,18 @@ const TimelineQueryTabContentComponent: React.FC<Props> = ({
                       : i18n.UNLOCK_SYNC_MAIN_DATE_PICKER_TOOL_TIP
                   }
                 >
-                  <EuiButtonIcon
+                  <EuiSwitch
                     data-test-subj={`timeline-date-picker-${
                       isDatePickerLocked ? 'lock' : 'unlock'
                     }-button`}
-                    color="primary"
-                    onClick={onToggleLock}
-                    iconType={isDatePickerLocked ? 'lock' : 'lockOpen'}
+                    label={
+                      isDatePickerLocked
+                        ? i18n.LOCK_SYNC_MAIN_DATE_PICKER_LABEL
+                        : i18n.UNLOCK_SYNC_MAIN_DATE_PICKER_LABEL
+                    }
+                    checked={isDatePickerLocked}
+                    onChange={onToggleLock}
+                    compressed
                     aria-label={
                       isDatePickerLocked
                         ? i18n.UNLOCK_SYNC_MAIN_DATE_PICKER_ARIA
@@ -344,6 +348,7 @@ const TimelineQueryTabContentComponent: React.FC<Props> = ({
                   indexPattern={indexPattern}
                   dataProviders={dataProviders}
                   filterManager={filterManager}
+                  show={show}
                   showCallOutUnauthorizedMsg={showCallOutUnauthorizedMsg}
                   timelineId={timelineId}
                   status={status}

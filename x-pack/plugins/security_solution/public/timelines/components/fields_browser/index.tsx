@@ -36,7 +36,6 @@ export const StatefulFieldsBrowserComponent: React.FC<FieldBrowserProps> = ({
   browserFields,
   height,
   onFieldSelected,
-  onUpdateColumns,
   timelineId,
   width,
 }) => {
@@ -150,7 +149,6 @@ export const StatefulFieldsBrowserComponent: React.FC<FieldBrowserProps> = ({
           onHideFieldBrowser={hideFieldBrowser}
           onOutsideClick={show ? hideFieldBrowser : noop}
           onSearchInputChange={updateFilter}
-          onUpdateColumns={onUpdateColumns}
           searchInput={filterInput}
           selectedCategoryId={selectedCategoryId}
           timelineId={timelineId}

@@ -6,7 +6,6 @@
 
 import { BrowserFields } from '../../../common/containers/source';
 import { ColumnHeaderOptions } from '../../../timelines/store/timeline/model';
-import { OnUpdateColumns } from '../timeline/events';
 
 export type OnFieldSelected = (fieldId: string) => void;
 export type OnHideFieldBrowser = () => void;
@@ -26,8 +25,6 @@ export interface FieldBrowserProps {
    * instead of dragging it to the timeline
    */
   onFieldSelected?: OnFieldSelected;
-  /** Invoked when a user chooses to view a new set of columns in the timeline */
-  onUpdateColumns: OnUpdateColumns;
   /** The timeline associated with this field browser */
   timelineId: string;
   /** The width of the field browser */

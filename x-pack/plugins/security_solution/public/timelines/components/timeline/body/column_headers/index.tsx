@@ -21,7 +21,7 @@ import { EXIT_FULL_SCREEN } from '../../../../../common/components/exit_full_scr
 import { FULL_SCREEN_TOGGLED_CLASS_NAME } from '../../../../../../common/constants';
 import { useFullScreen } from '../../../../../common/containers/use_full_screen';
 import { TimelineId } from '../../../../../../common/types/timeline';
-import { OnSelectAll, OnUpdateColumns } from '../../events';
+import { OnSelectAll } from '../../events';
 import { DEFAULT_ICON_BUTTON_WIDTH } from '../../helpers';
 import { StatefulFieldsBrowser } from '../../../fields_browser';
 import { StatefulRowRenderersBrowser } from '../../../row_renderers_browser';
@@ -47,7 +47,6 @@ interface Props {
   isEventViewer?: boolean;
   isSelectAllChecked: boolean;
   onSelectAll: OnSelectAll;
-  onUpdateColumns: OnUpdateColumns;
   showEventsSelect: boolean;
   showSelectAllCheckbox: boolean;
   sort: Sort;
@@ -94,7 +93,6 @@ export const ColumnHeadersComponent = ({
   isEventViewer = false,
   isSelectAllChecked,
   onSelectAll,
-  onUpdateColumns,
   showEventsSelect,
   showSelectAllCheckbox,
   sort,
@@ -218,7 +216,6 @@ export const ColumnHeadersComponent = ({
               columnHeaders={columnHeaders}
               data-test-subj="field-browser"
               height={FIELD_BROWSER_HEIGHT}
-              onUpdateColumns={onUpdateColumns}
               timelineId={timelineId}
               width={FIELD_BROWSER_WIDTH}
             />
@@ -279,7 +276,6 @@ export const ColumnHeaders = React.memo(
     prevProps.isEventViewer === nextProps.isEventViewer &&
     prevProps.isSelectAllChecked === nextProps.isSelectAllChecked &&
     prevProps.onSelectAll === nextProps.onSelectAll &&
-    prevProps.onUpdateColumns === nextProps.onUpdateColumns &&
     prevProps.showEventsSelect === nextProps.showEventsSelect &&
     prevProps.showSelectAllCheckbox === nextProps.showSelectAllCheckbox &&
     prevProps.sort === nextProps.sort &&

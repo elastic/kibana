@@ -25,6 +25,7 @@ interface Props {
   dataProviders: DataProvider[];
   filterManager: FilterManager;
   indexPattern: IIndexPattern;
+  show: boolean;
   showCallOutUnauthorizedMsg: boolean;
   status: TimelineStatusLiteralWithNull;
   timelineId: string;
@@ -35,6 +36,7 @@ const TimelineHeaderComponent: React.FC<Props> = ({
   indexPattern,
   dataProviders,
   filterManager,
+  show,
   showCallOutUnauthorizedMsg,
   status,
   timelineId,
@@ -58,18 +60,22 @@ const TimelineHeaderComponent: React.FC<Props> = ({
         size="s"
       />
     )}
-    <DataProviders
-      browserFields={browserFields}
-      timelineId={timelineId}
-      dataProviders={dataProviders}
-    />
+    {show && (
+      <>
+        <DataProviders
+          browserFields={browserFields}
+          timelineId={timelineId}
+          dataProviders={dataProviders}
+        />
 
-    <StatefulSearchOrFilter
-      browserFields={browserFields}
-      filterManager={filterManager}
-      indexPattern={indexPattern}
-      timelineId={timelineId}
-    />
+        <StatefulSearchOrFilter
+          browserFields={browserFields}
+          filterManager={filterManager}
+          indexPattern={indexPattern}
+          timelineId={timelineId}
+        />
+      </>
+    )}
   </>
 );
 
@@ -80,6 +86,7 @@ export const TimelineHeader = React.memo(
     deepEqual(prevProps.indexPattern, nextProps.indexPattern) &&
     deepEqual(prevProps.dataProviders, nextProps.dataProviders) &&
     prevProps.filterManager === nextProps.filterManager &&
+    prevProps.show === nextProps.show &&
     prevProps.showCallOutUnauthorizedMsg === nextProps.showCallOutUnauthorizedMsg &&
     prevProps.status === nextProps.status &&
     prevProps.timelineId === nextProps.timelineId
