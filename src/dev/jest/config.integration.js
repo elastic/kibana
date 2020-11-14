@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import config from './config';
+import config from './config.default';
 import preset from '@kbn/test/jest-preset';
 
 export default {
