@@ -46,10 +46,15 @@ export { readConfigFile } from './functional_test_runner/lib/config/read_config_
 
 export { runFtrCli } from './functional_test_runner/cli';
 
+export {
+  createAutoJUnitReporter,
+  runMochaCli,
+  setupJUnitReportGeneration,
+  escapeCdata,
+} from './mocha';
+
 export { runFailedTestsReporterCli } from './failed_tests_reporter';
 
 export { CI_PARALLEL_PROCESS_PREFIX } from './ci_parallel_process_prefix';
 
 export * from './functional_test_runner';
-
-export * from './jest';

@@ -5,7 +5,7 @@
  */
 import { act } from 'react-dom/test-utils';
 
-import { TestBed, SetupFunc, UnwrapPromise } from '../../../../../test_utils';
+import { TestBed, SetupFunc, UnwrapPromise } from '@kbn/test/jest';
 import { TemplateDeserialized } from '../../../common';
 
 interface MappingField {
@@ -208,7 +208,9 @@ export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
           jsonString: settings,
         }); // Using mocked EuiCodeEditor
       }
+    });
 
+    await act(async () => {
       clickNextButton();
     });
 

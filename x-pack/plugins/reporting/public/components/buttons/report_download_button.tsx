@@ -6,7 +6,7 @@
 
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import React, { FunctionComponent } from 'react';
-import { JobStatuses } from '../../../constants';
+import { JOB_STATUSES } from '../../../common/constants';
 import { Job as ListingJob, Props as ListingProps } from '../report_listing';
 
 type Props = { record: ListingJob } & ListingProps;
@@ -14,7 +14,7 @@ type Props = { record: ListingJob } & ListingProps;
 export const ReportDownloadButton: FunctionComponent<Props> = (props: Props) => {
   const { record, apiClient, intl } = props;
 
-  if (record.status !== JobStatuses.COMPLETED && record.status !== JobStatuses.WARNINGS) {
+  if (record.status !== JOB_STATUSES.COMPLETED && record.status !== JOB_STATUSES.WARNINGS) {
     return null;
   }
 

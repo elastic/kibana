@@ -48,6 +48,7 @@ export const IGNORE_FILE_GLOBS = [
   'Dockerfile*',
   'vars/*',
   '.ci/pipeline-library/**/*',
+  'packages/kbn-test/jest-preset.js',
 
   // filename must match language code which requires capital letters
   '**/translations/*.json',
@@ -69,7 +70,7 @@ export const IGNORE_FILE_GLOBS = [
 
   'x-pack/plugins/maps/server/fonts/**/*',
   // packages for the ingest manager's api integration tests could be valid semver which has dashes
-  'x-pack/test/ingest_manager_api_integration/apis/fixtures/test_packages/**/*',
+  'x-pack/test/fleet_api_integration/apis/fixtures/test_packages/**/*',
 ];
 
 /**

@@ -8,7 +8,6 @@ import semver from 'semver';
 import { Response } from 'node-fetch';
 import { URL } from 'url';
 import {
-  AssetParts,
   AssetsGroupedByServiceByType,
   CategoryId,
   CategorySummaryList,
@@ -18,16 +17,17 @@ import {
   RegistrySearchResults,
   RegistrySearchResult,
 } from '../../../types';
-import { unpackArchiveToCache } from '../archive';
-import { cacheGet, getArchiveFilelist, setArchiveFilelist } from '../archive';
-import { ArchiveEntry } from './extract';
+import {
+  getArchiveFilelist,
+  getPathParts,
+  setArchiveFilelist,
+  unpackArchiveToCache,
+} from '../archive';
 import { fetchUrl, getResponse, getResponseStream } from './requests';
-import { streamToBuffer } from './streams';
+import { streamToBuffer } from '../streams';
 import { getRegistryUrl } from './registry_url';
 import { appContextService } from '../..';
 import { PackageNotFoundError, PackageCacheError } from '../../../errors';
-
-export { ArchiveEntry, getBufferExtractor } from './extract';
 
 export interface SearchParams {
   category?: CategoryId;
@@ -126,27 +126,18 @@ export async function fetchCategories(params?: CategoriesParams): Promise<Catego
   return fetchUrl(url.toString()).then(JSON.parse);
 }
 
-export async function unpackRegistryPackageToCache(
-  pkgName: string,
-  pkgVersion: string,
-  filter = (entry: ArchiveEntry): boolean => true
-): Promise<string[]> {
-  const { archiveBuffer, archivePath } = await fetchArchiveBuffer(pkgName, pkgVersion);
-  const contentType = mime.lookup(archivePath);
-  if (!contentType) {
-    throw new Error(`Unknown compression format for '${archivePath}'. Please use .zip or .gz`);
-  }
-  const paths: string[] = await unpackArchiveToCache(archiveBuffer, contentType);
-  return paths;
-}
-
-export async function loadRegistryPackage(
+export async function getRegistryPackage(
   pkgName: string,
   pkgVersion: string
 ): Promise<{ paths: string[]; registryPackageInfo: RegistryPackage }> {
   let paths = getArchiveFilelist(pkgName, pkgVersion);
   if (!paths || paths.length === 0) {
-    paths = await unpackRegistryPackageToCache(pkgName, pkgVersion);
+    const { archiveBuffer, archivePath } = await fetchArchiveBuffer(pkgName, pkgVersion);
+    const contentType = mime.lookup(archivePath);
+    if (!contentType) {
+      throw new Error(`Unknown compression format for '${archivePath}'. Please use .zip or .gz`);
+    }
+    paths = await unpackArchiveToCache(archiveBuffer, contentType);
     setArchiveFilelist(pkgName, pkgVersion, paths);
   }
 
@@ -154,36 +145,6 @@ export async function loadRegistryPackage(
   const registryPackageInfo = await fetchInfo(pkgName, pkgVersion);
 
   return { paths, registryPackageInfo };
-}
-
-export function pathParts(path: string): AssetParts {
-  let dataset;
-
-  let [pkgkey, service, type, file] = path.split('/');
-
-  // if it's a data stream
-  if (service === 'data_stream') {
-    // save the dataset name
-    dataset = type;
-    // drop the `data_stream/dataset-name` portion & re-parse
-    [pkgkey, service, type, file] = path.replace(`data_stream/${dataset}/`, '').split('/');
-  }
-
-  // This is to cover for the fields.yml files inside the "fields" directory
-  if (file === undefined) {
-    file = type;
-    type = 'fields';
-    service = '';
-  }
-
-  return {
-    pkgkey,
-    service,
-    type,
-    file,
-    dataset,
-    path,
-  } as AssetParts;
 }
 
 export async function ensureCachedArchiveInfo(
@@ -194,7 +155,7 @@ export async function ensureCachedArchiveInfo(
   const paths = getArchiveFilelist(name, version);
   if (!paths || paths.length === 0) {
     if (installSource === 'registry') {
-      await loadRegistryPackage(name, version);
+      await getRegistryPackage(name, version);
     } else {
       throw new PackageCacheError(
         `Package ${name}-${version} not cached. If it was uploaded, try uninstalling and reinstalling manually.`
@@ -214,19 +175,12 @@ async function fetchArchiveBuffer(
   return { archiveBuffer, archivePath };
 }
 
-export function getAsset(key: string) {
-  const buffer = cacheGet(key);
-  if (buffer === undefined) throw new Error(`Cannot find asset ${key}`);
-
-  return buffer;
-}
-
 export function groupPathsByService(paths: string[]): AssetsGroupedByServiceByType {
   const kibanaAssetTypes = Object.values<string>(KibanaAssetType);
 
   // ASK: best way, if any, to avoid `any`?
   const assets = paths.reduce((map: any, path) => {
-    const parts = pathParts(path.replace(/^\/package\//, ''));
+    const parts = getPathParts(path.replace(/^\/package\//, ''));
     if (parts.service === 'kibana' && kibanaAssetTypes.includes(parts.type)) {
       if (!map[parts.service]) map[parts.service] = {};
       if (!map[parts.service][parts.type]) map[parts.service][parts.type] = [];
