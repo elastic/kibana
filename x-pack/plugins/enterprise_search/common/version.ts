@@ -8,4 +8,4 @@ import SemVer from 'semver/classes/semver';
 import pkg from '../../../../package.json';
 
 export const CURRENT_VERSION = new SemVer(pkg.version as string);
-export const CURRENT_MAJOR_VERSION = CURRENT_VERSION.major;
+export const CURRENT_MAJOR_VERSION = `${CURRENT_VERSION.major}.${CURRENT_VERSION.minor}`;

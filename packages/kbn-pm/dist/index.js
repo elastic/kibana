@@ -33762,8 +33762,10 @@ function spawnStreaming(command, args, opts, {
     mergeMultiline: true,
     tag: color.bold(prefix)
   });
-  spawned.stdout.pipe(prefixedStdout).pipe(streamToLog(debug));
-  spawned.stderr.pipe(prefixedStderr).pipe(streamToLog(debug));
+  spawned.stdout.pipe(prefixedStdout).pipe(streamToLog(debug)); // TypeScript note: As long as the proc stdio[1] is 'pipe', then stdout will not be null
+
+  spawned.stderr.pipe(prefixedStderr).pipe(streamToLog(debug)); // TypeScript note: As long as the proc stdio[2] is 'pipe', then stderr will not be null
+
   return spawned;
 }
 
@@ -52866,7 +52868,8 @@ const WatchCommand = {
     await Object(_utils_parallelize__WEBPACK_IMPORTED_MODULE_2__["parallelizeBatches"])(batchedProjects, async pkg => {
       const completionHint = await Object(_utils_watch__WEBPACK_IMPORTED_MODULE_4__["waitUntilWatchIsReady"])(pkg.runScriptStreaming(watchScriptName, {
         debug: false
-      }).stdout);
+      }).stdout // TypeScript note: As long as the proc stdio[1] is 'pipe', then stdout will not be null
+      );
       _utils_log__WEBPACK_IMPORTED_MODULE_1__["log"].success(`[${pkg.name}] Initial build completed (${completionHint}).`);
     });
   }

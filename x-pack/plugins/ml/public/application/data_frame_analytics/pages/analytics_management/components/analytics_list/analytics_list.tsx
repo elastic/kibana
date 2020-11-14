@@ -30,15 +30,13 @@ import { getTaskStateBadge, getJobTypeBadge, useColumns } from './use_columns';
 import { ExpandedRow } from './expanded_row';
 import { AnalyticStatsBarStats, StatsBar } from '../../../../../components/stats_bar';
 import { CreateAnalyticsButton } from '../create_analytics_button';
-import {
-  getSelectedIdFromUrl,
-  getGroupQueryText,
-} from '../../../../../jobs/jobs_list/components/utils';
+import { getSelectedIdFromUrl } from '../../../../../jobs/jobs_list/components/utils';
 import { SourceSelection } from '../source_selection';
 import { filterAnalytics } from '../../../../common/search_bar_filters';
 import { AnalyticsEmptyPrompt } from './empty_prompt';
 import { useTableSettings } from './use_table_settings';
 import { RefreshAnalyticsListButton } from '../refresh_analytics_list_button';
+import { getGroupQueryText } from '../../../../../../../common/util/string_utils';
 
 const filters: EuiSearchBarProps['filters'] = [
   {
