@@ -3,8 +3,7 @@
   "server": true,
   "version": "8.0.0",
   "kibanaVersion": "kibana",
-  "requiredPlugins": ["alerts", "features", "triggersActionsUi", "kibanaReact", "savedObjects"],
+  "requiredPlugins": ["alerts", "features", "triggersActionsUi", "kibanaReact", "savedObjects", "data"],
   "configPath": ["xpack", "stack_alerts"],
-  "ui": true,
-  "requiredBundles": ["kibanaReact", "kibanaUtils"]
+  "ui": true
 }
