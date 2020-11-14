@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import semver from 'semver';
+import semverGt from 'semver/functions/gt';
+import semverLt from 'semver/functions/lt';
 import Boom from '@hapi/boom';
 import { UnwrapPromise } from '@kbn/utility-types';
 import { SavedObject, SavedObjectsClientContract } from 'src/core/server';
@@ -185,7 +186,7 @@ export async function upgradePackage({
   latestPkg,
   pkgToUpgrade,
 }: UpgradePackageParams): Promise<BulkInstallResponse> {
-  if (!installedPkg || semver.gt(latestPkg.version, installedPkg.attributes.version)) {
+  if (!installedPkg || semverGt(latestPkg.version, installedPkg.attributes.version)) {
     const pkgkey = Registry.pkgToPkgKey({
       name: latestPkg.name,
       version: latestPkg.version,
@@ -252,7 +253,7 @@ async function installPackageFromRegistry({
     installType === 'reinstall' || installType === 'reupdate' || installType === 'rollback';
 
   const latestPackage = await Registry.fetchFindLatestPackage(pkgName);
-  if (semver.lt(pkgVersion, latestPackage.version) && !force && !installOutOfDateVersionOk) {
+  if (semverLt(pkgVersion, latestPackage.version) && !force && !installOutOfDateVersionOk) {
     throw new PackageOutdatedError(`${pkgkey} is out-of-date and cannot be installed or updated`);
   }
 
