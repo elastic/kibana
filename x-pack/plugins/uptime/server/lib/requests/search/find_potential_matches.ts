@@ -52,7 +52,25 @@ const queryBody = async (queryContext: QueryContext, searchAfter: any, size: num
 
   const body = {
     size: 0,
-    query: { bool: { filter: filters } },
+    query: {
+      bool: {
+        filter: filters,
+        ...(queryContext.query
+          ? {
+              minimum_should_match: 1,
+              should: [
+                {
+                  multi_match: {
+                    query: escape(queryContext.query),
+                    type: 'phrase_prefix',
+                    fields: ['monitor.id.text', 'monitor.name.text', 'url.full.text'],
+                  },
+                },
+              ],
+            }
+          : {}),
+      },
+    },
     aggs: {
       has_timespan: {
         filter: {

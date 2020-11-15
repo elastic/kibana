@@ -67,7 +67,7 @@ export function KueryBar({
   let currentRequestCheck: string;
 
   const [getUrlParams, updateUrlParams] = useUrlParams();
-  const { search: kuery } = getUrlParams();
+  const { search: kuery, query } = getUrlParams();
 
   useEffect(() => {
     updateSearchText(kuery);
@@ -154,7 +154,7 @@ export function KueryBar({
         dataTestSubj={dataTestSubj}
         disabled={indexPatternMissing}
         isLoading={isLoadingSuggestions || loading}
-        initialValue={defaultKuery || kuery}
+        initialValue={defaultKuery || kuery || query}
         onChange={onChange}
         onSubmit={onSubmit}
         suggestions={state.suggestions.slice(0, suggestionLimit)}

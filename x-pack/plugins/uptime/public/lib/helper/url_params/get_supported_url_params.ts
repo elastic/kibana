@@ -22,6 +22,7 @@ export interface UptimeUrlParams {
   selectedPingStatus: string;
   statusFilter: string;
   focusConnectorField?: boolean;
+  query?: string;
 }
 
 const {
@@ -77,9 +78,11 @@ export const getSupportedUrlParams = (params: {
     statusFilter,
     pagination,
     focusConnectorField,
+    query,
   } = filteredParams;
 
   return {
+    query,
     absoluteDateRangeStart: parseAbsoluteDate(
       dateRangeStart || DATE_RANGE_START,
       ABSOLUTE_DATE_RANGE_START

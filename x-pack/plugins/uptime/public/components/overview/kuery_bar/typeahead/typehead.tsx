@@ -7,8 +7,12 @@
 import React, { KeyboardEvent, ChangeEvent, MouseEvent, useState, useRef, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFieldSearch, EuiProgress, EuiOutsideClickDetector } from '@elastic/eui';
+import useDebounce from 'react-use/lib/useDebounce';
 import { Suggestions } from './suggestions';
 import { QuerySuggestion } from '../../../../../../../../src/plugins/data/public';
+import { useUrlParams } from '../../../../hooks';
+import { SearchType } from './search_type';
+import { useKqlSyntax } from './use_kql_syntax';
 
 const KEY_CODES = {
   LEFT: 37,
@@ -62,7 +66,37 @@ export const Typeahead: React.FC<TypeaheadProps> = ({
     selected: null,
   });
 
+  const { kqlSyntax, setKqlSyntax } = useKqlSyntax();
+
   const inputRef = useRef<HTMLInputElement>();
+
+  const [getUrlParams, updateUrlParams] = useUrlParams();
+
+  const { query, search } = getUrlParams();
+
+  useEffect(() => {
+    setState((prevState) => ({
+      ...prevState,
+      value: query || '',
+    }));
+  }, [query]);
+
+  useEffect(() => {
+    setState((prevState) => ({
+      ...prevState,
+      value: search || '',
+    }));
+  }, [search]);
+
+  const [debouncedValue, setDebouncedValue] = useState(query ?? '');
+
+  useDebounce(
+    () => {
+      updateUrlParams({ query: debouncedValue });
+    },
+    250,
+    [debouncedValue]
+  );
 
   useEffect(() => {
     if (state.inputIsPristine && initialValue) {
@@ -203,6 +237,18 @@ export const Typeahead: React.FC<TypeaheadProps> = ({
     const { value, selectionStart } = event.target;
     const hasValue = Boolean(value.trim());
 
+    if (!kqlSyntax) {
+      setState((prevState) => ({
+        ...prevState,
+        value,
+        inputIsPristine: false,
+        index: null,
+      }));
+
+      setDebouncedValue(value);
+      return;
+    }
+
     setState((prevState) => ({
       ...prevState,
       value,
@@ -218,16 +264,20 @@ export const Typeahead: React.FC<TypeaheadProps> = ({
   };
 
   const onClickInput = (event: MouseEvent<HTMLInputElement> & ChangeEvent<HTMLInputElement>) => {
+    if (!kqlSyntax) {
+      return;
+    }
     event.stopPropagation();
     const { selectionStart } = event.target;
     onChange(state.value, selectionStart!);
   };
 
   const onFocus = () => {
-    setState((prevState) => ({
-      ...prevState,
-      isSuggestionsVisible: true,
-    }));
+    if (kqlSyntax)
+      setState((prevState) => ({
+        ...prevState,
+        isSuggestionsVisible: true,
+      }));
   };
 
   const onClickSuggestion = (suggestion: QuerySuggestion) => {
@@ -272,9 +322,16 @@ export const Typeahead: React.FC<TypeaheadProps> = ({
             style={{
               backgroundImage: 'none',
             }}
-            placeholder={i18n.translate('xpack.uptime.kueryBar.searchPlaceholder', {
-              defaultMessage: 'Search monitor IDs, names, and protocol types...',
-            })}
+            placeholder={
+              kqlSyntax
+                ? i18n.translate('xpack.uptime.kueryBar.searchPlaceholder.kql', {
+                    defaultMessage:
+                      'Search using kql syntax for monitor IDs, names and type etc (E.g monitor.type: "http" AND tags: "dev")',
+                  })
+                : i18n.translate('xpack.uptime.kueryBar.searchPlaceholder.simple', {
+                    defaultMessage: 'Search by monitor ID, name, or url (E.g. http:// )',
+                  })
+            }
             inputRef={(node) => {
               if (node) {
                 inputRef.current = node;
@@ -289,6 +346,7 @@ export const Typeahead: React.FC<TypeaheadProps> = ({
             onClick={onClickInput}
             autoComplete="off"
             spellCheck={false}
+            append={<SearchType kqlSyntax={kqlSyntax} setKqlSyntax={setKqlSyntax} />}
           />
 
           {isLoading && (
@@ -303,15 +361,16 @@ export const Typeahead: React.FC<TypeaheadProps> = ({
             />
           )}
         </div>
-
-        <Suggestions
-          show={state.isSuggestionsVisible}
-          suggestions={suggestions}
-          index={state.index!}
-          onClick={onClickSuggestion}
-          onMouseEnter={onMouseEnterSuggestion}
-          loadMore={loadMore}
-        />
+        {kqlSyntax && (
+          <Suggestions
+            show={state.isSuggestionsVisible}
+            suggestions={suggestions}
+            index={state.index!}
+            onClick={onClickSuggestion}
+            onMouseEnter={onMouseEnterSuggestion}
+            loadMore={loadMore}
+          />
+        )}
       </span>
     </EuiOutsideClickDetector>
   );

@@ -50,3 +50,5 @@ export enum CERT_STATUS {
   EXPIRED = 'EXPIRED',
   TOO_OLD = 'TOO_OLD',
 }
+
+export const KQL_SYNTAX_LOCAL_STORAGE = 'xpack.uptime.kql.syntax';

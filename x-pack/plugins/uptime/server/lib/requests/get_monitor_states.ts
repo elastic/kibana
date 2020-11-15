@@ -48,6 +48,7 @@ export const getMonitorStates: UMElasticsearchQueryFn<
   pageSize,
   filters,
   statusFilter,
+  query,
 }) => {
   pagination = pagination || CONTEXT_DEFAULTS.CURSOR_PAGINATION;
   statusFilter = statusFilter === null ? undefined : statusFilter;
@@ -60,7 +61,8 @@ export const getMonitorStates: UMElasticsearchQueryFn<
     pagination,
     filters && filters !== '' ? JSON.parse(filters) : null,
     pageSize,
-    statusFilter
+    statusFilter,
+    query
   );
 
   const size = Math.min(queryContext.size, QUERY.DEFAULT_AGGS_CAP);
