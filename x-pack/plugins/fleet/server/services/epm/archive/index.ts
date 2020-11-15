@@ -14,10 +14,16 @@ import {
   setArchiveFilelist,
   deleteArchiveFilelist,
 } from './cache';
-import { ArchiveEntry, getBufferExtractor } from '../registry/extract';
+import { getBufferExtractor } from './extract';
 import { parseAndVerifyArchiveEntries } from './validation';
 
 export * from './cache';
+export { untarBuffer, unzipBuffer, getBufferExtractor } from './extract';
+
+export interface ArchiveEntry {
+  path: string;
+  buffer?: Buffer;
+}
 
 export async function getArchivePackage({
   archiveBuffer,

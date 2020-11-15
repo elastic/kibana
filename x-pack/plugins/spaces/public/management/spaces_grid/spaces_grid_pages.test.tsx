@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { mountWithIntl, shallowWithIntl, nextTick } from 'test_utils/enzyme_helpers';
+import { mountWithIntl, shallowWithIntl, nextTick } from '@kbn/test/jest';
 import { SpaceAvatar } from '../../space_avatar';
 import { spacesManagerMock } from '../../spaces_manager/mocks';
 import { SpacesManager } from '../../spaces_manager';
