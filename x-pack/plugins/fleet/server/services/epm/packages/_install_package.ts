@@ -23,6 +23,7 @@ import { updateCurrentWriteIndices } from '../elasticsearch/template/template';
 import { deleteKibanaSavedObjectsAssets } from './remove';
 import { installTransform } from '../elasticsearch/transform/install';
 import { createInstallation, saveKibanaAssetsRefs, updateVersion } from './install';
+import { saveArchiveEntriesToES } from '../archive/save_to_es';
 
 // this is only exported for testing
 // use a leading underscore to indicate it's not the supported path
@@ -62,6 +63,13 @@ export async function _installPackage({
       installSource,
     });
   }
+
+  await saveArchiveEntriesToES({
+    savedObjectsClient,
+    paths,
+    packageInfo,
+    installSource,
+  });
 
   // kick off `installIndexPatterns` & `installKibanaAssets` as early as possible because they're the longest running operations
   // we don't `await` here because we don't want to delay starting the many other `install*` functions

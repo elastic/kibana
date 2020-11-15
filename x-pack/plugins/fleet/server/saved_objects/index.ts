@@ -11,6 +11,7 @@ import {
   OUTPUT_SAVED_OBJECT_TYPE,
   AGENT_POLICY_SAVED_OBJECT_TYPE,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+  ASSETS_SAVED_OBJECT_TYPE,
   PACKAGES_SAVED_OBJECT_TYPE,
   AGENT_SAVED_OBJECT_TYPE,
   AGENT_EVENT_SAVED_OBJECT_TYPE,
@@ -307,6 +308,25 @@ const getSavedObjectTypes = (
         install_version: { type: 'keyword' },
         install_status: { type: 'keyword' },
         install_source: { type: 'keyword' },
+      },
+    },
+  },
+  [ASSETS_SAVED_OBJECT_TYPE]: {
+    name: ASSETS_SAVED_OBJECT_TYPE,
+    hidden: false,
+    namespaceType: 'agnostic',
+    management: {
+      importableAndExportable: false,
+    },
+    mappings: {
+      properties: {
+        package_name: { type: 'keyword' },
+        package_version: { type: 'keyword' },
+        install_source: { type: 'keyword' },
+        path: { type: 'text' },
+        media_type: { type: 'keyword' },
+        data_utf8: { type: 'text' },
+        data_base64: { type: 'binary' },
       },
     },
   },
