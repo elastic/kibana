@@ -99,7 +99,7 @@ export class DataServerPlugin
 
     const searchSetup = this.searchService.setup(core, {
       bfetch,
-      registerFunction: expressions.registerFunction,
+      expressions,
       usageCollection,
     });
 

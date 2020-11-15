@@ -25,12 +25,10 @@ import { CoreStart, CoreSetup, ToastsSetup } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { BatchedFunc, BfetchPublicSetup } from 'src/plugins/bfetch/public';
 import {
-  AbortError,
   IKibanaSearchRequest,
   IKibanaSearchResponse,
   ISearchOptions,
   ISessionService,
-  getCombinedSignal,
   ES_SEARCH_STRATEGY,
 } from '../../common';
 import { SearchUsageCollector } from './collectors';
@@ -44,6 +42,7 @@ import {
   getHttpError,
 } from './errors';
 import { toMountPoint } from '../../../kibana_react/public';
+import { AbortError, getCombinedAbortSignal } from '../../../kibana_utils/public';
 
 export interface SearchInterceptorDeps {
   bfetch: BfetchPublicSetup;
@@ -184,7 +183,9 @@ export class SearchInterceptor {
       ...(abortSignal ? [abortSignal] : []),
     ];
 
-    const { signal: combinedSignal, cleanup: cleanupCombinedSignal } = getCombinedSignal(signals);
+    const { signal: combinedSignal, cleanup: cleanupCombinedSignal } = getCombinedAbortSignal(
+      signals
+    );
     const cleanup = () => {
       subscription.unsubscribe();
       combinedSignal.removeEventListener('abort', cleanup);

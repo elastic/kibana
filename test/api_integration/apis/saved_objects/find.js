@@ -160,7 +160,7 @@ export default function ({ getService }) {
       });
 
       describe('wildcard namespace', () => {
-        it('should return 200 with individual responses from the default namespace', async () =>
+        it('should return 200 with individual responses from the all namespaces', async () =>
           await supertest
             .get('/api/saved_objects/_find?type=visualization&fields=title&namespaces=*')
             .expect(200)
@@ -168,7 +168,7 @@ export default function ({ getService }) {
               expect(resp.body).to.eql({
                 page: 1,
                 per_page: 20,
-                total: 1,
+                total: 2,
                 saved_objects: [
                   {
                     type: 'visualization',
@@ -188,6 +188,27 @@ export default function ({ getService }) {
                       },
                     ],
                     updated_at: '2017-09-21T18:51:23.794Z',
+                  },
+                  {
+                    attributes: {
+                      title: 'Count of requests',
+                    },
+                    id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
+                    migrationVersion: {
+                      visualization: '7.10.0',
+                    },
+                    namespaces: ['foo-ns'],
+                    references: [
+                      {
+                        id: '91200a00-9efd-11e7-acb3-3dab96693fab',
+                        name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+                        type: 'index-pattern',
+                      },
+                    ],
+                    score: 0,
+                    type: 'visualization',
+                    updated_at: '2017-09-21T18:51:23.794Z',
+                    version: 'WzYsMV0=',
                   },
                 ],
               });
