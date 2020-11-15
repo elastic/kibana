@@ -21,8 +21,6 @@ import { EncryptionConfig } from './encryption_config';
 import { generate } from './generate';
 
 import { Logger } from '../cli_plugin/lib/logger';
-import * as prompt from '../cli_keystore/utils/prompt';
-import fs from 'fs';
 
 describe('encryption key generation', () => {
   const encryptionConfig = new EncryptionConfig();
@@ -65,21 +63,6 @@ describe('encryption key generation', () => {
     expect(Logger.prototype.log.mock.calls[2]).toBeUndefined();
   });
 
-  it('should prompt the user to write keys if the interactive flag is set', () => {
-    const confirm = jest.spyOn(prompt, 'confirm').mockResolvedValue(true);
-    generate(encryptionConfig, { interactive: false });
-    expect(confirm).not.toHaveBeenCalled();
-    generate(encryptionConfig, { interactive: true });
-    expect(confirm).toHaveBeenCalledWith('Set xpack.encryptedSavedObjects.encryptionKey?');
-  });
-
-  it('should write keys if confirm is true', async () => {
-    jest.spyOn(prompt, 'confirm').mockResolvedValue(true);
-    jest.spyOn(prompt, 'question').mockResolvedValue(true);
-    fs.writeFileSync = jest.fn();
-    await generate(encryptionConfig, { interactive: true });
-    expect(fs.writeFileSync).toHaveBeenCalled();
-  });
   afterEach(() => {
     jest.restoreAllMocks();
   });

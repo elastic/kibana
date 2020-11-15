@@ -52,7 +52,7 @@ export async function interactive(keys, logger) {
     const promptedSaveLocation = await question(
       `What filename should be used for the sample Kibana config file? [${defaultSaveLocation}])`
     );
-    const saveLocation = defaultSaveLocation || promptedSaveLocation;
+    const saveLocation = promptedSaveLocation || defaultSaveLocation;
     writeFileSync(saveLocation, safeDump(setKeys));
     logger.log(`Wrote configuration to ${saveLocation}`);
   } else {
