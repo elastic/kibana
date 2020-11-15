@@ -23,7 +23,7 @@ Vagrant.configure("2") do |config|
     rpm.vm.provision "ansible" do |ansible|
       ansible.playbook = "test/package/rpm/playbook.yml"
     end
-    rpm.vm.network "forwarded_port", guest: 5601, host: 5610
+    rpm.vm.network "forwarded_port", guest: 5601, host: 5601
   end
 
   config.vm.define "docker" do |docker|
