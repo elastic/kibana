@@ -23,6 +23,7 @@ import { first, map } from 'rxjs/operators';
 import { getPanelData } from './vis_data/get_panel_data';
 import { Framework } from '../plugin';
 import { ReqFacade } from './search_strategies/strategies/abstract_search_strategy';
+import { VisPayload } from '../../common/types';
 
 interface GetVisDataResponse {
   [key: string]: GetVisDataPanel;
@@ -69,7 +70,7 @@ export function getVisData(
     ...request,
     framework,
     pre: {},
-    payload: request.body,
+    payload: request.body as VisPayload,
     getUiSettingsService: () => requestContext.core.uiSettings.client,
     getSavedObjectsClient: () => requestContext.core.savedObjects.client,
     getEsShardTimeout: async () => {

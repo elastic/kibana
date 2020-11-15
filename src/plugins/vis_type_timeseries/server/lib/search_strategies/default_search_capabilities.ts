@@ -25,7 +25,7 @@ import {
 import { RESTRICTIONS_KEYS } from '../../../common/ui_restrictions';
 import { ReqFacade } from './strategies/abstract_search_strategy';
 
-const getTimezoneFromRequest = (request: ReqFacade<any>) => {
+const getTimezoneFromRequest = (request: ReqFacade) => {
   return request.payload.timerange.timezone;
 };
 

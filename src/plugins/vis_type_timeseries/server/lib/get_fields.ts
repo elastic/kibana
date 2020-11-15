@@ -27,6 +27,7 @@ import {
   IndexPatternsFetcher,
 } from '../../../data/server';
 import { ReqFacade } from './search_strategies/strategies/abstract_search_strategy';
+import { VisPayload } from '../../common/types';
 
 export async function getFields(
   requestContext: RequestHandlerContext,
@@ -42,7 +43,7 @@ export async function getFields(
     requestContext,
     ...request,
     framework,
-    payload: {},
+    payload: {} as VisPayload,
     pre: {
       indexPatternsService: new IndexPatternsFetcher(
         requestContext.core.elasticsearch.client.asCurrentUser

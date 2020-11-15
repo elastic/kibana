@@ -34,7 +34,7 @@ import { VisPayload } from '../../../../common/types';
  *
  * This will be replaced by standard KibanaRequest and RequestContext objects in a later version.
  */
-export interface ReqFacade<T = unknown> extends FakeRequest {
+export interface ReqFacade<T = VisPayload> extends FakeRequest {
   requestContext: RequestHandlerContext;
   framework: Framework;
   payload: T;
@@ -47,7 +47,7 @@ export interface ReqFacade<T = unknown> extends FakeRequest {
 }
 
 export abstract class AbstractSearchStrategy {
-  async search(req: ReqFacade<VisPayload>, bodies: any[], indexType?: string) {
+  async search(req: ReqFacade, bodies: any[], indexType?: string) {
     const requests: any[] = [];
     const { sessionId } = req.payload;
 
