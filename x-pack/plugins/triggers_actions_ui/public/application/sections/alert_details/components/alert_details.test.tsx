@@ -7,16 +7,14 @@ import * as React from 'react';
 import uuid from 'uuid';
 import { shallow } from 'enzyme';
 import { AlertDetails } from './alert_details';
-import { Alert, ActionType, ValidationResult } from '../../../../types';
+import { Alert, ActionType } from '../../../../types';
 import { EuiTitle, EuiBadge, EuiFlexItem, EuiSwitch, EuiButtonEmpty, EuiText } from '@elastic/eui';
 import { ViewInApp } from './view_in_app';
-import { coreMock } from 'src/core/public/mocks';
 import {
   AlertExecutionStatusErrorReasons,
   ALERTS_FEATURE_ID,
 } from '../../../../../../alerts/common';
-
-const mockes = coreMock.createSetup();
+jest.mock('../../../../common/lib/kibana');
 
 jest.mock('react-router-dom', () => ({
   useHistory: () => ({

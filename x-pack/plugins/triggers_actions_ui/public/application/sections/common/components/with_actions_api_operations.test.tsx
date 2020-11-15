@@ -7,7 +7,9 @@ import * as React from 'react';
 import { shallow, mount } from 'enzyme';
 import { withActionOperations, ComponentOpts } from './with_actions_api_operations';
 import * as actionApis from '../../../lib/action_connector_api';
-import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
+import { useKibana } from '../../../../common/lib/kibana';
+const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
+jest.mock('../../../../common/lib/kibana');
 
 jest.mock('../../../lib/action_connector_api');
 
@@ -27,7 +29,7 @@ describe('with_action_api_operations', () => {
   });
 
   it('loadActionTypes calls the loadActionTypes api', () => {
-    const { http } = useKibana().services;
+    const { http } = useKibanaMock().services;
     const ComponentToExtend = ({ loadActionTypes }: ComponentOpts) => {
       return <button onClick={() => loadActionTypes()}>{'call api'}</button>;
     };

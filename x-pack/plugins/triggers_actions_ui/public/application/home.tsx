@@ -20,7 +20,6 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 
-import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 import { Section, routeToConnectors, routeToAlerts } from './constants';
 import { getAlertingSectionBreadcrumb } from './lib/breadcrumb';
 import { getCurrentDocTitle } from './lib/doc_title';
@@ -30,7 +29,7 @@ import { ActionsConnectorsList } from './sections/actions_connectors_list/compon
 import { AlertsList } from './sections/alerts_list/components/alerts_list';
 import { HealthCheck } from './components/health_check';
 import { HealthContextProvider } from './context/health_context';
-import { TriggersAndActionsUiServices } from './app';
+import { useKibana } from '../common/lib/kibana';
 
 export interface MatchParams {
   section: Section;
@@ -42,9 +41,7 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
   },
   history,
 }) => {
-  const { chrome, capabilities, setBreadcrumbs, docLinks, http } = useKibana<
-    TriggersAndActionsUiServices
-  >().services;
+  const { chrome, capabilities, setBreadcrumbs, docLinks, http } = useKibana().services;
 
   const canShowActions = hasShowActionsCapability(capabilities);
   const tabs: Array<{

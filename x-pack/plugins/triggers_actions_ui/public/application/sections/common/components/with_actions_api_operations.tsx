@@ -5,10 +5,10 @@
  */
 
 import React from 'react';
-import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 
 import { ActionType } from '../../../../types';
 import { loadActionTypes } from '../../../lib/action_connector_api';
+import { useKibana } from '../../../../common/lib/kibana';
 
 export interface ComponentOpts {
   loadActionTypes: () => Promise<ActionType[]>;

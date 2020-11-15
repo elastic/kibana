@@ -23,8 +23,8 @@ import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
 import { PluginStartContract as AlertingStart } from '../../../alerts/public';
 import { suspendedComponentWithProps } from './lib/suspended_component_with_props';
 
-import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
-import { setSavedObjectsClient } from '../common/lib/index_threshold_api';
+import { setSavedObjectsClient } from '../common/lib/data_apis';
+import { KibanaContextProvider } from '../common/lib/kibana';
 
 const TriggersActionsUIHome = lazy(async () => import('./home'));
 const AlertDetailsRoute = lazy(

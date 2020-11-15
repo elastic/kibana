@@ -22,7 +22,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { omit } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { loadAllActions, loadActionTypes, deleteActions } from '../../../lib/action_connector_api';
 import ConnectorAddFlyout from '../../action_connector_form/connector_add_flyout';
 import ConnectorEditFlyout, {
@@ -39,12 +38,16 @@ import { checkActionTypeEnabled } from '../../../lib/check_action_type_enabled';
 import './actions_connectors_list.scss';
 import { ActionConnector, ActionConnectorTableItem, ActionTypeIndex } from '../../../../types';
 import { EmptyConnectorsPrompt } from '../../../components/prompts/empty_connectors_prompt';
-import { TriggersAndActionsUiServices } from '../../../app';
+import { useKibana } from '../../../../common/lib/kibana';
 
 export const ActionsConnectorsList: React.FunctionComponent = () => {
-  const { http, toastNotifications, capabilities, actionTypeRegistry, docLinks } = useKibana<
-    TriggersAndActionsUiServices
-  >().services;
+  const {
+    http,
+    toastNotifications,
+    capabilities,
+    actionTypeRegistry,
+    docLinks,
+  } = useKibana().services;
   const canDelete = hasDeleteActionsCapability(capabilities);
   const canExecute = hasExecuteActionsCapability(capabilities);
   const canSave = hasSaveActionsCapability(capabilities);

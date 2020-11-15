@@ -5,7 +5,6 @@
  */
 
 import React from 'react';
-import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 
 import {
   Alert,
@@ -32,6 +31,7 @@ import {
   loadAlertTypes,
   health,
 } from '../../../lib/alert_api';
+import { useKibana } from '../../../../common/lib/kibana';
 
 export interface ComponentOpts {
   muteAlerts: (alerts: Alert[]) => Promise<void>;

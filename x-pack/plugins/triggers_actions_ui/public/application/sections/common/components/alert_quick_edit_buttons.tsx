@@ -8,7 +8,6 @@ import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiButtonEmpty, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
-import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 
 import { Alert } from '../../../../types';
 import {
@@ -16,7 +15,7 @@ import {
   ComponentOpts as BulkOperationsComponentOpts,
 } from './with_bulk_alert_api_operations';
 import './alert_quick_edit_buttons.scss';
-import { TriggersAndActionsUiServices } from '../../../app';
+import { useKibana } from '../../../../common/lib/kibana';
 
 export type ComponentOpts = {
   selectedItems: Alert[];
@@ -35,7 +34,7 @@ export const AlertQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
   disableAlerts,
   setAlertsToDelete,
 }: ComponentOpts) => {
-  const { toastNotifications } = useKibana<TriggersAndActionsUiServices>().services;
+  const { toastNotifications } = useKibana().services;
 
   const [isMutingAlerts, setIsMutingAlerts] = useState<boolean>(false);
   const [isUnmutingAlerts, setIsUnmutingAlerts] = useState<boolean>(false);

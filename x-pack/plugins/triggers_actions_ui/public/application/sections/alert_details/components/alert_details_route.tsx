@@ -9,7 +9,6 @@ import React, { useState, useEffect } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { ToastsApi } from 'kibana/public';
-import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { Alert, AlertType, ActionType } from '../../../../types';
 import { AlertDetailsWithApi as AlertDetails } from './alert_details';
 import { throwIfAbsent, throwIfIsntContained } from '../../../lib/value_validators';
@@ -21,7 +20,7 @@ import {
   ComponentOpts as ActionApis,
   withActionOperations,
 } from '../../common/components/with_actions_api_operations';
-import { TriggersAndActionsUiServices } from '../../../app';
+import { useKibana } from '../../../../common/lib/kibana';
 
 type AlertDetailsRouteProps = RouteComponentProps<{
   alertId: string;
@@ -37,7 +36,7 @@ export const AlertDetailsRoute: React.FunctionComponent<AlertDetailsRouteProps> 
   loadAlertTypes,
   loadActionTypes,
 }) => {
-  const { http, toastNotifications } = useKibana<TriggersAndActionsUiServices>().services;
+  const { http, toastNotifications } = useKibana().services;
 
   const [alert, setAlert] = useState<Alert | null>(null);
   const [alertType, setAlertType] = useState<AlertType | null>(null);
