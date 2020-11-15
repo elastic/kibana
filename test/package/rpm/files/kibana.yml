@@ -1,0 +1,3 @@
+server.host: 0.0.0.0
+
+elasticsearch.hosts: http://192.168.50.5:9200

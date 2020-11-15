@@ -11,9 +11,21 @@
       yum:
         name: /packages/kibana-8.0.0-SNAPSHOT-x86_64.rpm
         state: present
+    - name: copy kibana configuration
+      become: yes
+      copy:
+        src: ./files/kibana.yml
+        dest: /etc/kibana/kibana.yml
+      register: config
     - name: start kibana
       become: yes
       systemd:
         state: started
         name: kibana
+    - name: restart kibana
+      service:
+        name: kibana
+        state: restarted
+        when: config.changed
+
     - wait_for: host=localhost port=5601 timeout=60
