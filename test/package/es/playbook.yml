@@ -15,4 +15,5 @@
       systemd:
         state: started
         name: elasticsearch
+        daemon-reload: yes
     - wait_for: host=localhost port=9200 timeout=60

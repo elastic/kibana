@@ -26,6 +26,6 @@
       service:
         name: kibana
         state: restarted
-        when: config.changed
+      when: config.changed
 
     - wait_for: host=localhost port=5601 timeout=60
