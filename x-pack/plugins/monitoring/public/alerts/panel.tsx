@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { Fragment } from 'react';
+import React, { Fragment, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -34,24 +34,33 @@ interface Props {
 }
 export const AlertPanel: React.FC<Props> = (props: Props) => {
   const {
-    alert: { alert },
+    alert: { rawAlert },
     alertState,
     nextStepsFilter = () => true,
   } = props;
-  const [showFlyout, setShowFlyout] = React.useState(false);
-  const [isEnabled, setIsEnabled] = React.useState(alert.rawAlert.enabled);
-  const [isMuted, setIsMuted] = React.useState(alert.rawAlert.muteAll);
-  const [isSaving, setIsSaving] = React.useState(false);
-  const inSetupMode = isInSetupMode(React.useContext(SetupModeContext));
 
-  if (!alert.rawAlert) {
+  if (!rawAlert) {
     return null;
   }
 
-  async function disableAlert() {
+  /*
+    Looks like a false positive, see: https://github.com/typescript-eslint/typescript-eslint/issues/1051#issuecomment-555604349
+  */
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const [showFlyout, setShowFlyout] = useState(false);
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const [isEnabled, setIsEnabled] = useState(rawAlert.enabled);
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const [isMuted, setIsMuted] = useState(rawAlert.muteAll);
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const [isSaving, setIsSaving] = useState(false);
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const inSetupMode = isInSetupMode(React.useContext(SetupModeContext));
+
+  const disableAlert = async () => {
     setIsSaving(true);
     try {
-      await Legacy.shims.http.post(`${BASE_ALERT_API_PATH}/alert/${alert.rawAlert.id}/_disable`);
+      await Legacy.shims.http.post(`${BASE_ALERT_API_PATH}/alert/${rawAlert.id}/_disable`);
     } catch (err) {
       Legacy.shims.toastNotifications.addDanger({
         title: i18n.translate('xpack.monitoring.alerts.panel.disableAlert.errorTitle', {
@@ -61,11 +70,11 @@ export const AlertPanel: React.FC<Props> = (props: Props) => {
       });
     }
     setIsSaving(false);
-  }
-  async function enableAlert() {
+  };
+  const enableAlert = async () => {
     setIsSaving(true);
     try {
-      await Legacy.shims.http.post(`${BASE_ALERT_API_PATH}/alert/${alert.rawAlert.id}/_enable`);
+      await Legacy.shims.http.post(`${BASE_ALERT_API_PATH}/alert/${rawAlert.id}/_enable`);
     } catch (err) {
       Legacy.shims.toastNotifications.addDanger({
         title: i18n.translate('xpack.monitoring.alerts.panel.enableAlert.errorTitle', {
@@ -75,11 +84,11 @@ export const AlertPanel: React.FC<Props> = (props: Props) => {
       });
     }
     setIsSaving(false);
-  }
-  async function muteAlert() {
+  };
+  const muteAlert = async () => {
     setIsSaving(true);
     try {
-      await Legacy.shims.http.post(`${BASE_ALERT_API_PATH}/alert/${alert.rawAlert.id}/_mute_all`);
+      await Legacy.shims.http.post(`${BASE_ALERT_API_PATH}/alert/${rawAlert.id}/_mute_all`);
     } catch (err) {
       Legacy.shims.toastNotifications.addDanger({
         title: i18n.translate('xpack.monitoring.alerts.panel.muteAlert.errorTitle', {
@@ -89,11 +98,12 @@ export const AlertPanel: React.FC<Props> = (props: Props) => {
       });
     }
     setIsSaving(false);
-  }
-  async function unmuteAlert() {
+  };
+
+  const unmuteAlert = async () => {
     setIsSaving(true);
     try {
-      await Legacy.shims.http.post(`${BASE_ALERT_API_PATH}/alert/${alert.rawAlert.id}/_unmute_all`);
+      await Legacy.shims.http.post(`${BASE_ALERT_API_PATH}/alert/${rawAlert.id}/_unmute_all`);
     } catch (err) {
       Legacy.shims.toastNotifications.addDanger({
         title: i18n.translate('xpack.monitoring.alerts.panel.ummuteAlert.errorTitle', {
@@ -103,7 +113,7 @@ export const AlertPanel: React.FC<Props> = (props: Props) => {
       });
     }
     setIsSaving(false);
-  }
+  };
 
   const flyoutUi = showFlyout ? (
     <AlertsContextProvider
@@ -119,7 +129,7 @@ export const AlertPanel: React.FC<Props> = (props: Props) => {
       }}
     >
       <AlertEdit
-        initialAlert={alert.rawAlert}
+        initialAlert={rawAlert}
         onClose={() => {
           setShowFlyout(false);
           showBottomBar();

@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { IUiSettingsClient, Logger } from 'kibana/server';
+
 import { i18n } from '@kbn/i18n';
 import { BaseAlert } from './base_alert';
 import {
@@ -24,6 +24,7 @@ import { AlertMessageTokenType, AlertSeverity } from '../../common/enums';
 import { Alert, RawAlertInstance } from '../../../alerts/common';
 import { AlertingDefaults, createLink } from './alert_helpers';
 import { appendMetricbeatIndex } from '../lib/alerts/append_mb_index';
+import { Globals } from '../static_globals';
 
 type ActionVariables = Array<{ name: string; description: string }>;
 
@@ -44,29 +45,31 @@ export class ThreadPoolRejectionsAlertBase extends BaseAlert {
     ];
   }
 
-  protected defaultParams: ThreadPoolRejectionsAlertParams = {
-    threshold: 300,
-    duration: '5m',
-  };
-
   constructor(
     rawAlert: Alert | undefined = undefined,
-    public readonly type: string,
+    public readonly id: string,
     public readonly threadPoolType: string,
-    public readonly label: string,
+    public readonly name: string,
     public readonly actionVariables: ActionVariables
   ) {
-    super(rawAlert);
+    super(rawAlert, {
+      id,
+      name,
+      defaultParams: {
+        threshold: 300,
+        duration: '5m',
+      },
+      actionVariables,
+    });
   }
 
   protected async fetchData(
     params: ThreadPoolRejectionsAlertParams,
     callCluster: any,
     clusters: AlertCluster[],
-    uiSettings: IUiSettingsClient,
     availableCcs: string[]
   ): Promise<AlertData[]> {
-    let esIndexPattern = appendMetricbeatIndex(this.config, INDEX_PATTERN_ELASTICSEARCH);
+    let esIndexPattern = appendMetricbeatIndex(Globals.app.config, INDEX_PATTERN_ELASTICSEARCH);
     if (availableCcs) {
       esIndexPattern = getCcsIndexPattern(esIndexPattern, availableCcs);
     }
@@ -77,7 +80,7 @@ export class ThreadPoolRejectionsAlertBase extends BaseAlert {
       callCluster,
       clusters,
       esIndexPattern,
-      this.config.ui.max_bucket_size,
+      Globals.app.config.ui.max_bucket_size,
       this.threadPoolType,
       duration
     );
@@ -244,7 +247,7 @@ export class ThreadPoolRejectionsAlertBase extends BaseAlert {
 
     instance.scheduleActions('default', {
       internalShortMessage,
-      internalFullMessage: this.isCloud ? internalShortMessage : internalFullMessage,
+      internalFullMessage: Globals.app.isCloud ? internalShortMessage : internalFullMessage,
       threadPoolType: type,
       state: AlertingDefaults.ALERT_STATE.firing,
       count,
@@ -258,7 +261,6 @@ export class ThreadPoolRejectionsAlertBase extends BaseAlert {
     data: AlertData[],
     clusters: AlertCluster[],
     services: AlertServices,
-    logger: Logger,
     state: { lastChecked?: number }
   ) {
     const currentUTC = +new Date();
@@ -276,7 +278,7 @@ export class ThreadPoolRejectionsAlertBase extends BaseAlert {
 
       const instanceSuffix = firingNodeUuids.map((node) => node.meta.nodeId);
 
-      const instancePrefix = `${this.type}:${cluster.clusterUuid}:`;
+      const instancePrefix = `${this.id}:${cluster.clusterUuid}:`;
       const alertInstanceId = `${instancePrefix}:${instanceSuffix}`;
       const alertInstance = services.alertInstanceFactory(alertInstanceId);
       const newAlertStates: AlertThreadPoolRejectionsState[] = [];

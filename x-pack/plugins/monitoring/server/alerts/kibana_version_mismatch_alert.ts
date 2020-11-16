@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { IUiSettingsClient } from 'kibana/server';
+
 import { i18n } from '@kbn/i18n';
 import { BaseAlert } from './base_alert';
 import {
@@ -25,46 +25,49 @@ import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
 import { AlertSeverity } from '../../common/enums';
 import { fetchLegacyAlerts } from '../lib/alerts/fetch_legacy_alerts';
 import { AlertingDefaults } from './alert_helpers';
+import { SanitizedAlert } from '../../../alerts/common';
+import { Globals } from '../static_globals';
 
 const WATCH_NAME = 'kibana_version_mismatch';
 
 export class KibanaVersionMismatchAlert extends BaseAlert {
-  public type = ALERT_KIBANA_VERSION_MISMATCH;
-  public label = LEGACY_ALERT_DETAILS[ALERT_KIBANA_VERSION_MISMATCH].label;
-  public description = LEGACY_ALERT_DETAILS[ALERT_KIBANA_VERSION_MISMATCH].description;
-  public isLegacy = true;
-
-  protected actionVariables = [
-    {
-      name: 'versionList',
-      description: i18n.translate(
-        'xpack.monitoring.alerts.kibanaVersionMismatch.actionVariables.clusterHealth',
+  constructor(public rawAlert?: SanitizedAlert) {
+    super(rawAlert, {
+      id: ALERT_KIBANA_VERSION_MISMATCH,
+      name: LEGACY_ALERT_DETAILS[ALERT_KIBANA_VERSION_MISMATCH].label,
+      isLegacy: true,
+      actionVariables: [
         {
-          defaultMessage: 'The versions of Kibana running in this cluster.',
-        }
-      ),
-    },
-    {
-      name: 'clusterName',
-      description: i18n.translate(
-        'xpack.monitoring.alerts.kibanaVersionMismatch.actionVariables.clusterName',
+          name: 'versionList',
+          description: i18n.translate(
+            'xpack.monitoring.alerts.kibanaVersionMismatch.actionVariables.clusterHealth',
+            {
+              defaultMessage: 'The versions of Kibana running in this cluster.',
+            }
+          ),
+        },
         {
-          defaultMessage: 'The cluster to which the instances belong.',
-        }
-      ),
-    },
-    AlertingDefaults.ALERT_TYPE.context.internalShortMessage,
-    AlertingDefaults.ALERT_TYPE.context.internalFullMessage,
-    AlertingDefaults.ALERT_TYPE.context.state,
-    AlertingDefaults.ALERT_TYPE.context.action,
-    AlertingDefaults.ALERT_TYPE.context.actionPlain,
-  ];
+          name: 'clusterName',
+          description: i18n.translate(
+            'xpack.monitoring.alerts.kibanaVersionMismatch.actionVariables.clusterName',
+            {
+              defaultMessage: 'The cluster to which the instances belong.',
+            }
+          ),
+        },
+        AlertingDefaults.ALERT_TYPE.context.internalShortMessage,
+        AlertingDefaults.ALERT_TYPE.context.internalFullMessage,
+        AlertingDefaults.ALERT_TYPE.context.state,
+        AlertingDefaults.ALERT_TYPE.context.action,
+        AlertingDefaults.ALERT_TYPE.context.actionPlain,
+      ],
+    });
+  }
 
   protected async fetchData(
     params: CommonAlertParams,
     callCluster: any,
     clusters: AlertCluster[],
-    uiSettings: IUiSettingsClient,
     availableCcs: string[]
   ): Promise<AlertData[]> {
     let alertIndexPattern = INDEX_ALERTS;
@@ -76,7 +79,7 @@ export class KibanaVersionMismatchAlert extends BaseAlert {
       clusters,
       alertIndexPattern,
       WATCH_NAME,
-      this.config.ui.max_bucket_size
+      Globals.app.config.ui.max_bucket_size
     );
 
     return legacyAlerts.reduce((accum: AlertData[], legacyAlert) => {

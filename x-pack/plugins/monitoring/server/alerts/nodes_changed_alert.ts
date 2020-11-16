@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { IUiSettingsClient } from 'kibana/server';
+
 import { i18n } from '@kbn/i18n';
 import { BaseAlert } from './base_alert';
 import {
@@ -22,39 +22,49 @@ import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
 import { fetchLegacyAlerts } from '../lib/alerts/fetch_legacy_alerts';
 import { mapLegacySeverity } from '../lib/alerts/map_legacy_severity';
 import { AlertingDefaults } from './alert_helpers';
+import { SanitizedAlert } from '../../../alerts/common';
+import { Globals } from '../static_globals';
 
 const WATCH_NAME = 'elasticsearch_nodes';
 
 export class NodesChangedAlert extends BaseAlert {
-  public type = ALERT_NODES_CHANGED;
-  public label = LEGACY_ALERT_DETAILS[ALERT_NODES_CHANGED].label;
-  public description = LEGACY_ALERT_DETAILS[ALERT_NODES_CHANGED].description;
-  public isLegacy = true;
-
-  protected actionVariables = [
-    {
-      name: 'added',
-      description: i18n.translate('xpack.monitoring.alerts.nodesChanged.actionVariables.added', {
-        defaultMessage: 'The list of nodes added to the cluster.',
-      }),
-    },
-    {
-      name: 'removed',
-      description: i18n.translate('xpack.monitoring.alerts.nodesChanged.actionVariables.removed', {
-        defaultMessage: 'The list of nodes removed from the cluster.',
-      }),
-    },
-    {
-      name: 'restarted',
-      description: i18n.translate(
-        'xpack.monitoring.alerts.nodesChanged.actionVariables.restarted',
+  constructor(public rawAlert?: SanitizedAlert) {
+    super(rawAlert, {
+      id: ALERT_NODES_CHANGED,
+      name: LEGACY_ALERT_DETAILS[ALERT_NODES_CHANGED].label,
+      isLegacy: true,
+      actionVariables: [
         {
-          defaultMessage: 'The list of nodes restarted in the cluster.',
-        }
-      ),
-    },
-    ...Object.values(AlertingDefaults.ALERT_TYPE.context),
-  ];
+          name: 'added',
+          description: i18n.translate(
+            'xpack.monitoring.alerts.nodesChanged.actionVariables.added',
+            {
+              defaultMessage: 'The list of nodes added to the cluster.',
+            }
+          ),
+        },
+        {
+          name: 'removed',
+          description: i18n.translate(
+            'xpack.monitoring.alerts.nodesChanged.actionVariables.removed',
+            {
+              defaultMessage: 'The list of nodes removed from the cluster.',
+            }
+          ),
+        },
+        {
+          name: 'restarted',
+          description: i18n.translate(
+            'xpack.monitoring.alerts.nodesChanged.actionVariables.restarted',
+            {
+              defaultMessage: 'The list of nodes restarted in the cluster.',
+            }
+          ),
+        },
+        ...Object.values(AlertingDefaults.ALERT_TYPE.context),
+      ],
+    });
+  }
 
   private getNodeStates(legacyAlert: LegacyAlert): LegacyAlertNodesChangedList | undefined {
     return legacyAlert.nodes;
@@ -64,7 +74,6 @@ export class NodesChangedAlert extends BaseAlert {
     params: CommonAlertParams,
     callCluster: any,
     clusters: AlertCluster[],
-    uiSettings: IUiSettingsClient,
     availableCcs: string[]
   ): Promise<AlertData[]> {
     let alertIndexPattern = INDEX_ALERTS;
@@ -76,7 +85,7 @@ export class NodesChangedAlert extends BaseAlert {
       clusters,
       alertIndexPattern,
       WATCH_NAME,
-      this.config.ui.max_bucket_size
+      Globals.app.config.ui.max_bucket_size
     );
     return legacyAlerts.reduce((accum: AlertData[], legacyAlert) => {
       accum.push({

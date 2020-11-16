@@ -3,8 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import moment from 'moment';
-import { IUiSettingsClient } from 'kibana/server';
 import { i18n } from '@kbn/i18n';
 import { BaseAlert } from './base_alert';
 import {
@@ -30,45 +30,49 @@ import { AlertMessageTokenType } from '../../common/enums';
 import { fetchLegacyAlerts } from '../lib/alerts/fetch_legacy_alerts';
 import { mapLegacySeverity } from '../lib/alerts/map_legacy_severity';
 import { AlertingDefaults } from './alert_helpers';
+import { SanitizedAlert } from '../../../alerts/common';
+import { Globals } from '../static_globals';
 
 const WATCH_NAME = 'xpack_license_expiration';
 
 export class LicenseExpirationAlert extends BaseAlert {
-  public type = ALERT_LICENSE_EXPIRATION;
-  public label = LEGACY_ALERT_DETAILS[ALERT_LICENSE_EXPIRATION].label;
-  public description = LEGACY_ALERT_DETAILS[ALERT_LICENSE_EXPIRATION].description;
-  public isLegacy = true;
-  protected actionVariables = [
-    {
-      name: 'expiredDate',
-      description: i18n.translate(
-        'xpack.monitoring.alerts.licenseExpiration.actionVariables.expiredDate',
+  constructor(public rawAlert?: SanitizedAlert) {
+    super(rawAlert, {
+      id: ALERT_LICENSE_EXPIRATION,
+      name: LEGACY_ALERT_DETAILS[ALERT_LICENSE_EXPIRATION].label,
+      isLegacy: true,
+      actionVariables: [
         {
-          defaultMessage: 'The date when the license expires.',
-        }
-      ),
-    },
-    {
-      name: 'clusterName',
-      description: i18n.translate(
-        'xpack.monitoring.alerts.licenseExpiration.actionVariables.clusterName',
+          name: 'expiredDate',
+          description: i18n.translate(
+            'xpack.monitoring.alerts.licenseExpiration.actionVariables.expiredDate',
+            {
+              defaultMessage: 'The date when the license expires.',
+            }
+          ),
+        },
         {
-          defaultMessage: 'The cluster to which the license belong.',
-        }
-      ),
-    },
-    AlertingDefaults.ALERT_TYPE.context.internalShortMessage,
-    AlertingDefaults.ALERT_TYPE.context.internalFullMessage,
-    AlertingDefaults.ALERT_TYPE.context.state,
-    AlertingDefaults.ALERT_TYPE.context.action,
-    AlertingDefaults.ALERT_TYPE.context.actionPlain,
-  ];
+          name: 'clusterName',
+          description: i18n.translate(
+            'xpack.monitoring.alerts.licenseExpiration.actionVariables.clusterName',
+            {
+              defaultMessage: 'The cluster to which the license belong.',
+            }
+          ),
+        },
+        AlertingDefaults.ALERT_TYPE.context.internalShortMessage,
+        AlertingDefaults.ALERT_TYPE.context.internalFullMessage,
+        AlertingDefaults.ALERT_TYPE.context.state,
+        AlertingDefaults.ALERT_TYPE.context.action,
+        AlertingDefaults.ALERT_TYPE.context.actionPlain,
+      ],
+    });
+  }
 
   protected async fetchData(
     params: CommonAlertParams,
     callCluster: any,
     clusters: AlertCluster[],
-    uiSettings: IUiSettingsClient,
     availableCcs: string[]
   ): Promise<AlertData[]> {
     let alertIndexPattern = INDEX_ALERTS;
@@ -80,7 +84,7 @@ export class LicenseExpirationAlert extends BaseAlert {
       clusters,
       alertIndexPattern,
       WATCH_NAME,
-      this.config.ui.max_bucket_size
+      Globals.app.config.ui.max_bucket_size
     );
     return legacyAlerts.reduce((accum: AlertData[], legacyAlert) => {
       accum.push({

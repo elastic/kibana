@@ -4,13 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  UiSettingsServiceStart,
-  ILegacyCustomClusterClient,
-  Logger,
-  IUiSettingsClient,
-  LegacyCallAPIOptions,
-} from 'kibana/server';
+import { Logger, LegacyCallAPIOptions } from 'kibana/server';
 import { i18n } from '@kbn/i18n';
 import {
   AlertType,
@@ -19,7 +13,7 @@ import {
   AlertsClient,
   AlertServices,
 } from '../../../alerts/server';
-import { Alert, RawAlertInstance } from '../../../alerts/common';
+import { Alert, RawAlertInstance, SanitizedAlert } from '../../../alerts/common';
 import { ActionsClient } from '../../../actions/server';
 import {
   AlertState,
@@ -30,80 +24,56 @@ import {
   AlertEnableAction,
   CommonAlertFilter,
   CommonAlertParams,
-  CommonBaseAlert,
 } from '../../common/types/alerts';
 import { fetchAvailableCcs } from '../lib/alerts/fetch_available_ccs';
 import { fetchClusters } from '../lib/alerts/fetch_clusters';
 import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
 import { INDEX_PATTERN_ELASTICSEARCH } from '../../common/constants';
-import { MonitoringConfig } from '../config';
 import { AlertSeverity } from '../../common/enums';
 import { MonitoringLicenseService } from '../types';
 import { mbSafeQuery } from '../lib/mb_safe_query';
 import { appendMetricbeatIndex } from '../lib/alerts/append_mb_index';
+import { parseDuration } from '../../../alerts/common/parse_duration';
 
+import { Globals } from '../static_globals';
+
+interface AlertOptions {
+  id: string;
+  name: string;
+  throttle?: string | null;
+  interval?: string;
+  isLegacy?: boolean;
+  defaultParams?: CommonAlertParams;
+  actionVariables: Array<{ name: string; description: string }>;
+  fetchClustersRange?: number;
+}
+
+const defaultAlertOptions = (): AlertOptions => {
+  return {
+    id: '',
+    name: '',
+    throttle: '1d',
+    interval: '1m',
+    isLegacy: false,
+    defaultParams: {},
+    actionVariables: [],
+  };
+};
 export class BaseAlert {
-  public type!: string;
-  public label!: string;
-  public description!: string;
-  public defaultThrottle: string = '1d';
-  public defaultInterval: string = '1m';
-  public rawAlert: Alert | undefined;
-  public isLegacy: boolean = false;
+  protected scopedLogger: Logger;
 
-  protected getUiSettingsService!: () => Promise<UiSettingsServiceStart>;
-  protected monitoringCluster!: ILegacyCustomClusterClient;
-  protected getLogger!: (...scopes: string[]) => Logger;
-  protected config!: MonitoringConfig;
-  protected kibanaUrl!: string;
-  protected isCloud: boolean = false;
-  protected defaultParams: CommonAlertParams | {} = {};
-  public get paramDetails() {
-    return {};
-  }
-  protected actionVariables: Array<{ name: string; description: string }> = [];
-  protected alertType!: AlertType;
-
-  constructor(rawAlert: Alert | undefined = undefined) {
-    if (rawAlert) {
-      this.rawAlert = rawAlert;
-    }
-  }
-
-  public serialize(): CommonBaseAlert | null {
-    if (!this.rawAlert) {
-      return null;
-    }
-
-    return {
-      type: this.type,
-      label: this.label,
-      rawAlert: this.rawAlert,
-      paramDetails: this.paramDetails,
-      isLegacy: this.isLegacy,
-    };
-  }
-
-  public initializeAlertType(
-    getUiSettingsService: () => Promise<UiSettingsServiceStart>,
-    monitoringCluster: ILegacyCustomClusterClient,
-    getLogger: (...scopes: string[]) => Logger,
-    config: MonitoringConfig,
-    kibanaUrl: string,
-    isCloud: boolean
+  constructor(
+    public rawAlert?: SanitizedAlert,
+    public alertOptions: AlertOptions = defaultAlertOptions()
   ) {
-    this.getUiSettingsService = getUiSettingsService;
-    this.monitoringCluster = monitoringCluster;
-    this.config = config;
-    this.kibanaUrl = kibanaUrl;
-    this.getLogger = getLogger;
-    this.isCloud = isCloud;
+    this.scopedLogger = Globals.app.getLogger(alertOptions.id!);
   }
 
   public getAlertType(): AlertType {
+    const { id, name, actionVariables } = this.alertOptions;
     return {
-      id: this.type,
-      name: this.label,
+      id,
+      name,
       actionGroups: [
         {
           id: 'default',
@@ -116,13 +86,13 @@ export class BaseAlert {
       executor: (options: AlertExecutorOptions): Promise<any> => this.execute(options),
       producer: 'monitoring',
       actionVariables: {
-        context: this.actionVariables,
+        context: actionVariables,
       },
     };
   }
 
   public isEnabled(licenseService: MonitoringLicenseService) {
-    if (this.isLegacy) {
+    if (this.alertOptions.isLegacy) {
       const watcherFeature = licenseService.getWatcherFeature();
       if (!watcherFeature.isAvailable || !watcherFeature.isEnabled) {
         return false;
@@ -132,7 +102,7 @@ export class BaseAlert {
   }
 
   public getId() {
-    return this.rawAlert ? this.rawAlert.id : null;
+    return this.rawAlert?.id;
   }
 
   public async createIfDoesNotExist(
@@ -142,7 +112,7 @@ export class BaseAlert {
   ): Promise<Alert> {
     const existingAlertData = await alertsClient.find({
       options: {
-        search: this.type,
+        search: this.alertOptions.id,
       },
     });
 
@@ -161,23 +131,29 @@ export class BaseAlert {
         group: 'default',
         id: actionData.id,
         params: {
-          // This is just a server log right now, but will get more robut over time
-          message: this.getDefaultActionMessage(true),
+          message: '{{context.internalShortMessage}}',
           ...actionData.config,
         },
       });
     }
 
+    const {
+      defaultParams: params = {},
+      name,
+      id: alertTypeId,
+      throttle = '1d',
+      interval = '1m',
+    } = this.alertOptions;
     return await alertsClient.create({
       data: {
         enabled: true,
         tags: [],
-        params: this.defaultParams,
+        params,
         consumer: 'monitoring',
-        name: this.label,
-        alertTypeId: this.type,
-        throttle: this.defaultThrottle,
-        schedule: { interval: this.defaultInterval },
+        name,
+        alertTypeId,
+        throttle,
+        schedule: { interval },
         actions: alertActions,
       },
     });
@@ -226,56 +202,56 @@ export class BaseAlert {
   }
 
   protected async execute({ services, params, state }: AlertExecutorOptions): Promise<any> {
-    const logger = this.getLogger(this.type);
-    logger.debug(
+    this.scopedLogger.debug(
       `Executing alert with params: ${JSON.stringify(params)} and state: ${JSON.stringify(state)}`
     );
 
-    const _callCluster = this.monitoringCluster
-      ? this.monitoringCluster.callAsInternalUser
-      : services.callCluster;
+    const useCallCluster =
+      Globals.app.monitoringCluster?.callAsInternalUser || services.callCluster;
     const callCluster = async (
       endpoint: string,
       clientParams?: Record<string, unknown>,
       options?: LegacyCallAPIOptions
     ) => {
-      return await mbSafeQuery(async () => _callCluster(endpoint, clientParams, options));
+      return await mbSafeQuery(async () => useCallCluster(endpoint, clientParams, options));
     };
-    const availableCcs = this.config.ui.ccs.enabled ? await fetchAvailableCcs(callCluster) : [];
+    const availableCcs = Globals.app.config.ui.ccs.enabled
+      ? await fetchAvailableCcs(callCluster)
+      : [];
     const clusters = await this.fetchClusters(callCluster, availableCcs, params);
-    const uiSettings = (await this.getUiSettingsService()).asScopedToClient(
-      services.savedObjectsClient
-    );
 
-    const data = await this.fetchData(params, callCluster, clusters, uiSettings, availableCcs);
-    return await this.processData(data, clusters, services, logger, state);
+    const data = await this.fetchData(params, callCluster, clusters, availableCcs);
+    return await this.processData(data, clusters, services, state);
   }
 
   protected async fetchClusters(
     callCluster: any,
-    availableCcs: string[] | undefined = undefined,
+    availableCCS: string[] | undefined,
     params: CommonAlertParams
   ) {
-    let ccs;
-    if (!availableCcs) {
-      ccs = this.config.ui.ccs.enabled ? await fetchAvailableCcs(callCluster) : undefined;
-    } else {
-      ccs = availableCcs;
-    }
-    // Support CCS use cases by querying to find available remote clusters
-    // and then adding those to the index pattern we are searching against
-    let esIndexPattern = appendMetricbeatIndex(this.config, INDEX_PATTERN_ELASTICSEARCH);
+    const limit = parseDuration(params.limit as string);
+    const ccs =
+      availableCCS ||
+      (Globals.app.config.ui.ccs.enabled ? await fetchAvailableCcs(callCluster) : undefined);
+    let esIndexPattern = appendMetricbeatIndex(Globals.app.config, INDEX_PATTERN_ELASTICSEARCH);
     if (ccs) {
       esIndexPattern = getCcsIndexPattern(esIndexPattern, ccs);
     }
-    return await fetchClusters(callCluster, esIndexPattern);
+    const rangeFilter = this.alertOptions.fetchClustersRange
+      ? {
+          timestamp: {
+            format: 'epoch_millis',
+            gte: limit - this.alertOptions.fetchClustersRange,
+          },
+        }
+      : undefined;
+    return await fetchClusters(callCluster, esIndexPattern, rangeFilter);
   }
 
   protected async fetchData(
     params: CommonAlertParams | unknown,
     callCluster: any,
     clusters: AlertCluster[],
-    uiSettings: IUiSettingsClient,
     availableCcs: string[]
   ): Promise<Array<AlertData & unknown>> {
     // Child should implement
@@ -286,17 +262,16 @@ export class BaseAlert {
     data: Array<AlertData & unknown>,
     clusters: AlertCluster[],
     services: AlertServices,
-    logger: Logger,
     instanceState: unknown
   ): Promise<void | Record<string, any>> {
     for (const item of data) {
       const cluster = clusters.find((c: AlertCluster) => c.clusterUuid === item.clusterUuid);
       if (!cluster) {
-        logger.warn(`Unable to find cluster for clusterUuid='${item.clusterUuid}'`);
+        this.scopedLogger.warn(`Unable to find cluster for clusterUuid='${item.clusterUuid}'`);
         continue;
       }
 
-      const instance = services.alertInstanceFactory(`${this.type}:${item.instanceKey}`);
+      const instance = services.alertInstanceFactory(`${this.alertOptions.id}:${item.instanceKey}`);
       const state = (instance.getState() as unknown) as AlertInstanceState;
       const alertInstanceState: AlertInstanceState = { alertStates: state?.alertStates || [] };
       let alertState: AlertState;
@@ -309,7 +284,7 @@ export class BaseAlert {
 
       let shouldExecuteActions = false;
       if (item.shouldFire) {
-        logger.debug(`${this.type} is firing`);
+        this.scopedLogger.debug(`${this.alertOptions.name} is firing`);
         alertState.ui.triggeredMS = +new Date();
         alertState.ui.isFiring = true;
         alertState.ui.message = this.getUiMessage(alertState, item);
@@ -317,7 +292,7 @@ export class BaseAlert {
         alertState.ui.resolvedMS = 0;
         shouldExecuteActions = true;
       } else if (!item.shouldFire && alertState.ui.isFiring) {
-        logger.debug(`${this.type} is not firing anymore`);
+        this.scopedLogger.debug(`${this.alertOptions.name} is not firing anymore`);
         alertState.ui.isFiring = false;
         alertState.ui.resolvedMS = +new Date();
         alertState.ui.message = this.getUiMessage(alertState, item);
@@ -339,12 +314,6 @@ export class BaseAlert {
         this.executeActions(instance, alertInstanceState, item, cluster);
       }
     }
-  }
-
-  public getDefaultActionMessage(forDefaultServerLog: boolean): string {
-    return forDefaultServerLog
-      ? '{{context.internalShortMessage}}'
-      : '{{context.internalFullMessage}}';
   }
 
   protected findIndexInInstanceState(stateInstance: AlertInstanceState, cluster: AlertCluster) {
@@ -389,6 +358,6 @@ export class BaseAlert {
     if (ccs) {
       globalState.push(`ccs:${ccs}`);
     }
-    return `${this.kibanaUrl}/app/monitoring#/${link}?_g=(${globalState.toString()})`;
+    return `${Globals.app.url}/app/monitoring#/${link}?_g=(${globalState.toString()})`;
   }
 }

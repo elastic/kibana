@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { IUiSettingsClient } from 'kibana/server';
+
 import { i18n } from '@kbn/i18n';
 import { BaseAlert } from './base_alert';
 import {
@@ -23,6 +23,8 @@ import { AlertMessageTokenType, AlertClusterHealthType } from '../../common/enum
 import { fetchLegacyAlerts } from '../lib/alerts/fetch_legacy_alerts';
 import { mapLegacySeverity } from '../lib/alerts/map_legacy_severity';
 import { AlertingDefaults } from './alert_helpers';
+import { SanitizedAlert } from '../../../alerts/common';
+import { Globals } from '../static_globals';
 
 const RED_STATUS_MESSAGE = i18n.translate('xpack.monitoring.alerts.clusterHealth.redMessage', {
   defaultMessage: 'Allocate missing primary and replica shards',
@@ -38,29 +40,30 @@ const YELLOW_STATUS_MESSAGE = i18n.translate(
 const WATCH_NAME = 'elasticsearch_cluster_status';
 
 export class ClusterHealthAlert extends BaseAlert {
-  public type = ALERT_CLUSTER_HEALTH;
-  public label = LEGACY_ALERT_DETAILS[ALERT_CLUSTER_HEALTH].label;
-  public description = LEGACY_ALERT_DETAILS[ALERT_CLUSTER_HEALTH].description;
-  public isLegacy = true;
-
-  protected actionVariables = [
-    {
-      name: 'clusterHealth',
-      description: i18n.translate(
-        'xpack.monitoring.alerts.clusterHealth.actionVariables.clusterHealth',
+  constructor(public rawAlert?: SanitizedAlert) {
+    super(rawAlert, {
+      id: ALERT_CLUSTER_HEALTH,
+      name: LEGACY_ALERT_DETAILS[ALERT_CLUSTER_HEALTH].label,
+      isLegacy: true,
+      actionVariables: [
         {
-          defaultMessage: 'The health of the cluster.',
-        }
-      ),
-    },
-    ...Object.values(AlertingDefaults.ALERT_TYPE.context),
-  ];
+          name: 'clusterHealth',
+          description: i18n.translate(
+            'xpack.monitoring.alerts.clusterHealth.actionVariables.clusterHealth',
+            {
+              defaultMessage: 'The health of the cluster.',
+            }
+          ),
+        },
+        ...Object.values(AlertingDefaults.ALERT_TYPE.context),
+      ],
+    });
+  }
 
   protected async fetchData(
     params: CommonAlertParams,
     callCluster: any,
     clusters: AlertCluster[],
-    uiSettings: IUiSettingsClient,
     availableCcs: string[]
   ): Promise<AlertData[]> {
     let alertIndexPattern = INDEX_ALERTS;
@@ -72,7 +75,7 @@ export class ClusterHealthAlert extends BaseAlert {
       clusters,
       alertIndexPattern,
       WATCH_NAME,
-      this.config.ui.max_bucket_size
+      Globals.app.config.ui.max_bucket_size
     );
     return legacyAlerts.reduce((accum: AlertData[], legacyAlert) => {
       accum.push({

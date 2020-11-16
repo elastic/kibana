@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { IUiSettingsClient, Logger } from 'kibana/server';
+
 import { i18n } from '@kbn/i18n';
 import { BaseAlert } from './base_alert';
 import {
@@ -27,45 +27,46 @@ import {
 import { fetchMemoryUsageNodeStats } from '../lib/alerts/fetch_memory_usage_node_stats';
 import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
 import { AlertMessageTokenType, AlertSeverity } from '../../common/enums';
-import { RawAlertInstance } from '../../../alerts/common';
+import { RawAlertInstance, SanitizedAlert } from '../../../alerts/common';
 import { AlertingDefaults, createLink } from './alert_helpers';
 import { appendMetricbeatIndex } from '../lib/alerts/append_mb_index';
 import { parseDuration } from '../../../alerts/common/parse_duration';
+import { Globals } from '../static_globals';
 
 export class MemoryUsageAlert extends BaseAlert {
-  public type = ALERT_MEMORY_USAGE;
-  public label = ALERT_DETAILS[ALERT_MEMORY_USAGE].label;
-  public description = ALERT_DETAILS[ALERT_MEMORY_USAGE].description;
-
-  protected defaultParams = {
-    threshold: 85,
-    duration: '5m',
-  };
-
-  protected actionVariables = [
-    {
-      name: 'nodes',
-      description: i18n.translate('xpack.monitoring.alerts.memoryUsage.actionVariables.nodes', {
-        defaultMessage: 'The list of nodes reporting high memory usage.',
-      }),
-    },
-    {
-      name: 'count',
-      description: i18n.translate('xpack.monitoring.alerts.memoryUsage.actionVariables.count', {
-        defaultMessage: 'The number of nodes reporting high memory usage.',
-      }),
-    },
-    ...Object.values(AlertingDefaults.ALERT_TYPE.context),
-  ];
+  constructor(public rawAlert?: SanitizedAlert) {
+    super(rawAlert, {
+      id: ALERT_MEMORY_USAGE,
+      name: ALERT_DETAILS[ALERT_MEMORY_USAGE].label,
+      defaultParams: {
+        threshold: 85,
+        duration: '5m',
+      },
+      actionVariables: [
+        {
+          name: 'nodes',
+          description: i18n.translate('xpack.monitoring.alerts.memoryUsage.actionVariables.nodes', {
+            defaultMessage: 'The list of nodes reporting high memory usage.',
+          }),
+        },
+        {
+          name: 'count',
+          description: i18n.translate('xpack.monitoring.alerts.memoryUsage.actionVariables.count', {
+            defaultMessage: 'The number of nodes reporting high memory usage.',
+          }),
+        },
+        ...Object.values(AlertingDefaults.ALERT_TYPE.context),
+      ],
+    });
+  }
 
   protected async fetchData(
     params: CommonAlertParams,
     callCluster: any,
     clusters: AlertCluster[],
-    uiSettings: IUiSettingsClient,
     availableCcs: string[]
   ): Promise<AlertData[]> {
-    let esIndexPattern = appendMetricbeatIndex(this.config, INDEX_PATTERN_ELASTICSEARCH);
+    let esIndexPattern = appendMetricbeatIndex(Globals.app.config, INDEX_PATTERN_ELASTICSEARCH);
     if (availableCcs) {
       esIndexPattern = getCcsIndexPattern(esIndexPattern, availableCcs);
     }
@@ -80,7 +81,7 @@ export class MemoryUsageAlert extends BaseAlert {
       esIndexPattern,
       startMs,
       endMs,
-      this.config.ui.max_bucket_size
+      Globals.app.config.ui.max_bucket_size
     );
 
     return stats.map((stat) => {
@@ -246,7 +247,7 @@ export class MemoryUsageAlert extends BaseAlert {
 
       instance.scheduleActions('default', {
         internalShortMessage,
-        internalFullMessage: this.isCloud ? internalShortMessage : internalFullMessage,
+        internalFullMessage: Globals.app.isCloud ? internalShortMessage : internalFullMessage,
         state: AlertingDefaults.ALERT_STATE.firing,
         nodes: firingNodes
           .map((state) => `${state.nodeName}:${state.memoryUsage.toFixed(2)}`)
@@ -290,7 +291,6 @@ export class MemoryUsageAlert extends BaseAlert {
     data: AlertData[],
     clusters: AlertCluster[],
     services: AlertServices,
-    logger: Logger,
     state: any
   ) {
     const currentUTC = +new Date();
@@ -304,7 +304,7 @@ export class MemoryUsageAlert extends BaseAlert {
         .filter((node) => node.shouldFire)
         .map((node) => node.meta.nodeId)
         .join(',');
-      const instanceId = `${this.type}:${cluster.clusterUuid}:${firingNodeUuids}`;
+      const instanceId = `${this.alertOptions.id}:${cluster.clusterUuid}:${firingNodeUuids}`;
       const instance = services.alertInstanceFactory(instanceId);
       const newAlertStates: AlertMemoryUsageState[] = [];
 

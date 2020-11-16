@@ -29,19 +29,13 @@ export async function fetchStatus(
   await Promise.all(
     (alertTypes || ALERTS).map(async (type) => {
       const alert = await AlertsFactory.getByType(type, alertsClient);
-      if (!alert || !alert.isEnabled(licenseService)) {
-        return;
-      }
-      const serialized = alert.serialize();
-      if (!serialized) {
+      if (!alert || !alert.isEnabled(licenseService) || !alert.rawAlert) {
         return;
       }
 
       const result: CommonAlertStatus = {
-        exists: false,
-        enabled: false,
         states: [],
-        alert: serialized,
+        rawAlert: alert.rawAlert,
       };
 
       types.push({ type, result });
@@ -50,9 +44,6 @@ export async function fetchStatus(
       if (!id) {
         return result;
       }
-
-      result.exists = true;
-      result.enabled = true;
 
       // Now that we have the id, we can get the state
       const states = await alert.getStates(alertsClient, id, filters);

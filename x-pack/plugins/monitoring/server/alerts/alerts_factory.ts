@@ -34,6 +34,7 @@ import {
   ALERT_ELASTICSEARCH_VERSION_MISMATCH,
 } from '../../common/constants';
 import { AlertsClient } from '../../../alerts/server';
+import { Alert } from '../../../alerts/common';
 
 const BY_TYPE = {
   [ALERT_CLUSTER_HEALTH]: ClusterHealthAlert,
@@ -54,27 +55,23 @@ export class AlertsFactory {
   public static async getByType(
     type: string,
     alertsClient: AlertsClient | undefined
-  ): Promise<BaseAlert | null> {
-    const alertCls = BY_TYPE[type];
-    if (!alertCls) {
-      return null;
+  ): Promise<BaseAlert | void> {
+    const alertCls = BY_TYPE[type] || BaseAlert;
+    if (!alertCls || !alertsClient) {
+      return;
     }
-    if (alertsClient) {
-      const alertClientAlerts = await alertsClient.find({
-        options: {
-          filter: `alert.attributes.alertTypeId:${type}`,
-        },
-      });
+    const alertClientAlerts = await alertsClient.find({
+      options: {
+        filter: `alert.attributes.alertTypeId:${type}`,
+      },
+    });
 
-      if (alertClientAlerts.total === 0) {
-        return new alertCls();
-      }
-
-      const rawAlert = alertClientAlerts.data[0];
-      return new alertCls(rawAlert as BaseAlert['rawAlert']);
+    if (!alertClientAlerts.total || !alertClientAlerts.data?.length) {
+      return;
     }
 
-    return new alertCls();
+    const [rawAlert] = alertClientAlerts.data as [Alert];
+    return new alertCls(rawAlert) as BaseAlert;
   }
 
   public static getAll() {

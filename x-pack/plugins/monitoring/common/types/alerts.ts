@@ -4,22 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Alert } from '../../../alerts/common';
+import { Alert, SanitizedAlert } from '../../../alerts/common';
 import { AlertParamType, AlertMessageTokenType, AlertSeverity } from '../enums';
 
 export interface CommonBaseAlert {
-  type: string;
-  label: string;
-  paramDetails: CommonAlertParamDetails;
-  rawAlert: Alert;
-  isLegacy: boolean;
+  type?: string;
+  label?: string;
+  rawAlert?: Alert;
+  isLegacy?: boolean;
 }
 
 export interface CommonAlertStatus {
-  exists: boolean;
-  enabled: boolean;
   states: CommonAlertState[];
-  alert: CommonBaseAlert;
+  rawAlert: Alert | SanitizedAlert;
 }
 
 export interface CommonAlertState {

@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { IUiSettingsClient, Logger } from 'kibana/server';
+
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { BaseAlert } from './base_alert';
@@ -25,21 +25,19 @@ import { AlertInstance, AlertServices } from '../../../alerts/server';
 import {
   INDEX_PATTERN,
   ALERT_MISSING_MONITORING_DATA,
-  INDEX_PATTERN_ELASTICSEARCH,
   ALERT_DETAILS,
 } from '../../common/constants';
 import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
 import { AlertMessageTokenType, AlertSeverity } from '../../common/enums';
-import { RawAlertInstance } from '../../../alerts/common';
+import { RawAlertInstance, SanitizedAlert } from '../../../alerts/common';
 import { parseDuration } from '../../../alerts/common/parse_duration';
 import { appendMetricbeatIndex } from '../lib/alerts/append_mb_index';
 import { fetchMissingMonitoringData } from '../lib/alerts/fetch_missing_monitoring_data';
 import { getTypeLabelForStackProduct } from '../lib/alerts/get_type_label_for_stack_product';
 import { getListingLinkForStackProduct } from '../lib/alerts/get_listing_link_for_stack_product';
 import { getStackProductLabel } from '../lib/alerts/get_stack_product_label';
-import { fetchClusters } from '../lib/alerts/fetch_clusters';
-import { fetchAvailableCcs } from '../lib/alerts/fetch_available_ccs';
 import { AlertingDefaults, createLink } from './alert_helpers';
+import { Globals } from '../static_globals';
 
 const RESOLVED = i18n.translate('xpack.monitoring.alerts.missingData.resolved', {
   defaultMessage: 'resolved',
@@ -60,59 +58,33 @@ interface MissingDataParams {
 }
 
 export class MissingMonitoringDataAlert extends BaseAlert {
-  public defaultThrottle: string = '6h';
-
-  public type = ALERT_MISSING_MONITORING_DATA;
-  public label = ALERT_DETAILS[ALERT_MISSING_MONITORING_DATA].label;
-  public description = ALERT_DETAILS[ALERT_MISSING_MONITORING_DATA].description;
-
-  protected defaultParams: MissingDataParams = {
-    duration: DEFAULT_DURATION,
-    limit: DEFAULT_LIMIT,
-  };
-
-  protected actionVariables = [
-    {
-      name: 'stackProducts',
-      description: i18n.translate(
-        'xpack.monitoring.alerts.missingData.actionVariables.stackProducts',
-        {
-          defaultMessage: 'The stack products missing monitoring data.',
-        }
-      ),
-    },
-    {
-      name: 'count',
-      description: i18n.translate('xpack.monitoring.alerts.missingData.actionVariables.count', {
-        defaultMessage: 'The number of stack products missing monitoring data.',
-      }),
-    },
-    ...Object.values(AlertingDefaults.ALERT_TYPE.context),
-  ];
-
-  protected async fetchClusters(
-    callCluster: any,
-    availableCcs: string[] | undefined = undefined,
-    params: CommonAlertParams
-  ) {
-    const limit = parseDuration(((params as unknown) as MissingDataParams).limit);
-    let ccs;
-    if (!availableCcs) {
-      ccs = this.config.ui.ccs.enabled ? await fetchAvailableCcs(callCluster) : undefined;
-    } else {
-      ccs = availableCcs;
-    }
-    // Support CCS use cases by querying to find available remote clusters
-    // and then adding those to the index pattern we are searching against
-    let esIndexPattern = appendMetricbeatIndex(this.config, INDEX_PATTERN_ELASTICSEARCH);
-    if (ccs) {
-      esIndexPattern = getCcsIndexPattern(esIndexPattern, ccs);
-    }
-    return await fetchClusters(callCluster, esIndexPattern, {
-      timestamp: {
-        format: 'epoch_millis',
-        gte: limit - LIMIT_BUFFER,
+  constructor(public rawAlert?: SanitizedAlert) {
+    super(rawAlert, {
+      id: ALERT_MISSING_MONITORING_DATA,
+      name: ALERT_DETAILS[ALERT_MISSING_MONITORING_DATA].label,
+      defaultParams: {
+        duration: DEFAULT_DURATION,
+        limit: DEFAULT_LIMIT,
       },
+      throttle: '6h',
+      actionVariables: [
+        {
+          name: 'stackProducts',
+          description: i18n.translate(
+            'xpack.monitoring.alerts.missingData.actionVariables.stackProducts',
+            {
+              defaultMessage: 'The stack products missing monitoring data.',
+            }
+          ),
+        },
+        {
+          name: 'count',
+          description: i18n.translate('xpack.monitoring.alerts.missingData.actionVariables.count', {
+            defaultMessage: 'The number of stack products missing monitoring data.',
+          }),
+        },
+        ...Object.values(AlertingDefaults.ALERT_TYPE.context),
+      ],
     });
   }
 
@@ -120,10 +92,9 @@ export class MissingMonitoringDataAlert extends BaseAlert {
     params: CommonAlertParams,
     callCluster: any,
     clusters: AlertCluster[],
-    uiSettings: IUiSettingsClient,
     availableCcs: string[]
   ): Promise<AlertData[]> {
-    let indexPattern = appendMetricbeatIndex(this.config, INDEX_PATTERN);
+    let indexPattern = appendMetricbeatIndex(Globals.app.config, INDEX_PATTERN);
     if (availableCcs) {
       indexPattern = getCcsIndexPattern(indexPattern, availableCcs);
     }
@@ -134,7 +105,7 @@ export class MissingMonitoringDataAlert extends BaseAlert {
       callCluster,
       clusters,
       indexPattern,
-      this.config.ui.max_bucket_size,
+      Globals.app.config.ui.max_bucket_size,
       now,
       now - limit - LIMIT_BUFFER
     );
@@ -341,7 +312,7 @@ export class MissingMonitoringDataAlert extends BaseAlert {
       );
       instance.scheduleActions('default', {
         internalShortMessage,
-        internalFullMessage: this.isCloud ? internalShortMessage : internalFullMessage,
+        internalFullMessage: Globals.app.isCloud ? internalShortMessage : internalFullMessage,
         state: FIRING,
         stackProducts: firingStackProducts,
         count: firingCount,
@@ -414,7 +385,9 @@ export class MissingMonitoringDataAlert extends BaseAlert {
         return list;
       }, [] as string[]);
       firingInstances.sort(); // It doesn't matter how we sort, but keep the order consistent
-      const instanceId = `${this.type}:${cluster.clusterUuid}:${firingInstances.join(',')}`;
+      const instanceId = `${this.alertOptions.id}:${cluster.clusterUuid}:${firingInstances.join(
+        ','
+      )}`;
       const instance = services.alertInstanceFactory(instanceId);
       const instanceState = (instance.getState() as unknown) as AlertInstanceState;
       const alertInstanceState: AlertInstanceState = {

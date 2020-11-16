@@ -70,9 +70,9 @@ export const AlertsBadge: React.FC<Props> = (props: Props) => {
         title: i18n.translate('xpack.monitoring.alerts.badge.panelTitle', {
           defaultMessage: 'Alerts',
         }),
-        items: alerts.map(({ alert }, index) => {
+        items: alerts.map(({ rawAlert }, index) => {
           return {
-            name: <EuiText>{alert.label}</EuiText>,
+            name: <EuiText>{rawAlert.name}</EuiText>,
             panel: index + 1,
           };
         }),
@@ -80,7 +80,7 @@ export const AlertsBadge: React.FC<Props> = (props: Props) => {
       ...alerts.map((alertStatus, index) => {
         return {
           id: index + 1,
-          title: alertStatus.alert.label,
+          title: alertStatus.rawAlert.name,
           width: 400,
           content: <AlertPanel alert={alertStatus} nextStepsFilter={nextStepsFilter} />,
         };
@@ -147,7 +147,7 @@ export const AlertsBadge: React.FC<Props> = (props: Props) => {
                   <EuiText size="s">
                     <h4>{getDateFromState(alertState)}</h4>
                   </EuiText>
-                  <EuiText>{alert.alert.label}</EuiText>
+                  <EuiText>{alert.rawAlert.name}</EuiText>
                 </Fragment>
               ),
               panel: index + 1,
