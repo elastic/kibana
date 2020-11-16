@@ -279,7 +279,6 @@ describe('<TemplateEdit />', () => {
     });
   });
 
-  // @ts-expect-error
   if (BRANCH === '7.x') {
     describe('legacy index templates', () => {
       const legacyTemplateToEdit = fixtures.getTemplate({
