@@ -4,21 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import Boom from '@hapi/boom';
+import { MlPluginSetup } from '../../../../ml/server';
+import { PromiseReturnType } from '../../../../observability/typings/common';
+import {
+  getSeverity,
+  ML_ERRORS,
+  ServiceAnomalyStats,
+} from '../../../common/anomaly_detection';
+import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 import { getServiceHealthStatus } from '../../../common/service_health_status';
-import { Setup, SetupTimeRange } from '../helpers/setup_request';
-import { PromiseReturnType } from '../../../typings/common';
 import {
   TRANSACTION_PAGE_LOAD,
   TRANSACTION_REQUEST,
 } from '../../../common/transaction_types';
-import {
-  ServiceAnomalyStats,
-  getSeverity,
-  ML_ERRORS,
-} from '../../../common/anomaly_detection';
 import { getMlJobsWithAPMGroup } from '../anomaly_detection/get_ml_jobs_with_apm_group';
-import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
-import { MlPluginSetup } from '../../../../ml/server';
+import { Setup, SetupTimeRange } from '../helpers/setup_request';
 
 export const DEFAULT_ANOMALIES = { mlJobIds: [], serviceAnomalies: {} };
 
@@ -104,7 +104,7 @@ export async function getServiceAnomalies({
     },
   };
 
-  const response = await ml.mlSystem.mlAnomalySearch(params);
+  const response = await ml.mlSystem.mlAnomalySearch(params, mlJobIds);
 
   return {
     mlJobIds,

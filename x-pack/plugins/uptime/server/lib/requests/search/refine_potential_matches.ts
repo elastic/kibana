@@ -23,7 +23,7 @@ export const refinePotentialMatches = async (
     return [];
   }
 
-  const queryResult = await query(queryContext, potentialMatchMonitorIDs);
+  const { body: queryResult } = await query(queryContext, potentialMatchMonitorIDs);
   return await fullyMatchingIds(queryResult, queryContext.statusFilter);
 };
 

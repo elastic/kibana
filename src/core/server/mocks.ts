@@ -38,6 +38,7 @@ import { metricsServiceMock } from './metrics/metrics_service.mock';
 import { environmentServiceMock } from './environment/environment_service.mock';
 import { statusServiceMock } from './status/status_service.mock';
 import { coreUsageDataServiceMock } from './core_usage_data/core_usage_data_service.mock';
+import { i18nServiceMock } from './i18n/i18n_service.mock';
 
 export { configServiceMock } from './config/mocks';
 export { httpServerMock } from './http/http_server.mocks';
@@ -57,6 +58,7 @@ export { statusServiceMock } from './status/status_service.mock';
 export { contextServiceMock } from './context/context_service.mock';
 export { capabilitiesServiceMock } from './capabilities/capabilities_service.mock';
 export { coreUsageDataServiceMock } from './core_usage_data/core_usage_data_service.mock';
+export { i18nServiceMock } from './i18n/i18n_service.mock';
 
 export function pluginInitializerContextConfigMock<T>(config: T) {
   const globalConfig: SharedGlobalConfig = {
@@ -72,7 +74,7 @@ export function pluginInitializerContextConfigMock<T>(config: T) {
     },
     path: { data: '/tmp' },
     savedObjects: {
-      maxImportPayloadBytes: new ByteSizeValue(10485760),
+      maxImportPayloadBytes: new ByteSizeValue(26214400),
     },
   };
 
@@ -136,6 +138,7 @@ function createCoreSetupMock({
     context: contextServiceMock.createSetupContract(),
     elasticsearch: elasticsearchServiceMock.createSetup(),
     http: httpMock,
+    i18n: i18nServiceMock.createSetupContract(),
     savedObjects: savedObjectsServiceMock.createInternalSetupContract(),
     status: statusServiceMock.createSetupContract(),
     uiSettings: uiSettingsMock,
@@ -172,6 +175,7 @@ function createInternalCoreSetupMock() {
     savedObjects: savedObjectsServiceMock.createInternalSetupContract(),
     status: statusServiceMock.createInternalSetupContract(),
     environment: environmentServiceMock.createSetupContract(),
+    i18n: i18nServiceMock.createSetupContract(),
     httpResources: httpResourcesMock.createSetupContract(),
     rendering: renderingMock.createSetupContract(),
     uiSettings: uiSettingsServiceMock.createSetupContract(),

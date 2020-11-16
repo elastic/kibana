@@ -6,14 +6,9 @@
 
 import { validate } from '../../../../../common/validate';
 import { updateRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/update_rules_type_dependents';
-import { RuleAlertAction } from '../../../../../common/detection_engine/types';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
-import {
-  updateRulesBulkSchema,
-  UpdateRulesBulkSchemaDecoded,
-} from '../../../../../common/detection_engine/schemas/request/update_rules_bulk_schema';
+import { updateRulesBulkSchema } from '../../../../../common/detection_engine/schemas/request/update_rules_bulk_schema';
 import { rulesBulkSchema } from '../../../../../common/detection_engine/schemas/response/rules_bulk_schema';
-import { isMlRule } from '../../../../../common/machine_learning/helpers';
 import { IRouter } from '../../../../../../../../src/core/server';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { SetupPlugins } from '../../../../plugin';
@@ -25,16 +20,13 @@ import { transformBulkError, buildSiemResponse, createBulkErrorObject } from '..
 import { updateRules } from '../../rules/update_rules';
 import { updateRulesNotifications } from '../../rules/update_rules_notifications';
 import { ruleStatusSavedObjectsClientFactory } from '../../signals/rule_status_saved_objects_client';
-import { PartialFilter } from '../../types';
 
 export const updateRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) => {
   router.put(
     {
       path: `${DETECTION_ENGINE_RULES_URL}/_bulk_update`,
       validate: {
-        body: buildRouteValidation<typeof updateRulesBulkSchema, UpdateRulesBulkSchemaDecoded>(
-          updateRulesBulkSchema
-        ),
+        body: buildRouteValidation(updateRulesBulkSchema),
       },
       options: {
         tags: ['access:securitySolution'],
@@ -50,139 +42,45 @@ export const updateRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) =>
       if (!siemClient || !alertsClient) {
         return siemResponse.error({ statusCode: 404 });
       }
-      const mlAuthz = buildMlAuthz({ license: context.licensing.license, ml, request });
+
+      const mlAuthz = buildMlAuthz({
+        license: context.licensing.license,
+        ml,
+        request,
+        savedObjectsClient,
+      });
+
       const ruleStatusClient = ruleStatusSavedObjectsClientFactory(savedObjectsClient);
       const rules = await Promise.all(
         request.body.map(async (payloadRule) => {
-          const {
-            actions: actionsRest,
-            anomaly_threshold: anomalyThreshold,
-            author,
-            building_block_type: buildingBlockType,
-            description,
-            enabled,
-            event_category_override: eventCategoryOverride,
-            false_positives: falsePositives,
-            from,
-            query: queryOrUndefined,
-            language: languageOrUndefined,
-            license,
-            machine_learning_job_id: machineLearningJobId,
-            output_index: outputIndex,
-            saved_id: savedId,
-            timeline_id: timelineId,
-            timeline_title: timelineTitle,
-            meta,
-            filters: filtersRest,
-            rule_id: ruleId,
-            id,
-            index,
-            interval,
-            max_signals: maxSignals,
-            risk_score: riskScore,
-            risk_score_mapping: riskScoreMapping,
-            rule_name_override: ruleNameOverride,
-            name,
-            severity,
-            severity_mapping: severityMapping,
-            tags,
-            to,
-            type,
-            threat,
-            threshold,
-            threat_filters: threatFilters,
-            threat_index: threatIndex,
-            threat_query: threatQuery,
-            threat_mapping: threatMapping,
-            threat_language: threatLanguage,
-            throttle,
-            timestamp_override: timestampOverride,
-            references,
-            note,
-            version,
-            exceptions_list: exceptionsList,
-          } = payloadRule;
-          const finalIndex = outputIndex ?? siemClient.getSignalsIndex();
-          const idOrRuleIdOrUnknown = id ?? ruleId ?? '(unknown id)';
+          const idOrRuleIdOrUnknown = payloadRule.id ?? payloadRule.rule_id ?? '(unknown id)';
           try {
             const validationErrors = updateRuleValidateTypeDependents(payloadRule);
             if (validationErrors.length) {
               return createBulkErrorObject({
-                ruleId,
+                ruleId: payloadRule.rule_id,
                 statusCode: 400,
                 message: validationErrors.join(),
               });
             }
 
-            const query = !isMlRule(type) && queryOrUndefined == null ? '' : queryOrUndefined;
-
-            const language =
-              !isMlRule(type) && languageOrUndefined == null ? 'kuery' : languageOrUndefined;
-
-            // TODO: Fix these either with an is conversion or by better typing them within io-ts
-            const actions: RuleAlertAction[] = actionsRest as RuleAlertAction[];
-            const filters: PartialFilter[] | undefined = filtersRest as PartialFilter[];
-
-            throwHttpError(await mlAuthz.validateRuleType(type));
+            throwHttpError(await mlAuthz.validateRuleType(payloadRule.type));
 
             const rule = await updateRules({
               alertsClient,
-              anomalyThreshold,
-              author,
-              buildingBlockType,
-              description,
-              enabled,
-              eventCategoryOverride,
-              falsePositives,
-              from,
-              query,
-              language,
-              license,
-              machineLearningJobId,
-              outputIndex: finalIndex,
-              savedId,
               savedObjectsClient,
-              timelineId,
-              timelineTitle,
-              meta,
-              filters,
-              id,
-              ruleId,
-              index,
-              interval,
-              maxSignals,
-              riskScore,
-              riskScoreMapping,
-              ruleNameOverride,
-              name,
-              severity,
-              severityMapping,
-              tags,
-              to,
-              type,
-              threat,
-              threshold,
-              threatFilters,
-              threatIndex,
-              threatQuery,
-              threatMapping,
-              threatLanguage,
-              timestampOverride,
-              references,
-              note,
-              version,
-              exceptionsList,
-              actions,
+              defaultOutputIndex: siemClient.getSignalsIndex(),
+              ruleUpdate: payloadRule,
             });
             if (rule != null) {
               const ruleActions = await updateRulesNotifications({
                 ruleAlertId: rule.id,
                 alertsClient,
                 savedObjectsClient,
-                enabled,
-                actions,
-                throttle,
-                name,
+                enabled: payloadRule.enabled ?? true,
+                actions: payloadRule.actions,
+                throttle: payloadRule.throttle,
+                name: payloadRule.name,
               });
               const ruleStatuses = await ruleStatusClient.find({
                 perPage: 1,
@@ -193,7 +91,7 @@ export const updateRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) =>
               });
               return transformValidateBulkError(rule.id, rule, ruleActions, ruleStatuses);
             } else {
-              return getIdBulkError({ id, ruleId });
+              return getIdBulkError({ id: payloadRule.id, ruleId: payloadRule.rule_id });
             }
           } catch (err) {
             return transformBulkError(idOrRuleIdOrUnknown, err);

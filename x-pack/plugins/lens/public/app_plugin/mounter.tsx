@@ -151,6 +151,11 @@ export async function mountApp(
     trackUiEvent('loaded_404');
     return <FormattedMessage id="xpack.lens.app404" defaultMessage="404 Not Found" />;
   }
+  // dispatch synthetic hash change event to update hash history objects
+  // this is necessary because hash updates triggered by using popState won't trigger this event naturally.
+  const unlistenParentHistory = params.history.listen(() => {
+    window.dispatchEvent(new HashChangeEvent('hashchange'));
+  });
 
   params.element.classList.add('lnsAppWrapper');
   render(
@@ -171,5 +176,6 @@ export async function mountApp(
   return () => {
     instance.unmount();
     unmountComponentAtNode(params.element);
+    unlistenParentHistory();
   };
 }

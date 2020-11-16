@@ -21,13 +21,12 @@ import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { Assign, Ensure } from '@kbn/utility-types';
 
-import { ISearchSource } from 'src/plugins/data/public';
+import { ISearchOptions, ISearchSource } from 'src/plugins/data/public';
 import {
   ExpressionAstFunction,
   ExpressionAstArgument,
   SerializedFieldFormat,
 } from 'src/plugins/expressions/common';
-import { ISearchOptions } from '../es_search';
 
 import { IAggType } from './agg_type';
 import { writeParams } from './agg_params';

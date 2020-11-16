@@ -61,8 +61,13 @@ export async function findUsedDependencies(listedPkgDependencies: any, baseDir: 
   // side code entries that were provided
   const serverDependencies = await getDependencies(baseDir, serverEntries);
 
+  // List of hardcoded dependencies that we need and that are not discovered
+  // searching through code imports
+  // TODO: remove this once we get rid off @kbn/ui-framework
+  const hardCodedDependencies = ['@kbn/ui-framework'];
+
   // Consider this as our whiteList for the modules we can't delete
-  const whiteListedModules = [...serverDependencies];
+  const whiteListedModules = [...serverDependencies, ...hardCodedDependencies];
 
   const listedDependencies = Object.keys(listedPkgDependencies);
   const filteredListedDependencies = listedDependencies.filter((entry) => {

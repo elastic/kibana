@@ -26,6 +26,7 @@ import { validateModelMemoryLimit } from './validate_model_memory_limit';
 import { validateTimeRange, isValidTimeField } from './validate_time_range';
 import { validateJobSchema } from '../../routes/schemas/job_validation_schema';
 import { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
+import type { MlClient } from '../../lib/ml_client';
 
 export type ValidateJobPayload = TypeOf<typeof validateJobSchema>;
 
@@ -35,6 +36,7 @@ export type ValidateJobPayload = TypeOf<typeof validateJobSchema>;
  */
 export async function validateJob(
   client: IScopedClusterClient,
+  mlClient: MlClient,
   payload: ValidateJobPayload,
   kbnVersion = 'current',
   isSecurityDisabled?: boolean
@@ -94,7 +96,9 @@ export async function validateJob(
       // if cardinality checks didn't return a message with an error level
       if (cardinalityError === false) {
         validationMessages.push(...(await validateInfluencers(job)));
-        validationMessages.push(...(await validateModelMemoryLimit(client, job, duration)));
+        validationMessages.push(
+          ...(await validateModelMemoryLimit(client, mlClient, job, duration))
+        );
       }
     } else {
       validationMessages = basicValidation.messages;

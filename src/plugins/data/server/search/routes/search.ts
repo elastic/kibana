@@ -17,16 +17,13 @@
  * under the License.
  */
 
+import { first } from 'rxjs/operators';
 import { schema } from '@kbn/config-schema';
-import { IRouter } from 'src/core/server';
+import type { IRouter } from 'src/core/server';
 import { getRequestAbortedSignal } from '../../lib';
-import { SearchRouteDependencies } from '../search_service';
 import { shimHitsTotal } from './shim_hits_total';
 
-export function registerSearchRoute(
-  router: IRouter,
-  { getStartServices }: SearchRouteDependencies
-): void {
+export function registerSearchRoute(router: IRouter): void {
   router.post(
     {
       path: '/internal/search/{strategy}/{id?}',
@@ -46,18 +43,16 @@ export function registerSearchRoute(
       const { strategy, id } = request.params;
       const abortSignal = getRequestAbortedSignal(request.events.aborted$);
 
-      const [, , selfStart] = await getStartServices();
-
       try {
-        const response = await selfStart.search
-          .search(
+        const response = await context
+          .search!.search(
             { ...searchRequest, id },
             {
               abortSignal,
               strategy,
-            },
-            context
+            }
           )
+          .pipe(first())
           .toPromise();
 
         return res.ok({
@@ -97,12 +92,8 @@ export function registerSearchRoute(
     async (context, request, res) => {
       const { strategy, id } = request.params;
 
-      const [, , selfStart] = await getStartServices();
-      const searchStrategy = selfStart.search.getSearchStrategy(strategy);
-      if (!searchStrategy.cancel) return res.ok();
-
       try {
-        await searchStrategy.cancel(context, id);
+        await context.search!.cancel(id, { strategy });
         return res.ok();
       } catch (err) {
         return res.customError({
