@@ -104,6 +104,7 @@ export function runCli() {
 
         await Tasks.initTargets(context);
         await Tasks.optimize(context);
+        await Tasks.writePublicAssets(context);
         await Tasks.writeServerFiles(context);
         await Tasks.yarnInstall(context);
 
