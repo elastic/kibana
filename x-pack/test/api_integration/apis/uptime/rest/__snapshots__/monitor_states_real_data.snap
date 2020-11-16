@@ -1,0 +1,1257 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`monitor states endpoint will fetch monitor state data for the given down filters 1`] = `
+Object {
+  "nextPagePagination": null,
+  "prevPagePagination": null,
+  "summaries": Array [
+    Object {
+      "histogram": Object {
+        "points": Array [
+          Object {
+            "down": 1,
+            "timestamp": 1568172624744,
+          },
+          Object {
+            "down": 2,
+            "timestamp": 1568172677247,
+          },
+          Object {
+            "down": 1,
+            "timestamp": 1568172729750,
+          },
+          Object {
+            "down": 2,
+            "timestamp": 1568172782253,
+          },
+          Object {
+            "down": 2,
+            "timestamp": 1568172834756,
+          },
+          Object {
+            "down": 2,
+            "timestamp": 1568172887259,
+          },
+          Object {
+            "down": 1,
+            "timestamp": 1568172939762,
+          },
+          Object {
+            "down": 2,
+            "timestamp": 1568172992265,
+          },
+          Object {
+            "down": 2,
+            "timestamp": 1568173044768,
+          },
+          Object {
+            "down": 2,
+            "timestamp": 1568173097271,
+          },
+          Object {
+            "down": 1,
+            "timestamp": 1568173149774,
+          },
+          Object {
+            "down": 2,
+            "timestamp": 1568173202277,
+          },
+        ],
+      },
+      "minInterval": 52503,
+      "monitor_id": "0010-down",
+      "state": Object {
+        "monitor": Object {
+          "name": "",
+        },
+        "observer": Object {
+          "geo": Object {
+            "name": Array [
+              "mpls",
+            ],
+          },
+        },
+        "summary": Object {
+          "down": 1,
+          "status": "down",
+          "up": 0,
+        },
+        "summaryPings": Array [
+          Object {
+            "@timestamp": "2019-09-11T03:40:34.371Z",
+            "agent": Object {
+              "ephemeral_id": "412a92a8-2142-4b1a-a7a2-1afd32e12f85",
+              "hostname": "avc-x1x",
+              "id": "04e1d082-65bc-4929-8d65-d0768a2621c4",
+              "type": "heartbeat",
+              "version": "8.0.0",
+            },
+            "docId": "rZtoHm0B0I9WX_CznN_V",
+            "ecs": Object {
+              "version": "1.1.0",
+            },
+            "error": Object {
+              "message": "400 Bad Request",
+              "type": "validate",
+            },
+            "event": Object {
+              "dataset": "uptime",
+            },
+            "host": Object {
+              "name": "avc-x1x",
+            },
+            "http": Object {
+              "response": Object {
+                "body": Object {
+                  "bytes": 3,
+                  "content": "400",
+                  "hash": "26d228663f13a88592a12d16cf9587caab0388b262d6d9f126ed62f9333aca94",
+                },
+                "status_code": 400,
+              },
+              "rtt": Object {
+                "content": Object {
+                  "us": 41,
+                },
+                "response_header": Object {
+                  "us": 36777,
+                },
+                "total": Object {
+                  "us": 37821,
+                },
+                "validate": Object {
+                  "us": 36818,
+                },
+                "write_request": Object {
+                  "us": 53,
+                },
+              },
+            },
+            "monitor": Object {
+              "check_group": "d76f07d1-d445-11e9-88e3-3e80641b9c71",
+              "duration": Object {
+                "us": 37926,
+              },
+              "id": "0010-down",
+              "ip": "127.0.0.1",
+              "name": "",
+              "status": "down",
+              "type": "http",
+            },
+            "observer": Object {
+              "geo": Object {
+                "location": "37.926868, -78.024902",
+                "name": "mpls",
+              },
+              "hostname": "avc-x1x",
+            },
+            "resolve": Object {
+              "ip": "127.0.0.1",
+              "rtt": Object {
+                "us": 56,
+              },
+            },
+            "summary": Object {
+              "down": 1,
+              "up": 0,
+            },
+            "tcp": Object {
+              "rtt": Object {
+                "connect": Object {
+                  "us": 890,
+                },
+              },
+            },
+            "timestamp": "2019-09-11T03:40:34.371Z",
+            "url": Object {
+              "domain": "localhost",
+              "full": "http://localhost:5678/pattern?r=400x1",
+              "path": "/pattern",
+              "port": 5678,
+              "query": "r=400x1",
+              "scheme": "http",
+            },
+          },
+        ],
+        "timestamp": "2019-09-11T03:40:34.371Z",
+        "url": Object {
+          "domain": "localhost",
+          "full": "http://localhost:5678/pattern?r=400x1",
+          "path": "/pattern",
+          "port": 5678,
+          "query": "r=400x1",
+          "scheme": "http",
+        },
+      },
+    },
+    Object {
+      "histogram": Object {
+        "points": Array [
+          Object {
+            "down": 1,
+            "timestamp": 1568172624744,
+          },
+          Object {
+            "down": 2,
+            "timestamp": 1568172677247,
+          },
+          Object {
+            "down": 1,
+            "timestamp": 1568172729750,
+          },
+          Object {
+            "down": 2,
+            "timestamp": 1568172782253,
+          },
+          Object {
+            "down": 2,
+            "timestamp": 1568172834756,
+          },
+          Object {
+            "down": 2,
+            "timestamp": 1568172887259,
+          },
+          Object {
+            "down": 1,
+            "timestamp": 1568172939762,
+          },
+          Object {
+            "down": 2,
+            "timestamp": 1568172992265,
+          },
+          Object {
+            "down": 2,
+            "timestamp": 1568173044768,
+          },
+          Object {
+            "down": 2,
+            "timestamp": 1568173097271,
+          },
+          Object {
+            "down": 1,
+            "timestamp": 1568173149774,
+          },
+          Object {
+            "down": 2,
+            "timestamp": 1568173202277,
+          },
+        ],
+      },
+      "minInterval": 52503,
+      "monitor_id": "0020-down",
+      "state": Object {
+        "monitor": Object {
+          "name": "",
+        },
+        "observer": Object {
+          "geo": Object {
+            "name": Array [
+              "mpls",
+            ],
+          },
+        },
+        "summary": Object {
+          "down": 1,
+          "status": "down",
+          "up": 0,
+        },
+        "summaryPings": Array [
+          Object {
+            "@timestamp": "2019-09-11T03:40:34.372Z",
+            "agent": Object {
+              "ephemeral_id": "412a92a8-2142-4b1a-a7a2-1afd32e12f85",
+              "hostname": "avc-x1x",
+              "id": "04e1d082-65bc-4929-8d65-d0768a2621c4",
+              "type": "heartbeat",
+              "version": "8.0.0",
+            },
+            "docId": "X5toHm0B0I9WX_CznN-6",
+            "ecs": Object {
+              "version": "1.1.0",
+            },
+            "error": Object {
+              "message": "400 Bad Request",
+              "type": "validate",
+            },
+            "event": Object {
+              "dataset": "uptime",
+            },
+            "host": Object {
+              "name": "avc-x1x",
+            },
+            "http": Object {
+              "response": Object {
+                "body": Object {
+                  "bytes": 3,
+                  "content": "400",
+                  "hash": "26d228663f13a88592a12d16cf9587caab0388b262d6d9f126ed62f9333aca94",
+                },
+                "status_code": 400,
+              },
+              "rtt": Object {
+                "content": Object {
+                  "us": 54,
+                },
+                "response_header": Object {
+                  "us": 180,
+                },
+                "total": Object {
+                  "us": 555,
+                },
+                "validate": Object {
+                  "us": 234,
+                },
+                "write_request": Object {
+                  "us": 63,
+                },
+              },
+            },
+            "monitor": Object {
+              "check_group": "d7712ecb-d445-11e9-88e3-3e80641b9c71",
+              "duration": Object {
+                "us": 14900,
+              },
+              "id": "0020-down",
+              "ip": "127.0.0.1",
+              "name": "",
+              "status": "down",
+              "type": "http",
+            },
+            "observer": Object {
+              "geo": Object {
+                "location": "37.926868, -78.024902",
+                "name": "mpls",
+              },
+              "hostname": "avc-x1x",
+            },
+            "resolve": Object {
+              "ip": "127.0.0.1",
+              "rtt": Object {
+                "us": 14294,
+              },
+            },
+            "summary": Object {
+              "down": 1,
+              "up": 0,
+            },
+            "tcp": Object {
+              "rtt": Object {
+                "connect": Object {
+                  "us": 105,
+                },
+              },
+            },
+            "timestamp": "2019-09-11T03:40:34.372Z",
+            "url": Object {
+              "domain": "localhost",
+              "full": "http://localhost:5678/pattern?r=400x1",
+              "path": "/pattern",
+              "port": 5678,
+              "query": "r=400x1",
+              "scheme": "http",
+            },
+          },
+        ],
+        "timestamp": "2019-09-11T03:40:34.372Z",
+        "url": Object {
+          "domain": "localhost",
+          "full": "http://localhost:5678/pattern?r=400x1",
+          "path": "/pattern",
+          "port": 5678,
+          "query": "r=400x1",
+          "scheme": "http",
+        },
+      },
+    },
+    Object {
+      "histogram": Object {
+        "points": Array [
+          Object {
+            "timestamp": 1568172624744,
+          },
+          Object {
+            "timestamp": 1568172677247,
+          },
+          Object {
+            "timestamp": 1568172729750,
+          },
+          Object {
+            "timestamp": 1568172782253,
+          },
+          Object {
+            "timestamp": 1568172834756,
+          },
+          Object {
+            "down": 1,
+            "timestamp": 1568172887259,
+          },
+          Object {
+            "timestamp": 1568172939762,
+          },
+          Object {
+            "down": 1,
+            "timestamp": 1568172992265,
+          },
+          Object {
+            "down": 2,
+            "timestamp": 1568173044768,
+          },
+          Object {
+            "timestamp": 1568173097271,
+          },
+          Object {
+            "down": 1,
+            "timestamp": 1568173149774,
+          },
+          Object {
+            "down": 1,
+            "timestamp": 1568173202277,
+          },
+        ],
+      },
+      "minInterval": 52503,
+      "monitor_id": "0030-intermittent",
+      "state": Object {
+        "monitor": Object {
+          "name": "",
+        },
+        "observer": Object {
+          "geo": Object {
+            "name": Array [
+              "mpls",
+            ],
+          },
+        },
+        "summary": Object {
+          "down": 1,
+          "status": "down",
+          "up": 0,
+        },
+        "summaryPings": Array [
+          Object {
+            "@timestamp": "2019-09-11T03:40:34.373Z",
+            "agent": Object {
+              "ephemeral_id": "412a92a8-2142-4b1a-a7a2-1afd32e12f85",
+              "hostname": "avc-x1x",
+              "id": "04e1d082-65bc-4929-8d65-d0768a2621c4",
+              "type": "heartbeat",
+              "version": "8.0.0",
+            },
+            "docId": "eJtoHm0B0I9WX_CznN-6",
+            "ecs": Object {
+              "version": "1.1.0",
+            },
+            "error": Object {
+              "message": "500 Internal Server Error",
+              "type": "validate",
+            },
+            "event": Object {
+              "dataset": "uptime",
+            },
+            "host": Object {
+              "name": "avc-x1x",
+            },
+            "http": Object {
+              "response": Object {
+                "body": Object {
+                  "bytes": 3,
+                  "content": "500",
+                  "hash": "0604cd3138feed202ef293e062da2f4720f77a05d25ee036a7a01c9cfcdd1f0a",
+                },
+                "status_code": 500,
+              },
+              "rtt": Object {
+                "content": Object {
+                  "us": 28,
+                },
+                "response_header": Object {
+                  "us": 197,
+                },
+                "total": Object {
+                  "us": 17068,
+                },
+                "validate": Object {
+                  "us": 225,
+                },
+                "write_request": Object {
+                  "us": 58,
+                },
+              },
+            },
+            "monitor": Object {
+              "check_group": "d771299d-d445-11e9-88e3-3e80641b9c71",
+              "duration": Object {
+                "us": 17146,
+              },
+              "id": "0030-intermittent",
+              "ip": "127.0.0.1",
+              "name": "",
+              "status": "down",
+              "type": "http",
+            },
+            "observer": Object {
+              "geo": Object {
+                "location": "37.926868, -78.024902",
+                "name": "mpls",
+              },
+              "hostname": "avc-x1x",
+            },
+            "resolve": Object {
+              "ip": "127.0.0.1",
+              "rtt": Object {
+                "us": 33,
+              },
+            },
+            "summary": Object {
+              "down": 1,
+              "up": 0,
+            },
+            "tcp": Object {
+              "rtt": Object {
+                "connect": Object {
+                  "us": 16662,
+                },
+              },
+            },
+            "timestamp": "2019-09-11T03:40:34.373Z",
+            "url": Object {
+              "domain": "localhost",
+              "full": "http://localhost:5678/pattern?r=200x5,500x1",
+              "path": "/pattern",
+              "port": 5678,
+              "query": "r=200x5,500x1",
+              "scheme": "http",
+            },
+          },
+        ],
+        "timestamp": "2019-09-11T03:40:34.373Z",
+        "url": Object {
+          "domain": "localhost",
+          "full": "http://localhost:5678/pattern?r=200x5,500x1",
+          "path": "/pattern",
+          "port": 5678,
+          "query": "r=200x5,500x1",
+          "scheme": "http",
+        },
+      },
+    },
+    Object {
+      "histogram": Object {
+        "points": Array [
+          Object {
+            "down": 1,
+            "timestamp": 1568172624744,
+          },
+          Object {
+            "down": 2,
+            "timestamp": 1568172677247,
+          },
+          Object {
+            "down": 1,
+            "timestamp": 1568172729750,
+          },
+          Object {
+            "down": 2,
+            "timestamp": 1568172782253,
+          },
+          Object {
+            "down": 2,
+            "timestamp": 1568172834756,
+          },
+          Object {
+            "down": 2,
+            "timestamp": 1568172887259,
+          },
+          Object {
+            "down": 1,
+            "timestamp": 1568172939762,
+          },
+          Object {
+            "down": 2,
+            "timestamp": 1568172992265,
+          },
+          Object {
+            "down": 2,
+            "timestamp": 1568173044768,
+          },
+          Object {
+            "down": 2,
+            "timestamp": 1568173097271,
+          },
+          Object {
+            "down": 1,
+            "timestamp": 1568173149774,
+          },
+          Object {
+            "down": 2,
+            "timestamp": 1568173202277,
+          },
+        ],
+      },
+      "minInterval": 52503,
+      "monitor_id": "0040-down",
+      "state": Object {
+        "monitor": Object {
+          "name": "",
+        },
+        "observer": Object {
+          "geo": Object {
+            "name": Array [
+              "mpls",
+            ],
+          },
+        },
+        "summary": Object {
+          "down": 1,
+          "status": "down",
+          "up": 0,
+        },
+        "summaryPings": Array [
+          Object {
+            "@timestamp": "2019-09-11T03:40:34.372Z",
+            "agent": Object {
+              "ephemeral_id": "412a92a8-2142-4b1a-a7a2-1afd32e12f85",
+              "hostname": "avc-x1x",
+              "id": "04e1d082-65bc-4929-8d65-d0768a2621c4",
+              "type": "heartbeat",
+              "version": "8.0.0",
+            },
+            "docId": "eZtoHm0B0I9WX_CznN-6",
+            "ecs": Object {
+              "version": "1.1.0",
+            },
+            "error": Object {
+              "message": "400 Bad Request",
+              "type": "validate",
+            },
+            "event": Object {
+              "dataset": "uptime",
+            },
+            "host": Object {
+              "name": "avc-x1x",
+            },
+            "http": Object {
+              "response": Object {
+                "body": Object {
+                  "bytes": 3,
+                  "content": "400",
+                  "hash": "26d228663f13a88592a12d16cf9587caab0388b262d6d9f126ed62f9333aca94",
+                },
+                "status_code": 400,
+              },
+              "rtt": Object {
+                "content": Object {
+                  "us": 29,
+                },
+                "response_header": Object {
+                  "us": 172,
+                },
+                "total": Object {
+                  "us": 18023,
+                },
+                "validate": Object {
+                  "us": 201,
+                },
+                "write_request": Object {
+                  "us": 28,
+                },
+              },
+            },
+            "monitor": Object {
+              "check_group": "d76f5490-d445-11e9-88e3-3e80641b9c71",
+              "duration": Object {
+                "us": 18106,
+              },
+              "id": "0040-down",
+              "ip": "127.0.0.1",
+              "name": "",
+              "status": "down",
+              "type": "http",
+            },
+            "observer": Object {
+              "geo": Object {
+                "location": "37.926868, -78.024902",
+                "name": "mpls",
+              },
+              "hostname": "avc-x1x",
+            },
+            "resolve": Object {
+              "ip": "127.0.0.1",
+              "rtt": Object {
+                "us": 39,
+              },
+            },
+            "summary": Object {
+              "down": 1,
+              "up": 0,
+            },
+            "tcp": Object {
+              "rtt": Object {
+                "connect": Object {
+                  "us": 17766,
+                },
+              },
+            },
+            "timestamp": "2019-09-11T03:40:34.372Z",
+            "url": Object {
+              "domain": "localhost",
+              "full": "http://localhost:5678/pattern?r=400x1",
+              "path": "/pattern",
+              "port": 5678,
+              "query": "r=400x1",
+              "scheme": "http",
+            },
+          },
+        ],
+        "timestamp": "2019-09-11T03:40:34.372Z",
+        "url": Object {
+          "domain": "localhost",
+          "full": "http://localhost:5678/pattern?r=400x1",
+          "path": "/pattern",
+          "port": 5678,
+          "query": "r=400x1",
+          "scheme": "http",
+        },
+      },
+    },
+    Object {
+      "histogram": Object {
+        "points": Array [
+          Object {
+            "down": 1,
+            "timestamp": 1568172624744,
+          },
+          Object {
+            "down": 2,
+            "timestamp": 1568172677247,
+          },
+          Object {
+            "down": 1,
+            "timestamp": 1568172729750,
+          },
+          Object {
+            "down": 2,
+            "timestamp": 1568172782253,
+          },
+          Object {
+            "down": 2,
+            "timestamp": 1568172834756,
+          },
+          Object {
+            "down": 2,
+            "timestamp": 1568172887259,
+          },
+          Object {
+            "down": 1,
+            "timestamp": 1568172939762,
+          },
+          Object {
+            "down": 2,
+            "timestamp": 1568172992265,
+          },
+          Object {
+            "down": 2,
+            "timestamp": 1568173044768,
+          },
+          Object {
+            "down": 2,
+            "timestamp": 1568173097271,
+          },
+          Object {
+            "down": 1,
+            "timestamp": 1568173149774,
+          },
+          Object {
+            "down": 2,
+            "timestamp": 1568173202277,
+          },
+        ],
+      },
+      "minInterval": 52503,
+      "monitor_id": "0050-down",
+      "state": Object {
+        "monitor": Object {
+          "name": "",
+        },
+        "observer": Object {
+          "geo": Object {
+            "name": Array [
+              "mpls",
+            ],
+          },
+        },
+        "summary": Object {
+          "down": 1,
+          "status": "down",
+          "up": 0,
+        },
+        "summaryPings": Array [
+          Object {
+            "@timestamp": "2019-09-11T03:40:34.386Z",
+            "agent": Object {
+              "ephemeral_id": "412a92a8-2142-4b1a-a7a2-1afd32e12f85",
+              "hostname": "avc-x1x",
+              "id": "04e1d082-65bc-4929-8d65-d0768a2621c4",
+              "type": "heartbeat",
+              "version": "8.0.0",
+            },
+            "docId": "dJtoHm0B0I9WX_CznN-6",
+            "ecs": Object {
+              "version": "1.1.0",
+            },
+            "error": Object {
+              "message": "400 Bad Request",
+              "type": "validate",
+            },
+            "event": Object {
+              "dataset": "uptime",
+            },
+            "host": Object {
+              "name": "avc-x1x",
+            },
+            "http": Object {
+              "response": Object {
+                "body": Object {
+                  "bytes": 3,
+                  "content": "400",
+                  "hash": "26d228663f13a88592a12d16cf9587caab0388b262d6d9f126ed62f9333aca94",
+                },
+                "status_code": 400,
+              },
+              "rtt": Object {
+                "content": Object {
+                  "us": 36,
+                },
+                "response_header": Object {
+                  "us": 213,
+                },
+                "total": Object {
+                  "us": 1011,
+                },
+                "validate": Object {
+                  "us": 249,
+                },
+                "write_request": Object {
+                  "us": 20,
+                },
+              },
+            },
+            "monitor": Object {
+              "check_group": "d76f9a0c-d445-11e9-88e3-3e80641b9c71",
+              "duration": Object {
+                "us": 4258,
+              },
+              "id": "0050-down",
+              "ip": "127.0.0.1",
+              "name": "",
+              "status": "down",
+              "type": "http",
+            },
+            "observer": Object {
+              "geo": Object {
+                "location": "37.926868, -78.024902",
+                "name": "mpls",
+              },
+              "hostname": "avc-x1x",
+            },
+            "resolve": Object {
+              "ip": "127.0.0.1",
+              "rtt": Object {
+                "us": 3215,
+              },
+            },
+            "summary": Object {
+              "down": 1,
+              "up": 0,
+            },
+            "tcp": Object {
+              "rtt": Object {
+                "connect": Object {
+                  "us": 84,
+                },
+              },
+            },
+            "timestamp": "2019-09-11T03:40:34.386Z",
+            "url": Object {
+              "domain": "localhost",
+              "full": "http://localhost:5678/pattern?r=400x1",
+              "path": "/pattern",
+              "port": 5678,
+              "query": "r=400x1",
+              "scheme": "http",
+            },
+          },
+        ],
+        "timestamp": "2019-09-11T03:40:34.386Z",
+        "url": Object {
+          "domain": "localhost",
+          "full": "http://localhost:5678/pattern?r=400x1",
+          "path": "/pattern",
+          "port": 5678,
+          "query": "r=400x1",
+          "scheme": "http",
+        },
+      },
+    },
+    Object {
+      "histogram": Object {
+        "points": Array [
+          Object {
+            "down": 1,
+            "timestamp": 1568172624744,
+          },
+          Object {
+            "down": 2,
+            "timestamp": 1568172677247,
+          },
+          Object {
+            "down": 1,
+            "timestamp": 1568172729750,
+          },
+          Object {
+            "down": 2,
+            "timestamp": 1568172782253,
+          },
+          Object {
+            "down": 2,
+            "timestamp": 1568172834756,
+          },
+          Object {
+            "down": 2,
+            "timestamp": 1568172887259,
+          },
+          Object {
+            "down": 1,
+            "timestamp": 1568172939762,
+          },
+          Object {
+            "down": 2,
+            "timestamp": 1568172992265,
+          },
+          Object {
+            "down": 2,
+            "timestamp": 1568173044768,
+          },
+          Object {
+            "down": 2,
+            "timestamp": 1568173097271,
+          },
+          Object {
+            "down": 1,
+            "timestamp": 1568173149774,
+          },
+          Object {
+            "down": 2,
+            "timestamp": 1568173202277,
+          },
+        ],
+      },
+      "minInterval": 52503,
+      "monitor_id": "0070-down",
+      "state": Object {
+        "monitor": Object {
+          "name": "",
+        },
+        "observer": Object {
+          "geo": Object {
+            "name": Array [
+              "mpls",
+            ],
+          },
+        },
+        "summary": Object {
+          "down": 1,
+          "status": "down",
+          "up": 0,
+        },
+        "summaryPings": Array [
+          Object {
+            "@timestamp": "2019-09-11T03:40:34.375Z",
+            "agent": Object {
+              "ephemeral_id": "412a92a8-2142-4b1a-a7a2-1afd32e12f85",
+              "hostname": "avc-x1x",
+              "id": "04e1d082-65bc-4929-8d65-d0768a2621c4",
+              "type": "heartbeat",
+              "version": "8.0.0",
+            },
+            "docId": "a5toHm0B0I9WX_CznN-6",
+            "ecs": Object {
+              "version": "1.1.0",
+            },
+            "error": Object {
+              "message": "400 Bad Request",
+              "type": "validate",
+            },
+            "event": Object {
+              "dataset": "uptime",
+            },
+            "host": Object {
+              "name": "avc-x1x",
+            },
+            "http": Object {
+              "response": Object {
+                "body": Object {
+                  "bytes": 3,
+                  "content": "400",
+                  "hash": "26d228663f13a88592a12d16cf9587caab0388b262d6d9f126ed62f9333aca94",
+                },
+                "status_code": 400,
+              },
+              "rtt": Object {
+                "content": Object {
+                  "us": 33,
+                },
+                "response_header": Object {
+                  "us": 190,
+                },
+                "total": Object {
+                  "us": 2015,
+                },
+                "validate": Object {
+                  "us": 223,
+                },
+                "write_request": Object {
+                  "us": 21,
+                },
+              },
+            },
+            "monitor": Object {
+              "check_group": "d7712c5a-d445-11e9-88e3-3e80641b9c71",
+              "duration": Object {
+                "us": 15117,
+              },
+              "id": "0070-down",
+              "ip": "127.0.0.1",
+              "name": "",
+              "status": "down",
+              "type": "http",
+            },
+            "observer": Object {
+              "geo": Object {
+                "location": "37.926868, -78.024902",
+                "name": "mpls",
+              },
+              "hostname": "avc-x1x",
+            },
+            "resolve": Object {
+              "ip": "127.0.0.1",
+              "rtt": Object {
+                "us": 13061,
+              },
+            },
+            "summary": Object {
+              "down": 1,
+              "up": 0,
+            },
+            "tcp": Object {
+              "rtt": Object {
+                "connect": Object {
+                  "us": 84,
+                },
+              },
+            },
+            "timestamp": "2019-09-11T03:40:34.375Z",
+            "url": Object {
+              "domain": "localhost",
+              "full": "http://localhost:5678/pattern?r=400x1",
+              "path": "/pattern",
+              "port": 5678,
+              "query": "r=400x1",
+              "scheme": "http",
+            },
+          },
+        ],
+        "timestamp": "2019-09-11T03:40:34.375Z",
+        "url": Object {
+          "domain": "localhost",
+          "full": "http://localhost:5678/pattern?r=400x1",
+          "path": "/pattern",
+          "port": 5678,
+          "query": "r=400x1",
+          "scheme": "http",
+        },
+      },
+    },
+    Object {
+      "histogram": Object {
+        "points": Array [
+          Object {
+            "down": 1,
+            "timestamp": 1568172624744,
+          },
+          Object {
+            "down": 2,
+            "timestamp": 1568172677247,
+          },
+          Object {
+            "down": 1,
+            "timestamp": 1568172729750,
+          },
+          Object {
+            "down": 2,
+            "timestamp": 1568172782253,
+          },
+          Object {
+            "down": 2,
+            "timestamp": 1568172834756,
+          },
+          Object {
+            "down": 2,
+            "timestamp": 1568172887259,
+          },
+          Object {
+            "down": 1,
+            "timestamp": 1568172939762,
+          },
+          Object {
+            "down": 2,
+            "timestamp": 1568172992265,
+          },
+          Object {
+            "down": 2,
+            "timestamp": 1568173044768,
+          },
+          Object {
+            "down": 2,
+            "timestamp": 1568173097271,
+          },
+          Object {
+            "down": 1,
+            "timestamp": 1568173149774,
+          },
+          Object {
+            "down": 2,
+            "timestamp": 1568173202277,
+          },
+        ],
+      },
+      "minInterval": 52503,
+      "monitor_id": "0080-down",
+      "state": Object {
+        "monitor": Object {
+          "name": "",
+        },
+        "observer": Object {
+          "geo": Object {
+            "name": Array [
+              "mpls",
+            ],
+          },
+        },
+        "summary": Object {
+          "down": 1,
+          "status": "down",
+          "up": 0,
+        },
+        "summaryPings": Array [
+          Object {
+            "@timestamp": "2019-09-11T03:40:34.371Z",
+            "agent": Object {
+              "ephemeral_id": "412a92a8-2142-4b1a-a7a2-1afd32e12f85",
+              "hostname": "avc-x1x",
+              "id": "04e1d082-65bc-4929-8d65-d0768a2621c4",
+              "type": "heartbeat",
+              "version": "8.0.0",
+            },
+            "docId": "oJtoHm0B0I9WX_CznN_V",
+            "ecs": Object {
+              "version": "1.1.0",
+            },
+            "error": Object {
+              "message": "400 Bad Request",
+              "type": "validate",
+            },
+            "event": Object {
+              "dataset": "uptime",
+            },
+            "host": Object {
+              "name": "avc-x1x",
+            },
+            "http": Object {
+              "response": Object {
+                "body": Object {
+                  "bytes": 3,
+                  "content": "400",
+                  "hash": "26d228663f13a88592a12d16cf9587caab0388b262d6d9f126ed62f9333aca94",
+                },
+                "status_code": 400,
+              },
+              "rtt": Object {
+                "content": Object {
+                  "us": 34,
+                },
+                "response_header": Object {
+                  "us": 34569,
+                },
+                "total": Object {
+                  "us": 36089,
+                },
+                "validate": Object {
+                  "us": 34604,
+                },
+                "write_request": Object {
+                  "us": 60,
+                },
+              },
+            },
+            "monitor": Object {
+              "check_group": "d7715884-d445-11e9-88e3-3e80641b9c71",
+              "duration": Object {
+                "us": 36171,
+              },
+              "id": "0080-down",
+              "ip": "127.0.0.1",
+              "name": "",
+              "status": "down",
+              "type": "http",
+            },
+            "observer": Object {
+              "geo": Object {
+                "location": "37.926868, -78.024902",
+                "name": "mpls",
+              },
+              "hostname": "avc-x1x",
+            },
+            "resolve": Object {
+              "ip": "127.0.0.1",
+              "rtt": Object {
+                "us": 37,
+              },
+            },
+            "summary": Object {
+              "down": 1,
+              "up": 0,
+            },
+            "tcp": Object {
+              "rtt": Object {
+                "connect": Object {
+                  "us": 1033,
+                },
+              },
+            },
+            "timestamp": "2019-09-11T03:40:34.371Z",
+            "url": Object {
+              "domain": "localhost",
+              "full": "http://localhost:5678/pattern?r=400x1",
+              "path": "/pattern",
+              "port": 5678,
+              "query": "r=400x1",
+              "scheme": "http",
+            },
+          },
+        ],
+        "timestamp": "2019-09-11T03:40:34.371Z",
+        "url": Object {
+          "domain": "localhost",
+          "full": "http://localhost:5678/pattern?r=400x1",
+          "path": "/pattern",
+          "port": 5678,
+          "query": "r=400x1",
+          "scheme": "http",
+        },
+      },
+    },
+  ],
+  "totalSummaryCount": 2000,
+}
+`;
