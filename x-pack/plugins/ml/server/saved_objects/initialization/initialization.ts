@@ -60,7 +60,7 @@ export function jobSavedObjectsInitializationFactory(
       // initialize jobs
       const { initSavedObjects } = repairFactory(client, jobSavedObjectService);
       const { jobs } = await initSavedObjects(false, jobSpaceOverrides);
-      mlLog.info(`${jobs.length} job saved objects initialized for * space`);
+      mlLog.info(`${jobs.length} job saved objects initialized`);
     } catch (error) {
       mlLog.error(`Error Initializing jobs ${JSON.stringify(error)}`);
     }
