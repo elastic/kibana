@@ -69,7 +69,7 @@ const TabComponent = (props: TabProps) => {
           <EuiButtonEmpty iconType={'popout'} {...nodeLogsMenuItemLinkProps}>
             <FormattedMessage
               id="xpack.infra.nodeDetails.logs.openLogsLink"
-              defaultMessage={'Open in Logs'}
+              defaultMessage="Open in Logs"
             />
           </EuiButtonEmpty>
         </EuiFlexItem>
