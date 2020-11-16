@@ -112,7 +112,7 @@ describe('disable()', () => {
       id: '1',
       type: 'api_key_pending_invalidation',
       attributes: {
-        apiKeyId: '123',
+        apiKeyId: 'MTIz',
         createdAt: '2019-02-12T21:01:22.479Z',
       },
       references: [],
@@ -156,7 +156,7 @@ describe('disable()', () => {
     expect(taskManager.remove).toHaveBeenCalledWith('task-123');
     expect(
       (unsecuredSavedObjectsClient.create.mock.calls[0][1] as InvalidatePendingApiKey).apiKeyId
-    ).toBe('123');
+    ).toBe('MTIz');
   });
 
   test('falls back when getDecryptedAsInternalUser throws an error', async () => {
@@ -165,7 +165,7 @@ describe('disable()', () => {
       id: '1',
       type: 'api_key_pending_invalidation',
       attributes: {
-        apiKeyId: 'test',
+        apiKeyId: 'MTIz',
         createdAt: '2019-02-12T21:01:22.479Z',
       },
       references: [],
@@ -225,7 +225,7 @@ describe('disable()', () => {
       id: '1',
       type: 'api_key_pending_invalidation',
       attributes: {
-        apiKeyId: 'test',
+        apiKeyId: 'MTIz',
         createdAt: '2019-02-12T21:01:22.479Z',
       },
       references: [],
@@ -242,7 +242,7 @@ describe('disable()', () => {
       id: '1',
       type: 'api_key_pending_invalidation',
       attributes: {
-        apiKeyId: '123',
+        apiKeyId: 'MTIz',
         createdAt: '2019-02-12T21:01:22.479Z',
       },
       references: [],
@@ -258,7 +258,7 @@ describe('disable()', () => {
       id: '1',
       type: 'api_key_pending_invalidation',
       attributes: {
-        apiKeyId: '123',
+        apiKeyId: 'MTIz',
         createdAt: '2019-02-12T21:01:22.479Z',
       },
       references: [],
@@ -286,7 +286,7 @@ describe('disable()', () => {
     unsecuredSavedObjectsClient.create.mockRejectedValueOnce(new Error('Fail'));
     await alertsClient.disable({ id: '1' });
     expect(alertsClientParams.logger.error).toHaveBeenCalledWith(
-      'Failed to mark for API key [id="123"] for invalidation: Fail'
+      'Failed to mark for API key [id="MTIzOmFiYw=="] for invalidation: Fail'
     );
   });
 

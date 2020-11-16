@@ -84,7 +84,7 @@ describe('updateApiKey()', () => {
       id: '1',
       type: 'api_key_pending_invalidation',
       attributes: {
-        apiKeyId: '234',
+        apiKeyId: 'MjM0',
         createdAt: '2019-02-12T21:01:22.479Z',
       },
       references: [],
@@ -141,7 +141,7 @@ describe('updateApiKey()', () => {
       id: '1',
       type: 'api_key_pending_invalidation',
       attributes: {
-        apiKeyId: '123',
+        apiKeyId: 'MTIz',
         createdAt: '2019-02-12T21:01:22.479Z',
       },
       references: [],
@@ -199,7 +199,7 @@ describe('updateApiKey()', () => {
       id: '1',
       type: 'api_key_pending_invalidation',
       attributes: {
-        apiKeyId: 'test',
+        apiKeyId: 'MjM0',
         createdAt: '2019-02-12T21:01:22.479Z',
       },
       references: [],
@@ -223,7 +223,7 @@ describe('updateApiKey()', () => {
       id: '1',
       type: 'api_key_pending_invalidation',
       attributes: {
-        apiKeyId: '234',
+        apiKeyId: 'MjM0',
         createdAt: '2019-02-12T21:01:22.479Z',
       },
       references: [],
@@ -234,7 +234,7 @@ describe('updateApiKey()', () => {
     );
     expect(
       (unsecuredSavedObjectsClient.create.mock.calls[0][1] as InvalidatePendingApiKey).apiKeyId
-    ).toBe('234');
+    ).toBe('MjM0');
   });
 
   describe('authorization', () => {

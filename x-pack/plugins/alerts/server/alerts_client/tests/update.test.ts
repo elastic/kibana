@@ -164,7 +164,7 @@ describe('update()', () => {
       id: '1',
       type: 'api_key_pending_invalidation',
       attributes: {
-        apiKeyId: '234',
+        apiKeyId: 'MjM0',
         createdAt: '2019-02-12T21:01:22.479Z',
       },
       references: [],
@@ -388,7 +388,7 @@ describe('update()', () => {
       id: '1',
       type: 'api_key_pending_invalidation',
       attributes: {
-        apiKeyId: '234',
+        apiKeyId: 'MjM0',
         createdAt: '2019-02-12T21:01:22.479Z',
       },
       references: [],
@@ -397,7 +397,7 @@ describe('update()', () => {
       id: '1',
       type: 'api_key_pending_invalidation',
       attributes: {
-        apiKeyId: '234',
+        apiKeyId: 'MjM0',
         createdAt: '2019-02-12T21:01:22.479Z',
       },
       references: [],
@@ -560,7 +560,7 @@ describe('update()', () => {
       id: '1',
       type: 'api_key_pending_invalidation',
       attributes: {
-        apiKeyId: '234',
+        apiKeyId: 'MjM0',
         createdAt: '2019-02-12T21:01:22.479Z',
       },
       references: [],
@@ -832,7 +832,7 @@ describe('update()', () => {
       },
     });
     expect(alertsClientParams.logger.error).toHaveBeenCalledWith(
-      'Failed to mark for API key [id="123"] for invalidation: Fail'
+      'Failed to mark for API key [id="MTIzOmFiYw=="] for invalidation: Fail'
     );
   });
 
@@ -1002,7 +1002,7 @@ describe('update()', () => {
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"Fail"`);
     expect(
       (unsecuredSavedObjectsClient.create.mock.calls[1][1] as InvalidatePendingApiKey).apiKeyId
-    ).toBe('234');
+    ).toBe('MjM0');
   });
 
   describe('updating an alert schedule', () => {

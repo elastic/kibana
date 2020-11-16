@@ -162,7 +162,7 @@ describe('enable()', () => {
       id: '1',
       type: 'api_key_pending_invalidation',
       attributes: {
-        apiKeyId: '123',
+        apiKeyId: 'MTIz',
         createdAt,
       },
       references: [],
@@ -239,7 +239,7 @@ describe('enable()', () => {
       id: '1',
       type: 'api_key_pending_invalidation',
       attributes: {
-        apiKeyId: '123',
+        apiKeyId: 'MTIz',
         createdAt,
       },
       references: [],
@@ -252,7 +252,7 @@ describe('enable()', () => {
     });
     expect(
       (unsecuredSavedObjectsClient.create.mock.calls[0][1] as InvalidatePendingApiKey).apiKeyId
-    ).toBe('123');
+    ).toBe('MTIz');
   });
 
   test(`doesn't enable already enabled alerts`, async () => {
@@ -345,7 +345,7 @@ describe('enable()', () => {
       id: '1',
       type: 'api_key_pending_invalidation',
       attributes: {
-        apiKeyId: '123',
+        apiKeyId: 'MTIz',
         createdAt,
       },
       references: [],
@@ -358,7 +358,7 @@ describe('enable()', () => {
     expect(alertsClientParams.createAPIKey).toHaveBeenCalled();
     expect(
       (unsecuredSavedObjectsClient.create.mock.calls[0][1] as InvalidatePendingApiKey).apiKeyId
-    ).toBe('123');
+    ).toBe('MTIz');
     expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledTimes(1);
     expect(taskManager.schedule).not.toHaveBeenCalled();
   });

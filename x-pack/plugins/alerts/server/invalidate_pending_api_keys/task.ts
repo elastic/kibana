@@ -8,7 +8,8 @@ import {
   Logger,
   CoreStart,
   SavedObjectsFindResponse,
-  ISavedObjectsRepository,
+  KibanaRequest,
+  SavedObjectsClientContract,
 } from 'kibana/server';
 import { InvalidateAPIKeyParams, SecurityPluginSetup } from '../../../security/server';
 import {
@@ -97,6 +98,24 @@ function registerApiKeyInvalitorTaskDefinition(
   });
 }
 
+function getFakeKibanaRequest(basePath: string) {
+  const requestHeaders: Record<string, string> = {};
+  return ({
+    headers: requestHeaders,
+    getBasePath: () => basePath,
+    path: '/',
+    route: { settings: {} },
+    url: {
+      href: '/',
+    },
+    raw: {
+      req: {
+        url: '/',
+      },
+    },
+  } as unknown) as KibanaRequest;
+}
+
 function taskRunner(
   logger: Logger,
   coreStartServices: Promise<[CoreStart, AlertingPluginsStart, unknown]>,
@@ -110,17 +129,22 @@ function taskRunner(
         let totalInvalidated = 0;
         const configResult = await config;
         try {
-          const [{ savedObjects }] = await coreStartServices;
-          const repository = savedObjects.createInternalRepository([
-            'api_key_pending_invalidation',
-          ]);
+          const [{ savedObjects, http }] = await coreStartServices;
+          const savedObjectsClient = savedObjects.getScopedClient(
+            getFakeKibanaRequest(http.basePath.serverBasePath),
+            {
+              includedHiddenTypes: ['api_key_pending_invalidation'],
+              excludedWrappers: ['security'],
+            }
+          );
+
           const configuredDelay = configResult.invalidateApiKeysTask.removalDelay;
           const delay = timePeriodBeforeDate(new Date(), configuredDelay).toISOString();
 
           let hasApiKeysPendingInvalidation = true;
           const PAGE_SIZE = 100;
           do {
-            const apiKeysToInvalidate = await repository.find<InvalidatePendingApiKey>({
+            const apiKeysToInvalidate = await savedObjectsClient.find<InvalidatePendingApiKey>({
               type: 'api_key_pending_invalidation',
               filter: `api_key_pending_invalidation.attributes.createdAt <= "${delay}"`,
               page: 1,
@@ -130,7 +154,7 @@ function taskRunner(
             });
             totalInvalidated += await invalidateApiKeys(
               logger,
-              repository,
+              savedObjectsClient,
               apiKeysToInvalidate,
               securityPluginSetup
             );
@@ -166,22 +190,21 @@ function taskRunner(
 
 async function invalidateApiKeys(
   logger: Logger,
-  repository: ISavedObjectsRepository,
+  savedObjectsClient: SavedObjectsClientContract,
   apiKeysToInvalidate: SavedObjectsFindResponse<InvalidatePendingApiKey>,
   securityPluginSetup?: SecurityPluginSetup
 ) {
   let totalInvalidated = 0;
   await Promise.all(
     apiKeysToInvalidate.saved_objects.map(async (apiKeyObj) => {
-      const response = await invalidateAPIKey(
-        { id: apiKeyObj.attributes.apiKeyId },
-        securityPluginSetup
-      );
+      const apiKeyId = Buffer.from(apiKeyObj.attributes.apiKeyId, 'base64').toString();
+
+      const response = await invalidateAPIKey({ id: apiKeyId }, securityPluginSetup);
       if (response.apiKeysEnabled === true && response.result.error_count > 0) {
         logger.error(`Failed to invalidate API Key [id="${apiKeyObj.attributes.apiKeyId}"]`);
       } else {
         try {
-          await repository.delete('api_key_pending_invalidation', apiKeyObj.id);
+          await savedObjectsClient.delete('api_key_pending_invalidation', apiKeyObj.id);
           totalInvalidated++;
         } catch (err) {
           logger.error(

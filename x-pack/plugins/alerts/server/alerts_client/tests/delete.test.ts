@@ -97,7 +97,7 @@ describe('delete()', () => {
       id: '1',
       type: 'api_key_pending_invalidation',
       attributes: {
-        apiKeyId: 'test',
+        apiKeyId: 'MTIz',
         createdAt: '2019-02-12T21:01:22.479Z',
       },
       references: [],
@@ -121,7 +121,7 @@ describe('delete()', () => {
       id: '1',
       type: 'api_key_pending_invalidation',
       attributes: {
-        apiKeyId: 'test',
+        apiKeyId: 'MTIz',
         createdAt: '2019-02-12T21:01:22.479Z',
       },
       references: [],
@@ -156,7 +156,7 @@ describe('delete()', () => {
       id: '1',
       type: 'api_key_pending_invalidation',
       attributes: {
-        apiKeyId: 'test',
+        apiKeyId: 'MTIz',
         createdAt: '2019-02-12T21:01:22.479Z',
       },
       references: [],
@@ -180,7 +180,7 @@ describe('delete()', () => {
       'api_key_pending_invalidation'
     );
     expect(alertsClientParams.logger.error).toHaveBeenCalledWith(
-      'Failed to mark for API key [id="123"] for invalidation: Fail'
+      'Failed to mark for API key [id="MTIzOmFiYw=="] for invalidation: Fail'
     );
   });
 
@@ -189,7 +189,7 @@ describe('delete()', () => {
       id: '1',
       type: 'api_key_pending_invalidation',
       attributes: {
-        apiKeyId: 'test',
+        apiKeyId: 'MTIz',
         createdAt: '2019-02-12T21:01:22.479Z',
       },
       references: [],
