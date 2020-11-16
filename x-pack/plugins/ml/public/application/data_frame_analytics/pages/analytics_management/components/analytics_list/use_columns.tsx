@@ -199,7 +199,7 @@ export const useColumns = (
       'data-test-subj': 'mlAnalyticsTableRowDetailsToggle',
     },
     {
-      name: 'ID',
+      name: 'id',
       sortable: (item: DataFrameAnalyticsListRow) => item.id,
       truncateText: true,
       'data-test-subj': 'mlAnalyticsTableColumnId',
