@@ -6,6 +6,6 @@
 
 export interface FieldDetails {
   name: string;
-  value: string | string[];
+  value: string[];
   type: string;
 }

@@ -17,6 +17,19 @@ export interface DocumentDetailLogicValues {
   fields: FieldDetails[];
 }
 
+const normalizeFields = (
+  fieldDetails: Array<{
+    name: string;
+    value: string | string[];
+    type: string;
+  }>
+): FieldDetails[] => {
+  return fieldDetails.map((fieldDetail) => ({
+    ...fieldDetail,
+    value: Array.isArray(fieldDetail.value) ? fieldDetail.value : [fieldDetail.value],
+  }));
+};
+
 export interface DocumentDetailLogicActions {
   setFields(fields: FieldDetails[]): { fields: FieldDetails[] };
   deleteDocument(documentId: string): { documentId: string };
@@ -69,7 +82,7 @@ export const DocumentDetailLogic = kea<DocumentDetailLogicType>({
         const response = await http.get(
           `/api/app_search/engines/${engineName}/documents/${documentId}`
         );
-        actions.setFields(response.fields);
+        actions.setFields(normalizeFields(response.fields));
       } catch (e) {
         flashAPIErrors(e);
       }
