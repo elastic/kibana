@@ -22,6 +22,9 @@ const reservedFeaturePrrivilegePartRegex = /^(?!reserved_)[a-zA-Z0-9_-]+$/;
 export const uiCapabilitiesRegex = /^[a-zA-Z0-9:_-]+$/;
 
 const validLicenses = ['basic', 'standard', 'gold', 'platinum', 'enterprise', 'trial'];
+// sub-feature privileges are only available with a `gold` license or better, so restricting sub-feature privileges
+// for `gold` or below doesn't make a whole lot of sense.
+const validSubFeaturePrivilegeLicenses = ['platinum', 'enterprise', 'trial'];
 
 const managementSchema = Joi.object().pattern(
   managementSectionIdRegex,
@@ -59,7 +62,7 @@ const kibanaIndependentSubFeaturePrivilegeSchema = Joi.object({
   id: Joi.string().regex(subFeaturePrivilegePartRegex).required(),
   name: Joi.string().required(),
   includeIn: Joi.string().allow('all', 'read', 'none').required(),
-  minimumLicense: Joi.string().valid(...validLicenses),
+  minimumLicense: Joi.string().valid(...validSubFeaturePrivilegeLicenses),
   management: managementSchema,
   catalogue: catalogueSchema,
   alerting: Joi.object({

@@ -1313,7 +1313,7 @@ describe('FeatureRegistry', () => {
                   {
                     id: 'foo',
                     name: 'foo',
-                    minimumLicense: 'gold',
+                    minimumLicense: 'platinum',
                     includeIn: 'all',
                     savedObject: {
                       all: [],
@@ -1364,7 +1364,7 @@ describe('FeatureRegistry', () => {
                   {
                     id: 'foo',
                     name: 'foo',
-                    minimumLicense: 'gold',
+                    minimumLicense: 'platinum',
                     includeIn: 'all',
                     savedObject: {
                       all: [],
@@ -1375,7 +1375,7 @@ describe('FeatureRegistry', () => {
                   {
                     id: 'bar',
                     name: 'Bar',
-                    minimumLicense: 'gold',
+                    minimumLicense: 'platinum',
                     includeIn: 'all',
                     savedObject: {
                       all: [],
@@ -1476,9 +1476,13 @@ describe('FeatureRegistry', () => {
       const registry = new FeatureRegistry();
       features.forEach((f) => registry.registerKibanaFeature(f));
 
-      it('returns all features by default', () => {
+      it('returns all features and sub-feature privileges by default', () => {
         const result = registry.getAllKibanaFeatures();
         expect(result).toHaveLength(3);
+        const [, , withSubFeature] = result;
+        expect(withSubFeature.subFeatures).toHaveLength(1);
+        expect(withSubFeature.subFeatures[0].privilegeGroups).toHaveLength(1);
+        expect(withSubFeature.subFeatures[0].privilegeGroups[0].privileges).toHaveLength(1);
       });
 
       it('returns features which are satisfied by the current license', () => {
@@ -1497,21 +1501,9 @@ describe('FeatureRegistry', () => {
         expect(ids).toEqual(['gold-feature', 'unlicensed-feature', 'with-sub-feature']);
 
         const [, , withSubFeature] = result;
-        expect(withSubFeature.subFeatures).toMatchInlineSnapshot(`
-          Array [
-            SubFeature {
-              "config": Object {
-                "name": "licensed-sub-feature",
-                "privilegeGroups": Array [
-                  Object {
-                    "groupType": "independent",
-                    "privileges": Array [],
-                  },
-                ],
-              },
-            },
-          ]
-        `);
+        expect(withSubFeature.subFeatures).toHaveLength(1);
+        expect(withSubFeature.subFeatures[0].privilegeGroups).toHaveLength(1);
+        expect(withSubFeature.subFeatures[0].privilegeGroups[0].privileges).toHaveLength(0);
       });
     });
   });

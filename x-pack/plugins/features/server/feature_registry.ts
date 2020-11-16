@@ -64,9 +64,9 @@ export class FeatureRegistry {
 
     if (performLicenseCheck) {
       features = features.filter((feature) => {
-        return !feature.minimumLicense || license!.hasAtLeast(feature.minimumLicense);
-      });
-      features.forEach((feature) => {
+        const filter = !feature.minimumLicense || license!.hasAtLeast(feature.minimumLicense);
+        if (!filter) return false;
+
         feature.subFeatures?.forEach((subFeature) => {
           subFeature.privilegeGroups.forEach((group) => {
             group.privileges = group.privileges.filter(
@@ -75,6 +75,8 @@ export class FeatureRegistry {
             );
           });
         });
+
+        return true;
       });
     }
     return features.map((featureConfig) => new KibanaFeature(featureConfig));

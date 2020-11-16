@@ -13,7 +13,7 @@ import { licensingMock } from '../../../licensing/server/mocks';
 import { RequestHandler } from '../../../../../src/core/server';
 import { FeatureKibanaPrivileges, KibanaFeatureConfig, SubFeatureConfig } from '../../common';
 
-function createContextMock(licenseType: LicenseType = 'gold') {
+function createContextMock(licenseType: LicenseType = 'platinum') {
   return {
     core: coreMock.createRequestHandlerContext(),
     licensing: licensingMock.createRequestHandlerContext({ license: { type: licenseType } }),
@@ -31,7 +31,7 @@ function createPrivilege(partial: Partial<FeatureKibanaPrivileges> = {}): Featur
   };
 }
 
-function getExpectedSubFeatures(licenseType: LicenseType = 'gold'): SubFeatureConfig[] {
+function getExpectedSubFeatures(licenseType: LicenseType = 'platinum'): SubFeatureConfig[] {
   return [
     {
       name: 'basicFeature',
@@ -50,7 +50,7 @@ function getExpectedSubFeatures(licenseType: LicenseType = 'gold'): SubFeatureCo
       ],
     },
     {
-      name: 'goldFeature',
+      name: 'platinumFeature',
       privilegeGroups: [
         {
           groupType: 'independent',
@@ -58,10 +58,10 @@ function getExpectedSubFeatures(licenseType: LicenseType = 'gold'): SubFeatureCo
             licenseType !== 'basic'
               ? [
                   {
-                    id: 'goldFeatureSub1',
-                    name: 'gold sub 1',
+                    id: 'platinumFeatureSub1',
+                    name: 'platinum sub 1',
                     includeIn: 'all',
-                    minimumLicense: 'gold',
+                    minimumLicense: 'platinum',
                     ...createPrivilege(),
                   },
                 ]
@@ -71,8 +71,8 @@ function getExpectedSubFeatures(licenseType: LicenseType = 'gold'): SubFeatureCo
           groupType: 'mutually_exclusive',
           privileges: [
             {
-              id: 'goldFeatureMutExSub1',
-              name: 'gold sub 1',
+              id: 'platinumFeatureMutExSub1',
+              name: 'platinum sub 1',
               includeIn: 'all',
               ...createPrivilege(),
             },
