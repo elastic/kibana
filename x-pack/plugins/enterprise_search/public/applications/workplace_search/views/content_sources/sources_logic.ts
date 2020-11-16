@@ -8,27 +8,30 @@ import { cloneDeep, findIndex } from 'lodash';
 
 import { kea, MakeLogicType } from 'kea';
 
-import http from 'shared/http';
-import routes from 'workplace_search/routes';
+import { HttpLogic } from '../../../shared/http';
 
-import { handleAPIError } from 'app_search/utils/handleAPIError';
-import { IFlashMessagesProps } from 'shared/types';
 import {
-  IConnector,
-  IContentSourceDetails,
-  IContentSourceStatus,
-  IObject,
-  ISourceDataItem,
-} from 'workplace_search/types';
+  flashAPIErrors,
+  setSuccessMessage,
+  FlashMessagesLogic,
+} from '../../../shared/flash_messages';
 
-import { staticSourceData } from 'workplace_search/ContentSources/sourceData';
+import { Connector, ContentSourceDetails, ContentSourceStatus, SourceDataItem } from '../../types';
 
-import { AppLogic } from 'workplace_search/App/AppLogic';
+import { staticSourceData } from './source_data';
+
+import { AppLogic } from '../../app_logic';
+
+const ORG_SOURCES_PATH = '/api/workplace_search/org/sources';
+const ACCOUNT_SOURCES_PATH = '/api/workplace_search/account/sources';
+
+interface ServerStatuses {
+  [key: string]: string;
+}
 
 export interface ISourcesActions {
-  setServerSourceStatuses(statuses: IContentSourceStatus[]): IContentSourceStatus[];
+  setServerSourceStatuses(statuses: ContentSourceStatus[]): ContentSourceStatus[];
   onInitializeSources(serverResponse: ISourcesServerResponse): ISourcesServerResponse;
-  setFlashMessages(flashMessages: IFlashMessagesProps): { flashMessages: IFlashMessagesProps };
   onSetSearchability(
     sourceId: string,
     searchable: boolean
@@ -55,30 +58,30 @@ export interface IPermissionsModalProps {
   additionalConfiguration: boolean;
 }
 
+type CombinedDataItem = SourceDataItem & ContentSourceDetails;
+
 export interface ISourcesValues {
-  contentSources: IContentSourceDetails[];
-  privateContentSources: IContentSourceDetails[];
-  sourceData: ISourceDataItem[];
-  availableSources: ISourceDataItem[];
-  configuredSources: ISourceDataItem[];
-  serviceTypes: IConnector[];
-  flashMessages: IFlashMessagesProps;
+  contentSources: ContentSourceDetails[];
+  privateContentSources: ContentSourceDetails[];
+  sourceData: CombinedDataItem[];
+  availableSources: SourceDataItem[];
+  configuredSources: SourceDataItem[];
+  serviceTypes: Connector[];
   permissionsModal: IPermissionsModalProps | null;
   dataLoading: boolean;
-  serverStatuses: IObject | null;
+  serverStatuses: ServerStatuses | null;
 }
 
 interface ISourcesServerResponse {
-  contentSources: IContentSourceDetails[];
-  privateContentSources?: IContentSourceDetails[];
-  serviceTypes: IConnector[];
+  contentSources: ContentSourceDetails[];
+  privateContentSources?: ContentSourceDetails[];
+  serviceTypes: Connector[];
 }
 
 export const SourcesLogic = kea<MakeLogicType<ISourcesValues, ISourcesActions>>({
   actions: {
-    setServerSourceStatuses: (statuses: IContentSourceStatus[]) => statuses,
+    setServerSourceStatuses: (statuses: ContentSourceStatus[]) => statuses,
     onInitializeSources: (serverResponse: ISourcesServerResponse) => serverResponse,
-    setFlashMessages: (flashMessages: IFlashMessagesProps) => ({ flashMessages }),
     onSetSearchability: (sourceId: string, searchable: boolean) => ({ sourceId, searchable }),
     setAddedSource: (
       addedSourceName: string,
@@ -115,21 +118,6 @@ export const SourcesLogic = kea<MakeLogicType<ISourcesValues, ISourcesActions>>(
         onInitializeSources: (_, { serviceTypes }) => serviceTypes || [],
       },
     ],
-    flashMessages: [
-      {},
-      {
-        setFlashMessages: (_, { flashMessages }) => flashMessages,
-        setAddedSource: (_, { addedSourceName, additionalConfiguration }) => ({
-          success: [
-            [
-              `Successfully connected ${addedSourceName}.`,
-              additionalConfiguration ? 'This source requires additional configuration.' : '',
-            ].join(' '),
-          ],
-        }),
-        resetFlashMessages: () => ({}),
-      },
-    ],
     permissionsModal: [
       null,
       {
@@ -148,9 +136,9 @@ export const SourcesLogic = kea<MakeLogicType<ISourcesValues, ISourcesActions>>(
       null,
       {
         setServerSourceStatuses: (_, sources) => {
-          const serverStatuses = {};
+          const serverStatuses = {} as ServerStatuses;
           sources.forEach((source) => {
-            serverStatuses[source.id] = source.status.status;
+            serverStatuses[source.id as string] = source.status.status;
           });
           return serverStatuses;
         },
@@ -160,11 +148,11 @@ export const SourcesLogic = kea<MakeLogicType<ISourcesValues, ISourcesActions>>(
   selectors: ({ selectors }) => ({
     availableSources: [
       () => [selectors.sourceData],
-      (sourceData) => sourceData.filter(({ configured }) => !configured),
+      (sourceData: SourceDataItem[]) => sourceData.filter(({ configured }) => !configured),
     ],
     configuredSources: [
       () => [selectors.sourceData],
-      (sourceData) => sourceData.filter(({ configured }) => configured),
+      (sourceData: SourceDataItem[]) => sourceData.filter(({ configured }) => configured),
     ],
     sourceData: [
       () => [selectors.serviceTypes, selectors.contentSources],
@@ -173,63 +161,87 @@ export const SourcesLogic = kea<MakeLogicType<ISourcesValues, ISourcesActions>>(
     ],
   }),
   listeners: ({ actions, values }) => ({
-    initializeSources: () => {
+    initializeSources: async () => {
       const { isOrganization } = AppLogic.values;
-      const route = isOrganization
-        ? routes.fritoPieOrganizationContentSourcesPath()
-        : routes.fritoPieAccountContentSourcesPath();
+      const route = isOrganization ? ORG_SOURCES_PATH : ACCOUNT_SOURCES_PATH;
 
-      http(route)
-        .then(({ data }) => actions.onInitializeSources(data))
-        .catch(handleAPIError((messages) => actions.setFlashMessages({ error: messages })));
+      try {
+        const response = await HttpLogic.values.http.get(route);
+        actions.onInitializeSources(response);
+      } catch (e) {
+        flashAPIErrors(e);
+      }
 
       if (isOrganization && !values.serverStatuses) {
         // We want to get the initial statuses from the server to compare our polling results to.
-        fetchSourceStatuses(isOrganization, actions).then((sources: IContentSourceStatus[]) =>
-          actions.setServerSourceStatuses(sources)
-        );
+        const sourceStatuses = await fetchSourceStatuses(isOrganization);
+        actions.setServerSourceStatuses(sourceStatuses);
       }
     },
     // We poll the server and if the status update, we trigger a new fetch of the sources.
-    pollForSourceStatusChanges: () => {
+    pollForSourceStatusChanges: async () => {
       const { isOrganization } = AppLogic.values;
       if (!isOrganization) return;
       const serverStatuses = values.serverStatuses;
-      fetchSourceStatuses(isOrganization, actions).then((sources: IContentSourceStatus[]) => {
-        sources.some((source) => {
-          if (serverStatuses && serverStatuses[source.id] !== source.status.status) {
-            return actions.initializeSources();
-          }
-        });
+
+      const sourceStatuses = await fetchSourceStatuses(isOrganization);
+
+      sourceStatuses.some((source: ContentSourceStatus) => {
+        if (serverStatuses && serverStatuses[source.id] !== source.status.status) {
+          return actions.initializeSources();
+        }
       });
     },
-    setSourceSearchability: ({ sourceId, searchable }) => {
+    setSourceSearchability: async ({ sourceId, searchable }) => {
       const { isOrganization } = AppLogic.values;
       const route = isOrganization
-        ? routes.fritoPieOrganizationContentSourceSearchablePath(sourceId)
-        : routes.fritoPieAccountContentSourceSearchablePath(sourceId);
+        ? `/api/workplace_search/org/sources/${sourceId}/searchable`
+        : `/api/workplace_search/account/sources/${sourceId}/searchable`;
 
-      http
-        .put(route, { searchable })
-        .then(() => actions.onSetSearchability(sourceId, searchable))
-        .catch(handleAPIError((messages) => actions.setFlashMessages({ error: messages })));
+      try {
+        await HttpLogic.values.http.put(route, {
+          body: JSON.stringify({ searchable }),
+        });
+        actions.onSetSearchability(sourceId, searchable);
+      } catch (e) {
+        flashAPIErrors(e);
+      }
+    },
+    setAddedSource: ({ addedSourceName, additionalConfiguration }) => {
+      setSuccessMessage(
+        [
+          `Successfully connected ${addedSourceName}.`,
+          additionalConfiguration ? 'This source requires additional configuration.' : '',
+        ].join(' ')
+      );
+    },
+    resetFlashMessages: () => {
+      FlashMessagesLogic.actions.clearFlashMessages();
     },
   }),
 });
 
-const fetchSourceStatuses = (isOrganization, actions) => {
-  const route = isOrganization
-    ? routes.statusFritoPieAccountContentSourcesPath()
-    : routes.statusFritoPieOrganizationContentSourcesPath();
+const fetchSourceStatuses = async (isOrganization: boolean) => {
+  const route = isOrganization ? ORG_SOURCES_PATH : ACCOUNT_SOURCES_PATH;
+  let response;
 
-  return http(route)
-    .then(({ data }) => data)
-    .catch(handleAPIError((messages) => actions.setFlashMessages({ error: messages })));
+  try {
+    response = await HttpLogic.values.http.get(route);
+    SourcesLogic.actions.setServerSourceStatuses(response);
+  } catch (e) {
+    flashAPIErrors(e);
+  }
+
+  return response;
 };
 
-const updateSourcesOnToggle = (contentSources, sourceId, searchable) => {
-  if (!contentSources) return false;
-  const sources = cloneDeep(contentSources);
+const updateSourcesOnToggle = (
+  contentSources: ContentSourceDetails[],
+  sourceId: string,
+  searchable: boolean
+): ContentSourceDetails[] => {
+  if (!contentSources) return [];
+  const sources = cloneDeep(contentSources) as ContentSourceDetails[];
   const index = findIndex(sources, ({ id }) => id === sourceId);
   const updatedSource = sources[index];
   sources[index] = {
@@ -251,8 +263,12 @@ const updateSourcesOnToggle = (contentSources, sourceId, searchable) => {
  * can diplay "Add New" instead of "Connect", the latter of which is displated only when a connector
  * has been configured but there are no connected sources yet.
  */
-const mergeServerAndStaticData = (serverData, staticData, contentSources) => {
-  const combined = [] as ISourceDataItem[];
+const mergeServerAndStaticData = (
+  serverData: ContentSourceDetails[],
+  staticData: SourceDataItem[],
+  contentSources: ContentSourceDetails[]
+) => {
+  const combined = [] as CombinedDataItem[];
   serverData.forEach((serverItem) => {
     const type = serverItem.serviceType;
     const staticItem = staticData.find(({ serviceType }) => serviceType === type);
@@ -261,7 +277,7 @@ const mergeServerAndStaticData = (serverData, staticData, contentSources) => {
       ...serverItem,
       ...staticItem,
       connected: !!connectedSource,
-    });
+    } as CombinedDataItem);
   });
 
   return combined;
