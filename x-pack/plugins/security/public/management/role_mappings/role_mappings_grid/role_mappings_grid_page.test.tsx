@@ -6,11 +6,11 @@
 
 import React from 'react';
 import { CoreStart, ScopedHistory } from 'kibana/public';
-import { mountWithIntl, nextTick } from 'test_utils/enzyme_helpers';
+import { mountWithIntl, nextTick } from '@kbn/test/jest';
 import { RoleMappingsGridPage } from '.';
 import { SectionLoading, PermissionDenied, NoCompatibleRealms } from '../components';
 import { EmptyPrompt } from './empty_prompt';
-import { findTestSubject } from 'test_utils/find_test_subject';
+import { findTestSubject } from '@kbn/test/jest';
 import { EuiLink } from '@elastic/eui';
 import { act } from '@testing-library/react';
 import { DocumentationLinksService } from '../documentation_links';

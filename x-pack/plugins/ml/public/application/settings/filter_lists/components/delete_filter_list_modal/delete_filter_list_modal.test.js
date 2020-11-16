@@ -13,7 +13,7 @@ jest.mock('../../../../capabilities/check_capabilities', () => ({
 }));
 jest.mock('../../../../services/ml_api_service', () => 'ml');
 
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { shallowWithIntl } from '@kbn/test/jest';
 import React from 'react';
 
 import { DeleteFilterListModal } from './delete_filter_list_modal';
