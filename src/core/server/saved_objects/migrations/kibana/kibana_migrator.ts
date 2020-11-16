@@ -25,7 +25,7 @@
 import { KibanaConfigType } from 'src/core/server/kibana_config';
 import { BehaviorSubject } from 'rxjs';
 
-import { ElasticsearchClient, IClusterClient } from 'src/core/server/elasticsearch';
+import { ElasticsearchClient } from 'src/core/server/elasticsearch';
 import { Logger } from '../../../logging';
 import { IndexMapping, SavedObjectsTypeMappingDefinitions } from '../../mappings';
 import {
@@ -170,6 +170,7 @@ export class KibanaMigrator {
     });
 
     const migrators = Object.keys(indexMap).map((index) => {
+      // [Object.keys(indexMap)[0]].map((index) => {
       if (true) {
         return {
           migrate: (): Promise<MigrationResult> => {

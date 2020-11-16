@@ -94,28 +94,28 @@ export type UpdateTargetMappingsWaitForTaskState = BaseState & {
   updateTargetMappingsTaskId: string;
 };
 
-export type TargetDocumentsSearch = BaseState & {
+export type OutdatedDocumentsSearch = BaseState & {
   /** Start a scroll search for outdated documents in the target index */
-  controlState: 'TARGET_DOCUMENTS_SEARCH';
+  controlState: 'OUTDATED_DOCUMENTS_SEARCH';
   outdatedDocumentsQuery: Record<string, unknown>;
 };
 
-export type TargetDocumentsScroll = BaseState & {
+export type OutdatedDocumentsScroll = BaseState & {
   /** Retrieve the next batch of results from the scroll search for outdated documents in the target index */
-  controlState: 'TARGET_DOCUMENTS_SCROLL';
+  controlState: 'OUTDATED_DOCUMENTS_SCROLL';
   transformDocumentsScrollId: string;
 };
 
-export type TargetDocumentsTransform = BaseState & {
+export type OutdatedDocumentsTransform = BaseState & {
   /** Transform a batch of outdated documents to their latest version and write them to the target index */
-  controlState: 'TARGET_DOCUMENTS_TRANSFORM';
+  controlState: 'OUTDATED_DOCUMENTS_TRANSFORM';
   outdatedDocuments: SavedObjectsRawDoc[];
   transformDocumentsScrollId: string;
 };
 
-export type TargetDocumentsClearScroll = BaseState & {
+export type OutdatedDocumentsClearScroll = BaseState & {
   /** When there are no more results, clear the scroll */
-  controlState: 'TARGET_DOCUMENTS_CLEAR_SCROLL';
+  controlState: 'OUTDATED_DOCUMENTS_CLEAR_SCROLL';
   transformDocumentsScrollId: string;
 };
 
@@ -161,10 +161,10 @@ export type State =
   | CloneSourceState
   | UpdateTargetMappingsState
   | UpdateTargetMappingsWaitForTaskState
-  | TargetDocumentsSearch
-  | TargetDocumentsScroll
-  | TargetDocumentsTransform
-  | TargetDocumentsClearScroll
+  | OutdatedDocumentsSearch
+  | OutdatedDocumentsScroll
+  | OutdatedDocumentsTransform
+  | OutdatedDocumentsClearScroll
   | CloneLegacyState
   | SetLegacyWriteBlockState
   | PreMigrateLegacyState
@@ -450,53 +450,53 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
     };
     return {
       ...stateP,
-      controlState: 'TARGET_DOCUMENTS_SEARCH',
+      controlState: 'OUTDATED_DOCUMENTS_SEARCH',
       outdatedDocumentsQuery,
     };
-  } else if (stateP.controlState === 'TARGET_DOCUMENTS_SEARCH') {
+  } else if (stateP.controlState === 'OUTDATED_DOCUMENTS_SEARCH') {
     const res = resW as ResponseType<typeof stateP.controlState>;
     if (Either.isRight(res)) {
       // If there are no more results, clear the scroll
       if (res.right.docs.length === 0) {
         return {
           ...stateP,
-          controlState: 'TARGET_DOCUMENTS_CLEAR_SCROLL',
+          controlState: 'OUTDATED_DOCUMENTS_CLEAR_SCROLL',
           transformDocumentsScrollId: res.right.scrollId,
         };
       }
 
       return {
         ...stateP,
-        controlState: 'TARGET_DOCUMENTS_TRANSFORM',
+        controlState: 'OUTDATED_DOCUMENTS_TRANSFORM',
         transformDocumentsScrollId: res.right.scrollId,
         outdatedDocuments: res.right.docs,
       };
     }
     return stateP;
-  } else if (stateP.controlState === 'TARGET_DOCUMENTS_SCROLL') {
+  } else if (stateP.controlState === 'OUTDATED_DOCUMENTS_SCROLL') {
     const res = resW as ResponseType<typeof stateP.controlState>;
     if (Either.isRight(res)) {
       // If there are no more results, clear the scroll
       if (res.right.docs.length === 0) {
         return {
           ...stateP,
-          controlState: 'TARGET_DOCUMENTS_CLEAR_SCROLL',
+          controlState: 'OUTDATED_DOCUMENTS_CLEAR_SCROLL',
         };
       }
       return {
         ...stateP,
-        controlState: 'TARGET_DOCUMENTS_TRANSFORM',
+        controlState: 'OUTDATED_DOCUMENTS_TRANSFORM',
         transformDocumentsScrollId: res.right.scrollId,
         outdatedDocuments: res.right.docs,
       };
     }
     return stateP;
-  } else if (stateP.controlState === 'TARGET_DOCUMENTS_TRANSFORM') {
+  } else if (stateP.controlState === 'OUTDATED_DOCUMENTS_TRANSFORM') {
     return {
       ...stateP,
-      controlState: 'TARGET_DOCUMENTS_SCROLL',
+      controlState: 'OUTDATED_DOCUMENTS_SCROLL',
     };
-  } else if (stateP.controlState === 'TARGET_DOCUMENTS_CLEAR_SCROLL') {
+  } else if (stateP.controlState === 'OUTDATED_DOCUMENTS_CLEAR_SCROLL') {
     return { ...stateP, controlState: 'DONE' };
   } else if (stateP.controlState === 'INIT_NEW_INDICES') {
     return { ...stateP, controlState: 'DONE' };
@@ -531,22 +531,22 @@ export const nextActionMap = (
         (state as UpdateTargetMappingsWaitForTaskState).updateTargetMappingsTaskId,
         '60s'
       ),
-    TARGET_DOCUMENTS_SEARCH: Actions.search(
+    OUTDATED_DOCUMENTS_SEARCH: Actions.search(
       client,
       state.target,
-      (state as TargetDocumentsSearch).outdatedDocumentsQuery
+      (state as OutdatedDocumentsSearch).outdatedDocumentsQuery
     ),
     TARGET_DOCUMENTS_SCROLL: Actions.scroll(
       client,
-      (state as TargetDocumentsScroll).transformDocumentsScrollId
+      (state as OutdatedDocumentsScroll).transformDocumentsScrollId
     ),
     TARGET_DOCUMENTS_CLEAR_SCROLL: Actions.clearScroll(
       client,
-      (state as TargetDocumentsClearScroll).transformDocumentsScrollId
+      (state as OutdatedDocumentsClearScroll).transformDocumentsScrollId
     ),
     TARGET_DOCUMENTS_TRANSFORM: pipe(
       TaskEither.tryCatch(
-        () => transformRawDocs((state as TargetDocumentsTransform).outdatedDocuments),
+        () => transformRawDocs((state as OutdatedDocumentsTransform).outdatedDocuments),
         (e) => {
           throw e;
         }
