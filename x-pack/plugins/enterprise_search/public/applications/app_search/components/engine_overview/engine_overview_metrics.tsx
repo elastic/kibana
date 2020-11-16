@@ -5,8 +5,40 @@
  */
 
 import React from 'react';
+import { useValues } from 'kea';
+
+import { i18n } from '@kbn/i18n';
+import { EuiPageHeader, EuiTitle } from '@elastic/eui';
+
+import { EngineOverviewLogic } from './';
+
+import { UnavailablePrompt } from './components';
 
 export const EngineOverviewMetrics: React.FC = () => {
-  // TODO
-  return <>Metrics</>;
+  const { apiLogsUnavailable } = useValues(EngineOverviewLogic);
+
+  return (
+    <>
+      <EuiPageHeader>
+        <EuiTitle size="l">
+          <h1>
+            {i18n.translate('xpack.enterpriseSearch.appSearch.engine.overview.heading', {
+              defaultMessage: 'Engine Overview',
+            })}
+          </h1>
+        </EuiTitle>
+      </EuiPageHeader>
+      {apiLogsUnavailable ? (
+        <UnavailablePrompt />
+      ) : (
+        <>
+          {/* <TotalStats />
+          <EuiSpacer size="xl" />
+          <TotalCharts />
+          <EuiSpacer size="xl" />
+          <RecentLogs /> */}
+        </>
+      )}
+    </>
+  );
 };
