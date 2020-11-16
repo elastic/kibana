@@ -6,10 +6,10 @@
 
 import { KibanaReactContextValue } from '../../../../../../src/plugins/kibana_react/public';
 import { StartServices } from '../../types';
-import { DataAccessLayer } from '../types';
+import { DataAccessLayer, GraphRequestIdSchema, GraphRequestTimerange } from '../types';
 import {
+  ResolverNode,
   ResolverRelatedEvents,
-  ResolverTree,
   ResolverEntityIndex,
   ResolverPaginatedEvents,
   SafeResolverEvent,
@@ -73,11 +73,27 @@ export function dataAccessLayerFactory(
     },
 
     /**
-     * Used to get descendant and ancestor process events for a node.
+     *
+     *
+     * @param {string} dataId - Id of the data for what will be the origin node in the graph
+     * @param {*} schema - schema detailing what the id and parent fields should be
+     * @param {*} timerange
+     * @param {string[]} indices
+     * @returns {Promise<ResolverNode[]>}
      */
-    async resolverTree(entityID: string, signal: AbortSignal): Promise<ResolverTree> {
-      return context.services.http.get(`/api/endpoint/resolver/${entityID}`, {
-        signal,
+    async resolverGraph(
+      dataId: string,
+      schema: GraphRequestIdSchema,
+      timerange: GraphRequestTimerange,
+      indices: string[]
+    ): Promise<ResolverNode[]> {
+      return context.services.http.post('/api/endpoint/resolver/tree', {
+        body: JSON.stringify({
+          timerange,
+          schema,
+          nodes: [dataId],
+          indexPatterns: indices,
+        }),
       });
     },
 

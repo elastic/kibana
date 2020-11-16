@@ -24,8 +24,8 @@ export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialS
   if (action.type === 'appReceivedNewExternalProperties') {
     const nextState: DataState = {
       ...state,
-      tree: {
-        ...state.tree,
+      graph: {
+        ...state.graph,
         currentParameters: {
           databaseDocumentID: action.payload.databaseDocumentID,
           indices: action.payload.indices,
@@ -51,8 +51,8 @@ export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialS
     // keep track of what we're requesting, this way we know when to request and when not to.
     const nextState: DataState = {
       ...state,
-      tree: {
-        ...state.tree,
+      graph: {
+        ...state.graph,
         pendingRequestParameters: {
           databaseDocumentID: action.payload.databaseDocumentID,
           indices: action.payload.indices,
@@ -61,12 +61,12 @@ export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialS
     };
     return nextState;
   } else if (action.type === 'appAbortedResolverDataRequest') {
-    if (treeFetcherParameters.equal(action.payload, state.tree?.pendingRequestParameters)) {
+    if (treeFetcherParameters.equal(action.payload, state.graph?.pendingRequestParameters)) {
       // the request we were awaiting was aborted
       const nextState: DataState = {
         ...state,
-        tree: {
-          ...state.tree,
+        graph: {
+          ...state.graph,
           pendingRequestParameters: undefined,
         },
       };
@@ -79,8 +79,8 @@ export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialS
     const nextState: DataState = {
       ...state,
 
-      tree: {
-        ...state.tree,
+      graph: {
+        ...state.graph,
         /**
          * Store the last received data, as well as the databaseDocumentID it relates to.
          */
@@ -98,14 +98,14 @@ export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialS
     return nextState;
   } else if (action.type === 'serverFailedToReturnResolverData') {
     /** Only handle this if we are expecting a response */
-    if (state.tree?.pendingRequestParameters !== undefined) {
+    if (state.graph?.pendingRequestParameters !== undefined) {
       const nextState: DataState = {
         ...state,
-        tree: {
-          ...state.tree,
+        graph: {
+          ...state.graph,
           pendingRequestParameters: undefined,
           lastResponse: {
-            parameters: state.tree.pendingRequestParameters,
+            parameters: state.graph.pendingRequestParameters,
             successful: false,
           },
         },
@@ -197,7 +197,7 @@ export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialS
       ...state,
       currentRelatedEvent: {
         loading: false,
-        data: action.payload,
+        data: action.payload, // TODO: update related event return type
       },
     };
     return nextState;

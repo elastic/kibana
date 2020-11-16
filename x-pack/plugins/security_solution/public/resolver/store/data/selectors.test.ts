@@ -40,8 +40,8 @@ describe('data state', () => {
    */
   const viewAsAString = (dataState: DataState) => {
     return [
-      ['is loading', selectors.isTreeLoading(dataState)],
-      ['has an error', selectors.hadErrorLoadingTree(dataState)],
+      ['is loading', selectors.isGraphLoading(dataState)],
+      ['has an error', selectors.hadErrorLoadingGraph(dataState)],
       ['has more children', selectors.hasMoreChildren(dataState)],
       ['has more ancestors', selectors.hasMoreAncestors(dataState)],
       ['parameters to fetch', selectors.treeParametersToFetch(dataState)],
@@ -108,7 +108,7 @@ describe('data state', () => {
       ];
     });
     it('should be loading', () => {
-      expect(selectors.isTreeLoading(state())).toBe(true);
+      expect(selectors.isGraphLoading(state())).toBe(true);
     });
     it('should have a request to abort', () => {
       expect(selectors.treeRequestParametersToAbort(state())?.databaseDocumentID).toBe(
@@ -149,7 +149,7 @@ describe('data state', () => {
       ];
     });
     it('should be loading', () => {
-      expect(selectors.isTreeLoading(state())).toBe(true);
+      expect(selectors.isGraphLoading(state())).toBe(true);
     });
     it('should not have a request to abort', () => {
       expect(selectors.treeRequestParametersToAbort(state())).toBe(null);
@@ -172,10 +172,10 @@ describe('data state', () => {
         });
       });
       it('should not be loading', () => {
-        expect(selectors.isTreeLoading(state())).toBe(false);
+        expect(selectors.isGraphLoading(state())).toBe(false);
       });
       it('should have an error', () => {
-        expect(selectors.hadErrorLoadingTree(state())).toBe(true);
+        expect(selectors.hadErrorLoadingGraph(state())).toBe(true);
       });
       it('should not be loading, have more children, have more ancestors, have a request to make, or have a pending request that needs to be aborted.', () => {
         expect(viewAsAString(state())).toMatchInlineSnapshot(`
@@ -226,7 +226,7 @@ describe('data state', () => {
       ];
     });
     it('should be loading', () => {
-      expect(selectors.isTreeLoading(state())).toBe(true);
+      expect(selectors.isGraphLoading(state())).toBe(true);
     });
     it('should need to request the tree using the second set of parameters', () => {
       expect(selectors.treeParametersToFetch(state())?.databaseDocumentID).toBe(
@@ -267,7 +267,7 @@ describe('data state', () => {
         );
       });
       it('should not be loading', () => {
-        expect(selectors.isTreeLoading(state())).toBe(false);
+        expect(selectors.isGraphLoading(state())).toBe(false);
       });
       it('should not have an error, more children, or more ancestors.', () => {
         expect(viewAsAString(state())).toMatchInlineSnapshot(`
@@ -290,7 +290,7 @@ describe('data state', () => {
           expect(selectors.treeParametersToFetch(state())).toBe(null);
         });
         it('should be loading', () => {
-          expect(selectors.isTreeLoading(state())).toBe(true);
+          expect(selectors.isGraphLoading(state())).toBe(true);
         });
         it('should not have an error, more children, more ancestors, or a pending request that needs to be aborted.', () => {
           expect(viewAsAString(state())).toMatchInlineSnapshot(`
@@ -352,13 +352,13 @@ describe('data state', () => {
       });
     });
     it('should have origin as terminated', () => {
-      expect(selectors.isProcessTerminated(state())(originID)).toBe(true);
+      expect(selectors.isNodeInactive(state())(originID)).toBe(true);
     });
     it('should have first ancestor as termianted', () => {
-      expect(selectors.isProcessTerminated(state())(firstAncestorID)).toBe(true);
+      expect(selectors.isNodeInactive(state())(firstAncestorID)).toBe(true);
     });
     it('should have second ancestor as terminated', () => {
-      expect(selectors.isProcessTerminated(state())(secondAncestorID)).toBe(true);
+      expect(selectors.isNodeInactive(state())(secondAncestorID)).toBe(true);
     });
   });
   describe('with a tree with 2 children and no ancestors', () => {
@@ -458,7 +458,7 @@ describe('data state', () => {
         Object {
           "ariaLevels": Map {},
           "edgeLineSegments": Array [],
-          "processNodePositions": Map {},
+          "graphNodePositions": Map {},
         }
       `);
     });

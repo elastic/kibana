@@ -12,11 +12,13 @@ import { BBox } from 'rbush';
 import { Provider } from 'react-redux';
 import { ResolverAction } from './store/actions';
 import {
+  ResolverNode,
   ResolverRelatedEvents,
-  ResolverTree,
   ResolverEntityIndex,
   SafeResolverEvent,
   ResolverPaginatedEvents,
+  ResolverGraph,
+  ResolverGraphNode,
 } from '../../common/endpoint/types';
 
 /**
@@ -152,7 +154,7 @@ export type CameraState = {
 /**
  * Wrappers around our internal types that make them compatible with `rbush`.
  */
-export type IndexedEntity = IndexedEdgeLineSegment | IndexedProcessNode;
+export type IndexedEntity = IndexedEdgeLineSegment | IndexedGraphNode;
 
 /**
  * The entity stored in `rbush` for resolver edge lines.
@@ -165,9 +167,9 @@ export interface IndexedEdgeLineSegment extends BBox {
 /**
  * The entity store in `rbush` for resolver process nodes.
  */
-export interface IndexedProcessNode extends BBox {
-  type: 'processNode';
-  entity: SafeResolverEvent;
+export interface IndexedGraphNode extends BBox {
+  type: 'graphNode';
+  entity: ResolverGraphNode;
   position: Vector2;
 }
 
@@ -191,7 +193,7 @@ export interface CrumbInfo {
  * A type containing all things to actually be rendered to the DOM.
  */
 export interface VisibleEntites {
-  processNodePositions: ProcessPositions;
+  graphNodePositions: NodePositions;
   connectingEdgeLineSegments: EdgeLineSegment[];
 }
 
@@ -262,10 +264,10 @@ export interface DataState {
    */
   readonly currentRelatedEvent: {
     loading: boolean;
-    data: SafeResolverEvent | null;
+    data: ResolverGraphNode | null;
   };
 
-  readonly tree?: {
+  readonly graph?: {
     /**
      * The parameters passed from the resolver properties
      */
@@ -290,9 +292,9 @@ export interface DataState {
            */
           readonly successful: true;
           /**
-           * The ResolverTree parsed from the response.
+           * The ResolverGraph parsed from the response.
            */
-          readonly result: ResolverTree;
+          readonly result: ResolverGraph;
         }
       | {
           /**
@@ -380,25 +382,29 @@ export interface ProcessEvent {
 /**
  * A representation of a process tree with indices for O(1) access to children and values by id.
  */
-export interface IndexedProcessTree {
+export interface IndexedGraph {
   /**
    * Map of ID to a process's ordered children
    */
-  idToChildren: Map<string | undefined, SafeResolverEvent[]>;
+  idToChildren: Map<string | undefined, ResolverGraphNode[]>;
   /**
    * Map of ID to process
    */
-  idToProcess: Map<string, SafeResolverEvent>;
+  idToNode: Map<string, ResolverGraphNode>;
+  /**
+   * The id of the origin or root node provided by the backend
+   */
+  originId: string | undefined;
 }
 
 /**
- * A map of `ProcessEvents` (representing process nodes) to the 'width' of their subtrees as calculated by `widthsOfProcessSubtrees`
+ * A map of `ProcessEvents` (representing process nodes) to the 'width' of their subtrees as calculated by `calculateSubgraphWidths`
  */
-export type ProcessWidths = Map<SafeResolverEvent, number>;
+export type ProcessWidths = Map<ResolverGraphNode, number>;
 /**
- * Map of ProcessEvents (representing process nodes) to their positions. Calculated by `processPositions`
+ * Map of ProcessEvents (representing process nodes) to their positions. Calculated by `calculateNodePositions`
  */
-export type ProcessPositions = Map<SafeResolverEvent, Vector2>;
+export type NodePositions = Map<ResolverGraphNode, Vector2>;
 
 export type DurationTypes =
   | 'millisecond'
@@ -449,14 +455,14 @@ export interface EdgeLineSegment {
 }
 
 /**
- * Used to provide pre-calculated info from `widthsOfProcessSubtrees`. These 'width' values are used in the layout of the graph.
+ * Used to provide pre-calculated info from `calculateSubgraphWidths`. These 'width' values are used in the layout of the graph.
  */
 export type ProcessWithWidthMetadata = {
-  process: SafeResolverEvent;
+  node: ResolverGraphNode;
   width: number;
 } & (
   | {
-      parent: SafeResolverEvent;
+      parent: ResolverGraphNode;
       parentWidth: number;
       isOnlyChild: boolean;
       firstChildWidth: number;
@@ -566,7 +572,7 @@ export interface IsometricTaxiLayout {
   /**
    * A map of events to position. Each event represents its own node.
    */
-  processNodePositions: Map<SafeResolverEvent, Vector2>;
+  graphNodePositions: Map<ResolverGraphNode, Vector2>;
 
   /**
    * A map of edge-line segments, which graphically connect nodes.
@@ -576,7 +582,25 @@ export interface IsometricTaxiLayout {
   /**
    * defines the aria levels for nodes.
    */
-  ariaLevels: Map<SafeResolverEvent, number>;
+  ariaLevels: Map<ResolverGraphNode, number>;
+}
+
+/**
+ *
+ * The schema that defines which parameter to use as the id of the given node
+ * and which parameter to use to define the edge or relationship. Currently keyed off by parent
+ * as those are the existing relationships.
+ * @export
+ * @interface GraphRequestIdSchema
+ */
+export interface GraphRequestIdSchema {
+  id: string;
+  parent: string; // TODO: Maybe change this to neighbors or adjacents as a more general purpose graph.
+}
+
+export interface GraphRequestTimerange {
+  from: string;
+  to: string;
 }
 
 /**
@@ -607,9 +631,14 @@ export interface DataAccessLayer {
   event: (eventID: string) => Promise<SafeResolverEvent | null>;
 
   /**
-   * Fetch a ResolverTree for a entityID
+   * Fetch a ResolverTree for a given id
    */
-  resolverTree: (entityID: string, signal: AbortSignal) => Promise<ResolverTree>;
+  resolverGraph: (
+    dataId: string,
+    schema: GraphRequestIdSchema,
+    timerange: GraphRequestTimerange,
+    indices: string[]
+  ) => Promise<ResolverNode[]>;
 
   /**
    * Get entities matching a document.

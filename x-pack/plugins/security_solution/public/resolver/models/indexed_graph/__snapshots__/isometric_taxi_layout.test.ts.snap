@@ -4,7 +4,7 @@ exports[`resolver graph layout when rendering no nodes renders right 1`] = `
 Object {
   "ariaLevels": Map {},
   "edgeLineSegments": Array [],
-  "processNodePositions": Map {},
+  "graphNodePositions": Map {},
 }
 `;
 
@@ -27,7 +27,7 @@ Object {
     } => 1,
   },
   "edgeLineSegments": Array [],
-  "processNodePositions": Map {
+  "graphNodePositions": Map {
     Object {
       "@timestamp": 1582233383000,
       "agent": Object {
@@ -423,7 +423,7 @@ Object {
       ],
     },
   ],
-  "processNodePositions": Map {
+  "graphNodePositions": Map {
     Object {
       "@timestamp": 1582233383000,
       "agent": Object {
@@ -634,7 +634,7 @@ Object {
       ],
     },
   ],
-  "processNodePositions": Map {
+  "graphNodePositions": Map {
     Object {
       "@timestamp": 1582233383000,
       "agent": Object {

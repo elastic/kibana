@@ -19,7 +19,7 @@ import { useColors } from './use_colors';
  * Provides colors and HTML IDs used to render the 'cube' graphic that accompanies nodes.
  */
 export function useCubeAssets(
-  isProcessTerminated: boolean,
+  isNodeInactive: boolean,
   isProcessTrigger: boolean
 ): NodeStyleConfig {
   const SymbolIds = useSymbolIDs();
@@ -83,7 +83,7 @@ export function useCubeAssets(
     [SymbolIds, colorMap, theme]
   );
 
-  if (isProcessTerminated) {
+  if (isNodeInactive) {
     if (isProcessTrigger) {
       return nodeAssets.terminatedTriggerCube;
     } else {
