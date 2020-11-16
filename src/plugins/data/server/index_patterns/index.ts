@@ -17,5 +17,11 @@
  * under the License.
  */
 export * from './utils';
-export { IndexPatternsFetcher, FieldDescriptor, shouldReadFieldFromDocValues } from './fetcher';
+export {
+  IndexPatternsFetcher,
+  FieldDescriptor,
+  shouldReadFieldFromDocValues,
+  mergeCapabilitiesWithFields,
+  getCapabilitiesForRollupIndices,
+} from './fetcher';
 export { IndexPatternsService, IndexPatternsServiceStart } from './index_patterns_service';

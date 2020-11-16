@@ -905,6 +905,7 @@ In other use cases the message field can be used to concatenate different values
               start="2018-03-23T18:49:23.132Z"
               status="active"
               timelineType="default"
+              timerangeKind="absolute"
               toggleColumn={[MockFunction]}
               usersViewing={
                 Array [

@@ -34,7 +34,7 @@ import {
   gridlinesConfig,
 } from './types';
 import { createMockExecutionContext } from '../../../../../src/plugins/expressions/common/mocks';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
 import { EmptyPlaceholder } from '../shared_components/empty_placeholder';
 
@@ -256,6 +256,7 @@ const createArgsWithLayers = (layers: LayerArgs[] = [sampleLayer]): XYArgs => ({
     isVisible: false,
     position: Position.Top,
   },
+  valueLabels: 'hide',
   axisTitlesVisibilitySettings: {
     type: 'lens_xy_axisTitlesVisibilityConfig',
     x: true,
@@ -1867,6 +1868,7 @@ describe('xy_expression', () => {
         yTitle: '',
         yRightTitle: '',
         legend: { type: 'lens_xy_legendConfig', isVisible: false, position: Position.Top },
+        valueLabels: 'hide',
         tickLabelsVisibilitySettings: {
           type: 'lens_xy_tickLabelsConfig',
           x: true,
@@ -1952,6 +1954,7 @@ describe('xy_expression', () => {
         yTitle: '',
         yRightTitle: '',
         legend: { type: 'lens_xy_legendConfig', isVisible: false, position: Position.Top },
+        valueLabels: 'hide',
         tickLabelsVisibilitySettings: {
           type: 'lens_xy_tickLabelsConfig',
           x: true,
@@ -2023,6 +2026,7 @@ describe('xy_expression', () => {
         yTitle: '',
         yRightTitle: '',
         legend: { type: 'lens_xy_legendConfig', isVisible: true, position: Position.Top },
+        valueLabels: 'hide',
         tickLabelsVisibilitySettings: {
           type: 'lens_xy_tickLabelsConfig',
           x: true,

@@ -8,6 +8,8 @@ import {
   EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiPage,
+  EuiPageBody,
   EuiPanel,
   EuiSpacer,
   EuiText,
@@ -24,6 +26,7 @@ import { useUrlParams } from '../../../hooks/useUrlParams';
 import { callApmApi } from '../../../services/rest/createCallApmApi';
 import { fontFamilyCode, fontSizes, px, units } from '../../../style/variables';
 import { ApmHeader } from '../../shared/ApmHeader';
+import { SearchBar } from '../../shared/search_bar';
 import { DetailView } from './DetailView';
 import { ErrorDistribution } from './Distribution';
 
@@ -120,7 +123,7 @@ export function ErrorGroupDetails({ location, match }: ErrorGroupDetailsProps) {
     errorGroupData.error?.error.exception?.[0].handled === false;
 
   return (
-    <div>
+    <>
       <ApmHeader>
         <EuiFlexGroup alignItems="center">
           <EuiFlexItem grow={false}>
@@ -146,62 +149,67 @@ export function ErrorGroupDetails({ location, match }: ErrorGroupDetailsProps) {
           )}
         </EuiFlexGroup>
       </ApmHeader>
-
-      <EuiSpacer size="s" />
-
-      <EuiPanel>
-        {showDetails && (
-          <Titles>
-            <EuiText>
-              {logMessage && (
-                <Fragment>
+      <SearchBar />
+      <EuiPage>
+        <EuiPageBody>
+          <EuiPanel>
+            {showDetails && (
+              <Titles>
+                <EuiText>
+                  {logMessage && (
+                    <Fragment>
+                      <Label>
+                        {i18n.translate(
+                          'xpack.apm.errorGroupDetails.logMessageLabel',
+                          {
+                            defaultMessage: 'Log message',
+                          }
+                        )}
+                      </Label>
+                      <Message>{logMessage}</Message>
+                    </Fragment>
+                  )}
                   <Label>
                     {i18n.translate(
-                      'xpack.apm.errorGroupDetails.logMessageLabel',
+                      'xpack.apm.errorGroupDetails.exceptionMessageLabel',
                       {
-                        defaultMessage: 'Log message',
+                        defaultMessage: 'Exception message',
                       }
                     )}
                   </Label>
-                  <Message>{logMessage}</Message>
-                </Fragment>
+                  <Message>{excMessage || NOT_AVAILABLE_LABEL}</Message>
+                  <Label>
+                    {i18n.translate(
+                      'xpack.apm.errorGroupDetails.culpritLabel',
+                      {
+                        defaultMessage: 'Culprit',
+                      }
+                    )}
+                  </Label>
+                  <Culprit>{culprit || NOT_AVAILABLE_LABEL}</Culprit>
+                </EuiText>
+              </Titles>
+            )}
+            <ErrorDistribution
+              distribution={errorDistributionData}
+              title={i18n.translate(
+                'xpack.apm.errorGroupDetails.occurrencesChartLabel',
+                {
+                  defaultMessage: 'Occurrences',
+                }
               )}
-              <Label>
-                {i18n.translate(
-                  'xpack.apm.errorGroupDetails.exceptionMessageLabel',
-                  {
-                    defaultMessage: 'Exception message',
-                  }
-                )}
-              </Label>
-              <Message>{excMessage || NOT_AVAILABLE_LABEL}</Message>
-              <Label>
-                {i18n.translate('xpack.apm.errorGroupDetails.culpritLabel', {
-                  defaultMessage: 'Culprit',
-                })}
-              </Label>
-              <Culprit>{culprit || NOT_AVAILABLE_LABEL}</Culprit>
-            </EuiText>
-          </Titles>
-        )}
-        <ErrorDistribution
-          distribution={errorDistributionData}
-          title={i18n.translate(
-            'xpack.apm.errorGroupDetails.occurrencesChartLabel',
-            {
-              defaultMessage: 'Occurrences',
-            }
+            />
+          </EuiPanel>
+          <EuiSpacer size="s" />
+          {showDetails && (
+            <DetailView
+              errorGroup={errorGroupData}
+              urlParams={urlParams}
+              location={location}
+            />
           )}
-        />
-      </EuiPanel>
-      <EuiSpacer size="s" />
-      {showDetails && (
-        <DetailView
-          errorGroup={errorGroupData}
-          urlParams={urlParams}
-          location={location}
-        />
-      )}
-    </div>
+        </EuiPageBody>
+      </EuiPage>
+    </>
   );
 }

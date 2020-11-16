@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { registerTestBed } from '../../../../../test_utils';
+import { registerTestBed } from '@kbn/test/jest';
 
-/* eslint-disable @kbn/eslint/no-restricted-paths */
 import { RemoteClusterEdit } from '../../../public/application/sections/remote_cluster_edit';
 import { createRemoteClustersStore } from '../../../public/application/store';
 import { registerRouter } from '../../../public/application/services/routing';
