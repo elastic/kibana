@@ -58,29 +58,22 @@ export function MetricEditor({
       return;
     }
 
-    // unset field when new agg type does not support currently selected field.
-    if ('field' in metric && metric.field && metricAggregationType !== AGG_TYPE.COUNT) {
-      const fieldsForNewAggType = filterFieldsForAgg(fields, metricAggregationType);
-      const found = fieldsForNewAggType.find((field) => {
-        return field.name === metric.field;
-      });
-      if (found) {
-        onChange({
-          type: metricAggregationType,
-          label: metric.label,
-          field: metric.field,
-        });
-      } else {
-        onChange({
-          type: metricAggregationType,
-          label: metric.label,
-        });
-      }
+    const descriptor = {
+      type: metricAggregationType,
+      label: metric.label,
+    };
+
+    if (metricAggregationType === AGG_TYPE.COUNT || !('field' in metric) || !metric.field) {
+      onChange(descriptor);
+      return;
+    }
+
+    const fieldsForNewAggType = filterFieldsForAgg(fields, metricAggregationType);
+    const found = fieldsForNewAggType.find((field) => field.name === metric.field);
+    if (found) {
+      onChange({ ...descriptor, field: metric.field });
     } else {
-      onChange({
-        type: metricAggregationType,
-        label: metric.label,
-      });
+      onChange(descriptor);
     }
   };
   const onFieldChange = (fieldName?: string) => {
