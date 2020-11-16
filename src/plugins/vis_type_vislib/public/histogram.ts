@@ -48,7 +48,7 @@ export const histogramVisTypeDefinition: BaseVisTypeOptions<BasicVislibParams> =
   }),
   icon: 'visBarVertical',
   description: i18n.translate('visTypeVislib.histogram.histogramDescription', {
-    defaultMessage: 'Represent data in vertical bars on an axis.',
+    defaultMessage: 'Present data in vertical bars on an axis.',
   }),
   getSupportedTriggers: () => [VIS_EVENT_TO_TRIGGER.filter, VIS_EVENT_TO_TRIGGER.brush],
   toExpressionAst,

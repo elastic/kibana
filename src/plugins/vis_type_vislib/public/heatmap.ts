@@ -46,7 +46,7 @@ export const heatmapVisTypeDefinition: BaseVisTypeOptions<BasicVislibParams> = {
   title: i18n.translate('visTypeVislib.heatmap.heatmapTitle', { defaultMessage: 'Heat map' }),
   icon: 'heatmap',
   description: i18n.translate('visTypeVislib.heatmap.heatmapDescription', {
-    defaultMessage: 'Shade cells in a matrix.',
+    defaultMessage: 'Shade cells in cells in a matrix.',
   }),
   getSupportedTriggers: () => [VIS_EVENT_TO_TRIGGER.filter],
   toExpressionAst,

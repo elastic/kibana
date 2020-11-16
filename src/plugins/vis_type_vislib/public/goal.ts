@@ -33,7 +33,7 @@ export const goalVisTypeDefinition: BaseVisTypeOptions<BasicVislibParams> = {
   title: i18n.translate('visTypeVislib.goal.goalTitle', { defaultMessage: 'Goal' }),
   icon: 'visGoal',
   description: i18n.translate('visTypeVislib.goal.goalDescription', {
-    defaultMessage: 'Track how close you are to your final goal.',
+    defaultMessage: 'Track how a metric progresses to a goal.',
   }),
   toExpressionAst,
   visConfig: {

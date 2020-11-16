@@ -46,7 +46,7 @@ export const horizontalBarVisTypeDefinition: BaseVisTypeOptions<BasicVislibParam
   }),
   icon: 'visBarHorizontal',
   description: i18n.translate('visTypeVislib.horizontalBar.horizontalBarDescription', {
-    defaultMessage: 'Represent data in horizontal bars on an axis.',
+    defaultMessage: 'Present data in horizontal bars on an axis.',
   }),
   getSupportedTriggers: () => [VIS_EVENT_TO_TRIGGER.filter, VIS_EVENT_TO_TRIGGER.brush],
   toExpressionAst,

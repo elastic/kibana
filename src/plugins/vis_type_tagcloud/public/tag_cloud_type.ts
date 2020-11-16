@@ -33,7 +33,7 @@ export const tagCloudVisTypeDefinition = {
     return [VIS_EVENT_TO_TRIGGER.filter];
   },
   description: i18n.translate('visTypeTagCloud.vis.tagCloudDescription', {
-    defaultMessage: 'Display a group of words.',
+    defaultMessage: 'Display word frequency with font size.',
   }),
   visConfig: {
     defaults: {

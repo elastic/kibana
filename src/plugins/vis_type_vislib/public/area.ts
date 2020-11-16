@@ -47,7 +47,7 @@ export const areaVisTypeDefinition: BaseVisTypeOptions<BasicVislibParams> = {
   title: i18n.translate('visTypeVislib.area.areaTitle', { defaultMessage: 'Area' }),
   icon: 'visArea',
   description: i18n.translate('visTypeVislib.area.areaDescription', {
-    defaultMessage: 'Emphasize the quantity beneath a line chart.',
+    defaultMessage: 'Emphasize the data between an axis and a line.',
   }),
   getSupportedTriggers: () => [VIS_EVENT_TO_TRIGGER.filter, VIS_EVENT_TO_TRIGGER.brush],
   toExpressionAst,
