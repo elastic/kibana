@@ -5,14 +5,11 @@
  */
 
 import { IClusterClient, IScopedClusterClient, SavedObjectsClientContract } from 'kibana/server';
-// including KibanaRequest from 'kibana/server' causes an error
-// when being used with instanceof
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { KibanaRequest } from '../../.././../../src/core/server/http';
+import { KibanaRequest } from '../../.././../../src/core/server';
 import { MlLicense } from '../../common/license';
 
-import { SpacesPluginStart } from '../../../spaces/server';
 import { CloudSetup } from '../../../cloud/server';
+import { SpacesPluginStart } from '../../../spaces/server';
 import { licenseChecks } from './license_checks';
 import { MlSystemProvider, getMlSystemProvider } from './providers/system';
 import { JobServiceProvider, getJobServiceProvider } from './providers/job_service';
@@ -62,19 +59,28 @@ export function createSharedServices(
   getSpaces: (() => Promise<SpacesPluginStart>) | undefined,
   cloud: CloudSetup,
   resolveMlCapabilities: ResolveMlCapabilities,
-  getClusterClient: () => IClusterClient | null
+  getClusterClient: () => IClusterClient | null,
+  getInternalSavedObjectsClient: () => SavedObjectsClientContract | null,
+  isMlReady: () => Promise<void>
 ): SharedServices {
   const { isFullLicense, isMinimumLicense } = licenseChecks(mlLicense);
-
   function getGuards(
     request: KibanaRequest,
     savedObjectsClient: SavedObjectsClientContract
   ): Guards {
+    const internalSavedObjectsClient = getInternalSavedObjectsClient();
+    if (internalSavedObjectsClient === null) {
+      throw new Error('Internal saved object client not initialized');
+    }
     const getRequestItems = getRequestItemsProvider(
       resolveMlCapabilities,
       getClusterClient,
-      savedObjectsClient
+      savedObjectsClient,
+      internalSavedObjectsClient,
+      getSpaces !== undefined,
+      isMlReady
     );
+
     const { hasMlCapabilities, scopedClient, mlClient } = getRequestItems(request);
     const asyncGuards: Array<Promise<void>> = [];
 
@@ -111,7 +117,10 @@ export function createSharedServices(
 function getRequestItemsProvider(
   resolveMlCapabilities: ResolveMlCapabilities,
   getClusterClient: () => IClusterClient | null,
-  savedObjectsClient: SavedObjectsClientContract
+  savedObjectsClient: SavedObjectsClientContract,
+  internalSavedObjectsClient: SavedObjectsClientContract,
+  spaceEnabled: boolean,
+  isMlReady: () => Promise<void>
 ) {
   return (request: KibanaRequest) => {
     const getHasMlCapabilities = hasMlCapabilitiesProvider(resolveMlCapabilities);
@@ -122,7 +131,12 @@ function getRequestItemsProvider(
     // will not receive a real request object when being called from an alert.
     // instead a dummy request object will be supplied
     const clusterClient = getClusterClient();
-    const jobSavedObjectService = jobSavedObjectServiceFactory(savedObjectsClient);
+    const jobSavedObjectService = jobSavedObjectServiceFactory(
+      savedObjectsClient,
+      internalSavedObjectsClient,
+      spaceEnabled,
+      isMlReady
+    );
 
     if (clusterClient === null) {
       throw new MLClusterClientUninitialized(`ML's cluster client has not been initialized`);

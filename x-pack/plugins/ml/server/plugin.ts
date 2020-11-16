@@ -15,15 +15,15 @@ import {
   CapabilitiesStart,
   IClusterClient,
   SavedObjectsServiceStart,
-  SavedObjectsClientContract,
 } from 'kibana/server';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
 import { PluginsSetup, PluginsStart, RouteInitialization } from './types';
+import { SpacesPluginSetup } from '../../spaces/server';
 import { PLUGIN_ID } from '../common/constants/app';
 import { MlCapabilities } from '../common/types/capabilities';
 
 import { initMlTelemetry } from './lib/telemetry';
-import { initMlServerLog } from './client/log';
+import { initMlServerLog } from './lib/log';
 import { initSampleDataSets } from './lib/sample_data_sets';
 
 import { annotationRoutes } from './routes/annotations';
@@ -50,7 +50,11 @@ import { getPluginPrivileges } from '../common/types/capabilities';
 import { setupCapabilitiesSwitcher } from './lib/capabilities';
 import { registerKibanaSettings } from './lib/register_settings';
 import { trainedModelsRoutes } from './routes/trained_models';
-import { setupSavedObjects } from './saved_objects';
+import {
+  setupSavedObjects,
+  jobSavedObjectsInitializationFactory,
+  savedObjectClientsFactory,
+} from './saved_objects';
 import { RouteGuard } from './lib/route_guard';
 
 export type MlPluginSetup = SharedServices;
@@ -64,14 +68,19 @@ export class MlServerPlugin
   private capabilities: CapabilitiesStart | null = null;
   private clusterClient: IClusterClient | null = null;
   private savedObjectsStart: SavedObjectsServiceStart | null = null;
+  private spacesPlugin: SpacesPluginSetup | undefined;
+  private isMlReady: Promise<void>;
+  private setMlReady: () => void = () => {};
 
   constructor(ctx: PluginInitializerContext) {
     this.log = ctx.logger.get();
     this.version = ctx.env.packageInfo.branch;
     this.mlLicense = new MlLicense();
+    this.isMlReady = new Promise((resolve) => (this.setMlReady = resolve));
   }
 
   public setup(coreSetup: CoreSetup<PluginsStart>, plugins: PluginsSetup): MlPluginSetup {
+    this.spacesPlugin = plugins.spaces;
     const { admin, user, apmUser } = getPluginPrivileges();
 
     plugins.features.registerKibanaFeature({
@@ -121,18 +130,19 @@ export class MlServerPlugin
     setupCapabilitiesSwitcher(coreSetup, plugins.licensing.license$, this.log);
     setupSavedObjects(coreSetup.savedObjects);
 
-    const getMlSavedObjectsClient = (request: KibanaRequest): SavedObjectsClientContract | null => {
-      if (this.savedObjectsStart === null) {
-        return null;
-      }
-      return this.savedObjectsStart.getScopedClient(request, {
-        includedHiddenTypes: ['ml-job'],
-      });
-    };
+    const { getInternalSavedObjectsClient, getMlSavedObjectsClient } = savedObjectClientsFactory(
+      () => this.savedObjectsStart
+    );
 
     const routeInit: RouteInitialization = {
       router: coreSetup.http.createRouter(),
-      routeGuard: new RouteGuard(this.mlLicense, getMlSavedObjectsClient),
+      routeGuard: new RouteGuard(
+        this.mlLicense,
+        getMlSavedObjectsClient,
+        getInternalSavedObjectsClient,
+        plugins.spaces,
+        () => this.isMlReady
+      ),
       mlLicense: this.mlLicense,
     };
 
@@ -181,7 +191,9 @@ export class MlServerPlugin
         getSpaces,
         plugins.cloud,
         resolveMlCapabilities,
-        () => this.clusterClient
+        () => this.clusterClient,
+        () => getInternalSavedObjectsClient(),
+        () => this.isMlReady
       ),
     };
   }
@@ -190,6 +202,16 @@ export class MlServerPlugin
     this.capabilities = coreStart.capabilities;
     this.clusterClient = coreStart.elasticsearch.client;
     this.savedObjectsStart = coreStart.savedObjects;
+
+    // check whether the job saved objects exist
+    // and create them if needed.
+    const { initializeJobs } = jobSavedObjectsInitializationFactory(
+      coreStart,
+      this.spacesPlugin !== undefined
+    );
+    initializeJobs().finally(() => {
+      this.setMlReady();
+    });
   }
 
   public stop() {

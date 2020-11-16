@@ -11,14 +11,14 @@ import { ConfigType } from '../';
 
 import { callEnterpriseSearchConfigAPI } from './enterprise_search_config_api';
 
-interface ICheckAccess {
+interface CheckAccess {
   request: KibanaRequest;
   security?: SecurityPluginSetup;
   spaces?: SpacesPluginStart;
   config: ConfigType;
   log: Logger;
 }
-export interface IAccess {
+export interface Access {
   hasAppSearchAccess: boolean;
   hasWorkplaceSearchAccess: boolean;
 }
@@ -43,7 +43,7 @@ export const checkAccess = async ({
   spaces,
   request,
   log,
-}: ICheckAccess): Promise<IAccess> => {
+}: CheckAccess): Promise<Access> => {
   const isRbacEnabled = security?.authz.mode.useRbacForRequest(request) ?? false;
 
   // We can only retrieve the active space when either:
