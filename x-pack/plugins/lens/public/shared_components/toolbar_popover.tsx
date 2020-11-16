@@ -11,7 +11,8 @@ import { EuiIconLegend } from '../assets/legend';
 
 const typeToIconMap: { [type: string]: string | IconType } = {
   legend: EuiIconLegend as IconType,
-  values: 'visText',
+  labels: 'visText',
+  values: 'number',
 };
 
 export interface ToolbarPopoverProps {

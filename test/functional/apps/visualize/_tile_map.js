@@ -41,7 +41,7 @@ export default function ({ getService, getPageObjects }) {
         await browser.setWindowSize(1280, 1000);
 
         log.debug('navigateToApp visualize');
-        await PageObjects.visualize.navigateToNewVisualization();
+        await PageObjects.visualize.navigateToNewAggBasedVisualization();
         log.debug('clickTileMap');
         await PageObjects.visualize.clickTileMap();
         await PageObjects.visualize.clickNewSearch();
@@ -61,7 +61,7 @@ export default function ({ getService, getPageObjects }) {
         await browser.setWindowSize(1280, 1000);
 
         log.debug('navigateToApp visualize');
-        await PageObjects.visualize.navigateToNewVisualization();
+        await PageObjects.visualize.navigateToNewAggBasedVisualization();
         log.debug('clickTileMap');
         await PageObjects.visualize.clickTileMap();
         await PageObjects.visualize.clickNewSearch();
@@ -240,7 +240,7 @@ export default function ({ getService, getPageObjects }) {
         await browser.setWindowSize(1280, 1000);
 
         log.debug('navigateToApp visualize');
-        await PageObjects.visualize.navigateToNewVisualization();
+        await PageObjects.visualize.navigateToNewAggBasedVisualization();
         log.debug('clickTileMap');
         await PageObjects.visualize.clickTileMap();
         await PageObjects.visualize.clickNewSearch();

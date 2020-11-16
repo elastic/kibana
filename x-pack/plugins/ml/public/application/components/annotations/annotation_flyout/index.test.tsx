@@ -9,7 +9,7 @@ import useObservable from 'react-use/lib/useObservable';
 import mockAnnotations from '../annotations_table/__mocks__/mock_annotations.json';
 
 import React from 'react';
-import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl, shallowWithIntl } from '@kbn/test/jest';
 
 import { Annotation } from '../../../../../common/types/annotations';
 import { annotation$ } from '../../../services/annotations_service';

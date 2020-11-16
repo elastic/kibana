@@ -18,8 +18,9 @@
  */
 
 import { TypeOf } from '@kbn/config-schema';
-import { metricsItems, panel, seriesItems } from './vis_schema';
+import { metricsItems, panel, seriesItems, visPayloadSchema } from './vis_schema';
 
 export type SeriesItemsSchema = TypeOf<typeof seriesItems>;
 export type MetricsItemsSchema = TypeOf<typeof metricsItems>;
 export type PanelSchema = TypeOf<typeof panel>;
+export type VisPayload = TypeOf<typeof visPayloadSchema>;
