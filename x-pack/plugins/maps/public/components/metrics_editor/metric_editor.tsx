@@ -70,11 +70,10 @@ export function MetricEditor({
 
     const fieldsForNewAggType = filterFieldsForAgg(fields, metricAggregationType);
     const found = fieldsForNewAggType.find((field) => field.name === metric.field);
-    if (found) {
-      onChange({ ...descriptor, field: metric.field });
-    } else {
-      onChange(descriptor);
-    }
+    onChange({
+      ...descriptor,
+      field: found ? metric.field : undefined,
+    });
   };
   const onFieldChange = (fieldName?: string) => {
     if (!fieldName || metric.type === AGG_TYPE.COUNT) {
