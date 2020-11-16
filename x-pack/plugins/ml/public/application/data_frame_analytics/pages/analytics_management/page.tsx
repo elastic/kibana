@@ -40,7 +40,7 @@ import { DataFrameAnalyticsListColumn } from './components/analytics_list/common
 export const getDefaultDFAListState = (): ListingPageUrlState => ({
   pageIndex: 0,
   pageSize: 10,
-  sortField: DataFrameAnalyticsListColumn.id as string,
+  sortField: DataFrameAnalyticsListColumn.id,
   sortDirection: 'asc',
 });
 
@@ -48,7 +48,7 @@ export const Page: FC = () => {
   const [blockRefresh, setBlockRefresh] = useState(false);
   const [globalState] = useUrlState('_g');
 
-  const [dfaPageState, setDfaPageState] = usePageUrlState(getDefaultDFAListState());
+  const [dfaPageState, setDfaPageState] = usePageUrlState('dfa_jobs', getDefaultDFAListState());
 
   useRefreshInterval(setBlockRefresh);
 

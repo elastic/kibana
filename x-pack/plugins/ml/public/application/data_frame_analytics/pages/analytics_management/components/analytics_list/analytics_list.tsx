@@ -7,10 +7,10 @@
 import React, { FC, useCallback, useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
+  EuiInMemoryTable,
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiInMemoryTable,
   EuiSearchBar,
   EuiSearchBarProps,
   EuiSpacer,
@@ -126,14 +126,17 @@ export const DataFrameAnalyticsList: FC<Props> = ({
     isManagementTable
   );
 
-  const updateFilteredItems = (queryClauses: any) => {
-    if (queryClauses.length) {
-      const filtered = filterAnalytics(analytics, queryClauses);
-      setFilteredAnalytics(filtered);
-    } else {
-      setFilteredAnalytics(analytics);
-    }
-  };
+  const updateFilteredItems = useCallback(
+    (queryClauses: any[]) => {
+      if (queryClauses.length) {
+        const filtered = filterAnalytics(analytics, queryClauses);
+        setFilteredAnalytics(filtered);
+      } else {
+        setFilteredAnalytics(analytics);
+      }
+    },
+    [analytics]
+  );
 
   const filterList = () => {
     if (searchQueryText !== '') {
@@ -180,12 +183,11 @@ export const DataFrameAnalyticsList: FC<Props> = ({
   const handleSearchOnChange: EuiSearchBarProps['onChange'] = (search) => {
     if (search.error !== null) {
       setSearchError(search.error.message);
-      return false;
+      return;
     }
 
     setSearchError(undefined);
     setSearchQueryText(search.queryText);
-    return true;
   };
 
   // Before the analytics have been loaded for the first time, display the loading indicator only.
@@ -241,6 +243,7 @@ export const DataFrameAnalyticsList: FC<Props> = ({
       </EuiFlexGroup>
     </EuiFlexItem>
   );
+
   const search: EuiSearchBarProps = {
     query: searchQueryText,
     onChange: handleSearchOnChange,
@@ -274,15 +277,13 @@ export const DataFrameAnalyticsList: FC<Props> = ({
       <div data-test-subj="mlAnalyticsTableContainer">
         <EuiInMemoryTable<DataFrameAnalyticsListRow>
           allowNeutralSort={false}
-          className="mlAnalyticsInMemoryTable"
           columns={columns}
-          error={searchError}
           hasActions={false}
           isExpandable={true}
+          itemIdToExpandedRowMap={itemIdToExpandedRowMap}
           isSelectable={false}
           items={analytics}
           itemId={DataFrameAnalyticsListColumn.id}
-          itemIdToExpandedRowMap={itemIdToExpandedRowMap}
           loading={isLoading}
           onTableChange={onTableChange}
           pagination={pagination}
@@ -292,6 +293,7 @@ export const DataFrameAnalyticsList: FC<Props> = ({
           rowProps={(item) => ({
             'data-test-subj': `mlAnalyticsTableRow row-${item.id}`,
           })}
+          error={searchError}
         />
       </div>
 

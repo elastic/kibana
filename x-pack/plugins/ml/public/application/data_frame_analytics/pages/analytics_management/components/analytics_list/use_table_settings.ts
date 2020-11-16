@@ -5,6 +5,7 @@
  */
 
 import { Direction, EuiBasicTableProps, Pagination, PropertySort } from '@elastic/eui';
+import { useCallback, useMemo } from 'react';
 import { ListingPageUrlState } from '../../../../../../../common/types/common';
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50];
@@ -39,31 +40,40 @@ export function useTableSettings<TypeOfItem>(
   pageState: ListingPageUrlState,
   updatePageState: (update: Partial<ListingPageUrlState>) => void
 ): UseTableSettingsReturnValue<TypeOfItem> {
-  const onTableChange: EuiBasicTableProps<TypeOfItem>['onChange'] = ({
-    page,
-    sort,
-  }: CriteriaWithPagination<TypeOfItem>) => {
-    updatePageState({
-      ...(page ? { pageIndex: page.index, pageSize: page.size } : {}),
-      ...(sort ? { sortField: sort.field as string, sortDirection: sort.direction } : {}),
-    });
-  };
-
   const { pageIndex, pageSize, sortField, sortDirection } = pageState;
 
-  const pagination = {
-    pageIndex,
-    pageSize,
-    totalItemCount: items.length,
-    pageSizeOptions: PAGE_SIZE_OPTIONS,
-  };
-
-  const sorting = {
-    sort: {
-      field: sortField as string,
-      direction: sortDirection as Direction,
+  const onTableChange: EuiBasicTableProps<TypeOfItem>['onChange'] = useCallback(
+    ({ page, sort }: CriteriaWithPagination<TypeOfItem>) => {
+      const result = {
+        pageIndex: page?.index ?? pageState.pageIndex,
+        pageSize: page?.size ?? pageState.pageSize,
+        sortField: (sort?.field as string) ?? pageState.sortField,
+        sortDirection: sort?.direction ?? pageState.sortDirection,
+      };
+      updatePageState(result);
     },
-  };
+    [pageState, updatePageState]
+  );
+
+  const pagination = useMemo(
+    () => ({
+      pageIndex,
+      pageSize,
+      totalItemCount: items.length,
+      pageSizeOptions: PAGE_SIZE_OPTIONS,
+    }),
+    [items, pageIndex, pageSize]
+  );
+
+  const sorting = useMemo(
+    () => ({
+      sort: {
+        field: sortField as string,
+        direction: sortDirection as Direction,
+      },
+    }),
+    [sortField, sortDirection]
+  );
 
   return { onTableChange, pagination, sorting };
 }

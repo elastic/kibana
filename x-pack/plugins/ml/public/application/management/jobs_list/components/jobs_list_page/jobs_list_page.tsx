@@ -108,7 +108,7 @@ function useTabs(isMlEnabledInSpace: boolean): Tab[] {
         ),
       },
     ],
-    [isMlEnabledInSpace, adPageState, updateAdPageState, dfaPageState, updateAdPageState]
+    [isMlEnabledInSpace, adPageState, updateAdPageState, dfaPageState, updateDfaPageState]
   );
 }
 

@@ -155,28 +155,30 @@ export const useUrlState = (accessor: Accessor) => {
  * Hook for managing the URL state of the page.
  */
 export const usePageUrlState = <PageUrlState extends {}>(
+  pageKey: string,
   defaultState: PageUrlState
 ): [PageUrlState, (update: Partial<PageUrlState>) => void] => {
   const [appState, setAppState] = useUrlState('_a');
+  const pageState = appState?.[pageKey];
 
-  const listingPageState: PageUrlState = useMemo(() => {
+  const resultPageState: PageUrlState = useMemo(() => {
     return {
       ...defaultState,
-      ...(appState ?? {}),
+      ...(pageState ?? {}),
     };
-  }, [appState]);
+  }, [pageState]);
 
   const onStateUpdate = useCallback(
     (update: Partial<PageUrlState>, replace?: boolean) => {
-      setAppState({
-        ...(replace ? {} : listingPageState),
+      setAppState(pageKey, {
+        ...(replace ? {} : resultPageState),
         ...update,
       });
     },
-    [appState, setAppState]
+    [pageKey, resultPageState, setAppState]
   );
 
   return useMemo(() => {
-    return [listingPageState, onStateUpdate];
-  }, [listingPageState, onStateUpdate]);
+    return [resultPageState, onStateUpdate];
+  }, [resultPageState, onStateUpdate]);
 };

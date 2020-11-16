@@ -52,6 +52,8 @@ import { filterAnalyticsModels } from '../../../../common/search_bar_filters';
 import { ML_PAGES } from '../../../../../../../common/constants/ml_url_generator';
 import { DataFrameAnalysisConfigType } from '../../../../../../../common/types/data_frame_analytics';
 import { timeFormatter } from '../../../../../../../common/util/date_utils';
+import { ListingPageUrlState } from '../../../../../../../common/types/common';
+import { usePageUrlState } from '../../../../../util/url_state';
 
 type Stats = Omit<TrainedModelStat, 'model_id'>;
 
@@ -63,6 +65,13 @@ export type ModelItem = TrainedModelConfigResponse & {
 
 export type ModelItemFull = Required<ModelItem>;
 
+export const getDefaultModelsListState = (): ListingPageUrlState => ({
+  pageIndex: 0,
+  pageSize: 10,
+  sortField: ModelsTableToConfigMapping.id,
+  sortDirection: 'asc',
+});
+
 export const ModelsList: FC = () => {
   const {
     services: {
@@ -71,12 +80,24 @@ export const ModelsList: FC = () => {
   } = useMlKibana();
   const urlGenerator = useMlUrlGenerator();
 
+  const [pageState, updatePageState] = usePageUrlState(
+    'trained_models',
+    getDefaultModelsListState()
+  );
+
+  const searchQueryText = pageState.queryText ?? '';
+  const setSearchQueryText = useCallback(
+    (value) => {
+      updatePageState({ queryText: value });
+    },
+    [updatePageState]
+  );
+
   const canDeleteDataFrameAnalytics = capabilities.ml.canDeleteDataFrameAnalytics as boolean;
 
   const trainedModelsApiService = useTrainedModelsApiService();
   const { toasts } = useNotifications();
 
-  const [searchQueryText, setSearchQueryText] = useState('');
   const [filteredModels, setFilteredModels] = useState<ModelItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [items, setItems] = useState<ModelItem[]>([]);
@@ -432,8 +453,9 @@ export const ModelsList: FC = () => {
       : [];
 
   const { onTableChange, pagination, sorting } = useTableSettings<ModelItem>(
-    ModelsTableToConfigMapping.id,
-    filteredModels
+    filteredModels,
+    pageState,
+    updatePageState
   );
 
   const toolsLeft = (
