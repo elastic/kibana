@@ -34,10 +34,6 @@ import { RenderValue, visName } from './xy_vis_fn';
 const VisComponent = lazy<VisComponentType>(() => import('./vis_component'));
 
 function shouldShowNoResultsMessage(visData: any, visType: XyVisType): boolean {
-  if (['goal', 'gauge'].includes(visType)) {
-    return false;
-  }
-
   const rows: object[] | undefined = visData?.rows;
   const isZeroHits = visData?.hits === 0 || (rows && !rows.length);
 
