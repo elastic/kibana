@@ -6,7 +6,10 @@
 
 import expect from '@kbn/expect';
 
-import { QueryCreateSchema } from '../../../../plugins/security_solution/common/detection_engine/schemas/request';
+import {
+  EqlCreateSchema,
+  QueryCreateSchema,
+} from '../../../../plugins/security_solution/common/detection_engine/schemas/request';
 import { DEFAULT_SIGNALS_INDEX } from '../../../../plugins/security_solution/common/constants';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
@@ -194,7 +197,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       describe('EQL Rules', () => {
         it('generates signals from EQL sequences in the expected form', async () => {
-          const rule: CreateRulesSchema = {
+          const rule: EqlCreateSchema = {
             ...getSimpleRule(),
             from: '1900-01-01T00:00:00.000Z',
             rule_id: 'eql-rule',
@@ -246,7 +249,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('generates building block signals from EQL sequences in the expected form', async () => {
-          const rule: CreateRulesSchema = {
+          const rule: EqlCreateSchema = {
             ...getSimpleRule(),
             from: '1900-01-01T00:00:00.000Z',
             rule_id: 'eql-rule',
