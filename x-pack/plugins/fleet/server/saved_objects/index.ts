@@ -325,7 +325,7 @@ const getSavedObjectTypes = (
         install_source: { type: 'keyword' },
         path: { type: 'text' },
         media_type: { type: 'keyword' },
-        data_utf8: { type: 'text' },
+        data_utf8: { type: 'text', index: false },
         data_base64: { type: 'binary' },
       },
     },
