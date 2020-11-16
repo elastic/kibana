@@ -23,6 +23,7 @@ import {
 } from './metrics';
 import { dateHistogramOperation, DateHistogramIndexPatternColumn } from './date_histogram';
 import { countOperation, CountIndexPatternColumn } from './count';
+import { lastValueOperation, LastValueIndexPatternColumn } from './last_value';
 import { StateSetter, OperationMetadata } from '../../../types';
 import { BaseIndexPatternColumn } from './column_types';
 import { IndexPatternPrivateState, IndexPattern, IndexPatternField } from '../../types';
@@ -46,7 +47,8 @@ export type IndexPatternColumn =
   | CardinalityIndexPatternColumn
   | SumIndexPatternColumn
   | MedianIndexPatternColumn
-  | CountIndexPatternColumn;
+  | CountIndexPatternColumn
+  | LastValueIndexPatternColumn;
 
 export type FieldBasedIndexPatternColumn = Extract<IndexPatternColumn, { sourceField: string }>;
 
@@ -63,6 +65,7 @@ const internalOperationDefinitions = [
   cardinalityOperation,
   sumOperation,
   medianOperation,
+  lastValueOperation,
   countOperation,
   rangeOperation,
 ];
@@ -73,6 +76,7 @@ export { filtersOperation } from './filters';
 export { dateHistogramOperation } from './date_histogram';
 export { minOperation, averageOperation, sumOperation, maxOperation } from './metrics';
 export { countOperation } from './count';
+export { lastValueOperation } from './last_value';
 
 /**
  * Properties passed to the operation-specific part of the popover editor

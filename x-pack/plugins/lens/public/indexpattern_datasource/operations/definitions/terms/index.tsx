@@ -31,7 +31,7 @@ function ofName(name: string) {
 }
 
 function isSortableByColumn(column: IndexPatternColumn) {
-  return !column.isBucketed;
+  return !column.isBucketed && column.operationType !== 'last_value';
 }
 
 const DEFAULT_SIZE = 3;
