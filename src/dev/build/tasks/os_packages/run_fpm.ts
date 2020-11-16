@@ -114,6 +114,8 @@ export async function runFpm(
     '--template-value',
     `logDir=/var/log/kibana`,
     '--template-value',
+    `pidDir=/run/kibana`,
+    '--template-value',
     `envFile=/etc/default/kibana`,
     // config and data directories are copied to /usr/share and /var/lib
     // below, so exclude them from the main package source located in
@@ -122,6 +124,8 @@ export async function runFpm(
     `usr/share/kibana/config`,
     '--exclude',
     `usr/share/kibana/data`,
+    '--exclude',
+    'run/kibana/.gitempty',
 
     // flags specific to the package we are building, supplied by tasks below
     ...pkgSpecificFlags,
