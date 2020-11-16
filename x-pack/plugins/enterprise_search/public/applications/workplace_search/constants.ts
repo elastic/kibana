@@ -98,7 +98,7 @@ export const SOURCE_NAMES = {
     'xpack.enterpriseSearch.workplaceSearch.sources.sourceNames.salesforceSandbox',
     { defaultMessage: 'Salesforce Sandbox' }
   ),
-  SERVICE_NOW: i18n.translate(
+  SERVICENOW: i18n.translate(
     'xpack.enterpriseSearch.workplaceSearch.sources.sourceNames.serviceNow',
     { defaultMessage: 'ServiceNow' }
   ),
