@@ -4,12 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { Fragment, lazy } from 'react';
-import { mountWithIntl, nextTick } from 'test_utils/enzyme_helpers';
+import { mountWithIntl, nextTick } from '@kbn/test/jest';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { act } from 'react-dom/test-utils';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import { ValidationResult, Alert, AlertAction } from '../../../types';
 import ActionForm from './action_form';
+import { ResolvedActionGroup } from '../../../../../alerts/common';
 jest.mock('../../lib/action_connector_api', () => ({
   loadAllActions: jest.fn(),
   loadActionTypes: jest.fn(),
@@ -217,15 +218,22 @@ describe('action_form', () => {
       const wrapper = mountWithIntl(
         <ActionForm
           actions={initialAlert.actions}
-          messageVariables={[
-            { name: 'testVar1', description: 'test var1' },
-            { name: 'testVar2', description: 'test var2' },
-          ]}
+          messageVariables={{
+            params: [
+              { name: 'testVar1', description: 'test var1' },
+              { name: 'testVar2', description: 'test var2' },
+            ],
+            state: [],
+            context: [{ name: 'contextVar', description: 'context var1' }],
+          }}
           defaultActionGroupId={'default'}
           setActionIdByIndex={(id: string, index: number) => {
             initialAlert.actions[index].id = id;
           }}
-          actionGroups={[{ id: 'default', name: 'Default' }]}
+          actionGroups={[
+            { id: 'default', name: 'Default' },
+            { id: 'resolved', name: 'Resolved' },
+          ]}
           setActionGroupIdByIndex={(group: string, index: number) => {
             initialAlert.actions[index].group = group;
           }}
@@ -346,8 +354,50 @@ describe('action_form', () => {
             "inputDisplay": "Default",
             "value": "default",
           },
+          Object {
+            "data-test-subj": "addNewActionConnectorActionGroup-0-option-resolved",
+            "inputDisplay": "Resolved",
+            "value": "resolved",
+          },
         ]
       `);
+    });
+
+    it('renders selected Resolved action group', async () => {
+      const wrapper = await setup([
+        {
+          group: ResolvedActionGroup.id,
+          id: 'test',
+          actionTypeId: actionType.id,
+          params: {
+            message: '',
+          },
+        },
+      ]);
+      const actionOption = wrapper.find(
+        `[data-test-subj="${actionType.id}-ActionTypeSelectOption"]`
+      );
+      actionOption.first().simulate('click');
+      const actionGroupsSelect = wrapper.find(
+        `[data-test-subj="addNewActionConnectorActionGroup-0"]`
+      );
+      expect((actionGroupsSelect.first().props() as any).options).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "data-test-subj": "addNewActionConnectorActionGroup-0-option-default",
+            "inputDisplay": "Default",
+            "value": "default",
+          },
+          Object {
+            "data-test-subj": "addNewActionConnectorActionGroup-0-option-resolved",
+            "inputDisplay": "Resolved",
+            "value": "resolved",
+          },
+        ]
+      `);
+      expect(actionGroupsSelect.first().text()).toEqual(
+        'Select an option: Resolved, is selectedResolved'
+      );
     });
 
     it('renders available connectors for the selected action type', async () => {

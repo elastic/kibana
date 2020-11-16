@@ -12,7 +12,7 @@ import { spacesManagerMock } from '../spaces_manager/mocks';
 import { SpacesManager } from '../spaces_manager';
 import { NavControlPopover } from './nav_control_popover';
 import { EuiHeaderSectionItemButton } from '@elastic/eui';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 import { wait } from '@testing-library/react';
 
 describe('NavControlPopover', () => {
