@@ -81,7 +81,7 @@ describe('#create', () => {
     const attributes = { attrOne: 'one', attrSecret: 'secret', attrThree: 'three' };
 
     await expect(wrapper.create('known-type', attributes, { id: 'some-id' })).rejects.toThrowError(
-      'Predefined IDs are not allowed for saved objects with encrypted attributes.'
+      'Predefined IDs are not allowed for encrypted saved objects of type "known-type".'
     );
 
     expect(mockBaseClient.create).not.toHaveBeenCalled();
@@ -333,7 +333,7 @@ describe('#bulkCreate', () => {
     ];
 
     await expect(wrapper.bulkCreate(bulkCreateParams)).rejects.toThrowError(
-      'Predefined IDs are not allowed for saved objects with encrypted attributes.'
+      'Predefined IDs are not allowed for encrypted saved objects of type "known-type".'
     );
 
     expect(mockBaseClient.bulkCreate).not.toHaveBeenCalled();
