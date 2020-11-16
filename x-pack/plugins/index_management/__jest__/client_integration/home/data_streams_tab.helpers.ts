@@ -83,7 +83,7 @@ export const setup = async (overridingDependencies: any = {}): Promise<DataStrea
 
   const clickViewManagedSwitch = () => {
     const { find } = testBed;
-    find('viewManagedSwitch').simulate('click');
+    find('includeManagedSwitch').simulate('click');
   };
 
   const clickReloadButton = () => {

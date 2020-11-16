@@ -151,7 +151,7 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
   } else if (Array.isArray(dataStreams) && dataStreams.length > 0) {
     const filteredDataStreams = isIncludeManagedChecked
       ? dataStreams
-      : filterDataStreams(dataStreams, isIncludeManagedChecked);
+      : filterDataStreams(dataStreams);
     content = (
       <>
         <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
@@ -207,14 +207,33 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
             </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiSwitch
-              label={i18n.translate('xpack.idxMgmt.dataStreamListControls.viewManagedSwitchLabel', {
-                defaultMessage: 'View managed',
-              })}
-              checked={isIncludeManagedChecked}
-              onChange={(e) => setIsIncludeManagedChecked(e.target.checked)}
-              data-test-subj="viewManagedSwitch"
-            />
+            <EuiFlexGroup gutterSize="s">
+              <EuiFlexItem grow={false}>
+                <EuiSwitch
+                  label={i18n.translate(
+                    'xpack.idxMgmt.dataStreamListControls.includeManagedSwitchLabel',
+                    {
+                      defaultMessage: 'Include managed',
+                    }
+                  )}
+                  checked={isIncludeManagedChecked}
+                  onChange={(e) => setIsIncludeManagedChecked(e.target.checked)}
+                  data-test-subj="includeManagedSwitch"
+                />
+              </EuiFlexItem>
+
+              <EuiFlexItem grow={false}>
+                <EuiIconTip
+                  content={i18n.translate(
+                    'xpack.idxMgmt.dataStreamListControls.includeManagedSwitchToolTip',
+                    {
+                      defaultMessage: 'Display data streams managed by Ingest Manager',
+                    }
+                  )}
+                  position="top"
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
 

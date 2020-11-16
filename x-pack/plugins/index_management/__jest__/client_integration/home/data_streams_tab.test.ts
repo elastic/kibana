@@ -438,7 +438,7 @@ describe('Data Streams tab', () => {
         ['', 'non-managed-data-stream', 'green', '1', 'Delete'],
       ]);
 
-      expect(exists('viewManagedSwitch')).toBe(true);
+      expect(exists('includeManagedSwitch')).toBe(true);
 
       await act(async () => {
         actions.clickViewManagedSwitch();

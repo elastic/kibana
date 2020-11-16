@@ -10,8 +10,6 @@ export const isManagedByIngestManager = (dataStream: DataStream): boolean => {
   return Boolean(dataStream._meta?.managed && dataStream._meta?.managed_by === 'ingest-manager');
 };
 
-export const filterDataStreams = (dataStreams: DataStream[], managed: boolean): DataStream[] => {
-  return dataStreams.filter((dataStream: DataStream) =>
-    managed ? isManagedByIngestManager(dataStream) : !isManagedByIngestManager(dataStream)
-  );
+export const filterDataStreams = (dataStreams: DataStream[]): DataStream[] => {
+  return dataStreams.filter((dataStream: DataStream) => !isManagedByIngestManager(dataStream));
 };

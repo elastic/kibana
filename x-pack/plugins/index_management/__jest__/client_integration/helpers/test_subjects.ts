@@ -21,7 +21,7 @@ export type TestSubjects =
   | 'filterList.filterItem'
   | 'ilmPolicyLink'
   | 'includeStatsSwitch'
-  | 'viewManagedSwitch'
+  | 'includeManagedSwitch'
   | 'indexTable'
   | 'indexTableIncludeHiddenIndicesToggle'
   | 'indexTableIndexNameLink'
