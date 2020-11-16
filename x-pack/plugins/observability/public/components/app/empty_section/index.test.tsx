@@ -13,7 +13,7 @@ describe('EmptySection', () => {
     const section: ISection = {
       id: 'apm',
       title: 'APM',
-      icon: 'logoAPM',
+      icon: 'logoObservability',
       description: 'foo bar',
     };
     const { getByText, queryAllByText } = render(<EmptySection section={section} />);
@@ -26,7 +26,7 @@ describe('EmptySection', () => {
     const section: ISection = {
       id: 'apm',
       title: 'APM',
-      icon: 'logoAPM',
+      icon: 'logoObservability',
       description: 'foo bar',
       linkTitle: 'install agent',
       href: 'https://www.elastic.co',

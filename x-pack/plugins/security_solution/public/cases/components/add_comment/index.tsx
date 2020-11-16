@@ -8,7 +8,7 @@ import { EuiButton, EuiLoadingSpinner } from '@elastic/eui';
 import React, { useCallback, forwardRef, useImperativeHandle } from 'react';
 import styled from 'styled-components';
 
-import { CommentRequest } from '../../../../../case/common/api';
+import { CommentRequest, CommentType } from '../../../../../case/common/api';
 import { usePostComment } from '../../containers/use_post_comment';
 import { Case } from '../../containers/types';
 import { MarkdownEditorForm } from '../../../common/components/markdown_editor/eui_form';
@@ -27,6 +27,7 @@ const MySpinner = styled(EuiLoadingSpinner)`
 
 const initialCommentValue: CommentRequest = {
   comment: '',
+  type: CommentType.user,
 };
 
 export interface AddCommentRefObject {
@@ -81,7 +82,7 @@ export const AddComment = React.memo(
           if (onCommentSaving != null) {
             onCommentSaving();
           }
-          postComment(data, onCommentPosted);
+          postComment({ ...data, type: CommentType.user }, onCommentPosted);
           reset();
         }
       }, [onCommentPosted, onCommentSaving, postComment, reset, submit]);

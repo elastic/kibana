@@ -19,7 +19,7 @@
 
 import React from 'react';
 import { OverviewPageFooter } from './overview_page_footer';
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { shallowWithIntl } from '@kbn/test/jest';
 
 jest.mock('../../app_links', () => ({
   RedirectAppLinks: jest.fn((element: JSX.Element) => element),

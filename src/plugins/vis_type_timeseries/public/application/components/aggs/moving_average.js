@@ -25,6 +25,7 @@ import { MetricSelect } from './metric_select';
 import { createChangeHandler } from '../lib/create_change_handler';
 import { createSelectHandler } from '../lib/create_select_handler';
 import { createNumberHandler } from '../lib/create_number_handler';
+import { METRIC_TYPES } from '../../../../common/metric_types';
 import {
   htmlIdGenerator,
   EuiFlexGroup,
@@ -153,6 +154,7 @@ export const MovingAverageAgg = (props) => {
               metrics={siblings}
               metric={model}
               value={model.field}
+              exclude={[METRIC_TYPES.TOP_HIT]}
             />
           </EuiFormRow>
         </EuiFlexItem>

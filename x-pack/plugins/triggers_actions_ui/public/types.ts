@@ -3,7 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { HttpSetup, DocLinksStart, ToastsSetup } from 'kibana/public';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { HttpSetup, DocLinksStart, ToastsSetup } from 'kibana/public';
 import { ComponentType } from 'react';
 import { ActionGroup } from '../../alerts/common';
 import { ActionType } from '../../actions/common';
@@ -11,6 +12,7 @@ import { TypeRegistry } from './application/type_registry';
 import {
   SanitizedAlert as Alert,
   AlertAction,
+  AlertAggregations,
   AlertTaskState,
   AlertInstanceSummary,
   AlertInstanceStatus,
@@ -20,6 +22,7 @@ import {
 export {
   Alert,
   AlertAction,
+  AlertAggregations,
   AlertTaskState,
   AlertInstanceSummary,
   AlertInstanceStatus,
@@ -130,7 +133,7 @@ export interface ActionVariable {
 }
 
 export interface ActionVariables {
-  context: ActionVariable[];
+  context?: ActionVariable[];
   state: ActionVariable[];
   params: ActionVariable[];
 }
@@ -171,7 +174,9 @@ export interface AlertTypeParamsExpressionProps<
 export interface AlertTypeModel<AlertParamsType = any, AlertsContextValue = any> {
   id: string;
   name: string | JSX.Element;
+  description: string;
   iconClass: string;
+  documentationUrl: string | ((docLinks: DocLinksStart) => string) | null;
   validate: (alertParams: AlertParamsType) => ValidationResult;
   alertParamsExpression:
     | React.FunctionComponent<any>

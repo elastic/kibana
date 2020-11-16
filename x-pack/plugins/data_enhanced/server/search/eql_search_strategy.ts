@@ -4,79 +4,67 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { from } from 'rxjs';
-import { Logger } from 'kibana/server';
-import { ApiResponse, TransportRequestPromise } from '@elastic/elasticsearch/lib/Transport';
+import type { Logger } from 'kibana/server';
+import type { ApiResponse } from '@elastic/elasticsearch';
 
-import {
-  getAsyncOptions,
-  getDefaultSearchParams,
-  ISearchStrategy,
-  toSnakeCase,
-  shimAbortSignal,
-} from '../../../../../src/plugins/data/server';
-import { EqlSearchStrategyRequest, EqlSearchStrategyResponse } from '../../common/search/types';
+import { search } from '../../../../../src/plugins/data/server';
+import { doPartialSearch } from '../../common/search/es_search/es_search_rxjs_utils';
+import { getAsyncOptions, getDefaultSearchParams } from './get_default_search_params';
+
+import type { ISearchStrategy, IEsRawSearchResponse } from '../../../../../src/plugins/data/server';
+import type {
+  EqlSearchStrategyRequest,
+  EqlSearchStrategyResponse,
+} from '../../common/search/types';
 
 export const eqlSearchStrategyProvider = (
   logger: Logger
 ): ISearchStrategy<EqlSearchStrategyRequest, EqlSearchStrategyResponse> => {
   return {
-    cancel: async (context, id) => {
+    cancel: async (id, options, { esClient }) => {
       logger.debug(`_eql/delete ${id}`);
-      await context.core.elasticsearch.client.asCurrentUser.eql.delete({
+      await esClient.asCurrentUser.eql.delete({
         id,
       });
     },
-    search: (request, options, context) =>
-      from(
-        new Promise<EqlSearchStrategyResponse>(async (resolve, reject) => {
-          logger.debug(`_eql/search ${JSON.stringify(request.params) || request.id}`);
-          let promise: TransportRequestPromise<ApiResponse>;
 
-          try {
-            const eqlClient = context.core.elasticsearch.client.asCurrentUser.eql;
-            const uiSettingsClient = await context.core.uiSettings.client;
-            const asyncOptions = getAsyncOptions();
-            const searchOptions = toSnakeCase({ ...request.options });
+    search: (request, options, { esClient, uiSettingsClient }) => {
+      logger.debug(`_eql/search ${JSON.stringify(request.params) || request.id}`);
 
-            if (request.id) {
-              promise = eqlClient.get(
-                {
-                  id: request.id,
-                  ...toSnakeCase(asyncOptions),
-                },
-                searchOptions
-              );
-            } else {
-              const { ignoreThrottled, ignoreUnavailable } = await getDefaultSearchParams(
-                uiSettingsClient
-              );
-              const searchParams = toSnakeCase({
-                ignoreThrottled,
-                ignoreUnavailable,
-                ...asyncOptions,
-                ...request.params,
-              });
+      const { utils } = search.esSearch;
+      const asyncOptions = getAsyncOptions();
+      const requestOptions = utils.toSnakeCase({ ...request.options });
+      const client = esClient.asCurrentUser.eql;
 
-              promise = eqlClient.search(
-                searchParams as EqlSearchStrategyRequest['params'],
-                searchOptions
-              );
-            }
+      return doPartialSearch<ApiResponse<IEsRawSearchResponse>>(
+        async () => {
+          const { ignoreThrottled, ignoreUnavailable } = await getDefaultSearchParams(
+            uiSettingsClient
+          );
 
-            const rawResponse = await shimAbortSignal(promise, options?.abortSignal);
-            const { id, is_partial: isPartial, is_running: isRunning } = rawResponse.body;
-
-            resolve({
-              id,
-              isPartial,
-              isRunning,
-              rawResponse,
-            });
-          } catch (e) {
-            reject(e);
-          }
-        })
-      ),
+          return client.search(
+            utils.toSnakeCase({
+              ignoreThrottled,
+              ignoreUnavailable,
+              ...asyncOptions,
+              ...request.params,
+            }) as EqlSearchStrategyRequest['params'],
+            requestOptions
+          );
+        },
+        (id) =>
+          client.get(
+            {
+              id: id!,
+              ...utils.toSnakeCase(asyncOptions),
+            },
+            requestOptions
+          ),
+        (response) => !response.body.is_running,
+        (response) => response.body.id,
+        request.id,
+        options
+      ).pipe(utils.toKibanaSearchResponse());
+    },
   };
 };

@@ -20,6 +20,7 @@
 import { SessionService } from './session_service';
 import { ISessionService } from '../../common';
 import { coreMock } from '../../../../core/public/mocks';
+import { take, toArray } from 'rxjs/operators';
 
 describe('Session service', () => {
   let sessionService: ISessionService;
@@ -38,6 +39,21 @@ describe('Session service', () => {
       expect(sessionService.getSessionId()).not.toBeUndefined();
       sessionService.clear();
       expect(sessionService.getSessionId()).toBeUndefined();
+    });
+
+    it('Restores a session', async () => {
+      const sessionId = 'sessionId';
+      sessionService.restore(sessionId);
+      expect(sessionService.getSessionId()).toBe(sessionId);
+    });
+
+    it('sessionId$ observable emits current value', async () => {
+      sessionService.restore('1');
+      const emittedValues = sessionService.getSession$().pipe(take(3), toArray()).toPromise();
+      sessionService.restore('2');
+      sessionService.clear();
+
+      expect(await emittedValues).toEqual(['1', '2', undefined]);
     });
   });
 });

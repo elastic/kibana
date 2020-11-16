@@ -68,6 +68,9 @@ export const LOGS_FEATURE = {
   category: DEFAULT_APP_CATEGORIES.observability,
   app: ['infra', 'logs', 'kibana'],
   catalogue: ['infralogging', 'logs'],
+  management: {
+    insightsAndAlerting: ['triggersActions'],
+  },
   alerting: [LOG_DOCUMENT_COUNT_ALERT_TYPE_ID],
   privileges: {
     all: {
@@ -81,6 +84,9 @@ export const LOGS_FEATURE = {
       alerting: {
         all: [LOG_DOCUMENT_COUNT_ALERT_TYPE_ID],
       },
+      management: {
+        insightsAndAlerting: ['triggersActions'],
+      },
       ui: ['show', 'configureSource', 'save'],
     },
     read: {
@@ -89,6 +95,9 @@ export const LOGS_FEATURE = {
       api: ['infra'],
       alerting: {
         read: [LOG_DOCUMENT_COUNT_ALERT_TYPE_ID],
+      },
+      management: {
+        insightsAndAlerting: ['triggersActions'],
       },
       savedObject: {
         all: [],

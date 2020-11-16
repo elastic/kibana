@@ -114,7 +114,7 @@ function ThresholdPanel({
               defaultMessage: 'Line color',
             })}
             fullWidth
-            compressed
+            display="rowCompressed"
           >
             <EuiColorPicker
               compressed

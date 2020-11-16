@@ -5,9 +5,10 @@
  */
 
 import { EuiIcon, EuiBasicTable } from '@elastic/eui';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { ReactWrapper } from 'enzyme';
 import React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 import { RolesAPIClient } from '../roles_api_client';
 import { PermissionDenied } from './permission_denied';
 import { RolesGridPage } from './roles_grid_page';
@@ -15,7 +16,7 @@ import { RolesGridPage } from './roles_grid_page';
 import { coreMock, scopedHistoryMock } from '../../../../../../../src/core/public/mocks';
 import { rolesAPIClientMock } from '../index.mock';
 import { ReservedBadge, DisabledBadge } from '../../badges';
-import { findTestSubject } from 'test_utils/find_test_subject';
+import { findTestSubject } from '@kbn/test/jest';
 
 const mock403 = () => ({ body: { statusCode: 403 } });
 

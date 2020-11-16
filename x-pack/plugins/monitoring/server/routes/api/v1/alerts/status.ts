@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 import { handleError } from '../../../../lib/errors';
 import { RouteDependencies } from '../../../../types';
 import { fetchStatus } from '../../../../lib/alerts/fetch_status';
-import { CommonAlertFilter } from '../../../../../common/types';
+import { CommonAlertFilter } from '../../../../../common/types/alerts';
 
 export function alertStatusRoute(server: any, npRoute: RouteDependencies) {
   npRoute.router.post(

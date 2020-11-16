@@ -88,6 +88,7 @@ export interface FlyoutState {
   conflictedSavedObjectsLinkedToSavedSearches?: any[];
   conflictedSearchDocs?: any[];
   unmatchedReferences?: ProcessedImportResponse['unmatchedReferences'];
+  unmatchedReferencesTablePagination: { pageIndex: number; pageSize: number };
   failedImports?: ProcessedImportResponse['failedImports'];
   successfulImports?: ProcessedImportResponse['successfulImports'];
   conflictingRecord?: ConflictingRecord;
@@ -106,6 +107,17 @@ interface ConflictingRecord {
   done: (result: [boolean, string | undefined]) => void;
 }
 
+const getErrorMessage = (e: any) => {
+  const errorMessage =
+    e.body?.error && e.body?.message ? `${e.body.error}: ${e.body.message}` : e.message;
+  return i18n.translate('savedObjectsManagement.objectsTable.flyout.importFileErrorMessage', {
+    defaultMessage: 'The file could not be processed due to error: "{error}"',
+    values: {
+      error: errorMessage,
+    },
+  });
+};
+
 export class Flyout extends Component<FlyoutProps, FlyoutState> {
   constructor(props: FlyoutProps) {
     super(props);
@@ -115,6 +127,10 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
       conflictedSavedObjectsLinkedToSavedSearches: undefined,
       conflictedSearchDocs: undefined,
       unmatchedReferences: undefined,
+      unmatchedReferencesTablePagination: {
+        pageIndex: 0,
+        pageSize: 5,
+      },
       conflictingRecord: undefined,
       error: undefined,
       file: undefined,
@@ -178,9 +194,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
     } catch (e) {
       this.setState({
         status: 'error',
-        error: i18n.translate('savedObjectsManagement.objectsTable.flyout.importFileErrorMessage', {
-          defaultMessage: 'The file could not be processed.',
-        }),
+        error: getErrorMessage(e),
       });
       return;
     }
@@ -236,10 +250,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
     } catch (e) {
       this.setState({
         status: 'error',
-        error: i18n.translate(
-          'savedObjectsManagement.objectsTable.flyout.resolveImportErrorsFileErrorMessage',
-          { defaultMessage: 'The file could not be processed.' }
-        ),
+        error: getErrorMessage(e),
       });
     }
   };
@@ -432,8 +443,8 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
         );
       } catch (e) {
         this.setState({
-          error: e.message,
           status: 'error',
+          error: getErrorMessage(e),
           loadingMessage: undefined,
         });
         return;
@@ -467,7 +478,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
   };
 
   renderUnmatchedReferences() {
-    const { unmatchedReferences } = this.state;
+    const { unmatchedReferences, unmatchedReferencesTablePagination: tablePagination } = this.state;
 
     if (!unmatchedReferences) {
       return null;
@@ -527,22 +538,28 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
           { defaultMessage: 'New index pattern' }
         ),
         render: (id: string) => {
-          const options = this.state.indexPatterns!.map(
-            (indexPattern) =>
-              ({
-                text: indexPattern.title,
-                value: indexPattern.id,
-                'data-test-subj': `indexPatternOption-${indexPattern.title}`,
-              } as { text: string; value: string; 'data-test-subj'?: string })
-          );
+          const options = [
+            {
+              text: '-- Skip Import --',
+              value: '',
+            },
+            ...this.state.indexPatterns!.map(
+              (indexPattern) =>
+                ({
+                  text: indexPattern.title,
+                  value: indexPattern.id,
+                  'data-test-subj': `indexPatternOption-${indexPattern.title}`,
+                } as { text: string; value: string; 'data-test-subj'?: string })
+            ),
+          ];
 
-          options.unshift({
-            text: '-- Skip Import --',
-            value: '',
-          });
+          const selectedValue =
+            unmatchedReferences?.find((unmatchedRef) => unmatchedRef.existingIndexPatternId === id)
+              ?.newIndexPatternId ?? '';
 
           return (
             <EuiSelect
+              value={selectedValue}
               data-test-subj={`managementChangeIndexSelection-${id}`}
               onChange={(e) => this.onIndexChanged(id, e)}
               options={options}
@@ -553,6 +570,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
     ];
 
     const pagination = {
+      ...tablePagination,
       pageSizeOptions: [5, 10, 25],
     };
 
@@ -561,6 +579,16 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
         items={unmatchedReferences as any[]}
         columns={columns}
         pagination={pagination}
+        onTableChange={({ page }) => {
+          if (page) {
+            this.setState({
+              unmatchedReferencesTablePagination: {
+                pageSize: page.size,
+                pageIndex: page.index,
+              },
+            });
+          }
+        }}
       />
     );
   }
@@ -583,7 +611,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
           }
           color="danger"
         >
-          <p>{error}</p>
+          <p data-test-subj="importSavedObjectsErrorText">{error}</p>
         </EuiCallOut>
         <EuiSpacer size="s" />
       </Fragment>
@@ -737,6 +765,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
           }
         >
           <EuiFilePicker
+            accept=".ndjson, .json"
             fullWidth
             initialPromptText={
               <FormattedMessage

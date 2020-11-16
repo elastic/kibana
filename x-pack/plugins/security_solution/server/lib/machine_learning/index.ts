@@ -11,7 +11,10 @@ import { AnomalyRecordDoc as Anomaly } from '../../../../ml/server';
 
 export { Anomaly };
 export type AnomalyResults = SearchResponse<Anomaly>;
-type MlAnomalySearch = <T>(searchParams: RequestParams.Search) => Promise<SearchResponse<T>>;
+type MlAnomalySearch = <T>(
+  searchParams: RequestParams.Search,
+  jobIds: string[]
+) => Promise<SearchResponse<T>>;
 
 export interface AnomaliesSearchParams {
   jobIds: string[];
@@ -27,29 +30,32 @@ export const getAnomalies = async (
 ): Promise<AnomalyResults> => {
   const boolCriteria = buildCriteria(params);
 
-  return mlAnomalySearch({
-    size: params.maxRecords || 100,
-    body: {
-      query: {
-        bool: {
-          filter: [
-            {
-              query_string: {
-                query: 'result_type:record',
-                analyze_wildcard: false,
+  return mlAnomalySearch(
+    {
+      size: params.maxRecords || 100,
+      body: {
+        query: {
+          bool: {
+            filter: [
+              {
+                query_string: {
+                  query: 'result_type:record',
+                  analyze_wildcard: false,
+                },
               },
-            },
-            {
-              bool: {
-                must: boolCriteria,
+              {
+                bool: {
+                  must: boolCriteria,
+                },
               },
-            },
-          ],
+            ],
+          },
         },
+        sort: [{ record_score: { order: 'desc' } }],
       },
-      sort: [{ record_score: { order: 'desc' } }],
     },
-  });
+    params.jobIds
+  );
 };
 
 const buildCriteria = (params: AnomaliesSearchParams): object[] => {

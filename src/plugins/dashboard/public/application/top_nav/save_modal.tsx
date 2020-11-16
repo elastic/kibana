@@ -21,11 +21,13 @@ import React, { Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFormRow, EuiTextArea, EuiSwitch } from '@elastic/eui';
 
+import type { SavedObjectsTaggingApi } from '../../../../saved_objects_tagging_oss/public';
 import { SavedObjectSaveModal } from '../../../../saved_objects/public';
 
-interface SaveOptions {
+export interface SaveOptions {
   newTitle: string;
   newDescription: string;
+  newTags?: string[];
   newCopyOnSave: boolean;
   newTimeRestore: boolean;
   isTitleDuplicateConfirmed: boolean;
@@ -33,23 +35,19 @@ interface SaveOptions {
 }
 
 interface Props {
-  onSave: ({
-    newTitle,
-    newDescription,
-    newCopyOnSave,
-    newTimeRestore,
-    isTitleDuplicateConfirmed,
-    onTitleDuplicate,
-  }: SaveOptions) => void;
+  onSave: (options: SaveOptions) => void;
   onClose: () => void;
   title: string;
   description: string;
+  tags?: string[];
   timeRestore: boolean;
   showCopyOnSave: boolean;
+  savedObjectsTagging?: SavedObjectsTaggingApi;
 }
 
 interface State {
   description: string;
+  tags: string[];
   timeRestore: boolean;
 }
 
@@ -57,6 +55,7 @@ export class DashboardSaveModal extends React.Component<Props, State> {
   state: State = {
     description: this.props.description,
     timeRestore: this.props.timeRestore,
+    tags: this.props.tags ?? [],
   };
 
   constructor(props: Props) {
@@ -81,6 +80,7 @@ export class DashboardSaveModal extends React.Component<Props, State> {
       newTimeRestore: this.state.timeRestore,
       isTitleDuplicateConfirmed,
       onTitleDuplicate,
+      newTags: this.state.tags,
     });
   };
 
@@ -97,6 +97,18 @@ export class DashboardSaveModal extends React.Component<Props, State> {
   };
 
   renderDashboardSaveOptions() {
+    const { savedObjectsTagging } = this.props;
+    const tagSelector = savedObjectsTagging ? (
+      <savedObjectsTagging.ui.components.SavedObjectSaveModalTagSelector
+        initialSelection={this.state.tags}
+        onTagsSelected={(tags) => {
+          this.setState({
+            tags,
+          });
+        }}
+      />
+    ) : undefined;
+
     return (
       <Fragment>
         <EuiFormRow
@@ -113,6 +125,8 @@ export class DashboardSaveModal extends React.Component<Props, State> {
             onChange={this.onDescriptionChange}
           />
         </EuiFormRow>
+
+        {tagSelector}
 
         <EuiFormRow
           helpText={

@@ -19,8 +19,13 @@ import { ImpactfulMetrics } from './ImpactfulMetrics';
 import { PageLoadAndViews } from './Panels/PageLoadAndViews';
 import { VisitorBreakdownsPanel } from './Panels/VisitorBreakdowns';
 import { useBreakPoints } from './hooks/useBreakPoints';
+import { getPercentileLabel } from './UXMetrics/translations';
+import { useUrlParams } from '../../../hooks/useUrlParams';
 
 export function RumDashboard() {
+  const {
+    urlParams: { percentile },
+  } = useUrlParams();
   const { isSmall } = useBreakPoints();
 
   return (
@@ -30,7 +35,9 @@ export function RumDashboard() {
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem grow={1} data-cy={`client-metrics`}>
               <EuiTitle size="xs">
-                <h3>{I18LABELS.pageLoadDuration}</h3>
+                <h3>
+                  {I18LABELS.pageLoad} ({getPercentileLabel(percentile!)})
+                </h3>
               </EuiTitle>
               <EuiSpacer size="s" />
               <ClientMetrics />

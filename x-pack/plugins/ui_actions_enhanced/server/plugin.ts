@@ -16,7 +16,7 @@ import {
 } from './types';
 
 export interface SetupContract {
-  registerActionFactory: any;
+  registerActionFactory: (definition: ActionFactoryDefinition) => void;
 }
 
 export type StartContract = void;
@@ -25,7 +25,7 @@ interface SetupDependencies {
   embeddable: EmbeddableSetup; // Embeddable are needed because they register basic triggers/actions.
 }
 
-export class AdvancedUiActionsPublicPlugin
+export class AdvancedUiActionsServerPlugin
   implements Plugin<SetupContract, StartContract, SetupDependencies> {
   protected readonly actionFactories: ActionFactoryRegistry = new Map();
 
@@ -61,6 +61,7 @@ export class AdvancedUiActionsPublicPlugin
         ((state: SerializedEvent) => {
           return { state, references: [] };
         }),
+      migrations: definition.migrations || {},
     });
   };
 

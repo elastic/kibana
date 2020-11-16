@@ -6,6 +6,42 @@
 
 import { SerializedPolicy } from '../../../../common/types';
 
+export type DataTierAllocationType = 'node_roles' | 'node_attrs' | 'none';
+
+export interface DataAllocationMetaFields {
+  dataTierAllocationType: DataTierAllocationType;
+  allocationNodeAttribute?: string;
+}
+
+export interface MinAgeField {
+  minAgeUnit?: string;
+}
+
+export interface ForcemergeFields {
+  forceMergeEnabled: boolean;
+  bestCompression: boolean;
+}
+
+interface HotPhaseMetaFields extends ForcemergeFields {
+  useRollover: boolean;
+  maxStorageSizeUnit?: string;
+  maxAgeUnit?: string;
+}
+
+interface WarmPhaseMetaFields extends DataAllocationMetaFields, MinAgeField, ForcemergeFields {
+  enabled: boolean;
+  warmPhaseOnRollover: boolean;
+}
+
+interface ColdPhaseMetaFields extends DataAllocationMetaFields, MinAgeField {
+  enabled: boolean;
+  freezeEnabled: boolean;
+}
+
+interface DeletePhaseMetaFields extends MinAgeField {
+  enabled: boolean;
+}
+
 /**
  * Describes the shape of data after deserialization.
  */
@@ -15,12 +51,9 @@ export interface FormInternal extends SerializedPolicy {
    * certain form fields which affects what is ultimately serialized.
    */
   _meta: {
-    hot: {
-      useRollover: boolean;
-      forceMergeEnabled: boolean;
-      bestCompression: boolean;
-      maxStorageSizeUnit?: string;
-      maxAgeUnit?: string;
-    };
+    hot: HotPhaseMetaFields;
+    warm: WarmPhaseMetaFields;
+    cold: ColdPhaseMetaFields;
+    delete: DeletePhaseMetaFields;
   };
 }

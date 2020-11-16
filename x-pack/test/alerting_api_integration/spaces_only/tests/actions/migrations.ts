@@ -55,5 +55,22 @@ export default function createGetTests({ getService }: FtrProviderContext) {
         projectKey: 'CK',
       });
     });
+
+    it('7.11.0 migrates webhook connector configurations to have `hasAuth` property', async () => {
+      const responseWithAuth = await supertest.get(
+        `${getUrlPrefix(``)}/api/actions/action/949f909b-20a0-46e3-aadb-6a4d117bb592`
+      );
+
+      expect(responseWithAuth.status).to.eql(200);
+      expect(responseWithAuth.body.config).key('hasAuth');
+      expect(responseWithAuth.body.config.hasAuth).to.eql(true);
+
+      const responseNoAuth = await supertest.get(
+        `${getUrlPrefix(``)}/api/actions/action/7434121e-045a-47d6-a0a6-0b6da752397a`
+      );
+      expect(responseNoAuth.status).to.eql(200);
+      expect(responseNoAuth.body.config).key('hasAuth');
+      expect(responseNoAuth.body.config.hasAuth).to.eql(false);
+    });
   });
 }

@@ -6,14 +6,7 @@
 import React, { useCallback, useReducer, useState, useEffect } from 'react';
 import { isObject } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
-import {
-  EuiTitle,
-  EuiFlyoutHeader,
-  EuiFlyout,
-  EuiFlyoutBody,
-  EuiPortal,
-  EuiBetaBadge,
-} from '@elastic/eui';
+import { EuiTitle, EuiFlyoutHeader, EuiFlyout, EuiFlyoutBody, EuiPortal } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useAlertsContext } from '../../context/alerts_context';
 import { Alert, AlertAction, IErrorObject } from '../../../types';
@@ -21,7 +14,6 @@ import { AlertForm, validateBaseProperties } from './alert_form';
 import { alertReducer } from './alert_reducer';
 import { createAlert } from '../../lib/alert_api';
 import { HealthCheck } from '../../components/health_check';
-import { PLUGIN } from '../../constants/plugin';
 import { ConfirmAlertSave } from './confirm_alert_save';
 import { hasShowActionsCapability } from '../../lib/capabilities';
 import AlertAddFooter from './alert_add_footer';
@@ -162,20 +154,6 @@ export const AlertAdd = ({
               <FormattedMessage
                 defaultMessage="Create alert"
                 id="xpack.triggersActionsUI.sections.alertAdd.flyoutTitle"
-              />
-              &emsp;
-              <EuiBetaBadge
-                label="Beta"
-                tooltipContent={i18n.translate(
-                  'xpack.triggersActionsUI.sections.alertAdd.betaBadgeTooltipContent',
-                  {
-                    defaultMessage:
-                      '{pluginName} is in beta and is subject to change. The design and code is less mature than official GA features and is being provided as-is with no warranties. Beta features are not subject to the support SLA of official GA features.',
-                    values: {
-                      pluginName: PLUGIN.getI18nName(i18n),
-                    },
-                  }
-                )}
               />
             </h3>
           </EuiTitle>

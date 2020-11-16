@@ -5,7 +5,7 @@
  */
 
 import { Logger } from 'kibana/server';
-import { ESSearchResponse } from '../../../../../typings/elasticsearch';
+import { ESSearchResponse } from '../../../../../../../typings/elasticsearch';
 import { PromiseReturnType } from '../../../../../../observability/typings/common';
 import { Setup, SetupTimeRange } from '../../../helpers/setup_request';
 
@@ -81,7 +81,7 @@ export async function anomalySeriesFetcher({
     const response: ESSearchResponse<
       unknown,
       typeof params
-    > = (await ml.mlSystem.mlAnomalySearch(params)) as any;
+    > = (await ml.mlSystem.mlAnomalySearch(params, [jobId])) as any;
 
     return response;
   } catch (err) {

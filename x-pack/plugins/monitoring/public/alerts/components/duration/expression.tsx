@@ -6,10 +6,11 @@
 
 import React, { Fragment } from 'react';
 import { EuiForm, EuiSpacer } from '@elastic/eui';
-import { CommonAlertParamDetails } from '../../../../common/types';
+import { CommonAlertParamDetails } from '../../../../common/types/alerts';
 import { AlertParamDuration } from '../../flyout_expressions/alert_param_duration';
 import { AlertParamType } from '../../../../common/enums';
 import { AlertParamPercentage } from '../../flyout_expressions/alert_param_percentage';
+import { AlertParamNumber } from '../../flyout_expressions/alert_param_number';
 
 export interface Props {
   alertParams: { [property: string]: any };
@@ -26,14 +27,14 @@ export const Expression: React.FC<Props> = (props) => {
     const details = paramDetails[alertParamName];
     const value = alertParams[alertParamName];
 
-    switch (details.type) {
+    switch (details?.type) {
       case AlertParamType.Duration:
         return (
           <AlertParamDuration
             key={alertParamName}
             name={alertParamName}
             duration={value}
-            label={details.label}
+            label={details?.label}
             errors={errors[alertParamName]}
             setAlertParams={setAlertParams}
           />
@@ -43,8 +44,19 @@ export const Expression: React.FC<Props> = (props) => {
           <AlertParamPercentage
             key={alertParamName}
             name={alertParamName}
-            label={details.label}
+            label={details?.label}
             percentage={value}
+            errors={errors[alertParamName]}
+            setAlertParams={setAlertParams}
+          />
+        );
+      case AlertParamType.Number:
+        return (
+          <AlertParamNumber
+            key={alertParamName}
+            name={alertParamName}
+            label={details?.label}
+            value={value}
             errors={errors[alertParamName]}
             setAlertParams={setAlertParams}
           />

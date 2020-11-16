@@ -17,13 +17,15 @@
  * under the License.
  */
 
+import { BehaviorSubject } from 'rxjs';
 import { ISessionService } from './types';
 
 export function getSessionServiceMock(): jest.Mocked<ISessionService> {
   return {
     clear: jest.fn(),
     start: jest.fn(),
+    restore: jest.fn(),
     getSessionId: jest.fn(),
-    getSession$: jest.fn(),
+    getSession$: jest.fn(() => new BehaviorSubject(undefined).asObservable()),
   };
 }

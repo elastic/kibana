@@ -10,16 +10,11 @@ import { expandHostStats, expandNetworkStats } from '../tasks/overview';
 import { loginAndWaitForPage } from '../tasks/login';
 
 import { OVERVIEW_URL } from '../urls/navigation';
-import { esArchiverUnload, esArchiverLoad } from '../tasks/es_archiver';
 
 describe('Overview Page', () => {
-  before(() => {
-    cy.stubSearchStrategyApi('overviewHostQuery', 'overview_search_strategy');
-    cy.stubSearchStrategyApi('overviewNetworkQuery', 'overview_search_strategy');
-    loginAndWaitForPage(OVERVIEW_URL);
-  });
-
   it('Host stats render with correct values', () => {
+    cy.stubSearchStrategyApi('overview_search_strategy');
+    loginAndWaitForPage(OVERVIEW_URL);
     expandHostStats();
 
     HOST_STATS.forEach((stat) => {
@@ -28,6 +23,8 @@ describe('Overview Page', () => {
   });
 
   it('Network stats render with correct values', () => {
+    cy.stubSearchStrategyApi('overview_search_strategy');
+    loginAndWaitForPage(OVERVIEW_URL);
     expandNetworkStats();
 
     NETWORK_STATS.forEach((stat) => {
@@ -37,12 +34,10 @@ describe('Overview Page', () => {
 
   describe('with no data', () => {
     before(() => {
-      esArchiverUnload('auditbeat');
+      cy.server();
+      cy.fixture('empty_instance').as('emptyInstance');
       loginAndWaitForPage(OVERVIEW_URL);
-    });
-
-    after(() => {
-      esArchiverLoad('auditbeat');
+      cy.route('POST', '**/internal/search/securitySolutionIndexFields', '@emptyInstance');
     });
 
     it('Splash screen should be here', () => {
