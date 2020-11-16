@@ -4,6 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { EngineOverviewLogic } from './engine_overview_logic';
-export { EngineOverview } from './engine_overview';
-export { OVERVIEW_TITLE } from './constants';
+import { i18n } from '@kbn/i18n';
+
+export const OVERVIEW_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.engine.overview.title',
+  { defaultMessage: 'Overview' }
+);
