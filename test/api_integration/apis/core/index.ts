@@ -17,5 +17,11 @@
  * under the License.
  */
 
-export const MAX_BUCKETS_SETTING = 'metrics:max_buckets';
-export const INDEXES_SEPARATOR = ',';
+import { FtrProviderContext } from '../../ftr_provider_context';
+
+export default function ({ loadTestFile }: FtrProviderContext) {
+  describe('core', () => {
+    loadTestFile(require.resolve('./compression'));
+    loadTestFile(require.resolve('./translations'));
+  });
+}
