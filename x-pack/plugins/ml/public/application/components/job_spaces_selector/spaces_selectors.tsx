@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, useState, useEffect } from 'react';
+import React, { FC, useState, useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -69,51 +69,66 @@ export const SpacesSelector: FC<Props> = ({
     setSelectedSpaceIds(ids);
   }
 
-  const isGlobalControlChecked = selectedSpaceIds.includes(ALL_SPACES_ID);
+  const isGlobalControlChecked = useMemo(() => selectedSpaceIds.includes(ALL_SPACES_ID), [
+    selectedSpaceIds,
+  ]);
 
-  const options = allSpaces.map<SpaceOption>((space) => {
-    return {
-      label: space.name,
-      prepend: <SpaceAvatar space={space} size={'s'} />,
-      checked: selectedSpaceIds.includes(space.id) ? 'on' : undefined,
-      disabled: canEditSpaces === false,
-      ['data-space-id']: space.id,
-      ['data-test-subj']: `cts-space-selector-row-${space.id}`,
-    };
-  });
+  const options = useMemo(
+    () =>
+      allSpaces.map<SpaceOption>((space) => {
+        return {
+          label: space.name,
+          prepend: <SpaceAvatar space={space} size={'s'} />,
+          checked: selectedSpaceIds.includes(space.id) ? 'on' : undefined,
+          disabled: canEditSpaces === false,
+          ['data-space-id']: space.id,
+          ['data-test-subj']: `cts-space-selector-row-${space.id}`,
+        };
+      }),
+    [allSpaces, selectedSpaceIds, canEditSpaces]
+  );
 
-  const shareToAllSpaces = {
-    id: 'shareToAllSpaces',
-    title: i18n.translate('xpack.ml.management.spacesSelectorFlyout.shareToAllSpaces.title', {
-      defaultMessage: 'All spaces',
+  const shareToAllSpaces = useMemo(
+    () => ({
+      id: 'shareToAllSpaces',
+      title: i18n.translate('xpack.ml.management.spacesSelectorFlyout.shareToAllSpaces.title', {
+        defaultMessage: 'All spaces',
+      }),
+      text: i18n.translate('xpack.ml.management.spacesSelectorFlyout.shareToAllSpaces.text', {
+        defaultMessage: 'Make job available in all current and future spaces.',
+      }),
+      ...(!canShareToAllSpaces && {
+        tooltip: isGlobalControlChecked
+          ? i18n.translate(
+              'xpack.ml.management.spacesSelectorFlyout.shareToAllSpaces.cannotUncheckTooltip',
+              { defaultMessage: 'You need additional privileges to change this option.' }
+            )
+          : i18n.translate(
+              'xpack.ml.management.spacesSelectorFlyout.shareToAllSpaces.cannotCheckTooltip',
+              { defaultMessage: 'You need additional privileges to use this option.' }
+            ),
+      }),
+      disabled: !canShareToAllSpaces,
     }),
-    text: i18n.translate('xpack.ml.management.spacesSelectorFlyout.shareToAllSpaces.text', {
-      defaultMessage: 'Make job available in all current and future spaces.',
-    }),
-    ...(!canShareToAllSpaces && {
-      tooltip: isGlobalControlChecked
-        ? i18n.translate(
-            'xpack.ml.management.spacesSelectorFlyout.shareToAllSpaces.cannotUncheckTooltip',
-            { defaultMessage: 'You need additional privileges to change this option.' }
-          )
-        : i18n.translate(
-            'xpack.ml.management.spacesSelectorFlyout.shareToAllSpaces.cannotCheckTooltip',
-            { defaultMessage: 'You need additional privileges to use this option.' }
-          ),
-    }),
-    disabled: !canShareToAllSpaces,
-  };
+    [isGlobalControlChecked, canShareToAllSpaces]
+  );
 
-  const shareToExplicitSpaces = {
-    id: 'shareToExplicitSpaces',
-    title: i18n.translate('xpack.ml.management.spacesSelectorFlyout.shareToExplicitSpaces.title', {
-      defaultMessage: 'Select spaces',
+  const shareToExplicitSpaces = useMemo(
+    () => ({
+      id: 'shareToExplicitSpaces',
+      title: i18n.translate(
+        'xpack.ml.management.spacesSelectorFlyout.shareToExplicitSpaces.title',
+        {
+          defaultMessage: 'Select spaces',
+        }
+      ),
+      text: i18n.translate('xpack.ml.management.spacesSelectorFlyout.shareToExplicitSpaces.text', {
+        defaultMessage: 'Make job available in selected spaces only.',
+      }),
+      disabled: !canShareToAllSpaces && isGlobalControlChecked,
     }),
-    text: i18n.translate('xpack.ml.management.spacesSelectorFlyout.shareToExplicitSpaces.text', {
-      defaultMessage: 'Make job available in selected spaces only.',
-    }),
-    disabled: !canShareToAllSpaces && isGlobalControlChecked,
-  };
+    [canShareToAllSpaces, isGlobalControlChecked]
+  );
 
   return (
     <>
