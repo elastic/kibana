@@ -180,7 +180,7 @@ describe('test policy response handler', () => {
       });
 
       const mockRequest = httpServerMock.createKibanaRequest({
-        query: { policy_id: 'my-policy', package_name: 'endpoint' },
+        query: { policy_id: '41a1b470-221b-11eb-8fba-fb9c0d46ace3', package_name: 'endpoint' },
       });
 
       await policySummarysHandler(
@@ -191,7 +191,7 @@ describe('test policy response handler', () => {
       expect(mockResponse.ok).toBeCalled();
       expect(mockResponse.ok.mock.calls[0][0]?.body).toEqual({
         summary_response: {
-          policy_id: 'my-policy',
+          policy_id: '41a1b470-221b-11eb-8fba-fb9c0d46ace3',
           package: 'endpoint',
           versions_count: { '8.0.0': 2, '8.1.0': 1 },
         },
