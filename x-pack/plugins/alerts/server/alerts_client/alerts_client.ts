@@ -242,6 +242,7 @@ export class AlertsClient {
       createdBy: username,
       updatedBy: username,
       createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
       params: validatedAlertTypeParams as RawAlert['params'],
       muteAll: false,
       mutedInstanceIds: [],
@@ -291,12 +292,7 @@ export class AlertsClient {
       });
       createdAlert.attributes.scheduledTaskId = scheduledTask.id;
     }
-    return this.getAlertFromRaw(
-      createdAlert.id,
-      createdAlert.attributes,
-      createdAlert.updated_at,
-      references
-    );
+    return this.getAlertFromRaw(createdAlert.id, createdAlert.attributes, references);
   }
 
   public async get({ id }: { id: string }): Promise<SanitizedAlert> {
@@ -306,7 +302,7 @@ export class AlertsClient {
       result.attributes.consumer,
       ReadOperations.Get
     );
-    return this.getAlertFromRaw(result.id, result.attributes, result.updated_at, result.references);
+    return this.getAlertFromRaw(result.id, result.attributes, result.references);
   }
 
   public async getAlertState({ id }: { id: string }): Promise<AlertTaskState | void> {
@@ -395,13 +391,11 @@ export class AlertsClient {
       type: 'alert',
     });
 
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    const authorizedData = data.map(({ id, attributes, updated_at, references }) => {
+    const authorizedData = data.map(({ id, attributes, references }) => {
       ensureAlertTypeIsAuthorized(attributes.alertTypeId, attributes.consumer);
       return this.getAlertFromRaw(
         id,
         fields ? (pick(attributes, fields) as RawAlert) : attributes,
-        updated_at,
         references
       );
     });
@@ -577,6 +571,7 @@ export class AlertsClient {
       params: validatedAlertTypeParams as RawAlert['params'],
       actions,
       updatedBy: username,
+      updatedAt: new Date().toISOString(),
     });
     try {
       updatedObject = await this.unsecuredSavedObjectsClient.create<RawAlert>(
@@ -595,12 +590,7 @@ export class AlertsClient {
       throw e;
     }
 
-    return this.getPartialAlertFromRaw(
-      id,
-      updatedObject.attributes,
-      updatedObject.updated_at,
-      updatedObject.references
-    );
+    return this.getPartialAlertFromRaw(id, updatedObject.attributes, updatedObject.references);
   }
 
   private apiKeyAsAlertAttributes(
@@ -747,6 +737,7 @@ export class AlertsClient {
           username
         ),
         updatedBy: username,
+        updatedAt: new Date().toISOString(),
       });
       try {
         await this.unsecuredSavedObjectsClient.update('alert', id, updateAttributes, { version });
@@ -817,6 +808,7 @@ export class AlertsClient {
           apiKey: null,
           apiKeyOwner: null,
           updatedBy: await this.getUserName(),
+          updatedAt: new Date().toISOString(),
         }),
         { version }
       );
@@ -857,6 +849,7 @@ export class AlertsClient {
       muteAll: true,
       mutedInstanceIds: [],
       updatedBy: await this.getUserName(),
+      updatedAt: new Date().toISOString(),
     });
     const updateOptions = { version };
 
@@ -895,6 +888,7 @@ export class AlertsClient {
       muteAll: false,
       mutedInstanceIds: [],
       updatedBy: await this.getUserName(),
+      updatedAt: new Date().toISOString(),
     });
     const updateOptions = { version };
 
@@ -939,6 +933,7 @@ export class AlertsClient {
         this.updateMeta({
           mutedInstanceIds,
           updatedBy: await this.getUserName(),
+          updatedAt: new Date().toISOString(),
         }),
         { version }
       );
@@ -981,6 +976,7 @@ export class AlertsClient {
         alertId,
         this.updateMeta({
           updatedBy: await this.getUserName(),
+          updatedAt: new Date().toISOString(),
           mutedInstanceIds: mutedInstanceIds.filter((id: string) => id !== alertInstanceId),
         }),
         { version }
@@ -1032,19 +1028,17 @@ export class AlertsClient {
   private getAlertFromRaw(
     id: string,
     rawAlert: RawAlert,
-    updatedAt: SavedObject['updated_at'],
     references: SavedObjectReference[] | undefined
   ): Alert {
     // In order to support the partial update API of Saved Objects we have to support
     // partial updates of an Alert, but when we receive an actual RawAlert, it is safe
     // to cast the result to an Alert
-    return this.getPartialAlertFromRaw(id, rawAlert, updatedAt, references) as Alert;
+    return this.getPartialAlertFromRaw(id, rawAlert, references) as Alert;
   }
 
   private getPartialAlertFromRaw(
     id: string,
-    { createdAt, meta, scheduledTaskId, ...rawAlert }: Partial<RawAlert>,
-    updatedAt: SavedObject['updated_at'] = createdAt,
+    { createdAt, updatedAt, meta, scheduledTaskId, ...rawAlert }: Partial<RawAlert>,
     references: SavedObjectReference[] | undefined
   ): PartialAlert {
     // Not the prettiest code here, but if we want to use most of the
