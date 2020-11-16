@@ -3,6 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+/* eslint-disable complexity */
+
+import { AlertServices } from '../../../../../alerts/server';
 
 import { singleSearchAfter } from './single_search_after';
 import { singleBulkCreate } from './single_bulk_create';
@@ -15,7 +18,35 @@ import {
   getSignalTimeTuples,
   mergeReturns,
 } from './utils';
-import { SearchAfterAndBulkCreateParams, SearchAfterAndBulkCreateReturnType } from './types';
+import {
+  GetFieldMappingType,
+  SearchAfterAndBulkCreateParams,
+  SearchAfterAndBulkCreateReturnType,
+} from './types';
+
+interface ReturnType {
+  [timestampString: string]: string[]; // maps timestampString like @timestamp or 'event.ingested' to the indices that contain that timestamp mapping
+}
+
+export const checkMappingForTimestampFields = async (
+  indices: string[],
+  timestamps: string[],
+  services: AlertServices
+): Promise<ReturnType> => {
+  const foundMappings: GetFieldMappingType = await services.callCluster('indices.getFieldMapping', {
+    index: indices,
+    fields: timestamps,
+  });
+
+  // map the timestamp fields like '@timestamp', 'event.ingested' etc.. to the indices that contain mappings for these fields
+  const toReturn = timestamps.reduce((acc, timestamp) => {
+    return {
+      [timestamp]: indices.filter((index) => foundMappings[index].mappings[timestamp] != null),
+      ...acc,
+    };
+  }, {} as ReturnType);
+  return toReturn;
+};
 
 // search_after through documents and re-index using bulk endpoint.
 export const searchAfterAndBulkCreate = async ({
@@ -57,6 +88,12 @@ export const searchAfterAndBulkCreate = async ({
     ? [ruleParams.timestampOverride, '@timestamp']
     : ['@timestamp'];
 
+  const timestampsAndIndices = await checkMappingForTimestampFields(
+    inputIndexPattern,
+    timestampsToSort,
+    services
+  );
+
   for (const timestamp of timestampsToSort) {
     const totalToFromTuples = getSignalTimeTuples({
       logger,
@@ -84,6 +121,48 @@ export const searchAfterAndBulkCreate = async ({
         try {
           logger.debug(buildRuleMessage(`sortIds: ${sortId}`));
 
+          logger.debug(
+            `inputIndexPattern: ${JSON.stringify(
+              inputIndexPattern,
+              null,
+              2
+            )}, timestampsAndIndices[timestamp].length: ${JSON.stringify(
+              timestampsAndIndices[timestamp],
+              null,
+              2
+            )}`
+          );
+
+          if (
+            timestampsAndIndices[timestamp] == null ||
+            timestampsAndIndices[timestamp].length === 0
+          ) {
+            logger.error(
+              buildRuleMessage(
+                `The field ${timestamp} was not found in any of the following index patterns ${JSON.stringify(
+                  inputIndexPattern,
+                  null,
+                  2
+                )}`
+              )
+            );
+            break;
+          } else if (inputIndexPattern.length !== timestampsAndIndices[timestamp].length) {
+            logger.error(
+              buildRuleMessage(
+                `one or more indices from index pattern ${JSON.stringify(
+                  inputIndexPattern,
+                  null,
+                  2
+                )} are missing required field ${timestamp}. ${timestamp} was found in ${JSON.stringify(
+                  timestampsAndIndices[timestamp],
+                  null,
+                  2
+                )}`
+              )
+            );
+            break;
+          }
           // perform search_after with optionally undefined sortId
           const { searchResult, searchDuration, searchErrors } = await singleSearchAfter({
             buildRuleMessage,
