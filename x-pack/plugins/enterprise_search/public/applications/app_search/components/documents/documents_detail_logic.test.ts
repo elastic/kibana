@@ -114,7 +114,7 @@ describe('DocumentsLogic', () => {
       });
 
       afterEach(() => {
-        confirmSpy.mockRestore())
+        confirmSpy.mockRestore();
       });
 
       it('will call an API endpoint and show a success message', async () => {
