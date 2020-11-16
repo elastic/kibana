@@ -31,7 +31,7 @@ export function registerIngestManagerUsageCollector(
 
   // create usage collector
   const ingestManagerCollector = usageCollection.makeUsageCollector<Usage>({
-    type: 'ingest_manager',
+    type: 'fleet',
     isReady: () => true,
     fetch: async () => {
       const soClient = await getInternalSavedObjectsClient(core);
