@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl, shallowWithIntl } from '@kbn/test/jest';
 import React from 'react';
 
 import { Overrides } from './overrides';

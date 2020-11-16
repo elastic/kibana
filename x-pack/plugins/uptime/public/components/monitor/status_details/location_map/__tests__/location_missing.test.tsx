@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { renderWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { renderWithIntl, shallowWithIntl } from '@kbn/test/jest';
 import { LocationMissingWarning } from '../location_missing';
 
 describe('LocationMissingWarning component', () => {
