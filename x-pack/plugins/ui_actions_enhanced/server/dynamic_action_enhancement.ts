@@ -17,9 +17,8 @@ export const dynamicActionEnhancement = (
     telemetry: (state: SerializableState, telemetry: Record<string, any>) => {
       let telemetryData = telemetry;
       (state as DynamicActionsState).events.forEach((event: SerializedEvent) => {
-        if (getActionFactory(event.action.factoryId)) {
-          telemetryData = getActionFactory(event.action.factoryId)!.telemetry(event, telemetryData);
-        }
+        const factory = getActionFactory(event.action.factoryId);
+        if (factory) telemetryData = factory.telemetry(event, telemetryData);
       });
       return telemetryData;
     },
@@ -27,8 +26,9 @@ export const dynamicActionEnhancement = (
       const references: SavedObjectReference[] = [];
       const newState: DynamicActionsState = {
         events: (state as DynamicActionsState).events.map((event: SerializedEvent) => {
-          const result = getActionFactory(event.action.factoryId)
-            ? getActionFactory(event.action.factoryId)!.extract(event)
+          const factory = getActionFactory(event.action.factoryId);
+          const result = factory
+            ? factory.extract(event)
             : {
                 state: event,
                 references: [],
@@ -42,9 +42,8 @@ export const dynamicActionEnhancement = (
     inject: (state: SerializableState, references: SavedObjectReference[]) => {
       return {
         events: (state as DynamicActionsState).events.map((event: SerializedEvent) => {
-          return getActionFactory(event.action.factoryId)
-            ? getActionFactory(event.action.factoryId)!.inject(event, references)
-            : event;
+          const factory = getActionFactory(event.action.factoryId);
+          return factory ? factory.inject(event, references) : event;
         }),
       } as DynamicActionsState;
     },
