@@ -10,7 +10,12 @@ import {
   SavedObjectsClientContract,
 } from 'src/core/server';
 import { SecurityPluginSetup } from '../../../security/server';
-import { AgentService, FleetStartContract, PackageService } from '../../../fleet/server';
+import {
+  AgentService,
+  FleetStartContract,
+  PackageService,
+  PackagePolicyServiceInterface,
+} from '../../../fleet/server';
 import { PluginStartContract as AlertsPluginStartContract } from '../../../alerts/server';
 import { getPackagePolicyCreateCallback } from './ingest_integration';
 import { ManifestManager } from './services/artifacts';
@@ -66,7 +71,7 @@ export const createMetadataService = (packageService: PackageService): MetadataS
 };
 
 export type EndpointAppContextServiceStartContract = Partial<
-  Pick<FleetStartContract, 'agentService' | 'packageService'>
+  Pick<FleetStartContract, 'agentService' | 'packageService' | 'packagePolicyService'>
 > & {
   logger: Logger;
   manifestManager?: ManifestManager;
@@ -85,11 +90,13 @@ export type EndpointAppContextServiceStartContract = Partial<
 export class EndpointAppContextService {
   private agentService: AgentService | undefined;
   private manifestManager: ManifestManager | undefined;
+  private packagePolicyService: PackagePolicyServiceInterface | undefined;
   private savedObjectsStart: SavedObjectsServiceStart | undefined;
   private metadataService: MetadataService | undefined;
 
   public start(dependencies: EndpointAppContextServiceStartContract) {
     this.agentService = dependencies.agentService;
+    this.packagePolicyService = dependencies.packagePolicyService;
     this.manifestManager = dependencies.manifestManager;
     this.savedObjectsStart = dependencies.savedObjectsStart;
     this.metadataService = createMetadataService(dependencies.packageService!);
@@ -113,6 +120,10 @@ export class EndpointAppContextService {
 
   public getAgentService(): AgentService | undefined {
     return this.agentService;
+  }
+
+  public getPackagePolicyService(): PackagePolicyServiceInterface | undefined {
+    return this.packagePolicyService;
   }
 
   public getMetadataService(): MetadataService | undefined {

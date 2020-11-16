@@ -565,6 +565,7 @@ export type HostMetadata = Immutable<{
         id: string;
         status: HostPolicyResponseActionStatus;
         name: string;
+        endpoint_policy_version: number;
         version: number;
       };
     };

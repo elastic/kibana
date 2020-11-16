@@ -347,6 +347,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     this.endpointAppContextService.start({
       agentService: plugins.fleet?.agentService,
       packageService: plugins.fleet?.packageService,
+      packagePolicyService: plugins.fleet?.packagePolicyService,
       appClientFactory: this.appClientFactory,
       security: this.setupPlugins!.security!,
       alerts: plugins.alerts,

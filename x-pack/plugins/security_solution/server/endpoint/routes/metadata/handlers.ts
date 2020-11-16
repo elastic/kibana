@@ -291,12 +291,18 @@ async function enrichHostMetadata(
         metadataRequestContext.requestHandlerContext.core.savedObjects.client,
         elasticAgentId
       );
+    const endpointPolicy = await metadataRequestContext.endpointAppContextService
+      .getPackagePolicyService()
+      ?.get(
+        metadataRequestContext.requestHandlerContext.core.savedObjects.client,
+        hostMetadata.Endpoint.policy.applied.id
+      );
     policyVersions = {
       agent: {
-        applied: agent?.policy_revision!,
+        applied: agent?.policy_revision || 0,
         configured: 0,
       },
-      endpoint: 0,
+      endpoint: endpointPolicy?.revision || 0,
     };
   } catch (e) {
     log.error(e);
