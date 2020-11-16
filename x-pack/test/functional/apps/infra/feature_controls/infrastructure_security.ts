@@ -268,10 +268,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     describe('global infrastructure read & apm privileges', () => {
       before(async () => {
-            },
-          ],
-        });
-
         await security.user.create('global_infrastructure_apm_read_user', {
           password: 'global_infrastructure_apm_read_user-password',
           roles: ['global_infrastructure_apm_read_role'],
