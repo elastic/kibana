@@ -6,18 +6,13 @@
 
 import { validate } from '../../../../../common/validate';
 import { createRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/create_rules_type_dependents';
-import { RuleAlertAction } from '../../../../../common/detection_engine/types';
-import {
-  CreateRulesBulkSchemaDecoded,
-  createRulesBulkSchema,
-} from '../../../../../common/detection_engine/schemas/request/create_rules_bulk_schema';
+import { createRulesBulkSchema } from '../../../../../common/detection_engine/schemas/request/create_rules_bulk_schema';
 import { rulesBulkSchema } from '../../../../../common/detection_engine/schemas/response/rules_bulk_schema';
 import { IRouter } from '../../../../../../../../src/core/server';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { SetupPlugins } from '../../../../plugin';
 import { buildMlAuthz } from '../../../machine_learning/authz';
 import { throwHttpError } from '../../../machine_learning/validation';
-import { createRules } from '../../rules/create_rules';
 import { readRules } from '../../rules/read_rules';
 import { getDuplicates } from './utils';
 import { transformValidateBulkError } from './validate';
@@ -26,17 +21,14 @@ import { buildRouteValidation } from '../../../../utils/build_validation/route_v
 
 import { transformBulkError, createBulkErrorObject, buildSiemResponse } from '../utils';
 import { updateRulesNotifications } from '../../rules/update_rules_notifications';
-import { PartialFilter } from '../../types';
-import { isMlRule } from '../../../../../common/machine_learning/helpers';
+import { convertCreateAPIToInternalSchema } from '../../schemas/rule_converters';
 
 export const createRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) => {
   router.post(
     {
       path: `${DETECTION_ENGINE_RULES_URL}/_bulk_create`,
       validate: {
-        body: buildRouteValidation<typeof createRulesBulkSchema, CreateRulesBulkSchemaDecoded>(
-          createRulesBulkSchema
-        ),
+        body: buildRouteValidation(createRulesBulkSchema),
       },
       options: {
         tags: ['access:securitySolution'],
@@ -67,158 +59,63 @@ export const createRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) =>
         ruleDefinitions
           .filter((rule) => rule.rule_id == null || !dupes.includes(rule.rule_id))
           .map(async (payloadRule) => {
-            const {
-              actions: actionsRest,
-              anomaly_threshold: anomalyThreshold,
-              author,
-              building_block_type: buildingBlockType,
-              description,
-              enabled,
-              event_category_override: eventCategoryOverride,
-              false_positives: falsePositives,
-              from,
-              query: queryOrUndefined,
-              language: languageOrUndefined,
-              license,
-              machine_learning_job_id: machineLearningJobId,
-              output_index: outputIndex,
-              saved_id: savedId,
-              meta,
-              filters: filtersRest,
-              rule_id: ruleId,
-              index,
-              interval,
-              max_signals: maxSignals,
-              risk_score: riskScore,
-              risk_score_mapping: riskScoreMapping,
-              rule_name_override: ruleNameOverride,
-              name,
-              severity,
-              severity_mapping: severityMapping,
-              tags,
-              threat,
-              threat_filters: threatFilters,
-              threat_index: threatIndex,
-              threat_mapping: threatMapping,
-              threat_query: threatQuery,
-              threat_language: threatLanguage,
-              concurrent_searches: concurrentSearches,
-              items_per_search: itemsPerSearch,
-              threshold,
-              throttle,
-              timestamp_override: timestampOverride,
-              to,
-              type,
-              references,
-              note,
-              timeline_id: timelineId,
-              timeline_title: timelineTitle,
-              version,
-              exceptions_list: exceptionsList,
-            } = payloadRule;
+            if (payloadRule.rule_id != null) {
+              const rule = await readRules({
+                alertsClient,
+                ruleId: payloadRule.rule_id,
+                id: undefined,
+              });
+              if (rule != null) {
+                return createBulkErrorObject({
+                  ruleId: payloadRule.rule_id,
+                  statusCode: 409,
+                  message: `rule_id: "${payloadRule.rule_id}" already exists`,
+                });
+              }
+            }
+            const internalRule = convertCreateAPIToInternalSchema(payloadRule, siemClient);
             try {
               const validationErrors = createRuleValidateTypeDependents(payloadRule);
               if (validationErrors.length) {
                 return createBulkErrorObject({
-                  ruleId,
+                  ruleId: internalRule.params.ruleId,
                   statusCode: 400,
                   message: validationErrors.join(),
                 });
               }
 
-              const query = !isMlRule(type) && queryOrUndefined == null ? '' : queryOrUndefined;
-
-              const language =
-                !isMlRule(type) && languageOrUndefined == null ? 'kuery' : languageOrUndefined;
-
-              // TODO: Fix these either with an is conversion or by better typing them within io-ts
-              const actions: RuleAlertAction[] = actionsRest as RuleAlertAction[];
-              const filters: PartialFilter[] | undefined = filtersRest as PartialFilter[];
-              throwHttpError(await mlAuthz.validateRuleType(type));
-
-              const finalIndex = outputIndex ?? siemClient.getSignalsIndex();
+              throwHttpError(await mlAuthz.validateRuleType(internalRule.params.type));
+              const finalIndex = internalRule.params.outputIndex;
               const indexExists = await getIndexExists(clusterClient.callAsCurrentUser, finalIndex);
               if (!indexExists) {
                 return createBulkErrorObject({
-                  ruleId,
+                  ruleId: internalRule.params.ruleId,
                   statusCode: 400,
                   message: `To create a rule, the index must exist first. Index ${finalIndex} does not exist`,
                 });
               }
-              if (ruleId != null) {
-                const rule = await readRules({ alertsClient, ruleId, id: undefined });
-                if (rule != null) {
-                  return createBulkErrorObject({
-                    ruleId,
-                    statusCode: 409,
-                    message: `rule_id: "${ruleId}" already exists`,
-                  });
-                }
-              }
-              const createdRule = await createRules({
-                alertsClient,
-                anomalyThreshold,
-                author,
-                buildingBlockType,
-                description,
-                enabled,
-                eventCategoryOverride,
-                falsePositives,
-                from,
-                immutable: false,
-                query,
-                language,
-                license,
-                machineLearningJobId,
-                outputIndex: finalIndex,
-                savedId,
-                timelineId,
-                timelineTitle,
-                meta,
-                filters,
-                ruleId,
-                index,
-                interval,
-                maxSignals,
-                name,
-                riskScore,
-                riskScoreMapping,
-                ruleNameOverride,
-                severity,
-                severityMapping,
-                tags,
-                to,
-                type,
-                threat,
-                threatFilters,
-                threatMapping,
-                threatQuery,
-                threatIndex,
-                threatLanguage,
-                concurrentSearches,
-                itemsPerSearch,
-                threshold,
-                timestampOverride,
-                references,
-                note,
-                version,
-                exceptionsList,
-                actions: throttle === 'rule' ? actions : [], // Only enable actions if throttle is set to rule, otherwise we are a notification and should not enable it,
+
+              const createdRule = await alertsClient.create({
+                data: internalRule,
               });
 
               const ruleActions = await updateRulesNotifications({
                 ruleAlertId: createdRule.id,
                 alertsClient,
                 savedObjectsClient,
-                enabled,
-                actions,
-                throttle,
-                name,
+                enabled: createdRule.enabled,
+                actions: payloadRule.actions,
+                throttle: payloadRule.throttle ?? null,
+                name: createdRule.name,
               });
 
-              return transformValidateBulkError(ruleId, createdRule, ruleActions);
+              return transformValidateBulkError(
+                internalRule.params.ruleId,
+                createdRule,
+                ruleActions
+              );
             } catch (err) {
-              return transformBulkError(ruleId, err);
+              return transformBulkError(internalRule.params.ruleId, err);
             }
           })
       );
