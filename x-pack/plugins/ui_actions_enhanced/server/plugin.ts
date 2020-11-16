@@ -69,40 +69,4 @@ export class AdvancedUiActionsServerPlugin
     const actionFactory = this.actionFactories.get(actionFactoryId);
     return actionFactory;
   };
-
-  public readonly telemetry = (state: DynamicActionsState, telemetry: Record<string, any> = {}) => {
-    state.events.forEach((event: SerializedEvent) => {
-      if (this.actionFactories.has(event.action.factoryId)) {
-        this.actionFactories.get(event.action.factoryId)!.telemetry(event, telemetry);
-      }
-    });
-    return telemetry;
-  };
-
-  public readonly extract = (state: DynamicActionsState) => {
-    const references: SavedObjectReference[] = [];
-    const newState = {
-      events: state.events.map((event: SerializedEvent) => {
-        const result = this.actionFactories.has(event.action.factoryId)
-          ? this.actionFactories.get(event.action.factoryId)!.extract(event)
-          : {
-              state: event,
-              references: [],
-            };
-        result.references.forEach((r) => references.push(r));
-        return result.state;
-      }),
-    };
-    return { state: newState, references };
-  };
-
-  public readonly inject = (state: DynamicActionsState, references: SavedObjectReference[]) => {
-    return {
-      events: state.events.map((event: SerializedEvent) => {
-        return this.actionFactories.has(event.action.factoryId)
-          ? this.actionFactories.get(event.action.factoryId)!.inject(event, references)
-          : event;
-      }),
-    };
-  };
 }
