@@ -12191,8 +12191,6 @@
     "xpack.ml.dataframe.analyticsList.expandedRow.tabs.jobSettings.state": "ステータス",
     "xpack.ml.dataframe.analyticsList.expandedRow.tabs.jobSettings.stats": "統計",
     "xpack.ml.dataframe.analyticsList.expandedRow.tabs.jobSettingsLabel": "ジョブの詳細",
-    "xpack.ml.dataframe.analyticsList.experimentalBadgeLabel": "実験的",
-    "xpack.ml.dataframe.analyticsList.experimentalBadgeTooltipContent": "データフレーム分析は実験段階の機能です。フィードバックをお待ちしています。",
     "xpack.ml.dataframe.analyticsList.fetchSourceIndexPatternForCloneErrorMessage": "インデックスパターン{indexPattern}が存在するかどうかを確認するときにエラーが発生しました。{error}",
     "xpack.ml.dataframe.analyticsList.forceStopModalBody": "{analyticsId}は失敗状態です。ジョブを停止して、エラーを修正する必要があります。",
     "xpack.ml.dataframe.analyticsList.forceStopModalCancelButton": "キャンセル",
