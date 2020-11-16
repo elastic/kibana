@@ -20,12 +20,12 @@
 import { CoreStart, KibanaRequest, SavedObjectsClientContract } from 'kibana/server';
 import {
   BackgroundSessionSavedObjectAttributes,
-  createRequestHash,
   IKibanaSearchRequest,
   ISearchOptions,
   SearchSessionFindOptions,
 } from '../../../common';
 import { BACKGROUND_SESSION_TYPE } from '../../saved_objects';
+import { createRequestHash } from './utils';
 
 const DEFAULT_EXPIRATION = 7 * 24 * 60 * 60 * 1000;
 

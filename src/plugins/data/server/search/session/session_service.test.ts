@@ -19,9 +19,9 @@
 
 import type { SavedObject, SavedObjectsClientContract } from 'kibana/server';
 import { savedObjectsClientMock } from '../../../../../core/server/mocks';
-import { createRequestHash } from '../../../common';
 import { BACKGROUND_SESSION_TYPE } from '../../saved_objects';
 import { BackgroundSessionService } from './session_service';
+import { createRequestHash } from './utils';
 
 describe('BackgroundSessionService', () => {
   let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
