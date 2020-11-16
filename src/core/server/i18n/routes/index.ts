@@ -17,17 +17,9 @@
  * under the License.
  */
 
-export const getKibanaTranslationFilesMock = jest.fn();
-jest.doMock('./get_kibana_translation_files', () => ({
-  getKibanaTranslationFiles: getKibanaTranslationFilesMock,
-}));
+import { IRouter } from '../../http';
+import { registerTranslationsRoute } from './translations';
 
-export const initTranslationsMock = jest.fn();
-jest.doMock('./init_translations', () => ({
-  initTranslations: initTranslationsMock,
-}));
-
-export const registerRoutesMock = jest.fn();
-jest.doMock('./routes', () => ({
-  registerRoutes: registerRoutesMock,
-}));
+export const registerRoutes = ({ router, locale }: { router: IRouter; locale: string }) => {
+  registerTranslationsRoute(router, locale);
+};
