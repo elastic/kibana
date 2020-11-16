@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 import { DocLinksStart } from 'kibana/public';
 import ServiceNowConnectorFields from './servicenow_connectors';
 import { ServiceNowActionConnector } from './types';
