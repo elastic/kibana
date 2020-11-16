@@ -40,7 +40,6 @@ import {
   Position,
   Settings,
   RenderChangeListener,
-  ElementClickListener,
   TooltipProps,
   TooltipType,
 } from '@elastic/charts';
@@ -55,6 +54,7 @@ import { SeriesLayer } from '../../charts/public';
 //   ClickTriggerEvent,
 // } from '../../charts/public';
 import { Datatable, DatatableColumn, IInterpreterRenderHandlers } from '../../expressions/public';
+import { ValueClickContext } from '../../embeddable/public';
 
 import { PieVisParams } from './types';
 import { getThemeService, getColorsService, getFormatService } from './services';
@@ -115,11 +115,34 @@ const PieComponent = (props: PieComponentProps) => {
     [props]
   );
 
+  // move it to utils
   const handleFilterClick = useCallback(
-    (visData: Datatable): ElementClickListener => (elements) => {
-      // console.log('boom');
+    (clickedLayers: LayerValue[], bucketColumns: BucketColumns[], visData: Datatable): void => {
+      const data: ValueClickContext['data']['data'] = [];
+      const matchingIndex = visData.rows.findIndex((row) =>
+        clickedLayers.every((layer, index) => {
+          const columnId = bucketColumns[index].id;
+          return row[columnId] === layer.groupByRollup;
+        })
+      );
+
+      data.push(
+        ...clickedLayers.map((clickedLayer, index) => ({
+          column: visData.columns.findIndex((col) => col.id === bucketColumns[index].id),
+          row: matchingIndex,
+          value: clickedLayer.groupByRollup,
+          table: visData,
+        }))
+      );
+
+      const event = {
+        name: 'filterBucket',
+        data: { data },
+      };
+
+      props.fireEvent(event);
     },
-    []
+    [props]
   );
 
   // const getFilterEventData = useCallback(
@@ -323,42 +346,42 @@ const PieComponent = (props: PieComponentProps) => {
 
   return (
     <div className="pieChart__container" data-test-subj="visTypePieChart">
-      {/* <LegendToggle
+      <div className="pieChart__wrapper">
+        {/* <LegendToggle
         onClick={toggleLegend}
         showLegend={showLegend}
         legendPosition={legendPosition}
       /> */}
-      <Chart size="100%">
-        <Settings
-          showLegend={showLegend}
-          legendPosition={visParams.legendPosition || Position.Right}
-          legendMaxDepth={undefined}
-          tooltip={tooltip}
-          // onElementClick={(args) => {
-          //   const context = getFilterContext(args[0][0] as LayerValue[], groups, firstTable);
-
-          //   onClickValue(desanitizeFilterContext(context));
-          // }}
-          onElementClick={handleFilterClick(visData)}
-          theme={chartTheme}
-          baseTheme={chartBaseTheme}
-        />
-        <Partition
-          id="pie"
-          data={visData.rows}
-          valueAccessor={(d: Datum) => getSliceValue(d, metricColumn)}
-          percentFormatter={(d: number) => percentFormatter.convert(d / 100)}
-          valueGetter={!visParams.labels.show || !visParams.labels.values ? undefined : 'percent'}
-          valueFormatter={(d: number) =>
-            !visParams.labels.show || !visParams.labels.values
-              ? ''
-              : metricFieldFormatter.convert(d)
-          }
-          layers={layers}
-          config={config}
-          topGroove={!visParams.labels.show ? 0 : undefined}
-        />
-      </Chart>
+        <Chart size="100%">
+          <Settings
+            showLegend={showLegend}
+            legendPosition={visParams.legendPosition || Position.Right}
+            legendMaxDepth={undefined}
+            tooltip={tooltip}
+            onElementClick={(args) => {
+              handleFilterClick(args[0][0] as LayerValue[], bucketColumns, visData);
+            }}
+            // onElementClick={handleFilterClick(visData)}
+            theme={chartTheme}
+            baseTheme={chartBaseTheme}
+          />
+          <Partition
+            id="pie"
+            data={visData.rows}
+            valueAccessor={(d: Datum) => getSliceValue(d, metricColumn)}
+            percentFormatter={(d: number) => percentFormatter.convert(d / 100)}
+            valueGetter={!visParams.labels.show || !visParams.labels.values ? undefined : 'percent'}
+            valueFormatter={(d: number) =>
+              !visParams.labels.show || !visParams.labels.values
+                ? ''
+                : metricFieldFormatter.convert(d)
+            }
+            layers={layers}
+            config={config}
+            topGroove={!visParams.labels.show ? 0 : undefined}
+          />
+        </Chart>
+      </div>
     </div>
   );
 };
