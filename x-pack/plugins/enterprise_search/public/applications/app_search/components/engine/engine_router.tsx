@@ -19,7 +19,8 @@ import {
   ENGINES_PATH,
   ENGINE_PATH,
   ENGINE_ANALYTICS_PATH,
-  // ENGINE_DOCUMENTS_PATH,
+  ENGINE_DOCUMENTS_PATH,
+  ENGINE_DOCUMENT_DETAIL_PATH,
   // ENGINE_SCHEMA_PATH,
   // ENGINE_CRAWLER_PATH,
   // META_ENGINE_SOURCE_ENGINES_PATH,
@@ -48,6 +49,7 @@ import {
 import { Loading } from '../../../shared/loading';
 
 import { EngineLogic } from './';
+import { DocumentDetail, Documents } from '../documents';
 
 export const EngineRouter: React.FC = () => {
   const {
@@ -98,6 +100,12 @@ export const EngineRouter: React.FC = () => {
           <div data-test-subj="AnalyticsTODO">Just testing right now</div>
         </Route>
       )}
+      <Route path={ENGINE_PATH + ENGINE_DOCUMENT_DETAIL_PATH}>
+        <DocumentDetail engineBreadcrumb={engineBreadcrumb} />
+      </Route>
+      <Route path={ENGINE_PATH + ENGINE_DOCUMENTS_PATH}>
+        <Documents engineBreadcrumb={engineBreadcrumb} />
+      </Route>
       <Route>
         <SetPageChrome trail={[...engineBreadcrumb, OVERVIEW_TITLE]} />
         <div data-test-subj="EngineOverviewTODO">Overview</div>
