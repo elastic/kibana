@@ -58,8 +58,6 @@ jest.mock('../../../common/containers/sourcerer', () => {
 describe('StatefulTimeline', () => {
   const props: StatefulTimelineOwnProps = {
     timelineId: 'id',
-    onClose: jest.fn(),
-    usersViewing: [],
   };
 
   beforeEach(() => {

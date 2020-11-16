@@ -48,13 +48,9 @@ Avatar.displayName = 'Avatar';
 
 interface AddTimelineButtonComponentProps {
   timelineId: string;
-  usersViewing: string[];
 }
 
-const AddTimelineButtonComponent: React.FC<AddTimelineButtonComponentProps> = ({
-  timelineId,
-  usersViewing,
-}) => {
+const AddTimelineButtonComponent: React.FC<AddTimelineButtonComponentProps> = ({ timelineId }) => {
   const [showActions, setShowActions] = useState(false);
   const [showTimelineModal, setShowTimelineModal] = useState(false);
 

@@ -11,35 +11,27 @@ import { AddTimelineButton } from './';
 import { useKibana } from '../../../../common/lib/kibana';
 import { TimelineStatus, TimelineType } from '../../../../../common/types/timeline';
 
-jest.mock('../../../../common/lib/kibana', () => {
-  return {
-    useKibana: jest.fn(),
-    useUiSetting$: jest.fn().mockReturnValue([]),
-  };
-});
+jest.mock('../../../../common/lib/kibana', () => ({
+  useKibana: jest.fn(),
+  useUiSetting$: jest.fn().mockReturnValue([]),
+}));
 
-jest.mock('./new_template_timeline', () => {
-  return {
-    NewTemplateTimeline: jest.fn(() => <div data-test-subj="create-template-btn" />),
-  };
-});
+jest.mock('./new_template_timeline', () => ({
+  NewTemplateTimeline: jest.fn(() => <div data-test-subj="create-template-btn" />),
+}));
 
-jest.mock('./helpers', () => {
-  return {
-    Description: jest.fn().mockReturnValue(<div data-test-subj="Description" />),
-    ExistingCase: jest.fn().mockReturnValue(<div data-test-subj="ExistingCase" />),
-    NewCase: jest.fn().mockReturnValue(<div data-test-subj="NewCase" />),
-    NewTimeline: jest.fn().mockReturnValue(<div data-test-subj="create-default-btn" />),
-    NotesButton: jest.fn().mockReturnValue(<div data-test-subj="NotesButton" />),
-  };
-});
+jest.mock('./helpers', () => ({
+  Description: jest.fn().mockReturnValue(<div data-test-subj="Description" />),
+  ExistingCase: jest.fn().mockReturnValue(<div data-test-subj="ExistingCase" />),
+  NewCase: jest.fn().mockReturnValue(<div data-test-subj="NewCase" />),
+  NewTimeline: jest.fn().mockReturnValue(<div data-test-subj="create-default-btn" />),
+  NotesButton: jest.fn().mockReturnValue(<div data-test-subj="NotesButton" />),
+}));
 
-jest.mock('../../../../common/components/inspect', () => {
-  return {
-    InspectButton: jest.fn().mockReturnValue(<div />),
-    InspectButtonContainer: jest.fn(({ children }) => <div>{children}</div>),
-  };
-});
+jest.mock('../../../../common/components/inspect', () => ({
+  InspectButton: jest.fn().mockReturnValue(<div />),
+  InspectButtonContainer: jest.fn(({ children }) => <div>{children}</div>),
+}));
 
 describe('AddTimelineButton', () => {
   let wrapper: ReactWrapper;
@@ -53,7 +45,6 @@ describe('AddTimelineButton', () => {
     showNotes: false,
     showDescription: false,
     showUsersView: false,
-    usersViewing: [],
     description: 'desc',
     updateDescription: jest.fn(),
     associateNote: jest.fn(),

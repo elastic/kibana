@@ -8,15 +8,12 @@ import { EuiPanel } from '@elastic/eui';
 import { rgba } from 'polished';
 import React from 'react';
 import styled from 'styled-components';
-import deepEqual from 'fast-deep-equal';
 
 import { IS_DRAGGING_CLASS_NAME } from '../../../../common/components/drag_and_drop/helpers';
 import { DataProvider } from '../../timeline/data_providers/data_provider';
 import { flattenIntoAndGroups } from '../../timeline/data_providers/helpers';
 import { DataProviders } from '../../timeline/data_providers';
 import { FlyoutHeaderPanel } from '../header';
-import { useSourcererScope } from '../../../../common/containers/sourcerer';
-import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 
 export const FLYOUT_BUTTON_CLASS_NAME = 'timeline-flyout-button';
 
@@ -56,18 +53,6 @@ const Container = styled.div`
 
 Container.displayName = 'Container';
 
-const BadgeButtonContainer = styled.div`
-  align-items: flex-start;
-  display: flex;
-  flex-direction: row;
-  left: -87px;
-  position: absolute;
-  top: 34px;
-  transform: rotate(-90deg);
-`;
-
-BadgeButtonContainer.displayName = 'BadgeButtonContainer';
-
 const DataProvidersPanel = styled(EuiPanel)`
   border-radius: 0;
   padding: 0 4px 0 4px;
@@ -76,38 +61,23 @@ const DataProvidersPanel = styled(EuiPanel)`
 `;
 
 interface FlyoutButtonProps {
-  dataProviders: DataProvider[];
-  onOpen: () => void;
   show: boolean;
   timelineId: string;
 }
 
-export const FlyoutButton = React.memo<FlyoutButtonProps>(
-  ({ onOpen, show, dataProviders, timelineId }) => {
-    const { browserFields } = useSourcererScope(SourcererScopeName.timeline);
+export const FlyoutButton = React.memo<FlyoutButtonProps>(({ show, timelineId }) => {
+  if (!show) {
+    return null;
+  }
 
-    if (!show) {
-      return null;
-    }
-
-    return (
-      <Container>
-        <FlyoutHeaderPanel timelineId={timelineId} />
-        <DataProvidersPanel paddingSize="none">
-          <DataProviders
-            browserFields={browserFields}
-            timelineId={timelineId}
-            dataProviders={dataProviders}
-          />
-        </DataProvidersPanel>
-      </Container>
-    );
-  },
-  (prevProps, nextProps) =>
-    prevProps.show === nextProps.show &&
-    prevProps.onOpen === nextProps.onOpen &&
-    deepEqual(prevProps.dataProviders, nextProps.dataProviders) &&
-    prevProps.timelineId === nextProps.timelineId
-);
+  return (
+    <Container>
+      <FlyoutHeaderPanel timelineId={timelineId} />
+      <DataProvidersPanel paddingSize="none">
+        <DataProviders timelineId={timelineId} />
+      </DataProvidersPanel>
+    </Container>
+  );
+});
 
 FlyoutButton.displayName = 'FlyoutButton';

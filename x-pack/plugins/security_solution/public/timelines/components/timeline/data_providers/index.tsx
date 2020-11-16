@@ -7,24 +7,24 @@
 import { rgba } from 'polished';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
-import deepEqual from 'fast-deep-equal';
 
-import { BrowserFields } from '../../../../common/containers/source';
+import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
+import { useSourcererScope } from '../../../../common/containers/sourcerer';
+import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { DroppableWrapper } from '../../../../common/components/drag_and_drop/droppable_wrapper';
 import {
   droppableTimelineProvidersPrefix,
   IS_DRAGGING_CLASS_NAME,
 } from '../../../../common/components/drag_and_drop/helpers';
 
-import { DataProvider } from './data_provider';
 import { Empty } from './empty';
 import { Providers } from './providers';
 import { useManageTimeline } from '../../manage_timeline';
+import { timelineSelectors } from '../../../store/timeline';
+import { timelineDefaults } from '../../../store/timeline/defaults';
 
 interface Props {
-  browserFields: BrowserFields;
   timelineId: string;
-  dataProviders: DataProvider[];
 }
 
 const DropTargetDataProvidersContainer = styled.div`
@@ -80,38 +80,38 @@ const getDroppableId = (id: string): string => `${droppableTimelineProvidersPref
  * the user to drop anything with a facet count into
  * the data pro section.
  */
-export const DataProviders = React.memo<Props>(
-  ({ browserFields, dataProviders, timelineId }) => {
-    const { getManageTimelineById } = useManageTimeline();
-    const isLoading = useMemo(() => getManageTimelineById(timelineId).isLoading, [
-      getManageTimelineById,
-      timelineId,
-    ]);
-    return (
-      <DropTargetDataProvidersContainer className="drop-target-data-providers-container">
-        <DropTargetDataProviders
-          className="drop-target-data-providers"
-          data-test-subj="dataProviders"
-        >
-          {dataProviders != null && dataProviders.length ? (
-            <Providers
-              browserFields={browserFields}
-              timelineId={timelineId}
-              dataProviders={dataProviders}
-            />
-          ) : (
-            <DroppableWrapper isDropDisabled={isLoading} droppableId={getDroppableId(timelineId)}>
-              <Empty browserFields={browserFields} timelineId={timelineId} />
-            </DroppableWrapper>
-          )}
-        </DropTargetDataProviders>
-      </DropTargetDataProvidersContainer>
-    );
-  },
-  (prevProps, nextProps) =>
-    prevProps.timelineId === nextProps.timelineId &&
-    deepEqual(prevProps.browserFields, nextProps.browserFields) &&
-    deepEqual(prevProps.dataProviders, nextProps.dataProviders)
-);
+export const DataProviders = React.memo<Props>(({ timelineId }) => {
+  const { browserFields } = useSourcererScope(SourcererScopeName.timeline);
+  const { getManageTimelineById } = useManageTimeline();
+  const isLoading = useMemo(() => getManageTimelineById(timelineId).isLoading, [
+    getManageTimelineById,
+    timelineId,
+  ]);
+  const getTimeline = timelineSelectors.getTimelineByIdSelector();
+  const { dataProviders } = useDeepEqualSelector(
+    (state) => getTimeline(state, timelineId) ?? timelineDefaults
+  );
+
+  return (
+    <DropTargetDataProvidersContainer className="drop-target-data-providers-container">
+      <DropTargetDataProviders
+        className="drop-target-data-providers"
+        data-test-subj="dataProviders"
+      >
+        {dataProviders != null && dataProviders.length ? (
+          <Providers
+            browserFields={browserFields}
+            timelineId={timelineId}
+            dataProviders={dataProviders}
+          />
+        ) : (
+          <DroppableWrapper isDropDisabled={isLoading} droppableId={getDroppableId(timelineId)}>
+            <Empty browserFields={browserFields} timelineId={timelineId} />
+          </DroppableWrapper>
+        )}
+      </DropTargetDataProviders>
+    </DropTargetDataProvidersContainer>
+  );
+});
 
 DataProviders.displayName = 'DataProviders';

@@ -7,7 +7,6 @@
 import { EuiTabbedContent, EuiSpacer, EuiTitle, EuiProgress } from '@elastic/eui';
 import React, { useEffect, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
-import deepEqual from 'fast-deep-equal';
 import styled from 'styled-components';
 
 import { timelineActions, timelineSelectors } from '../../store/timeline';
@@ -52,11 +51,9 @@ const StyledEuiTabbedContent = styled(EuiTabbedContent)`
 
 export interface Props {
   timelineId: string;
-  onClose: () => void;
-  usersViewing: string[];
 }
 
-const StatefulTimelineComponent: React.FC<Props> = ({ timelineId, onClose, usersViewing }) => {
+const StatefulTimelineComponent: React.FC<Props> = ({ timelineId }) => {
   const getTimeline = timelineSelectors.getTimelineByIdSelector();
   const dispatch = useDispatch();
   const { selectedPatterns } = useSourcererScope(SourcererScopeName.timeline);
@@ -115,7 +112,7 @@ const StatefulTimelineComponent: React.FC<Props> = ({ timelineId, onClose, users
         <TimelineTemplateBadge>{i18n.TIMELINE_TEMPLATE}</TimelineTemplateBadge>
       )}
 
-      <FlyoutHeaderPanel onClose={onClose} timelineId={timelineId} usersViewing={usersViewing} />
+      <FlyoutHeaderPanel timelineId={timelineId} />
       <FlyoutHeader timelineId={timelineId} />
 
       <StyledEuiTabbedContent tabs={tabs} initialSelectedTab={tabs[0]} autoFocus="selected" />
@@ -125,10 +122,4 @@ const StatefulTimelineComponent: React.FC<Props> = ({ timelineId, onClose, users
 
 StatefulTimelineComponent.displayName = 'StatefulTimelineComponent';
 
-export const StatefulTimeline = React.memo(
-  StatefulTimelineComponent,
-  (prevProps, nextProps) =>
-    prevProps.timelineId === nextProps.timelineId &&
-    prevProps.onClose === nextProps.onClose &&
-    deepEqual(prevProps.usersViewing, nextProps.usersViewing)
-);
+export const StatefulTimeline = React.memo(StatefulTimelineComponent);

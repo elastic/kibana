@@ -10,7 +10,6 @@ import { FilterManager, IIndexPattern } from 'src/plugins/data/public';
 import deepEqual from 'fast-deep-equal';
 
 import { DataProviders } from '../data_providers';
-import { DataProvider } from '../data_providers/data_provider';
 import { StatefulSearchOrFilter } from '../search_or_filter';
 import { BrowserFields } from '../../../../common/containers/source';
 
@@ -22,7 +21,6 @@ import {
 
 interface Props {
   browserFields: BrowserFields;
-  dataProviders: DataProvider[];
   filterManager: FilterManager;
   indexPattern: IIndexPattern;
   show: boolean;
@@ -34,7 +32,6 @@ interface Props {
 const TimelineHeaderComponent: React.FC<Props> = ({
   browserFields,
   indexPattern,
-  dataProviders,
   filterManager,
   show,
   showCallOutUnauthorizedMsg,
@@ -62,11 +59,7 @@ const TimelineHeaderComponent: React.FC<Props> = ({
     )}
     {show && (
       <>
-        <DataProviders
-          browserFields={browserFields}
-          timelineId={timelineId}
-          dataProviders={dataProviders}
-        />
+        <DataProviders timelineId={timelineId} />
 
         <StatefulSearchOrFilter
           browserFields={browserFields}
@@ -84,7 +77,6 @@ export const TimelineHeader = React.memo(
   (prevProps, nextProps) =>
     deepEqual(prevProps.browserFields, nextProps.browserFields) &&
     deepEqual(prevProps.indexPattern, nextProps.indexPattern) &&
-    deepEqual(prevProps.dataProviders, nextProps.dataProviders) &&
     prevProps.filterManager === nextProps.filterManager &&
     prevProps.show === nextProps.show &&
     prevProps.showCallOutUnauthorizedMsg === nextProps.showCallOutUnauthorizedMsg &&

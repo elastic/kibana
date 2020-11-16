@@ -8,7 +8,6 @@ import { shallow } from 'enzyme';
 import React from 'react';
 import useResizeObserver from 'use-resize-observer/polyfilled';
 
-import { mockBrowserFields } from '../../../../common/containers/source/mock';
 import { Direction } from '../../../../graphql/types';
 import {
   defaultHeaders,
@@ -99,9 +98,7 @@ describe('Timeline', () => {
       dataProviders: mockDataProviders,
       end: endDate,
       filters: [],
-      id: TimelineId.test,
-      indexNames: mockIndexNames,
-      indexPattern,
+      timelineId: TimelineId.test,
       isLive: false,
       isSaving: false,
       itemsPerPage: 5,
@@ -117,7 +114,6 @@ describe('Timeline', () => {
       status: TimelineStatus.active,
       timelineType: TimelineType.default,
       timerangeKind: 'absolute',
-      usersViewing: ['elastic'],
     };
   });
 

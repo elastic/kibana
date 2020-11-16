@@ -39,8 +39,6 @@ jest.mock('../timeline', () => ({
   StatefulTimeline: () => <div />,
 }));
 
-const usersViewing = ['elastic'];
-
 describe.skip('Flyout', () => {
   const state: State = mockGlobalState;
   const { storage } = createSecuritySolutionStorageMock();
@@ -53,7 +51,7 @@ describe.skip('Flyout', () => {
     test('it renders correctly against snapshot', () => {
       const wrapper = shallow(
         <TestProviders>
-          <Flyout timelineId="test" usersViewing={usersViewing} />
+          <Flyout timelineId="test" />
         </TestProviders>
       );
       expect(wrapper.find('Flyout')).toMatchSnapshot();
@@ -62,7 +60,7 @@ describe.skip('Flyout', () => {
     test('it renders the default flyout state as a button', () => {
       const wrapper = mount(
         <TestProviders>
-          <Flyout timelineId="test" usersViewing={usersViewing} />
+          <Flyout timelineId="test" />
         </TestProviders>
       );
 
@@ -83,7 +81,7 @@ describe.skip('Flyout', () => {
 
       const wrapper = mount(
         <TestProviders store={storeShowIsTrue}>
-          <Flyout timelineId="test" usersViewing={usersViewing} />
+          <Flyout timelineId="test" />
         </TestProviders>
       );
 
@@ -95,7 +93,7 @@ describe.skip('Flyout', () => {
     test('should call the onOpen when the mouse is clicked for rendering', () => {
       const wrapper = mount(
         <TestProviders>
-          <Flyout timelineId="test" usersViewing={usersViewing} />
+          <Flyout timelineId="test" />
         </TestProviders>
       );
 

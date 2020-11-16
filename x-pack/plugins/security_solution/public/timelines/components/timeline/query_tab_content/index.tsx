@@ -14,6 +14,7 @@ import {
   EuiFlyoutFooter,
   EuiToolTip,
   EuiSwitch,
+  EuiSpacer,
 } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React, { useCallback, useState, useMemo, useEffect } from 'react';
@@ -313,6 +314,7 @@ export const TimelineQueryTabContentComponent: React.FC<Props> = ({
                 </EuiFlexItem>
               </EuiFlexGroup>
               <div>
+                <EuiSpacer size="s" />
                 <EuiToolTip
                   data-test-subj="timeline-date-picker-lock-tooltip"
                   position="top"
@@ -341,12 +343,12 @@ export const TimelineQueryTabContentComponent: React.FC<Props> = ({
                     }
                   />
                 </EuiToolTip>
+                <EuiSpacer size="s" />
               </div>
               <TimelineHeaderContainer data-test-subj="timelineHeader">
                 <TimelineHeader
                   browserFields={browserFields}
                   indexPattern={indexPattern}
-                  dataProviders={dataProviders}
                   filterManager={filterManager}
                   show={show}
                   showCallOutUnauthorizedMsg={showCallOutUnauthorizedMsg}
