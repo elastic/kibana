@@ -3,14 +3,18 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React from 'react';
 import { render as testLibRender } from '@testing-library/react';
-import { CoreStart } from 'kibana/public';
+import { AppMountParameters, CoreStart } from 'kibana/public';
+import React from 'react';
+import { IntlProvider } from 'react-intl';
 import { of } from 'rxjs';
-import { PluginContext } from '../context/plugin_context';
-import { EuiThemeProvider } from '../typings';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
+import translations from '../../../translations/translations/ja-JP.json';
+import { PluginContext } from '../context/plugin_context';
 import { ObservabilityPluginSetupDeps } from '../plugin';
+import { EuiThemeProvider } from '../typings';
+
+const appMountParameters = ({ setHeaderActionMenu: () => {} } as unknown) as AppMountParameters;
 
 export const core = ({
   http: {
@@ -30,10 +34,12 @@ const plugins = ({
 
 export const render = (component: React.ReactNode) => {
   return testLibRender(
-    <KibanaContextProvider services={{ ...core }}>
-      <PluginContext.Provider value={{ core, plugins }}>
-        <EuiThemeProvider>{component}</EuiThemeProvider>
-      </PluginContext.Provider>
-    </KibanaContextProvider>
+    <IntlProvider locale="en-US" messages={translations.messages}>
+      <KibanaContextProvider services={{ ...core }}>
+        <PluginContext.Provider value={{ appMountParameters, core, plugins }}>
+          <EuiThemeProvider>{component}</EuiThemeProvider>
+        </PluginContext.Provider>
+      </KibanaContextProvider>
+    </IntlProvider>
   );
 };

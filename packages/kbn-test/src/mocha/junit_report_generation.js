@@ -22,7 +22,7 @@ import { writeFileSync, mkdirSync } from 'fs';
 import { inspect } from 'util';
 
 import xmlBuilder from 'xmlbuilder';
-import { getUniqueJunitReportPath } from '@kbn/test';
+import { getUniqueJunitReportPath } from '../report_path';
 
 import { getSnapshotOfRunnableLogs } from './log_cache';
 import { escapeCdata } from '../';

@@ -23,7 +23,7 @@ import * as Rx from 'rxjs';
 import { mergeMap, map, catchError } from 'rxjs/operators';
 import { allValuesFrom } from '../common';
 
-const stat$ = Rx.bindNodeCallback(Fs.stat);
+const stat$ = Rx.bindNodeCallback<Fs.PathLike, Fs.Stats>(Fs.stat);
 
 /**
  * get mtimes of referenced paths concurrently, limit concurrency to 100

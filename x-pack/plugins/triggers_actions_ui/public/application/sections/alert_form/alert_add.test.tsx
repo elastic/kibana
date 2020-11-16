@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import * as React from 'react';
-import { mountWithIntl, nextTick } from 'test_utils/enzyme_helpers';
+import { mountWithIntl, nextTick } from '@kbn/test/jest';
 import { act } from 'react-dom/test-utils';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFormLabel } from '@elastic/eui';
@@ -181,8 +181,6 @@ describe('alert_add', () => {
     expect(wrapper.find('[data-test-subj="saveAlertButton"]').exists()).toBeTruthy();
 
     wrapper.find('[data-test-subj="my-alert-type-SelectOption"]').first().simulate('click');
-
-    expect(wrapper.contains('Metadata: some value. Fields: test.')).toBeTruthy();
 
     expect(wrapper.find('input#alertName').props().value).toBe('');
 
