@@ -20,7 +20,7 @@ import {
   ADD_SALESFORCE_PATH,
   ADD_SALESFORCE_SANDBOX_PATH,
   ADD_SERVICENOW_PATH,
-  ADD_SHARE_POINT_PATH,
+  ADD_SHAREPOINT_PATH,
   ADD_SLACK_PATH,
   ADD_ZENDESK_PATH,
   ADD_CUSTOM_PATH,
@@ -37,7 +37,7 @@ import {
   EDIT_SALESFORCE_PATH,
   EDIT_SALESFORCE_SANDBOX_PATH,
   EDIT_SERVICENOW_PATH,
-  EDIT_SHARE_POINT_PATH,
+  EDIT_SHAREPOINT_PATH,
   EDIT_SLACK_PATH,
   EDIT_ZENDESK_PATH,
   EDIT_CUSTOM_PATH,
@@ -53,7 +53,7 @@ import {
   ONEDRIVE_DOCS_URL,
   SALESFORCE_DOCS_URL,
   SERVICENOW_DOCS_URL,
-  SHARE_POINT_DOCS_URL,
+  SHAREPOINT_DOCS_URL,
   SLACK_DOCS_URL,
   ZENDESK_DOCS_URL,
   CUSTOM_SOURCE_DOCS_URL,
@@ -614,15 +614,15 @@ export const staticSourceData = [
     accountContextOnly: false,
   },
   {
-    name: SOURCE_NAMES.SHARE_POINT,
+    name: SOURCE_NAMES.SHAREPOINT,
     serviceType: 'share_point',
-    addPath: ADD_SHARE_POINT_PATH,
-    editPath: EDIT_SHARE_POINT_PATH,
+    addPath: ADD_SHAREPOINT_PATH,
+    editPath: EDIT_SHAREPOINT_PATH,
     configuration: {
       isPublicKey: false,
       hasOauthRedirect: true,
       needsBaseUrl: false,
-      documentationUrl: SHARE_POINT_DOCS_URL,
+      documentationUrl: SHAREPOINT_DOCS_URL,
       applicationPortalUrl: 'https://portal.azure.com/',
     },
     sourceDescription: i18n.translate(
@@ -630,7 +630,7 @@ export const staticSourceData = [
       {
         defaultMessage:
           '{sourceName} is a cloud-based collaboration, knowledge management and storage platform for organizations of all sizes. Often used as a centralized content management system (CMS), SharePoint Online stores a wealth of information across departments and teams.',
-        values: { sourceName: SOURCE_NAMES.SHARE_POINT },
+        values: { sourceName: SOURCE_NAMES.SHAREPOINT },
       }
     ),
     connectStepDescription: connectStepDescription.files,

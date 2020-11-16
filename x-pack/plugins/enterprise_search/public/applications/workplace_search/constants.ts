@@ -102,7 +102,7 @@ export const SOURCE_NAMES = {
     'xpack.enterpriseSearch.workplaceSearch.sources.sourceNames.serviceNow',
     { defaultMessage: 'ServiceNow' }
   ),
-  SHARE_POINT: i18n.translate(
+  SHAREPOINT: i18n.translate(
     'xpack.enterpriseSearch.workplaceSearch.sources.sourceNames.sharePoint',
     { defaultMessage: 'SharePoint Online' }
   ),
