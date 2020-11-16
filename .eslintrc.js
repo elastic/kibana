@@ -1039,8 +1039,15 @@ module.exports = {
      * Alerting Services overrides
      */
     {
-      // typescript only for front and back end
+      // typescript for front and back end
       files: ['x-pack/plugins/{alerts,stack_alerts,actions,task_manager,event_log}/**/*.{ts,tsx}'],
+      rules: {
+        '@typescript-eslint/no-explicit-any': 'error',
+      },
+    },
+    {
+      // typescript only for back end
+      files: ['x-pack/plugins/triggers_actions_ui/server/**/*.ts'],
       rules: {
         '@typescript-eslint/no-explicit-any': 'error',
       },

@@ -18,7 +18,7 @@ type DeepPartial<T> = {
   [P in keyof T]?: T[P] extends Array<infer U> ? Array<DeepPartial<U>> : DeepPartial<T[P]>;
 };
 
-export const ECS_VERSION = '1.5.0';
+export const ECS_VERSION = '1.6.0';
 
 // types and config-schema describing the es structures
 export type IValidatedEvent = TypeOf<typeof EventSchema>;
@@ -42,6 +42,7 @@ export const EventSchema = schema.maybe(
         duration: ecsNumber(),
         end: ecsDate(),
         outcome: ecsString(),
+        reason: ecsString(),
       })
     ),
     error: schema.maybe(
@@ -61,6 +62,7 @@ export const EventSchema = schema.maybe(
           schema.object({
             instance_id: ecsString(),
             action_group_id: ecsString(),
+            status: ecsString(),
           })
         ),
         saved_objects: schema.maybe(
