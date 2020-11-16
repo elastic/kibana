@@ -7,7 +7,7 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 import { act } from '@testing-library/react';
-import { nextTick } from 'test_utils/enzyme_helpers';
+import { nextTick } from '@kbn/test/jest';
 import { LoginState } from '../../../common/login_state';
 import { LoginPage } from './login_page';
 import { coreMock } from '../../../../../../src/core/public/mocks';
