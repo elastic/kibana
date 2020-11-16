@@ -26,13 +26,17 @@ import { Observable, Subject } from 'rxjs';
 export const fromStreamingXhr = (
   xhr: Pick<
     XMLHttpRequest,
-    'onprogress' | 'onreadystatechange' | 'readyState' | 'status' | 'responseText'
-  >
+    'onprogress' | 'onreadystatechange' | 'readyState' | 'status' | 'responseText' | 'abort'
+  >,
+  abort$?: Observable<boolean>
 ): Observable<string> => {
   const subject = new Subject<string>();
   let index = 0;
+  let aborted = false;
 
   const processBatch = () => {
+    if (aborted) return;
+
     const { responseText } = xhr;
     if (index >= responseText.length) return;
     subject.next(responseText.substr(index));
@@ -41,6 +45,15 @@ export const fromStreamingXhr = (
 
   xhr.onprogress = processBatch;
 
+  const sub = abort$?.subscribe((done) => {
+    if (done && xhr.readyState !== 4) {
+      aborted = true;
+      xhr.abort();
+      subject.complete();
+      sub?.unsubscribe();
+    }
+  });
+
   xhr.onreadystatechange = () => {
     // Older browsers don't support onprogress, so we need
     // to call this here, too. It's safe to call this multiple
@@ -48,7 +61,7 @@ export const fromStreamingXhr = (
     processBatch();
 
     // 4 is the magic number that means the request is done
-    if (xhr.readyState === 4) {
+    if (!aborted && xhr.readyState === 4) {
       // 0 indicates a network failure. 400+ messages are considered server errors
       if (xhr.status === 0 || xhr.status >= 400) {
         subject.error(new Error(`Batch request failed with status ${xhr.status}`));

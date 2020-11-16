@@ -19,6 +19,7 @@
 
 import { fetchStreaming } from './fetch_streaming';
 import { mockXMLHttpRequest } from '../test_helpers/xhr';
+import { Subject } from 'rxjs';
 
 const tick = () => new Promise((resolve) => setTimeout(resolve, 1));
 
@@ -125,6 +126,33 @@ test('completes stream observable when request finishes', async () => {
 
   (env.xhr as any).responseText = 'foo';
   env.xhr.onprogress!({} as any);
+  (env.xhr as any).readyState = 4;
+  (env.xhr as any).status = 200;
+  env.xhr.onreadystatechange!({} as any);
+
+  expect(spy).toHaveBeenCalledTimes(1);
+});
+
+test('completes stream observable when aborted', async () => {
+  const env = setup();
+  const abort$ = new Subject<boolean>();
+  const { stream } = fetchStreaming({
+    url: 'http://example.com',
+    abort$,
+  });
+
+  const spy = jest.fn();
+  stream.subscribe({
+    complete: spy,
+  });
+
+  expect(spy).toHaveBeenCalledTimes(0);
+
+  (env.xhr as any).responseText = 'foo';
+  env.xhr.onprogress!({} as any);
+
+  abort$.next(true);
+
   (env.xhr as any).readyState = 4;
   (env.xhr as any).status = 200;
   env.xhr.onreadystatechange!({} as any);

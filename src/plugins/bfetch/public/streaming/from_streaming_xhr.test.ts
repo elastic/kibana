@@ -17,10 +17,12 @@
  * under the License.
  */
 
+import { Subject } from 'rxjs';
 import { fromStreamingXhr } from './from_streaming_xhr';
 
 const createXhr = (): XMLHttpRequest =>
   (({
+    abort: () => {},
     onprogress: () => {},
     onreadystatechange: () => {},
     readyState: 0,
@@ -93,6 +95,39 @@ test('completes observable when request reaches end state', () => {
 
   expect(complete).toHaveBeenCalledTimes(0);
 
+  (xhr as any).readyState = 4;
+  (xhr as any).status = 200;
+  xhr.onreadystatechange!({} as any);
+
+  expect(complete).toHaveBeenCalledTimes(1);
+});
+
+test('completes observable when aborted', () => {
+  const xhr = createXhr();
+  const abort$ = new Subject<boolean>();
+  const observable = fromStreamingXhr(xhr, abort$);
+
+  const next = jest.fn();
+  const complete = jest.fn();
+  observable.subscribe({
+    next,
+    complete,
+  });
+
+  (xhr as any).responseText = '1';
+  xhr.onprogress!({} as any);
+
+  (xhr as any).responseText = '2';
+  xhr.onprogress!({} as any);
+
+  expect(complete).toHaveBeenCalledTimes(0);
+
+  (xhr as any).readyState = 2;
+  abort$.next(true);
+
+  expect(complete).toHaveBeenCalledTimes(1);
+
+  // Shouldn't trigger additional events
   (xhr as any).readyState = 4;
   (xhr as any).status = 200;
   xhr.onreadystatechange!({} as any);

@@ -140,7 +140,7 @@ export class SearchInterceptor {
     strategy?: string
   ): Promise<IKibanaSearchResponse> {
     if (this.batchedFetch) {
-      return this.batchedFetch({ request, strategy });
+      return this.batchedFetch({ request, strategy }, signal);
     } else {
       const { id, ...searchRequest } = request;
       const path = trimEnd(`/internal/search/${strategy || ES_SEARCH_STRATEGY}/${id || ''}`, '/');

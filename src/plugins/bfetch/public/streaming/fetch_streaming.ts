@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { Observable } from 'rxjs';
 import { fromStreamingXhr } from './from_streaming_xhr';
 
 export interface FetchStreamingParams {
@@ -24,6 +25,7 @@ export interface FetchStreamingParams {
   headers?: Record<string, string>;
   method?: 'GET' | 'POST';
   body?: string;
+  abort$?: Observable<boolean>;
 }
 
 /**
@@ -35,6 +37,7 @@ export function fetchStreaming({
   headers = {},
   method = 'POST',
   body = '',
+  abort$,
 }: FetchStreamingParams) {
   const xhr = new window.XMLHttpRequest();
 
@@ -45,7 +48,7 @@ export function fetchStreaming({
   // Set the HTTP headers
   Object.entries(headers).forEach(([k, v]) => xhr.setRequestHeader(k, v));
 
-  const stream = fromStreamingXhr(xhr);
+  const stream = fromStreamingXhr(xhr, abort$);
 
   // Send the payload to the server
   xhr.send(body);
