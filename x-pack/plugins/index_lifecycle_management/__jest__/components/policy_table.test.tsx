@@ -6,7 +6,7 @@
 import moment from 'moment-timezone';
 import React, { ReactElement } from 'react';
 import { ReactWrapper } from 'enzyme';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 import { findTestSubject, takeMountedSnapshot } from '@elastic/eui/lib/test';
 
 import {
