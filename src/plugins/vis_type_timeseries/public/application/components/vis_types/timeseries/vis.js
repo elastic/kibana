@@ -161,8 +161,8 @@ export class TimeseriesVisualization extends Component {
     const yAxis = [];
     let mainDomainAdded = false;
 
-    const allSeriesHavePercentFormatter = seriesModel.every(
-      (seriesGroup) => seriesGroup.formatter === 'percent'
+    const allSeriesHaveSameFormatters = seriesModel.every(
+      (seriesGroup) => seriesGroup.formatter === seriesModel[0].formatter
     );
 
     this.showToastNotification = null;
@@ -201,9 +201,7 @@ export class TimeseriesVisualization extends Component {
           seriesDataRow.useDefaultGroupDomain = !isCustomDomain;
         });
 
-      const tickFormatter = allSeriesHavePercentFormatter
-        ? this.yAxisStackedByPercentFormatter
-        : (val) => val;
+      const tickFormatter = allSeriesHaveSameFormatters ? seriesGroupTickFormatter : (val) => val;
 
       if (isCustomDomain) {
         TimeseriesVisualization.addYAxis(yAxis, {
