@@ -48,11 +48,8 @@ export interface KibanaSettingsCollectorExtraOptions {
   getEmailValueStructure(email: string | null): EmailSettingData;
 }
 
-export type KibanaSettingsCollector = Collector<
-  EmailSettingData | undefined,
-  unknown,
-  KibanaSettingsCollectorExtraOptions
->;
+export type KibanaSettingsCollector = Collector<EmailSettingData | undefined> &
+  KibanaSettingsCollectorExtraOptions;
 
 export function getSettingsCollector(
   usageCollection: UsageCollectionSetup,
