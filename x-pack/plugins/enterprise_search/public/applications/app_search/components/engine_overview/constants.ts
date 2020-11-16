@@ -10,3 +10,18 @@ export const OVERVIEW_TITLE = i18n.translate(
   'xpack.enterpriseSearch.appSearch.engine.overview.title',
   { defaultMessage: 'Overview' }
 );
+
+export const VIEW_ANALYTICS = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.engine.overview.analyticsLink',
+  { defaultMessage: 'View Analytics' }
+);
+
+export const VIEW_API_LOGS = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.engine.overview.apiLogsLink',
+  { defaultMessage: 'View API Logs' }
+);
+
+export const LAST_7_DAYS = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.engine.overview.chartDuration',
+  { defaultMessage: 'Last 7 days' }
+);
