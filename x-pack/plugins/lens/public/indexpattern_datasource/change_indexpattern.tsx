@@ -81,6 +81,7 @@ export function ChangeIndexPattern({
               onChangeIndexPattern(choice.value);
               setPopoverIsOpen(false);
             }}
+            // @ts-expect-error Property 'value' is missing in type '...'
             searchProps={{
               compressed: true,
               ...(selectableProps ? selectableProps.searchProps : undefined),
