@@ -6,7 +6,7 @@
 
 import React from 'react';
 import sinon from 'sinon';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 import { ExplainCollectionInterval } from '../collection_interval';
 import { findTestSubject } from '@elastic/eui/lib/test';
 

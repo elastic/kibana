@@ -18,12 +18,16 @@
  */
 
 import { savedObjectsServiceMock } from '../../../../core/server/mocks';
-import { dashboardSavedObjectTypeMigrations as migrations } from './dashboard_migrations';
+import { createDashboardSavedObjectTypeMigrations } from './dashboard_migrations';
 import { migrations730 } from './migrations_730';
 import { DashboardDoc700To720, DashboardDoc730ToLatest, DashboardDocPre700 } from '../../common';
 import { RawSavedDashboardPanel730ToLatest } from '../../common';
+import { createEmbeddableSetupMock } from '../../../embeddable/server/mocks';
 
 const mockContext = savedObjectsServiceMock.createMigrationContext();
+const migrations = createDashboardSavedObjectTypeMigrations({
+  embeddable: createEmbeddableSetupMock(),
+});
 
 test('dashboard migration 7.3.0 migrates filters to query on search source', () => {
   const doc: DashboardDoc700To720 = {

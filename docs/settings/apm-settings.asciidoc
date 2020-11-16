@@ -43,6 +43,9 @@ Changing these settings may disable features of the APM App.
 | `xpack.apm.enabled`
   | Set to `false` to disable the APM app. Defaults to `true`.
 
+| `xpack.apm.maxServiceEnvironments`
+  | Maximum number of unique service environments recognized by the UI. Defaults to `100`.
+
 | `xpack.apm.serviceMapFingerprintBucketSize`
   | Maximum number of unique transaction combinations sampled for generating service map focused on a specific service. Defaults to `100`.
 
