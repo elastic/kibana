@@ -14,7 +14,7 @@ import {
 } from '../../mocks';
 import { ChildDragDropProvider, DroppableEvent } from '../../../drag_drop';
 import { EuiFormRow } from '@elastic/eui';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 import { Visualization } from '../../../types';
 import { LayerPanel } from './layer_panel';
 import { coreMock } from 'src/core/public/mocks';
