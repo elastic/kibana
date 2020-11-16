@@ -54,13 +54,12 @@ describe('Inspect', () => {
     );
   });
 
-  context('Timeline', () => {
+  context.only('Timeline', () => {
     it('inspects the timeline', () => {
       const hostExistsQuery = 'host.name: *';
       loginAndWaitForPage(HOSTS_URL);
       openTimelineUsingToggle();
       executeTimelineKQL(hostExistsQuery);
-      openTimelineSettings();
       openTimelineInspectButton();
       cy.get(INSPECT_MODAL).should('be.visible');
     });

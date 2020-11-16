@@ -75,15 +75,16 @@ const AddToCaseButtonComponent: React.FC<Props> = ({ timelineId }) => {
     onOpenCaseModal();
   }, [onOpenCaseModal, handlePopoverClose]);
 
-  const closePopover = () => {
+  const closePopover = useCallback(() => {
     setPopover(false);
-  };
+  }, []);
 
   const button = useMemo(
     () => (
       <EuiButton
         fill
         size="m"
+        data-test-subj="attach-timeline-case-button"
         iconType="arrowDown"
         iconSide="right"
         onClick={handleButtonClick}
@@ -97,10 +98,18 @@ const AddToCaseButtonComponent: React.FC<Props> = ({ timelineId }) => {
 
   const items = useMemo(
     () => [
-      <EuiContextMenuItem key="new-case" onClick={handleNewCaseClick}>
+      <EuiContextMenuItem
+        key="new-case"
+        data-test-subj="attach-timeline-new-case"
+        onClick={handleNewCaseClick}
+      >
         {i18n.ATTACH_TO_NEW_CASE}
       </EuiContextMenuItem>,
-      <EuiContextMenuItem key="existing-case" onClick={handleExistingCaseClick}>
+      <EuiContextMenuItem
+        key="existing-case"
+        data-test-subj="attach-timeline-existing-case"
+        onClick={handleExistingCaseClick}
+      >
         {i18n.ATTACH_TO_EXISTING_CASE}
       </EuiContextMenuItem>,
     ],

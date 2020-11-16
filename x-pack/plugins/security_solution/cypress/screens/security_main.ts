@@ -6,4 +6,6 @@
 
 export const MAIN_PAGE = '[data-test-subj="kibanaChrome"]';
 
-export const TIMELINE_TOGGLE_BUTTON = '[data-test-subj="flyoutOverlay"]';
+export const TIMELINE_BOTTOM_BAR = '[data-test-subj="flyoutBottomBar"]';
+
+export const TIMELINE_TOGGLE_BUTTON = `${TIMELINE_BOTTOM_BAR} [data-test-subj="flyoutOverlay"]`;

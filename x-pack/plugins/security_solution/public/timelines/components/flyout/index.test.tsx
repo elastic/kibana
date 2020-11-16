@@ -22,7 +22,7 @@ import { mockDataProviders } from '../timeline/data_providers/mock/mock_data_pro
 import * as timelineActions from '../../store/timeline/actions';
 
 import { Flyout } from '.';
-import { FlyoutButton } from './button';
+import { FlyoutBottomBar } from './button';
 
 const mockDispatch = jest.fn();
 jest.mock('react-redux', () => {
@@ -103,12 +103,12 @@ describe.skip('Flyout', () => {
     });
   });
 
-  describe('showFlyoutButton', () => {
+  describe('showFlyoutBottomBar', () => {
     test('should show the flyout button when show is true', () => {
       const openMock = jest.fn();
       const wrapper = mount(
         <TestProviders>
-          <FlyoutButton
+          <FlyoutBottomBar
             dataProviders={mockDataProviders}
             show={true}
             timelineId="test"
@@ -125,7 +125,7 @@ describe.skip('Flyout', () => {
       const openMock = jest.fn();
       const wrapper = mount(
         <TestProviders>
-          <FlyoutButton
+          <FlyoutBottomBar
             dataProviders={mockDataProviders}
             show={false}
             timelineId="test"
@@ -142,7 +142,7 @@ describe.skip('Flyout', () => {
       const openMock = jest.fn();
       const wrapper = mount(
         <TestProviders>
-          <FlyoutButton
+          <FlyoutBottomBar
             dataProviders={mockDataProviders}
             show={true}
             timelineId="test"
@@ -159,7 +159,7 @@ describe.skip('Flyout', () => {
       const openMock = jest.fn();
       const wrapper = mount(
         <TestProviders>
-          <FlyoutButton
+          <FlyoutBottomBar
             dataProviders={mockDataProviders}
             show={true}
             timelineId="test"

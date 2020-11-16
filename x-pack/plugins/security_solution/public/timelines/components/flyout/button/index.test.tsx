@@ -10,9 +10,9 @@ import React from 'react';
 import { TestProviders } from '../../../../common/mock/test_providers';
 import { twoGroups } from '../../timeline/data_providers/mock/mock_and_providers';
 
-import { FlyoutButton, getBadgeCount } from '.';
+import { FlyoutBottomBar, getBadgeCount } from '.';
 
-describe.skip('FlyoutButton', () => {
+describe.skip('FlyoutBottomBar', () => {
   describe('getBadgeCount', () => {
     test('it returns 0 when dataProviders is empty', () => {
       expect(getBadgeCount([])).toEqual(0);
@@ -28,7 +28,7 @@ describe.skip('FlyoutButton', () => {
 
     const wrapper = mount(
       <TestProviders>
-        <FlyoutButton dataProviders={[]} onOpen={onOpen} show={true} timelineId="test" />
+        <FlyoutBottomBar dataProviders={[]} onOpen={onOpen} show={true} timelineId="test" />
       </TestProviders>
     );
 
@@ -40,7 +40,7 @@ describe.skip('FlyoutButton', () => {
 
     const wrapper = mount(
       <TestProviders>
-        <FlyoutButton dataProviders={[]} onOpen={onOpen} show={true} timelineId="test" />
+        <FlyoutBottomBar dataProviders={[]} onOpen={onOpen} show={true} timelineId="test" />
       </TestProviders>
     );
 
@@ -54,7 +54,7 @@ describe.skip('FlyoutButton', () => {
 
     const wrapper = mount(
       <TestProviders>
-        <FlyoutButton dataProviders={[]} onOpen={onOpen} show={true} timelineId="test" />
+        <FlyoutBottomBar dataProviders={[]} onOpen={onOpen} show={true} timelineId="test" />
       </TestProviders>
     );
 
@@ -66,7 +66,7 @@ describe.skip('FlyoutButton', () => {
 
     const wrapper = mount(
       <TestProviders>
-        <FlyoutButton dataProviders={[]} onOpen={onOpen} show={false} timelineId="test" />
+        <FlyoutBottomBar dataProviders={[]} onOpen={onOpen} show={false} timelineId="test" />
       </TestProviders>
     );
 
@@ -78,7 +78,7 @@ describe.skip('FlyoutButton', () => {
 
     const wrapper = mount(
       <TestProviders>
-        <FlyoutButton dataProviders={[]} onOpen={onOpen} show={true} timelineId="test" />
+        <FlyoutBottomBar dataProviders={[]} onOpen={onOpen} show={true} timelineId="test" />
       </TestProviders>
     );
 

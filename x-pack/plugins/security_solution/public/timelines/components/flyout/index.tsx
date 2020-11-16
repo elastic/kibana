@@ -7,7 +7,7 @@
 import React from 'react';
 import styled from 'styled-components';
 
-import { FlyoutButton } from './button';
+import { FlyoutBottomBar } from './button';
 import { Pane } from './pane';
 import { timelineSelectors } from '../../store/timeline';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
@@ -34,7 +34,7 @@ const FlyoutComponent: React.FC<OwnProps> = ({ timelineId }) => {
       <Visible show={show}>
         <Pane timelineId={timelineId} />
       </Visible>
-      <FlyoutButton show={!show} timelineId={timelineId} />
+      <FlyoutBottomBar show={!show} timelineId={timelineId} />
     </>
   );
 };

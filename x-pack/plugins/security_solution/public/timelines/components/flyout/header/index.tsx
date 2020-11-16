@@ -109,7 +109,7 @@ const FlyoutHeaderComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }) => {
   );
 
   return (
-    <StyledTimelineHeader alignItems="center" gutterSize="xl">
+    <StyledTimelineHeader alignItems="center" gutterSize="m">
       <EuiFlexItem>
         <EuiFlexGroup data-test-subj="properties-left" gutterSize="s">
           <EuiFlexItem>

@@ -44,7 +44,7 @@ const ActiveTimelinesComponent: React.FC<ActiveTimelinesProps> = ({
   return (
     <EuiFlexGroup>
       <EuiFlexItem grow={false}>
-        <EuiButton size="s" fill={isOpen} onClick={handleToggleOpen}>
+        <EuiButton data-test-subj="flyoutOverlay" size="s" fill={isOpen} onClick={handleToggleOpen}>
           {title}
           <EuiButtonIcon
             iconType="cross"

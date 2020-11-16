@@ -60,18 +60,18 @@ const DataProvidersPanel = styled(EuiPanel)`
   z-index: ${({ theme }) => theme.eui.euiZLevel9};
 `;
 
-interface FlyoutButtonProps {
+interface FlyoutBottomBarProps {
   show: boolean;
   timelineId: string;
 }
 
-export const FlyoutButton = React.memo<FlyoutButtonProps>(({ show, timelineId }) => {
+export const FlyoutBottomBar = React.memo<FlyoutBottomBarProps>(({ show, timelineId }) => {
   if (!show) {
     return null;
   }
 
   return (
-    <Container>
+    <Container data-test-subj="flyoutBottomBar">
       <FlyoutHeaderPanel timelineId={timelineId} />
       <DataProvidersPanel paddingSize="none">
         <DataProviders timelineId={timelineId} />
@@ -80,4 +80,4 @@ export const FlyoutButton = React.memo<FlyoutButtonProps>(({ show, timelineId })
   );
 });
 
-FlyoutButton.displayName = 'FlyoutButton';
+FlyoutBottomBar.displayName = 'FlyoutBottomBar';

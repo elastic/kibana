@@ -11,6 +11,7 @@ import { ALL_CASES_CREATE_NEW_CASE_TABLE_BTN } from '../screens/all_cases';
 import {
   ADD_FILTER,
   ADD_NOTE_BUTTON,
+  ATTACH_TIMELINE_TO_CASE_BUTTON,
   ATTACH_TIMELINE_TO_EXISTING_CASE_ICON,
   ATTACH_TIMELINE_TO_NEW_CASE_ICON,
   CASE,
@@ -85,12 +86,12 @@ export const addNewCase = () => {
 };
 
 export const attachTimelineToNewCase = () => {
-  cy.get(TIMELINE_SETTINGS_ICON).click({ force: true });
+  cy.get(ATTACH_TIMELINE_TO_CASE_BUTTON).click({ force: true });
   cy.get(ATTACH_TIMELINE_TO_NEW_CASE_ICON).click({ force: true });
 };
 
 export const attachTimelineToExistingCase = () => {
-  cy.get(TIMELINE_SETTINGS_ICON).click({ force: true });
+  cy.get(ATTACH_TIMELINE_TO_CASE_BUTTON).click({ force: true });
   cy.get(ATTACH_TIMELINE_TO_EXISTING_CASE_ICON).click({ force: true });
 };
 
