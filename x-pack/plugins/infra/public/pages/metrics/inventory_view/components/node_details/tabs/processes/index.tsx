@@ -6,7 +6,7 @@
 
 import React, { useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiSearchBar, EuiSpacer, Query } from '@elastic/eui';
+import { EuiSearchBar, EuiSpacer, EuiEmptyPrompt, EuiButton, Query } from '@elastic/eui';
 import { useProcessList } from '../../../../hooks/use_process_list';
 import { TabContent, TabProps } from '../shared';
 import { STATE_NAMES } from './states';
@@ -17,16 +17,43 @@ const TabComponent = ({ currentTime, node, nodeType, options }: TabProps) => {
   const [searchFilter, setSearchFilter] = useState<Query>(EuiSearchBar.Query.MATCH_ALL);
 
   const hostTerm = useMemo(() => {
-    const field = options.fields[nodeType];
+    const field =
+      options.fields && Reflect.has(options.fields, nodeType)
+        ? Reflect.get(options.fields, nodeType)
+        : nodeType;
     return { [field]: node.name };
   }, [options, node, nodeType]);
 
-  const { loading, error, response } = useProcessList(
+  const { loading, error, response, makeRequest: reload } = useProcessList(
     hostTerm,
     'metricbeat-*',
-    options.fields?.timestamp,
+    options.fields!.timestamp,
     currentTime
   );
+
+  if (error) {
+    return (
+      <TabContent>
+        <EuiEmptyPrompt
+          iconType="tableDensityNormal"
+          title={
+            <h4>
+              {i18n.translate('xpack.infra.metrics.nodeDetails.processListError', {
+                defaultMessage: 'Unable to show process data',
+              })}
+            </h4>
+          }
+          actions={
+            <EuiButton color="primary" fill onClick={reload}>
+              {i18n.translate('xpack.infra.metrics.nodeDetails.processListRetry', {
+                defaultMessage: 'Try again',
+              })}
+            </EuiButton>
+          }
+        />
+      </TabContent>
+    );
+  }
 
   return (
     <TabContent>
