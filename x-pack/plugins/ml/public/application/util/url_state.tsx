@@ -10,7 +10,7 @@ import { isEqual } from 'lodash';
 import { decode, encode } from 'rison-node';
 import { useHistory, useLocation } from 'react-router-dom';
 
-import { Dictionary, ListingPageUrlState } from '../../../common/types/common';
+import { Dictionary } from '../../../common/types/common';
 
 import { getNestedProperty } from './object_utils';
 
@@ -152,10 +152,9 @@ export const useUrlState = (accessor: Accessor) => {
 };
 
 /**
- * Hooks for managing URL state on the listing pages, e.g.
- * Anomaly Detection jobs, DFA job, Trained models
+ * Hook for managing the URL state of the page.
  */
-export const useListingPageUrlState = <PageUrlState extends ListingPageUrlState>(
+export const usePageUrlState = <PageUrlState extends {}>(
   defaultState: PageUrlState
 ): [PageUrlState, (update: Partial<PageUrlState>) => void] => {
   const [appState, setAppState] = useUrlState('_a');
@@ -168,9 +167,9 @@ export const useListingPageUrlState = <PageUrlState extends ListingPageUrlState>
   }, [appState]);
 
   const onStateUpdate = useCallback(
-    (update: Partial<PageUrlState>) => {
+    (update: Partial<PageUrlState>, replace?: boolean) => {
       setAppState({
-        ...listingPageState,
+        ...(replace ? {} : listingPageState),
         ...update,
       });
     },

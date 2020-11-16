@@ -35,11 +35,10 @@ import { JobsListView } from '../../../../jobs/jobs_list/components/jobs_list_vi
 import { DataFrameAnalyticsList } from '../../../../data_frame_analytics/pages/analytics_management/components/analytics_list';
 import { AccessDeniedPage } from '../access_denied_page';
 import { SharePluginStart } from '../../../../../../../../../src/plugins/share/public';
-import {
-  AnomalyDetectionJobsListState,
-  getDefaultAnomalyDetectionJobsListState,
-} from '../../../../jobs/jobs_list/jobs';
+import { getDefaultAnomalyDetectionJobsListState } from '../../../../jobs/jobs_list/jobs';
 import { getMlGlobalServices } from '../../../../app';
+import { ListingPageUrlState } from '../../../../../../common/types/common';
+import { getDefaultDFAListState } from '../../../../data_frame_analytics/pages/analytics_management/page';
 
 interface Tab {
   'data-test-subj': string;
@@ -48,20 +47,27 @@ interface Tab {
   content: any;
 }
 
-function useTabs(isMlEnabledInSpace: boolean): Tab[] {
-  const [jobsViewState, setJobsViewState] = useState<AnomalyDetectionJobsListState>(
-    getDefaultAnomalyDetectionJobsListState()
-  );
+function usePageState<T extends ListingPageUrlState>(
+  defaultState: T
+): [T, (update: Partial<T>) => void] {
+  const [pageState, setPageState] = useState<T>(defaultState);
 
   const updateState = useCallback(
-    (update: Partial<AnomalyDetectionJobsListState>) => {
-      setJobsViewState({
-        ...jobsViewState,
+    (update: Partial<T>) => {
+      setPageState({
+        ...pageState,
         ...update,
       });
     },
-    [jobsViewState]
+    [pageState]
   );
+
+  return [pageState, updateState];
+}
+
+function useTabs(isMlEnabledInSpace: boolean): Tab[] {
+  const [adPageState, updateAdPageState] = usePageState(getDefaultAnomalyDetectionJobsListState());
+  const [dfaPageState, updateDfaPageState] = usePageState(getDefaultDFAListState());
 
   return useMemo(
     () => [
@@ -75,8 +81,8 @@ function useTabs(isMlEnabledInSpace: boolean): Tab[] {
           <Fragment>
             <EuiSpacer size="m" />
             <JobsListView
-              jobsViewState={jobsViewState}
-              onJobsViewStateUpdate={updateState}
+              jobsViewState={adPageState}
+              onJobsViewStateUpdate={updateAdPageState}
               isManagementTable={true}
               isMlEnabledInSpace={isMlEnabledInSpace}
             />
@@ -95,12 +101,14 @@ function useTabs(isMlEnabledInSpace: boolean): Tab[] {
             <DataFrameAnalyticsList
               isManagementTable={true}
               isMlEnabledInSpace={isMlEnabledInSpace}
+              pageState={dfaPageState}
+              updatePageState={updateDfaPageState}
             />
           </Fragment>
         ),
       },
     ],
-    [isMlEnabledInSpace, jobsViewState, updateState]
+    [isMlEnabledInSpace, adPageState, updateAdPageState, dfaPageState, updateAdPageState]
   );
 }
 

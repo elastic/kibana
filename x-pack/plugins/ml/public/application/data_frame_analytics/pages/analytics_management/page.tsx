@@ -31,7 +31,7 @@ import { NodeAvailableWarning } from '../../../components/node_available_warning
 import { UpgradeWarning } from '../../../components/upgrade';
 import { AnalyticsNavigationBar } from './components/analytics_navigation_bar';
 import { ModelsList } from './components/models_management';
-import { useListingPageUrlState } from '../../../util/url_state';
+import { usePageUrlState } from '../../../util/url_state';
 import { ListingPageUrlState } from '../../../../../common/types/common';
 import { DataFrameAnalyticsListColumn } from './components/analytics_list/common';
 
@@ -45,7 +45,7 @@ export const getDefaultDFAListState = (): ListingPageUrlState => ({
 export const Page: FC = () => {
   const [blockRefresh, setBlockRefresh] = useState(false);
 
-  const [dfaPageState, setDfaPageState] = useListingPageUrlState(getDefaultDFAListState());
+  const [dfaPageState, setDfaPageState] = usePageUrlState(getDefaultDFAListState());
 
   useRefreshInterval(setBlockRefresh);
 
