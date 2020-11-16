@@ -7,7 +7,9 @@ import React, { PropsWithChildren } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFlexItem, EuiText, EuiFlexGroup, EuiTitle, EuiButtonEmpty } from '@elastic/eui';
 import { partition } from 'lodash';
-import { ActionGroup } from '../../../../../alerts/common';
+import { ActionGroup, getBuiltinActionGroups } from '../../../../../alerts/common';
+
+const BUILT_IN_ACTION_GROUPS: Set<string> = new Set(getBuiltinActionGroups().map(({ id }) => id));
 
 export type ActionGroupWithCondition<T> = ActionGroup &
   (
@@ -28,6 +30,7 @@ export interface AlertConditionsProps<ConditionProps> {
   actionGroups: Array<ActionGroupWithCondition<ConditionProps>>;
   onInitializeConditionsFor?: (actionGroup: ActionGroupWithCondition<ConditionProps>) => void;
   onResetConditionsFor?: (actionGroup: ActionGroupWithCondition<ConditionProps>) => void;
+  includeBuiltInActionGroups?: boolean;
 }
 
 export const AlertConditions = <ConditionProps extends any>({
@@ -35,10 +38,14 @@ export const AlertConditions = <ConditionProps extends any>({
   actionGroups,
   onInitializeConditionsFor,
   onResetConditionsFor,
+  includeBuiltInActionGroups = false,
   children,
 }: PropsWithChildren<AlertConditionsProps<ConditionProps>>) => {
-  const [withConditions, withoutConditions] = partition(actionGroups, (actionGroup) =>
-    actionGroup.hasOwnProperty('conditions')
+  const [withConditions, withoutConditions] = partition(
+    includeBuiltInActionGroups
+      ? actionGroups
+      : actionGroups.filter(({ id }) => !BUILT_IN_ACTION_GROUPS.has(id)),
+    (actionGroup) => actionGroup.hasOwnProperty('conditions')
   );
 
   return (
