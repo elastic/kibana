@@ -7,11 +7,17 @@
 import Boom from '@hapi/boom';
 import { IScopedClusterClient } from 'kibana/server';
 import type { JobObject, JobSavedObjectService } from './service';
-import { JobType } from '../../common/types/saved_objects';
+import { JobType, RepairSavedObjectResponse } from '../../common/types/saved_objects';
 import { checksFactory } from './checks';
 import { getSavedObjectClientError } from './util';
 
 import { Datafeed } from '../../common/types/anomaly_detection_jobs';
+
+export interface JobSpaceOverrides {
+  overrides: {
+    [type in JobType]: { [jobId: string]: string[] };
+  };
+}
 
 export function repairFactory(
   client: IScopedClusterClient,
@@ -20,13 +26,7 @@ export function repairFactory(
   const { checkStatus } = checksFactory(client, jobSavedObjectService);
 
   async function repairJobs(simulate: boolean = false) {
-    type Result = Record<string, { success: boolean; error?: any }>;
-    const results: {
-      savedObjectsCreated: Result;
-      savedObjectsDeleted: Result;
-      datafeedsAdded: Result;
-      datafeedsRemoved: Result;
-    } = {
+    const results: RepairSavedObjectResponse = {
       savedObjectsCreated: {},
       savedObjectsDeleted: {},
       datafeedsAdded: {},
@@ -180,14 +180,14 @@ export function repairFactory(
     return results;
   }
 
-  async function initSavedObjects(simulate: boolean = false, namespaces: string[] = ['*']) {
+  async function initSavedObjects(simulate: boolean = false, spaceOverrides?: JobSpaceOverrides) {
     const results: { jobs: Array<{ id: string; type: string }>; success: boolean; error?: any } = {
       jobs: [],
       success: true,
     };
     const status = await checkStatus();
 
-    const jobs: JobObject[] = [];
+    const jobs: Array<{ job: JobObject; namespaces: string[] }> = [];
     const types: JobType[] = ['anomaly-detector', 'data-frame-analytics'];
 
     types.forEach((type) => {
@@ -197,22 +197,28 @@ export function repairFactory(
             results.jobs.push({ id: job.jobId, type });
           } else {
             jobs.push({
-              job_id: job.jobId,
-              datafeed_id: job.datafeedId ?? null,
-              type,
+              job: {
+                job_id: job.jobId,
+                datafeed_id: job.datafeedId ?? null,
+                type,
+              },
+              // allow some jobs to be assigned to specific spaces when initializing
+              namespaces: spaceOverrides?.overrides[type][job.jobId] ?? ['*'],
             });
           }
         }
       });
     });
+
     try {
-      const createResults = await jobSavedObjectService.bulkCreateJobs(jobs, namespaces);
+      const createResults = await jobSavedObjectService.bulkCreateJobs(jobs);
       createResults.saved_objects.forEach(({ attributes }) => {
         results.jobs.push({
           id: attributes.job_id,
           type: attributes.type,
         });
       });
+      return { jobs: jobs.map((j) => j.job.job_id) };
     } catch (error) {
       results.success = false;
       results.error = Boom.boomify(error).output;
