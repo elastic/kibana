@@ -133,7 +133,7 @@ export interface ActionVariable {
 }
 
 export interface ActionVariables {
-  context: ActionVariable[];
+  context?: ActionVariable[];
   state: ActionVariable[];
   params: ActionVariable[];
 }

@@ -5,11 +5,11 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 
 import { RoleComboBox } from '.';
 import { EuiComboBox } from '@elastic/eui';
-import { findTestSubject } from 'test_utils/find_test_subject';
+import { findTestSubject } from '@kbn/test/jest';
 
 describe('RoleComboBox', () => {
   it('renders the provided list of roles via EuiComboBox options', () => {
