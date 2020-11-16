@@ -60,13 +60,13 @@ export interface PaginationInput {
 
 export interface PaginationInputPaginated {
   /** The activePage parameter defines the page of results you want to fetch */
-  activePage?: number;
+  activePage: number;
   /** The cursorStart parameter defines the start of the results to be displayed */
   cursorStart: number;
   /** The fakePossibleCount parameter determines the total count in order to show 5 additional pages */
-  fakePossibleCount?: number;
+  fakePossibleCount: number;
   /** The querySize parameter is the number of items to be returned */
-  querySize?: number;
+  querySize: number;
 }
 
 export interface DocValueFields {

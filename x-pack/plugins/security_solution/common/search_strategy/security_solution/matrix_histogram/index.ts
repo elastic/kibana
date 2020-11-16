@@ -7,7 +7,7 @@
 import { IEsSearchResponse } from '../../../../../../../src/plugins/data/common';
 import { AuthenticationHit } from '../hosts';
 import { Inspect, Maybe, SortField, TimerangeInput } from '../../common';
-import { RequestBasicOptions } from '../';
+import { NetworkDnsFields, RequestBasicOptions } from '../';
 import { AlertsGroupData } from './alerts';
 import { AnomaliesActionGroupData, AnomalyHit } from './anomalies';
 import { DnsHistogramGroupData } from './dns';
@@ -31,16 +31,23 @@ export enum MatrixHistogramType {
   dns = 'dns',
 }
 
-export interface MatrixHistogramRequestOptions extends RequestBasicOptions {
+export interface MatrixHistogramBasicRequestOptions extends RequestBasicOptions {
   timerange: TimerangeInput;
   histogramType: MatrixHistogramType;
   stackByField: string;
   threshold?: { field: string | undefined; value: number } | undefined;
   inspect?: Maybe<Inspect>;
-  isHistogram?: boolean;
-  isPtrIncluded?: boolean;
-  sort?: SortField;
 }
+
+export interface DnsMatrixHistogramRequestOptions extends MatrixHistogramBasicRequestOptions {
+  sort: SortField<NetworkDnsFields>;
+  isPtrIncluded: boolean;
+  isHistogram: boolean;
+}
+
+export type MatrixHistogramRequestOptions<T = null> = T extends MatrixHistogramType.dns
+  ? DnsMatrixHistogramRequestOptions
+  : MatrixHistogramBasicRequestOptions;
 
 export interface MatrixHistogramStrategyResponse extends IEsSearchResponse {
   inspect?: Maybe<Inspect>;
@@ -60,7 +67,7 @@ export interface MatrixHistogramBucket {
 }
 
 export interface MatrixHistogramSchema<T> {
-  buildDsl: (options: MatrixHistogramRequestOptions) => {};
+  buildDsl: <T>(options: MatrixHistogramRequestOptions<T>) => {};
   aggName: string;
   parseKey: string;
   parser?: <T>(data: MatrixHistogramParseData<T>, keyBucket: string) => MatrixHistogramData[];

@@ -19,7 +19,10 @@ import { getBarchartConfigs, getCustomChartData } from './utils';
 import { useMatrixHistogram } from '../../containers/matrix_histogram';
 import { MatrixHistogramProps, MatrixHistogramOption, MatrixHistogramQueryProps } from './types';
 import { InspectButtonContainer } from '../inspect';
-import { MatrixHistogramType } from '../../../../common/search_strategy/security_solution';
+import {
+  MatrixHistogramType,
+  NetworkDnsFields,
+} from '../../../../common/search_strategy/security_solution';
 import {
   MatrixHistogramMappingTypes,
   GetTitle,
@@ -28,6 +31,7 @@ import {
 import { GlobalTimeArgs } from '../../containers/use_global_time';
 import { setAbsoluteRangeDatePicker } from '../../store/inputs/actions';
 import { InputsModelId } from '../../store/inputs/constants';
+import { SortField } from '../../../../common/search_strategy/common';
 
 export type MatrixHistogramComponentProps = MatrixHistogramProps &
   Omit<MatrixHistogramQueryProps, 'stackByField'> & {
@@ -47,6 +51,8 @@ export type MatrixHistogramComponentProps = MatrixHistogramProps &
     subtitle?: string | GetSubTitle;
     timelineId?: string;
     title: string | GetTitle;
+    isPtrIncluded?: boolean;
+    sort?: SortField<NetworkDnsFields>;
   };
 
 const DEFAULT_PANEL_HEIGHT = 300;
@@ -61,34 +67,36 @@ const HistogramPanel = styled(Panel)<{ height?: number }>`
   ${({ height }) => (height != null ? `height: ${height}px;` : '')}
 `;
 
-export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> = ({
-  chartHeight,
-  defaultStackByOption,
-  endDate,
-  errorMessage,
-  filterQuery,
-  headerChildren,
-  histogramType,
-  hideHistogramIfEmpty = false,
-  id,
-  isPtrIncluded = false,
-  indexNames,
-  legendPosition,
-  mapping,
-  panelHeight = DEFAULT_PANEL_HEIGHT,
-  setAbsoluteRangeDatePickerTarget = 'global',
-  setQuery,
-  showLegend,
-  showSpacer = true,
-  stackByOptions,
-  startDate,
-  subtitle,
-  sort,
-  timelineId,
-  title,
-  titleSize,
-  yTickFormatter,
-}) => {
+export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> = (
+  args: MatrixHistogramComponentProps
+) => {
+  const {
+    chartHeight,
+    defaultStackByOption,
+    endDate,
+    errorMessage,
+    filterQuery,
+    headerChildren,
+    histogramType,
+    hideHistogramIfEmpty = false,
+    id,
+    indexNames,
+    legendPosition,
+    mapping,
+    panelHeight = DEFAULT_PANEL_HEIGHT,
+    setAbsoluteRangeDatePickerTarget = 'global',
+    setQuery,
+    showLegend,
+    showSpacer = true,
+    stackByOptions,
+    startDate,
+    subtitle,
+    timelineId,
+    title,
+    titleSize,
+    yTickFormatter,
+  } = args;
+
   const dispatch = useDispatch();
   const handleBrushEnd = useCallback(
     ({ x }) => {
@@ -132,6 +140,12 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
     [defaultStackByOption, stackByOptions]
   );
 
+  const isPtrIncluded = useMemo(
+    () => ('isPtrIncluded' in args ? { isPtrIncluded: args.isPtrIncluded } : {}),
+    [args]
+  );
+  const sort = useMemo(() => ('sort' in args ? { sort: args.sort } : {}), [args]);
+
   const [loading, { data, inspect, totalCount, refetch }] = useMatrixHistogram({
     endDate,
     errorMessage,
@@ -140,8 +154,8 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
     indexNames,
     startDate,
     stackByField: selectedStackByOption.value,
-    sort,
-    isPtrIncluded,
+    ...sort,
+    ...isPtrIncluded,
   });
 
   const titleWithStackByField = useMemo(
