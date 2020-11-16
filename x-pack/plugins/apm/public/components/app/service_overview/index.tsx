@@ -11,7 +11,6 @@ import {
   EuiPanel,
   EuiTitle,
 } from '@elastic/eui';
-import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useTrackPageview } from '../../../../../observability/public';
