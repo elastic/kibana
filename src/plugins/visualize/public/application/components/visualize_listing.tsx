@@ -145,44 +145,12 @@ export const VisualizeListing = () => {
     [savedObjects.client, toastNotifications]
   );
 
-<<<<<<< HEAD
   const searchFilters = useMemo(() => {
     return savedObjectsTagging
       ? [savedObjectsTagging.ui.getSearchBarFilter({ useName: true })]
       : [];
   }, [savedObjectsTagging]);
 
-  return (
-    <TableListView
-      headingId="visualizeListingHeading"
-      // we allow users to create visualizations even if they can't save them
-      // for data exploration purposes
-      createItem={createNewVis}
-      tableCaption={i18n.translate('visualize.listing.table.listTitle', {
-        defaultMessage: 'Visualizations',
-      })}
-      findItems={fetchItems}
-      deleteItems={visualizeCapabilities.delete ? deleteItems : undefined}
-      editItem={visualizeCapabilities.save ? editItem : undefined}
-      tableColumns={tableColumns}
-      listingLimit={listingLimit}
-      initialPageSize={savedObjectsPublic.settings.getPerPage()}
-      initialFilter={''}
-      rowHeader="title"
-      noItemsFragment={noItemsFragment}
-      entityName={i18n.translate('visualize.listing.table.entityName', {
-        defaultMessage: 'visualization',
-      })}
-      entityNamePlural={i18n.translate('visualize.listing.table.entityNamePlural', {
-        defaultMessage: 'visualizations',
-      })}
-      tableListTitle={i18n.translate('visualize.listing.table.listTitle', {
-        defaultMessage: 'Visualizations',
-      })}
-      toastNotifications={toastNotifications}
-      searchFilters={searchFilters}
-    />
-=======
   const calloutMessage = (
     <>
       Building a dashboard? Create new content directly from the{' '}
@@ -210,6 +178,9 @@ export const VisualizeListing = () => {
         // we allow users to create visualizations even if they can't save them
         // for data exploration purposes
         createItem={createNewVis}
+        tableCaption={i18n.translate('visualize.listing.table.listTitle', {
+          defaultMessage: 'Visualizations',
+        })}
         findItems={fetchItems}
         deleteItems={visualizeCapabilities.delete ? deleteItems : undefined}
         editItem={visualizeCapabilities.save ? editItem : undefined}
@@ -217,6 +188,7 @@ export const VisualizeListing = () => {
         listingLimit={listingLimit}
         initialPageSize={savedObjectsPublic.settings.getPerPage()}
         initialFilter={''}
+        rowHeader="title"
         noItemsFragment={noItemsFragment}
         entityName={i18n.translate('visualize.listing.table.entityName', {
           defaultMessage: 'visualization',
@@ -228,8 +200,8 @@ export const VisualizeListing = () => {
           defaultMessage: 'Visualizations',
         })}
         toastNotifications={toastNotifications}
+        searchFilters={searchFilters}
       />
     </>
->>>>>>> wip
   );
 };
