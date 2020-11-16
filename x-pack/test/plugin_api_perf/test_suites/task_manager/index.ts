@@ -14,7 +14,7 @@ export default function ({ loadTestFile }: { loadTestFile: (file: string) => voi
    * worth keeping around for future use, rather than being rewritten time and time again.
    */
   describe.skip('task_manager_perf', function taskManagerSuite() {
-    this.tags('ciGroup1');
+    this.tags('ciGroup2');
     loadTestFile(require.resolve('./task_manager_perf_integration'));
   });
 }

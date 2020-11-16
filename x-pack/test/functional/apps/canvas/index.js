@@ -19,7 +19,7 @@ export default function canvasApp({ loadTestFile, getService }) {
       await security.testUser.restoreDefaults();
     });
 
-    this.tags('ciGroup1'); // CI requires tags ヽ(゜Q。)ノ？
+    this.tags('ciGroup2'); // CI requires tags ヽ(゜Q。)ノ？
     loadTestFile(require.resolve('./smoke_test'));
     loadTestFile(require.resolve('./expression'));
     loadTestFile(require.resolve('./filters'));
