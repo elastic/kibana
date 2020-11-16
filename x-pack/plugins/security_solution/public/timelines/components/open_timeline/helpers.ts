@@ -358,7 +358,7 @@ export const queryTimelineById = <TCache>({
         );
 
         if (onOpenTimeline != null) {
-          onOpenTimeline({ ...timeline });
+          onOpenTimeline(timeline);
         } else if (updateTimeline) {
           const { from, to } = normalizeTimeRange({
             from: getOr(null, 'dateRange.start', timeline),
