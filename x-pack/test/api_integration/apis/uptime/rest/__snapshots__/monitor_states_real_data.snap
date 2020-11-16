@@ -63,6 +63,7 @@ Object {
       "state": Object {
         "monitor": Object {
           "name": "",
+          "type": "http",
         },
         "observer": Object {
           "geo": Object {
@@ -242,6 +243,7 @@ Object {
       "state": Object {
         "monitor": Object {
           "name": "",
+          "type": "http",
         },
         "observer": Object {
           "geo": Object {
