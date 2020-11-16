@@ -24,7 +24,7 @@ import { getFilesForCommit, checkFileCasing } from './precommit_hook';
 
 run(
   async ({ log, flags }) => {
-    const files = await getFilesForCommit();
+    const files = await getFilesForCommit(flags.ref);
     const errors = [];
 
     try {
@@ -52,15 +52,17 @@ run(
   },
   {
     description: `
-    Run checks on files that are staged for commit
+    Run checks on files that are staged for commit by default
   `,
     flags: {
       boolean: ['fix'],
+      string: ['ref'],
       default: {
         fix: false,
       },
       help: `
       --fix              Execute eslint in --fix mode
+      --ref              Run checks against any git ref files (example HEAD or <commit_sha>) instead of running against staged ones
     `,
     },
   }
