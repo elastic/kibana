@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LegacyAPICaller } from 'src/core/server';
+import { ILegacyClusterClient } from 'src/core/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { getSettingsCollector } from './get_settings_collector';
 import { getMonitoringUsageCollector } from './get_usage_collector';
@@ -15,10 +15,8 @@ export { KibanaSettingsCollector } from './get_settings_collector';
 export function registerCollectors(
   usageCollection: UsageCollectionSetup,
   config: MonitoringConfig,
-  callCluster: LegacyAPICaller
+  esClient: ILegacyClusterClient
 ) {
   usageCollection.registerCollector(getSettingsCollector(usageCollection, config));
-  usageCollection.registerCollector(
-    getMonitoringUsageCollector(usageCollection, config, callCluster)
-  );
+  usageCollection.registerCollector(getMonitoringUsageCollector(usageCollection, config, esClient));
 }

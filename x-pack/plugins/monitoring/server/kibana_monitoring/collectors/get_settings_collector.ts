@@ -44,6 +44,14 @@ interface EmailSettingData {
   xpack: { default_admin_email: string | null };
 }
 
+function getEmailValueStructure(email: string | null): EmailSettingData {
+  return {
+    xpack: {
+      default_admin_email: email,
+    },
+  };
+}
+
 export interface KibanaSettingsCollector extends Collector<EmailSettingData | undefined> {
   getEmailValueStructure(email: string | null): EmailSettingData;
 }
@@ -52,7 +60,11 @@ export function getSettingsCollector(
   usageCollection: UsageCollectionSetup,
   config: MonitoringConfig
 ) {
-  return usageCollection.makeStatsCollector({
+  const collector = usageCollection.makeStatsCollector<
+    EmailSettingData | undefined,
+    unknown,
+    false
+  >({
     type: KIBANA_SETTINGS_TYPE,
     isReady: () => true,
     schema: {
@@ -60,13 +72,13 @@ export function getSettingsCollector(
         default_admin_email: { type: 'text' },
       },
     },
-    async fetch(this: KibanaSettingsCollector) {
+    async fetch() {
       let kibanaSettingsData;
       const defaultAdminEmail = await checkForEmailValue(config);
 
       // skip everything if defaultAdminEmail === undefined
       if (defaultAdminEmail || (defaultAdminEmail === null && shouldUseNull)) {
-        kibanaSettingsData = this.getEmailValueStructure(defaultAdminEmail);
+        kibanaSettingsData = getEmailValueStructure(defaultAdminEmail);
         this.log.debug(
           `[${defaultAdminEmail}] default admin email setting found, sending [${KIBANA_SETTINGS_TYPE}] monitoring document.`
         );
@@ -82,12 +94,8 @@ export function getSettingsCollector(
       // returns undefined if there was no result
       return kibanaSettingsData;
     },
-    getEmailValueStructure(email: string | null) {
-      return {
-        xpack: {
-          default_admin_email: email,
-        },
-      };
-    },
   });
+  // Attaching the method to the collector because we need to use it in `/api/settings`
+  (collector as KibanaSettingsCollector).getEmailValueStructure = getEmailValueStructure;
+  return collector;
 }
