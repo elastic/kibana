@@ -37,4 +37,3 @@ export interface PieExpressionProps {
   data: LensMultiTable;
   args: PieExpressionArgs;
 }
-
