@@ -31,7 +31,7 @@ export const WorkplaceSearch: React.FC<InitialAppData> = (props) => {
 
 export const WorkplaceSearchConfigured: React.FC<InitialAppData> = (props) => {
   const { hasInitialized } = useValues(AppLogic);
-  const { initializeAppData } = useActions(AppLogic);
+  const { initializeAppData, setContext } = useActions(AppLogic);
   const { renderHeaderActions } = useValues(KibanaLogic);
   const { errorConnecting, readOnlyMode } = useValues(HttpLogic);
 
@@ -52,6 +52,10 @@ export const WorkplaceSearchConfigured: React.FC<InitialAppData> = (props) => {
       renderHeaderActions(WorkplaceSearchHeaderActions);
     }
   }, [hasInitialized]);
+
+  useEffect(() => {
+    setContext(isOrganization);
+  }, [isOrganization]);
 
   return (
     <Switch>
