@@ -17,17 +17,11 @@
  * under the License.
  */
 
-export const getKibanaTranslationFilesMock = jest.fn();
-jest.doMock('./get_kibana_translation_files', () => ({
-  getKibanaTranslationFiles: getKibanaTranslationFilesMock,
-}));
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-export const initTranslationsMock = jest.fn();
-jest.doMock('./init_translations', () => ({
-  initTranslations: initTranslationsMock,
-}));
-
-export const registerRoutesMock = jest.fn();
-jest.doMock('./routes', () => ({
-  registerRoutes: registerRoutesMock,
-}));
+export default function ({ loadTestFile }: FtrProviderContext) {
+  describe('core', () => {
+    loadTestFile(require.resolve('./compression'));
+    loadTestFile(require.resolve('./translations'));
+  });
+}
