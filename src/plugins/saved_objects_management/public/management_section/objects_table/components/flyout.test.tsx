@@ -28,7 +28,7 @@ import {
 } from './flyout.test.mocks';
 
 import React from 'react';
-import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers';
+import { shallowWithI18nProvider } from '@kbn/test/jest';
 import { coreMock } from '../../../../../../core/public/mocks';
 import { serviceRegistryMock } from '../../../services/service_registry.mock';
 import { Flyout, FlyoutProps, FlyoutState } from './flyout';
