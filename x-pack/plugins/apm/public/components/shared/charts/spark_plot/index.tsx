@@ -16,10 +16,11 @@ import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 interface Props {
   color: string;
   series: Array<{ x: number; y: number | null }>;
+  width: string;
 }
 
 export function SparkPlot(props: Props) {
-  const { series, color } = props;
+  const { series, color, width } = props;
   const chartTheme = useChartTheme();
 
   const isEmpty = series.every((point) => point.y === null);
@@ -40,7 +41,7 @@ export function SparkPlot(props: Props) {
   }
 
   return (
-    <Chart size={{ height: px(24), width: px(64) }}>
+    <Chart size={{ height: px(24), width }}>
       <Settings
         theme={{
           ...chartTheme,

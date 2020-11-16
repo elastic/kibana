@@ -22,7 +22,7 @@ import { callApmApi } from '../../../../services/rest/createCallApmApi';
 import { TimestampTooltip } from '../../../shared/TimestampTooltip';
 import { ErrorDetailLink } from '../../../shared/Links/apm/ErrorDetailLink';
 import { px, truncate, unit } from '../../../../style/variables';
-import { FetchWrapper } from './fetch_wrapper';
+import { TableFetchWrapper } from '../../../shared/table_fetch_wrapper';
 
 interface Props {
   serviceName: string;
@@ -223,7 +223,7 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem>
-        <FetchWrapper hasData={!!items.length} status={status}>
+        <TableFetchWrapper hasData={!!items.length} status={status}>
           <EuiBasicTable
             columns={columns}
             items={items}
@@ -259,7 +259,7 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
               },
             }}
           />
-        </FetchWrapper>
+        </TableFetchWrapper>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

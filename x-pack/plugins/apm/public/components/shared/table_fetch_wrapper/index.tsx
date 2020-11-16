@@ -5,11 +5,11 @@
  */
 
 import React from 'react';
-import { FETCH_STATUS } from '../../../../hooks/useFetcher';
-import { ErrorStatePrompt } from '../../../shared/ErrorStatePrompt';
-import { LoadingStatePrompt } from '../../../shared/LoadingStatePrompt';
+import { FETCH_STATUS } from '../../../hooks/useFetcher';
+import { ErrorStatePrompt } from '../ErrorStatePrompt';
+import { LoadingStatePrompt } from '../LoadingStatePrompt';
 
-export function FetchWrapper({
+export function TableFetchWrapper({
   hasData,
   status,
   children,
