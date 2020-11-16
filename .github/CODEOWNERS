@@ -25,6 +25,7 @@
 /src/plugins/vis_type_vega/ @elastic/kibana-app
 /src/plugins/vis_type_vislib/ @elastic/kibana-app
 /src/plugins/vis_type_xy/ @elastic/kibana-app
+/src/plugins/vis_type_pie/ @elastic/kibana-app
 /src/plugins/visualize/ @elastic/kibana-app
 /src/plugins/visualizations/ @elastic/kibana-app
 

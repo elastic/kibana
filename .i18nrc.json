@@ -58,6 +58,7 @@
     "visTypeVega": "src/plugins/vis_type_vega",
     "visTypeVislib": "src/plugins/vis_type_vislib",
     "visTypeXy": "src/plugins/vis_type_xy",
+    "visTypePie": "src/plugins/vis_type_pie",
     "visualizations": "src/plugins/visualizations",
     "lensOss": "src/plugins/lens_oss",
     "mapsOss": "src/plugins/maps_oss",

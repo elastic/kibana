@@ -17,8 +17,4 @@
  * under the License.
  */
 
-import { getPieVisTypeDefinition } from './pie';
-
-export const pieVisType = (showElasticChartsOptions?: boolean) => {
-  return getPieVisTypeDefinition(showElasticChartsOptions);
-};
+export { truncateLabels } from './truncate_labels';

@@ -41,6 +41,8 @@ import {
   Settings,
   RenderChangeListener,
   ElementClickListener,
+  TooltipProps,
+  TooltipType,
 } from '@elastic/charts';
 import { keys } from '@elastic/eui';
 import { SeriesLayer } from '../../charts/public';
@@ -315,6 +317,10 @@ const PieComponent = (props: PieComponentProps) => {
     };
   });
 
+  const tooltip: TooltipProps = {
+    type: visParams.addTooltip ? TooltipType.Follow : TooltipType.None,
+  };
+
   return (
     <div className="pieChart__container" data-test-subj="visTypePieChart">
       {/* <LegendToggle
@@ -327,6 +333,7 @@ const PieComponent = (props: PieComponentProps) => {
           showLegend={showLegend}
           legendPosition={visParams.legendPosition || Position.Right}
           legendMaxDepth={undefined}
+          tooltip={tooltip}
           // onElementClick={(args) => {
           //   const context = getFilterContext(args[0][0] as LayerValue[], groups, firstTable);
 

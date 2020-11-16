@@ -5,5 +5,5 @@
   "ui": true,
   "requiredPlugins": ["charts", "data", "expressions", "visualizations", "kibanaLegacy"],
   "optionalPlugins": ["visTypeXy"],
-  "requiredBundles": ["kibanaUtils", "visDefaultEditor"]
+  "requiredBundles": ["kibanaUtils", "visDefaultEditor", "visTypePie"]
 }

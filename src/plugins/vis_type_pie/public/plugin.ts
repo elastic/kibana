@@ -23,7 +23,7 @@ import { ChartsPluginSetup } from '../../charts/public';
 import { DataPublicPluginStart } from '../../data/public';
 import { createPieVisFn } from './pie_fn';
 import { pieVisRenderer } from './pie_renderer';
-import { pieVisTypeDefinition } from './vis_type';
+import { pieVisType } from './vis_type';
 import { setThemeService, setColorsService, setFormatService } from './services';
 
 export interface VisTypePieSetupDependencies {
@@ -50,7 +50,7 @@ export class VisTypePiePlugin {
 
     [createPieVisFn].forEach(expressions.registerFunction);
     expressions.registerRenderer(pieVisRenderer);
-    visualizations.createBaseVisualization(pieVisTypeDefinition);
+    visualizations.createBaseVisualization(pieVisType(true));
     // core.getStartServices().then(([coreStart]) => {
     //   visualizations.registerAlias(getLensAliasConfig(coreStart.docLinks));
     // });

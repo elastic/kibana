@@ -241,6 +241,10 @@ The plugin exposes the static DefaultEditorController class to consume.
 |Contains the metric visualization.
 
 
+|{kib-repo}blob/{branch}/src/plugins/vis_type_pie/README.md[visTypePie]
+|Contains the pie chart implementation using the elastic-charts library. The goal is to eventually deprecate the old implementation and keep only this. Until then, the library used is defined by the Charts Library advanced setting.
+
+
 |{kib-repo}blob/{branch}/src/plugins/vis_type_table/README.md[visTypeTable]
 |Contains the data table visualization, that allows presenting data in a simple table format.
 
