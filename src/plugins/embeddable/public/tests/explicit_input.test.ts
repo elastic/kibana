@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { take } from 'rxjs/operators';
 import { testPlugin } from './test_plugin';
 import {
   FILTERABLE_EMBEDDABLE,
