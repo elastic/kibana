@@ -12,61 +12,54 @@ import { AlertsClientMock } from '../../../../../alerts/server/alerts_client.moc
 describe('updateRules', () => {
   it('should call alertsClient.disable if the rule was enabled and enabled is false', async () => {
     const rulesOptionsMock = getUpdateRulesOptionsMock();
-    const ruleOptions = {
-      ...rulesOptionsMock,
-      enabled: false,
-    };
-    ((ruleOptions.alertsClient as unknown) as AlertsClientMock).get.mockResolvedValue(getResult());
+    rulesOptionsMock.ruleUpdate.enabled = false;
+    ((rulesOptionsMock.alertsClient as unknown) as AlertsClientMock).get.mockResolvedValue(
+      getResult()
+    );
 
-    await updateRules(ruleOptions);
+    await updateRules(rulesOptionsMock);
 
-    expect(ruleOptions.alertsClient.disable).toHaveBeenCalledWith(
+    expect(rulesOptionsMock.alertsClient.disable).toHaveBeenCalledWith(
       expect.objectContaining({
-        id: rulesOptionsMock.id,
+        id: rulesOptionsMock.ruleUpdate.id,
       })
     );
   });
 
   it('should call alertsClient.enable if the rule was disabled and enabled is true', async () => {
     const rulesOptionsMock = getUpdateRulesOptionsMock();
-    const ruleOptions = {
-      ...rulesOptionsMock,
-      enabled: true,
-    };
+    rulesOptionsMock.ruleUpdate.enabled = true;
 
-    ((ruleOptions.alertsClient as unknown) as AlertsClientMock).get.mockResolvedValue({
+    ((rulesOptionsMock.alertsClient as unknown) as AlertsClientMock).get.mockResolvedValue({
       ...getResult(),
       enabled: false,
     });
 
-    await updateRules(ruleOptions);
+    await updateRules(rulesOptionsMock);
 
-    expect(ruleOptions.alertsClient.enable).toHaveBeenCalledWith(
+    expect(rulesOptionsMock.alertsClient.enable).toHaveBeenCalledWith(
       expect.objectContaining({
-        id: rulesOptionsMock.id,
+        id: rulesOptionsMock.ruleUpdate.id,
       })
     );
   });
 
-  it('calls the alertsClient with ML params', async () => {
+  it('calls the alertsClient with params', async () => {
     const rulesOptionsMock = getUpdateMlRulesOptionsMock();
-    const ruleOptions = {
-      ...rulesOptionsMock,
-      enabled: true,
-    };
+    rulesOptionsMock.ruleUpdate.enabled = true;
 
-    ((ruleOptions.alertsClient as unknown) as AlertsClientMock).get.mockResolvedValue(
+    ((rulesOptionsMock.alertsClient as unknown) as AlertsClientMock).get.mockResolvedValue(
       getMlResult()
     );
 
-    await updateRules(ruleOptions);
+    await updateRules(rulesOptionsMock);
 
-    expect(ruleOptions.alertsClient.update).toHaveBeenCalledWith(
+    expect(rulesOptionsMock.alertsClient.update).toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({
           params: expect.objectContaining({
-            anomalyThreshold: rulesOptionsMock.anomalyThreshold,
-            machineLearningJobId: rulesOptionsMock.machineLearningJobId,
+            type: 'machine_learning',
+            severity: 'high',
           }),
         }),
       })

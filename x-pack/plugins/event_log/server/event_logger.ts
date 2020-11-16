@@ -72,7 +72,6 @@ export class EventLogger implements IEventLogger {
 
     const event: IEvent = {};
     const fixedProperties = {
-      '@timestamp': new Date().toISOString(),
       ecs: {
         version: ECS_VERSION,
       },
@@ -81,8 +80,12 @@ export class EventLogger implements IEventLogger {
       },
     };
 
+    const defaultProperties = {
+      '@timestamp': new Date().toISOString(),
+    };
+
     // merge the initial properties and event properties
-    merge(event, this.initialProperties, eventProperties, fixedProperties);
+    merge(event, defaultProperties, this.initialProperties, eventProperties, fixedProperties);
 
     let validatedEvent: IValidatedEvent;
     try {
