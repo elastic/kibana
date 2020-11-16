@@ -10,7 +10,7 @@ import { createKibanaPrivileges } from '../../../../__fixtures__/kibana_privileg
 import { SecuredSubFeature } from '../../../../model';
 import { PrivilegeFormCalculator } from '../privilege_form_calculator';
 import { Role } from '../../../../../../../common/model';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 import { SubFeatureForm } from './sub_feature_form';
 import { EuiCheckbox, EuiButtonGroup } from '@elastic/eui';
 import { act } from '@testing-library/react';
