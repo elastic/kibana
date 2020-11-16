@@ -126,27 +126,23 @@ test('executes the task by calling the executor with proper parameters', async (
   expect(
     mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser
   ).toHaveBeenCalledWith('action_task_params', '3', { namespace: 'namespace-test' });
+
   expect(mockedActionExecutor.execute).toHaveBeenCalledWith({
     actionId: '2',
     params: { baz: true },
-    request: {
-      getBasePath: expect.any(Function),
+    request: expect.objectContaining({
       headers: {
         // base64 encoded "123:abc"
         authorization: 'ApiKey MTIzOmFiYw==',
       },
-      path: '/',
-      route: { settings: {} },
-      url: {
-        href: '/',
-      },
-      raw: {
-        req: {
-          url: '/',
-        },
-      },
-    },
+    }),
   });
+
+  const [executeParams] = mockedActionExecutor.execute.mock.calls[0];
+  expect(taskRunnerFactoryInitializerParams.basePathService.set).toHaveBeenCalledWith(
+    executeParams.request,
+    '/s/test'
+  );
 });
 
 test('cleans up action_task_params object', async () => {
@@ -255,24 +251,19 @@ test('uses API key when provided', async () => {
   expect(mockedActionExecutor.execute).toHaveBeenCalledWith({
     actionId: '2',
     params: { baz: true },
-    request: {
-      getBasePath: expect.anything(),
+    request: expect.objectContaining({
       headers: {
         // base64 encoded "123:abc"
         authorization: 'ApiKey MTIzOmFiYw==',
       },
-      path: '/',
-      route: { settings: {} },
-      url: {
-        href: '/',
-      },
-      raw: {
-        req: {
-          url: '/',
-        },
-      },
-    },
+    }),
   });
+
+  const [executeParams] = mockedActionExecutor.execute.mock.calls[0];
+  expect(taskRunnerFactoryInitializerParams.basePathService.set).toHaveBeenCalledWith(
+    executeParams.request,
+    '/s/test'
+  );
 });
 
 test(`doesn't use API key when not provided`, async () => {
@@ -297,21 +288,16 @@ test(`doesn't use API key when not provided`, async () => {
   expect(mockedActionExecutor.execute).toHaveBeenCalledWith({
     actionId: '2',
     params: { baz: true },
-    request: {
-      getBasePath: expect.anything(),
+    request: expect.objectContaining({
       headers: {},
-      path: '/',
-      route: { settings: {} },
-      url: {
-        href: '/',
-      },
-      raw: {
-        req: {
-          url: '/',
-        },
-      },
-    },
+    }),
   });
+
+  const [executeParams] = mockedActionExecutor.execute.mock.calls[0];
+  expect(taskRunnerFactoryInitializerParams.basePathService.set).toHaveBeenCalledWith(
+    executeParams.request,
+    '/s/test'
+  );
 });
 
 test(`throws an error when license doesn't support the action type`, async () => {

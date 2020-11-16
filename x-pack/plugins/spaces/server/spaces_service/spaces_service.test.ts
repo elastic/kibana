@@ -102,41 +102,6 @@ describe('SpacesService', () => {
     });
   });
 
-  describe('#getBasePath', () => {
-    it(`throws when a space id is not provided`, async () => {
-      const { spacesServiceStart } = createService();
-
-      // @ts-ignore TS knows this isn't right
-      expect(() => spacesServiceStart.getBasePath()).toThrowErrorMatchingInlineSnapshot(
-        `"spaceId is required to retrieve base path"`
-      );
-
-      expect(() => spacesServiceStart.getBasePath('')).toThrowErrorMatchingInlineSnapshot(
-        `"spaceId is required to retrieve base path"`
-      );
-    });
-
-    it('returns "" for the default space and no server base path', async () => {
-      const { spacesServiceStart } = createService();
-      expect(spacesServiceStart.getBasePath(DEFAULT_SPACE_ID)).toEqual('');
-    });
-
-    it('returns /sbp for the default space and the "/sbp" server base path', async () => {
-      const { spacesServiceStart } = createService('/sbp');
-      expect(spacesServiceStart.getBasePath(DEFAULT_SPACE_ID)).toEqual('/sbp');
-    });
-
-    it('returns /s/foo for the foo space and no server base path', async () => {
-      const { spacesServiceStart } = createService();
-      expect(spacesServiceStart.getBasePath('foo')).toEqual('/s/foo');
-    });
-
-    it('returns /sbp/s/foo for the foo space and the "/sbp" server base path', async () => {
-      const { spacesServiceStart } = createService('/sbp');
-      expect(spacesServiceStart.getBasePath('foo')).toEqual('/sbp/s/foo');
-    });
-  });
-
   describe('#isInDefaultSpace', () => {
     it('returns true when in the default space', async () => {
       const { spacesServiceStart } = createService();
