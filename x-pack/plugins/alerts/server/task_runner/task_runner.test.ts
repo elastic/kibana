@@ -25,12 +25,12 @@ import { alertsMock, alertsClientMock } from '../mocks';
 import { eventLoggerMock } from '../../../event_log/server/event_logger.mock';
 import { IEventLogger } from '../../../event_log/server';
 import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
-import { Alert } from '../../common';
+import { Alert, ResolvedActionGroup } from '../../common';
 import { omit } from 'lodash';
 const alertType = {
   id: 'test',
   name: 'My test alert',
-  actionGroups: [{ id: 'default', name: 'Default' }],
+  actionGroups: [{ id: 'default', name: 'Default' }, ResolvedActionGroup],
   defaultActionGroupId: 'default',
   executor: jest.fn(),
   producer: 'alerts',
@@ -91,7 +91,7 @@ describe('Task Runner', () => {
     throttle: null,
     muteAll: false,
     enabled: true,
-    alertTypeId: '123',
+    alertTypeId: alertType.id,
     apiKey: '',
     apiKeyOwner: 'elastic',
     schedule: { interval: '10s' },
@@ -110,6 +110,14 @@ describe('Task Runner', () => {
         actionTypeId: 'action',
         params: {
           foo: true,
+        },
+      },
+      {
+        group: ResolvedActionGroup.id,
+        id: '2',
+        actionTypeId: 'action',
+        params: {
+          isResolved: true,
         },
       },
     ],
@@ -503,6 +511,79 @@ describe('Task Runner', () => {
             "message": "alert executed: test:1: 'alert-name'",
           },
         ],
+      ]
+    `);
+  });
+
+  test('fire resolved actions for execution for the alertInstances which is in the resolved state', async () => {
+    taskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
+    taskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);
+
+    alertType.executor.mockImplementation(
+      ({ services: executorServices }: AlertExecutorOptions) => {
+        executorServices.alertInstanceFactory('1').scheduleActions('default');
+      }
+    );
+    const taskRunner = new TaskRunner(
+      alertType,
+      {
+        ...mockedTaskInstance,
+        state: {
+          ...mockedTaskInstance.state,
+          alertInstances: {
+            '1': { meta: {}, state: { bar: false } },
+            '2': { meta: {}, state: { bar: false } },
+          },
+        },
+      },
+      taskRunnerFactoryInitializerParams
+    );
+    alertsClient.get.mockResolvedValue(mockedAlertTypeSavedObject);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        apiKey: Buffer.from('123:abc').toString('base64'),
+      },
+      references: [],
+    });
+    const runnerResult = await taskRunner.run();
+    expect(runnerResult.state.alertInstances).toMatchInlineSnapshot(`
+      Object {
+        "1": Object {
+          "meta": Object {
+            "lastScheduledActions": Object {
+              "date": 1970-01-01T00:00:00.000Z,
+              "group": "default",
+            },
+          },
+          "state": Object {
+            "bar": false,
+          },
+        },
+      }
+    `);
+
+    const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
+    expect(eventLogger.logEvent).toHaveBeenCalledTimes(5);
+    expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(2);
+    expect(actionsClient.enqueueExecution.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "apiKey": "MTIzOmFiYw==",
+          "id": "2",
+          "params": Object {
+            "isResolved": true,
+          },
+          "source": Object {
+            "source": Object {
+              "id": "1",
+              "type": "alert",
+            },
+            "type": "SAVED_OBJECT",
+          },
+          "spaceId": undefined,
+        },
       ]
     `);
   });
