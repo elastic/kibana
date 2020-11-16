@@ -99,13 +99,6 @@ const PieComponent = (props: PieComponentProps) => {
 
   const [showLegend, setShowLegend] = useState(true);
 
-  const fillLabel: Partial<PartitionFillLabel> = {
-    textInvertible: true,
-    valueFont: {
-      fontWeight: 700,
-    },
-  };
-
   const onRenderChange = useCallback<RenderChangeListener>(
     (isRendered) => {
       if (isRendered) {
@@ -254,6 +247,17 @@ const PieComponent = (props: PieComponentProps) => {
     return Number.EPSILON;
   }
 
+  const fillLabel: Partial<PartitionFillLabel> = {
+    textInvertible: true,
+    valueFont: {
+      fontWeight: 700,
+    },
+  };
+
+  if (!visParams.labels.values) {
+    fillLabel.valueFormatter = () => '';
+  }
+
   const config: RecursivePartial<PartitionConfig> = {
     partitionLayout: PartitionLayout.sunburst,
     fontFamily: chartTheme.barSeriesStyle?.displayValue?.fontFamily,
@@ -263,9 +267,10 @@ const PieComponent = (props: PieComponentProps) => {
     minFontSize: 10,
     maxFontSize: 16,
     linkLabel: {
-      maxCount: 5,
+      maxCount: Number.POSITIVE_INFINITY,
       fontSize: 11,
       textColor: chartTheme.axes?.axisTitle?.fill,
+      maxTextLength: visParams.labels.truncate ?? undefined,
     },
     sectorLineStroke: chartTheme.lineSeriesStyle?.point?.fill,
     sectorLineWidth: 1.5,
@@ -361,7 +366,6 @@ const PieComponent = (props: PieComponentProps) => {
             onElementClick={(args) => {
               handleFilterClick(args[0][0] as LayerValue[], bucketColumns, visData);
             }}
-            // onElementClick={handleFilterClick(visData)}
             theme={chartTheme}
             baseTheme={chartBaseTheme}
           />
@@ -370,11 +374,9 @@ const PieComponent = (props: PieComponentProps) => {
             data={visData.rows}
             valueAccessor={(d: Datum) => getSliceValue(d, metricColumn)}
             percentFormatter={(d: number) => percentFormatter.convert(d / 100)}
-            valueGetter={!visParams.labels.show || !visParams.labels.values ? undefined : 'percent'}
+            valueGetter={!visParams.labels.show ? undefined : 'percent'}
             valueFormatter={(d: number) =>
-              !visParams.labels.show || !visParams.labels.values
-                ? ''
-                : metricFieldFormatter.convert(d)
+              !visParams.labels.show ? '' : metricFieldFormatter.convert(d)
             }
             layers={layers}
             config={config}
