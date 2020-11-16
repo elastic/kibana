@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Datatable } from 'src/plugins/expressions/public';
+import { KibanaDatatable } from 'src/plugins/expressions/public';
 import { getSliceValue, getFilterContext } from './render_helpers';
 
 describe('render helpers', () => {

@@ -5,10 +5,10 @@
  */
 
 import { Datum, LayerValue } from '@elastic/charts';
-import { Datatable, DatatableColumn } from 'src/plugins/expressions/public';
+import { KibanaDatatable, KibanaDatatableColumn } from 'src/plugins/expressions/public';
 import { LensFilterEvent } from '../types';
 
-export function getSliceValue(d: Datum, metricColumn: DatatableColumn) {
+export function getSliceValue(d: Datum, metricColumn: KibanaDatatableColumn) {
   if (typeof d[metricColumn.id] === 'number' && d[metricColumn.id] !== 0) {
     return d[metricColumn.id];
   }
