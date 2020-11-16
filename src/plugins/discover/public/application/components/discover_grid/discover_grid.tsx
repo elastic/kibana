@@ -38,13 +38,12 @@ import {
   getVisibleColumns,
 } from './discover_grid_helpers';
 import { DiscoverGridFlyout } from './discover_grid_flyout';
-import { DiscoverGridToolbarSelection } from './discover_grid_toolbar_selection';
 import { DiscoverGridContext } from './discover_grid_context';
-import { ViewButton } from './discover_grid_view_button';
 import { getRenderCellValueFn } from './get_render_cell_value';
 import { DiscoverGridSettings } from './types';
-import { DiscoverGridSelectButton, DiscoverGridSelection } from './discover_grid_doc_selection';
+import { DiscoverGridSelection, DiscoverGridToolbarSelection } from './discover_grid_doc_selection';
 import { SortPairArr } from '../../angular/doc_table/lib/get_sort';
+import { leadControlColumns } from './discover_grid_columns';
 
 interface SortObj {
   id: string;
@@ -186,7 +185,7 @@ export const DiscoverGrid = React.memo(
     );
     const schemaDetectors = useMemo(() => getSchemaDetectors(), []);
     const popoverContents = useMemo(() => getPopoverContents(), []);
-    const colummsVisibility = useMemo(
+    const columnsVisibility = useMemo(
       () => ({
         visibleColumns: getVisibleColumns(columns, indexPattern, showTimeCol) as string[],
         setVisibleColumns: (newColumns: string[]) => {
@@ -199,43 +198,7 @@ export const DiscoverGrid = React.memo(
       sortingColumns,
       onTableSort,
     ]);
-    const lead = useMemo(() => {
-      if (!rows) {
-        return [];
-      }
-      return [
-        useDocSelector
-          ? {
-              id: 'checkBox',
-              width: 31,
-              headerCellRender: () => (
-                <EuiScreenReaderOnly>
-                  <span>
-                    {i18n.translate('discover.selectColumnHeader', {
-                      defaultMessage: 'Select column',
-                    })}
-                  </span>
-                </EuiScreenReaderOnly>
-              ),
-              rowCellRender: (col: number) => <DiscoverGridSelectButton col={col} rows={rows} />,
-            }
-          : null,
-        {
-          id: 'openDetails',
-          width: 31,
-          headerCellRender: () => (
-            <EuiScreenReaderOnly>
-              <span>
-                {i18n.translate('discover.controlColumnHeader', {
-                  defaultMessage: 'Control column',
-                })}
-              </span>
-            </EuiScreenReaderOnly>
-          ),
-          rowCellRender: ViewButton,
-        },
-      ].filter((obj) => !!obj);
-    }, [rows, useDocSelector]);
+    const lead = useMemo(() => leadControlColumns(rows, useDocSelector), [rows, useDocSelector]);
 
     if (!rowCount || !rows) {
       return (
@@ -275,7 +238,7 @@ export const DiscoverGrid = React.memo(
               columns={euiGridColumns}
               renderCellValue={renderCellValue}
               leadingControlColumns={lead}
-              columnVisibility={colummsVisibility}
+              columnVisibility={columnsVisibility}
               pagination={paginationObj}
               toolbarVisibility={toolbarVisibility}
               gridStyle={gridStyle}

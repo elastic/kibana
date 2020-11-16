@@ -29,7 +29,7 @@ export const ViewButton = ({ rowIndex }: { rowIndex: number }) => {
       aria-label={i18n.translate('discover.grid.viewDoc', {
         defaultMessage: 'Toggle dialog with details',
       })}
-      onClick={() => setViewed(rowIndex)}
+      onClick={() => setViewed(rowIndex === viewed ? -1 : rowIndex)}
       className="dscTable__buttonToggle"
     >
       <EuiIcon size="s" type={viewed === rowIndex ? 'expandMini' : 'expand'} />

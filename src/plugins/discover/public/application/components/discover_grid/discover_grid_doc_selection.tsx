@@ -31,6 +31,7 @@ import {
   EuiPortal,
   EuiTitle,
   EuiSpacer,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 import { ElasticSearchHit } from '../../doc_views/doc_views_types';
 import { JsonCodeBlock } from '../json_code_block/json_code_block';
@@ -148,3 +149,18 @@ export function DiscoverGridSelection({
     </EuiPortal>
   );
 }
+
+export const DiscoverGridToolbarSelection = () => {
+  const { selected, showSelected, setShowSelected } = useContext<GridContext>(DiscoverGridContext);
+  return (
+    <EuiButtonEmpty
+      size="xs"
+      iconType="arrowDown"
+      color="primary"
+      className="euiDataGrid__controlBtn"
+      onClick={() => (selected.size ? setShowSelected(!showSelected) : void 0)}
+    >
+      {selected.size} {selected.size === 1 ? 'record' : 'records'} selected
+    </EuiButtonEmpty>
+  );
+};
