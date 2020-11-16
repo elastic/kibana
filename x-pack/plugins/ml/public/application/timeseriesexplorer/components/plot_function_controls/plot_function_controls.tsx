@@ -7,8 +7,9 @@ import React, { useEffect } from 'react';
 import { EuiFlexItem, EuiFormRow, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { mlJobService } from '../../../services/job_service';
-import { getFunctionDescription } from '../../get_function_description';
+import { getFunctionDescription, isMetricDetector } from '../../get_function_description';
 import { useToastNotificationService } from '../../../services/toast_notification_service';
+import { ML_JOB_AGGREGATION } from '../../../../../common/constants/aggregation_types';
 
 const plotByFunctionOptions = [
   {
@@ -46,6 +47,9 @@ export const PlotByFunctionControls = ({
   const toastNotificationService = useToastNotificationService();
 
   useEffect(() => {
+    if (functionDescription !== undefined) {
+      return;
+    }
     const getFunctionDescriptionToPlot = async () => {
       const functionToPlot = await getFunctionDescription(
         {
@@ -64,10 +68,10 @@ export const PlotByFunctionControls = ({
       // set if only entity controls are picked
       selectedEntities !== undefined &&
       functionDescription === undefined &&
-      selectedJob.analysis_config?.detectors?.hasOwnProperty(selectedDetectorIndex)
+      isMetricDetector(selectedJob, selectedDetectorIndex)
     ) {
       const detector = selectedJob.analysis_config.detectors[selectedDetectorIndex];
-      if (detector?.function === 'metric') {
+      if (detector?.function === ML_JOB_AGGREGATION.METRIC) {
         getFunctionDescriptionToPlot();
       }
     }
@@ -79,7 +83,7 @@ export const PlotByFunctionControls = ({
     functionDescription,
   ]);
 
-  if (functionDescription === undefined || functionDescription === 'unknown') return null;
+  if (functionDescription === undefined) return null;
 
   return (
     <EuiFlexItem grow={false}>

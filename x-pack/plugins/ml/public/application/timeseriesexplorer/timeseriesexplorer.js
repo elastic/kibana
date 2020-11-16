@@ -84,6 +84,7 @@ import { SeriesControls } from './components/series_controls';
 import { TimeSeriesChartWithTooltips } from './components/timeseries_chart/timeseries_chart_with_tooltip';
 import { PlotByFunctionControls } from './components/plot_function_controls';
 import { aggregationTypeTransform } from '../../../common/util/anomaly_utils';
+import { isMetricDetector } from './get_function_description';
 
 // Used to indicate the chart is being plotted across
 // all partition field values, where the cardinality of the field cannot be
@@ -104,16 +105,6 @@ export function getViewableDetectors(selectedJob) {
     }
   });
   return viewableDetectors;
-}
-
-export function isMetricDetector(selectedJob, selectedDetectorIndex) {
-  if (selectedJob?.analysis_config?.detectors?.hasOwnProperty(selectedDetectorIndex)) {
-    const detector = selectedJob.analysis_config.detectors[selectedDetectorIndex];
-    if (detector?.function === 'metric') {
-      return true;
-    }
-  }
-  return false;
 }
 
 function getTimeseriesexplorerDefaultState() {

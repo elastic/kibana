@@ -12,6 +12,16 @@ import { getCriteriaFields } from './get_criteria_fields';
 import { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
 import { ML_JOB_AGGREGATION } from '../../../common/constants/aggregation_types';
 
+export function isMetricDetector(selectedJob: CombinedJob, selectedDetectorIndex: number) {
+  if (selectedJob?.analysis_config?.detectors?.hasOwnProperty(selectedDetectorIndex)) {
+    const detector = selectedJob.analysis_config.detectors[selectedDetectorIndex];
+    if (detector?.function === ML_JOB_AGGREGATION.METRIC) {
+      return true;
+    }
+  }
+  return false;
+}
+
 /**
  * Get the function description from the record with the highest anomaly score
  */
@@ -31,11 +41,7 @@ export const getFunctionDescription = async (
 ) => {
   // if the detector's function is metric, fetch the highest scoring anomaly record
   // and set to plot the function_description (avg/min/max) of that record by default
-  if (
-    selectedJob?.analysis_config?.detectors[selectedDetectorIndex]?.function !==
-    ML_JOB_AGGREGATION.METRIC
-  )
-    return;
+  if (!isMetricDetector(selectedJob, selectedDetectorIndex)) return;
 
   const entityControls = getControlsForDetector(
     selectedDetectorIndex,

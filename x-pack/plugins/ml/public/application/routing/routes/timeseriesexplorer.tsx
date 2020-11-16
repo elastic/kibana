@@ -158,13 +158,9 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
   const selectedEntities = isJobChange ? undefined : appState?.mlTimeSeriesExplorer?.entities;
   const selectedForecastId = isJobChange ? undefined : appState?.mlTimeSeriesExplorer?.forecastId;
 
-  const previousSelectedEntities = usePrevious(selectedEntities);
-  const isSelectedEntitiesChange = !isEqual(previousSelectedEntities, selectedEntities);
-
-  const selectedFunctionDescription =
-    isJobChange || isSelectedEntitiesChange
-      ? undefined
-      : appState?.mlTimeSeriesExplorer?.functionDescription;
+  const selectedFunctionDescription = isJobChange
+    ? undefined
+    : appState?.mlTimeSeriesExplorer?.functionDescription;
 
   const zoom: AppStateZoom | undefined = isJobChange
     ? undefined
