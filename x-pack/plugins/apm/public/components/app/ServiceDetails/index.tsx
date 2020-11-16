@@ -20,7 +20,7 @@ export function ServiceDetails({ match, tab }: Props) {
   return (
     <div>
       <ApmHeader>
-        <EuiTitle size="l">
+        <EuiTitle>
           <h1>{serviceName}</h1>
         </EuiTitle>
       </ApmHeader>
