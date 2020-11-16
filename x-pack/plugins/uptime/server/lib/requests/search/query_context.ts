@@ -6,39 +6,43 @@
 
 import moment from 'moment';
 import { ElasticsearchClient } from 'kibana/server';
-import { CursorPagination } from './types';
 import { parseRelativeDate } from '../../helper';
-import { CursorDirection, SortOrder } from '../../../../common/runtime_types';
 
 export class QueryContext {
   callES: ElasticsearchClient;
   heartbeatIndices: string;
   dateRangeStart: string;
   dateRangeEnd: string;
-  pagination: CursorPagination;
   filterClause: any | null;
   size: number;
   statusFilter?: string;
   hasTimespanCache?: boolean;
+  sortField?: string;
+  sortDirection?: string;
+  pageIndex: number;
 
   constructor(
     database: any,
     heartbeatIndices: string,
     dateRangeStart: string,
     dateRangeEnd: string,
-    pagination: CursorPagination,
     filterClause: any | null,
     size: number,
-    statusFilter?: string
+    pageIndex: number,
+    statusFilter?: string,
+    sortField?: string,
+    sortDirection?: string
   ) {
     this.callES = database;
     this.heartbeatIndices = heartbeatIndices;
     this.dateRangeStart = dateRangeStart;
     this.dateRangeEnd = dateRangeEnd;
-    this.pagination = pagination;
     this.filterClause = filterClause;
     this.size = size;
+    this.pageIndex = pageIndex;
     this.statusFilter = statusFilter;
+    this.sortField = sortField;
+    this.sortDirection = sortDirection;
   }
 
   async search(params: any): Promise<any> {
@@ -141,27 +145,12 @@ export class QueryContext {
       this.heartbeatIndices,
       this.dateRangeStart,
       this.dateRangeEnd,
-      this.pagination,
       this.filterClause,
       this.size,
-      this.statusFilter
+      this.pageIndex,
+      this.statusFilter,
+      this.sortField,
+      this.sortDirection
     );
-  }
-
-  // Returns true if the order returned by the ES query matches the requested sort order.
-  // This useful to determine if the results need to be reversed from their ES results order.
-  // I.E. when navigating backwards using prevPagePagination (CursorDirection.Before) yet using a SortOrder.ASC.
-  searchSortAligned(): boolean {
-    if (this.pagination.cursorDirection === CursorDirection.AFTER) {
-      return this.pagination.sortOrder === SortOrder.ASC;
-    } else {
-      return this.pagination.sortOrder === SortOrder.DESC;
-    }
-  }
-
-  cursorOrder(): 'asc' | 'desc' {
-    return CursorDirection[this.pagination.cursorDirection] === CursorDirection.AFTER
-      ? 'asc'
-      : 'desc';
   }
 }

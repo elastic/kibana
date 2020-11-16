@@ -18,7 +18,10 @@ export const createMonitorListRoute: UMRestApiRouteFactory = (libs) => ({
       filters: schema.maybe(schema.string()),
       pagination: schema.maybe(schema.string()),
       statusFilter: schema.maybe(schema.string()),
+      sortField: schema.maybe(schema.string()),
+      sortDirection: schema.maybe(schema.string()),
       pageSize: schema.number(),
+      pageIndex: schema.number(),
     }),
   },
   options: {
@@ -33,40 +36,34 @@ export const createMonitorListRoute: UMRestApiRouteFactory = (libs) => ({
         pagination,
         statusFilter,
         pageSize,
+        pageIndex,
+        sortField,
+        sortDirection,
       } = request.query;
 
       const decodedPagination = pagination
         ? JSON.parse(decodeURIComponent(pagination))
         : CONTEXT_DEFAULTS.CURSOR_PAGINATION;
-      const [
-        indexStatus,
-        { summaries, nextPagePagination, prevPagePagination },
-      ] = await Promise.all([
-        libs.requests.getIndexStatus({ callES, dynamicSettings }),
-        libs.requests.getMonitorStates({
-          callES,
-          dynamicSettings,
-          dateRangeStart,
-          dateRangeEnd,
-          pagination: decodedPagination,
-          pageSize,
-          filters,
-          // this is added to make typescript happy,
-          // this sort of reassignment used to be further downstream but I've moved it here
-          // because this code is going to be decomissioned soon
-          statusFilter: statusFilter || undefined,
-        }),
-      ]);
 
-      const totalSummaryCount = indexStatus?.docCount ?? 0;
+      const result = await libs.requests.getMonitorStates({
+        callES,
+        dynamicSettings,
+        dateRangeStart,
+        dateRangeEnd,
+        pagination: decodedPagination,
+        pageSize,
+        pageIndex,
+        sortField,
+        sortDirection,
+        filters,
+        // this is added to make typescript happy,
+        // this sort of reassignment used to be further downstream but I've moved it here
+        // because this code is going to be decomissioned soon
+        statusFilter: statusFilter || undefined,
+      });
 
       return response.ok({
-        body: {
-          summaries,
-          nextPagePagination,
-          prevPagePagination,
-          totalSummaryCount,
-        },
+        body: result,
       });
     } catch (e) {
       return response.internalError({ body: { message: e.message } });

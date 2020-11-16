@@ -31,6 +31,9 @@ export const MonitorList: React.FC<MonitorListProps> = (props) => {
   const { filters } = props;
 
   const [pageSize, setPageSize] = useState<number>(getPageSizeValue);
+  const [pageIndex, setPageIndex] = useState<number>(0);
+  const [sortField, setSortField] = useState<string>('summary.down');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
 
   const dispatch = useDispatch();
 
@@ -50,6 +53,9 @@ export const MonitorList: React.FC<MonitorListProps> = (props) => {
         pageSize,
         pagination,
         statusFilter,
+        sortField,
+        sortDirection,
+        pageIndex,
       })
     );
   }, [
@@ -61,14 +67,25 @@ export const MonitorList: React.FC<MonitorListProps> = (props) => {
     pageSize,
     pagination,
     statusFilter,
+    sortField,
+    sortDirection,
+    pageIndex,
   ]);
 
   return (
     <MonitorListComponent
       {...props}
-      monitorList={monitorList}
-      pageSize={pageSize}
-      setPageSize={setPageSize}
+      {...{
+        monitorList,
+        pageSize,
+        setPageSize,
+        pageIndex,
+        setPageIndex,
+        sortField,
+        setSortField,
+        sortDirection,
+        setSortDirection,
+      }}
     />
   );
 };

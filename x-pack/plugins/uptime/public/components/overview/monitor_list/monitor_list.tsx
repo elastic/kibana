@@ -4,16 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  EuiButtonIcon,
-  EuiBasicTable,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiLink,
-  EuiPanel,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiButtonIcon, EuiBasicTable, EuiIcon, EuiLink, EuiPanel, EuiSpacer } from '@elastic/eui';
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { HistogramPoint, X509Expiry } from '../../../../common/runtime_types';
@@ -22,9 +13,7 @@ import { MonitorListStatusColumn } from './monitor_list_status_column';
 import { ExpandedRowMap } from './types';
 import { MonitorBarSeries } from '../../common/charts';
 import { MonitorPageLink } from '../../common/monitor_page_link';
-import { OverviewPageLink } from './overview_page_link';
 import * as labels from './translations';
-import { MonitorListPageSizeSelect } from './monitor_list_page_size_select';
 import { MonitorListDrawer } from './monitor_list_drawer/list_drawer_container';
 import { MonitorListProps } from './monitor_list_container';
 import { MonitorList } from '../../../state/reducers/monitor_list';
@@ -57,19 +46,28 @@ export const MonitorListComponent: ({
   linkParameters,
   pageSize,
   setPageSize,
+  pageIndex,
+  setPageIndex,
+  sortField,
+  setSortField,
+  sortDirection,
+  setSortDirection,
 }: Props) => any = ({
   filters,
   monitorList: { list, error, loading },
   linkParameters,
   pageSize,
   setPageSize,
+  pageIndex,
+  setPageIndex,
+  sortField,
+  setSortField,
+  sortDirection,
+  setSortDirection,
 }) => {
   const [drawerIds, updateDrawerIds] = useState<string[]>([]);
 
   const items = list.summaries ?? [];
-
-  const nextPagePagination = list.nextPagePagination ?? '';
-  const prevPagePagination = list.prevPagePagination ?? '';
 
   const getExpandedRowMap = () => {
     return drawerIds.reduce((map: ExpandedRowMap, id: string) => {
@@ -87,15 +85,16 @@ export const MonitorListComponent: ({
   const columns = [
     {
       align: 'left' as const,
-      field: 'state.summary.status',
+      field: 'summary.down',
       name: labels.STATUS_COLUMN_LABEL,
       mobileOptions: {
         fullWidth: true,
       },
-      render: (status: string, { state: { timestamp, summaryPings } }: MonitorSummary) => {
+      sortable: true,
+      render: (_value: string, { state: { timestamp, summaryPings, summary } }: MonitorSummary) => {
         return (
           <MonitorListStatusColumn
-            status={status}
+            status={summary.status!}
             timestamp={timestamp}
             summaryPings={summaryPings ?? []}
           />
@@ -104,33 +103,37 @@ export const MonitorListComponent: ({
     },
     {
       align: 'left' as const,
-      field: 'state.monitor.name',
+      field: 'monitor.name',
       name: labels.NAME_COLUMN_LABEL,
       mobileOptions: {
         fullWidth: true,
       },
-      render: (name: string, summary: MonitorSummary) => (
-        <MonitorPageLink monitorId={summary.monitor_id} linkParameters={linkParameters}>
-          {name ? name : `Unnamed - ${summary.monitor_id}`}
+      sortable: true,
+      render: (_value: string, { monitor_id: monitorId, state: { monitor } }: MonitorSummary) => (
+        <MonitorPageLink monitorId={monitorId} linkParameters={linkParameters}>
+          {monitor.name ? monitor.name : `Unnamed - ${monitorId}`}
         </MonitorPageLink>
       ),
-      sortable: true,
     },
     {
       align: 'left' as const,
-      field: 'state.url.full',
+      field: 'url.full',
       name: URL_LABEL,
-      render: (url: string, summary: MonitorSummary) => (
-        <TruncatedEuiLink href={url} target="_blank" color="text">
-          {url} <EuiIcon size="s" type="popout" color="subbdued" />
+      sortable: true,
+      render: (_value: string, { state: { url } }: MonitorSummary) => (
+        <TruncatedEuiLink href={url.full} target="_blank" color="text">
+          {url.full} <EuiIcon size="s" type="popout" color="subbdued" />
         </TruncatedEuiLink>
       ),
     },
     {
       align: 'left' as const,
-      field: 'state.tls.server.x509',
+      field: 'tls.server.x509.not_after',
       name: labels.TLS_COLUMN_LABEL,
-      render: (x509: X509Expiry) => <CertStatusColumn expiry={x509} />,
+      sortable: true,
+      render: (_val: X509Expiry, { state }: MonitorSummary) => (
+        <CertStatusColumn expiry={state.tls?.server.x509} />
+      ),
     },
     {
       align: 'center' as const,
@@ -181,6 +184,23 @@ export const MonitorListComponent: ({
     },
   ];
 
+  const sorting = {
+    sort: {
+      field: sortField,
+      direction: sortDirection,
+    },
+  };
+
+  const onTableChange = ({ page = {}, sort = {} }) => {
+    const { field: sortFieldN, direction: sortDirectionN } = sort;
+
+    setSortField(sortFieldN);
+    setSortDirection(sortDirectionN);
+
+    setPageIndex(page.index);
+    setPageSize(page.size);
+  };
+
   return (
     <EuiPanel>
       <MonitorListHeader />
@@ -196,31 +216,10 @@ export const MonitorListComponent: ({
         items={items}
         noItemsMessage={noItemsMessage(loading, filters)}
         columns={columns}
+        sorting={sorting}
+        pagination={{ totalItemCount: list.totalMonitors ?? 0, pageSize, pageIndex }}
+        onChange={onTableChange}
       />
-      <EuiSpacer size="m" />
-      <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <MonitorListPageSizeSelect size={pageSize} setSize={setPageSize} />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup responsive={false}>
-            <EuiFlexItem grow={false}>
-              <OverviewPageLink
-                dataTestSubj="xpack.uptime.monitorList.prevButton"
-                direction="prev"
-                pagination={prevPagePagination}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <OverviewPageLink
-                dataTestSubj="xpack.uptime.monitorList.nextButton"
-                direction="next"
-                pagination={nextPagePagination}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      </EuiFlexGroup>
     </EuiPanel>
   );
 };

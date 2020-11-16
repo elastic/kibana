@@ -12,7 +12,6 @@ import { MonitorSummary, Ping } from '../../../../common/runtime_types';
  * If provided check groups are not the latest complete group, they are discarded.
  * @param queryContext the data and resources needed to perform the query
  * @param potentialMatchMonitorIDs the monitor ID's of interest
- * @param potentialMatchCheckGroups the check groups to filter for the latest match per ID
  */
 // check groups for their associated monitor IDs. If not, it discards the result.
 export const refinePotentialMatches = async (
@@ -37,10 +36,10 @@ export const fullyMatchingIds = (queryResult: any, statusFilter?: string): Monit
     const summaryPings: Ping[] = [];
 
     for (const locBucket of monBucket.location.buckets) {
-      const latest = locBucket.summaries.latest.hits.hits[0];
+      const latestSummary = locBucket.summaries.latest.hits.hits[0];
       // It is possible for no latest summary to exist in this bucket if only partial
       // non-summary docs exist
-      if (!latest) {
+      if (!latestSummary) {
         continue;
       }
 
@@ -52,19 +51,20 @@ export const fullyMatchingIds = (queryResult: any, statusFilter?: string): Monit
       // that has not yet sent a summary doc
       if (
         latestStillMatching &&
-        latestStillMatching._source['@timestamp'] >= latest._source['@timestamp']
+        latestStillMatching._source['@timestamp'] >= latestSummary._source['@timestamp']
       ) {
         matched = true;
       }
 
       summaryPings.push({
-        docId: latest._id,
-        timestamp: latest._source['@timestamp'],
-        ...latest._source,
+        docId: latestSummary._id,
+        timestamp: latestSummary._source['@timestamp'],
+        ...latestSummary._source,
       });
     }
 
     const someDown = summaryPings.some((p) => (p.summary?.down ?? 0) > 0);
+
     const statusFilterOk = !statusFilter ? true : statusFilter === 'up' ? !someDown : someDown;
 
     if (matched && statusFilterOk) {
@@ -125,7 +125,7 @@ export const query = async (
           terms: {
             field: 'monitor.id',
             size: potentialMatchMonitorIDs.length,
-            order: { _key: queryContext.cursorOrder() },
+            order: { _key: 'desc' },
           },
           aggs: {
             location: {

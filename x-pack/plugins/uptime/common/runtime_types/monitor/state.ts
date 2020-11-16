@@ -72,16 +72,10 @@ export const MonitorSummaryType = t.intersection([
 
 export type MonitorSummary = t.TypeOf<typeof MonitorSummaryType>;
 
-export const MonitorSummariesResultType = t.intersection([
-  t.partial({
-    totalSummaryCount: t.number,
-  }),
-  t.type({
-    summaries: t.array(MonitorSummaryType),
-    prevPagePagination: t.union([t.string, t.null]),
-    nextPagePagination: t.union([t.string, t.null]),
-  }),
-]);
+export const MonitorSummariesResultType = t.type({
+  summaries: t.array(MonitorSummaryType),
+  totalMonitors: t.number,
+});
 
 export type MonitorSummariesResult = t.TypeOf<typeof MonitorSummariesResultType>;
 
@@ -99,13 +93,3 @@ export const FetchMonitorStatesQueryArgsType = t.intersection([
 ]);
 
 export type FetchMonitorStatesQueryArgs = t.TypeOf<typeof FetchMonitorStatesQueryArgsType>;
-
-export enum CursorDirection {
-  AFTER = 'AFTER',
-  BEFORE = 'BEFORE',
-}
-
-export enum SortOrder {
-  ASC = 'ASC',
-  DESC = 'DESC',
-}
