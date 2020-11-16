@@ -8,6 +8,7 @@ import RE2 from 're2';
 import { SavedObjectsClientContract, SavedObjectsFindOptions } from 'kibana/server';
 import { JobType, ML_SAVED_OBJECT_TYPE } from '../../common/types/saved_objects';
 import { MLJobNotFound } from '../lib/ml_client';
+import { getSavedObjectClientError } from './util';
 
 export interface JobObject {
   job_id: string;
@@ -247,11 +248,10 @@ export function jobSavedObjectServiceFactory(
           results[id] = {
             success: true,
           };
-        } catch (e) {
-          const error = e.isBoom && e.output?.payload ? e.output.payload : e;
+        } catch (error) {
           results[id] = {
             success: false,
-            error,
+            error: getSavedObjectClientError(error),
           };
         }
       }
@@ -269,11 +269,10 @@ export function jobSavedObjectServiceFactory(
           results[job.attributes.job_id] = {
             success: true,
           };
-        } catch (e) {
-          const error = e.isBoom && e.output?.payload ? e.output.payload : e;
+        } catch (error) {
           results[job.attributes.job_id] = {
             success: false,
-            error,
+            error: getSavedObjectClientError(error),
           };
         }
       }

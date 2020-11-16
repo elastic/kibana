@@ -5,6 +5,7 @@
  */
 
 import React, { FC, useState, useEffect } from 'react';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiFlyout,
@@ -22,25 +23,38 @@ import {
 } from '@elastic/eui';
 
 import { ml } from '../../services/ml_api_service';
-import { RepairSavedObjectResponse } from '../../../../common/types/saved_objects';
+import {
+  RepairSavedObjectResponse,
+  SavedObjectResult,
+} from '../../../../common/types/saved_objects';
 import { RepairList } from './repair_results';
+import { useToastNotificationService } from '../../services/toast_notification_service';
 
 interface Props {
   onClose: () => void;
 }
 export const JobSpacesRepairFlyout: FC<Props> = ({ onClose }) => {
+  const { displayErrorToast, displaySuccessToast } = useToastNotificationService();
   const [loading, setLoading] = useState(false);
   const [repairable, setRepairable] = useState(false);
   const [repairResp, setRepairResp] = useState<RepairSavedObjectResponse | null>(null);
 
   async function loadRepairList(simulate: boolean = true) {
     setLoading(true);
-    const resp = await ml.savedObjects.repairSavedObjects(simulate);
-    setRepairResp(resp);
+    try {
+      const resp = await ml.savedObjects.repairSavedObjects(simulate);
+      setRepairResp(resp);
 
-    const count = Object.values(resp).reduce((acc, cur) => acc + Object.keys(cur).length, 0);
-    setRepairable(count > 0);
-    setLoading(false);
+      const count = Object.values(resp).reduce((acc, cur) => acc + Object.keys(cur).length, 0);
+      setRepairable(count > 0);
+      setLoading(false);
+      return resp;
+    } catch (error) {
+      // this shouldn't be hit as errors are returned per-repair task
+      // as part of the response
+      displayErrorToast(error);
+    }
+    return null;
   }
 
   useEffect(() => {
@@ -49,8 +63,30 @@ export const JobSpacesRepairFlyout: FC<Props> = ({ onClose }) => {
 
   async function repair() {
     if (repairable) {
-      await loadRepairList(false);
+      // perform the repair
+      const resp = await loadRepairList(false);
+      // check simulate the repair again to check that all
+      // items have been repaired.
       await loadRepairList(true);
+
+      if (resp === null) {
+        return;
+      }
+      const { successCount, errorCount } = getResponseCounts(resp);
+      if (errorCount > 0) {
+        const title = i18n.translate('xpack.ml.management.repairSavedObjectsFlyout.repair.error', {
+          defaultMessage: 'Some jobs could not be repaired',
+        });
+        displayErrorToast(resp as any, title);
+        return;
+      }
+
+      displaySuccessToast(
+        i18n.translate('xpack.ml.management.repairSavedObjectsFlyout.repair.success', {
+          defaultMessage: '{successCount} {successCount, plural, one {job} other {jobs}} repaired',
+          values: { successCount },
+        })
+      );
     }
   }
 
@@ -107,3 +143,18 @@ export const JobSpacesRepairFlyout: FC<Props> = ({ onClose }) => {
     </>
   );
 };
+
+function getResponseCounts(resp: RepairSavedObjectResponse) {
+  let successCount = 0;
+  let errorCount = 0;
+  Object.values(resp).forEach((result: SavedObjectResult) => {
+    Object.values(result).forEach(({ success, error }) => {
+      if (success === true) {
+        successCount++;
+      } else if (error !== undefined) {
+        errorCount++;
+      }
+    });
+  });
+  return { successCount, errorCount };
+}

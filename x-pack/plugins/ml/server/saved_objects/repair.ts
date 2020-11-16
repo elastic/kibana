@@ -9,6 +9,7 @@ import { IScopedClusterClient } from 'kibana/server';
 import type { JobObject, JobSavedObjectService } from './service';
 import { JobType } from '../../common/types/saved_objects';
 import { checksFactory } from './checks';
+import { getSavedObjectClientError } from './util';
 
 import { Datafeed } from '../../common/types/anomaly_detection_jobs';
 
@@ -54,7 +55,7 @@ export function repairFactory(
             } catch (error) {
               results.savedObjectsCreated[job.jobId] = {
                 success: false,
-                error: error.body ?? error,
+                error: getSavedObjectClientError(error),
               };
             }
           });
@@ -75,7 +76,7 @@ export function repairFactory(
             } catch (error) {
               results.savedObjectsCreated[job.jobId] = {
                 success: false,
-                error: error.body ?? error,
+                error: getSavedObjectClientError(error),
               };
             }
           });
@@ -97,7 +98,7 @@ export function repairFactory(
             } catch (error) {
               results.savedObjectsDeleted[job.jobId] = {
                 success: false,
-                error: error.body ?? error,
+                error: getSavedObjectClientError(error),
               };
             }
           });
@@ -118,7 +119,7 @@ export function repairFactory(
             } catch (error) {
               results.savedObjectsDeleted[job.jobId] = {
                 success: false,
-                error: error.body ?? error,
+                error: getSavedObjectClientError(error),
               };
             }
           });
@@ -143,7 +144,10 @@ export function repairFactory(
               }
               results.datafeedsAdded[job.jobId] = { success: true };
             } catch (error) {
-              results.datafeedsAdded[job.jobId] = { success: false, error };
+              results.datafeedsAdded[job.jobId] = {
+                success: false,
+                error: getSavedObjectClientError(error),
+              };
             }
           });
         }
@@ -163,7 +167,10 @@ export function repairFactory(
               await jobSavedObjectService.deleteDatafeed(datafeedId);
               results.datafeedsRemoved[job.jobId] = { success: true };
             } catch (error) {
-              results.datafeedsRemoved[job.jobId] = { success: false, error: error.body ?? error };
+              results.datafeedsRemoved[job.jobId] = {
+                success: false,
+                error: getSavedObjectClientError(error),
+              };
             }
           });
         }
