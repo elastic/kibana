@@ -7,9 +7,9 @@
 import React from 'react';
 import moment from 'moment';
 import { renderWithIntl, shallowWithIntl } from '@kbn/test/jest';
-import { getLocationStatus, MonitorListStatusColumn } from '../monitor_list_status_column';
-import { Ping } from '../../../../../common/runtime_types';
-import { STATUS } from '../../../../../common/constants';
+import { Ping } from '../../../../../../common/runtime_types';
+import { STATUS } from '../../../../../../common/constants';
+import { getLocationStatus, MonitorListStatusColumn } from '../monitor_status_column';
 
 describe('MonitorListStatusColumn', () => {
   beforeAll(() => {
@@ -263,19 +263,19 @@ describe('MonitorListStatusColumn', () => {
   });
 
   it(' will test getLocationStatus location', () => {
-    let statusMessage = getLocationStatus(summaryPings, STATUS.UP);
+    let { statusMessage } = getLocationStatus(summaryPings, STATUS.UP);
 
     expect(statusMessage).toBe('in 1/3 Locations');
 
-    statusMessage = getLocationStatus(summaryPings, STATUS.DOWN);
+    statusMessage = getLocationStatus(summaryPings, STATUS.DOWN).statusMessage;
 
     expect(statusMessage).toBe('in 2/3 Locations');
 
-    statusMessage = getLocationStatus(upChecks, STATUS.UP);
+    statusMessage = getLocationStatus(upChecks, STATUS.UP).statusMessage;
 
     expect(statusMessage).toBe('in 3/3 Locations');
 
-    statusMessage = getLocationStatus(downChecks, STATUS.UP);
+    statusMessage = getLocationStatus(downChecks, STATUS.UP).statusMessage;
 
     expect(statusMessage).toBe('in 0/3 Locations');
   });

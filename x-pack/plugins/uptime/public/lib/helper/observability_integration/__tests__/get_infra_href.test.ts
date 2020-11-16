@@ -30,7 +30,7 @@ describe('getInfraHref', () => {
         summaryPings: [ping],
         summary: {},
         url: {},
-        monitor: {},
+        monitor: { type: 'http' },
         timestamp: '123',
       },
     };

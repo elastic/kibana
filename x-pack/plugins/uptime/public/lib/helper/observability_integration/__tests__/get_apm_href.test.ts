@@ -14,7 +14,7 @@ describe('getApmHref', () => {
       monitor_id: 'foo',
       state: {
         summary: {},
-        monitor: {},
+        monitor: { type: 'http' },
         summaryPings: [
           makePing({
             docId: 'foo',

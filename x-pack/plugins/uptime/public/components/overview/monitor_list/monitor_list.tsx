@@ -16,7 +16,7 @@ import {
 import React, { useState } from 'react';
 import { HistogramPoint, X509Expiry } from '../../../../common/runtime_types';
 import { MonitorSummary } from '../../../../common/runtime_types';
-import { MonitorListStatusColumn } from './monitor_list_status_column';
+import { MonitorListStatusColumn } from './columns/monitor_status_column';
 import { ExpandedRowMap } from './types';
 import { MonitorBarSeries } from '../../common/charts';
 import { OverviewPageLink } from './overview_page_link';
@@ -25,7 +25,7 @@ import { MonitorListPageSizeSelect } from './monitor_list_page_size_select';
 import { MonitorListDrawer } from './monitor_list_drawer/list_drawer_container';
 import { MonitorListProps } from './monitor_list_container';
 import { MonitorList } from '../../../state/reducers/monitor_list';
-import { CertStatusColumn } from './cert_status_column';
+import { CertStatusColumn } from './columns/cert_status_column';
 import { MonitorListHeader } from './monitor_list_header';
 import { URL_LABEL } from '../../common/translations';
 import { EnableMonitorAlert } from './columns/enable_alert';

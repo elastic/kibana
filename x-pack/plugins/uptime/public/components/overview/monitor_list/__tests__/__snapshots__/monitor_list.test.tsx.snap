@@ -820,10 +820,6 @@ exports[`MonitorList component renders loading state 1`] = `
 
 exports[`MonitorList component renders the monitor list 1`] = `
 .c3 {
-  padding-left: 5px;
-}
-
-.c5 {
   padding-top: 12px;
 }
 
@@ -835,12 +831,6 @@ exports[`MonitorList component renders the monitor list 1`] = `
 
 .c0 {
   position: relative;
-}
-
-.c4 {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 @media (max-width:574px) {
@@ -966,7 +956,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
         </div>
       </div>
       <table
-        class="euiTable euiTable--responsive"
+        class="euiTable euiTable--responsive euiTable--auto"
         id="generated-id"
         tabindex="-1"
       >
@@ -1060,7 +1050,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
               data-test-subj="tableHeaderCell_Status alert_5"
               role="columnheader"
               scope="col"
-              style="width:150px"
+              style="width:100px"
             >
               <div
                 class="euiTableCellContent euiTableCellContent--alignCenter"
@@ -1121,27 +1111,6 @@ exports[`MonitorList component renders the monitor list 1`] = `
                         />
                       </span>
                     </div>
-                    <div
-                      class="euiFlexItem"
-                    >
-                      <span
-                        class="c3"
-                      >
-                        <span
-                          class="euiToolTipAnchor"
-                        >
-                          <div
-                            class="euiText euiText--extraSmall eui-textNoWrap"
-                          >
-                            <div
-                              class="euiTextColor euiTextColor--subdued"
-                            >
-                              5m ago
-                            </div>
-                          </div>
-                        </span>
-                      </span>
-                    </div>
                   </div>
                   <div
                     class="euiSpacer euiSpacer--xs"
@@ -1149,7 +1118,33 @@ exports[`MonitorList component renders the monitor list 1`] = `
                   <div
                     class="euiText euiText--extraSmall"
                   >
-                    in 0/1 Location
+                    <span
+                      class="euiToolTipAnchor"
+                    >
+                      <div
+                        class="euiText euiText--extraSmall eui-textNoWrap"
+                        style="padding-right:5px"
+                      >
+                        <div
+                          class="euiTextColor euiTextColor--subdued"
+                        >
+                          in 0/1 Location 
+                        </div>
+                      </div>
+                    </span>
+                    <span
+                      class="euiToolTipAnchor"
+                    >
+                      <div
+                        class="euiText euiText--extraSmall eui-textNoWrap"
+                      >
+                        <div
+                          class="euiTextColor euiTextColor--subdued"
+                        >
+                          Checked 9:02:03 AM
+                        </div>
+                      </div>
+                    </span>
                   </div>
                 </div>
               </div>
@@ -1179,13 +1174,21 @@ exports[`MonitorList component renders the monitor list 1`] = `
                   </button>
                   <div>
                     <button
-                      aria-label="Filter all monitors with type "
-                      class="euiBadge euiBadge-isClickable euiBadge--hollow euiBadge--iconLeft"
+                      class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall euiButtonEmpty--flushLeft"
                       title="Filter all monitors with type "
+                      type="button"
                     >
                       <span
-                        class="euiBadge__content"
-                      />
+                        class="euiButtonContent euiButtonEmpty__content"
+                      >
+                        <span
+                          class="euiButtonEmpty__text"
+                        >
+                          <div
+                            class="euiText euiText--extraSmall"
+                          />
+                        </span>
+                      </span>
                     </button>
                   </div>
                 </div>
@@ -1203,15 +1206,9 @@ exports[`MonitorList component renders the monitor list 1`] = `
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <button
-                  class="euiLink euiLink--text c4"
+                  class="euiLink euiLink--text"
                   type="button"
-                >
-                   
-                  <span
-                    color="subbdued"
-                    data-euiicon-type="popout"
-                  />
-                </button>
+                />
               </div>
             </td>
             <td
@@ -1253,7 +1250,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
             </td>
             <td
               class="euiTableRowCell"
-              style="width:150px"
+              style="width:100px"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -1350,27 +1347,6 @@ exports[`MonitorList component renders the monitor list 1`] = `
                         />
                       </span>
                     </div>
-                    <div
-                      class="euiFlexItem"
-                    >
-                      <span
-                        class="c3"
-                      >
-                        <span
-                          class="euiToolTipAnchor"
-                        >
-                          <div
-                            class="euiText euiText--extraSmall eui-textNoWrap"
-                          >
-                            <div
-                              class="euiTextColor euiTextColor--subdued"
-                            >
-                              5m ago
-                            </div>
-                          </div>
-                        </span>
-                      </span>
-                    </div>
                   </div>
                   <div
                     class="euiSpacer euiSpacer--xs"
@@ -1378,7 +1354,33 @@ exports[`MonitorList component renders the monitor list 1`] = `
                   <div
                     class="euiText euiText--extraSmall"
                   >
-                    in 0/1 Location
+                    <span
+                      class="euiToolTipAnchor"
+                    >
+                      <div
+                        class="euiText euiText--extraSmall eui-textNoWrap"
+                        style="padding-right:5px"
+                      >
+                        <div
+                          class="euiTextColor euiTextColor--subdued"
+                        >
+                          in 0/1 Location 
+                        </div>
+                      </div>
+                    </span>
+                    <span
+                      class="euiToolTipAnchor"
+                    >
+                      <div
+                        class="euiText euiText--extraSmall eui-textNoWrap"
+                      >
+                        <div
+                          class="euiTextColor euiTextColor--subdued"
+                        >
+                          Checked 9:02:03 AM
+                        </div>
+                      </div>
+                    </span>
                   </div>
                 </div>
               </div>
@@ -1408,13 +1410,21 @@ exports[`MonitorList component renders the monitor list 1`] = `
                   </button>
                   <div>
                     <button
-                      aria-label="Filter all monitors with type "
-                      class="euiBadge euiBadge-isClickable euiBadge--hollow euiBadge--iconLeft"
+                      class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall euiButtonEmpty--flushLeft"
                       title="Filter all monitors with type "
+                      type="button"
                     >
                       <span
-                        class="euiBadge__content"
-                      />
+                        class="euiButtonContent euiButtonEmpty__content"
+                      >
+                        <span
+                          class="euiButtonEmpty__text"
+                        >
+                          <div
+                            class="euiText euiText--extraSmall"
+                          />
+                        </span>
+                      </span>
                     </button>
                   </div>
                 </div>
@@ -1432,15 +1442,9 @@ exports[`MonitorList component renders the monitor list 1`] = `
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <button
-                  class="euiLink euiLink--text c4"
+                  class="euiLink euiLink--text"
                   type="button"
-                >
-                   
-                  <span
-                    color="subbdued"
-                    data-euiicon-type="popout"
-                  />
-                </button>
+                />
               </div>
             </td>
             <td
@@ -1482,7 +1486,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
             </td>
             <td
               class="euiTableRowCell"
-              style="width:150px"
+              style="width:100px"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -1600,7 +1604,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
         >
           <button
             aria-label="A disabled pagination button indicating that there cannot be any further navigation in the monitors list."
-            class="euiButtonIcon euiButtonIcon--text c5"
+            class="euiButtonIcon euiButtonIcon--text c3"
             data-test-subj="xpack.uptime.monitorList.prevButton"
             disabled=""
             type="button"
@@ -1617,7 +1621,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
         >
           <button
             aria-label="A disabled pagination button indicating that there cannot be any further navigation in the monitors list."
-            class="euiButtonIcon euiButtonIcon--text c5"
+            class="euiButtonIcon euiButtonIcon--text c3"
             data-test-subj="xpack.uptime.monitorList.nextButton"
             disabled=""
             type="button"
