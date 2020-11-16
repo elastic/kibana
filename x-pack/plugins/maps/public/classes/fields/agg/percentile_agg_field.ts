@@ -33,6 +33,16 @@ export class PercentileAggField extends CountAggField implements IESAggField {
     return true;
   }
 
+  async getLabel(): Promise<string> {
+    const suffix = this._percentile === 1 ? 'st' : this._percentile === 2 ? 'nd' : 'th';
+    return this._label
+      ? this._label
+      : `${this._percentile}${suffix} ${this._source.getAggLabel(
+          this._getAggType(),
+          this.getRootName()
+        )}`;
+  }
+
   getName() {
     return `${super.getName()}_${this._percentile}`;
   }

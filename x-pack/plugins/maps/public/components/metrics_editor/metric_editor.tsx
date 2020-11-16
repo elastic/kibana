@@ -7,13 +7,19 @@
 import React, { ChangeEvent, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { EuiButtonEmpty, EuiComboBoxOptionOption, EuiFieldText, EuiFormRow } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiComboBoxOptionOption,
+  EuiFieldText,
+  EuiFormRow,
+  EuiRange,
+} from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { MetricSelect } from './metric_select';
 import { SingleFieldSelect } from '../single_field_select';
 import { AggDescriptor } from '../../../common/descriptor_types';
-import { AGG_TYPE } from '../../../common/constants';
+import { AGG_TYPE, DEFAULT_PERCENTILE } from '../../../common/constants';
 import { getTermsFields } from '../../index_pattern_util';
 import { IFieldType } from '../../../../../../src/plugins/data/public';
 
@@ -65,11 +71,20 @@ export function MetricEditor({
         return field.name === metric.field;
       });
       if (found) {
-        onChange({
-          type: metricAggregationType,
-          label: metric.label,
-          field: metric.field,
-        });
+        if (metricAggregationType === AGG_TYPE.PERCENTILE) {
+          onChange({
+            type: metricAggregationType,
+            label: metric.label,
+            field: metric.field,
+            percentile: metric.percentile,
+          });
+        } else {
+          onChange({
+            type: metricAggregationType,
+            label: metric.label,
+            field: metric.field,
+          });
+        }
       } else {
         onChange({
           type: metricAggregationType,
@@ -91,6 +106,15 @@ export function MetricEditor({
       label: metric.label,
       type: metric.type,
       field: fieldName,
+    });
+  };
+  const onPercentileChange = (e: ChangeEvent<HTMLInputElement>) => {
+    if (metric.type !== AGG_TYPE.PERCENTILE) {
+      return;
+    }
+    onChange({
+      ...metric,
+      percentile: parseInt(e.target.value, 10),
     });
   };
   const onLabelChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -118,6 +142,29 @@ export function MetricEditor({
           fields={filterFieldsForAgg(fields, metric.type)}
           isClearable={false}
           compressed
+        />
+      </EuiFormRow>
+    );
+  }
+
+  let percentileSelect;
+  if (metric.type === AGG_TYPE.PERCENTILE) {
+    percentileSelect = (
+      <EuiFormRow
+        label={i18n.translate('xpack.maps.metricsEditor.selectPercentileLabel', {
+          defaultMessage: 'Percentile',
+        })}
+        display="columnCompressed"
+      >
+        <EuiRange
+          min={0}
+          max={100}
+          step={1}
+          value={typeof metric.percentile === 'number' ? metric.percentile : DEFAULT_PERCENTILE}
+          onChange={onPercentileChange}
+          showLabels
+          showValue
+          aria-label="percentile select"
         />
       </EuiFormRow>
     );
@@ -180,6 +227,7 @@ export function MetricEditor({
       </EuiFormRow>
 
       {fieldSelect}
+      {percentileSelect}
       {labelInput}
       {removeButton}
     </Fragment>
