@@ -215,6 +215,16 @@ export class DataPublicPlugin
       trackUiMetric: this.usageCollection?.reportUiStats.bind(this.usageCollection, 'data_plugin'),
     });
 
+    // core.http
+    //   .fetch('/api/index_patterns/index_pattern', {
+    //     method: 'POST',
+    //     body: JSON.stringify({
+    //       name: 'test',
+    //     }),
+    //   })
+    //   .then((val) => console.log('val', val))
+    //   .catch((err) => console.log('err', err));
+
     return {
       ...dataServices,
       ui: {

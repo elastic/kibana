@@ -93,6 +93,13 @@ export class DataServerPlugin
     this.autocompleteService.setup(core);
     this.kqlTelemetryService.setup(core, { usageCollection });
 
+    // core.http.registerRouteHandlerContext(
+    //   'indexPatternsService',
+    //   async (context, req, res): Promise<{}> => {
+    //     return {};
+    //   }
+    // );
+
     core.uiSettings.register(getUiSettings());
 
     const searchSetup = this.searchService.setup(core, {

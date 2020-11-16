@@ -20,6 +20,7 @@
 import { schema } from '@kbn/config-schema';
 import { HttpServiceSetup, RequestHandlerContext } from 'kibana/server';
 import { IndexPatternsFetcher } from './fetcher';
+import { registerCreateIndexPatternRoute } from './routes/create_index_pattern';
 
 export function registerRoutes(http: HttpServiceSetup) {
   const parseMetaFields = (metaFields: string | string[]) => {
@@ -33,6 +34,9 @@ export function registerRoutes(http: HttpServiceSetup) {
   };
 
   const router = http.createRouter();
+
+  registerCreateIndexPatternRoute(router);
+
   router.get(
     {
       path: '/api/index_patterns/_fields_for_wildcard',
