@@ -4,9 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { memo, ReactNode, useMemo } from 'react';
+import React, { memo, ReactNode, useCallback, useMemo } from 'react';
 import { Redirect } from 'react-router-dom';
-import { EuiBasicTable, EuiLink, EuiTableFieldDataColumnType } from '@elastic/eui';
+import {
+  CriteriaWithPagination,
+  EuiBasicTable,
+  EuiLink,
+  EuiTableFieldDataColumnType,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedRelative } from '@kbn/i18n/react';
 import { useGetPackageInstallStatus } from '../../hooks';
@@ -16,6 +21,7 @@ import {
   AGENT_SAVED_OBJECT_TYPE,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
 } from '../../../../../../../common/constants';
+import { useUrlPagination } from '../../../../hooks';
 
 const IntegrationDetailsLink = memo<{
   integrationPolicy: PackagePolicy;
@@ -74,11 +80,22 @@ export const PackagePoliciesPanel = ({ name, version }: PackagePoliciesPanelProp
   const { getPath } = useLink();
   const getPackageInstallStatus = useGetPackageInstallStatus();
   const packageInstallStatus = getPackageInstallStatus(name);
+  const { pagination, pageSizeOptions, setPagination } = useUrlPagination();
   const { data } = useGetPackagePolicies({
-    page: 1,
-    perPage: 1000,
+    page: pagination.currentPage,
+    perPage: pagination.pageSize,
     kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: ${name}`,
   });
+
+  const handleTableOnChange = useCallback(
+    ({ page }: CriteriaWithPagination<PackagePolicy>) => {
+      setPagination({
+        currentPage: page.index + 1,
+        pageSize: page.size,
+      });
+    },
+    [setPagination]
+  );
 
   const columns: Array<EuiTableFieldDataColumnType<PackagePolicy>> = useMemo(
     () => [
@@ -160,6 +177,13 @@ export const PackagePoliciesPanel = ({ name, version }: PackagePoliciesPanelProp
       columns={columns}
       loading={false}
       data-test-subj="integrationPolicyTable"
+      pagination={{
+        pageIndex: pagination.currentPage - 1,
+        pageSize: pagination.pageSize,
+        totalItemCount: data?.total ?? 0,
+        pageSizeOptions,
+      }}
+      onChange={handleTableOnChange}
     />
   );
 };
