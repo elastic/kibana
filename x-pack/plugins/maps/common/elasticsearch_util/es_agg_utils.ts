@@ -6,7 +6,7 @@
 import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
 import { IndexPattern, IFieldType } from '../../../../../src/plugins/data/common';
-import { TOP_TERM_PERCENTAGE_SUFFIX } from '../constants';
+import { AGG_TYPE, TOP_TERM_PERCENTAGE_SUFFIX } from '../constants';
 
 export type BucketProperties = Record<string | number, unknown>;
 export type PropertiesMap = Map<string, BucketProperties>;
@@ -46,6 +46,7 @@ export function extractPropertiesFromBucket(
       continue;
     }
 
+    // todo: push these implementations in the IAggFields
     if (_.has(bucket[key], 'value')) {
       properties[key] = bucket[key].value;
     } else if (_.has(bucket[key], 'buckets')) {
@@ -63,7 +64,17 @@ export function extractPropertiesFromBucket(
         );
       }
     } else {
-      properties[key] = bucket[key];
+      if (key.startsWith(AGG_TYPE.PERCENTILE)) {
+        const values = bucket[key].values;
+        for (const k in values) {
+          if (values.hasOwnProperty(k)) {
+            properties[key] = values[k];
+            break;
+          }
+        }
+      } else {
+        properties[key] = bucket[key];
+      }
     }
   }
   return properties;

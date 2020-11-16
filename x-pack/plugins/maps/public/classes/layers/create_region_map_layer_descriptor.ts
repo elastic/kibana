@@ -21,7 +21,6 @@ import {
 import { VectorStyle } from '../styles/vector/vector_style';
 import { EMSFileSource } from '../sources/ems_file_source';
 // @ts-ignore
-import { ESGeoGridSource } from '../sources/es_geo_grid_source';
 import { VectorLayer } from './vector_layer/vector_layer';
 import { getDefaultDynamicProperties } from '../styles/vector/vector_style_defaults';
 import { NUMERICAL_COLOR_PALETTES } from '../styles/color_palettes';
@@ -35,9 +34,13 @@ export function createAggDescriptor(metricAgg: string, metricFieldName?: string)
   });
   const aggType = aggTypeKey ? AGG_TYPE[aggTypeKey as keyof typeof AGG_TYPE] : undefined;
 
-  return aggType && metricFieldName
-    ? { type: aggType, field: metricFieldName }
-    : { type: AGG_TYPE.COUNT };
+  if (!aggType || aggType === AGG_TYPE.COUNT || !metricFieldName) {
+    return { type: AGG_TYPE.COUNT };
+  } else if (aggType === AGG_TYPE.PERCENTILE) {
+    return { type: aggType, field: metricFieldName, percentile: 50 };
+  } else {
+    return { type: aggType, field: metricFieldName };
+  }
 }
 
 export function createRegionMapLayerDescriptor({

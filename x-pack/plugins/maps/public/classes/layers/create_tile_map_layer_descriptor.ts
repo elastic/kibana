@@ -59,9 +59,17 @@ export function createAggDescriptor(
   });
   const aggType = aggTypeKey ? AGG_TYPE[aggTypeKey as keyof typeof AGG_TYPE] : undefined;
 
-  return aggType && metricFieldName && (!isHeatmap(mapType) || isMetricCountable(aggType))
-    ? { type: aggType, field: metricFieldName }
-    : { type: AGG_TYPE.COUNT };
+  if (!aggType || aggType === AGG_TYPE.COUNT || !metricFieldName) {
+    return { type: AGG_TYPE.COUNT };
+  } else if (aggType === AGG_TYPE.PERCENTILE) {
+    return { type: aggType, field: metricFieldName, percentile: 50 };
+  } else {
+    if (isHeatmap(mapType) && isMetricCountable(aggType)) {
+      return { type: AGG_TYPE.COUNT };
+    } else {
+      return { type: aggType, field: metricFieldName };
+    }
+  }
 }
 
 export function createTileMapLayerDescriptor({

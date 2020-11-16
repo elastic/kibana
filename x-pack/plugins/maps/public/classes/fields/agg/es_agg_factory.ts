@@ -6,7 +6,7 @@
 
 import { AggDescriptor } from '../../../../common/descriptor_types';
 import { IESAggSource } from '../../sources/es_agg_source';
-import { AGG_TYPE, FIELD_ORIGIN } from '../../../../common/constants';
+import { AGG_TYPE, DEFAULT_PERCENTILE, FIELD_ORIGIN } from '../../../../common/constants';
 import { ESDocField } from '../es_doc_field';
 import { TopTermPercentageField } from './top_term_percentage_field';
 import { CountAggField } from './count_agg_field';
@@ -31,10 +31,17 @@ export function esAggFieldsFactory(
   } else if (aggDescriptor.type === AGG_TYPE.PERCENTILE) {
     aggField = new PercentileAggField({
       label: aggDescriptor.label,
+      esDocField:
+        'field' in aggDescriptor && aggDescriptor.field
+          ? new ESDocField({ fieldName: aggDescriptor.field, source, origin })
+          : undefined,
+      percentile:
+        'percentile' in aggDescriptor && typeof aggDescriptor.percentile === 'number'
+          ? aggDescriptor.percentile
+          : DEFAULT_PERCENTILE,
       source,
       origin,
       canReadFromGeoJson,
-      percentile: aggDescriptor.percentile,
     });
   } else {
     aggField = new AggField({
