@@ -26,7 +26,7 @@ import { ExpressionFunctionDefinition, Render } from '../../expressions/public';
 import { metricsRequestHandler } from './request_handler';
 
 type Input = KibanaContext | null;
-type Output = Promise<Render<RenderValue>>;
+type Output = Promise<Render<TimeseriesRenderValue>>;
 
 interface Arguments {
   params: string;
@@ -36,7 +36,7 @@ interface Arguments {
 
 type VisParams = Required<Arguments>;
 
-interface RenderValue {
+export interface TimeseriesRenderValue {
   visType: 'metrics';
   visData: Input;
   visConfig: VisParams;
@@ -92,7 +92,7 @@ export const createMetricsFn = (): ExpressionFunctionDefinition<
 
     return {
       type: 'render',
-      as: 'visualization',
+      as: 'timeseries_vis',
       value: {
         uiState,
         visType: 'metrics',
