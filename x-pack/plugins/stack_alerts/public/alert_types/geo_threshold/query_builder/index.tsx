@@ -30,7 +30,12 @@ import { EntityIndexExpression } from './expressions/entity_index_expression';
 import { EntityByExpression } from './expressions/entity_by_expression';
 import { BoundaryIndexExpression } from './expressions/boundary_index_expression';
 import { IIndexPattern } from '../../../../../../../src/plugins/data/common/index_patterns';
-import { QueryStringInput } from '../../../../../../../src/plugins/data/public';
+import {
+  esQuery,
+  esKuery,
+  Query,
+  QueryStringInput,
+} from '../../../../../../../src/plugins/data/public';
 
 const DEFAULT_VALUES = {
   TRACKING_EVENT: '',
