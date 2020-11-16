@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Query } from '../../../../../../../../src/plugins/data/common/query';
+import { Query } from '../../../../../../src/plugins/data/common';
 
 export enum TrackingEvent {
   entered = 'entered',

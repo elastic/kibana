@@ -13,8 +13,8 @@ import {
   ActionTypeRegistryContract,
   AlertTypeRegistryContract,
   IErrorObject,
-} from '../../../../../types';
-import { IIndexPattern } from '../../../../../../../../../src/plugins/data/common/index_patterns';
+} from '../../../../../triggers_actions_ui/public';
+import { IIndexPattern } from '../../../../../../../src/plugins/data/common';
 
 const alertsContext = {
   http: (null as unknown) as HttpSetup,
