@@ -6,6 +6,7 @@
 
 import expect from '@kbn/expect';
 import { Response as SupertestResponse } from 'supertest';
+import { ResolvedActionGroup } from '../../../../../plugins/alerts/common';
 import { Space } from '../../../common/types';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import {
@@ -133,6 +134,133 @@ instanceStateValue: true
       });
 
       await taskManagerUtils.waitForActionTaskParamsToBeCleanedUp(testStart);
+    });
+
+    it('should fire actions when an alert instance is resolved', async () => {
+      const reference = alertUtils.generateReference();
+
+      const { body: createdAction } = await supertestWithoutAuth
+        .post(`${getUrlPrefix(space.id)}/api/actions/action`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          name: 'MY action',
+          actionTypeId: 'test.noop',
+          config: {},
+          secrets: {},
+        })
+        .expect(200);
+
+      // pattern of when the alert should fire.
+      const pattern = {
+        instance: [true, true],
+      };
+
+      const createdAlert = await supertestWithoutAuth
+        .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
+        .set('kbn-xsrf', 'foo')
+        .send(
+          getTestAlertData({
+            alertTypeId: 'test.patternFiring',
+            schedule: { interval: '1s' },
+            throttle: null,
+            params: {
+              pattern,
+            },
+            actions: [
+              {
+                id: createdAction.id,
+                group: 'default',
+                params: {},
+              },
+              {
+                group: ResolvedActionGroup.id,
+                id: indexRecordActionId,
+                params: {
+                  index: ES_TEST_INDEX_NAME,
+                  reference,
+                  message: 'Resolved message',
+                },
+              },
+            ],
+          })
+        );
+
+      expect(createdAlert.status).to.eql(200);
+      const alertId = createdAlert.body.id;
+      objectRemover.add(space.id, alertId, 'alert', 'alerts');
+
+      const actionTestRecord = (
+        await esTestIndexTool.waitForDocs('action:test.index-record', reference)
+      )[0];
+
+      expect(actionTestRecord._source.params.message).to.eql('Resolved message');
+    });
+
+    it('should not fire actions when an alert instance is resolved, but alert is muted', async () => {
+      const testStart = new Date();
+      const reference = alertUtils.generateReference();
+
+      const { body: createdAction } = await supertestWithoutAuth
+        .post(`${getUrlPrefix(space.id)}/api/actions/action`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          name: 'MY action',
+          actionTypeId: 'test.noop',
+          config: {},
+          secrets: {},
+        })
+        .expect(200);
+
+      // pattern of when the alert should fire.
+      const pattern = {
+        instance: [true, true],
+      };
+      // created disabled alert
+      const createdAlert = await supertestWithoutAuth
+        .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
+        .set('kbn-xsrf', 'foo')
+        .send(
+          getTestAlertData({
+            alertTypeId: 'test.patternFiring',
+            schedule: { interval: '1s' },
+            enabled: false,
+            throttle: null,
+            params: {
+              pattern,
+              reference,
+            },
+            actions: [
+              {
+                id: createdAction.id,
+                group: 'default',
+                params: {},
+              },
+              {
+                group: ResolvedActionGroup.id,
+                id: indexRecordActionId,
+                params: {
+                  index: ES_TEST_INDEX_NAME,
+                  reference,
+                  message: 'Resolved message',
+                },
+              },
+            ],
+          })
+        );
+      expect(createdAlert.status).to.eql(200);
+      const alertId = createdAlert.body.id;
+
+      await alertUtils.muteAll(alertId);
+
+      await alertUtils.enable(alertId);
+
+      await esTestIndexTool.search('alert:test.patternFiring', reference);
+
+      await taskManagerUtils.waitForActionTaskParamsToBeCleanedUp(testStart);
+
+      const actionTestRecord = await esTestIndexTool.search('action:test.index-record', reference);
+      expect(actionTestRecord.hits.total.value).to.eql(0);
+      objectRemover.add(space.id, alertId, 'alert', 'alerts');
     });
 
     it('should reschedule failing alerts using the Task Manager retry logic with alert schedule interval', async () => {

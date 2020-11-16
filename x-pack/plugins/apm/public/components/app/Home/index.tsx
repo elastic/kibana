@@ -4,79 +4,76 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiTabs, EuiTitle } from '@elastic/eui';
+import { EuiTab, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { ComponentType } from 'react';
 import { $ElementType } from 'utility-types';
 import { ApmHeader } from '../../shared/ApmHeader';
-import { EuiTabLink } from '../../shared/EuiTabLink';
-import { ServiceMapLink } from '../../shared/Links/apm/ServiceMapLink';
-import { ServiceInventoryLink } from '../../shared/Links/apm/service_inventory_link';
-import { TraceOverviewLink } from '../../shared/Links/apm/TraceOverviewLink';
+import { useServiceMapHref } from '../../shared/Links/apm/ServiceMapLink';
+import { useServiceInventoryHref } from '../../shared/Links/apm/service_inventory_link';
+import { useTraceOverviewHref } from '../../shared/Links/apm/TraceOverviewLink';
+import { MainTabs } from '../../shared/main_tabs';
 import { ServiceMap } from '../ServiceMap';
 import { ServiceInventory } from '../service_inventory';
 import { TraceOverview } from '../TraceOverview';
 
-const homeTabs = [
-  {
-    link: (
-      <ServiceInventoryLink>
-        {i18n.translate('xpack.apm.home.servicesTabLabel', {
-          defaultMessage: 'Services',
-        })}
-      </ServiceInventoryLink>
-    ),
-    render: () => <ServiceInventory />,
-    name: 'services',
-  },
-  {
-    link: (
-      <TraceOverviewLink>
-        {i18n.translate('xpack.apm.home.tracesTabLabel', {
-          defaultMessage: 'Traces',
-        })}
-      </TraceOverviewLink>
-    ),
-    render: () => <TraceOverview />,
-    name: 'traces',
-  },
-  {
-    link: (
-      <ServiceMapLink>
-        {i18n.translate('xpack.apm.home.serviceMapTabLabel', {
-          defaultMessage: 'Service Map',
-        })}
-      </ServiceMapLink>
-    ),
-    render: () => <ServiceMap />,
-    name: 'service-map',
-  },
-];
+interface Tab {
+  key: string;
+  href: string;
+  text: string;
+  Component: ComponentType;
+}
 
 interface Props {
   tab: 'traces' | 'services' | 'service-map';
 }
 
 export function Home({ tab }: Props) {
+  const homeTabs: Tab[] = [
+    {
+      key: 'services',
+      href: useServiceInventoryHref(),
+      text: i18n.translate('xpack.apm.home.servicesTabLabel', {
+        defaultMessage: 'Services',
+      }),
+      Component: ServiceInventory,
+    },
+    {
+      key: 'traces',
+      href: useTraceOverviewHref(),
+      text: i18n.translate('xpack.apm.home.tracesTabLabel', {
+        defaultMessage: 'Traces',
+      }),
+      Component: TraceOverview,
+    },
+    {
+      key: 'service-map',
+      href: useServiceMapHref(),
+      text: i18n.translate('xpack.apm.home.serviceMapTabLabel', {
+        defaultMessage: 'Service Map',
+      }),
+      Component: ServiceMap,
+    },
+  ];
   const selectedTab = homeTabs.find(
-    (homeTab) => homeTab.name === tab
+    (homeTab) => homeTab.key === tab
   ) as $ElementType<typeof homeTabs, number>;
 
   return (
-    <div>
+    <>
       <ApmHeader>
-        <EuiTitle size="l">
+        <EuiTitle>
           <h1>APM</h1>
         </EuiTitle>
       </ApmHeader>
-      <EuiTabs>
-        {homeTabs.map((homeTab) => (
-          <EuiTabLink isSelected={homeTab === selectedTab} key={homeTab.name}>
-            {homeTab.link}
-          </EuiTabLink>
+      <MainTabs>
+        {homeTabs.map(({ href, key, text }) => (
+          <EuiTab href={href} isSelected={key === selectedTab.key} key={key}>
+            {text}
+          </EuiTab>
         ))}
-      </EuiTabs>
-      {selectedTab.render()}
-    </div>
+      </MainTabs>
+      <selectedTab.Component />
+    </>
   );
 }
