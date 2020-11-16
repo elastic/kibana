@@ -9,14 +9,12 @@ import { getAlertType } from './alert_type';
 import { Params } from './alert_type_params';
 
 describe('alertType', () => {
-  const service = {
-    indexThreshold: {
-      timeSeriesQuery: jest.fn(),
-    },
-    logger: loggingSystemMock.create().get(),
+  const logger = loggingSystemMock.create().get();
+  const data = {
+    timeSeriesQuery: jest.fn(),
   };
 
-  const alertType = getAlertType(service);
+  const alertType = getAlertType(logger, Promise.resolve(data));
 
   it('alert type creation structure is the expected value', async () => {
     expect(alertType.id).toBe('.index-threshold');
