@@ -22,6 +22,7 @@ import {
 } from '@elastic/eui';
 
 import { useLocation } from 'react-router-dom';
+import { useUrlState } from '../../../util/url_state';
 import { NavigationMenu } from '../../../components/navigation_menu';
 import { DatePickerWrapper } from '../../../components/navigation_menu/date_picker_wrapper';
 import { DataFrameAnalyticsList } from './components/analytics_list';
@@ -31,6 +32,7 @@ import { NodeAvailableWarning } from '../../../components/node_available_warning
 import { UpgradeWarning } from '../../../components/upgrade';
 import { AnalyticsNavigationBar } from './components/analytics_navigation_bar';
 import { ModelsList } from './components/models_management';
+import { JobMap } from '../job_map';
 import { usePageUrlState } from '../../../util/url_state';
 import { ListingPageUrlState } from '../../../../../common/types/common';
 import { DataFrameAnalyticsListColumn } from './components/analytics_list/common';
@@ -44,6 +46,7 @@ export const getDefaultDFAListState = (): ListingPageUrlState => ({
 
 export const Page: FC = () => {
   const [blockRefresh, setBlockRefresh] = useState(false);
+  const [globalState] = useUrlState('_g');
 
   const [dfaPageState, setDfaPageState] = usePageUrlState(getDefaultDFAListState());
 
@@ -51,6 +54,7 @@ export const Page: FC = () => {
 
   const location = useLocation();
   const selectedTabId = useMemo(() => location.pathname.split('/').pop(), [location]);
+  const mapJobId = globalState?.ml?.jobId;
 
   return (
     <Fragment>
@@ -85,9 +89,11 @@ export const Page: FC = () => {
             </EuiPageHeaderSection>
             <EuiPageHeaderSection>
               <EuiFlexGroup alignItems="center" gutterSize="s">
-                <EuiFlexItem grow={false}>
-                  <RefreshAnalyticsListButton />
-                </EuiFlexItem>
+                {selectedTabId !== 'map' && (
+                  <EuiFlexItem grow={false}>
+                    <RefreshAnalyticsListButton />
+                  </EuiFlexItem>
+                )}
                 <EuiFlexItem grow={false}>
                   <DatePickerWrapper />
                 </EuiFlexItem>
@@ -99,8 +105,8 @@ export const Page: FC = () => {
           <UpgradeWarning />
 
           <EuiPageContent>
-            <AnalyticsNavigationBar selectedTabId={selectedTabId} />
-
+            <AnalyticsNavigationBar selectedTabId={selectedTabId} jobId={mapJobId} />
+            {selectedTabId === 'map' && mapJobId && <JobMap analyticsId={mapJobId} />}
             {selectedTabId === 'data_frame_analytics' && (
               <DataFrameAnalyticsList
                 blockRefresh={blockRefresh}
