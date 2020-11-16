@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { ExpressionFunctionDefinition, Datatable } from 'src/plugins/expressions/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { search } from '../../../../../src/plugins/data/public';
+import { buildResultColumns } from '../../../../../src/plugins/expressions/common';
 
 type TimeScaleUnit = 's' | 'm' | 'h' | 'd';
 
@@ -69,17 +70,6 @@ export function getTimeScaleFunction(data: DataPublicPluginStart) {
       input,
       { dateColumnId, inputColumnId, outputColumnId, outputColumnName, targetUnit }: TimeScaleArgs
     ) {
-      if (input.columns.some((column) => column.id === outputColumnId)) {
-        throw new Error(
-          i18n.translate('xpack.lens.functions.timeScale.columnConflictMessage', {
-            defaultMessage: 'Specified outputColumnId {columnId} already exists.',
-            values: {
-              columnId: outputColumnId,
-            },
-          })
-        );
-      }
-
       const dateColumnDefinition = input.columns.find((column) => column.id === dateColumnId);
 
       if (!dateColumnDefinition) {
@@ -93,25 +83,16 @@ export function getTimeScaleFunction(data: DataPublicPluginStart) {
         );
       }
 
-      const inputColumnDefinition = input.columns.find((column) => column.id === inputColumnId);
+      const resultColumns = buildResultColumns(
+        input,
+        outputColumnId,
+        inputColumnId,
+        outputColumnName
+      );
 
-      if (!inputColumnDefinition) {
+      if (!resultColumns) {
         return input;
       }
-
-      const outputColumnDefinition = {
-        ...inputColumnDefinition,
-        id: outputColumnId,
-        name: outputColumnName || outputColumnId,
-      };
-
-      const resultColumns = [...input.columns];
-      // add output column after input column in the table
-      resultColumns.splice(
-        resultColumns.indexOf(inputColumnDefinition) + 1,
-        0,
-        outputColumnDefinition
-      );
 
       const targetUnitInMs = unitInMs[targetUnit];
       const timeInfo = await data.search.aggs.getDateMetaByDatatableColumn(dateColumnDefinition);

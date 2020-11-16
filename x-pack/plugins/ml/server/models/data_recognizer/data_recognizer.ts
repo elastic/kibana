@@ -37,7 +37,7 @@ import {
   prefixDatafeedId,
   splitIndexPatternNames,
 } from '../../../common/util/job_utils';
-import { mlLog } from '../../client/log';
+import { mlLog } from '../../lib/log';
 import { calculateModelMemoryLimitProvider } from '../calculate_model_memory_limit';
 import { fieldsServiceProvider } from '../fields_service';
 import { jobServiceProvider } from '../job_service';
