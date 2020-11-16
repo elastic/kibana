@@ -7,7 +7,7 @@
 import { renderHook, act } from '@testing-library/react-hooks';
 
 import { useCreateRule, ReturnCreateRule } from './use_create_rule';
-import { getUpdateRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/update_rules_schema.mock';
+import { getCreateRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/rule_schemas.mock';
 
 jest.mock('./api');
 
@@ -24,7 +24,7 @@ describe('useCreateRule', () => {
         useCreateRule()
       );
       await waitForNextUpdate();
-      result.current[1](getUpdateRulesSchemaMock());
+      result.current[1](getCreateRulesSchemaMock());
       rerender();
       expect(result.current).toEqual([{ isLoading: true, isSaved: false }, result.current[1]]);
     });
@@ -36,7 +36,7 @@ describe('useCreateRule', () => {
         useCreateRule()
       );
       await waitForNextUpdate();
-      result.current[1](getUpdateRulesSchemaMock());
+      result.current[1](getCreateRulesSchemaMock());
       await waitForNextUpdate();
       expect(result.current).toEqual([{ isLoading: false, isSaved: true }, result.current[1]]);
     });
