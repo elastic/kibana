@@ -17,9 +17,7 @@
  * under the License.
  */
 
-import { createHash } from 'crypto';
 import Boom from '@hapi/boom';
-import { i18n } from '@kbn/i18n';
 import * as UiSharedDeps from '@kbn/ui-shared-deps';
 import { KibanaRequest } from '../../../core/server';
 import { AppBootstrap } from './bootstrap';
@@ -37,36 +35,6 @@ import { getApmConfig } from '../apm';
  * @param {KbnServer['config']} config
  */
 export function uiRenderMixin(kbnServer, server, config) {
-  const translationsCache = { translations: null, hash: null };
-  server.route({
-    path: '/translations/{locale}.json',
-    method: 'GET',
-    config: { auth: false },
-    handler(request, h) {
-      // Kibana server loads translations only for a single locale
-      // that is specified in `i18n.locale` config value.
-      const { locale } = request.params;
-      if (i18n.getLocale() !== locale.toLowerCase()) {
-        throw Boom.notFound(`Unknown locale: ${locale}`);
-      }
-
-      // Stringifying thousands of labels and calculating hash on the resulting
-      // string can be expensive so it makes sense to do it once and cache.
-      if (translationsCache.translations == null) {
-        translationsCache.translations = JSON.stringify(i18n.getTranslation());
-        translationsCache.hash = createHash('sha1')
-          .update(translationsCache.translations)
-          .digest('hex');
-      }
-
-      return h
-        .response(translationsCache.translations)
-        .header('cache-control', 'must-revalidate')
-        .header('content-type', 'application/json')
-        .etag(translationsCache.hash);
-    },
-  });
-
   const authEnabled = !!server.auth.settings.default;
   server.route({
     path: '/bootstrap.js',
