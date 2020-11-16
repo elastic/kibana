@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import { getAreaVisTypeDefinition } from './area.tsx';
-import { getLineVisTypeDefinition } from './line.tsx';
-import { getHistogramVisTypeDefinition } from './histogram.tsx';
-import { getHorizontalBarVisTypeDefinition } from './horizontal_bar.tsx';
+import { getAreaVisTypeDefinition } from './area';
+import { getLineVisTypeDefinition } from './line';
+import { getHistogramVisTypeDefinition } from './histogram';
+import { getHorizontalBarVisTypeDefinition } from './horizontal_bar';
 import { XyVisTypeDefinition } from '../types';
 
 export const visTypesDefinitions = [
