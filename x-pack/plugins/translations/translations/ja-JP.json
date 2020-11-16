@@ -20735,8 +20735,6 @@
     "xpack.uptime.monitorList.defineConnector.description": "アラートを有効にするには、デフォルトのアラートアクションコネクターを定義してください。",
     "xpack.uptime.monitorList.disableDownAlert": "ステータスアラートを無効にする",
     "xpack.uptime.monitorList.downLineSeries.downLabel": "ダウン",
-    "xpack.uptime.monitorList.drawer.locations.statusDown": "{locations}でダウン",
-    "xpack.uptime.monitorList.drawer.locations.statusUp": "{locations}でアップ",
     "xpack.uptime.monitorList.drawer.missingLocation": "一部のHeartbeatインスタンスには位置情報が定義されていません。Heartbeat構成への{link}。",
     "xpack.uptime.monitorList.enabledAlerts.noAlert": "このモニターではアラートが有効ではありません。",
     "xpack.uptime.monitorList.enabledAlerts.title": "有効なアラート：",

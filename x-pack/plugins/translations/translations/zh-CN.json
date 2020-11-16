@@ -20755,8 +20755,6 @@
     "xpack.uptime.monitorList.defineConnector.description": "要开始启用告警，请在以下位置定义默认告警操作连接器",
     "xpack.uptime.monitorList.disableDownAlert": "禁用状态告警",
     "xpack.uptime.monitorList.downLineSeries.downLabel": "关闭",
-    "xpack.uptime.monitorList.drawer.locations.statusDown": "在 {locations} 已关闭",
-    "xpack.uptime.monitorList.drawer.locations.statusUp": "在 {locations} 正运行",
     "xpack.uptime.monitorList.drawer.missingLocation": "某些 Heartbeat 实例未定义位置。{link}到您的 Heartbeat 配置。",
     "xpack.uptime.monitorList.enabledAlerts.noAlert": "没有为此监测启用告警。",
     "xpack.uptime.monitorList.enabledAlerts.title": "已启用的告警：",
