@@ -343,6 +343,16 @@
           },
           "type": "text"
         }
+      },
+      "runtime": {
+        "runtime_number": {
+          "type": "long",
+          "script": {
+            "script": {
+              "source": "emit(doc['bytes'].value)"
+            }
+          }
+        }
       }
     },
     "settings": {
@@ -708,6 +718,16 @@
           },
           "type": "text"
         }
+      },
+      "runtime": {
+        "runtime_number": {
+          "type": "long",
+          "script": {
+            "script": {
+              "source": "emit(doc['bytes'].value)"
+            }
+          }
+        }
       }
     },
     "settings": {
@@ -1072,6 +1092,16 @@
             }
           },
           "type": "text"
+        }
+      },
+      "runtime": {
+        "runtime_number": {
+          "type": "long",
+          "script": {
+            "script": {
+              "source": "emit(doc['bytes'].value)"
+            }
+          }
         }
       }
     },
