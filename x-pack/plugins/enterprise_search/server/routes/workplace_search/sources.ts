@@ -25,6 +25,40 @@ const oAuthConfigSchema = schema.object({
   consumer_key: schema.string(),
 });
 
+export function registerAccountSourcesRoute({
+  router,
+  enterpriseSearchRequestHandler,
+}: RouteDependencies) {
+  router.get(
+    {
+      path: '/api/workplace_search/account/sources',
+      validate: false,
+    },
+    async (context, request, response) => {
+      return enterpriseSearchRequestHandler.createRequest({
+        path: '/ws/sources',
+      })(context, request, response);
+    }
+  );
+}
+
+export function registerAccountSourcesStatusRoute({
+  router,
+  enterpriseSearchRequestHandler,
+}: RouteDependencies) {
+  router.get(
+    {
+      path: '/api/workplace_search/account/sources/status',
+      validate: false,
+    },
+    async (context, request, response) => {
+      return enterpriseSearchRequestHandler.createRequest({
+        path: '/ws/sources/status',
+      })(context, request, response);
+    }
+  );
+}
+
 export function registerAccountSourceRoute({
   router,
   enterpriseSearchRequestHandler,
@@ -223,6 +257,65 @@ export function registerAccountPrepareSourcesRoute({
     async (context, request, response) => {
       return enterpriseSearchRequestHandler.createRequest({
         path: `/ws/pre_content_sources/${request.params.service_type}`,
+      })(context, request, response);
+    }
+  );
+}
+
+export function registerAccountSourceSearchableRoute({
+  router,
+  enterpriseSearchRequestHandler,
+}: RouteDependencies) {
+  router.put(
+    {
+      path: '/api/workplace_search/sources/{id}/searchable',
+      validate: {
+        body: schema.object({
+          searchable: schema.boolean(),
+        }),
+        params: schema.object({
+          id: schema.string(),
+        }),
+      },
+    },
+    async (context, request, response) => {
+      return enterpriseSearchRequestHandler.createRequest({
+        path: `/ws/sources/${request.params.id}/searchable`,
+        body: request.body,
+      })(context, request, response);
+    }
+  );
+}
+
+export function registerOrgSourcesRoute({
+  router,
+  enterpriseSearchRequestHandler,
+}: RouteDependencies) {
+  router.get(
+    {
+      path: '/api/workplace_search/org/sources',
+      validate: false,
+    },
+    async (context, request, response) => {
+      return enterpriseSearchRequestHandler.createRequest({
+        path: '/ws/org/sources',
+      })(context, request, response);
+    }
+  );
+}
+
+export function registerOrgSourcesStatusRoute({
+  router,
+  enterpriseSearchRequestHandler,
+}: RouteDependencies) {
+  router.get(
+    {
+      path: '/api/workplace_search/org/sources/status',
+      validate: false,
+    },
+    async (context, request, response) => {
+      return enterpriseSearchRequestHandler.createRequest({
+        path: '/ws/org/sources/status',
       })(context, request, response);
     }
   );
@@ -431,6 +524,31 @@ export function registerOrgPrepareSourcesRoute({
   );
 }
 
+export function registerOrgSourceSearchableRoute({
+  router,
+  enterpriseSearchRequestHandler,
+}: RouteDependencies) {
+  router.put(
+    {
+      path: '/api/workplace_search/org/sources/{id}/searchable',
+      validate: {
+        body: schema.object({
+          searchable: schema.boolean(),
+        }),
+        params: schema.object({
+          id: schema.string(),
+        }),
+      },
+    },
+    async (context, request, response) => {
+      return enterpriseSearchRequestHandler.createRequest({
+        path: `/ws/org/sources/${request.params.id}/searchable`,
+        body: request.body,
+      })(context, request, response);
+    }
+  );
+}
+
 export function registerOrgSourceOauthConfigurationsRoute({
   router,
   enterpriseSearchRequestHandler,
@@ -522,6 +640,8 @@ export function registerOrgSourceOauthConfigurationRoute({
 }
 
 export const registerSourcesRoutes = (dependencies: RouteDependencies) => {
+  registerAccountSourcesRoute(dependencies);
+  registerAccountSourcesStatusRoute(dependencies);
   registerAccountSourceRoute(dependencies);
   registerAccountCreateSourceRoute(dependencies);
   registerAccountSourceDocumentsRoute(dependencies);
@@ -530,6 +650,9 @@ export const registerSourcesRoutes = (dependencies: RouteDependencies) => {
   registerAccountSourceSettingsRoute(dependencies);
   registerAccountPreSourceRoute(dependencies);
   registerAccountPrepareSourcesRoute(dependencies);
+  registerAccountSourceSearchableRoute(dependencies);
+  registerOrgSourcesRoute(dependencies);
+  registerOrgSourcesStatusRoute(dependencies);
   registerOrgSourceRoute(dependencies);
   registerOrgCreateSourceRoute(dependencies);
   registerOrgSourceDocumentsRoute(dependencies);
@@ -538,6 +661,7 @@ export const registerSourcesRoutes = (dependencies: RouteDependencies) => {
   registerOrgSourceSettingsRoute(dependencies);
   registerOrgPreSourceRoute(dependencies);
   registerOrgPrepareSourcesRoute(dependencies);
+  registerOrgSourceSearchableRoute(dependencies);
   registerOrgSourceOauthConfigurationsRoute(dependencies);
   registerOrgSourceOauthConfigurationRoute(dependencies);
 };
