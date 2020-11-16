@@ -50,18 +50,6 @@ export interface Axis {
   axisLabel: string;
 }
 
-export interface Options {
-  xaxis: {
-    tickFormatter: (val: number) => string;
-  };
-  crosshair: {
-    color: string;
-    lineWidth: number;
-  };
-  colors: string[];
-  yaxes: Axis[];
-}
-
 interface TimeRangeBounds {
   min: Moment | undefined;
   max: Moment | undefined;
@@ -80,11 +68,11 @@ const colors = [
   '#D70060',
 ];
 
-function buildOptions(
+function createTickFormat(
   intervalValue: string,
   timefilter: TimefilterContract,
   uiSettings: IUiSettingsClient
-): Options {
+) {
   // Get the X-axis tick format
   const time: TimeRangeBounds = timefilter.getBounds();
   const interval = calculateInterval(
@@ -96,20 +84,7 @@ function buildOptions(
   );
   const format = xaxisFormatterProvider(uiSettings)(interval);
 
-  const options = {
-    xaxis: {
-      // Use moment to format ticks so we get timezone correction
-      tickFormatter: (val: number) => moment(val).format(format),
-    },
-    crosshair: {
-      color: '#C66',
-      lineWidth: 2,
-    },
-    colors,
-    yaxes: [],
-  };
-
-  return options;
+  return (val: number) => moment(val).format(format);
 }
 
-export { buildOptions, colors };
+export { createTickFormat, colors };

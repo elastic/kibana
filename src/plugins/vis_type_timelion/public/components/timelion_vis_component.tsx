@@ -19,7 +19,15 @@
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { compact, cloneDeep, last, map } from 'lodash';
-import { Chart, Settings, Position, Axis, TooltipType, YDomainRange } from '@elastic/charts';
+import {
+  Chart,
+  Settings,
+  Position,
+  Axis,
+  TooltipType,
+  YDomainRange,
+  BrushEndListener,
+} from '@elastic/charts';
 
 import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
 import { useKibana } from '../../../kibana_react/public';
@@ -27,7 +35,7 @@ import { useKibana } from '../../../kibana_react/public';
 import { AreaSeriesComponent } from './area_series';
 import { BarSeriesComponent } from './bar_series';
 
-import { buildOptions, colors, Axis as IAxis, Options } from '../helpers/panel_utils';
+import { createTickFormat, colors, Axis as IAxis } from '../helpers/panel_utils';
 import { tickFormatters } from '../helpers/tick_formatters';
 
 import { Series, Sheet } from '../helpers/timelion_request_handler';
@@ -52,9 +60,6 @@ function TimelionVisComponent({
 }: TimelionVisComponentProps) {
   const kibana = useKibana<TimelionVisDependencies>();
   const [chart, setChart] = useState(() => cloneDeep(seriesList.list));
-  const [options, setOptions] = useState<Options>(
-    buildOptions(interval, kibana.services.timefilter, kibana.services.uiSettings)
-  );
 
   const updateYAxes = function (yaxes: IAxis[]) {
     yaxes.forEach((yaxis: IAxis) => {
@@ -95,29 +100,23 @@ function TimelionVisComponent({
     setChart(newChart);
   }, [seriesList.list]);
 
-  useEffect(() => {
-    setOptions(buildOptions(interval, kibana.services.timefilter, kibana.services.uiSettings));
-  }, [interval, kibana.services.timefilter, kibana.services.uiSettings]);
-
   // temp solution, will be changed after fix https://github.com/elastic/elastic-charts/issues/878
   const getLegendPosition = useCallback(() => {
     const chartGlobal = chart[0]._global;
-    if (chartGlobal && chartGlobal.legend) {
-      switch (chartGlobal.legend.position) {
-        case 'ne':
-          return Position.Right;
-        case 'nw':
-          return Position.Left;
-        case 'se':
-          return Position.Right;
-        case 'sw':
-          return Position.Left;
-      }
+    switch (chartGlobal?.legend.position) {
+      case 'ne':
+        return Position.Right;
+      case 'nw':
+        return Position.Left;
+      case 'se':
+        return Position.Right;
+      case 'sw':
+        return Position.Left;
     }
     return Position.Left;
   }, [chart]);
 
-  const brushEndListener = useCallback(
+  const brushEndListener = useCallback<BrushEndListener>(
     ({ x }) => {
       if (!x) {
         return;
@@ -145,7 +144,7 @@ function TimelionVisComponent({
 
   const onRenderChange = useCallback(
     (isRendered: boolean) => {
-      if (!isRendered) {
+      if (isRendered) {
         renderComplete();
       }
     },
@@ -155,6 +154,11 @@ function TimelionVisComponent({
   const title: string = useMemo(() => last(compact(map(seriesList.list, '_title'))) || '', [
     seriesList.list,
   ]);
+
+  const tickFormat = useMemo(
+    () => createTickFormat(interval, kibana.services.timefilter, kibana.services.uiSettings),
+    [interval, kibana.services.timefilter, kibana.services.uiSettings]
+  );
 
   return (
     <div className="timelionChart">
@@ -172,12 +176,7 @@ function TimelionVisComponent({
             type: TooltipType.VerticalCursor,
           }}
         />
-        <Axis
-          id="bottom"
-          position={Position.Bottom}
-          showOverlappingTicks
-          tickFormat={options.xaxis.tickFormatter}
-        />
+        <Axis id="bottom" position={Position.Bottom} showOverlappingTicks tickFormat={tickFormat} />
         {chart[0]._global?.yaxes ? (
           chart[0]._global.yaxes.map((axis: IAxis, index: number) => {
             return (
