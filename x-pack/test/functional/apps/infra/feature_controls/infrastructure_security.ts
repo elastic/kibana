@@ -15,7 +15,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
   const globalNav = getService('globalNav');
-  const retry = getService('retry');
 
   describe('infrastructure security', () => {
     describe('global infrastructure all privileges', () => {
@@ -95,24 +94,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           });
           await PageObjects.infraHome.goToTime(DATE_WITH_DATA);
           await testSubjects.existOrFail('waffleMap');
-        });
-
-        describe('context menu', () => {
-          before(async () => {
-            await testSubjects.click('nodeContainer');
-          });
-
-          it(`does not show link to view logs`, async () => {
-            await retry.waitFor('context menu', () => testSubjects.exists('~nodeContextMenu'));
-            const link = await testSubjects.find('~viewLogsContextMenuItem');
-            expect(await link.isEnabled()).to.be(false);
-          });
-
-          it(`does not show link to view apm traces`, async () => {
-            await retry.waitFor('context menu', () => testSubjects.exists('~nodeContextMenu'));
-            const link = await testSubjects.find('~viewApmTracesContextMenuItem');
-            expect(await link.isEnabled()).to.be(false);
-          });
         });
 
         it(`doesn't show read-only badge`, async () => {
@@ -213,24 +194,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await testSubjects.existOrFail('waffleMap');
         });
 
-        describe('context menu', () => {
-          before(async () => {
-            await testSubjects.click('nodeContainer');
-          });
-
-          it(`does not show link to view logs`, async () => {
-            await retry.waitFor('context menu', () => testSubjects.exists('~nodeContextMenu'));
-            const link = await testSubjects.find('~viewLogsContextMenuItem');
-            expect(await link.isEnabled()).to.be(false);
-          });
-
-          it(`does not show link to view apm traces`, async () => {
-            await retry.waitFor('context menu', () => testSubjects.exists('~nodeContextMenu'));
-            const link = await testSubjects.find('~viewApmTracesContextMenuItem');
-            expect(await link.isEnabled()).to.be(false);
-          });
-        });
-
         it(`shows read-only badge`, async () => {
           await globalNav.badgeExistsOrFail('Read only');
         });
@@ -300,44 +263,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         after(async () => {
           await esArchiver.unload('infra/metrics_and_logs');
         });
-
-        it(`context menu allows user to view logs`, async () => {
-          await PageObjects.common.navigateToUrlWithBrowserHistory('infraOps', '', undefined, {
-            ensureCurrentUrl: true,
-            shouldLoginIfPrompted: false,
-          });
-          await PageObjects.infraHome.goToTime(DATE_WITH_DATA);
-          await testSubjects.existOrFail('waffleMap');
-          await testSubjects.click('nodeContainer');
-          await retry.waitFor('context menu', () => testSubjects.exists('nodeContextMenu'));
-          await testSubjects.click('viewLogsContextMenuItem');
-          await testSubjects.existOrFail('infraLogsPage');
-        });
       });
     });
 
     describe('global infrastructure read & apm privileges', () => {
       before(async () => {
-        await security.role.create('global_infrastructure_apm_read_role', {
-          elasticsearch: {
-            indices: [
-              {
-                names: ['metricbeat-*', 'filebeat-*'],
-                privileges: ['read', 'view_index_metadata'],
-              },
-            ],
-          },
-          kibana: [
-            {
-              feature: {
-                infrastructure: ['read'],
-                apm: ['all'],
-              },
-              spaces: ['*'],
-            },
-          ],
-        });
-
         await security.user.create('global_infrastructure_apm_read_user', {
           password: 'global_infrastructure_apm_read_user-password',
           roles: ['global_infrastructure_apm_read_role'],
@@ -365,19 +295,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         after(async () => {
           await esArchiver.unload('infra/metrics_and_logs');
-        });
-
-        it(`context menu allows user to view APM traces`, async () => {
-          await PageObjects.common.navigateToUrlWithBrowserHistory('infraOps', '', undefined, {
-            ensureCurrentUrl: true,
-            shouldLoginIfPrompted: false,
-          });
-          await PageObjects.infraHome.goToTime(DATE_WITH_DATA);
-          await testSubjects.existOrFail('waffleMap');
-          await testSubjects.click('nodeContainer');
-          await retry.waitFor('context menu', () => testSubjects.exists('nodeContextMenu'));
-          await testSubjects.click('viewApmTracesContextMenuItem');
-          await testSubjects.existOrFail('apmMainContainer');
         });
       });
     });
