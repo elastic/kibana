@@ -74,16 +74,8 @@ describe('DocumentDetailLogic', () => {
     });
 
     describe('getDocumentDetails', () => {
-      it('will call an API endpoint and then store the normalized result', async () => {
-        const fields = [
-          { name: 'foo', value: 'foo', type: 'string' },
-          { name: 'bar', value: ['bar'], type: 'string' },
-        ];
-        const normalizedFields = [
-          { name: 'foo', value: ['foo'], type: 'string' },
-          { name: 'bar', value: ['bar'], type: 'string' },
-        ];
-
+      it('will call an API endpoint and then store the result', async () => {
+        const fields = [{ name: 'name', value: 'python', type: 'string' }];
         jest.spyOn(DocumentDetailLogic.actions, 'setFields');
         const promise = Promise.resolve({ fields });
         http.get.mockReturnValue(promise);
@@ -92,7 +84,7 @@ describe('DocumentDetailLogic', () => {
 
         expect(http.get).toHaveBeenCalledWith(`/api/app_search/engines/engine1/documents/1`);
         await promise;
-        expect(DocumentDetailLogic.actions.setFields).toHaveBeenCalledWith(normalizedFields);
+        expect(DocumentDetailLogic.actions.setFields).toHaveBeenCalledWith(fields);
       });
 
       it('handles errors', async () => {
