@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { run, combineErrors } from '@kbn/dev-utils';
+import { run, combineErrors, createFlagError } from '@kbn/dev-utils';
 import * as Eslint from './eslint';
 import * as Sasslint from './sasslint';
 import { getFilesForCommit, checkFileCasing } from './precommit_hook';
@@ -26,6 +26,20 @@ run(
   async ({ log, flags }) => {
     const files = await getFilesForCommit(flags.ref);
     const errors = [];
+
+    const maxFilesCount = flags['max-files']
+      ? Number.parseInt(String(flags['max-files']), 10)
+      : undefined;
+    if (maxFilesCount !== undefined && (!Number.isFinite(maxFilesCount) || maxFilesCount < 1)) {
+      throw createFlagError('expected --max-files to be a number greater than 0');
+    }
+
+    if (maxFilesCount && files.length > maxFilesCount) {
+      log.info(
+        `--max-files is set to ${maxFilesCount} and ${files.length} were discovered. The current script execution will be skipped.`
+      );
+      return;
+    }
 
     try {
       await checkFileCasing(log, files);
@@ -56,12 +70,13 @@ run(
   `,
     flags: {
       boolean: ['fix'],
-      string: ['ref'],
+      string: ['max-files', 'ref'],
       default: {
         fix: false,
       },
       help: `
       --fix              Execute eslint in --fix mode
+      --max-files        Max files number to check against. If exceeded the script will skip the execution
       --ref              Run checks against any git ref files (example HEAD or <commit_sha>) instead of running against staged ones
     `,
     },
