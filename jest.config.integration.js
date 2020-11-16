@@ -17,26 +17,27 @@
  * under the License.
  */
 
-export default {
+const preset = require('@kbn/test/jest-preset');
+
+module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../..',
-  roots: [
-    '<rootDir>/src/plugins',
-    '<rootDir>/src/legacy/ui',
-    '<rootDir>/src/core',
-    '<rootDir>/src/legacy/server',
-    '<rootDir>/src/cli',
-    '<rootDir>/src/cli_keystore',
-    '<rootDir>/src/cli_encryption_keys',
-    '<rootDir>/src/cli_plugin',
-    '<rootDir>/packages/kbn-test/target/functional_test_runner',
-    '<rootDir>/src/dev',
-    '<rootDir>/src/optimize',
-    '<rootDir>/src/legacy/utils',
-    '<rootDir>/src/setup_node_env',
-    '<rootDir>/packages',
-    '<rootDir>/test/functional/services/remote',
-    '<rootDir>/src/dev/code_coverage/ingest_coverage',
+  rootDir: '.',
+  roots: ['<rootDir>/x-pack', '<rootDir>/packages', '<rootDir>/x-pack'],
+  testMatch: [
+    '**/integration_tests/**/*.test.js',
+    '**/integration_tests/**/*.test.ts',
+    '**/integration_tests/**/*.test.tsx',
   ],
   testRunner: 'jasmine2',
+  testPathIgnorePatterns: preset.testPathIgnorePatterns.filter(
+    (pattern) => !pattern.includes('integration_tests')
+  ),
+  reporters: [
+    'default',
+    [
+      '<rootDir>/packages/kbn-test/target/jest/junit_reporter',
+      { reportName: 'Jest Integration Tests' },
+    ],
+  ],
+  setupFilesAfterEnv: ['<rootDir>/packages/kbn-test/target/jest/setup/after_env.integration.js'],
 };

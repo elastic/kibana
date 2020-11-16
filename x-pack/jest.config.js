@@ -5,7 +5,6 @@
  */
 
 module.exports = {
-  preset: '@kbn/test',
-  rootDir: '../../..',
-  roots: ['<rootDir>/x-pack/plugins/observability'],
+  rootDir: '..',
+  projects: ['<rootDir>/x-pack/plugins/*/jest.config.js'],
 };

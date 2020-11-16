@@ -17,6 +17,5 @@
  * under the License.
  */
 
-import { run } from 'jest';
-
-run(process.argv.slice(2));
+require('../src/setup_node_env');
+require('@kbn/test').runCheckJestConfigsCli();

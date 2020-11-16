@@ -17,24 +17,13 @@
  * under the License.
  */
 
-// # Run Jest integration tests
-//
-// All args will be forwarded directly to Jest, e.g. to watch tests run:
-//
-//     node scripts/jest_integration --watch
-//
-// or to build code coverage:
-//
-//     node scripts/jest_integration --coverage
-//
-// See all cli options in https://facebook.github.io/jest/docs/cli.html
-
-var resolve = require('path').resolve;
-process.argv.push('--config', resolve(__dirname, '../jest.config.integration.js'));
-process.argv.push('--runInBand');
-
-if (process.env.NODE_ENV == null) {
-  process.env.NODE_ENV = 'test';
-}
-
-require('jest').run();
+module.exports = {
+  rootDir: '.',
+  projects: [
+    '<rootDir>/packages/*/jest.config.js',
+    '<rootDir>/src/*/jest.config.js',
+    '<rootDir>/src/legacy/*/jest.config.js',
+    '<rootDir>/src/plugins/*/jest.config.js',
+    '<rootDir>/test/*/jest.config.js',
+  ],
+};

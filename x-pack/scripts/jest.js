@@ -4,5 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-require('../../src/setup_node_env');
-require('../dev-tools/jest').runJest();
+process.argv.push('--config', require('path').resolve(__dirname, '../jest.config.js'));
+
+if (process.env.NODE_ENV == null) {
+  process.env.NODE_ENV = 'test';
+}
+
+require('jest').run();

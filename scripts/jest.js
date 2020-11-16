@@ -30,7 +30,10 @@
 // See all cli options in https://facebook.github.io/jest/docs/cli.html
 
 var resolve = require('path').resolve;
-process.argv.push('--config', resolve(__dirname, '../src/dev/jest/config.js'));
+process.argv.push('--config', resolve(__dirname, '../jest.config.oss.js'));
 
-require('../src/setup_node_env');
-require('../src/dev/jest/cli');
+if (process.env.NODE_ENV == null) {
+  process.env.NODE_ENV = 'test';
+}
+
+require('jest').run();
