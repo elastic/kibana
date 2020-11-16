@@ -30,7 +30,8 @@ import {
   TutorialDirectoryHeaderLink,
   TutorialModuleNotice,
 } from './applications/fleet/components/home_integration';
-import { registerPackagePolicyComponent } from './applications/fleet/sections/agent_policy/create_package_policy_page/components/custom_package_policy';
+import { createExtensionRegistrationCallback } from './applications/fleet/services/ui_extensions';
+import { UIExtensionRegistrationCallback, UIExtensionsStorage } from './applications/fleet/types';
 
 export { IngestManagerConfigType } from '../common/types';
 
@@ -43,7 +44,7 @@ export interface IngestManagerSetup {}
  * Describes public IngestManager plugin contract returned at the `start` stage.
  */
 export interface IngestManagerStart {
-  registerPackagePolicyComponent: typeof registerPackagePolicyComponent;
+  registerExtension: UIExtensionRegistrationCallback;
   isInitialized: () => Promise<true>;
 }
 
@@ -62,6 +63,7 @@ export class IngestManagerPlugin
     Plugin<IngestManagerSetup, IngestManagerStart, IngestManagerSetupDeps, IngestManagerStartDeps> {
   private config: IngestManagerConfigType;
   private kibanaVersion: string;
+  private extensions: UIExtensionsStorage = {};
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = this.initializerContext.config.get<IngestManagerConfigType>();
@@ -71,6 +73,7 @@ export class IngestManagerPlugin
   public setup(core: CoreSetup, deps: IngestManagerSetupDeps) {
     const config = this.config;
     const kibanaVersion = this.kibanaVersion;
+    const extensions = this.extensions;
 
     // Set up http client
     setHttpClient(core.http);
@@ -92,7 +95,15 @@ export class IngestManagerPlugin
           IngestManagerStart
         ];
         const { renderApp, teardownIngestManager } = await import('./applications/fleet/');
-        const unmount = renderApp(coreStart, params, deps, startDeps, config, kibanaVersion);
+        const unmount = renderApp(
+          coreStart,
+          params,
+          deps,
+          startDeps,
+          config,
+          kibanaVersion,
+          extensions
+        );
 
         return () => {
           unmount();
@@ -153,7 +164,8 @@ export class IngestManagerPlugin
 
         return successPromise;
       },
-      registerPackagePolicyComponent,
+
+      registerExtension: createExtensionRegistrationCallback(this.extensions),
     };
   }
 

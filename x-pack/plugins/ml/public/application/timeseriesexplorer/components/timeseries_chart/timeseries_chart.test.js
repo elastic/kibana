@@ -7,7 +7,7 @@
 //import mockOverallSwimlaneData from './__mocks__/mock_overall_swimlane.json';
 
 import moment from 'moment-timezone';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 import React from 'react';
 
 import { TimeseriesChart } from './timeseries_chart';

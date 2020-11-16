@@ -27,7 +27,7 @@ import {
   ActionTypeIndex,
   ActionConnector,
   ActionType,
-  ActionVariable,
+  ActionVariables,
 } from '../../../types';
 import { SectionLoading } from '../../components/section_loading';
 import { ConnectorAddModal } from './connector_add_modal';
@@ -51,7 +51,7 @@ export interface ActionAccordionFormProps {
   toastNotifications: ToastsSetup;
   docLinks: DocLinksStart;
   actionTypes?: ActionType[];
-  messageVariables?: ActionVariable[];
+  messageVariables?: ActionVariables;
   defaultActionMessage?: string;
   setHasActionsDisabled?: (value: boolean) => void;
   setHasActionsWithBrokenConnector?: (value: boolean) => void;
