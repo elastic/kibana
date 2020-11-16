@@ -4,7 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { UnavailablePrompt } from './unavailable_prompt';
-export { TotalStats } from './total_stats';
-export { TotalCharts } from './total_charts';
-export { RecentLogs } from './recent_logs';
+import { i18n } from '@kbn/i18n';
+
+export const RECENT_API_EVENTS = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.engine.apiLogs.recent',
+  { defaultMessage: 'Recent API Events' }
+);

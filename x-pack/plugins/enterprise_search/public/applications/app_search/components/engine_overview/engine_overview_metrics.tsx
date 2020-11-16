@@ -8,11 +8,11 @@ import React from 'react';
 import { useValues } from 'kea';
 
 import { i18n } from '@kbn/i18n';
-import { EuiPageHeader, EuiTitle } from '@elastic/eui';
+import { EuiPageHeader, EuiTitle, EuiSpacer } from '@elastic/eui';
 
 import { EngineOverviewLogic } from './';
 
-import { UnavailablePrompt } from './components';
+import { UnavailablePrompt, TotalStats, TotalCharts, RecentLogs } from './components';
 
 export const EngineOverviewMetrics: React.FC = () => {
   const { apiLogsUnavailable } = useValues(EngineOverviewLogic);
@@ -32,11 +32,11 @@ export const EngineOverviewMetrics: React.FC = () => {
         <UnavailablePrompt />
       ) : (
         <>
-          {/* <TotalStats />
+          <TotalStats />
           <EuiSpacer size="xl" />
           <TotalCharts />
           <EuiSpacer size="xl" />
-          <RecentLogs /> */}
+          <RecentLogs />
         </>
       )}
     </>
