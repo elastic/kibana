@@ -33,6 +33,7 @@ import { ISearchOptions as ISearchOptions_2 } from 'src/plugins/data/public';
 import { ISearchSource } from 'src/plugins/data/public';
 import { IUiSettingsClient } from 'src/core/server';
 import { KibanaRequest } from 'src/core/server';
+import { KibanaRequest as KibanaRequest_2 } from 'kibana/server';
 import { LegacyAPICaller } from 'kibana/server';
 import { Logger } from 'kibana/server';
 import { Logger as Logger_2 } from 'src/core/server';
