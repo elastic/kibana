@@ -11,7 +11,7 @@ import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { search } from '../../../../../src/plugins/data/public';
 import { buildResultColumns } from '../../../../../src/plugins/expressions/common';
 
-type TimeScaleUnit = 's' | 'm' | 'h' | 'd';
+export type TimeScaleUnit = 's' | 'm' | 'h' | 'd';
 
 export interface TimeScaleArgs {
   dateColumnId: string;

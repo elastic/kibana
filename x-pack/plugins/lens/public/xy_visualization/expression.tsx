@@ -20,8 +20,6 @@ import {
   GeometryValue,
   XYChartSeriesIdentifier,
   StackMode,
-  RecursivePartial,
-  Theme,
   VerticalAlignment,
   HorizontalAlignment,
 } from '@elastic/charts';
@@ -222,36 +220,23 @@ export const getXyChartRenderer = (dependencies: {
   },
 });
 
-function mergeThemeWithValueLabelsStyling(
-  theme: RecursivePartial<Theme>,
-  valuesLabelMode: string = 'hide',
-  isHorizontal: boolean
-) {
+function getValueLabelsStyling(isHorizontal: boolean) {
   const VALUE_LABELS_MAX_FONTSIZE = 15;
   const VALUE_LABELS_MIN_FONTSIZE = 10;
   const VALUE_LABELS_VERTICAL_OFFSET = -10;
   const VALUE_LABELS_HORIZONTAL_OFFSET = 10;
 
-  if (valuesLabelMode === 'hide') {
-    return theme;
-  }
   return {
-    ...theme,
-    ...{
-      barSeriesStyle: {
-        ...theme.barSeriesStyle,
-        displayValue: {
-          fontSize: { min: VALUE_LABELS_MIN_FONTSIZE, max: VALUE_LABELS_MAX_FONTSIZE },
-          fill: { textInverted: true, textBorder: 2 },
-          alignment: isHorizontal
-            ? {
-                vertical: VerticalAlignment.Middle,
-              }
-            : { horizontal: HorizontalAlignment.Center },
-          offsetX: isHorizontal ? VALUE_LABELS_HORIZONTAL_OFFSET : 0,
-          offsetY: isHorizontal ? 0 : VALUE_LABELS_VERTICAL_OFFSET,
-        },
-      },
+    displayValue: {
+      fontSize: { min: VALUE_LABELS_MIN_FONTSIZE, max: VALUE_LABELS_MAX_FONTSIZE },
+      fill: { textInverted: true, textBorder: 2 },
+      alignment: isHorizontal
+        ? {
+            vertical: VerticalAlignment.Middle,
+          }
+        : { horizontal: HorizontalAlignment.Center },
+      offsetX: isHorizontal ? VALUE_LABELS_HORIZONTAL_OFFSET : 0,
+      offsetY: isHorizontal ? 0 : VALUE_LABELS_VERTICAL_OFFSET,
     },
   };
 }
@@ -445,9 +430,8 @@ export function XYChart({
     // No histogram charts
     !isHistogramViz;
 
-  const baseThemeWithMaybeValueLabels = !shouldShowValueLabels
-    ? chartTheme
-    : mergeThemeWithValueLabelsStyling(chartTheme, valueLabels, shouldRotate);
+  const valueLabelsStyling =
+    shouldShowValueLabels && valueLabels !== 'hide' && getValueLabelsStyling(shouldRotate);
 
   const colorAssignments = getColorAssignments(args.layers, data, formatFactory);
 
@@ -461,7 +445,16 @@ export function XYChart({
         }
         legendPosition={legend.position}
         showLegendExtra={false}
-        theme={baseThemeWithMaybeValueLabels}
+        theme={{
+          ...chartTheme,
+          barSeriesStyle: {
+            ...chartTheme.barSeriesStyle,
+            ...valueLabelsStyling,
+          },
+          background: {
+            color: undefined, // removes background for embeddables
+          },
+        }}
         baseTheme={chartBaseTheme}
         tooltip={{
           headerFormatter: (d) => safeXAccessorLabelRenderer(d.value),

@@ -9,19 +9,19 @@ import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { DashboardStart } from 'src/plugins/dashboard/public';
 import { reactToUiComponent } from '../../../../../../../src/plugins/kibana_react/public';
 import {
-  TriggerId,
   TriggerContextMapping,
+  TriggerId,
 } from '../../../../../../../src/plugins/ui_actions/public';
 import { CollectConfigContainer } from './components';
 import {
-  UiActionsEnhancedDrilldownDefinition as Drilldown,
-  UiActionsEnhancedBaseActionFactoryContext as BaseActionFactoryContext,
   AdvancedUiActionsStart,
+  UiActionsEnhancedBaseActionFactoryContext as BaseActionFactoryContext,
+  UiActionsEnhancedDrilldownDefinition as Drilldown,
 } from '../../../../../ui_actions_enhanced/public';
 import { txtGoToDashboard } from './i18n';
 import {
-  StartServicesGetter,
   CollectConfigProps,
+  StartServicesGetter,
 } from '../../../../../../../src/plugins/kibana_utils/public';
 import { KibanaURL } from '../../../../../../../src/plugins/share/public';
 import { Config } from './types';

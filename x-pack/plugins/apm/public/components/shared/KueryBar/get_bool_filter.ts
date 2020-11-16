@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ESFilter } from '../../../../../../typings/elasticsearch';
 import {
   ERROR_GROUP_ID,
   PROCESSOR_EVENT,
@@ -12,7 +13,6 @@ import {
   TRANSACTION_TYPE,
 } from '../../../../common/elasticsearch_fieldnames';
 import { UIProcessorEvent } from '../../../../common/processor_event';
-import { ESFilter } from '../../../../typings/elasticsearch';
 import { IUrlParams } from '../../../context/UrlParamsContext/types';
 
 export function getBoolFilter({
