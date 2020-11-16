@@ -6,6 +6,6 @@
   }
 
   &__background {
-    fill: $euiColorLightShade;
+    fill: lightOrDarkTheme($euiColorLightShade, $euiColorMediumShade);
   }
 }
