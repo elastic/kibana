@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { curry, isUndefined, isEmpty, pick, omitBy } from 'lodash';
+import { curry, isUndefined, pick, omitBy } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { postPagerduty } from './lib/post_pagerduty';
@@ -86,7 +86,7 @@ const ParamsSchema = schema.object(
 
 function validateParams(paramsObject: unknown): string | void {
   const { timestamp, eventAction, dedupKey } = paramsObject as ActionParamsType;
-  if (timestamp != null && timestamp.length > 0) {
+  if (timestamp != null) {
     try {
       const date = Date.parse(timestamp);
       if (isNaN(date)) {
@@ -275,7 +275,7 @@ function getBodyForEventAction(actionId: string, params: ActionParamsType): Page
     summary: params.summary || 'No summary provided.',
     source: params.source || `Kibana Action ${actionId}`,
     severity: params.severity || 'info',
-    ...omitBy(pick(params, ['timestamp', 'component', 'group', 'class']), isUndefined || isEmpty),
+    ...omitBy(pick(params, ['timestamp', 'component', 'group', 'class']), isUndefined),
   };
 
   return data;

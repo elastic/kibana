@@ -140,40 +140,6 @@ describe('validateParams()', () => {
     expect(validateParams(actionType, params)).toEqual(params);
   });
 
-  test('should validate and pass when params is valid and optional timestamp is empty string', () => {
-    expect(validateParams(actionType, {})).toEqual({});
-
-    const params = {
-      eventAction: 'trigger',
-      dedupKey: 'a dedupKey',
-      summary: 'a summary',
-      source: 'a source',
-      severity: 'critical',
-      timestamp: '',
-      component: 'a component',
-      group: 'a group',
-      class: 'a class',
-    };
-    expect(validateParams(actionType, params)).toEqual(params);
-  });
-
-  test('should validate and pass when params is valid and optional timestamp is undefined', () => {
-    expect(validateParams(actionType, {})).toEqual({});
-
-    const params = {
-      eventAction: 'trigger',
-      dedupKey: 'a dedupKey',
-      summary: 'a summary',
-      source: 'a source',
-      severity: 'critical',
-      timestamp: undefined,
-      component: 'a component',
-      group: 'a group',
-      class: 'a class',
-    };
-    expect(validateParams(actionType, params)).toEqual(params);
-  });
-
   test('should validate and throw error when params is invalid', () => {
     expect(() => {
       validateParams(actionType, { eventAction: 'ackynollage' });
