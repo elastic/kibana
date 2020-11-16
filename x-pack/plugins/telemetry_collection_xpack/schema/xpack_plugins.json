@@ -1778,7 +1778,7 @@
         }
       }
     },
-    "ingest_manager": {
+    "fleet": {
       "properties": {
         "fleet_enabled": {
           "type": "boolean"
