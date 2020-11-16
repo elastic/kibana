@@ -16,6 +16,8 @@ import {
 } from '../../common/types/ml_url_generator';
 import { ML_PAGES } from '../../common/constants/ml_url_generator';
 import { setStateToKbnUrl } from '../../../../../src/plugins/kibana_utils/public';
+import { getGroupQueryText, getJobQueryText } from '../../common/util/string_utils';
+import { ListingPageUrlState } from '../../common/types/common';
 
 export function createDataFrameAnalyticsJobManagementUrl(
   appBasePath: string,
@@ -26,13 +28,23 @@ export function createDataFrameAnalyticsJobManagementUrl(
   if (mlUrlGeneratorState) {
     const { jobId, groupIds, globalState } = mlUrlGeneratorState;
     if (jobId || groupIds) {
-      const queryState: Partial<DataFrameAnalyticsQueryState> = {
-        jobId,
-        groupIds,
+      const queryTextArr = [];
+      if (jobId) {
+        queryTextArr.push(getJobQueryText(jobId));
+      }
+      if (groupIds) {
+        queryTextArr.push(getGroupQueryText(groupIds));
+      }
+      const jobsListState: Partial<ListingPageUrlState> = {
+        ...(queryTextArr.length > 0 ? { queryText: queryTextArr.join(' ') } : {}),
+      };
+
+      const queryState: Record<string, Partial<ListingPageUrlState>> = {
+        dfa_jobs: jobsListState,
       };
 
       url = setStateToKbnUrl<Partial<DataFrameAnalyticsQueryState>>(
-        'mlManagement',
+        '_a',
         queryState,
         { useHash: false, storeInHashQuery: false },
         url
