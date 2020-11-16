@@ -18,7 +18,7 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 import { TableHeader } from './table_header';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { SortOrder } from './helpers';

@@ -21,7 +21,7 @@ import React from 'react';
 import { findTestSubject } from '@elastic/eui/lib/test';
 // @ts-ignore
 import stubbedLogstashFields from 'fixtures/logstash_fields';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 import { DiscoverField } from './discover_field';
 import { coreMock } from '../../../../../../core/public/mocks';
 import { IndexPatternField } from '../../../../../data/public';
