@@ -97,7 +97,7 @@ export default function ({ getService }: FtrProviderContext) {
       const filterItems = ['filter_item_permission'];
 
       const ecIndexPattern = 'ft_module_sample_ecommerce';
-      const ecExpectedTotalCount = 287;
+      const ecExpectedTotalCount = '287';
       const ecExpectedFieldPanelCount = 2;
 
       const uploadFilePath = path.join(

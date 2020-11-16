@@ -17,5 +17,9 @@
  * under the License.
  */
 
-export const MAX_BUCKETS_SETTING = 'metrics:max_buckets';
-export const INDEXES_SEPARATOR = ',';
+import { IRouter } from '../../http';
+import { registerTranslationsRoute } from './translations';
+
+export const registerRoutes = ({ router, locale }: { router: IRouter; locale: string }) => {
+  registerTranslationsRoute(router, locale);
+};

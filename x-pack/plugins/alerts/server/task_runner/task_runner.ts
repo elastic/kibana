@@ -37,6 +37,7 @@ import { IEvent, IEventLogger, SAVED_OBJECT_REL_PRIMARY } from '../../../event_l
 import { isAlertSavedObjectNotFoundError } from '../lib/is_alert_not_found_error';
 import { AlertsClient } from '../alerts_client';
 import { partiallyUpdateAlert } from '../saved_objects';
+import { ResolvedActionGroup } from '../../common';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
 
@@ -210,6 +211,7 @@ export class TaskRunner {
     const instancesWithScheduledActions = pickBy(alertInstances, (alertInstance: AlertInstance) =>
       alertInstance.hasScheduledActions()
     );
+
     generateNewAndResolvedInstanceEvents({
       eventLogger,
       originalAlertInstances,
@@ -220,6 +222,14 @@ export class TaskRunner {
     });
 
     if (!muteAll) {
+      scheduleActionsForResolvedInstances(
+        alertInstances,
+        executionHandler,
+        originalAlertInstances,
+        instancesWithScheduledActions,
+        alert.mutedInstanceIds
+      );
+
       const mutedInstanceIdsSet = new Set(mutedInstanceIds);
 
       await Promise.all(
@@ -476,6 +486,34 @@ function generateNewAndResolvedInstanceEvents(params: GenerateNewAndResolvedInst
       message,
     };
     eventLogger.logEvent(event);
+  }
+}
+
+function scheduleActionsForResolvedInstances(
+  alertInstancesMap: Record<string, AlertInstance>,
+  executionHandler: ReturnType<typeof createExecutionHandler>,
+  originalAlertInstances: Record<string, AlertInstance>,
+  currentAlertInstances: Dictionary<AlertInstance>,
+  mutedInstanceIds: string[]
+) {
+  const currentAlertInstanceIds = Object.keys(currentAlertInstances);
+  const originalAlertInstanceIds = Object.keys(originalAlertInstances);
+  const resolvedIds = without(
+    originalAlertInstanceIds,
+    ...currentAlertInstanceIds,
+    ...mutedInstanceIds
+  );
+  for (const id of resolvedIds) {
+    const instance = alertInstancesMap[id];
+    instance.updateLastScheduledActions(ResolvedActionGroup.id);
+    instance.unscheduleActions();
+    executionHandler({
+      actionGroup: ResolvedActionGroup.id,
+      context: {},
+      state: {},
+      alertInstanceId: id,
+    });
+    instance.scheduleActions(ResolvedActionGroup.id);
   }
 }
 
