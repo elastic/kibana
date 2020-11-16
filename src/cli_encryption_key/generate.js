@@ -28,15 +28,23 @@ export async function generate(encryptionConfig, command) {
   if (isEmpty(keys)) {
     logger.log('No keys to write.  Use the --force flag to generate new keys.');
   } else {
+    if (!command.quiet) {
+      logger.log('## Kibana Encryption Key Generation Utility\n');
+      logger.log(
+        `The 'generate' command guides you through the process of setting encryption keys for: `
+      );
+      logger.log(encryptionConfig.docs());
+      logger.log(
+        'Already defined settings are ignored and can be regenerated using the --force flag.  Check the documentation links for instructions on how to rotate encryption keys.'
+      );
+      logger.log('Definitions should be set in the kibana.yml used configure Kibana.\n');
+    }
     if (command.interactive) {
       await interactive(keys, logger);
     } else {
-      if (!command.quiet) logger.log('Generating encryption keys.');
+      if (!command.quiet) logger.log('Settings:');
       logger.log(safeDump(keys));
     }
-  }
-  if (command.force && !command.quiet) {
-    logger.log('Any pre-existing keys in kibana.yml will need to be rotated manually.');
   }
 }
 

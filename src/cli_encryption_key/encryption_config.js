@@ -32,6 +32,23 @@ export class EncryptionConfig {
     'xpack.reporting.encryptionKey',
     'xpack.security.encryptionKey',
   ];
+  #encryptionMeta = {
+    'xpack.encryptedSavedObjects.encryptionKey': {
+      docs:
+        'https://www.elastic.co/guide/en/kibana/current/xpack-security-secure-saved-objects.html#xpack-security-secure-saved-objects',
+      description: 'Used to encrypt stored objects such as dashboards and visualizations',
+    },
+    'xpack.reporting.encryptionKey': {
+      docs:
+        'https://www.elastic.co/guide/en/kibana/current/security-settings-kb.html#security-session-and-cookie-settings',
+      description: 'Used to encrypt saved reports',
+    },
+    'xpack.security.encryptionKey': {
+      docs:
+        'https://www.elastic.co/guide/en/kibana/current/security-settings-kb.html#security-session-and-cookie-settings',
+      description: 'Used to encrypt session information',
+    },
+  };
 
   _getEncryptionKey(key) {
     return get(this.#config, key);
@@ -43,6 +60,17 @@ export class EncryptionConfig {
 
   _generateEncryptionKey() {
     return crypto.randomBytes(16).toString('hex');
+  }
+
+  docs() {
+    let docs = '';
+    this.#encryptionKeyPaths.forEach((key) => {
+      docs += `${key}
+    ${this.#encryptionMeta[key].description}
+    ${this.#encryptionMeta[key].docs}
+`;
+    });
+    return docs;
   }
 
   generate({ force = false }) {

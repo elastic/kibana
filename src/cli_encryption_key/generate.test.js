@@ -35,8 +35,7 @@ describe('encryption key generation', () => {
       quiet: false,
     };
     generate(encryptionConfig, command);
-    const keys = Logger.prototype.log.mock.calls[1][0];
-
+    const keys = Logger.prototype.log.mock.calls[6][0];
     expect(keys.search('xpack.encryptedSavedObjects.encryptionKey')).toBeGreaterThanOrEqual(0);
     expect(keys.search('xpack.reporting.encryptionKey')).toBeGreaterThanOrEqual(0);
     expect(keys.search('xpack.security.encryptionKey')).toBeGreaterThanOrEqual(0);
@@ -49,18 +48,6 @@ describe('encryption key generation', () => {
     const nextLog = Logger.prototype.log.mock.calls[1];
     expect(keys.search('xpack.encryptedSavedObjects.encryptionKey')).toBeGreaterThanOrEqual(0);
     expect(nextLog).toEqual(undefined);
-  });
-
-  it('should add a rotation warning if the force flag is set', () => {
-    generate(encryptionConfig, { force: true });
-    expect(Logger.prototype.log.mock.calls[2][0]).toEqual(
-      'Any pre-existing keys in kibana.yml will need to be rotated manually.'
-    );
-  });
-
-  it('should not add a rotation warning if the force flag is unset', () => {
-    generate(encryptionConfig, { force: false });
-    expect(Logger.prototype.log.mock.calls[2]).toBeUndefined();
   });
 
   afterEach(() => {

@@ -24,12 +24,6 @@ import { safeDump } from 'js-yaml';
 
 export async function interactive(keys, logger) {
   const settings = Object.keys(keys);
-  logger.log('## Kibana Encryption Key Generation Utility\n');
-  logger.log(
-    `The 'generate' command guides you through the process of generating encryption keys for: `
-  );
-  logger.log(settings.join('\n'));
-  logger.log('');
   logger.log(
     'This tool will ask you a number of questions in order to generate the right set of keys for your needs.\n'
   );
