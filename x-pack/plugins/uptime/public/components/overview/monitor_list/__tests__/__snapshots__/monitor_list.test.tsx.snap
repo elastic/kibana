@@ -199,7 +199,9 @@ exports[`MonitorList component MonitorListPagination component renders the pagin
               Object {
                 "monitor_id": "foo",
                 "state": Object {
-                  "monitor": Object {},
+                  "monitor": Object {
+                    "type": "http",
+                  },
                   "summary": Object {
                     "down": 2,
                     "up": 1,
@@ -255,7 +257,9 @@ exports[`MonitorList component MonitorListPagination component renders the pagin
               Object {
                 "monitor_id": "bar",
                 "state": Object {
-                  "monitor": Object {},
+                  "monitor": Object {
+                    "type": "http",
+                  },
                   "summary": Object {
                     "down": 0,
                     "up": 2,
@@ -507,7 +511,9 @@ exports[`MonitorList component renders error list 1`] = `
               Object {
                 "monitor_id": "foo",
                 "state": Object {
-                  "monitor": Object {},
+                  "monitor": Object {
+                    "type": "http",
+                  },
                   "summary": Object {
                     "down": 2,
                     "up": 1,
@@ -563,7 +569,9 @@ exports[`MonitorList component renders error list 1`] = `
               Object {
                 "monitor_id": "bar",
                 "state": Object {
-                  "monitor": Object {},
+                  "monitor": Object {
+                    "type": "http",
+                  },
                   "summary": Object {
                     "down": 0,
                     "up": 2,
@@ -710,7 +718,9 @@ exports[`MonitorList component renders loading state 1`] = `
               Object {
                 "monitor_id": "foo",
                 "state": Object {
-                  "monitor": Object {},
+                  "monitor": Object {
+                    "type": "http",
+                  },
                   "summary": Object {
                     "down": 2,
                     "up": 1,
@@ -766,7 +776,9 @@ exports[`MonitorList component renders loading state 1`] = `
               Object {
                 "monitor_id": "bar",
                 "state": Object {
-                  "monitor": Object {},
+                  "monitor": Object {
+                    "type": "http",
+                  },
                   "summary": Object {
                     "down": 0,
                     "up": 2,
@@ -1141,7 +1153,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
                         <div
                           class="euiTextColor euiTextColor--subdued"
                         >
-                          Checked 9:02:03 AM
+                          Checked 9:31:38 AM
                         </div>
                       </div>
                     </span>
@@ -1175,7 +1187,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
                   <div>
                     <button
                       class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall euiButtonEmpty--flushLeft"
-                      title="Filter all monitors with type "
+                      title="Filter all monitors with type http"
                       type="button"
                     >
                       <span
@@ -1186,7 +1198,9 @@ exports[`MonitorList component renders the monitor list 1`] = `
                         >
                           <div
                             class="euiText euiText--extraSmall"
-                          />
+                          >
+                            HTTP Ping
+                          </div>
                         </span>
                       </span>
                     </button>
@@ -1377,7 +1391,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
                         <div
                           class="euiTextColor euiTextColor--subdued"
                         >
-                          Checked 9:02:03 AM
+                          Checked 9:31:38 AM
                         </div>
                       </div>
                     </span>
@@ -1411,7 +1425,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
                   <div>
                     <button
                       class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall euiButtonEmpty--flushLeft"
-                      title="Filter all monitors with type "
+                      title="Filter all monitors with type http"
                       type="button"
                     >
                       <span
@@ -1422,7 +1436,9 @@ exports[`MonitorList component renders the monitor list 1`] = `
                         >
                           <div
                             class="euiText euiText--extraSmall"
-                          />
+                          >
+                            HTTP Ping
+                          </div>
                         </span>
                       </span>
                     </button>
@@ -1734,7 +1750,9 @@ exports[`MonitorList component shallow renders the monitor list 1`] = `
               Object {
                 "monitor_id": "foo",
                 "state": Object {
-                  "monitor": Object {},
+                  "monitor": Object {
+                    "type": "http",
+                  },
                   "summary": Object {
                     "down": 2,
                     "up": 1,
@@ -1790,7 +1808,9 @@ exports[`MonitorList component shallow renders the monitor list 1`] = `
               Object {
                 "monitor_id": "bar",
                 "state": Object {
-                  "monitor": Object {},
+                  "monitor": Object {
+                    "type": "http",
+                  },
                   "summary": Object {
                     "down": 0,
                     "up": 2,

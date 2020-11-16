@@ -63,8 +63,6 @@ export const OverviewPageComponent = React.memo(
       dispatch(getMonitorAlertsAction.get());
     }, [dispatch]);
 
-    const linkParameters = stringifyUrlParams(params, true);
-
     const heading = i18n.translate('xpack.uptime.overviewPage.headerText', {
       defaultMessage: 'Overview',
       description: `The text that will be displayed in the app's heading when the Overview page loads.`,
