@@ -53,7 +53,11 @@ export function TransactionBreakdownGraph({ fetchStatus, timeseries }: Props) {
   const xFormatter = niceTimeFormatter([min, max]);
 
   return (
-    <ChartContainer height={XY_HEIGHT} status={fetchStatus}>
+    <ChartContainer
+      height={XY_HEIGHT}
+      hasData={!!timeseries}
+      status={fetchStatus}
+    >
       <Chart ref={chartRef} id="timeSpentBySpan">
         <Settings
           onBrushEnd={({ x }) => onBrushEnd({ x, history })}

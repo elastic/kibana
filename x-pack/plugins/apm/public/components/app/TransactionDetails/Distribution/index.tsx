@@ -211,7 +211,11 @@ export function TransactionDistribution({
           />
         </h5>
       </EuiTitle>
-      <ChartContainer height={unit * 10} status={fetchStatus}>
+      <ChartContainer
+        height={unit * 10}
+        hasData={!!(distribution && !distribution.noHits)}
+        status={fetchStatus}
+      >
         <Chart>
           <Settings
             xDomain={{ min: xMin, max: xMax }}

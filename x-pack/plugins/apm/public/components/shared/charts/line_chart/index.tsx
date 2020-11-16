@@ -88,7 +88,7 @@ export function LineChart({
     );
 
   return (
-    <ChartContainer status={fetchStatus} height={height}>
+    <ChartContainer hasData={!isEmpty} height={height} status={fetchStatus}>
       <Chart ref={chartRef} id={id}>
         <Settings
           onBrushEnd={({ x }) => onBrushEnd({ x, history })}
