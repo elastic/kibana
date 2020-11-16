@@ -32,10 +32,10 @@
 export class Defer<T> {
   public readonly resolve!: (data: T) => void;
   public readonly reject!: (error: any) => void;
-  public readonly promise: Promise<T> = new Promise<T>((resolve, reject) => {
+  public readonly promise: Promise<T | void> = new Promise<T>((resolve, reject) => {
     (this as any).resolve = resolve;
     (this as any).reject = reject;
-  });
+  }).catch(() => {});
 }
 
 export const defer = <T>() => new Defer<T>();
