@@ -19,11 +19,14 @@ import {
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { useUrlParams } from '../../../../hooks';
 
-const popoverStyle = {
+const btnStyle = {
   padding: '10px 8px 0 8px',
-  width: 32,
   borderRadius: 0,
+  height: 38,
+  width: 32,
   backgroundColor: '#e9edf3',
+  paddingTop: 8,
+  paddingBottom: 8,
   cursor: 'pointer',
 };
 
@@ -62,7 +65,7 @@ export const SearchType = ({ kqlSyntax, setKqlSyntax }: Props) => {
   const button = kqlSyntax ? (
     <EuiButtonEmpty onClick={onButtonClick}>KQL</EuiButtonEmpty>
   ) : (
-    <EuiIcon type="boxesVertical" onClick={onButtonClick} />
+    <EuiIcon style={btnStyle} type="boxesVertical" onClick={onButtonClick} />
   );
 
   return (
@@ -71,9 +74,7 @@ export const SearchType = ({ kqlSyntax, setKqlSyntax }: Props) => {
         button={button}
         isOpen={isPopoverOpen}
         closePopover={closePopover}
-        anchorClassName="euiIcon"
-        className="euiIcon"
-        style={kqlSyntax ? {} : popoverStyle}
+        // style={kqlSyntax ? {} : popoverStyle}
         ownFocus={true}
         anchorPosition="downRight"
       >

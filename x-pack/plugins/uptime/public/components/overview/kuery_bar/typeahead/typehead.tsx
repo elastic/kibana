@@ -4,34 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { KeyboardEvent, ChangeEvent, MouseEvent, useState, useRef, useEffect } from 'react';
-import { i18n } from '@kbn/i18n';
+import React, { ChangeEvent, MouseEvent, useState, useRef, useEffect } from 'react';
 import { EuiFieldSearch, EuiProgress, EuiOutsideClickDetector } from '@elastic/eui';
-import useDebounce from 'react-use/lib/useDebounce';
 import { Suggestions } from './suggestions';
 import { QuerySuggestion } from '../../../../../../../../src/plugins/data/public';
-import { useUrlParams } from '../../../../hooks';
 import { SearchType } from './search_type';
 import { useKqlSyntax } from './use_kql_syntax';
-
-const KEY_CODES = {
-  LEFT: 37,
-  UP: 38,
-  RIGHT: 39,
-  DOWN: 40,
-  ENTER: 13,
-  ESC: 27,
-  TAB: 9,
-};
-
-interface TypeaheadState {
-  isSuggestionsVisible: boolean;
-  index: number | null;
-  value: string;
-  inputIsPristine: boolean;
-  lastSubmitted: string;
-  selected: QuerySuggestion | null;
-}
+import { useKeyEvents } from './use_key_events';
+import { KQL_PLACE_HOLDER, SIMPLE_SEARCH_PLACEHOLDER } from './translations';
+import { useSimpleQuery } from './use_simple_kuery';
 
 interface TypeaheadProps {
   onChange: (inputValue: string, selectionStart: number | null) => void;
@@ -57,227 +38,92 @@ export const Typeahead: React.FC<TypeaheadProps> = ({
   isLoading,
   loadMore,
 }) => {
-  const [state, setState] = useState<TypeaheadState>({
-    isSuggestionsVisible: false,
-    index: null,
-    value: '',
-    inputIsPristine: true,
-    lastSubmitted: '',
-    selected: null,
-  });
+  const [value, setValue] = useState('');
+  const [index, setIndex] = useState<number | null>(null);
+  const [isSuggestionsVisible, setIsSuggestionsVisible] = useState(false);
 
-  const { kqlSyntax, setKqlSyntax } = useKqlSyntax();
+  const [selected, setSelected] = useState<QuerySuggestion | null>(null);
+  const [inputIsPristine, setInputIsPristine] = useState(true);
+  const [lastSubmitted, setLastSubmitted] = useState('');
+
+  const { kqlSyntax, setKqlSyntax } = useKqlSyntax({ setValue });
 
   const inputRef = useRef<HTMLInputElement>();
 
-  const [getUrlParams, updateUrlParams] = useUrlParams();
-
-  const { query, search } = getUrlParams();
+  const { setQuery } = useSimpleQuery();
 
   useEffect(() => {
-    setState((prevState) => ({
-      ...prevState,
-      value: query || '',
-    }));
-  }, [query]);
-
-  useEffect(() => {
-    setState((prevState) => ({
-      ...prevState,
-      value: search || '',
-    }));
-  }, [search]);
-
-  const [debouncedValue, setDebouncedValue] = useState(query ?? '');
-
-  useDebounce(
-    () => {
-      updateUrlParams({ query: debouncedValue });
-    },
-    250,
-    [debouncedValue]
-  );
-
-  useEffect(() => {
-    if (state.inputIsPristine && initialValue) {
-      setState((prevState) => ({
-        ...prevState,
-        value: initialValue,
-      }));
+    if (inputIsPristine && initialValue) {
+      setValue(initialValue);
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialValue]);
 
-  const incrementIndex = (currentIndex: number) => {
-    let nextIndex = currentIndex + 1;
-    if (currentIndex === null || nextIndex >= suggestions.length) {
-      nextIndex = 0;
-    }
-
-    setState((prevState) => ({
-      ...prevState,
-      index: nextIndex,
-    }));
-  };
-
-  const decrementIndex = (currentIndex: number) => {
-    let previousIndex: number | null = currentIndex - 1;
-    if (previousIndex < 0) {
-      previousIndex = null;
-    }
-
-    setState((prevState) => ({
-      ...prevState,
-      index: previousIndex,
-    }));
-  };
-
-  const onKeyUp = (event: KeyboardEvent<HTMLInputElement> & ChangeEvent<HTMLInputElement>) => {
-    const { selectionStart } = event.target;
-    const { value } = state;
-    switch (event.keyCode) {
-      case KEY_CODES.LEFT:
-        setState((prevState) => ({
-          ...prevState,
-          isSuggestionsVisible: true,
-        }));
-        onChange(value, selectionStart);
-        break;
-      case KEY_CODES.RIGHT:
-        setState((prevState) => ({
-          ...prevState,
-          isSuggestionsVisible: true,
-        }));
-        onChange(value, selectionStart);
-        break;
-    }
-  };
-
-  const onKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
-    const { isSuggestionsVisible, index, value } = state;
-    switch (event.keyCode) {
-      case KEY_CODES.DOWN:
-        event.preventDefault();
-        if (isSuggestionsVisible) {
-          incrementIndex(index!);
-        } else {
-          setState((prevState) => ({
-            ...prevState,
-            isSuggestionsVisible: true,
-            index: 0,
-          }));
-        }
-        break;
-      case KEY_CODES.UP:
-        event.preventDefault();
-        if (isSuggestionsVisible) {
-          decrementIndex(index!);
-        }
-        break;
-      case KEY_CODES.ENTER:
-        event.preventDefault();
-        if (isSuggestionsVisible && suggestions[index!]) {
-          selectSuggestion(suggestions[index!]);
-        } else {
-          setState((prevState) => ({
-            ...prevState,
-            isSuggestionsVisible: false,
-          }));
-
-          onSubmit(value);
-        }
-        break;
-      case KEY_CODES.ESC:
-        event.preventDefault();
-
-        setState((prevState) => ({
-          ...prevState,
-          isSuggestionsVisible: false,
-        }));
-
-        break;
-      case KEY_CODES.TAB:
-        setState((prevState) => ({
-          ...prevState,
-          isSuggestionsVisible: false,
-        }));
-        break;
-    }
-  };
-
   const selectSuggestion = (suggestion: QuerySuggestion) => {
     const nextInputValue =
-      state.value.substr(0, suggestion.start) +
-      suggestion.text +
-      state.value.substr(suggestion.end);
+      value.substr(0, suggestion.start) + suggestion.text + value.substr(suggestion.end);
 
-    setState((prevState) => ({
-      ...prevState,
-      value: nextInputValue,
-      index: null,
-      selected: suggestion,
-    }));
+    setValue(nextInputValue);
+    setSelected(suggestion);
+    setIndex(null);
 
     onChange(nextInputValue, nextInputValue.length);
   };
 
-  const onClickOutside = () => {
-    if (state.isSuggestionsVisible) {
-      setState((prevState) => ({
-        ...prevState,
-        isSuggestionsVisible: false,
-      }));
+  const { onKeyDown, onKeyUp } = useKeyEvents({
+    index,
+    value,
+    isSuggestionsVisible,
+    setIndex,
+    setIsSuggestionsVisible,
+    suggestions,
+    selectSuggestion,
+    onChange,
+    onSubmit,
+  });
 
+  const onClickOutside = () => {
+    if (isSuggestionsVisible) {
+      setIsSuggestionsVisible(false);
       onSuggestionSubmit();
     }
   };
 
   const onChangeInputValue = (event: ChangeEvent<HTMLInputElement>) => {
-    const { value, selectionStart } = event.target;
-    const hasValue = Boolean(value.trim());
+    const { value: valueN, selectionStart } = event.target;
+    const hasValue = Boolean(valueN.trim());
+
+    setValue(valueN);
+
+    setInputIsPristine(false);
+    setIndex(null);
 
     if (!kqlSyntax) {
-      setState((prevState) => ({
-        ...prevState,
-        value,
-        inputIsPristine: false,
-        index: null,
-      }));
-
-      setDebouncedValue(value);
+      setQuery(valueN);
       return;
     }
 
-    setState((prevState) => ({
-      ...prevState,
-      value,
-      inputIsPristine: false,
-      isSuggestionsVisible: hasValue,
-      index: null,
-    }));
+    setIsSuggestionsVisible(hasValue);
 
     if (!hasValue) {
-      onSubmit(value);
+      onSubmit(valueN);
     }
-    onChange(value, selectionStart!);
+    onChange(valueN, selectionStart!);
   };
 
   const onClickInput = (event: MouseEvent<HTMLInputElement> & ChangeEvent<HTMLInputElement>) => {
-    if (!kqlSyntax) {
-      return;
+    if (kqlSyntax) {
+      event.stopPropagation();
+      const { selectionStart } = event.target;
+      onChange(value, selectionStart!);
     }
-    event.stopPropagation();
-    const { selectionStart } = event.target;
-    onChange(state.value, selectionStart!);
   };
 
   const onFocus = () => {
-    if (kqlSyntax)
-      setState((prevState) => ({
-        ...prevState,
-        isSuggestionsVisible: true,
-      }));
+    if (kqlSyntax) {
+      setIsSuggestionsVisible(true);
+    }
   };
 
   const onClickSuggestion = (suggestion: QuerySuggestion) => {
@@ -285,18 +131,11 @@ export const Typeahead: React.FC<TypeaheadProps> = ({
     if (inputRef.current) inputRef.current.focus();
   };
 
-  const onMouseEnterSuggestion = (index: number) => {
-    setState({ ...state, index });
-
-    setState((prevState) => ({
-      ...prevState,
-      index,
-    }));
+  const onMouseEnterSuggestion = (indexN: number) => {
+    setIndex(indexN);
   };
 
   const onSuggestionSubmit = () => {
-    const { value, lastSubmitted, selected } = state;
-
     if (
       lastSubmitted !== value &&
       selected &&
@@ -304,11 +143,8 @@ export const Typeahead: React.FC<TypeaheadProps> = ({
     ) {
       onSubmit(value);
 
-      setState((prevState) => ({
-        ...prevState,
-        lastSubmitted: value,
-        selected: null,
-      }));
+      setLastSubmitted(value);
+      setSelected(null);
     }
   };
 
@@ -319,26 +155,21 @@ export const Typeahead: React.FC<TypeaheadProps> = ({
           <EuiFieldSearch
             aria-label={ariaLabel}
             fullWidth
-            style={{
-              backgroundImage: 'none',
-            }}
-            placeholder={
+            style={
               kqlSyntax
-                ? i18n.translate('xpack.uptime.kueryBar.searchPlaceholder.kql', {
-                    defaultMessage:
-                      'Search using kql syntax for monitor IDs, names and type etc (E.g monitor.type: "http" AND tags: "dev")',
-                  })
-                : i18n.translate('xpack.uptime.kueryBar.searchPlaceholder.simple', {
-                    defaultMessage: 'Search by monitor ID, name, or url (E.g. http:// )',
-                  })
+                ? {
+                    backgroundImage: 'none',
+                  }
+                : {}
             }
+            placeholder={kqlSyntax ? KQL_PLACE_HOLDER : SIMPLE_SEARCH_PLACEHOLDER}
             inputRef={(node) => {
               if (node) {
                 inputRef.current = node;
               }
             }}
             disabled={disabled}
-            value={state.value}
+            value={value}
             onKeyDown={onKeyDown}
             onKeyUp={onKeyUp}
             onFocus={onFocus}
@@ -363,9 +194,9 @@ export const Typeahead: React.FC<TypeaheadProps> = ({
         </div>
         {kqlSyntax && (
           <Suggestions
-            show={state.isSuggestionsVisible}
+            show={isSuggestionsVisible}
             suggestions={suggestions}
-            index={state.index!}
+            index={index!}
             onClick={onClickSuggestion}
             onMouseEnter={onMouseEnterSuggestion}
             loadMore={loadMore}
