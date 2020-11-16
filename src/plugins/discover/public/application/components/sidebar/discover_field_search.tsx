@@ -221,6 +221,7 @@ export function DiscoverFieldSearch({ onChange, value, types }: Props) {
   const buttonGroup = (id: string, legend: string) => {
     return (
       <EuiButtonGroup
+        id={`fieldSearchGroup-${id}`}
         legend={legend}
         options={toggleButtons(id)}
         idSelected={`${id}-${values[id]}`}
@@ -275,7 +276,9 @@ export function DiscoverFieldSearch({ onChange, value, types }: Props) {
             closePopover={() => {
               setPopoverOpen(false);
             }}
+            ownFocus={true}
             button={buttonContent}
+            initialFocus={'fieldSearchGroup-aggregatable'}
           >
             <EuiPopoverTitle>
               {i18n.translate('discover.fieldChooser.filter.filterByTypeLabel', {
