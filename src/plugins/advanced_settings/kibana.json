@@ -4,6 +4,6 @@
   "server": true,
   "ui": true,
   "requiredPlugins": ["management"],
-  "optionalPlugins": ["home"],
+  "optionalPlugins": ["home", "usageCollection"],
   "requiredBundles": ["kibanaReact", "home"]
 }
