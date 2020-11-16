@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, Suspense, useState } from 'react';
+import React, { Fragment, Suspense, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -25,10 +25,20 @@ import {
   EuiLoadingSpinner,
   EuiBadge,
 } from '@elastic/eui';
-import { IErrorObject, AlertAction, ActionTypeIndex, ActionConnector } from '../../../types';
+import { ResolvedActionGroup } from '../../../../../alerts/common';
+import {
+  IErrorObject,
+  AlertAction,
+  ActionTypeIndex,
+  ActionConnector,
+  ActionVariables,
+  ActionVariable,
+} from '../../../types';
 import { checkActionFormActionTypeEnabled } from '../../lib/check_action_type_enabled';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
 import { ActionAccordionFormProps } from './action_form';
+import { transformActionVariables } from '../../lib/action_variables';
+import { resolvedActionGroupMessage } from '../../constants';
 
 export type ActionTypeFormProps = {
   actionItem: AlertAction;
@@ -88,6 +98,20 @@ export const ActionTypeForm = ({
   setActionGroupIdByIndex,
 }: ActionTypeFormProps) => {
   const [isOpen, setIsOpen] = useState(true);
+  const [availableActionVariables, setAvailableActionVariables] = useState<ActionVariable[]>([]);
+  const [availableDefaultActionMessage, setAvailableDefaultActionMessage] = useState<
+    string | undefined
+  >(undefined);
+
+  useEffect(() => {
+    setAvailableActionVariables(getAvailableActionVariables(messageVariables, actionItem.group));
+    const res =
+      actionItem.group === ResolvedActionGroup.id
+        ? resolvedActionGroupMessage
+        : defaultActionMessage;
+    setAvailableDefaultActionMessage(res);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [actionItem.group]);
 
   const canSave = hasSaveActionsCapability(capabilities);
   const getSelectedOptions = (actionItemId: string) => {
@@ -244,8 +268,8 @@ export const ActionTypeForm = ({
             index={index}
             errors={actionParamsErrors.errors}
             editAction={setActionParamsProperty}
-            messageVariables={messageVariables}
-            defaultMessage={defaultActionMessage ?? undefined}
+            messageVariables={availableActionVariables}
+            defaultMessage={availableDefaultActionMessage}
             docLinks={docLinks}
             http={http}
             toastNotifications={toastNotifications}
@@ -337,3 +361,20 @@ export const ActionTypeForm = ({
     </Fragment>
   );
 };
+
+function getAvailableActionVariables(
+  actionVariables: ActionVariables | undefined,
+  actionGroup: string
+) {
+  if (!actionVariables) {
+    return [];
+  }
+  const filteredActionVariables =
+    actionGroup === ResolvedActionGroup.id
+      ? { params: actionVariables.params, state: actionVariables.state }
+      : actionVariables;
+
+  return transformActionVariables(filteredActionVariables).sort((a, b) =>
+    a.name.toUpperCase().localeCompare(b.name.toUpperCase())
+  );
+}
