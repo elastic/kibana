@@ -47,6 +47,10 @@ export interface IndexPatternsServiceStartDeps {
 }
 
 export class IndexPatternsService implements Plugin<void, IndexPatternsServiceStart> {
+  #uiSettings?: CoreStart['uiSettings'];
+  #fieldFormats?: FieldFormatsStart;
+  #logger?: Logger;
+
   public setup(core: CoreSetup) {
     core.savedObjects.registerType(indexPatternSavedObjectType);
     core.capabilities.registerProvider(capabilitiesProvider);
@@ -55,29 +59,37 @@ export class IndexPatternsService implements Plugin<void, IndexPatternsServiceSt
   }
 
   public start(core: CoreStart, { fieldFormats, logger }: IndexPatternsServiceStartDeps) {
-    const { uiSettings } = core;
+    this.#uiSettings = core.uiSettings;
+    this.#fieldFormats = fieldFormats;
+    this.#logger = logger;
 
     return {
-      indexPatternsServiceFactory: async (
-        savedObjectsClient: SavedObjectsClientContract,
-        elasticsearchClient: ElasticsearchClient
-      ) => {
-        const uiSettingsClient = uiSettings.asScopedToClient(savedObjectsClient);
-        const formats = await fieldFormats.fieldFormatServiceFactory(uiSettingsClient);
-
-        return new IndexPatternsCommonService({
-          uiSettings: new UiSettingsServerToCommon(uiSettingsClient),
-          savedObjectsClient: new SavedObjectsClientServerToCommon(savedObjectsClient),
-          apiClient: new IndexPatternsApiServer(elasticsearchClient),
-          fieldFormats: formats,
-          onError: (error) => {
-            logger.error(error);
-          },
-          onNotification: ({ title, text }) => {
-            logger.warn(`${title} : ${text}`);
-          },
-        });
-      },
+      indexPatternsServiceFactory: this.createIndexPatternsService.bind(this),
     };
+  }
+
+  public async createIndexPatternsService(
+    savedObjectsClient: SavedObjectsClientContract,
+    elasticsearchClient: ElasticsearchClient
+  ) {
+    if (!this.#uiSettings) throw new Error('UI Settings not set in IndexPatternsService.');
+    if (!this.#fieldFormats) throw new Error('Field formats not set in IndexPatternsService.');
+    if (!this.#logger) throw new Error('Logger not set in IndexPatternsService.');
+
+    const uiSettingsClient = this.#uiSettings.asScopedToClient(savedObjectsClient);
+    const formats = await this.#fieldFormats.fieldFormatServiceFactory(uiSettingsClient);
+
+    return new IndexPatternsCommonService({
+      uiSettings: new UiSettingsServerToCommon(uiSettingsClient),
+      savedObjectsClient: new SavedObjectsClientServerToCommon(savedObjectsClient),
+      apiClient: new IndexPatternsApiServer(elasticsearchClient),
+      fieldFormats: formats,
+      onError: (error) => {
+        this.#logger!.error(error);
+      },
+      onNotification: ({ title, text }) => {
+        this.#logger!.warn(`${title} : ${text}`);
+      },
+    });
   }
 }
