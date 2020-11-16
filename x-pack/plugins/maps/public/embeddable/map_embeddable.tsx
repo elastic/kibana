@@ -202,7 +202,7 @@ export class MapEmbeddable
   }
 
   public supportedTriggers(): Array<keyof TriggerContextMapping> {
-    return [APPLY_FILTER_TRIGGER];
+    return [APPLY_FILTER_TRIGGER, 'VALUE_CLICK_TRIGGER'];
   }
 
   setRenderTooltipContent = (renderTooltipContent: RenderToolTipContent) => {
@@ -321,22 +321,67 @@ export class MapEmbeddable
   }
 
   addFilters = async (filters: Filter[], actionId: string = ACTION_GLOBAL_APPLY_FILTER) => {
-    const executeContext = {
-      ...this.getActionContext(),
-      filters,
-    };
     const action = getUiActions().getAction(actionId);
     if (!action) {
       throw new Error('Unable to apply filter, could not locate action');
     }
-    action.execute(executeContext);
+    if (action.type === 'URL_DRILLDOWN') {
+      action.execute({
+        ...this.getActionContext(),
+        data: {
+          data: [
+            {
+              table: {
+                columns: [{
+                  id: 'column0',
+                }],
+                rows: [{
+                  id: 'row0',
+                }],
+                type: 'datatable'
+              },
+              column: 0,
+              row: 0,
+              value: 'US',
+            }
+          ]
+        },
+      });
+      return;
+    }
+    action.execute({
+      ...this.getActionContext(),
+      filters,
+    });
   };
 
   getFilterActions = async () => {
-    return await getUiActions().getTriggerCompatibleActions(APPLY_FILTER_TRIGGER, {
+    const filterActions = await getUiActions().getTriggerCompatibleActions(APPLY_FILTER_TRIGGER, {
       embeddable: this,
       filters: [],
     });
+    const valueClickActions = await getUiActions().getTriggerCompatibleActions('VALUE_CLICK_TRIGGER', {
+      embeddable: this,
+      data: {
+        data: [
+          {
+            table: {
+              columns: [{
+                id: 'column0',
+              }],
+              rows: [{
+                id: 'row0',
+              }],
+              type: 'datatable'
+            },
+            column: 0,
+            row: 0,
+            value: 'fake value',
+          }
+        ]
+      },
+    });
+    return [ ...filterActions, ...valueClickActions ];
   };
 
   getActionContext = () => {

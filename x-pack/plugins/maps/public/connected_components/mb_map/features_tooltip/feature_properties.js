@@ -112,6 +112,7 @@ export class FeatureProperties extends React.Component {
   };
 
   _renderFilterActions(tooltipProperty) {
+    console.log(this.state.actions);
     const panel = {
       id: 0,
       items: this.state.actions.map((action) => {
@@ -119,7 +120,7 @@ export class FeatureProperties extends React.Component {
         const iconType = action.getIconType(actionContext);
         const name = action.getDisplayName(actionContext);
         return {
-          name,
+          name: name ? name : action.id,
           icon: iconType ? <EuiIcon type={iconType} /> : null,
           onClick: async () => {
             this.props.onCloseTooltip();
