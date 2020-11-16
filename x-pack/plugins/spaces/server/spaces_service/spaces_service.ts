@@ -12,7 +12,7 @@ import {
   SpacesClientServiceStart,
 } from '../lib/spaces_client';
 import { ConfigType } from '../config';
-import { getSpaceIdFromPath, addSpaceIdToPath } from '../../common/lib/spaces_url_parser';
+import { getSpaceIdFromPath } from '../../common/lib/spaces_url_parser';
 import { DEFAULT_SPACE_ID } from '../../common/constants';
 import { spaceIdToNamespace, namespaceToSpaceId } from '../lib/utils/namespace';
 import { Space } from '..';
@@ -75,12 +75,6 @@ export interface SpacesServiceStart {
   getActiveSpace(request: KibanaRequest): Promise<Space>;
 
   /**
-   * Gets the space-aware base path for the specified space id.
-   * @param spaceId
-   */
-  getBasePath(spaceId: string): string;
-
-  /**
    * Converts the provided space id into the corresponding Saved Objects `namespace` id.
    * @param spaceId
    */
@@ -141,12 +135,7 @@ export class SpacesService {
         const spaceId = this.getSpaceId(request, coreStart.http.basePath);
         return getScopedClient(request).get(spaceId);
       },
-      getBasePath: (spaceId: string) => {
-        if (!spaceId) {
-          throw new TypeError(`spaceId is required to retrieve base path`);
-        }
-        return addSpaceIdToPath(coreStart.http.basePath.serverBasePath, spaceId);
-      },
+
       isInDefaultSpace: (request: KibanaRequest) => {
         const spaceId = this.getSpaceId(request, coreStart.http.basePath);
 

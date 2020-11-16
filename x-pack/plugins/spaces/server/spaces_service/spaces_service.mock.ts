@@ -30,7 +30,6 @@ const createStartContractMock = (spaceId = DEFAULT_SPACE_ID) => {
     createSpacesClient: jest.fn().mockReturnValue(spacesClientMock.create()),
     getSpaceId: jest.fn().mockReturnValue(spaceId),
     isInDefaultSpace: jest.fn().mockReturnValue(spaceId === DEFAULT_SPACE_ID),
-    getBasePath: jest.fn().mockReturnValue(''),
     getActiveSpace: jest.fn(),
   };
   return startContract;

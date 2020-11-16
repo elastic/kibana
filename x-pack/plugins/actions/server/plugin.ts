@@ -133,7 +133,6 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
 
   private readonly logger: Logger;
   private actionsConfig?: ActionsConfig;
-  private serverBasePath?: string;
   private taskRunnerFactory?: TaskRunnerFactory;
   private actionTypeRegistry?: ActionTypeRegistry;
   private actionExecutor?: ActionExecutor;
@@ -210,7 +209,6 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
     });
     this.taskRunnerFactory = taskRunnerFactory;
     this.actionTypeRegistry = actionTypeRegistry;
-    this.serverBasePath = core.http.basePath.serverBasePath;
     this.actionExecutor = actionExecutor;
     this.security = plugins.security;
 
@@ -357,12 +355,6 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
           : undefined,
     });
 
-    const getBasePath = (spaceId?: string): string => {
-      return plugins.spaces && spaceId
-        ? plugins.spaces.spacesService.getBasePath(spaceId)
-        : this.serverBasePath!;
-    };
-
     const spaceIdToNamespace = (spaceId?: string): string | undefined => {
       return plugins.spaces && spaceId
         ? plugins.spaces.spacesService.spaceIdToNamespace(spaceId)
@@ -373,7 +365,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
       logger,
       actionTypeRegistry: actionTypeRegistry!,
       encryptedSavedObjectsClient,
-      getBasePath,
+      basePathService: core.http.basePath,
       spaceIdToNamespace,
       getUnsecuredSavedObjectsClient: (request: KibanaRequest) =>
         this.getUnsecuredSavedObjectsClient(core.savedObjects, request),

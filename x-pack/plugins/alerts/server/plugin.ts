@@ -115,7 +115,6 @@ export class AlertingPlugin {
   private readonly logger: Logger;
   private alertTypeRegistry?: AlertTypeRegistry;
   private readonly taskRunnerFactory: TaskRunnerFactory;
-  private serverBasePath?: string;
   private licenseState: LicenseState | null = null;
   private isESOUsingEphemeralEncryptionKey?: boolean;
   private security?: SecurityPluginSetup;
@@ -181,8 +180,6 @@ export class AlertingPlugin {
       taskRunnerFactory: this.taskRunnerFactory,
     });
     this.alertTypeRegistry = alertTypeRegistry;
-
-    this.serverBasePath = core.http.basePath.serverBasePath;
 
     const usageCollection = plugins.usageCollection;
     if (usageCollection) {
@@ -259,12 +256,6 @@ export class AlertingPlugin {
       includedHiddenTypes: ['alert'],
     });
 
-    const getBasePath = (spaceId?: string): string => {
-      return plugins.spaces && spaceId
-        ? plugins.spaces.spacesService.getBasePath(spaceId)
-        : this.serverBasePath!;
-    };
-
     const spaceIdToNamespace = (spaceId?: string): string | undefined => {
       return plugins.spaces && spaceId
         ? plugins.spaces.spacesService.spaceIdToNamespace(spaceId)
@@ -306,7 +297,7 @@ export class AlertingPlugin {
       spaceIdToNamespace,
       actionsPlugin: plugins.actions,
       encryptedSavedObjectsClient,
-      getBasePath,
+      basePathService: core.http.basePath,
       eventLogger: this.eventLogger!,
       internalSavedObjectsRepository: core.savedObjects.createInternalRepository(['alert']),
     });

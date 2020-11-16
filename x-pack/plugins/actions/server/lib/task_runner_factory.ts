@@ -5,6 +5,7 @@
  */
 
 import { pick } from 'lodash';
+import type { Request } from '@hapi/hapi';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { map, fromNullable, getOrElse } from 'fp-ts/lib/Option';
 import {
@@ -12,7 +13,8 @@ import {
   SavedObjectsClientContract,
   KibanaRequest,
   SavedObjectReference,
-} from 'src/core/server';
+  IBasePath,
+} from '../../../../../src/core/server';
 import { ActionExecutorContract } from './action_executor';
 import { ExecutorError } from './executor_error';
 import { RunContext } from '../../../task_manager/server';
@@ -21,7 +23,6 @@ import { ActionTypeDisabledError } from './errors';
 import {
   ActionTaskParams,
   ActionTypeRegistryContract,
-  GetBasePathFunction,
   SpaceIdToNamespaceFunction,
   ActionTypeExecutorResult,
 } from '../types';
@@ -33,7 +34,7 @@ export interface TaskRunnerContext {
   actionTypeRegistry: ActionTypeRegistryContract;
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
   spaceIdToNamespace: SpaceIdToNamespaceFunction;
-  getBasePath: GetBasePathFunction;
+  basePathService: IBasePath;
   getUnsecuredSavedObjectsClient: (request: KibanaRequest) => SavedObjectsClientContract;
 }
 
@@ -64,7 +65,7 @@ export class TaskRunnerFactory {
       logger,
       encryptedSavedObjectsClient,
       spaceIdToNamespace,
-      getBasePath,
+      basePathService,
       getUnsecuredSavedObjectsClient,
     } = this.taskRunnerContext!;
 
@@ -87,11 +88,12 @@ export class TaskRunnerFactory {
           requestHeaders.authorization = `ApiKey ${apiKey}`;
         }
 
+        const path = spaceId ? `/s/${spaceId}` : '/';
+
         // Since we're using API keys and accessing elasticsearch can only be done
         // via a request, we're faking one with the proper authorization headers.
-        const fakeRequest = ({
+        const fakeRequest = KibanaRequest.from(({
           headers: requestHeaders,
-          getBasePath: () => getBasePath(spaceId),
           path: '/',
           route: { settings: {} },
           url: {
@@ -102,7 +104,9 @@ export class TaskRunnerFactory {
               url: '/',
             },
           },
-        } as unknown) as KibanaRequest;
+        } as unknown) as Request);
+
+        basePathService.set(fakeRequest, path);
 
         let executorResult: ActionTypeExecutorResult<unknown>;
         try {

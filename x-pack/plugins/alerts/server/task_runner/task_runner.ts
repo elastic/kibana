@@ -5,6 +5,7 @@
  */
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { Dictionary, pickBy, mapValues, without, cloneDeep } from 'lodash';
+import type { Request } from '@hapi/hapi';
 import { Logger, KibanaRequest } from '../../../../../src/core/server';
 import { TaskRunnerContext } from './task_runner_factory';
 import { ConcreteTaskInstance, throwUnrecoverableError } from '../../../task_manager/server';
@@ -91,9 +92,10 @@ export class TaskRunner {
       requestHeaders.authorization = `ApiKey ${apiKey}`;
     }
 
-    return ({
+    const path = spaceId ? `/s/${spaceId}` : '/';
+
+    const fakeRequest = KibanaRequest.from(({
       headers: requestHeaders,
-      getBasePath: () => this.context.getBasePath(spaceId),
       path: '/',
       route: { settings: {} },
       url: {
@@ -104,7 +106,11 @@ export class TaskRunner {
           url: '/',
         },
       },
-    } as unknown) as KibanaRequest;
+    } as unknown) as Request);
+
+    this.context.basePathService.set(fakeRequest, path);
+
+    return fakeRequest;
   }
 
   private getServicesWithSpaceLevelPermissions(

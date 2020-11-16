@@ -18,6 +18,7 @@ import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/serv
 import {
   loggingSystemMock,
   savedObjectsRepositoryMock,
+  httpServiceMock,
 } from '../../../../../src/core/server/mocks';
 import { PluginStartContract as ActionsPluginStart } from '../../../actions/server';
 import { actionsMock, actionsClientMock } from '../../../actions/server/mocks';
@@ -78,7 +79,7 @@ describe('Task Runner', () => {
     encryptedSavedObjectsClient,
     logger: loggingSystemMock.create().get(),
     spaceIdToNamespace: jest.fn().mockReturnValue(undefined),
-    getBasePath: jest.fn().mockReturnValue(undefined),
+    basePathService: httpServiceMock.createBasePath(),
     eventLogger: eventLoggerMock.create(),
     internalSavedObjectsRepository: savedObjectsRepositoryMock.create(),
   };
