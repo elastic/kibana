@@ -81,29 +81,9 @@ const connectStepDescription = {
   empty: '',
 };
 
-const sourceNames = {
-  confluence: SOURCE_NAMES.CONFLUENCE,
-  confluenceServer: SOURCE_NAMES.CONFLUENCE_SERVER,
-  dropbox: SOURCE_NAMES.DROPBOX,
-  github: SOURCE_NAMES.GITHUB,
-  githubEnterprise: SOURCE_NAMES.GITHUB_ENTERPRISE,
-  gmail: SOURCE_NAMES.GMAIL,
-  googleDrive: SOURCE_NAMES.GOOGLE_DRIVE,
-  jira: SOURCE_NAMES.JIRA,
-  jiraServer: SOURCE_NAMES.JIRA_SERVER,
-  oneDrive: SOURCE_NAMES.ONEDRIVE,
-  salesforce: SOURCE_NAMES.SALESFORCE,
-  salesforceSandbox: SOURCE_NAMES.SALESFORCE_SANDBOX,
-  serviceNow: SOURCE_NAMES.SERVICENOW,
-  sharePoint: SOURCE_NAMES.SHARE_POINT,
-  slack: SOURCE_NAMES.SLACK,
-  zendesk: SOURCE_NAMES.ZENDESK,
-  custom: SOURCE_NAMES.CUSTOM,
-};
-
 export const staticSourceData = [
   {
-    name: sourceNames.confluence,
+    name: SOURCE_NAMES.CONFLUENCE,
     serviceType: 'confluence_cloud',
     addPath: ADD_CONFLUENCE_PATH,
     editPath: EDIT_CONFLUENCE_PATH,
@@ -119,7 +99,7 @@ export const staticSourceData = [
       {
         defaultMessage:
           '{sourceName} is a team workspace, where knowledge and collaboration meet. Often used as an organizational wiki and intranet, it usually houses valuable information for staff across multiple areas of your business.',
-        values: { sourceName: sourceNames.confluence },
+        values: { sourceName: SOURCE_NAMES.CONFLUENCE },
       }
     ),
     connectStepDescription: connectStepDescription.attachments,
@@ -145,7 +125,7 @@ export const staticSourceData = [
     accountContextOnly: false,
   },
   {
-    name: sourceNames.confluenceServer,
+    name: SOURCE_NAMES.CONFLUENCE_SERVER,
     serviceType: 'confluence_server',
     addPath: ADD_CONFLUENCE_SERVER_PATH,
     editPath: EDIT_CONFLUENCE_SERVER_PATH,
@@ -160,7 +140,7 @@ export const staticSourceData = [
       {
         defaultMessage:
           '{sourceName} is a team workspace, where knowledge and collaboration meet. Often used as an organizational wiki and intranet, it usually houses valuable information for staff across multiple areas of your business.',
-        values: { sourceName: sourceNames.confluence },
+        values: { sourceName: SOURCE_NAMES.CONFLUENCE },
       }
     ),
     connectStepDescription: connectStepDescription.attachments,
@@ -186,7 +166,7 @@ export const staticSourceData = [
     accountContextOnly: false,
   },
   {
-    name: sourceNames.dropbox,
+    name: SOURCE_NAMES.DROPBOX,
     serviceType: 'dropbox',
     addPath: ADD_DROPBOX_PATH,
     editPath: EDIT_DROPBOX_PATH,
@@ -202,7 +182,7 @@ export const staticSourceData = [
       {
         defaultMessage:
           '{sourceName} is a cloud-based storage service for organizations of all sizes. Create, store, share and automatically synchronize documents across your desktop and web.',
-        values: { sourceName: sourceNames.dropbox },
+        values: { sourceName: SOURCE_NAMES.DROPBOX },
       }
     ),
     connectStepDescription: connectStepDescription.files,
@@ -223,7 +203,7 @@ export const staticSourceData = [
     accountContextOnly: false,
   },
   {
-    name: sourceNames.github,
+    name: SOURCE_NAMES.GITHUB,
     serviceType: 'github',
     addPath: ADD_GITHUB_PATH,
     editPath: EDIT_GITHUB_PATH,
@@ -241,7 +221,7 @@ export const staticSourceData = [
       {
         defaultMessage:
           '{sourceName} is a development platform, version control and collaboration platform for teams of all sizes. From open source to business, you can host and review code, manage projects, and build software across departments and continents.',
-        values: { sourceName: sourceNames.github },
+        values: { sourceName: SOURCE_NAMES.GITHUB },
       }
     ),
     connectStepDescription: connectStepDescription.empty,
@@ -266,7 +246,7 @@ export const staticSourceData = [
     accountContextOnly: false,
   },
   {
-    name: sourceNames.githubEnterprise,
+    name: SOURCE_NAMES.GITHUB_ENTERPRISE,
     serviceType: 'github_enterprise_server',
     addPath: ADD_GITHUB_ENTERPRISE_PATH,
     editPath: EDIT_GITHUB_ENTERPRISE_PATH,
@@ -290,7 +270,7 @@ export const staticSourceData = [
       {
         defaultMessage:
           '{sourceName} is a development platform, version control and collaboration platform for teams of all sizes. From open source to business, you can host and review code, manage projects, and build software across departments and continents.',
-        values: { sourceName: sourceNames.githubEnterprise },
+        values: { sourceName: SOURCE_NAMES.GITHUB_ENTERPRISE },
       }
     ),
     connectStepDescription: connectStepDescription.empty,
@@ -315,7 +295,7 @@ export const staticSourceData = [
     accountContextOnly: false,
   },
   {
-    name: sourceNames.gmail,
+    name: SOURCE_NAMES.GMAIL,
     serviceType: 'gmail',
     addPath: ADD_GMAIL_PATH,
     editPath: EDIT_GMAIL_PATH,
@@ -331,7 +311,7 @@ export const staticSourceData = [
       {
         defaultMessage:
           '{sourceName} is a free email service developed by Google. It is fast, reliable, and trusted by millions of people and organizations around the world. Workplace Search brings all of your Gmail content into one relevant and ease-to-use search experience.',
-        values: { sourceName: sourceNames.gmail },
+        values: { sourceName: SOURCE_NAMES.GMAIL },
       }
     ),
     connectStepDescription: connectStepDescription.empty,
@@ -342,7 +322,7 @@ export const staticSourceData = [
     accountContextOnly: true,
   },
   {
-    name: sourceNames.googleDrive,
+    name: SOURCE_NAMES.GOOGLE_DRIVE,
     serviceType: 'google_drive',
     addPath: ADD_GOOGLE_DRIVE_PATH,
     editPath: EDIT_GOOGLE_DRIVE_PATH,
@@ -358,7 +338,7 @@ export const staticSourceData = [
       {
         defaultMessage:
           '{sourceName} is a cloud-based storage and collaboration service for organizations of all sizes, with a focus on G Suite document (Google Docs, Sheets, Slides, etc) storage and collaboration. Create, store, share and automatically synchronize documents across your desktop and web.',
-        values: { sourceName: sourceNames.googleDrive },
+        values: { sourceName: SOURCE_NAMES.GOOGLE_DRIVE },
       }
     ),
     connectStepDescription: connectStepDescription.files,
@@ -380,7 +360,7 @@ export const staticSourceData = [
     accountContextOnly: false,
   },
   {
-    name: sourceNames.jira,
+    name: SOURCE_NAMES.JIRA,
     serviceType: 'jira_cloud',
     addPath: ADD_JIRA_PATH,
     editPath: EDIT_JIRA_PATH,
@@ -396,7 +376,7 @@ export const staticSourceData = [
       {
         defaultMessage:
           '{sourceName} is an issue tracking product that provides bug tracking, workflow automation, and agile project management tools for teams of all sizes. ',
-        values: { sourceName: sourceNames.jira },
+        values: { sourceName: SOURCE_NAMES.JIRA },
       }
     ),
     connectStepDescription: connectStepDescription.files,
@@ -424,7 +404,7 @@ export const staticSourceData = [
     accountContextOnly: false,
   },
   {
-    name: sourceNames.jiraServer,
+    name: SOURCE_NAMES.JIRA_SERVER,
     serviceType: 'jira_server',
     addPath: ADD_JIRA_SERVER_PATH,
     editPath: EDIT_JIRA_SERVER_PATH,
@@ -440,7 +420,7 @@ export const staticSourceData = [
       {
         defaultMessage:
           '{sourceName} is an issue tracking product that provides bug tracking, workflow automation, and agile project management tools for teams of all sizes. ',
-        values: { sourceName: sourceNames.jiraServer },
+        values: { sourceName: SOURCE_NAMES.JIRA_SERVER },
       }
     ),
     connectStepDescription: connectStepDescription.files,
@@ -468,7 +448,7 @@ export const staticSourceData = [
     accountContextOnly: false,
   },
   {
-    name: sourceNames.oneDrive,
+    name: SOURCE_NAMES.ONEDRIVE,
     serviceType: 'one_drive',
     addPath: ADD_ONEDRIVE_PATH,
     editPath: EDIT_ONEDRIVE_PATH,
@@ -484,7 +464,7 @@ export const staticSourceData = [
       {
         defaultMessage:
           '{sourceName} is a cloud-based storage service for organizations of all sizes, with a focus on Office 365 document storage and collaboration. Create, store, share and automatically synchronize documents across your organization.',
-        values: { sourceName: sourceNames.oneDrive },
+        values: { sourceName: SOURCE_NAMES.ONEDRIVE },
       }
     ),
     connectStepDescription: connectStepDescription.files,
@@ -506,7 +486,7 @@ export const staticSourceData = [
     accountContextOnly: false,
   },
   {
-    name: sourceNames.salesforce,
+    name: SOURCE_NAMES.SALESFORCE,
     serviceType: 'salesforce',
     addPath: ADD_SALESFORCE_PATH,
     editPath: EDIT_SALESFORCE_PATH,
@@ -522,7 +502,7 @@ export const staticSourceData = [
       {
         defaultMessage:
           '{sourceName} is a cloud-based customer relationship management (CRM) platform with a focus on customer service, marketing automation, analytics, and sales operation tooling.',
-        values: { sourceName: sourceNames.salesforce },
+        values: { sourceName: SOURCE_NAMES.SALESFORCE },
       }
     ),
     connectStepDescription: connectStepDescription.attachments,
@@ -549,7 +529,7 @@ export const staticSourceData = [
     accountContextOnly: false,
   },
   {
-    name: sourceNames.salesforceSandbox,
+    name: SOURCE_NAMES.SALESFORCE_SANDBOX,
     serviceType: 'salesforce_sandbox',
     addPath: ADD_SALESFORCE_SANDBOX_PATH,
     editPath: EDIT_SALESFORCE_SANDBOX_PATH,
@@ -565,7 +545,7 @@ export const staticSourceData = [
       {
         defaultMessage:
           '{sourceName} is a cloud-based customer relationship management (CRM) platform with a focus on customer service, marketing automation, analytics, and sales operation tooling.',
-        values: { sourceName: sourceNames.salesforceSandbox },
+        values: { sourceName: SOURCE_NAMES.SALESFORCE_SANDBOX },
       }
     ),
     connectStepDescription: connectStepDescription.attachments,
@@ -592,7 +572,7 @@ export const staticSourceData = [
     accountContextOnly: false,
   },
   {
-    name: sourceNames.serviceNow,
+    name: SOURCE_NAMES.SERVICENOW,
     serviceType: 'service_now',
     addPath: ADD_SERVICENOW_PATH,
     editPath: EDIT_SERVICENOW_PATH,
@@ -608,7 +588,7 @@ export const staticSourceData = [
       {
         defaultMessage:
           '{sourceName} is a cloud-based IT Service Management (ITSM) platform focusing on workflow automation and internal organizational support.',
-        values: { sourceName: sourceNames.serviceNow },
+        values: { sourceName: SOURCE_NAMES.SERVICENOW },
       }
     ),
     connectStepDescription: connectStepDescription.empty,
@@ -634,7 +614,7 @@ export const staticSourceData = [
     accountContextOnly: false,
   },
   {
-    name: sourceNames.sharePoint,
+    name: SOURCE_NAMES.SHARE_POINT,
     serviceType: 'share_point',
     addPath: ADD_SHARE_POINT_PATH,
     editPath: EDIT_SHARE_POINT_PATH,
@@ -650,7 +630,7 @@ export const staticSourceData = [
       {
         defaultMessage:
           '{sourceName} is a cloud-based collaboration, knowledge management and storage platform for organizations of all sizes. Often used as a centralized content management system (CMS), SharePoint Online stores a wealth of information across departments and teams.',
-        values: { sourceName: sourceNames.sharePoint },
+        values: { sourceName: SOURCE_NAMES.SHARE_POINT },
       }
     ),
     connectStepDescription: connectStepDescription.files,
@@ -672,7 +652,7 @@ export const staticSourceData = [
     accountContextOnly: false,
   },
   {
-    name: sourceNames.slack,
+    name: SOURCE_NAMES.SLACK,
     serviceType: 'slack',
     addPath: ADD_SLACK_PATH,
     editPath: EDIT_SLACK_PATH,
@@ -687,8 +667,8 @@ export const staticSourceData = [
       'xpack.enterpriseSearch.workplaceSearch.sources.sourceDescriptions.slack',
       {
         defaultMessage:
-          '{sourceName} is a communication tool that enables real-time collaboration and decision making. With ${sourceNames.slack}, keep track of the work happening across teams, engage directly with your coworkers on ongoing projects and communicate with other organizations.',
-        values: { sourceName: sourceNames.slack },
+          '{sourceName} is a communication tool that enables real-time collaboration and decision making. With {sourceName}, keep track of the work happening across teams, engage directly with your coworkers on ongoing projects and communicate with other organizations.',
+        values: { sourceName: SOURCE_NAMES.SLACK },
       }
     ),
     connectStepDescription: connectStepDescription.empty,
@@ -703,7 +683,7 @@ export const staticSourceData = [
     accountContextOnly: true,
   },
   {
-    name: sourceNames.zendesk,
+    name: SOURCE_NAMES.ZENDESK,
     serviceType: 'zendesk',
     addPath: ADD_ZENDESK_PATH,
     editPath: EDIT_ZENDESK_PATH,
@@ -720,7 +700,7 @@ export const staticSourceData = [
       {
         defaultMessage:
           '{sourceName} is cloud-based customer relationship management and customer support platform that provides tools for tracking, prioritizing, and solving customer support tickets.',
-        values: { sourceName: sourceNames.zendesk },
+        values: { sourceName: SOURCE_NAMES.ZENDESK },
       }
     ),
     connectStepDescription: connectStepDescription.empty,
@@ -741,7 +721,7 @@ export const staticSourceData = [
     accountContextOnly: false,
   },
   {
-    name: sourceNames.custom,
+    name: SOURCE_NAMES.CUSTOM,
     serviceType: 'custom',
     addPath: ADD_CUSTOM_PATH,
     editPath: EDIT_CUSTOM_PATH,
