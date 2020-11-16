@@ -103,11 +103,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.visualize.gotoVisualizationLandingPage();
         await listingTable.waitUntilTableIsLoaded();
 
-        // //// TODO: remove, here for screenshot
-        const foo = await listingTable.getAllItemsNames();
-        expect(foo).to.contain('My new markdown viz');
-        //////
-
         await selectFilterTags('tag-1');
         const itemNames = await listingTable.getAllItemsNames();
         expect(itemNames).to.contain('My new markdown viz');
@@ -148,11 +143,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         await PageObjects.visualize.gotoVisualizationLandingPage();
         await listingTable.waitUntilTableIsLoaded();
-
-        // //// TODO: remove, here for screenshot
-        const foo = await listingTable.getAllItemsNames();
-        expect(foo).to.contain('vis-with-new-tag');
-        //////
 
         await selectFilterTags('my-new-tag');
         const itemNames = await listingTable.getAllItemsNames();
