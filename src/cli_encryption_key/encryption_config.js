@@ -40,7 +40,7 @@ export class EncryptionConfig {
     },
     'xpack.reporting.encryptionKey': {
       docs:
-        'https://www.elastic.co/guide/en/kibana/current/security-settings-kb.html#security-session-and-cookie-settings',
+        'https://www.elastic.co/guide/en/kibana/current/reporting-settings-kb.html#general-reporting-settings',
       description: 'Used to encrypt saved reports',
     },
     'xpack.security.encryptionKey': {
