@@ -14,7 +14,7 @@ import { EMSFileSource, sourceTitle } from './ems_file_source';
 import { getEMSSettings } from '../../../kibana_services';
 import { EMSFileSourceDescriptor } from '../../../../common/descriptor_types';
 import { LAYER_WIZARD_CATEGORY } from '../../../../common/constants';
-import { EMSBoundariesLayerIcon } from './ems_boundaries_layer_icon';
+import { EMSBoundariesLayerIcon } from '../../layers/icons/ems_boundaries_layer_icon';
 
 export const emsBoundariesLayerWizardConfig: LayerWizard = {
   categories: [LAYER_WIZARD_CATEGORY.REFERENCE],
