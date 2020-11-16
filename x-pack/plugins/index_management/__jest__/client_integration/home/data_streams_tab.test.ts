@@ -8,6 +8,7 @@ import { act } from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
 
 import { API_BASE_PATH } from '../../../common/constants';
+import * as fixtures from '../../../test/fixtures';
 import { setupEnvironment } from '../helpers';
 
 import {
@@ -89,6 +90,8 @@ describe('Data Streams tab', () => {
         setLoadIndicesResponse,
         setLoadDataStreamsResponse,
         setLoadDataStreamResponse,
+        setLoadTemplateResponse,
+        setLoadTemplatesResponse,
       } = httpRequestsMockHelpers;
 
       setLoadIndicesResponse([
@@ -102,6 +105,10 @@ describe('Data Streams tab', () => {
         createDataStreamPayload({ name: 'dataStream2' }),
       ]);
       setLoadDataStreamResponse(dataStreamForDetailPanel);
+
+      const indexTemplate = fixtures.getTemplate({ name: 'indexTemplate' });
+      setLoadTemplatesResponse({ templates: [indexTemplate], legacyTemplates: [] });
+      setLoadTemplateResponse(indexTemplate);
 
       testBed = await setup({ history: createMemoryHistory() });
       await act(async () => {
@@ -243,6 +250,26 @@ describe('Data Streams tab', () => {
         expect(JSON.parse(JSON.parse(requestBody).body)).toEqual({
           dataStreams: ['dataStream1'],
         });
+      });
+
+      test('clicking index template name navigates to the index template details', async () => {
+        const {
+          actions: { clickNameAt, clickDetailPanelIndexTemplateLink },
+          findDetailPanelIndexTemplateLink,
+          component,
+          find,
+        } = testBed;
+
+        await clickNameAt(0);
+
+        const indexTemplateLink = findDetailPanelIndexTemplateLink();
+        expect(indexTemplateLink.text()).toBe('indexTemplate');
+
+        await clickDetailPanelIndexTemplateLink();
+
+        component.update();
+        expect(find('summaryTab').exists()).toBeTruthy();
+        expect(find('title').text().trim()).toBe('indexTemplate');
       });
     });
   });

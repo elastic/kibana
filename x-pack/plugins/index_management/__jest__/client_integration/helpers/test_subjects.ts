@@ -52,4 +52,5 @@ export type TestSubjects =
   | 'templateList'
   | 'templatesTab'
   | 'templateTable'
+  | 'title'
   | 'viewButton';
