@@ -5,17 +5,13 @@
  */
 
 import React, { Fragment } from 'react';
-import { i18n } from '@kbn/i18n';
 import {
-  EuiPopover,
-  EuiLink,
   EuiPanel,
   EuiSpacer,
-  EuiCallOut,
-  EuiContextMenu,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiText,
+  EuiAccordion,
+  EuiListGroup,
+  EuiListGroupItem,
+  EuiTextColor,
 } from '@elastic/eui';
 import { replaceTokens } from './lib/replace_tokens';
 import { AlertMessage, AlertState } from '../../common/types/alerts';
@@ -32,8 +28,6 @@ interface Props {
 export const AlertsCallout: React.FC<Props> = (props: Props) => {
   const { alerts, stateFilter = () => true, nextStepsFilter = () => true } = props;
   const inSetupMode = isInSetupMode(React.useContext(SetupModeContext));
-  const [activeDetailsPopover, setActiveDetailsPopover] = React.useState<boolean | number>(false);
-  const [activeConfigPopover, setActiveConfigPopover] = React.useState<boolean | number>(false);
 
   if (inSetupMode) {
     return null;
@@ -53,93 +47,38 @@ export const AlertsCallout: React.FC<Props> = (props: Props) => {
   }
 
   const accordions = list.map((status, index) => {
-    const detailsPanels = [
-      {
-        id: 0,
-        title: status.alert.alert.label,
-        items: (status.state.state.ui.message.nextSteps || [])
-          .filter(nextStepsFilter)
-          .map((step: AlertMessage) => {
-            return {
-              name: <EuiText size="s">{replaceTokens(step)}</EuiText>,
-            };
-          }),
-      },
-    ];
-    const configPanels = [
-      {
-        id: 0,
-        title: status.alert.alert.label,
-        width: 400,
-        content: (
-          <div style={{ padding: '1rem' }}>
-            <AlertConfiguration alert={status.alert.alert} compressed />
-          </div>
-        ),
-      },
-    ];
-    const detailsButton = (
-      <EuiLink onClick={() => setActiveDetailsPopover(index)}>
-        <EuiText size="s">
-          {i18n.translate('xpack.monitoring.alerts.callout.viewDetails', {
-            defaultMessage: 'View details',
-          })}
-        </EuiText>
-      </EuiLink>
+    const buttonContent = (
+      <EuiTextColor color="danger">{replaceTokens(status.state.state.ui.message)}</EuiTextColor>
     );
-    const configButton = (
-      <EuiLink onClick={() => setActiveConfigPopover(index)}>
-        <EuiText size="s">
-          {i18n.translate('xpack.monitoring.alerts.callout.configure', {
-            defaultMessage: 'configure',
-          })}
-        </EuiText>
-      </EuiLink>
+
+    const accordion = (
+      <EuiAccordion
+        id={`monitoringAlertCallout_${index}`}
+        buttonContent={buttonContent}
+        paddingSize="s"
+      >
+        <EuiListGroup
+          flush={true}
+          bordered={true}
+          gutterSize="m"
+          size="xs"
+          style={{ marginTop: '0.5rem', paddingTop: '0.5rem', paddingBottom: '0.5rem' }}
+        >
+          {(status.state.state.ui.message.nextSteps || [])
+            .filter(nextStepsFilter)
+            .map((step: AlertMessage) => {
+              return <EuiListGroupItem onClick={() => {}} label={replaceTokens(step)} />;
+            })}
+          <EuiListGroupItem label={<AlertConfiguration alert={status.alert.alert} compressed />} />
+        </EuiListGroup>
+        {/* <EuiSpacer /> */}
+      </EuiAccordion>
     );
-    const title = (
-      <EuiFlexGroup alignItems="baseline" gutterSize="s">
-        <EuiFlexItem grow={false}>
-          <EuiText size="s" style={{ display: 'inline' }}>
-            {replaceTokens(status.state.state.ui.message)}
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup alignItems="baseline" gutterSize="xs">
-            <EuiFlexItem grow={false}>
-              <EuiPopover
-                button={detailsButton}
-                isOpen={activeDetailsPopover === index}
-                closePopover={() => setActiveDetailsPopover(false)}
-                panelPaddingSize="none"
-                anchorPosition="downLeft"
-              >
-                <EuiContextMenu initialPanelId={0} panels={detailsPanels} />
-              </EuiPopover>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiText size="s">or</EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiPopover
-                button={configButton}
-                isOpen={activeConfigPopover === index}
-                closePopover={() => setActiveConfigPopover(false)}
-                panelPaddingSize="none"
-                anchorPosition="downLeft"
-              >
-                <EuiContextMenu initialPanelId={0} panels={configPanels} />
-              </EuiPopover>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
-    const buttonContent = <EuiCallOut title={title} color="danger" iconType="bell" size="s" />;
 
     const spacer = index !== list.length - 1 ? <EuiSpacer /> : null;
     return (
       <div key={index}>
-        {buttonContent}
+        {accordion}
         {spacer}
       </div>
     );
