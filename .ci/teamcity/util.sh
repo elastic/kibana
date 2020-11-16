@@ -72,8 +72,9 @@ tc_retry() {
       echo "##teamcity[setParameter name='elastic.build.flaky' value='true']"
       tc_end_block "Retryable Step - Attempt #2"
     else
+      status="$?"
       tc_end_block "Retryable Step - Attempt #2"
-      return "$?"
+      return "$status"
     fi
   }
   tc_end_block "Retryable Step - Attempt #1"
