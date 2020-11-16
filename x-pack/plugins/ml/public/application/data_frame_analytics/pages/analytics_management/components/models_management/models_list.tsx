@@ -81,7 +81,7 @@ export const ModelsList: FC = () => {
   const urlGenerator = useMlUrlGenerator();
 
   const [pageState, updatePageState] = usePageUrlState(
-    'trained_models',
+    ML_PAGES.DATA_FRAME_ANALYTICS_MODELS_MANAGE,
     getDefaultModelsListState()
   );
 

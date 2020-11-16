@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { MlPages } from '../constants/ml_url_generator';
+
 export interface Dictionary<TValue> {
   [id: string]: TValue;
 }
@@ -39,3 +41,7 @@ export interface ListingPageUrlState {
   sortDirection: string;
   queryText?: string;
 }
+
+export type AppPageState<T> = {
+  [key in MlPages]?: Partial<T>;
+};

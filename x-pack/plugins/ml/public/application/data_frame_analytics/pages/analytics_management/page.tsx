@@ -36,6 +36,7 @@ import { JobMap } from '../job_map';
 import { usePageUrlState } from '../../../util/url_state';
 import { ListingPageUrlState } from '../../../../../common/types/common';
 import { DataFrameAnalyticsListColumn } from './components/analytics_list/common';
+import { ML_PAGES } from '../../../../../common/constants/ml_url_generator';
 
 export const getDefaultDFAListState = (): ListingPageUrlState => ({
   pageIndex: 0,
@@ -48,7 +49,10 @@ export const Page: FC = () => {
   const [blockRefresh, setBlockRefresh] = useState(false);
   const [globalState] = useUrlState('_g');
 
-  const [dfaPageState, setDfaPageState] = usePageUrlState('dfa_jobs', getDefaultDFAListState());
+  const [dfaPageState, setDfaPageState] = usePageUrlState(
+    ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE,
+    getDefaultDFAListState()
+  );
 
   useRefreshInterval(setBlockRefresh);
 

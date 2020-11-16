@@ -13,6 +13,7 @@ import { useHistory, useLocation } from 'react-router-dom';
 import { Dictionary } from '../../../common/types/common';
 
 import { getNestedProperty } from './object_utils';
+import { MlPages } from '../../../common/constants/ml_url_generator';
 
 type Accessor = '_a' | '_g';
 export type SetUrlState = (
@@ -155,7 +156,7 @@ export const useUrlState = (accessor: Accessor) => {
  * Hook for managing the URL state of the page.
  */
 export const usePageUrlState = <PageUrlState extends {}>(
-  pageKey: string,
+  pageKey: MlPages,
   defaultState: PageUrlState
 ): [PageUrlState, (update: Partial<PageUrlState>) => void] => {
   const [appState, setAppState] = useUrlState('_a');

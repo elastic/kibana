@@ -180,7 +180,9 @@ describe('MlUrlGenerator', () => {
             jobId: 'grid_regression_1',
           },
         });
-        expect(url).toBe('/app/ml/data_frame_analytics?mlManagement=(jobId:grid_regression_1)');
+        expect(url).toBe(
+          '/app/ml/data_frame_analytics?_a=(data_frame_analytics:(queryText:grid_regression_1))'
+        );
       });
 
       it('should generate valid URL for the Data Frame Analytics job management page with groupIds', async () => {
@@ -190,7 +192,9 @@ describe('MlUrlGenerator', () => {
             groupIds: ['group_1', 'group_2'],
           },
         });
-        expect(url).toBe('/app/ml/data_frame_analytics?mlManagement=(groupIds:!(group_1,group_2))');
+        expect(url).toBe(
+          "/app/ml/data_frame_analytics?_a=(data_frame_analytics:(queryText:'groups:(group_1%20or%20group_2)'))"
+        );
       });
     });
 
