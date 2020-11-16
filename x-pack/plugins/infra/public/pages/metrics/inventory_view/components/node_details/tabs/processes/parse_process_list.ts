@@ -5,6 +5,7 @@
  */
 
 import { ProcessListAPIResponse } from '../../../../../../../../common/http_api';
+import { Process } from './types';
 
 export const parseProcessList = (processList: ProcessListAPIResponse) =>
   processList.map((process) => {
@@ -38,7 +39,7 @@ export const parseProcessList = (processList: ProcessListAPIResponse) =>
       pid: processMeta.pid,
       user: user.name,
       timeseries,
-    };
+    } as Process;
   });
 
 const pickTimeseries = (rows: any[], metricID: string) => ({

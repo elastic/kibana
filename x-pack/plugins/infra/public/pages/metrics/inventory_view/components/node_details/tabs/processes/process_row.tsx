@@ -33,8 +33,14 @@ import { MetricExplorerSeriesChart } from '../../../../../metrics_explorer/compo
 import { MetricsExplorerAggregation } from '../../../../../../../../common/http_api';
 import { Color } from '../../../../../../../../common/color_palette';
 import { euiStyled } from '../../../../../../../../../observability/public';
+import { Process } from './types';
 
-export const ProcessRow = ({ cells, item }) => {
+interface Props {
+  cells: React.ReactNode[];
+  item: Process;
+}
+
+export const ProcessRow = ({ cells, item }: Props) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
   return (
@@ -72,16 +78,18 @@ export const ProcessRow = ({ cells, item }) => {
                         </EuiDescriptionListDescription>
                       </div>
                     </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiButton>
-                        {i18n.translate(
-                          'xpack.infra.metrics.nodeDetails.processes.viewTraceInAPM',
-                          {
-                            defaultMessage: 'View trace in APM',
-                          }
-                        )}
-                      </EuiButton>
-                    </EuiFlexItem>
+                    {item.apmTrace && (
+                      <EuiFlexItem grow={false}>
+                        <EuiButton>
+                          {i18n.translate(
+                            'xpack.infra.metrics.nodeDetails.processes.viewTraceInAPM',
+                            {
+                              defaultMessage: 'View trace in APM',
+                            }
+                          )}
+                        </EuiButton>
+                      </EuiFlexItem>
+                    )}
                   </EuiFlexGroup>
                   <EuiFlexGrid columns={2} gutterSize="s">
                     <EuiFlexItem>
@@ -141,7 +149,12 @@ export const ProcessRow = ({ cells, item }) => {
   );
 };
 
-const ProcessChart = ({ timeseries, color, label }) => {
+interface ProcessChartProps {
+  timeseries: Process['timeseries']['x'];
+  color: Color;
+  label: string;
+}
+const ProcessChart = ({ timeseries, color, label }: ProcessChartProps) => {
   const chartMetric = {
     color,
     aggregation: 'avg' as MetricsExplorerAggregation,

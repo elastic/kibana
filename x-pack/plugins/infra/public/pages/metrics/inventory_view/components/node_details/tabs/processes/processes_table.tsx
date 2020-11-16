@@ -24,17 +24,18 @@ import {
 import { ProcessListAPIResponse } from '../../../../../../../../common/http_api';
 import { FORMATTERS } from '../../../../../../../../common/formatters';
 import { euiStyled } from '../../../../../../../../../observability/public';
+import { Process } from './types';
 import { ProcessRow, CodeLine } from './process_row';
 import { parseProcessList } from './parse_process_list';
 import { StateBadge } from './state_badge';
 import { STATE_ORDER } from './states';
 
-interface TableBodyProps {
+interface TableProps {
   processList: ProcessListAPIResponse;
   currentTime: number;
+  isLoading: boolean;
+  searchFilter: Query;
 }
-
-type TableProps = TableBodyProps & { isLoading: boolean; searchFilter: Query };
 
 function useSortableProperties<T>(
   sortablePropertyItems: Array<{
@@ -74,9 +75,7 @@ export const ProcessesTable = ({
   const [itemsPerPage, setItemsPerPage] = useState(10);
   useEffect(() => setCurrentPage(0), [processList, searchFilter, itemsPerPage]);
 
-  const { sortedColumn, sortItems, setSortedColumn } = useSortableProperties<
-    ProcessListAPIResponse
-  >(
+  const { sortedColumn, sortItems, setSortedColumn } = useSortableProperties<Process>(
     [
       {
         name: 'state',
@@ -108,7 +107,7 @@ export const ProcessesTable = ({
   );
 
   const currentItems = useMemo(() => {
-    const filteredItems = Query.execute(searchFilter, parseProcessList(processList));
+    const filteredItems = Query.execute(searchFilter, parseProcessList(processList)) as Process[];
     if (!filteredItems.length) return [];
     const sortedItems = sortItems(filteredItems);
     return sortedItems;
@@ -137,7 +136,7 @@ export const ProcessesTable = ({
           <EuiTableHeaderCell width={24} />
           {columns.map((column) => (
             <EuiTableHeaderCell
-              key={column.field}
+              key={`${String(column.field)}-header`}
               align={column.align ?? LEFT_ALIGNMENT}
               width={column.width}
               onSort={column.sortable ? () => setSortedColumn(column.field) : undefined}
@@ -149,7 +148,7 @@ export const ProcessesTable = ({
           ))}
         </EuiTableHeader>
         <StyledTableBody>
-          <ProcessesTableBody processList={currentItemsPage} currentTime={currentTime} />
+          <ProcessesTableBody items={currentItemsPage} currentTime={currentTime} />
         </StyledTableBody>
       </EuiTable>
       <EuiSpacer size="m" />
@@ -182,12 +181,16 @@ const LoadingPlaceholder = () => {
   );
 };
 
-const ProcessesTableBody = ({ processList, currentTime }: TableBodyProps) => (
+interface TableBodyProps {
+  items: Process[];
+  currentTime: number;
+}
+const ProcessesTableBody = ({ items, currentTime }: TableBodyProps) => (
   <>
-    {processList.map((item, i) => {
+    {items.map((item, i) => {
       const cells = columns.map((column) => (
         <EuiTableRowCell
-          key={`${column.field}-${i}`}
+          key={`${String(column.field)}-${i}`}
           header={column.name}
           align={column.align ?? LEFT_ALIGNMENT}
           textOnly={column.textOnly ?? true}
@@ -228,7 +231,7 @@ const RuntimeCell = ({ startTime, currentTime }: { startTime: string; currentTim
 };
 
 const columns: Array<{
-  field: string;
+  field: keyof Process;
   name: string;
   sortable: boolean;
   render?: Function;
