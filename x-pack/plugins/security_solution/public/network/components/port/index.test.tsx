@@ -7,7 +7,7 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 
-import { removeExternalLinkText } from '../../../../../../test_utils';
+import { removeExternalLinkText } from '../../../../common/test_utils';
 import '../../../common/mock/match_media';
 import { TestProviders } from '../../../common/mock/test_providers';
 import { useMountAppended } from '../../../common/utils/use_mount_appended';

@@ -6,8 +6,8 @@
 
 import { mount, shallow, ShallowWrapper } from 'enzyme';
 import React from 'react';
-import { removeExternalLinkText } from '../../../../../../test_utils';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { removeExternalLinkText } from '../../../../common/test_utils';
+import { mountWithIntl } from '@kbn/test/jest';
 
 import { encodeIpv6 } from '../../lib/helpers';
 import { useUiSetting$ } from '../../lib/kibana';

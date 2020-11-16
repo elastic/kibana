@@ -12,8 +12,10 @@ import {
   act,
   waitFor,
 } from '@testing-library/react';
-import { removeExternalLinkText } from '../../../../../../../../../test_utils';
 import * as apmApi from '../../../../../../services/rest/createCallApmApi';
+
+export const removeExternalLinkText = (str: string) =>
+  str.replace(/\(opens in a new tab or window\)/g, '');
 
 describe('LinkPreview', () => {
   let callApmApiSpy: jest.SpyInstance<any, never>;

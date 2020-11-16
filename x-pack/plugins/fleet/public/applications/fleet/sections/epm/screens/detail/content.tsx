@@ -7,12 +7,11 @@
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
-import { DEFAULT_PANEL, DetailParams } from '.';
+import { DetailParams } from '.';
 import { PackageInfo } from '../../../../types';
 import { AssetsFacetGroup } from '../../components/assets_facet_group';
 import { CenterColumn, LeftColumn, RightColumn } from './layout';
 import { OverviewPanel } from './overview_panel';
-import { SideNavLinks } from './side_nav_links';
 import { PackagePoliciesPanel } from './package_policies_panel';
 import { SettingsPanel } from './settings_panel';
 
@@ -31,12 +30,9 @@ const ContentFlexGroup = styled(EuiFlexGroup)`
 `;
 
 export function Content(props: ContentProps) {
-  const { name, panel, version } = props;
   return (
     <ContentFlexGroup>
-      <SideNavColumn>
-        <SideNavLinks name={name} version={version} active={panel || DEFAULT_PANEL} />
-      </SideNavColumn>
+      <SideNavColumn />
       <CenterColumn>
         <ContentPanel {...props} />
       </CenterColumn>
@@ -62,7 +58,7 @@ export function ContentPanel(props: ContentPanelProps) {
           latestVersion={latestVersion}
         />
       );
-    case 'usages':
+    case 'policies':
       return <PackagePoliciesPanel name={name} version={version} />;
     case 'overview':
     default:

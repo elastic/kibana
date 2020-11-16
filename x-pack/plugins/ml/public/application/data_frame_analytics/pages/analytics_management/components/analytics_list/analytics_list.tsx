@@ -10,7 +10,7 @@ import {
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiBasicTable,
+  EuiInMemoryTable,
   EuiSearchBar,
   EuiSearchBarProps,
   EuiSpacer,
@@ -30,15 +30,13 @@ import { getTaskStateBadge, getJobTypeBadge, useColumns } from './use_columns';
 import { ExpandedRow } from './expanded_row';
 import { AnalyticStatsBarStats, StatsBar } from '../../../../../components/stats_bar';
 import { CreateAnalyticsButton } from '../create_analytics_button';
-import {
-  getSelectedIdFromUrl,
-  getGroupQueryText,
-} from '../../../../../jobs/jobs_list/components/utils';
+import { getSelectedIdFromUrl } from '../../../../../jobs/jobs_list/components/utils';
 import { SourceSelection } from '../source_selection';
-import { filterAnalytics, AnalyticsSearchBar } from '../analytics_search_bar';
+import { filterAnalytics } from '../../../../common/search_bar_filters';
 import { AnalyticsEmptyPrompt } from './empty_prompt';
 import { useTableSettings } from './use_table_settings';
 import { RefreshAnalyticsListButton } from '../refresh_analytics_list_button';
+import { getGroupQueryText } from '../../../../../../../common/util/string_utils';
 
 const filters: EuiSearchBarProps['filters'] = [
   {
@@ -97,6 +95,7 @@ export const DataFrameAnalyticsList: FC<Props> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [filteredAnalytics, setFilteredAnalytics] = useState<DataFrameAnalyticsListRow[]>([]);
   const [searchQueryText, setSearchQueryText] = useState('');
+  const [searchError, setSearchError] = useState<string | undefined>();
   const [analytics, setAnalytics] = useState<DataFrameAnalyticsListRow[]>([]);
   const [analyticsStats, setAnalyticsStats] = useState<AnalyticStatsBarStats | undefined>(
     undefined
@@ -183,9 +182,21 @@ export const DataFrameAnalyticsList: FC<Props> = ({
     isMlEnabledInSpace
   );
 
-  const { onTableChange, pageOfItems, pagination, sorting } = useTableSettings<
-    DataFrameAnalyticsListRow
-  >(DataFrameAnalyticsListColumn.id, filteredAnalytics);
+  const { onTableChange, pagination, sorting } = useTableSettings<DataFrameAnalyticsListRow>(
+    DataFrameAnalyticsListColumn.id,
+    filteredAnalytics
+  );
+
+  const handleSearchOnChange: EuiSearchBarProps['onChange'] = (search) => {
+    if (search.error !== null) {
+      setSearchError(search.error.message);
+      return false;
+    }
+
+    setSearchError(undefined);
+    setSearchQueryText(search.queryText);
+    return true;
+  };
 
   // Before the analytics have been loaded for the first time, display the loading indicator only.
   // Otherwise a user would see 'No data frame analytics found' during the initial loading.
@@ -240,6 +251,14 @@ export const DataFrameAnalyticsList: FC<Props> = ({
       </EuiFlexGroup>
     </EuiFlexItem>
   );
+  const search: EuiSearchBarProps = {
+    query: searchQueryText,
+    onChange: handleSearchOnChange,
+    box: {
+      incremental: true,
+    },
+    filters,
+  };
 
   return (
     <div data-test-subj="mlAnalyticsJobList">
@@ -263,25 +282,22 @@ export const DataFrameAnalyticsList: FC<Props> = ({
       </EuiFlexGroup>
       <EuiSpacer size="m" />
       <div data-test-subj="mlAnalyticsTableContainer">
-        <AnalyticsSearchBar
-          filters={filters}
-          searchQueryText={searchQueryText}
-          setSearchQueryText={setSearchQueryText}
-        />
-        <EuiSpacer size="l" />
-        <EuiBasicTable<DataFrameAnalyticsListRow>
-          className="mlAnalyticsTable"
+        <EuiInMemoryTable<DataFrameAnalyticsListRow>
+          allowNeutralSort={false}
+          className="mlAnalyticsInMemoryTable"
           columns={columns}
+          error={searchError}
           hasActions={false}
           isExpandable={true}
           isSelectable={false}
-          items={pageOfItems}
+          items={analytics}
           itemId={DataFrameAnalyticsListColumn.id}
           itemIdToExpandedRowMap={itemIdToExpandedRowMap}
           loading={isLoading}
-          onChange={onTableChange}
-          pagination={pagination!}
+          onTableChange={onTableChange}
+          pagination={pagination}
           sorting={sorting}
+          search={search}
           data-test-subj={isLoading ? 'mlAnalyticsTable loading' : 'mlAnalyticsTable loaded'}
           rowProps={(item) => ({
             'data-test-subj': `mlAnalyticsTableRow row-${item.id}`,

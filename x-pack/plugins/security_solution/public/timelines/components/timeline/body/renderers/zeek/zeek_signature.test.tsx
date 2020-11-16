@@ -8,7 +8,7 @@ import { shallow } from 'enzyme';
 import { cloneDeep } from 'lodash/fp';
 import React from 'react';
 
-import { removeExternalLinkText } from '../../../../../../../../../test_utils';
+import { removeExternalLinkText } from '../../../../../../../common/test_utils';
 import '../../../../../../common/mock/match_media';
 import { Ecs } from '../../../../../../../common/ecs';
 import { mockTimelineData, TestProviders } from '../../../../../../common/mock';
