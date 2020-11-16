@@ -25,17 +25,24 @@ import { Collector, CollectorOptions } from './collector';
 export type UsageCollectorOptions<
   TFetchReturn = unknown,
   UFormatBulkUploadPayload = { usage: { [key: string]: TFetchReturn } },
-  WithKibanaRequest extends boolean = false
-> = CollectorOptions<TFetchReturn, UFormatBulkUploadPayload, WithKibanaRequest> &
+  WithKibanaRequest extends boolean = false,
+  ExtraOptions extends object = {}
+> = CollectorOptions<TFetchReturn, UFormatBulkUploadPayload, WithKibanaRequest, ExtraOptions> &
   Required<Pick<CollectorOptions<TFetchReturn, UFormatBulkUploadPayload, boolean>, 'schema'>>;
 
 export class UsageCollector<
   TFetchReturn,
-  UFormatBulkUploadPayload = { usage: { [key: string]: TFetchReturn } }
-> extends Collector<TFetchReturn, UFormatBulkUploadPayload> {
+  UFormatBulkUploadPayload = { usage: { [key: string]: TFetchReturn } },
+  ExtraOptions extends object = {}
+> extends Collector<TFetchReturn, UFormatBulkUploadPayload, ExtraOptions> {
   constructor(
     public readonly log: Logger,
-    collectorOptions: UsageCollectorOptions<TFetchReturn, UFormatBulkUploadPayload, any>
+    collectorOptions: UsageCollectorOptions<
+      TFetchReturn,
+      UFormatBulkUploadPayload,
+      any,
+      ExtraOptions
+    >
   ) {
     super(log, collectorOptions);
   }

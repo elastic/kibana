@@ -82,8 +82,12 @@ export type CollectorFetchContext<WithKibanaRequest extends boolean | undefined 
     }
   : {});
 
-export type CollectorFetchMethod<WithKibanaRequest extends boolean | undefined, TReturn> = (
-  this: Collector<TReturn, unknown>, // Specify the context of `this` for this.log and others to become available
+export type CollectorFetchMethod<
+  WithKibanaRequest extends boolean | undefined,
+  TReturn,
+  ExtraOptions extends object = {}
+> = (
+  this: Collector<TReturn, unknown> & ExtraOptions, // Specify the context of `this` for this.log and others to become available
   context: CollectorFetchContext<WithKibanaRequest>
 ) => Promise<TReturn> | TReturn;
 
@@ -105,7 +109,8 @@ export type CollectorOptionsFetchExtendedContext<
 export type CollectorOptions<
   TFetchReturn = unknown,
   UFormatBulkUploadPayload = TFetchReturn, // TODO: Once we remove bulk_uploader's dependency on usageCollection, we'll be able to remove this type
-  WithKibanaRequest extends boolean = boolean
+  WithKibanaRequest extends boolean = boolean,
+  ExtraOptions extends object = {}
 > = {
   /**
    * Unique string identifier for the collector
@@ -124,7 +129,7 @@ export type CollectorOptions<
    * The method that will collect and return the data in the final format.
    * @param collectorFetchContext {@link CollectorFetchContext}
    */
-  fetch: CollectorFetchMethod<WithKibanaRequest, TFetchReturn>;
+  fetch: CollectorFetchMethod<WithKibanaRequest, TFetchReturn, ExtraOptions>;
   /**
    * A hook for allowing the fetched data payload to be organized into a typed
    * data model for internal bulk upload. See defaultFormatterForBulkUpload for
@@ -132,19 +137,24 @@ export type CollectorOptions<
    * @deprecated Used only by the Legacy Monitoring collection (to be removed in 8.0)
    */
   formatForBulkUpload?: CollectorFormatForBulkUpload<TFetchReturn, UFormatBulkUploadPayload>;
-} & (WithKibanaRequest extends true // If enforced to true via Types, the config must be enforced
-  ? {
-      extendFetchContext: CollectorOptionsFetchExtendedContext<WithKibanaRequest>;
-    }
-  : {
-      extendFetchContext?: CollectorOptionsFetchExtendedContext<WithKibanaRequest>;
-    });
+} & ExtraOptions &
+  (WithKibanaRequest extends true // If enforced to true via Types, the config must be enforced
+    ? {
+        extendFetchContext: CollectorOptionsFetchExtendedContext<WithKibanaRequest>;
+      }
+    : {
+        extendFetchContext?: CollectorOptionsFetchExtendedContext<WithKibanaRequest>;
+      });
 
-export class Collector<TFetchReturn, UFormatBulkUploadPayload = TFetchReturn> {
+export class Collector<
+  TFetchReturn,
+  UFormatBulkUploadPayload = TFetchReturn,
+  ExtraOptions extends object = {}
+> {
   public readonly extendFetchContext: CollectorOptionsFetchExtendedContext<any>;
   public readonly type: CollectorOptions<TFetchReturn, UFormatBulkUploadPayload, any>['type'];
   public readonly init?: CollectorOptions<TFetchReturn, UFormatBulkUploadPayload, any>['init'];
-  public readonly fetch: CollectorFetchMethod<any, TFetchReturn>;
+  public readonly fetch: CollectorFetchMethod<any, TFetchReturn, ExtraOptions>;
   public readonly isReady: CollectorOptions<TFetchReturn, UFormatBulkUploadPayload, any>['isReady'];
   private readonly _formatForBulkUpload?: CollectorFormatForBulkUpload<
     TFetchReturn,
@@ -169,7 +179,7 @@ export class Collector<TFetchReturn, UFormatBulkUploadPayload = TFetchReturn> {
       isReady,
       extendFetchContext = {},
       ...options
-    }: CollectorOptions<TFetchReturn, UFormatBulkUploadPayload, any>
+    }: CollectorOptions<TFetchReturn, UFormatBulkUploadPayload, any, ExtraOptions>
   ) {
     if (type === undefined) {
       throw new Error('Collector must be instantiated with a options.type string property');

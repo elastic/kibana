@@ -44,26 +44,25 @@ interface EmailSettingData {
   xpack: { default_admin_email: string | null };
 }
 
-function getEmailValueStructure(email: string | null): EmailSettingData {
-  return {
-    xpack: {
-      default_admin_email: email,
-    },
-  };
-}
-
-export interface KibanaSettingsCollector extends Collector<EmailSettingData | undefined> {
+export interface KibanaSettingsCollectorExtraOptions {
   getEmailValueStructure(email: string | null): EmailSettingData;
 }
+
+export type KibanaSettingsCollector = Collector<
+  EmailSettingData | undefined,
+  unknown,
+  KibanaSettingsCollectorExtraOptions
+>;
 
 export function getSettingsCollector(
   usageCollection: UsageCollectionSetup,
   config: MonitoringConfig
 ) {
-  const collector = usageCollection.makeStatsCollector<
+  return usageCollection.makeStatsCollector<
     EmailSettingData | undefined,
     unknown,
-    false
+    false,
+    KibanaSettingsCollectorExtraOptions
   >({
     type: KIBANA_SETTINGS_TYPE,
     isReady: () => true,
@@ -78,7 +77,7 @@ export function getSettingsCollector(
 
       // skip everything if defaultAdminEmail === undefined
       if (defaultAdminEmail || (defaultAdminEmail === null && shouldUseNull)) {
-        kibanaSettingsData = getEmailValueStructure(defaultAdminEmail);
+        kibanaSettingsData = this.getEmailValueStructure(defaultAdminEmail);
         this.log.debug(
           `[${defaultAdminEmail}] default admin email setting found, sending [${KIBANA_SETTINGS_TYPE}] monitoring document.`
         );
@@ -94,8 +93,12 @@ export function getSettingsCollector(
       // returns undefined if there was no result
       return kibanaSettingsData;
     },
+    getEmailValueStructure(email: string | null) {
+      return {
+        xpack: {
+          default_admin_email: email,
+        },
+      };
+    },
   });
-  // Attaching the method to the collector because we need to use it in `/api/settings`
-  (collector as KibanaSettingsCollector).getEmailValueStructure = getEmailValueStructure;
-  return collector;
 }

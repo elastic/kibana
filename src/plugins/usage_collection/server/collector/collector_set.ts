@@ -49,37 +49,58 @@ export class CollectorSet {
     this.maximumWaitTimeForAllCollectorsInS = maximumWaitTimeForAllCollectorsInS || 60;
   }
 
+  /**
+   * Instantiates a stats collector with the definition provided in the options
+   * @param options Definition of the collector {@link CollectorOptions}
+   */
   public makeStatsCollector = <
     TFetchReturn,
     TFormatForBulkUpload,
-    WithKibanaRequest extends boolean
+    WithKibanaRequest extends boolean,
+    ExtraOptions extends object = {}
   >(
-    options: CollectorOptions<TFetchReturn, TFormatForBulkUpload, WithKibanaRequest>
+    options: CollectorOptions<TFetchReturn, TFormatForBulkUpload, WithKibanaRequest, ExtraOptions>
   ) => {
-    return new Collector<TFetchReturn, TFormatForBulkUpload>(this.logger, options);
+    return new Collector<TFetchReturn, TFormatForBulkUpload, ExtraOptions>(this.logger, options);
   };
+
+  /**
+   * Instantiates an usage collector with the definition provided in the options
+   * @param options Definition of the collector {@link CollectorOptions}
+   */
   public makeUsageCollector = <
     TFetchReturn,
     TFormatForBulkUpload = { usage: { [key: string]: TFetchReturn } },
     // TODO: Right now, users will need to explicitly claim `true` for TS to allow `kibanaRequest` usage.
     //  If we improve `telemetry-check-tools` so plugins do not need to specify TFetchReturn,
     //  we'll be able to remove the type defaults and TS will successfully infer the config value as provided in JS.
-    WithKibanaRequest extends boolean = false
+    WithKibanaRequest extends boolean = false,
+    ExtraOptions extends object = {}
   >(
-    options: UsageCollectorOptions<TFetchReturn, TFormatForBulkUpload, WithKibanaRequest>
+    options: UsageCollectorOptions<
+      TFetchReturn,
+      TFormatForBulkUpload,
+      WithKibanaRequest,
+      ExtraOptions
+    >
   ) => {
-    return new UsageCollector<TFetchReturn, TFormatForBulkUpload>(this.logger, options);
+    return new UsageCollector<TFetchReturn, TFormatForBulkUpload, ExtraOptions>(
+      this.logger,
+      options
+    );
   };
 
-  /*
-   * @param collector {Collector} collector object
+  /**
+   * Registers a collector to be used when collecting all the usage and stats data
+   * @param collector Collector to be added to the set (previously created via `makeUsageCollector` or `makeStatsCollector`)
    */
   public registerCollector = <
     TFetchReturn,
     TFormatForBulkUpload,
-    WithKibanaRequest extends boolean
+    WithKibanaRequest extends boolean,
+    ExtraOptions extends object
   >(
-    collector: Collector<TFetchReturn, TFormatForBulkUpload>
+    collector: Collector<TFetchReturn, TFormatForBulkUpload, ExtraOptions>
   ) => {
     // check instanceof
     if (!(collector instanceof Collector)) {
