@@ -83,5 +83,21 @@ export const metricsVisDefinition = {
     return [VIS_EVENT_TO_TRIGGER.applyFilter];
   },
   inspectorAdapters: {},
+  getUsedIndexPattern: async (params: VisParams) => {
+    const { indexPatterns } = getDataStart();
+    const indexes: string = params.index_pattern;
+
+    if (indexes) {
+      const cachedIndexes = await indexPatterns.getIdsWithTitle();
+      const ids = indexes
+        .split(INDEXES_SEPARATOR)
+        .map((title) => cachedIndexes.find((i) => i.title === title)?.id)
+        .filter((id) => id);
+
+      return Promise.all(ids.map((id) => indexPatterns.get(id!)));
+    }
+
+    return [];
+  },
   responseHandler: 'none',
 };
