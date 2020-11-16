@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const BRANCH = '8.x';
+export const BRANCH = '7.x';
