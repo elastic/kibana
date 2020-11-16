@@ -37,6 +37,7 @@ import {
   LensByReferenceInput,
   LensEmbeddableInput,
 } from '../editor_frame_service/embeddable/embeddable';
+import { exportAsCSVs } from '../editor_frame_service/editor_frame/export_csv';
 
 export function App({
   history,
@@ -480,10 +481,18 @@ export function App({
         // Temporarily required until the 'by value' paradigm is default.
         (dashboardFeatureFlag.allowByValueEmbeddables || Boolean(initialInput))
     ),
+    showExportToCSV: Boolean(lastKnownDoc?.state.activeData),
     isByValueMode: getIsByValueMode(),
     showCancel: Boolean(state.isLinkedToOriginatingApp),
     savingPermitted,
     actions: {
+      exportToCSV: () => {
+        exportAsCSVs(lastKnownDoc?.title || 'unsaved', lastKnownDoc?.state.activeData, {
+          csvSeparator: uiSettings.get('csv:separator', ','),
+          quoteValues: uiSettings.get('csv:quoteValues', true),
+          formatFactory: data.fieldFormats.deserialize,
+        });
+      },
       saveAndReturn: () => {
         if (savingPermitted && lastKnownDoc) {
           // disabling the validation on app leave because the document has been saved.

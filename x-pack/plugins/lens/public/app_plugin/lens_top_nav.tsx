@@ -10,12 +10,13 @@ import { LensTopNavActions } from './types';
 
 export function getLensTopNavConfig(options: {
   showSaveAndReturn: boolean;
+  showExportToCSV: boolean;
   showCancel: boolean;
   isByValueMode: boolean;
   actions: LensTopNavActions;
   savingPermitted: boolean;
 }): TopNavMenuData[] {
-  const { showSaveAndReturn, showCancel, actions, savingPermitted } = options;
+  const { showSaveAndReturn, showCancel, actions, savingPermitted, showExportToCSV } = options;
   const topNavMenu: TopNavMenuData[] = [];
 
   const saveButtonLabel = options.isByValueMode
@@ -39,6 +40,19 @@ export function getLensTopNavConfig(options: {
       testId: 'lnsApp_cancelButton',
       description: i18n.translate('xpack.lens.app.cancelButtonAriaLabel', {
         defaultMessage: 'Return to the last app without saving changes',
+      }),
+    });
+  }
+
+  if (showExportToCSV) {
+    topNavMenu.push({
+      label: i18n.translate('xpack.lens.app.downloadCSV', {
+        defaultMessage: 'Download as CSV',
+      }),
+      run: actions.exportToCSV,
+      testId: 'lnsApp_downloadCSVButton',
+      description: i18n.translate('xpack.lens.app.cancelButtonAriaLabel', {
+        defaultMessage: 'Download the data as CSV file',
       }),
     });
   }

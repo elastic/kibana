@@ -69,6 +69,7 @@ export function getSavedObjectFormat({
         visualization: state.visualization.state,
         query: framePublicAPI.query,
         filters: persistableFilters,
+        activeData: state.activeData,
       },
       references,
     },

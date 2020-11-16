@@ -11,6 +11,7 @@ import {
 } from 'kibana/public';
 import { Query } from '../../../../../src/plugins/data/public';
 import { DOC_TYPE, PersistableFilter } from '../../common';
+import { TableInspectorAdapter } from '../editor_frame_service/types';
 
 export interface Document {
   savedObjectId?: string;
@@ -27,6 +28,7 @@ export interface Document {
       state?: unknown;
     };
     filters: PersistableFilter[];
+    activeData?: TableInspectorAdapter;
   };
   references: SavedObjectReference[];
 }
