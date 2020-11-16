@@ -18,13 +18,14 @@
  */
 import { DefaultSearchCapabilities } from './default_search_capabilities';
 import { ReqFacade } from './strategies/abstract_search_strategy';
+import { VisPayload } from '../../../common/types';
 
 describe('DefaultSearchCapabilities', () => {
   let defaultSearchCapabilities: DefaultSearchCapabilities;
-  let req: ReqFacade;
+  let req: ReqFacade<VisPayload>;
 
   beforeEach(() => {
-    req = {} as ReqFacade;
+    req = {} as ReqFacade<VisPayload>;
     defaultSearchCapabilities = new DefaultSearchCapabilities(req);
   });
 
@@ -52,7 +53,7 @@ describe('DefaultSearchCapabilities', () => {
           timezone: 'UTC',
         },
       },
-    } as unknown) as ReqFacade;
+    } as unknown) as ReqFacade<VisPayload>;
 
     expect(defaultSearchCapabilities.searchTimezone).toEqual('UTC');
   });

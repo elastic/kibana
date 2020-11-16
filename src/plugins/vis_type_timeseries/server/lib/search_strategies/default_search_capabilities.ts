@@ -24,13 +24,17 @@ import {
 } from '../vis_data/helpers/unit_to_seconds';
 import { RESTRICTIONS_KEYS } from '../../../common/ui_restrictions';
 import { ReqFacade } from './strategies/abstract_search_strategy';
+import { VisPayload } from '../../../common/types';
 
-const getTimezoneFromRequest = (request: ReqFacade) => {
+const getTimezoneFromRequest = (request: ReqFacade<VisPayload>) => {
   return request.payload.timerange.timezone;
 };
 
 export class DefaultSearchCapabilities {
-  constructor(public request: ReqFacade, public fieldsCapabilities: Record<string, any> = {}) {}
+  constructor(
+    public request: ReqFacade<VisPayload>,
+    public fieldsCapabilities: Record<string, any> = {}
+  ) {}
 
   public get defaultTimeInterval() {
     return null;

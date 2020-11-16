@@ -27,7 +27,6 @@ import {
   IndexPatternsFetcher,
 } from '../../../data/server';
 import { ReqFacade } from './search_strategies/strategies/abstract_search_strategy';
-import { VisPayload } from '../../common/types';
 
 export async function getFields(
   requestContext: RequestHandlerContext,
@@ -39,11 +38,11 @@ export async function getFields(
   // removes the need to refactor many layers of dependencies on "req", and instead just augments the top
   // level object passed from here. The layers should be refactored fully at some point, but for now
   // this works and we are still using the New Platform services for these vis data portions.
-  const reqFacade: ReqFacade = {
+  const reqFacade: ReqFacade<{}> = {
     requestContext,
     ...request,
     framework,
-    payload: {} as VisPayload,
+    payload: {},
     pre: {
       indexPatternsService: new IndexPatternsFetcher(
         requestContext.core.elasticsearch.client.asCurrentUser

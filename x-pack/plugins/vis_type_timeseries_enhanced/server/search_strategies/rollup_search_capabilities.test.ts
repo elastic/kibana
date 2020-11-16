@@ -6,13 +6,13 @@
 import { Unit } from '@elastic/datemath';
 import { RollupSearchCapabilities } from './rollup_search_capabilities';
 
-import { ReqFacade } from '../../../../../src/plugins/vis_type_timeseries/server';
+import { ReqFacade, VisPayload } from '../../../../../src/plugins/vis_type_timeseries/server';
 
 describe('Rollup Search Capabilities', () => {
   const testTimeZone = 'time_zone';
   const testInterval = '10s';
   const rollupIndex = 'rollupIndex';
-  const request = ({} as unknown) as ReqFacade;
+  const request = ({} as unknown) as ReqFacade<VisPayload>;
 
   let fieldsCapabilities: Record<string, any>;
   let rollupSearchCaps: RollupSearchCapabilities;

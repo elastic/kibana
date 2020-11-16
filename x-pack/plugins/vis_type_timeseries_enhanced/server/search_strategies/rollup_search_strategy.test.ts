@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { RollupSearchStrategy } from './rollup_search_strategy';
-import type { ReqFacade } from '../../../../../src/plugins/vis_type_timeseries/server';
+import type { ReqFacade, VisPayload } from '../../../../../src/plugins/vis_type_timeseries/server';
 
 jest.mock('../../../../../src/plugins/vis_type_timeseries/server', () => {
   const actual = jest.requireActual('../../../../../src/plugins/vis_type_timeseries/server');
@@ -45,7 +45,7 @@ describe('Rollup Search Strategy', () => {
         },
       },
     },
-  } as unknown) as ReqFacade;
+  } as unknown) as ReqFacade<VisPayload>;
 
   const indexPattern = 'indexPattern';
 

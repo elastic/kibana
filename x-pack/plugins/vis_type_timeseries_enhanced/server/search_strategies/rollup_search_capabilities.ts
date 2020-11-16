@@ -9,13 +9,18 @@ import { leastCommonInterval, isCalendarInterval } from './lib/interval_helper';
 import {
   ReqFacade,
   DefaultSearchCapabilities,
+  VisPayload,
 } from '../../../../../src/plugins/vis_type_timeseries/server';
 
 export class RollupSearchCapabilities extends DefaultSearchCapabilities {
   rollupIndex: string;
   availableMetrics: Record<string, any>;
 
-  constructor(req: ReqFacade, fieldsCapabilities: Record<string, any>, rollupIndex: string) {
+  constructor(
+    req: ReqFacade<VisPayload>,
+    fieldsCapabilities: Record<string, any>,
+    rollupIndex: string
+  ) {
     super(req, fieldsCapabilities);
 
     this.rollupIndex = rollupIndex;

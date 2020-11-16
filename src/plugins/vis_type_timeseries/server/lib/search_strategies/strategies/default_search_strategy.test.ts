@@ -18,13 +18,14 @@
  */
 import { DefaultSearchStrategy } from './default_search_strategy';
 import { ReqFacade } from './abstract_search_strategy';
+import { VisPayload } from '../../../../common/types';
 
 describe('DefaultSearchStrategy', () => {
   let defaultSearchStrategy: DefaultSearchStrategy;
-  let req: ReqFacade;
+  let req: ReqFacade<VisPayload>;
 
   beforeEach(() => {
-    req = {} as ReqFacade;
+    req = {} as ReqFacade<VisPayload>;
     defaultSearchStrategy = new DefaultSearchStrategy();
   });
 

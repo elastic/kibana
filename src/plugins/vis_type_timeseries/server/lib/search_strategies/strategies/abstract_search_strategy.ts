@@ -34,7 +34,7 @@ import { VisPayload } from '../../../../common/types';
  *
  * This will be replaced by standard KibanaRequest and RequestContext objects in a later version.
  */
-export interface ReqFacade<T = VisPayload> extends FakeRequest {
+export interface ReqFacade<T = unknown> extends FakeRequest {
   requestContext: RequestHandlerContext;
   framework: Framework;
   payload: T;
@@ -47,7 +47,7 @@ export interface ReqFacade<T = VisPayload> extends FakeRequest {
 }
 
 export abstract class AbstractSearchStrategy {
-  async search(req: ReqFacade, bodies: any[], indexType?: string) {
+  async search(req: ReqFacade<VisPayload>, bodies: any[], indexType?: string) {
     const requests: any[] = [];
     const { sessionId } = req.payload;
 
@@ -71,19 +71,23 @@ export abstract class AbstractSearchStrategy {
     return Promise.all(requests);
   }
 
-  async getFieldsForWildcard(req: ReqFacade, indexPattern: string, capabilities?: unknown) {
+  checkForViability(
+    req: ReqFacade<VisPayload>,
+    indexPattern: string
+  ): Promise<{ isViable: boolean; capabilities: unknown }> {
+    throw new TypeError('Must override method');
+  }
+
+  async getFieldsForWildcard<TPayload = unknown>(
+    req: ReqFacade<TPayload>,
+    indexPattern: string,
+    capabilities?: unknown
+  ) {
     const { indexPatternsService } = req.pre;
 
     return await indexPatternsService!.getFieldsForWildcard({
       pattern: indexPattern,
       fieldCapsOptions: { allow_no_indices: true },
     });
-  }
-
-  checkForViability(
-    req: ReqFacade,
-    indexPattern: string
-  ): Promise<{ isViable: boolean; capabilities: unknown }> {
-    throw new TypeError('Must override method');
   }
 }

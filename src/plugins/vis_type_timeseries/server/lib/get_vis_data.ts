@@ -23,7 +23,6 @@ import { first, map } from 'rxjs/operators';
 import { getPanelData } from './vis_data/get_panel_data';
 import { Framework } from '../plugin';
 import { ReqFacade } from './search_strategies/strategies/abstract_search_strategy';
-import { VisPayload } from '../../common/types';
 
 interface GetVisDataResponse {
   [key: string]: GetVisDataPanel;
@@ -65,12 +64,12 @@ export function getVisData(
   // removes the need to refactor many layers of dependencies on "req", and instead just augments the top
   // level object passed from here. The layers should be refactored fully at some point, but for now
   // this works and we are still using the New Platform services for these vis data portions.
-  const reqFacade: ReqFacade = {
+  const reqFacade: ReqFacade<GetVisDataOptions> = {
     requestContext,
     ...request,
     framework,
     pre: {},
-    payload: request.body as VisPayload,
+    payload: request.body,
     getUiSettingsService: () => requestContext.core.uiSettings.client,
     getSavedObjectsClient: () => requestContext.core.savedObjects.client,
     getEsShardTimeout: async () => {
