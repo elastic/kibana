@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import './spaces_selector.scss';
 import React, { FC, useState, useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -82,7 +83,7 @@ export const SpacesSelector: FC<Props> = ({
           checked: selectedSpaceIds.includes(space.id) ? 'on' : undefined,
           disabled: canEditSpaces === false,
           ['data-space-id']: space.id,
-          ['data-test-subj']: `cts-space-selector-row-${space.id}`,
+          ['data-test-subj']: `mlSpaceSelectorRow_${space.id}`,
         };
       }),
     [allSpaces, selectedSpaceIds, canEditSpaces]
@@ -156,8 +157,8 @@ export const SpacesSelector: FC<Props> = ({
               listProps={{
                 bordered: true,
                 rowHeight: 40,
-                className: 'spcCopyToSpace__spacesList',
-                'data-test-subj': 'cts-form-space-selector',
+                className: 'mlCopyToSpace__spacesList',
+                'data-test-subj': 'mlFormSpaceSelector',
               }}
               searchable
             >

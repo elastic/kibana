@@ -21,7 +21,7 @@ export const CannotEditCallout: FC<{ jobId: string }> = ({ jobId }) => (
     >
       <FormattedMessage
         id="xpack.ml.management.spacesSelectorFlyout.cannotEditCallout.text"
-        defaultMessage="This job cannot be moved as it is in the * space and you do not have permission to see all spaces. Please log in as a user who had permission to see all spaces to perform this action."
+        defaultMessage="To change this job's spaces, you need privileges to modify jobs in all spaces. Contact your system administrator for more information."
       />
     </EuiCallOut>
     <EuiSpacer size="l" />
