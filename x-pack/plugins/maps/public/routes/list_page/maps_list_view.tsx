@@ -68,57 +68,57 @@ if (savedObjectsTagging) {
   tableColumns.push(savedObjectsTagging.ui.getTableColumnDefinition());
 }
 
+function navigateToNewMap() {
+  const navigateToApp = getNavigateToApp();
+  navigateToApp(APP_ID, {
+    path: MAP_PATH,
+  });
+}
+
+async function findMaps(searchQuery: string) {
+  let searchTerm = searchQuery;
+  let tagReferences;
+
+  if (savedObjectsTagging) {
+    const parsed = savedObjectsTagging.ui.parseSearchQuery(searchQuery, {
+      useName: true,
+    });
+    searchTerm = parsed.searchTerm;
+    tagReferences = parsed.tagReferences;
+  }
+
+  const resp = await getSavedObjectsClient().find<MapSavedObjectAttributes>({
+    type: MAP_SAVED_OBJECT_TYPE,
+    search: searchTerm ? `${searchTerm}*` : undefined,
+    perPage: getSavedObjects().settings.getListingLimit(),
+    page: 1,
+    searchFields: ['title^3', 'description'],
+    defaultSearchOperator: 'AND',
+    fields: ['description', 'title'],
+    hasReference: tagReferences,
+  });
+
+  return {
+    total: resp.total,
+    hits: resp.savedObjects.map((savedObject) => {
+      return {
+        id: savedObject.id,
+        title: savedObject.attributes.title,
+        description: savedObject.attributes.description,
+        references: savedObject.references,
+      };
+    }),
+  };
+}
+
+async function deleteMaps(items: object[]) {
+  const deletions = items.map((item) => {
+    return getSavedObjectsClient().delete(MAP_SAVED_OBJECT_TYPE, (item as MapItem).id);
+  });
+  await Promise.all(deletions);
+}
+
 export function MapsListView() {
-  function navigateToNewMap() {
-    const navigateToApp = getNavigateToApp();
-    navigateToApp(APP_ID, {
-      path: MAP_PATH,
-    });
-  }
-
-  async function findMaps(searchQuery: string) {
-    let searchTerm = searchQuery;
-    let tagReferences;
-
-    if (savedObjectsTagging) {
-      const parsed = savedObjectsTagging.ui.parseSearchQuery(searchQuery, {
-        useName: true,
-      });
-      searchTerm = parsed.searchTerm;
-      tagReferences = parsed.tagReferences;
-    }
-
-    const resp = await getSavedObjectsClient().find<MapSavedObjectAttributes>({
-      type: MAP_SAVED_OBJECT_TYPE,
-      search: searchTerm ? `${searchTerm}*` : undefined,
-      perPage: getSavedObjects().settings.getListingLimit(),
-      page: 1,
-      searchFields: ['title^3', 'description'],
-      defaultSearchOperator: 'AND',
-      fields: ['description', 'title'],
-      hasReference: tagReferences,
-    });
-
-    return {
-      total: resp.total,
-      hits: resp.savedObjects.map((savedObject) => {
-        return {
-          id: savedObject.id,
-          title: savedObject.attributes.title,
-          description: savedObject.attributes.description,
-          references: savedObject.references,
-        };
-      }),
-    };
-  }
-
-  async function deleteMaps(items: object[]) {
-    const deletions = items.map((item) => {
-      return getSavedObjectsClient().delete(MAP_SAVED_OBJECT_TYPE, (item as MapItem).id);
-    });
-    await Promise.all(deletions);
-  }
-
   const isReadOnly = !getMapsCapabilities().save;
 
   getCoreChrome().docTitle.change(getAppTitle());
