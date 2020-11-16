@@ -15,7 +15,8 @@ export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['logstash']);
   const retry = getService('retry');
 
-  describe('pipeline create new', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/83231
+  describe.skip('pipeline create new', () => {
     let originalWindowSize;
 
     before(async () => {
