@@ -7,19 +7,15 @@
 import React from 'react';
 
 import { EuiPageHeader, EuiPageHeaderSection, EuiTitle, EuiPageContentBody } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 
 import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
+import { DOCUMENTS_TITLE } from './constants';
 
 interface Props {
   engineBreadcrumb: string[];
 }
 
 export const Documents: React.FC<Props> = ({ engineBreadcrumb }) => {
-  const DOCUMENTS_TITLE = i18n.translate('xpack.enterpriseSearch.appSearch.documents.title', {
-    defaultMessage: 'Documents',
-  });
-
   return (
     <>
       <SetPageChrome trail={[...engineBreadcrumb, DOCUMENTS_TITLE]} />
