@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 
-import { CreateRulesSchema } from '../../../../plugins/security_solution/common/detection_engine/schemas/request';
+import { QueryCreateSchema } from '../../../../plugins/security_solution/common/detection_engine/schemas/request';
 import { DEFAULT_SIGNALS_INDEX } from '../../../../plugins/security_solution/common/constants';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
@@ -53,7 +53,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should have the specific audit record for _id or none of these tests below will pass', async () => {
-        const rule: CreateRulesSchema = {
+        const rule: QueryCreateSchema = {
           ...getSimpleRule(),
           from: '1900-01-01T00:00:00.000Z',
           query: `_id:${ID}`,
@@ -65,7 +65,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should have recorded the rule_id within the signal', async () => {
-        const rule: CreateRulesSchema = {
+        const rule: QueryCreateSchema = {
           ...getSimpleRule(),
           from: '1900-01-01T00:00:00.000Z',
           query: `_id:${ID}`,
@@ -77,7 +77,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should query and get back expected signal structure using a basic KQL query', async () => {
-        const rule: CreateRulesSchema = {
+        const rule: QueryCreateSchema = {
           ...getSimpleRule(),
           from: '1900-01-01T00:00:00.000Z',
           query: `_id:${ID}`,
@@ -124,7 +124,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should query and get back expected signal structure when it is a signal on a signal', async () => {
         // create a 1 signal from 1 auditbeat record
-        const rule: CreateRulesSchema = {
+        const rule: QueryCreateSchema = {
           ...getSimpleRule(),
           from: '1900-01-01T00:00:00.000Z',
           query: `_id:${ID}`,
@@ -133,7 +133,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForSignalsToBePresent(supertest, 1);
 
         // Run signals on top of that 1 signal which should create a single signal (on top of) a signal
-        const ruleForSignals: CreateRulesSchema = {
+        const ruleForSignals: QueryCreateSchema = {
           ...getSimpleRule(),
           rule_id: 'signal-on-signal',
           index: [`${DEFAULT_SIGNALS_INDEX}*`],
@@ -333,7 +333,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should have the specific audit record for _id or none of these tests below will pass', async () => {
-        const rule: CreateRulesSchema = {
+        const rule: QueryCreateSchema = {
           ...getSimpleRule(),
           index: ['signal_name_clash'],
           from: '1900-01-01T00:00:00.000Z',
@@ -346,7 +346,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should have recorded the rule_id within the signal', async () => {
-        const rule: CreateRulesSchema = {
+        const rule: QueryCreateSchema = {
           ...getSimpleRule(),
           index: ['signal_name_clash'],
           from: '1900-01-01T00:00:00.000Z',
@@ -359,7 +359,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should query and get back expected signal structure using a basic KQL query', async () => {
-        const rule: CreateRulesSchema = {
+        const rule: QueryCreateSchema = {
           ...getSimpleRule(),
           index: ['signal_name_clash'],
           from: '1900-01-01T00:00:00.000Z',
@@ -402,7 +402,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should query and get back expected signal structure when it is a signal on a signal', async () => {
         // create a 1 signal from 1 auditbeat record
-        const rule: CreateRulesSchema = {
+        const rule: QueryCreateSchema = {
           ...getSimpleRule(),
           index: ['signal_name_clash'],
           from: '1900-01-01T00:00:00.000Z',
@@ -412,7 +412,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForSignalsToBePresent(supertest, 1);
 
         // Run signals on top of that 1 signal which should create a single signal (on top of) a signal
-        const ruleForSignals: CreateRulesSchema = {
+        const ruleForSignals: QueryCreateSchema = {
           ...getSimpleRule(),
           rule_id: 'signal-on-signal',
           index: [`${DEFAULT_SIGNALS_INDEX}*`],
@@ -486,7 +486,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should have the specific audit record for _id or none of these tests below will pass', async () => {
-        const rule: CreateRulesSchema = {
+        const rule: QueryCreateSchema = {
           ...getSimpleRule(),
           index: ['signal_object_clash'],
           from: '1900-01-01T00:00:00.000Z',
@@ -499,7 +499,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should have recorded the rule_id within the signal', async () => {
-        const rule: CreateRulesSchema = {
+        const rule: QueryCreateSchema = {
           ...getSimpleRule(),
           index: ['signal_object_clash'],
           from: '1900-01-01T00:00:00.000Z',
@@ -512,7 +512,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should query and get back expected signal structure using a basic KQL query', async () => {
-        const rule: CreateRulesSchema = {
+        const rule: QueryCreateSchema = {
           ...getSimpleRule(),
           index: ['signal_object_clash'],
           from: '1900-01-01T00:00:00.000Z',
@@ -561,7 +561,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should query and get back expected signal structure when it is a signal on a signal', async () => {
         // create a 1 signal from 1 auditbeat record
-        const rule: CreateRulesSchema = {
+        const rule: QueryCreateSchema = {
           ...getSimpleRule(),
           index: ['signal_object_clash'],
           from: '1900-01-01T00:00:00.000Z',
@@ -571,7 +571,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForSignalsToBePresent(supertest, 1);
 
         // Run signals on top of that 1 signal which should create a single signal (on top of) a signal
-        const ruleForSignals: CreateRulesSchema = {
+        const ruleForSignals: QueryCreateSchema = {
           ...getSimpleRule(),
           rule_id: 'signal-on-signal',
           index: [`${DEFAULT_SIGNALS_INDEX}*`],
