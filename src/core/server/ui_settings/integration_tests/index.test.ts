@@ -24,7 +24,7 @@ import { docMissingSuite } from './doc_missing';
 import { docMissingAndIndexReadOnlySuite } from './doc_missing_and_index_read_only';
 
 describe('uiSettings/routes', function () {
-  jest.setTimeout(30000);
+  jest.setTimeout(10000);
 
   beforeAll(startServers);
   /* eslint-disable jest/valid-describe */

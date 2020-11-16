@@ -20,6 +20,7 @@
 import React from 'react';
 import { mount } from 'enzyme';
 import { mountWithIntl, nextTick } from '@kbn/test/jest';
+import { first } from 'rxjs/operators';
 
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { I18nProvider } from '@kbn/i18n/react';
@@ -76,20 +77,13 @@ test('HelloWorldContainer initializes embeddables', async () => {
     { getEmbeddableFactory } as any
   );
 
-  const subscription = container.getOutput$().subscribe(() => {
-    if (container.getOutput().embeddableLoaded['123']) {
-      const embeddable = container.getChild<ContactCardEmbeddable>('123');
-      expect(embeddable).toBeDefined();
-      expect(embeddable.id).toBe('123');
-    }
-  });
+  const subscription = container.getOutput$().pipe(first()).toPromise;
+  await subscription;
 
-  if (container.getOutput().embeddableLoaded['123']) {
-    const embeddable = container.getChild<ContactCardEmbeddable>('123');
-    expect(embeddable).toBeDefined();
-    expect(embeddable.id).toBe('123');
-    subscription.unsubscribe();
-  }
+  expect(container.getOutput().embeddableLoaded['123']).toBeTruthy();
+  const embeddable = container.getChild<ContactCardEmbeddable>('123');
+  expect(embeddable).toBeDefined();
+  expect(embeddable.id).toBe('123');
 });
 
 test('HelloWorldContainer.addNewEmbeddable', async () => {

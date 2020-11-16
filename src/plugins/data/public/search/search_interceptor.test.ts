@@ -250,7 +250,7 @@ describe('SearchInterceptor', () => {
         await flushPromises();
       });
 
-      test('Immediately aborts if passed an aborted abort signal', async () => {
+      test('Immediately aborts if passed an aborted abort signal', (done) => {
         const abort = new AbortController();
         const mockRequest: IEsSearchRequest = {
           params: {},
@@ -261,6 +261,7 @@ describe('SearchInterceptor', () => {
         const error = (e: any) => {
           expect(e).toBeInstanceOf(AbortError);
           expect(mockCoreSetup.http.fetch).not.toBeCalled();
+          done();
         };
         response.subscribe({ error });
       });

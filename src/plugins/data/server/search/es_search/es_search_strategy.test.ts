@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { first } from 'rxjs/operators';
 import { pluginInitializerContextConfigMock } from '../../../../../core/server/mocks';
 import { esSearchStrategyProvider } from './es_search_strategy';
 import { SearchStrategyDependencies } from '../types';
@@ -58,34 +59,38 @@ describe('ES search strategy', () => {
   it('calls the API caller with the params with defaults', async () => {
     const params = { index: 'logstash-*' };
 
-    await esSearchStrategyProvider(mockConfig$, mockLogger)
+    const promise = await esSearchStrategyProvider(mockConfig$, mockLogger)
       .search({ params }, {}, mockDeps)
-      .subscribe(() => {
-        expect(mockApiCaller).toBeCalled();
-        expect(mockApiCaller.mock.calls[0][0]).toEqual({
-          ...params,
-          ignore_unavailable: true,
-          track_total_hits: true,
-        });
-      });
+      .pipe(first())
+      .toPromise();
+    await promise;
+
+    expect(mockApiCaller).toBeCalled();
+    expect(mockApiCaller.mock.calls[0][0]).toEqual({
+      ...params,
+      ignore_unavailable: true,
+      track_total_hits: true,
+    });
   });
 
   it('calls the API caller with overridden defaults', async () => {
     const params = { index: 'logstash-*', ignore_unavailable: false, timeout: '1000ms' };
 
-    await esSearchStrategyProvider(mockConfig$, mockLogger)
+    const promise = await esSearchStrategyProvider(mockConfig$, mockLogger)
       .search({ params }, {}, mockDeps)
-      .subscribe(() => {
-        expect(mockApiCaller).toBeCalled();
-        expect(mockApiCaller.mock.calls[0][0]).toEqual({
-          ...params,
-          track_total_hits: true,
-        });
-      });
+      .pipe(first())
+      .toPromise();
+    await promise;
+
+    expect(mockApiCaller).toBeCalled();
+    expect(mockApiCaller.mock.calls[0][0]).toEqual({
+      ...params,
+      track_total_hits: true,
+    });
   });
 
-  it('has all response parameters', async () =>
-    await esSearchStrategyProvider(mockConfig$, mockLogger)
+  it('has all response parameters', async () => {
+    const promise = await esSearchStrategyProvider(mockConfig$, mockLogger)
       .search(
         {
           params: { index: 'logstash-*' },
@@ -93,10 +98,13 @@ describe('ES search strategy', () => {
         {},
         mockDeps
       )
-      .subscribe((data) => {
-        expect(data.isRunning).toBe(false);
-        expect(data.isPartial).toBe(false);
-        expect(data).toHaveProperty('loaded');
-        expect(data).toHaveProperty('rawResponse');
-      }));
+      .pipe(first())
+      .toPromise();
+    await promise;
+
+    expect(promise.isRunning).toBe(false);
+    expect(promise.isPartial).toBe(false);
+    expect(promise).toHaveProperty('loaded');
+    expect(promise).toHaveProperty('rawResponse');
+  });
 });

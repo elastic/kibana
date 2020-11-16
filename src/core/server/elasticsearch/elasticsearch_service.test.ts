@@ -229,9 +229,11 @@ describe('#setup', () => {
     await delay(10);
 
     expect(mockedClient.nodes.info).toHaveBeenCalledTimes(0);
-    setupContract.esNodesCompatibility$.subscribe(() => {
-      expect(mockedClient.nodes.info).toHaveBeenCalledTimes(1);
-    });
+
+    const promise = setupContract.esNodesCompatibility$.pipe(first()).toPromise();
+    await promise;
+
+    expect(mockedClient.nodes.info).toHaveBeenCalledTimes(1);
   });
 
   it('esNodeVersionCompatibility$ stops polling when unsubscribed from', async () => {
@@ -243,11 +245,12 @@ describe('#setup', () => {
     const setupContract = await elasticsearchService.setup(setupDeps);
 
     expect(mockedClient.nodes.info).toHaveBeenCalledTimes(0);
-    const sub = setupContract.esNodesCompatibility$.subscribe(async () => {
-      sub.unsubscribe();
-      await delay(100);
-      expect(mockedClient.nodes.info).toHaveBeenCalledTimes(1);
-    });
+
+    const sub = setupContract.esNodesCompatibility$.pipe(first()).toPromise();
+    await sub;
+
+    await delay(100);
+    expect(mockedClient.nodes.info).toHaveBeenCalledTimes(1);
   });
 });
 
@@ -355,12 +358,12 @@ describe('#stop', () => {
 
     const setupContract = await elasticsearchService.setup(setupDeps);
 
-    setupContract.esNodesCompatibility$.subscribe(async () => {
-      expect(mockedClient.nodes.info).toHaveBeenCalledTimes(1);
+    const promise = setupContract.esNodesCompatibility$.pipe(first()).toPromise();
+    await promise;
+    expect(mockedClient.nodes.info).toHaveBeenCalledTimes(1);
 
-      await elasticsearchService.stop();
-      await delay(100);
-      expect(mockedClient.nodes.info).toHaveBeenCalledTimes(1);
-    });
+    await elasticsearchService.stop();
+    await delay(100);
+    expect(mockedClient.nodes.info).toHaveBeenCalledTimes(1);
   });
 });

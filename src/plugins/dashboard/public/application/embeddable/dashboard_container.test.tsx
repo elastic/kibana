@@ -101,7 +101,7 @@ test('DashboardContainer.addNewEmbeddable', async () => {
   expect(embeddableInContainer.id).toBe(embeddable.id);
 });
 
-test('DashboardContainer.replacePanel', async () => {
+test('DashboardContainer.replacePanel', (done) => {
   const ID = '123';
   const initialInput = getSampleDashboardInput({
     panels: {
@@ -126,6 +126,7 @@ test('DashboardContainer.replacePanel', async () => {
       case 2: {
         expect(panels[ID].type).toBe(EMPTY_EMBEDDABLE);
         subscription.unsubscribe();
+        done();
       }
 
       default:
