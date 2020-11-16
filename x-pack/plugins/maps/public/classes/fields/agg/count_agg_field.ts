@@ -14,9 +14,9 @@ import { IESAggField, CountAggFieldParams } from './agg_field_types';
 
 // Agg without field. Essentially a count-aggregation.
 export class CountAggField implements IESAggField {
-  private readonly _source: IESAggSource;
+  readonly _source: IESAggSource;
   private readonly _origin: FIELD_ORIGIN;
-  private readonly _label?: string;
+  readonly _label?: string;
   private readonly _canReadFromGeoJson: boolean;
 
   constructor({ label, source, origin, canReadFromGeoJson = true }: CountAggFieldParams) {

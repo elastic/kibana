@@ -72,12 +72,15 @@ export function MetricEditor({
       });
       if (found) {
         if (metricAggregationType === AGG_TYPE.PERCENTILE) {
-          onChange({
+          const m = {
             type: metricAggregationType,
             label: metric.label,
             field: metric.field,
-            percentile: metric.percentile,
-          });
+          };
+          if ('percentile' in metric) {
+            m.percentile = metric.percentile;
+          }
+          onChange(m);
         } else {
           onChange({
             type: metricAggregationType,
@@ -108,7 +111,7 @@ export function MetricEditor({
       field: fieldName,
     });
   };
-  const onPercentileChange = (e: ChangeEvent<HTMLInputElement>) => {
+  const onPercentileChange = (e: MouseEvent<HTMLButtonElement, MouseEvent>) => {
     if (metric.type !== AGG_TYPE.PERCENTILE) {
       return;
     }
