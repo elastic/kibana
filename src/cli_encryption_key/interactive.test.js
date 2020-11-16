@@ -24,9 +24,8 @@ import { Logger } from '../cli_plugin/lib/logger';
 import * as prompt from '../cli_keystore/utils/prompt';
 import fs from 'fs';
 import crypto from 'crypto';
-import dedent from 'dedent';
 
-describe.only('encryption key generation interactive', () => {
+describe('encryption key generation interactive', () => {
   const encryptionConfig = new EncryptionConfig();
   beforeEach(() => {
     Logger.prototype.log = jest.fn();
