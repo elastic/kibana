@@ -12,7 +12,7 @@ import { ActionConnector, ValidationResult } from '../../../types';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import { ActionsConnectorsContextProvider } from '../../context/actions_connectors_context';
 import { EuiFormRow, EuiFieldText, EuiText, EuiLink, EuiForm, EuiSelect } from '@elastic/eui';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 
 const mockedActionParamsFields = lazy(async () => ({
   default() {

@@ -24,7 +24,7 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 import realHits from 'fixtures/real_hits.js';
 // @ts-ignore
 import stubbedLogstashFields from 'fixtures/logstash_fields';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 import React from 'react';
 import { DiscoverSidebarProps } from './discover_sidebar';
 import { coreMock } from '../../../../../../core/public/mocks';

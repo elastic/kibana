@@ -18,7 +18,7 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 import { TypesStart, VisType, VisGroups } from '../../vis_types';
 import { AggBasedSelection } from './agg_based_selection';
 
