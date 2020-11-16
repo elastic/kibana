@@ -7,7 +7,7 @@
 import React, { useMemo } from 'react';
 import { mapValues, countBy } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { EuiBasicTable, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiBasicTable, EuiLoadingSpinner, EuiBasicTableColumn } from '@elastic/eui';
 import { euiStyled } from '../../../../../../../../../observability/public';
 import { ProcessListAPIResponse } from '../../../../../../../../common/http_api';
 import { parseProcessList } from './parse_process_list';
@@ -18,19 +18,26 @@ interface Props {
   isLoading: boolean;
 }
 
+type SummaryColumn = {
+  total: number;
+} & Record<keyof typeof STATE_NAMES, number>;
+
 export const SummaryTable = ({ processList, isLoading }: Props) => {
   const parsedList = parseProcessList(processList);
   const processCount = useMemo(
-    () => ({
-      total: isLoading ? -1 : parsedList.length,
-      ...mapValues(STATE_NAMES, () => (isLoading ? -1 : 0)),
-      ...(isLoading ? [] : countBy(parsedList, 'state')),
-    }),
+    () =>
+      [
+        {
+          total: isLoading ? -1 : parsedList.length,
+          ...mapValues(STATE_NAMES, () => (isLoading ? -1 : 0)),
+          ...(isLoading ? [] : countBy(parsedList, 'state')),
+        },
+      ] as SummaryColumn[],
     [parsedList, isLoading]
   );
   return (
     <StyleWrapper>
-      <EuiBasicTable items={[processCount]} columns={columns} />
+      <EuiBasicTable items={processCount} columns={columns} />
     </StyleWrapper>
   );
 };
@@ -47,7 +54,7 @@ const columns = [
     render: loadingRenderer,
   },
   ...Object.entries(STATE_NAMES).map(([field, name]) => ({ field, name, render: loadingRenderer })),
-];
+] as Array<EuiBasicTableColumn<SummaryColumn>>;
 
 const LoadingSpinner = euiStyled(EuiLoadingSpinner).attrs({ size: 'm' })`
   margin-top: 2px;
