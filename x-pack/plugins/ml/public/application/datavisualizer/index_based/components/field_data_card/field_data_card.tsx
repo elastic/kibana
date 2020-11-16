@@ -76,7 +76,7 @@ export const FieldDataCard: FC<FieldDataCardProps> = ({ config }) => {
       hasShadow={false}
     >
       <FieldTitleBar card={config} />
-      <div className="mlFieldDataCard__content">
+      <div className="mlFieldDataCard__content" data-test-subj="mlFieldDataCardContent">
         {loading === true ? <LoadingIndicator /> : getCardContent()}
       </div>
     </EuiPanel>
