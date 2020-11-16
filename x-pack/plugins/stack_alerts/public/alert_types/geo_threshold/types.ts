@@ -7,7 +7,7 @@
 export enum TrackingEvent {
   entered = 'entered',
   exited = 'exited',
-  crossing = 'crossed',
+  crossed = 'crossed',
 }
 
 export interface GeoThresholdAlertParams {
