@@ -13,6 +13,7 @@ import {
 function createEncryptedSavedObjectsServiceMock() {
   return ({
     isRegistered: jest.fn(),
+    allowPredefinedID: jest.fn(),
     stripOrDecryptAttributes: jest.fn(),
     encryptAttributes: jest.fn(),
     decryptAttributes: jest.fn(),
