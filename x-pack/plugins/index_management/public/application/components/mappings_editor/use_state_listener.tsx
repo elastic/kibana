@@ -73,6 +73,12 @@ export const useMappingsStateListener = ({ onChange, value, mappingsType }: Args
               };
         }
 
+        return mappingsType === undefined
+          ? undefined
+          : {
+              [mappingsType]: {}, // We still need to preserve the mappings type even if no fields have been defined
+            };
+
         return undefined;
       },
       validate: async () => {
