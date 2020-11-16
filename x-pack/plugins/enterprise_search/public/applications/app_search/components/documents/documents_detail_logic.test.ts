@@ -89,7 +89,7 @@ describe('DocumentsLogic', () => {
 
       it('handles errors', async () => {
         mount();
-        const promise = Promise.reject('An error occured');
+        const promise = Promise.reject('An error occurred');
         http.get.mockReturnValue(promise);
 
         try {
@@ -98,23 +98,23 @@ describe('DocumentsLogic', () => {
         } catch {
           // Do nothing
         }
-        expect(flashAPIErrors).toHaveBeenCalledWith('An error occured');
+        expect(flashAPIErrors).toHaveBeenCalledWith('An error occurred');
       });
     });
 
     describe('deleteDocument', () => {
-      let originalWindowConfirm: any;
+      let confirmSpy: any;
       let promise: Promise<any>;
 
       beforeEach(() => {
-        originalWindowConfirm = window.confirm;
-        window.confirm = () => true;
+        confirmSpy = jest.spyOn(window, 'confirm');
+        confirmSpy.mockImplementation(jest.fn(() => true));
         promise = Promise.resolve({});
         http.delete.mockReturnValue(promise);
       });
 
       afterEach(() => {
-        window.confirm = originalWindowConfirm;
+        confirmSpy.mockRestore())
       });
 
       it('will call an API endpoint and show a success message', async () => {

@@ -15,9 +15,9 @@ export interface DocumentsLogicActions {
   openDocumentCreation(): void;
 }
 
-type DocumnetsLogicType = MakeLogicType<DocumentsLogicValues, DocumentsLogicActions>;
+type DocumentsLogicType = MakeLogicType<DocumentsLogicValues, DocumentsLogicActions>;
 
-export const DocumentsLogic = kea<DocumnetsLogicType>({
+export const DocumentsLogic = kea<DocumentsLogicType>({
   path: ['enterprise_search', 'app_search', 'documents_logic'],
   actions: () => ({
     openDocumentCreation: true,

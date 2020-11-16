@@ -17,7 +17,6 @@ describe('document routes', () => {
       mockRouter = new MockRouter({
         method: 'get',
         path: '/api/app_search/engines/{engineName}/documents/{documentId}',
-        payload: 'query',
       });
 
       registerDocumentRoutes({
@@ -43,7 +42,6 @@ describe('document routes', () => {
       mockRouter = new MockRouter({
         method: 'delete',
         path: '/api/app_search/engines/{engineName}/documents/{documentId}',
-        payload: 'query',
       });
 
       registerDocumentRoutes({

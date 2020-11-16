@@ -41,9 +41,9 @@ const DELETE_SUCCESS = i18n.translate(
 export const DocumentDetailLogic = kea<DocumentDetailLogicType>({
   path: ['enterprise_search', 'app_search', 'document_detail_logic'],
   actions: () => ({
-    setFields: (fields: FieldDetails[]) => ({ fields }),
-    getDocumentDetails: (documentId: string) => ({ documentId }),
-    deleteDocument: (documentId: string) => ({ documentId }),
+    setFields: (fields) => ({ fields }),
+    getDocumentDetails: (documentId) => ({ documentId }),
+    deleteDocument: (documentId) => ({ documentId }),
   }),
   reducers: () => ({
     dataLoading: [
