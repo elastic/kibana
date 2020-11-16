@@ -57,3 +57,13 @@ export interface ContentSourceDetails extends ContentSource {
 export interface SourcePriority {
   [id: string]: number;
 }
+
+export enum FeatureIds {
+  SyncFrequency = 'SyncFrequency',
+  SyncedItems = 'SyncedItems',
+  SearchableContent = 'SearchableContent',
+  Remote = 'Remote',
+  Private = 'Private',
+  GlobalAccessPermissions = 'GlobalAccessPermissions',
+  DocumentLevelPermissions = 'DocumentLevelPermissions',
+}
