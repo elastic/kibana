@@ -249,12 +249,12 @@ describe('getOperationTypesForField', () => {
               },
               Object {
                 "field": "bytes",
-                "operationType": "max",
+                "operationType": "min",
                 "type": "field",
               },
               Object {
                 "field": "bytes",
-                "operationType": "min",
+                "operationType": "max",
                 "type": "field",
               },
               Object {
