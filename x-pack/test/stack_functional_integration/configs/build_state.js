@@ -15,7 +15,7 @@ const envObj = (path) => dotEnv.config({ path });
 const maybeUseExternalList = (obj) =>
   fromNullable(obj.TESTS_LIST).fold(
     () => ({ tests: testsList(obj), ...obj }), // Define in this repo
-    (xs) => ({ tests: xs, ...obj }) // Use defs from external repo
+    (tests) => ({ tests, ...obj }) // Use defs from external repo
   );
 
 // default fn :: path -> {}
