@@ -5,7 +5,7 @@
  */
 
 import { Logger } from 'kibana/server';
-import { ESSearchResponse } from '../../../../../typings/elasticsearch';
+import { ESSearchResponse } from '../../../../../../../typings/elasticsearch';
 import { PromiseReturnType } from '../../../../../../observability/typings/common';
 import { Setup, SetupTimeRange } from '../../../helpers/setup_request';
 
