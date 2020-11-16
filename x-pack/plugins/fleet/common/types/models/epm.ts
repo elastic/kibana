@@ -30,7 +30,7 @@ export type InstallSource = 'registry' | 'upload';
 
 export type EpmPackageInstallStatus = 'installed' | 'installing';
 
-export type DetailViewPanelName = 'overview' | 'usages' | 'settings';
+export type DetailViewPanelName = 'overview' | 'policies' | 'settings';
 export type ServiceName = 'kibana' | 'elasticsearch';
 export type AgentAssetType = typeof agentAssetTypes;
 export type AssetType = KibanaAssetType | ElasticsearchAssetType | ValueOf<AgentAssetType>;
@@ -47,7 +47,7 @@ export enum KibanaAssetType {
 }
 
 /*
- Enum of saved object types that are allowed to be installed 
+ Enum of saved object types that are allowed to be installed
 */
 export enum KibanaSavedObjectType {
   dashboard = 'dashboard',

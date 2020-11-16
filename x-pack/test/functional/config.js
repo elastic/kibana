@@ -473,12 +473,7 @@ export default async function ({ readConfigFile }) {
 
         logstash_read_user: {
           elasticsearch: {
-            indices: [
-              {
-                names: ['.logstash*'],
-                privileges: ['read'],
-              },
-            ],
+            cluster: ['manage_logstash_pipelines'],
           },
         },
 
