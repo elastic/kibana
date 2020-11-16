@@ -5,23 +5,26 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { AlertType, AlertExecutorOptions } from '../../types';
+import { Logger } from 'src/core/server';
+import { AlertType, AlertExecutorOptions, StackAlertsStartDeps } from '../../types';
 import { Params, ParamsSchema } from './alert_type_params';
 import { ActionContext, BaseActionContext, addMessages } from './action_context';
-import { TimeSeriesQuery } from './lib/time_series_query';
-import { Service } from '../../types';
 import { STACK_ALERTS_FEATURE_ID } from '../../../common';
+import {
+  CoreQueryParamsSchemaProperties,
+  TimeSeriesQuery,
+} from '../../../../triggers_actions_ui/server';
 
 export const ID = '.index-threshold';
 
-import { CoreQueryParamsSchemaProperties } from './lib/core_query_types';
 const ActionGroupId = 'threshold met';
 const ComparatorFns = getComparatorFns();
 export const ComparatorFnNames = new Set(ComparatorFns.keys());
 
-export function getAlertType(service: Service): AlertType<Params, {}, {}, ActionContext> {
-  const { logger } = service;
-
+export function getAlertType(
+  logger: Logger,
+  data: Promise<StackAlertsStartDeps['triggersActionsUi']['data']>
+): AlertType<Params, {}, {}, ActionContext> {
   const alertTypeName = i18n.translate('xpack.stackAlerts.indexThreshold.alertTypeTitle', {
     defaultMessage: 'Index threshold',
   });
@@ -152,7 +155,7 @@ export function getAlertType(service: Service): AlertType<Params, {}, {}, Action
       interval: undefined,
     };
     // console.log(`index_threshold: query: ${JSON.stringify(queryParams, null, 4)}`);
-    const result = await service.indexThreshold.timeSeriesQuery({
+    const result = await (await data).timeSeriesQuery({
       logger,
       callCluster,
       query: queryParams,
