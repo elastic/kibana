@@ -9,7 +9,7 @@ import { act } from 'react-dom/test-utils';
 import moment from 'moment-timezone';
 
 import { findTestSubject } from '@elastic/eui/lib/test';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 import { SinonFakeServer } from 'sinon';
 import { ReactWrapper } from 'enzyme';
 import axios from 'axios';
