@@ -99,7 +99,12 @@ describe('Security Plugin', () => {
           data: {} as DataPublicPluginStart,
           features: {} as FeaturesPluginStart,
         })
-      ).toBeUndefined();
+      ).toEqual({
+        navControlService: {
+          getUserMenuLinks$: expect.any(Function),
+          addUserMenuLinks: expect.any(Function),
+        },
+      });
     });
 
     it('starts Management Service if `management` plugin is available', () => {

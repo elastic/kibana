@@ -19,6 +19,11 @@ With *Role mappings*, you can:
 [role="screenshot"]
 image:user/security/role-mappings/images/role-mappings-grid.png["Role mappings"]
 
+[float]
+==== Required permissions
+
+The `manage_security` cluster privilege is required to manage Role Mappings.
+
 
 [float]
 === Create a role mapping

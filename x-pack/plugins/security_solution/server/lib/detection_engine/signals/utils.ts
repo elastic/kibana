@@ -511,7 +511,23 @@ export const getSignalTimeTuples = ({
  */
 export const createErrorsFromShard = ({ errors }: { errors: ShardError[] }): string[] => {
   return errors.map((error) => {
-    return `reason: ${error.reason.reason}, type: ${error.reason.caused_by.type}, caused by: ${error.reason.caused_by.reason}`;
+    const {
+      reason: {
+        reason,
+        type,
+        caused_by: { reason: causedByReason, type: causedByType } = {
+          reason: undefined,
+          type: undefined,
+        },
+      } = {},
+    } = error;
+
+    return [
+      ...(reason != null ? [`reason: "${reason}"`] : []),
+      ...(type != null ? [`type: "${type}"`] : []),
+      ...(causedByReason != null ? [`caused by reason: "${causedByReason}"`] : []),
+      ...(causedByType != null ? [`caused by type: "${causedByType}"`] : []),
+    ].join(' ');
   });
 };
 

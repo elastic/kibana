@@ -7,7 +7,8 @@
     "Administrators may use the tasklist command to display a list of currently running processes. By itself, it does not indicate malicious activity. After obtaining a foothold, it's possible adversaries may use discovery commands like tasklist to get information about running processes."
   ],
   "index": [
-    "winlogbeat-*"
+    "winlogbeat-*",
+    "logs-endpoint.events.*"
   ],
   "language": "kuery",
   "license": "Elastic License",
@@ -18,7 +19,10 @@
   "severity": "low",
   "tags": [
     "Elastic",
-    "Windows"
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Discovery"
   ],
   "threat": [
     {

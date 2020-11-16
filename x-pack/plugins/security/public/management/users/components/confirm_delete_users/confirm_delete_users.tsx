@@ -8,6 +8,7 @@ import React, { Component, Fragment } from 'react';
 import { EuiOverlayMask, EuiConfirmModal } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { NotificationsStart } from 'src/core/public';
 import { UserAPIClient } from '../..';
 

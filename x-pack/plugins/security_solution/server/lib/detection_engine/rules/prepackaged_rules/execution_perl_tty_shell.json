@@ -17,7 +17,10 @@
   "severity": "high",
   "tags": [
     "Elastic",
-    "Linux"
+    "Host",
+    "Linux",
+    "Threat Detection",
+    "Execution"
   ],
   "threat": [
     {

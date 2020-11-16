@@ -92,6 +92,12 @@ function ServiceDetailsNodes(
   return <ServiceDetails {...props} tab="nodes" />;
 }
 
+function ServiceDetailsOverview(
+  props: RouteComponentProps<{ serviceName: string }>
+) {
+  return <ServiceDetails {...props} tab="overview" />;
+}
+
 function ServiceDetailsServiceMap(
   props: RouteComponentProps<{ serviceName: string }>
 ) {
@@ -214,6 +220,14 @@ export const routes: APMRouteDefinition[] = [
       renderAsRedirectTo(
         `/services/${props.match.params.serviceName}/transactions`
       )(props),
+  } as APMRouteDefinition<{ serviceName: string }>,
+  {
+    exact: true,
+    path: '/services/:serviceName/overview',
+    breadcrumb: i18n.translate('xpack.apm.breadcrumb.overviewTitle', {
+      defaultMessage: 'Overview',
+    }),
+    component: ServiceDetailsOverview,
   } as APMRouteDefinition<{ serviceName: string }>,
   // errors
   {

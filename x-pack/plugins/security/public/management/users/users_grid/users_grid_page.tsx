@@ -23,6 +23,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { NotificationsStart, ApplicationStart, ScopedHistory } from 'src/core/public';
 import { User, Role } from '../../../../common/model';
 import { ConfirmDeleteUsers } from '../components';
@@ -112,7 +113,7 @@ export class UsersGridPage extends Component<Props, State> {
         render: (username: string) => (
           <EuiLink
             data-test-subj="userRowUserName"
-            {...reactRouterNavigate(this.props.history, `/edit/${username}`)}
+            {...reactRouterNavigate(this.props.history, `/edit/${encodeURIComponent(username)}`)}
           >
             {username}
           </EuiLink>
@@ -259,6 +260,10 @@ export class UsersGridPage extends Component<Props, State> {
             {
               <EuiInMemoryTable
                 itemId="username"
+                tableCaption={i18n.translate('xpack.security.management.users.tableCaption', {
+                  defaultMessage: 'Users',
+                })}
+                rowHeader="username"
                 columns={columns}
                 selection={selectionConfig}
                 pagination={pagination}

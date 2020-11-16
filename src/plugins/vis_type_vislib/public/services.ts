@@ -19,7 +19,6 @@
 
 import { createGetterSetter } from '../../kibana_utils/public';
 import { DataPublicPluginStart } from '../../data/public';
-import { KibanaLegacyStart } from '../../kibana_legacy/public';
 
 export const [getDataActions, setDataActions] = createGetterSetter<
   DataPublicPluginStart['actions']
@@ -28,7 +27,3 @@ export const [getDataActions, setDataActions] = createGetterSetter<
 export const [getFormatService, setFormatService] = createGetterSetter<
   DataPublicPluginStart['fieldFormats']
 >('vislib data.fieldFormats');
-
-export const [getKibanaLegacy, setKibanaLegacy] = createGetterSetter<KibanaLegacyStart>(
-  'vislib kibanalegacy'
-);

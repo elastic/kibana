@@ -1706,6 +1706,16 @@
           "properties": {
             "overview": {
               "type": "long"
+            },
+            "setup_guide": {
+              "type": "long"
+            }
+          }
+        },
+        "ui_error": {
+          "properties": {
+            "cannot_connect": {
+              "type": "long"
             }
           }
         },
@@ -3240,7 +3250,7 @@
           "type": "boolean"
         },
         "authProviderCount": {
-          "type": "number"
+          "type": "long"
         },
         "enabledAuthProviders": {
           "type": "array",

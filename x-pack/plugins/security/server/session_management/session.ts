@@ -4,15 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import nodeCrypto, { Crypto } from '@elastic/node-crypto';
 import { promisify } from 'util';
 import { randomBytes, createHash } from 'crypto';
-import { Duration } from 'moment';
-import { KibanaRequest, Logger } from '../../../../../src/core/server';
-import { AuthenticationProvider } from '../../common/types';
-import { ConfigType } from '../config';
-import { SessionIndex, SessionIndexValue } from './session_index';
-import { SessionCookie } from './session_cookie';
+import nodeCrypto, { Crypto } from '@elastic/node-crypto';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { KibanaRequest, Logger } from '../../../../../src/core/server';
+import type { AuthenticationProvider } from '../../common/types';
+import type { ConfigType } from '../config';
+import type { SessionIndex, SessionIndexValue } from './session_index';
+import type { SessionCookie } from './session_cookie';
 
 /**
  * The shape of the value that represents user's session information.
@@ -86,21 +86,6 @@ const AAD_BYTE_LENGTH = 32;
 
 export class Session {
   /**
-   * Session idle timeout in ms. If `null`, a session will stay active until its max lifespan is reached.
-   */
-  private readonly idleTimeout: Duration | null;
-
-  /**
-   * Timeout after which idle timeout property is updated in the index.
-   */
-  private readonly idleIndexUpdateTimeout: number | null;
-
-  /**
-   * Session max lifespan in ms. If `null` session may live indefinitely.
-   */
-  private readonly lifespan: Duration | null;
-
-  /**
    * Used to encrypt and decrypt portion of the session value using configured encryption key.
    */
   private readonly crypto: Crypto;
@@ -112,14 +97,6 @@ export class Session {
 
   constructor(private readonly options: Readonly<SessionOptions>) {
     this.crypto = nodeCrypto({ encryptionKey: this.options.config.encryptionKey });
-    this.idleTimeout = this.options.config.session.idleTimeout;
-    this.lifespan = this.options.config.session.lifespan;
-
-    // The timeout after which we update index is two times longer than configured idle timeout
-    // since index updates are costly and we want to minimize them.
-    this.idleIndexUpdateTimeout = this.options.config.session.idleTimeout
-      ? this.options.config.session.idleTimeout.asMilliseconds() * 2
-      : null;
   }
 
   /**
@@ -193,7 +170,7 @@ export class Session {
     const sessionLogger = this.getLoggerForSID(sid);
     sessionLogger.debug('Creating a new session.');
 
-    const sessionExpirationInfo = this.calculateExpiry();
+    const sessionExpirationInfo = this.calculateExpiry(sessionValue.provider);
     const { username, state, ...publicSessionValue } = sessionValue;
 
     // First try to store session in the index and only then in the cookie to make sure cookie is
@@ -226,7 +203,10 @@ export class Session {
       return null;
     }
 
-    const sessionExpirationInfo = this.calculateExpiry(sessionCookieValue.lifespanExpiration);
+    const sessionExpirationInfo = this.calculateExpiry(
+      sessionValue.provider,
+      sessionCookieValue.lifespanExpiration
+    );
     const { username, state, metadata, ...publicSessionInfo } = sessionValue;
 
     // First try to store session in the index and only then in the cookie to make sure cookie is
@@ -275,7 +255,10 @@ export class Session {
 
     // We calculate actual expiration values based on the information extracted from the portion of
     // the session value that is stored in the cookie since it always contains the most recent value.
-    const sessionExpirationInfo = this.calculateExpiry(sessionCookieValue.lifespanExpiration);
+    const sessionExpirationInfo = this.calculateExpiry(
+      sessionValue.provider,
+      sessionCookieValue.lifespanExpiration
+    );
     if (
       sessionExpirationInfo.idleTimeoutExpiration === sessionValue.idleTimeoutExpiration &&
       sessionExpirationInfo.lifespanExpiration === sessionValue.lifespanExpiration
@@ -310,17 +293,24 @@ export class Session {
         'Session lifespan configuration has changed, session index will be updated.'
       );
       updateSessionIndex = true;
-    } else if (
-      this.idleIndexUpdateTimeout !== null &&
-      this.idleIndexUpdateTimeout <
-        sessionExpirationInfo.idleTimeoutExpiration! -
-          sessionValue.metadata.index.idleTimeoutExpiration!
-    ) {
-      // 3. If idle timeout was updated a while ago.
-      sessionLogger.debug(
-        'Session idle timeout stored in the index is too old and will be updated.'
+    } else {
+      // The timeout after which we update index is two times longer than configured idle timeout
+      // since index updates are costly and we want to minimize them.
+      const { idleTimeout } = this.options.config.session.getExpirationTimeouts(
+        sessionValue.provider
       );
-      updateSessionIndex = true;
+      if (
+        idleTimeout !== null &&
+        idleTimeout.asMilliseconds() * 2 <
+          sessionExpirationInfo.idleTimeoutExpiration! -
+            sessionValue.metadata.index.idleTimeoutExpiration!
+      ) {
+        // 3. If idle timeout was updated a while ago.
+        sessionLogger.debug(
+          'Session idle timeout stored in the index is too old and will be updated.'
+        );
+        updateSessionIndex = true;
+      }
     }
 
     // First try to store session in the index and only then in the cookie to make sure cookie is
@@ -374,18 +364,21 @@ export class Session {
   }
 
   private calculateExpiry(
+    provider: AuthenticationProvider,
     currentLifespanExpiration?: number | null
   ): { idleTimeoutExpiration: number | null; lifespanExpiration: number | null } {
     const now = Date.now();
+    const { idleTimeout, lifespan } = this.options.config.session.getExpirationTimeouts(provider);
+
     // if we are renewing an existing session, use its `lifespanExpiration` -- otherwise, set this value
     // based on the configured server `lifespan`.
     // note, if the server had a `lifespan` set and then removes it, remove `lifespanExpiration` on renewed sessions
     // also, if the server did not have a `lifespan` set and then adds it, add `lifespanExpiration` on renewed sessions
     const lifespanExpiration =
-      currentLifespanExpiration && this.lifespan
+      currentLifespanExpiration && lifespan
         ? currentLifespanExpiration
-        : this.lifespan && now + this.lifespan.asMilliseconds();
-    const idleTimeoutExpiration = this.idleTimeout && now + this.idleTimeout.asMilliseconds();
+        : lifespan && now + lifespan.asMilliseconds();
+    const idleTimeoutExpiration = idleTimeout && now + idleTimeout.asMilliseconds();
 
     return { idleTimeoutExpiration, lifespanExpiration };
   }

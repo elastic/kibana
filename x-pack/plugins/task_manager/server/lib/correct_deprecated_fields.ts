@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Logger } from 'src/core/server';
 import { TaskInstance, TaskInstanceWithDeprecatedFields } from '../task';
-import { Logger } from '../../../../../src/core/server';
 
 export function ensureDeprecatedFieldsAreCorrected(
   { id, taskType, interval, schedule, ...taskInstance }: TaskInstanceWithDeprecatedFields,

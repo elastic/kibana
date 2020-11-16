@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
 import { mockInsecureClusterService } from './insecure_cluster_service/insecure_cluster_service.mock';
 import { SecurityOssPluginSetup, SecurityOssPluginStart } from './plugin';
 

@@ -24,7 +24,7 @@ import { ExpressionValue } from '../expression_types/types';
 import { ExecutionContext } from '../execution';
 import { ExpressionAstFunction } from '../ast';
 import { SavedObjectReference } from '../../../../core/types';
-import { PersistableState } from '../../../kibana_utils/common';
+import { PersistableState, SerializableState } from '../../../kibana_utils/common';
 
 export class ExpressionFunction implements PersistableState<ExpressionAstFunction['arguments']> {
   /**
@@ -76,6 +76,9 @@ export class ExpressionFunction implements PersistableState<ExpressionAstFunctio
     state: ExpressionAstFunction['arguments'],
     references: SavedObjectReference[]
   ) => ExpressionAstFunction['arguments'];
+  migrations: {
+    [key: string]: (state: SerializableState) => SerializableState;
+  };
 
   constructor(functionDefinition: AnyExpressionFunctionDefinition) {
     const {
@@ -91,6 +94,7 @@ export class ExpressionFunction implements PersistableState<ExpressionAstFunctio
       telemetry,
       inject,
       extract,
+      migrations,
     } = functionDefinition;
 
     this.name = name;
@@ -104,6 +108,7 @@ export class ExpressionFunction implements PersistableState<ExpressionAstFunctio
     this.telemetry = telemetry || ((s, c) => c);
     this.inject = inject || identity;
     this.extract = extract || ((s) => ({ state: s, references: [] }));
+    this.migrations = migrations || {};
 
     for (const [key, arg] of Object.entries(args || {})) {
       this.args[key] = new ExpressionFunctionParameter(key, arg);

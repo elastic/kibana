@@ -16,6 +16,8 @@ export const setAbsoluteRangeDatePicker = actionCreator<{
   id: InputsModelId;
   from: string;
   to: string;
+  fromStr?: string;
+  toStr?: string;
 }>('SET_ABSOLUTE_RANGE_DATE_PICKER');
 
 export const setTimelineRangeDatePicker = actionCreator<{

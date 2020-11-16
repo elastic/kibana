@@ -11,16 +11,19 @@
     "winlogbeat-*",
     "logs-endpoint.events.*"
   ],
-  "language": "kuery",
+  "language": "eql",
   "license": "Elastic License",
   "name": "Network Connection via Registration Utility",
-  "query": "event.category:network and event.type:connection and process.name:(regsvr32.exe or regsvr64.exe or RegAsm.exe or RegSvcs.exe) and not destination.ip:(10.0.0.0/8 or 169.254.169.254 or 172.16.0.0/12 or 192.168.0.0/16)",
+  "query": "sequence by process.entity_id\n  [process where (process.name : \"regsvr32.exe\" or process.name : \"regsvr64.exe\" or\n                  process.name : \"RegAsm.exe\" or process.name : \"RegSvcs.exe\") and\n     event.type == \"start\"]\n  [network where (process.name : \"regsvr32.exe\" or process.name : \"regsvr64.exe\" or\n                  process.name : \"RegAsm.exe\" or process.name : \"RegSvcs.exe\") and\n     not cidrmatch(destination.ip, \"10.0.0.0/8\", \"169.254.169.254\", \"172.16.0.0/12\", \"192.168.0.0/16\")]\n",
   "risk_score": 21,
   "rule_id": "fb02b8d3-71ee-4af1-bacd-215d23f17efa",
   "severity": "low",
   "tags": [
     "Elastic",
-    "Windows"
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Execution"
   ],
   "threat": [
     {
@@ -54,6 +57,6 @@
       ]
     }
   ],
-  "type": "query",
+  "type": "eql",
   "version": 5
 }

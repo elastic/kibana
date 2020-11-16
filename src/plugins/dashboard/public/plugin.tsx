@@ -63,6 +63,7 @@ import {
   KibanaLegacyStart,
 } from '../../kibana_legacy/public';
 import { FeatureCatalogueCategory, HomePublicPluginSetup } from '../../../plugins/home/public';
+import type { SavedObjectTaggingOssPluginStart } from '../../saved_objects_tagging_oss/public';
 import { DEFAULT_APP_CATEGORIES } from '../../../core/public';
 
 import {
@@ -135,6 +136,7 @@ interface StartDependencies {
   share?: SharePluginStart;
   uiActions: UiActionsStart;
   savedObjects: SavedObjectsStart;
+  savedObjectsTaggingOss?: SavedObjectTaggingOssPluginStart;
 }
 
 export type DashboardSetup = void;
@@ -299,6 +301,7 @@ export class DashboardPlugin
           kibanaLegacy: { dashboardConfig },
           urlForwarding: { navigateToDefaultApp, navigateToLegacyKibanaUrl },
           savedObjects,
+          savedObjectsTaggingOss,
         } = pluginsStart;
 
         const deps: RenderDeps = {
@@ -327,6 +330,7 @@ export class DashboardPlugin
           scopedHistory: () => this.currentHistory!,
           setHeaderActionMenu: params.setHeaderActionMenu,
           savedObjects,
+          savedObjectsTagging: savedObjectsTaggingOss?.getTaggingApi(),
           restorePreviousUrl,
         };
         // make sure the index pattern list is up to date
@@ -446,6 +450,7 @@ export class DashboardPlugin
     const savedDashboardLoader = createSavedDashboardLoader({
       savedObjectsClient: core.savedObjects.client,
       savedObjects: plugins.savedObjects,
+      embeddableStart: plugins.embeddable,
     });
     const dashboardContainerFactory = plugins.embeddable.getEmbeddableFactory(
       DASHBOARD_CONTAINER_TYPE

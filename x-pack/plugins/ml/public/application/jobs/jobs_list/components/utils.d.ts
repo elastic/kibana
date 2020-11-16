@@ -5,6 +5,4 @@
  */
 
 export function getSelectedIdFromUrl(str: string): { groupIds?: string[]; jobId?: string };
-export function getGroupQueryText(arr: string[]): string;
-export function getJobQueryText(arr: string | string[]): string;
 export function clearSelectedJobIdFromUrl(str: string): void;

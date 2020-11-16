@@ -109,7 +109,10 @@ export async function runFpm(
     `pluginsDir=/usr/share/kibana/plugins`,
     '--template-value',
     `dataDir=/var/lib/kibana`,
-
+    '--template-value',
+    `logDir=/var/log/kibana`,
+    '--template-value',
+    `envFile=/etc/default/kibana`,
     // config and data directories are copied to /usr/share and /var/lib
     // below, so exclude them from the main package source located in
     // /usr/share/kibana/config. PATHS MUST BE RELATIVE, so drop the leading slash
@@ -132,7 +135,6 @@ export async function runFpm(
     `${resolveWithTrailingSlash(fromBuild('data'))}=/var/lib/kibana/`,
 
     // copy package configurations
-    `${resolveWithTrailingSlash(__dirname, 'service_templates/sysv/')}=/`,
     `${resolveWithTrailingSlash(__dirname, 'service_templates/systemd/')}=/`,
   ];
 

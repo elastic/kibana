@@ -5,15 +5,20 @@
  */
 
 import React from 'react';
-import { EuiFlexItem, EuiStat, EuiFlexGroup } from '@elastic/eui';
+import { EuiFlexItem, EuiStat, EuiFlexGroup, EuiIconTip } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import {
   DATA_UNDEFINED_LABEL,
   FCP_LABEL,
+  FCP_TOOLTIP,
   LONGEST_LONG_TASK,
+  LONGEST_LONG_TASK_TOOLTIP,
   NO_OF_LONG_TASK,
+  NO_OF_LONG_TASK_TOOLTIP,
   SUM_LONG_TASKS,
+  SUM_LONG_TASKS_TOOLTIP,
   TBT_LABEL,
+  TBT_TOOLTIP,
 } from './translations';
 import { useFetcher } from '../../../../hooks/useFetcher';
 import { useUxQuery } from '../hooks/useUxQuery';
@@ -37,8 +42,9 @@ interface Props {
   loading: boolean;
 }
 
-function formatTitle(unit: string, value?: number) {
-  if (typeof value === 'undefined') return DATA_UNDEFINED_LABEL;
+function formatTitle(unit: string, value?: number | null) {
+  if (typeof value === 'undefined' || value === null)
+    return DATA_UNDEFINED_LABEL;
   return formatToSec(value, unit);
 }
 
@@ -69,7 +75,12 @@ export function KeyUXMetrics({ data, loading }: Props) {
         <EuiStat
           titleSize="s"
           title={formatTitle('ms', data?.fcp)}
-          description={FCP_LABEL}
+          description={
+            <>
+              {FCP_LABEL}
+              <EuiIconTip content={FCP_TOOLTIP} type="questionInCircle" />
+            </>
+          }
           isLoading={loading}
         />
       </EuiFlexItem>
@@ -77,7 +88,12 @@ export function KeyUXMetrics({ data, loading }: Props) {
         <EuiStat
           titleSize="s"
           title={formatTitle('ms', data?.tbt)}
-          description={TBT_LABEL}
+          description={
+            <>
+              {TBT_LABEL}
+              <EuiIconTip content={TBT_TOOLTIP} type="questionInCircle" />
+            </>
+          }
           isLoading={loading}
         />
       </EuiFlexItem>
@@ -85,11 +101,19 @@ export function KeyUXMetrics({ data, loading }: Props) {
         <EuiStat
           titleSize="s"
           title={
-            longTaskData?.noOfLongTasks
-              ? numeral(longTaskData.noOfLongTasks).format('0,0')
+            longTaskData?.noOfLongTasks !== undefined
+              ? numeral(longTaskData?.noOfLongTasks).format('0,0')
               : DATA_UNDEFINED_LABEL
           }
-          description={NO_OF_LONG_TASK}
+          description={
+            <>
+              {NO_OF_LONG_TASK}
+              <EuiIconTip
+                content={NO_OF_LONG_TASK_TOOLTIP}
+                type="questionInCircle"
+              />
+            </>
+          }
           isLoading={status !== 'success'}
         />
       </EuiFlexItem>
@@ -97,7 +121,15 @@ export function KeyUXMetrics({ data, loading }: Props) {
         <EuiStat
           titleSize="s"
           title={formatTitle('ms', longTaskData?.longestLongTask)}
-          description={LONGEST_LONG_TASK}
+          description={
+            <>
+              {LONGEST_LONG_TASK}
+              <EuiIconTip
+                content={LONGEST_LONG_TASK_TOOLTIP}
+                type="questionInCircle"
+              />
+            </>
+          }
           isLoading={status !== 'success'}
         />
       </EuiFlexItem>
@@ -105,7 +137,15 @@ export function KeyUXMetrics({ data, loading }: Props) {
         <EuiStat
           titleSize="s"
           title={formatTitle('ms', longTaskData?.sumOfLongTasks)}
-          description={SUM_LONG_TASKS}
+          description={
+            <>
+              {SUM_LONG_TASKS}
+              <EuiIconTip
+                content={SUM_LONG_TASKS_TOOLTIP}
+                type="questionInCircle"
+              />
+            </>
+          }
           isLoading={status !== 'success'}
         />
       </EuiFlexItem>

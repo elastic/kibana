@@ -20,9 +20,10 @@
   "severity": "low",
   "tags": [
     "Elastic",
-    "ML",
-    "Packetbeat"
+    "Network",
+    "Threat Detection",
+    "ML"
   ],
   "type": "machine_learning",
-  "version": 2
+  "version": 3
 }

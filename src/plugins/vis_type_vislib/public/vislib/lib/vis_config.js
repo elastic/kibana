@@ -50,7 +50,6 @@ export class VisConfig {
       return _.get(this._values, property, defaults);
     } else {
       throw new Error(`Accessing invalid config property: ${property}`);
-      return defaults;
     }
   }
 

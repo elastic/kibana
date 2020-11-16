@@ -11,13 +11,16 @@
   "language": "eql",
   "license": "Elastic License",
   "name": "Service Command Lateral Movement",
-  "query": "/* dependent on a wildcard for remote path */\n\nsequence by process.entity_id with maxspan=1m\n  [process where event.type in (\"start\", \"process_started\") and\n     (process.name == \"sc.exe\" or process.pe.original_file_name == \"sc.exe\") and\n     wildcard(process.args, \"\\\\\\\\*\") and wildcard(process.args, \"binPath*\", \"binpath*\") and\n     process.args in (\"create\", \"config\", \"failure\", \"start\")]\n  [network where event.type == \"connection\" and process.name == \"sc.exe\" and destination.address != \"127.0.0.1\"]\n",
+  "query": "sequence by process.entity_id with maxspan=1m\n  [process where event.type in (\"start\", \"process_started\") and\n                               /* uncomment once in winlogbeat */\n     (process.name == \"sc.exe\" /* or process.pe.original_file_name == \"sc.exe\" */ ) and\n                                                   /* case insensitive */\n      wildcard(process.args, \"\\\\\\\\*\") and wildcard(process.args, \"binPath=*\", \"binpath=*\") and\n      (process.args : \"create\" or\n       process.args : \"config\" or\n       process.args : \"failure\" or\n       process.args : \"start\")]\n  [network where process.name : \"sc.exe\" and destination.ip != \"127.0.0.1\"]\n",
   "risk_score": 21,
   "rule_id": "d61cbcf8-1bc1-4cff-85ba-e7b21c5beedc",
   "severity": "low",
   "tags": [
     "Elastic",
-    "Windows"
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Lateral Movement"
   ],
   "threat": [
     {

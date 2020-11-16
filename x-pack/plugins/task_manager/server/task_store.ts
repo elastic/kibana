@@ -41,25 +41,22 @@ import {
   shouldBeOneOf,
   mustBeAllOf,
   filterDownBy,
-  ExistsFilter,
-  TermFilter,
-  RangeFilter,
   asPinnedQuery,
   matchesClauses,
   SortOptions,
 } from './queries/query_clauses';
 
 import {
-  updateFields,
+  updateFieldsAndMarkAsFailed,
   IdleTaskWithExpiredRunAt,
   InactiveTasks,
   RunningOrClaimingTaskWithExpiredRetryAt,
-  TaskWithSchedule,
-  taskWithLessThanMaxAttempts,
   SortByRunAtAndRetryAt,
   tasksClaimedByOwner,
 } from './queries/mark_available_tasks_as_claimed';
 import { TaskTypeDictionary } from './task_type_dictionary';
+
+import { ESSearchResponse, ESSearchBody } from '../../../typings/elasticsearch';
 
 export interface StoreOpts {
   esClient: ElasticsearchClient;
@@ -78,6 +75,9 @@ export interface SearchOpts {
   seq_no_primary_term?: boolean;
   search_after?: unknown[];
 }
+
+export type AggregationOpts = Pick<Required<ESSearchBody>, 'aggs'> &
+  Pick<ESSearchBody, 'query' | 'size'>;
 
 export interface UpdateByQuerySearchOpts extends SearchOpts {
   script?: object;
@@ -259,18 +259,13 @@ export class TaskStore {
     claimTasksById: OwnershipClaimingOpts['claimTasksById'],
     size: OwnershipClaimingOpts['size']
   ): Promise<number> {
-    const tasksWithRemainingAttempts = [...this.definitions].map(([type, { maxAttempts }]) =>
-      taskWithLessThanMaxAttempts(type, maxAttempts || this.maxAttempts)
-    );
+    const taskMaxAttempts = [...this.definitions].reduce((accumulator, [type, { maxAttempts }]) => {
+      return { ...accumulator, [type]: maxAttempts || this.maxAttempts };
+    }, {});
     const queryForScheduledTasks = mustBeAllOf(
       // Either a task with idle status and runAt <= now or
       // status running or claiming with a retryAt <= now.
-      shouldBeOneOf(IdleTaskWithExpiredRunAt, RunningOrClaimingTaskWithExpiredRetryAt),
-      // Either task has a schedule or the attempts < the maximum configured
-      shouldBeOneOf<ExistsFilter | TermFilter | RangeFilter>(
-        TaskWithSchedule,
-        ...tasksWithRemainingAttempts
-      )
+      shouldBeOneOf(IdleTaskWithExpiredRunAt, RunningOrClaimingTaskWithExpiredRetryAt)
     );
 
     // The documents should be sorted by runAt/retryAt, unless there are pinned
@@ -295,11 +290,14 @@ export class TaskStore {
           ),
           filterDownBy(InactiveTasks)
         ),
-        update: updateFields({
-          ownerId: this.taskManagerId,
-          status: 'claiming',
-          retryAt: claimOwnershipUntil,
-        }),
+        update: updateFieldsAndMarkAsFailed(
+          {
+            ownerId: this.taskManagerId,
+            retryAt: claimOwnershipUntil,
+          },
+          claimTasksById || [],
+          taskMaxAttempts
+        ),
         sort,
       }),
       {
@@ -501,6 +499,25 @@ export class TaskStore {
     }
   }
 
+  public async aggregate<TSearchRequest extends AggregationOpts>({
+    aggs,
+    query,
+    size = 0,
+  }: TSearchRequest): Promise<ESSearchResponse<ConcreteTaskInstance, { body: TSearchRequest }>> {
+    const { body } = await this.esClient.search<
+      ESSearchResponse<ConcreteTaskInstance, { body: TSearchRequest }>
+    >({
+      index: this.index,
+      ignore_unavailable: true,
+      body: ensureAggregationOnlyReturnsTaskObjects({
+        query,
+        aggs,
+        size,
+      }),
+    });
+    return body;
+  }
+
   private async updateByQuery(
     opts: UpdateByQuerySearchOpts = {},
     // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -580,6 +597,22 @@ function ensureQueryOnlyReturnsTaskObjects(opts: SearchOpts): SearchOpts {
     ? { bool: { must: [queryOnlyTasks, originalQuery] } }
     : queryOnlyTasks;
 
+  return {
+    ...opts,
+    query,
+  };
+}
+
+function ensureAggregationOnlyReturnsTaskObjects(opts: AggregationOpts): AggregationOpts {
+  const originalQuery = opts.query;
+  const filterToOnlyTasks = {
+    bool: {
+      filter: [{ term: { type: 'task' } }],
+    },
+  };
+  const query = originalQuery
+    ? { bool: { must: [filterToOnlyTasks, originalQuery] } }
+    : filterToOnlyTasks;
   return {
     ...opts,
     query,
