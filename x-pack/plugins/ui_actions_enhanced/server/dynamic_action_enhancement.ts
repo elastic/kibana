@@ -6,22 +6,19 @@
 
 import { EnhancementRegistryDefinition } from '../../../../src/plugins/embeddable/server';
 import { SavedObjectReference } from '../../../../src/core/types';
-import { DynamicActionsState, SerializedEvent } from './types';
-import { AdvancedUiActionsServerPlugin } from './plugin';
+import { ActionFactory, DynamicActionsState, SerializedEvent } from './types';
 import { SerializableState } from '../../../../src/plugins/kibana_utils/common';
 
 export const dynamicActionEnhancement = (
-  uiActionsEnhanced: AdvancedUiActionsServerPlugin
+  getActionFactory: (id: string) => undefined | ActionFactory
 ): EnhancementRegistryDefinition => {
   return {
     id: 'dynamicActions',
     telemetry: (state: SerializableState, telemetry: Record<string, any>) => {
       let telemetryData = telemetry;
       (state as DynamicActionsState).events.forEach((event: SerializedEvent) => {
-        if (uiActionsEnhanced.getActionFactory(event.action.factoryId)) {
-          telemetryData = uiActionsEnhanced
-            .getActionFactory(event.action.factoryId)!
-            .telemetry(event, telemetryData);
+        if (getActionFactory(event.action.factoryId)) {
+          telemetryData = getActionFactory(event.action.factoryId)!.telemetry(event, telemetryData);
         }
       });
       return telemetryData;
@@ -30,8 +27,8 @@ export const dynamicActionEnhancement = (
       const references: SavedObjectReference[] = [];
       const newState: DynamicActionsState = {
         events: (state as DynamicActionsState).events.map((event: SerializedEvent) => {
-          const result = uiActionsEnhanced.getActionFactory(event.action.factoryId)
-            ? uiActionsEnhanced.getActionFactory(event.action.factoryId)!.extract(event)
+          const result = getActionFactory(event.action.factoryId)
+            ? getActionFactory(event.action.factoryId)!.extract(event)
             : {
                 state: event,
                 references: [],
@@ -45,8 +42,8 @@ export const dynamicActionEnhancement = (
     inject: (state: SerializableState, references: SavedObjectReference[]) => {
       return {
         events: (state as DynamicActionsState).events.map((event: SerializedEvent) => {
-          return uiActionsEnhanced.getActionFactory(event.action.factoryId)
-            ? uiActionsEnhanced.getActionFactory(event.action.factoryId)!.inject(event, references)
+          return getActionFactory(event.action.factoryId)
+            ? getActionFactory(event.action.factoryId)!.inject(event, references)
             : event;
         }),
       } as DynamicActionsState;

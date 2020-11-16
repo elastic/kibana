@@ -5,15 +5,10 @@
  */
 
 import { identity } from 'lodash';
-import { CoreSetup, Plugin, SavedObjectReference } from '../../../../src/core/server';
+import { CoreSetup, Plugin } from '../../../../src/core/server';
 import { EmbeddableSetup } from '../../../../src/plugins/embeddable/server';
 import { dynamicActionEnhancement } from './dynamic_action_enhancement';
-import {
-  ActionFactoryRegistry,
-  SerializedEvent,
-  ActionFactoryDefinition,
-  DynamicActionsState,
-} from './types';
+import { ActionFactoryRegistry, SerializedEvent, ActionFactoryDefinition } from './types';
 
 export interface SetupContract {
   registerActionFactory: (definition: ActionFactoryDefinition) => void;
@@ -32,7 +27,9 @@ export class AdvancedUiActionsServerPlugin
   constructor() {}
 
   public setup(core: CoreSetup, { embeddable }: SetupDependencies) {
-    embeddable.registerEnhancement(dynamicActionEnhancement(this));
+    const getActionFactory = (actionFactoryId: string) => this.actionFactories.get(actionFactoryId);
+
+    embeddable.registerEnhancement(dynamicActionEnhancement(getActionFactory));
 
     return {
       registerActionFactory: this.registerActionFactory,
@@ -63,10 +60,5 @@ export class AdvancedUiActionsServerPlugin
         }),
       migrations: definition.migrations || {},
     });
-  };
-
-  public readonly getActionFactory = (actionFactoryId: string) => {
-    const actionFactory = this.actionFactories.get(actionFactoryId);
-    return actionFactory;
   };
 }
