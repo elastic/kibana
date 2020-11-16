@@ -10,7 +10,6 @@ import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import { useDispatch } from 'react-redux';
 import { useGetUrlParams } from '../hooks';
-import { stringifyUrlParams } from '../lib/helper/stringify_url_params';
 import { PageHeader } from './page_header';
 import { IIndexPattern } from '../../../../../src/plugins/data/public';
 import { useUpdateKueryString } from '../hooks';

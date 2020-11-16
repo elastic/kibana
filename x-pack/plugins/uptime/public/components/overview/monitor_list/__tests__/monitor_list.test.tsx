@@ -18,6 +18,7 @@ import { renderWithRouter, shallowWithRouter } from '../../../../lib';
 import * as redux from 'react-redux';
 import moment from 'moment';
 import { IHttpFetchError } from '../../../../../../../../src/core/public';
+import { mockMoment } from '../../../../lib/helper/testHelpers';
 
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => {
   return {
@@ -106,6 +107,10 @@ const testBarSummary: MonitorSummary = {
 
 describe('MonitorList component', () => {
   let localStorageMock: any;
+
+  beforeAll(() => {
+    mockMoment();
+  });
 
   const getMonitorList = (timestamp?: string): MonitorSummariesResult => {
     if (timestamp) {

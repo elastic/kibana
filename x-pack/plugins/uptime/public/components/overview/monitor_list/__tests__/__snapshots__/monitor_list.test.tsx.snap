@@ -1153,7 +1153,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
                         <div
                           class="euiTextColor euiTextColor--subdued"
                         >
-                          Checked 9:31:38 AM
+                          Checked Sept 4, 2020  9:31:38 AM
                         </div>
                       </div>
                     </span>
@@ -1391,7 +1391,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
                         <div
                           class="euiTextColor euiTextColor--subdued"
                         >
-                          Checked 9:31:38 AM
+                          Checked Sept 4, 2020  9:31:38 AM
                         </div>
                       </div>
                     </span>
