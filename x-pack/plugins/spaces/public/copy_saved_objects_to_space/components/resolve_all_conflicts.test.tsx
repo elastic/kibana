@@ -7,8 +7,8 @@
 import React from 'react';
 import { ReactWrapper } from 'enzyme';
 import { act } from '@testing-library/react';
-import { shallowWithIntl, mountWithIntl, nextTick } from 'test_utils/enzyme_helpers';
-import { findTestSubject } from 'test_utils/find_test_subject';
+import { shallowWithIntl, mountWithIntl, nextTick } from '@kbn/test/jest';
+import { findTestSubject } from '@kbn/test/jest';
 import { ResolveAllConflicts, ResolveAllConflictsProps } from './resolve_all_conflicts';
 import { SummarizedCopyToSpaceResult } from '..';
 import { ImportRetry } from '../types';

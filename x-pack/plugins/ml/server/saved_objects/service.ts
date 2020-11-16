@@ -6,8 +6,7 @@
 
 import RE2 from 're2';
 import { SavedObjectsClientContract, SavedObjectsFindOptions } from 'kibana/server';
-import { ML_SAVED_OBJECT_TYPE } from './saved_objects';
-import { JobType } from '../../common/types/saved_objects';
+import { JobType, ML_SAVED_OBJECT_TYPE } from '../../common/types/saved_objects';
 import { MLJobNotFound } from '../lib/ml_client';
 
 export interface JobObject {
@@ -19,13 +18,19 @@ type JobObjectFilter = { [k in keyof JobObject]?: string };
 
 export type JobSavedObjectService = ReturnType<typeof jobSavedObjectServiceFactory>;
 
-export function jobSavedObjectServiceFactory(savedObjectsClient: SavedObjectsClientContract) {
+export function jobSavedObjectServiceFactory(
+  savedObjectsClient: SavedObjectsClientContract,
+  internalSavedObjectsClient: SavedObjectsClientContract,
+  spacesEnabled: boolean,
+  isMlReady: () => Promise<void>
+) {
   async function _getJobObjects(
     jobType?: JobType,
     jobId?: string,
     datafeedId?: string,
     currentSpaceOnly: boolean = true
   ) {
+    await isMlReady();
     const filterObject: JobObjectFilter = {};
 
     if (jobType !== undefined) {
@@ -41,7 +46,7 @@ export function jobSavedObjectServiceFactory(savedObjectsClient: SavedObjectsCli
     const options: SavedObjectsFindOptions = {
       type: ML_SAVED_OBJECT_TYPE,
       perPage: 10000,
-      ...(currentSpaceOnly === true ? {} : { namespaces: ['*'] }),
+      ...(spacesEnabled === false || currentSpaceOnly === true ? {} : { namespaces: ['*'] }),
       searchFields,
       filter,
     };
@@ -52,23 +57,24 @@ export function jobSavedObjectServiceFactory(savedObjectsClient: SavedObjectsCli
   }
 
   async function _createJob(jobType: JobType, jobId: string, datafeedId?: string) {
-    try {
-      await _deleteJob(jobType, jobId);
-    } catch (error) {
-      // fail silently
-      // the job object may or may not already exist, we'll overwrite it anyway.
-    }
-    await savedObjectsClient.create<JobObject>(ML_SAVED_OBJECT_TYPE, {
-      job_id: jobId,
-      datafeed_id: datafeedId ?? null,
-      type: jobType,
-    });
+    await isMlReady();
+    await savedObjectsClient.create<JobObject>(
+      ML_SAVED_OBJECT_TYPE,
+      {
+        job_id: jobId,
+        datafeed_id: datafeedId ?? null,
+        type: jobType,
+      },
+      { id: jobId, overwrite: true }
+    );
   }
 
   async function _bulkCreateJobs(jobs: JobObject[], namespaces?: string[]) {
+    await isMlReady();
     return await savedObjectsClient.bulkCreate<JobObject>(
       jobs.map((j) => ({
         type: ML_SAVED_OBJECT_TYPE,
+        id: j.job_id,
         attributes: j,
         initialNamespaces: namespaces,
       }))
@@ -82,7 +88,7 @@ export function jobSavedObjectServiceFactory(savedObjectsClient: SavedObjectsCli
       throw new MLJobNotFound('job not found');
     }
 
-    await savedObjectsClient.delete(ML_SAVED_OBJECT_TYPE, job.id);
+    await savedObjectsClient.delete(ML_SAVED_OBJECT_TYPE, job.id, { force: true });
   }
 
   async function createAnomalyDetectionJob(jobId: string, datafeedId?: string) {
@@ -107,6 +113,26 @@ export function jobSavedObjectServiceFactory(savedObjectsClient: SavedObjectsCli
 
   async function getAllJobObjects(jobType?: JobType, currentSpaceOnly: boolean = true) {
     return await _getJobObjects(jobType, undefined, undefined, currentSpaceOnly);
+  }
+
+  async function getAllJobObjectsForAllSpaces(jobType?: JobType) {
+    await isMlReady();
+    const filterObject: JobObjectFilter = {};
+
+    if (jobType !== undefined) {
+      filterObject.type = jobType;
+    }
+
+    const { filter, searchFields } = createSavedObjectFilter(filterObject);
+    const options: SavedObjectsFindOptions = {
+      type: ML_SAVED_OBJECT_TYPE,
+      perPage: 10000,
+      ...(spacesEnabled === false ? {} : { namespaces: ['*'] }),
+      searchFields,
+      filter,
+    };
+
+    return (await internalSavedObjectsClient.find<JobObject>(options)).saved_objects;
   }
 
   async function addDatafeed(datafeedId: string, jobId: string) {
@@ -268,6 +294,7 @@ export function jobSavedObjectServiceFactory(savedObjectsClient: SavedObjectsCli
     assignJobsToSpaces,
     removeJobsFromSpaces,
     bulkCreateJobs,
+    getAllJobObjectsForAllSpaces,
   };
 }
 

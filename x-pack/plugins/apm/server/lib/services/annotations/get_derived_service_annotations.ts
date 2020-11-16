@@ -4,19 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { isNumber } from 'lodash';
+import { ESFilter } from '../../../../../../typings/elasticsearch';
 import { Annotation, AnnotationType } from '../../../../common/annotations';
-import { SetupTimeRange, Setup } from '../../helpers/setup_request';
-import { ESFilter } from '../../../../typings/elasticsearch';
-import { rangeFilter } from '../../../../common/utils/range_filter';
 import {
   SERVICE_NAME,
   SERVICE_VERSION,
 } from '../../../../common/elasticsearch_fieldnames';
-import { getEnvironmentUiFilterES } from '../../helpers/convert_ui_filters/get_environment_ui_filter_es';
+import { rangeFilter } from '../../../../common/utils/range_filter';
 import {
   getDocumentTypeFilterForAggregatedTransactions,
   getProcessorEventForAggregatedTransactions,
 } from '../../helpers/aggregated_transactions';
+import { getEnvironmentUiFilterES } from '../../helpers/convert_ui_filters/get_environment_ui_filter_es';
+import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 
 export async function getDerivedServiceAnnotations({
   setup,

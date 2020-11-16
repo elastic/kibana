@@ -73,6 +73,11 @@ export function EnvironmentFilter() {
     end,
   });
 
+  // Set the min-width so we don't see as much collapsing of the select during
+  // the loading state. 200px is what is looks like if "production" is
+  // the contents.
+  const minWidth = 200;
+
   return (
     <EuiSelect
       prepend={i18n.translate('xpack.apm.filter.environment.label', {
@@ -84,6 +89,7 @@ export function EnvironmentFilter() {
         updateEnvironmentUrl(history, location, event.target.value);
       }}
       isLoading={status === 'loading'}
+      style={{ minWidth }}
     />
   );
 }
