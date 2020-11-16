@@ -168,8 +168,9 @@ export const PackagePoliciesPanel = ({ name, version }: PackagePoliciesPanelProp
 
   // if they arrive at this page and the package is not installed, send them to overview
   // this happens if they arrive with a direct url or they uninstall while on this tab
-  if (packageInstallStatus.status !== InstallStatus.installed)
+  if (packageInstallStatus.status !== InstallStatus.installed) {
     return <Redirect to={getPath('integration_details', { pkgkey: `${name}-${version}` })} />;
+  }
 
   return (
     <EuiBasicTable
