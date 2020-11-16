@@ -37,6 +37,7 @@ import { TransportRequestParams } from '@elastic/elasticsearch/lib/Transport';
 import { TransportRequestPromise } from '@elastic/elasticsearch/lib/Transport';
 import { Type } from '@kbn/config-schema';
 import { TypeOf } from '@kbn/config-schema';
+import { UiStatsMetricType } from '@kbn/analytics';
 import { UnregisterCallback } from 'history';
 import { UserProvidedValues as UserProvidedValues_2 } from 'src/core/server/types';
 
@@ -627,8 +628,7 @@ export interface HttpFetchOptionsWithPath extends HttpFetchOptions {
 
 // @public (undocumented)
 export interface HttpFetchQuery {
-    // (undocumented)
-    [key: string]: string | number | boolean | undefined | Array<string | number | boolean | undefined>;
+    [key: string]: string | number | boolean | string[] | number[] | boolean[] | undefined | null;
 }
 
 // @public
@@ -1365,6 +1365,11 @@ export interface UiSettingsParams<T = unknown> {
     // Warning: (ae-forgotten-export) The symbol "DeprecationSettings" needs to be exported by the entry point index.d.ts
     deprecation?: DeprecationSettings;
     description?: string;
+    // @deprecated
+    metric?: {
+        type: UiStatsMetricType;
+        name: string;
+    };
     name?: string;
     optionLabels?: Record<string, string>;
     options?: string[];
