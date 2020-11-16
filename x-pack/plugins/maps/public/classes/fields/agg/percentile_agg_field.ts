@@ -43,7 +43,7 @@ export class PercentileAggField extends CountAggField implements IESAggField {
 
   getValueAggDsl(indexPattern: IndexPattern): unknown {
     const field = getField(indexPattern, this.getRootName());
-    const dsl = addFieldToDSL({}, field);
+    const dsl: Record<string, unknown> = addFieldToDSL({}, field);
     dsl.percents = [this._percentile];
     return {
       percentiles: dsl,
