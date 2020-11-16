@@ -1205,10 +1205,10 @@ describe('status check alert', () => {
     it('creates a set of unique IDs from a list of composite unique objects', () => {
       expect(getUniqueIdsByLoc(downItems, availItems)).toEqual(
         new Set<string>([
-          'firstharrisburg',
-          'firstfairbanks',
-          'secondharrisburg',
-          'secondfairbanks',
+          'first-harrisburg',
+          'first-fairbanks',
+          'second-harrisburg',
+          'second-fairbanks',
         ])
       );
     });
