@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import $ from 'jquery';
 import moment, { Moment } from 'moment-timezone';
 import { Position } from '@elastic/charts';
 
@@ -54,6 +55,9 @@ interface TimeRangeBounds {
   min: Moment | undefined;
   max: Moment | undefined;
 }
+
+export const ACTIVE_CURSOR = 'ACTIVE_CURSOR_TIMELION';
+export const eventBus = $({});
 
 const colors = [
   '#01A4A4',

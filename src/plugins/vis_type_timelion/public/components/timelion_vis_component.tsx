@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef, RefObject } from 'react';
 import { compact, cloneDeep, last, map } from 'lodash';
 import {
   Chart,
@@ -27,6 +27,7 @@ import {
   TooltipType,
   YDomainRange,
   BrushEndListener,
+  PointerEvent,
 } from '@elastic/charts';
 
 import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
@@ -35,7 +36,13 @@ import { useKibana } from '../../../kibana_react/public';
 import { AreaSeriesComponent } from './area_series';
 import { BarSeriesComponent } from './bar_series';
 
-import { createTickFormat, colors, Axis as IAxis } from '../helpers/panel_utils';
+import {
+  createTickFormat,
+  colors,
+  Axis as IAxis,
+  ACTIVE_CURSOR,
+  eventBus,
+} from '../helpers/panel_utils';
 import { tickFormatters } from '../helpers/tick_formatters';
 
 import { Series, Sheet } from '../helpers/timelion_request_handler';
@@ -52,6 +59,10 @@ interface TimelionVisComponentProps {
   renderComplete: IInterpreterRenderHandlers['done'];
 }
 
+const handleCursorUpdate = (cursor: PointerEvent) => {
+  eventBus.trigger(ACTIVE_CURSOR, cursor);
+};
+
 function TimelionVisComponent({
   interval,
   seriesList,
@@ -60,6 +71,7 @@ function TimelionVisComponent({
 }: TimelionVisComponentProps) {
   const kibana = useKibana<TimelionVisDependencies>();
   const [chart, setChart] = useState(() => cloneDeep(seriesList.list));
+  const chartRef = useRef<Chart>();
 
   const updateYAxes = function (yaxes: IAxis[]) {
     yaxes.forEach((yaxis: IAxis) => {
@@ -81,6 +93,20 @@ function TimelionVisComponent({
       }
     });
   };
+
+  useEffect(() => {
+    const updateCursor = (_: any, cursor: PointerEvent) => {
+      if (chartRef.current) {
+        chartRef.current.dispatchExternalPointerEvent(cursor);
+      }
+    };
+
+    eventBus.on(ACTIVE_CURSOR, updateCursor);
+
+    return () => {
+      eventBus.off(ACTIVE_CURSOR, updateCursor);
+    };
+  }, []);
 
   useEffect(() => {
     const newChart = seriesList.list.map((series: Series, seriesIndex: number) => {
@@ -163,18 +189,20 @@ function TimelionVisComponent({
   return (
     <div className="timelionChart">
       <div className="timelionChart__topTitle">{title}</div>
-      <Chart renderer="canvas" size={{ width: '100%' }}>
+      <Chart ref={chartRef as RefObject<Chart>} renderer="canvas" size={{ width: '100%' }}>
         <Settings
           onBrushEnd={brushEndListener}
           showLegend
           legendPosition={getLegendPosition()}
           onRenderChange={onRenderChange}
+          onPointerUpdate={handleCursorUpdate}
           theme={kibana.services.chartTheme.useChartsTheme()}
           baseTheme={kibana.services.chartTheme.useChartsBaseTheme()}
           tooltip={{
             snap: true,
             type: TooltipType.VerticalCursor,
           }}
+          externalPointerEvents={{ tooltip: { visible: false } }}
         />
         <Axis id="bottom" position={Position.Bottom} showOverlappingTicks tickFormat={tickFormat} />
         {chart[0]._global?.yaxes ? (
