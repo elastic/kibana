@@ -52,6 +52,13 @@ export const encryptedSavedObjectsServiceMock = {
     mock.isRegistered.mockImplementation(
       (type) => registrations.findIndex((r) => r.type === type) >= 0
     );
+    mock.allowPredefinedID.mockImplementation((type) => {
+      const registration = registrations.find((r) => r.type === type);
+      if (!registration) {
+        return true;
+      }
+      return registration.allowPredefinedID === true;
+    });
     mock.encryptAttributes.mockImplementation(async (descriptor, attrs) =>
       processAttributes(
         descriptor,

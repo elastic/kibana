@@ -68,16 +68,17 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
     }
 
     // Saved objects with encrypted attributes should have IDs that are hard to guess especially
-    // since IDs are part of the AAD used during encryption, that's why we control them within this
-    // wrapper and don't allow consumers to specify their own IDs directly.
+    // since IDs are part of the AAD used during encryption. Types can opt-out of this restriction,
+    // when necessary, but it's much safer for this wrapper to generate them.
 
     // only allow a specified ID if we're overwriting an existing ESO with a Version
     // this helps us ensure that the document really was previously created using ESO
     // and not being used to get around the specified ID limitation
-    const canSpecifyID = options.overwrite && options.version;
+    const canSpecifyID =
+      (options.overwrite && options.version) || this.options.service.allowPredefinedID(type);
     if (options.id && !canSpecifyID) {
       throw new Error(
-        'Predefined IDs are not allowed for saved objects with encrypted attributes.'
+        `Predefined IDs are not allowed for encrypted saved objects of type "${type}".`
       );
     }
 
@@ -118,10 +119,12 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
         // Saved objects with encrypted attributes should have IDs that are hard to guess especially
         // since IDs are part of the AAD used during encryption, that's why we control them within this
         // wrapper and don't allow consumers to specify their own IDs directly unless overwriting the original document.
-        const canSpecifyID = options?.overwrite && object.version;
+        const canSpecifyID =
+          (options?.overwrite && object.version) ||
+          this.options.service.allowPredefinedID(object.type);
         if (object.id && !canSpecifyID) {
           throw new Error(
-            'Predefined IDs are not allowed for saved objects with encrypted attributes.'
+            `Predefined IDs are not allowed for encrypted saved objects of type "${object.type}".`
           );
         }
 

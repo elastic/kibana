@@ -31,6 +31,7 @@ export interface EncryptedSavedObjectTypeRegistration {
   readonly type: string;
   readonly attributesToEncrypt: ReadonlySet<string | AttributeToEncrypt>;
   readonly attributesToExcludeFromAAD?: ReadonlySet<string>;
+  readonly allowPredefinedID?: boolean;
 }
 
 /**
@@ -142,6 +143,19 @@ export class EncryptedSavedObjectsService {
    */
   public isRegistered(type: string) {
     return this.typeDefinitions.has(type);
+  }
+
+  /**
+   * Checks whether specified saved object type supports predefined IDs. If the type isn't registered
+   * as an encrypted saved object type, this will return "true".
+   * @param type Saved object type.
+   */
+  public allowPredefinedID(type: string) {
+    const typeDefinitions = this.typeDefinitions.get(type);
+    if (typeDefinitions === undefined) {
+      return true;
+    }
+    return typeDefinitions.allowPredefinedID === true;
   }
 
   /**

@@ -89,6 +89,35 @@ describe('#isRegistered', () => {
   });
 });
 
+describe('#allowPredefinedID', () => {
+  it('returns true for unknown types', () => {
+    expect(service.allowPredefinedID('unknown-type')).toBe(true);
+  });
+
+  it('returns true for types registered setting allowPredefinedID to true', () => {
+    service.registerType({
+      type: 'known-type-1',
+      attributesToEncrypt: new Set(['attr-1']),
+      allowPredefinedID: true,
+    });
+    expect(service.allowPredefinedID('known-type-1')).toBe(true);
+  });
+
+  it('returns false for types registered without setting allowPredefinedID', () => {
+    service.registerType({ type: 'known-type-1', attributesToEncrypt: new Set(['attr-1']) });
+    expect(service.allowPredefinedID('known-type-1')).toBe(false);
+  });
+
+  it('returns false for types registered setting allowPredefinedID to false', () => {
+    service.registerType({
+      type: 'known-type-1',
+      attributesToEncrypt: new Set(['attr-1']),
+      allowPredefinedID: false,
+    });
+    expect(service.allowPredefinedID('known-type-1')).toBe(false);
+  });
+});
+
 describe('#stripOrDecryptAttributes', () => {
   it('does not strip attributes from unknown types', async () => {
     const attributes = { attrOne: 'one', attrTwo: 'two', attrThree: 'three' };
