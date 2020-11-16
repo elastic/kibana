@@ -4,10 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useState } from 'react';
 import { Direction, EuiBasicTableProps, Pagination, PropertySort } from '@elastic/eui';
+import { ListingPageUrlState } from '../../../../../../../common/types/common';
 
-const PAGE_SIZE = 10;
 const PAGE_SIZE_OPTIONS = [10, 25, 50];
 
 // Copying from EUI EuiBasicTable types as type is not correctly picked up for table's onChange
@@ -29,15 +28,6 @@ export interface CriteriaWithPagination<T> extends Criteria<T> {
   };
 }
 
-interface AnalyticsBasicTableSettings<T> {
-  pageIndex: number;
-  pageSize: number;
-  totalItemCount: number;
-  hidePerPageOptions: boolean;
-  sortField: keyof T;
-  sortDirection: Direction;
-}
-
 interface UseTableSettingsReturnValue<T> {
   onTableChange: EuiBasicTableProps<T>['onChange'];
   pagination: Pagination;
@@ -45,35 +35,21 @@ interface UseTableSettingsReturnValue<T> {
 }
 
 export function useTableSettings<TypeOfItem>(
-  sortByField: keyof TypeOfItem,
-  items: TypeOfItem[]
+  items: TypeOfItem[],
+  pageState: ListingPageUrlState,
+  updatePageState: (update: Partial<ListingPageUrlState>) => void
 ): UseTableSettingsReturnValue<TypeOfItem> {
-  const [tableSettings, setTableSettings] = useState<AnalyticsBasicTableSettings<TypeOfItem>>({
-    pageIndex: 0,
-    pageSize: PAGE_SIZE,
-    totalItemCount: 0,
-    hidePerPageOptions: false,
-    sortField: sortByField,
-    sortDirection: 'asc',
-  });
-
   const onTableChange: EuiBasicTableProps<TypeOfItem>['onChange'] = ({
-    page = { index: 0, size: PAGE_SIZE },
-    sort = { field: sortByField, direction: 'asc' },
+    page,
+    sort,
   }: CriteriaWithPagination<TypeOfItem>) => {
-    const { index, size } = page;
-    const { field, direction } = sort;
-
-    setTableSettings({
-      ...tableSettings,
-      pageIndex: index,
-      pageSize: size,
-      sortField: field,
-      sortDirection: direction,
+    updatePageState({
+      ...(page ? { pageIndex: page.index, pageSize: page.size } : {}),
+      ...(sort ? { sortField: sort.field as string, sortDirection: sort.direction } : {}),
     });
   };
 
-  const { pageIndex, pageSize, sortField, sortDirection } = tableSettings;
+  const { pageIndex, pageSize, sortField, sortDirection } = pageState;
 
   const pagination = {
     pageIndex,
@@ -85,7 +61,7 @@ export function useTableSettings<TypeOfItem>(
   const sorting = {
     sort: {
       field: sortField as string,
-      direction: sortDirection,
+      direction: sortDirection as Direction,
     },
   };
 

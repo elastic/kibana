@@ -31,9 +31,21 @@ import { NodeAvailableWarning } from '../../../components/node_available_warning
 import { UpgradeWarning } from '../../../components/upgrade';
 import { AnalyticsNavigationBar } from './components/analytics_navigation_bar';
 import { ModelsList } from './components/models_management';
+import { useListingPageUrlState } from '../../../util/url_state';
+import { ListingPageUrlState } from '../../../../../common/types/common';
+import { DataFrameAnalyticsListColumn } from './components/analytics_list/common';
+
+export const getDefaultDFAListState = (): ListingPageUrlState => ({
+  pageIndex: 0,
+  pageSize: 10,
+  sortField: DataFrameAnalyticsListColumn.id as string,
+  sortDirection: 'asc',
+});
 
 export const Page: FC = () => {
   const [blockRefresh, setBlockRefresh] = useState(false);
+
+  const [dfaPageState, setDfaPageState] = useListingPageUrlState(getDefaultDFAListState());
 
   useRefreshInterval(setBlockRefresh);
 
@@ -90,7 +102,11 @@ export const Page: FC = () => {
             <AnalyticsNavigationBar selectedTabId={selectedTabId} />
 
             {selectedTabId === 'data_frame_analytics' && (
-              <DataFrameAnalyticsList blockRefresh={blockRefresh} />
+              <DataFrameAnalyticsList
+                blockRefresh={blockRefresh}
+                pageState={dfaPageState}
+                updatePageState={setDfaPageState}
+              />
             )}
             {selectedTabId === 'models' && <ModelsList />}
           </EuiPageContent>
