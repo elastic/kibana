@@ -1438,15 +1438,6 @@ const connector = {
 </EuiButton>
 
 // in render section of component
-<ActionsConnectorsContextProvider
-        value={{
-          http: http,
-          toastNotifications: notifications.toasts,
-          actionTypeRegistry: triggersActionsUi.actionTypeRegistry,
-          capabilities: application.capabilities,
-          docLinks,
-        }}
-      >
         <ConnectorAddFlyout
           addFlyoutVisible={addFlyoutVisible}
           setAddFlyoutVisibility={setAddFlyoutVisibility}
@@ -1457,8 +1448,9 @@ const connector = {
               name: 'Index',
             },
           ]}
+          reloadConnectors={reloadConnectors}
+          consumer={'alerts'}
         />
-</ActionsConnectorsContextProvider>
 ```
 
 ConnectorAddFlyout Props definition:
@@ -1545,29 +1537,23 @@ const { http, triggersActionsUi, notifications, application } = useKibana().serv
 </EuiButton>
 
 // in render section of component
-<ActionsConnectorsContextProvider
-        value={{
-          http: http,
-          toastNotifications: notifications.toasts,
-          actionTypeRegistry: triggersActionsUi.actionTypeRegistry,
-          capabilities: application.capabilities,
-        }}
-      >
         <ConnectorEditFlyout
-            initialConnector={connector}
-            editFlyoutVisible={editFlyoutVisible}
-            setEditFlyoutVisibility={setEditFlyoutVisibility}
-          />
-</ActionsConnectorsContextProvider>
+          initialConnector={editedConnectorItem}
+          onClose={onCloseEditFlyout}
+          reloadConnectors={reloadConnectors}
+          consumer={'alerts'}
+        />
 
 ```
 
 ConnectorEditFlyout Props definition:
 ```
 export interface ConnectorEditProps {
-  initialConnector: ActionConnectorTableItem;
-  editFlyoutVisible: boolean;
-  setEditFlyoutVisibility: React.Dispatch<React.SetStateAction<boolean>>;
+  initialConnector: ActionConnector;
+  onClose: () => void;
+  tab?: EditConectorTabs;
+  reloadConnectors?: () => Promise<ActionConnector[] | void>;
+  consumer?: string;
 }
 ```
 

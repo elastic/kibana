@@ -33,7 +33,6 @@ import {
   hasExecuteActionsCapability,
 } from '../../../lib/capabilities';
 import { DeleteModalConfirmation } from '../../../components/delete_modal_confirmation';
-import { ActionsConnectorsContextProvider } from '../../../context/actions_connectors_context';
 import { checkActionTypeEnabled } from '../../../lib/check_action_type_enabled';
 import './actions_connectors_list.scss';
 import { ActionConnector, ActionConnectorTableItem, ActionTypeIndex } from '../../../../types';
@@ -41,13 +40,7 @@ import { EmptyConnectorsPrompt } from '../../../components/prompts/empty_connect
 import { useKibana } from '../../../../common/lib/kibana';
 
 export const ActionsConnectorsList: React.FunctionComponent = () => {
-  const {
-    http,
-    toastNotifications,
-    capabilities,
-    actionTypeRegistry,
-    docLinks,
-  } = useKibana().services;
+  const { http, toastNotifications, capabilities, actionTypeRegistry } = useKibana().services;
   const canDelete = hasDeleteActionsCapability(capabilities);
   const canExecute = hasExecuteActionsCapability(capabilities);
   const canSave = hasSaveActionsCapability(capabilities);
@@ -356,37 +349,30 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
           <EmptyConnectorsPrompt onCTAClicked={() => setAddFlyoutVisibility(true)} />
         )}
       {actionConnectorTableItems.length === 0 && !canSave && <NoPermissionPrompt />}
-      <ActionsConnectorsContextProvider
-        value={{
-          actionTypeRegistry,
-          http,
-          capabilities,
-          toastNotifications,
-          reloadConnectors: loadActions,
-          docLinks,
-        }}
-      >
-        {addFlyoutVisible ? (
-          <ConnectorAddFlyout
-            onClose={() => {
-              setAddFlyoutVisibility(false);
-            }}
-            onTestConnector={(connector) => editItem(connector, EditConectorTabs.Test)}
-          />
-        ) : null}
-        {editConnectorProps.initialConnector ? (
-          <ConnectorEditFlyout
-            key={`${editConnectorProps.initialConnector.id}${
-              editConnectorProps.tab ? `:${editConnectorProps.tab}` : ``
-            }`}
-            initialConnector={editConnectorProps.initialConnector}
-            tab={editConnectorProps.tab}
-            onClose={() => {
-              setEditConnectorProps(omit(editConnectorProps, 'initialConnector'));
-            }}
-          />
-        ) : null}
-      </ActionsConnectorsContextProvider>
+      {addFlyoutVisible ? (
+        <ConnectorAddFlyout
+          onClose={() => {
+            setAddFlyoutVisibility(false);
+          }}
+          onTestConnector={(connector) => editItem(connector, EditConectorTabs.Test)}
+          reloadConnectors={loadActions}
+          actionTypeRegistry={actionTypeRegistry}
+        />
+      ) : null}
+      {editConnectorProps.initialConnector ? (
+        <ConnectorEditFlyout
+          key={`${editConnectorProps.initialConnector.id}${
+            editConnectorProps.tab ? `:${editConnectorProps.tab}` : ``
+          }`}
+          initialConnector={editConnectorProps.initialConnector}
+          tab={editConnectorProps.tab}
+          onClose={() => {
+            setEditConnectorProps(omit(editConnectorProps, 'initialConnector'));
+          }}
+          reloadConnectors={loadActions}
+          actionTypeRegistry={actionTypeRegistry}
+        />
+      ) : null}
     </section>
   );
 };

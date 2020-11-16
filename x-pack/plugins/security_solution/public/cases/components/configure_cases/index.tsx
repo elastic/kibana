@@ -13,7 +13,6 @@ import { useKibana } from '../../../common/lib/kibana';
 import { useConnectors } from '../../containers/configure/use_connectors';
 import { useCaseConfigure } from '../../containers/configure/use_configure';
 import {
-  ActionsConnectorsContextProvider,
   ActionType,
   ConnectorAddFlyout,
   ConnectorEditFlyout,
@@ -61,7 +60,7 @@ interface ConfigureCasesComponentProps {
 }
 
 const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userCanCrud }) => {
-  const { http, triggersActionsUi, notifications, application, docLinks } = useKibana().services;
+  const { triggersActionsUi } = useKibana().services;
 
   const [connectorIsValid, setConnectorIsValid] = useState(true);
   const [addFlyoutVisible, setAddFlyoutVisibility] = useState<boolean>(false);
@@ -187,28 +186,25 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
           selectedConnector={connector.id}
         />
       </SectionWrapper>
-      <ActionsConnectorsContextProvider
-        value={{
-          http,
-          actionTypeRegistry: triggersActionsUi.actionTypeRegistry,
-          toastNotifications: notifications.toasts,
-          capabilities: application.capabilities,
-          reloadConnectors,
-          docLinks,
-          consumer: 'case',
-        }}
-      >
-        {addFlyoutVisible && (
-          <ConnectorAddFlyout onClose={onCloseAddFlyout} actionTypes={actionTypes} />
-        )}
-        {editedConnectorItem && editFlyoutVisible && (
-          <ConnectorEditFlyout
-            key={editedConnectorItem.id}
-            initialConnector={editedConnectorItem}
-            onClose={onCloseEditFlyout}
-          />
-        )}
-      </ActionsConnectorsContextProvider>
+      {addFlyoutVisible && (
+        <ConnectorAddFlyout
+          onClose={onCloseAddFlyout}
+          actionTypes={actionTypes}
+          reloadConnectors={reloadConnectors}
+          consumer={'case'}
+          actionTypeRegistry={triggersActionsUi.actionTypeRegistry}
+        />
+      )}
+      {editedConnectorItem && editFlyoutVisible && (
+        <ConnectorEditFlyout
+          key={editedConnectorItem.id}
+          initialConnector={editedConnectorItem}
+          onClose={onCloseEditFlyout}
+          reloadConnectors={reloadConnectors}
+          consumer={'case'}
+          actionTypeRegistry={triggersActionsUi.actionTypeRegistry}
+        />
+      )}
     </FormWrapper>
   );
 };

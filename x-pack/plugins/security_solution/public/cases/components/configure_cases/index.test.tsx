@@ -12,7 +12,6 @@ import { TestProviders } from '../../../common/mock';
 import { Connectors } from './connectors';
 import { ClosureOptions } from './closure_options';
 import {
-  ActionsConnectorsContextProvider,
   ConnectorAddFlyout,
   ConnectorEditFlyout,
   TriggersAndActionsUIPublicPluginStart,
@@ -60,11 +59,6 @@ describe('ConfigureCases', () => {
 
     test('it renders the ClosureType', () => {
       expect(wrapper.find('[data-test-subj="closure-options-radio-group"]').exists()).toBeTruthy();
-    });
-
-    test('it renders the ActionsConnectorsContextProvider', () => {
-      // Components from triggersActionsUi  do not have a data-test-subj
-      expect(wrapper.find(ActionsConnectorsContextProvider).exists()).toBeTruthy();
     });
 
     test('it does NOT render the ConnectorAddFlyout', () => {

@@ -7,7 +7,6 @@ import * as React from 'react';
 import { mountWithIntl } from '@kbn/test/jest';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 import ConnectorAddFlyout from './connector_add_flyout';
-import { ActionsConnectorsContextProvider } from '../../context/actions_connectors_context';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import { ValidationResult } from '../../../types';
 
@@ -45,32 +44,22 @@ describe('connector_add_flyout', () => {
     actionTypeRegistry.has.mockReturnValue(true);
 
     const wrapper = mountWithIntl(
-      <ActionsConnectorsContextProvider
-        value={{
-          http: deps!.http,
-          toastNotifications: deps!.toastNotifications,
-          actionTypeRegistry: deps!.actionTypeRegistry,
-          capabilities: deps!.capabilities,
-          reloadConnectors: () => {
-            return new Promise<void>(() => {});
+      <ConnectorAddFlyout
+        onClose={() => {}}
+        actionTypes={[
+          {
+            id: actionType.id,
+            enabled: true,
+            name: 'Test',
+            enabledInConfig: true,
+            enabledInLicense: true,
+            minimumLicenseRequired: 'basic',
           },
-          docLinks: deps!.docLinks,
+        ]}
+        reloadConnectors={() => {
+          return new Promise<void>(() => {});
         }}
-      >
-        <ConnectorAddFlyout
-          onClose={() => {}}
-          actionTypes={[
-            {
-              id: actionType.id,
-              enabled: true,
-              name: 'Test',
-              enabledInConfig: true,
-              enabledInLicense: true,
-              minimumLicenseRequired: 'basic',
-            },
-          ]}
-        />
-      </ActionsConnectorsContextProvider>
+      />
     );
     expect(wrapper.find('ActionTypeMenu')).toHaveLength(1);
     expect(wrapper.find(`[data-test-subj="${actionType.id}-card"]`).exists()).toBeTruthy();
@@ -86,40 +75,30 @@ describe('connector_add_flyout', () => {
     actionTypeRegistry.has.mockReturnValue(true);
 
     const wrapper = mountWithIntl(
-      <ActionsConnectorsContextProvider
-        value={{
-          http: deps!.http,
-          toastNotifications: deps!.toastNotifications,
-          actionTypeRegistry: deps!.actionTypeRegistry,
-          capabilities: deps!.capabilities,
-          reloadConnectors: () => {
-            return new Promise<void>(() => {});
+      <ConnectorAddFlyout
+        onClose={() => {}}
+        actionTypes={[
+          {
+            id: actionType.id,
+            enabled: true,
+            name: 'Test',
+            enabledInConfig: true,
+            enabledInLicense: true,
+            minimumLicenseRequired: 'basic',
           },
-          docLinks: deps!.docLinks,
+          {
+            id: disabledActionType.id,
+            enabled: true,
+            name: 'Test',
+            enabledInConfig: true,
+            enabledInLicense: false,
+            minimumLicenseRequired: 'gold',
+          },
+        ]}
+        reloadConnectors={() => {
+          return new Promise<void>(() => {});
         }}
-      >
-        <ConnectorAddFlyout
-          onClose={() => {}}
-          actionTypes={[
-            {
-              id: actionType.id,
-              enabled: true,
-              name: 'Test',
-              enabledInConfig: true,
-              enabledInLicense: true,
-              minimumLicenseRequired: 'basic',
-            },
-            {
-              id: disabledActionType.id,
-              enabled: true,
-              name: 'Test',
-              enabledInConfig: true,
-              enabledInLicense: false,
-              minimumLicenseRequired: 'gold',
-            },
-          ]}
-        />
-      </ActionsConnectorsContextProvider>
+      />
     );
     const callout = wrapper.find('UpgradeYourLicenseCallOut');
     expect(callout).toHaveLength(1);
@@ -145,40 +124,30 @@ describe('connector_add_flyout', () => {
     actionTypeRegistry.has.mockReturnValue(true);
 
     const wrapper = mountWithIntl(
-      <ActionsConnectorsContextProvider
-        value={{
-          http: deps!.http,
-          toastNotifications: deps!.toastNotifications,
-          actionTypeRegistry: deps!.actionTypeRegistry,
-          capabilities: deps!.capabilities,
-          reloadConnectors: () => {
-            return new Promise<void>(() => {});
+      <ConnectorAddFlyout
+        onClose={() => {}}
+        actionTypes={[
+          {
+            id: actionType.id,
+            enabled: true,
+            name: 'Test',
+            enabledInConfig: true,
+            enabledInLicense: true,
+            minimumLicenseRequired: 'basic',
           },
-          docLinks: deps!.docLinks,
+          {
+            id: disabledActionType.id,
+            enabled: true,
+            name: 'Test',
+            enabledInConfig: true,
+            enabledInLicense: false,
+            minimumLicenseRequired: 'platinum',
+          },
+        ]}
+        reloadConnectors={() => {
+          return new Promise<void>(() => {});
         }}
-      >
-        <ConnectorAddFlyout
-          onClose={() => {}}
-          actionTypes={[
-            {
-              id: actionType.id,
-              enabled: true,
-              name: 'Test',
-              enabledInConfig: true,
-              enabledInLicense: true,
-              minimumLicenseRequired: 'basic',
-            },
-            {
-              id: disabledActionType.id,
-              enabled: true,
-              name: 'Test',
-              enabledInConfig: true,
-              enabledInLicense: false,
-              minimumLicenseRequired: 'platinum',
-            },
-          ]}
-        />
-      </ActionsConnectorsContextProvider>
+      />
     );
     const callout = wrapper.find('UpgradeYourLicenseCallOut');
     expect(callout).toHaveLength(0);
@@ -192,40 +161,30 @@ describe('connector_add_flyout', () => {
     actionTypeRegistry.has.mockReturnValue(true);
 
     const wrapper = mountWithIntl(
-      <ActionsConnectorsContextProvider
-        value={{
-          http: deps!.http,
-          toastNotifications: deps!.toastNotifications,
-          actionTypeRegistry: deps!.actionTypeRegistry,
-          capabilities: deps!.capabilities,
-          reloadConnectors: () => {
-            return new Promise<void>(() => {});
+      <ConnectorAddFlyout
+        onClose={() => {}}
+        actionTypes={[
+          {
+            id: actionType.id,
+            enabled: true,
+            name: 'Test',
+            enabledInConfig: true,
+            enabledInLicense: true,
+            minimumLicenseRequired: 'basic',
           },
-          docLinks: deps!.docLinks,
+          {
+            id: disabledActionType.id,
+            enabled: true,
+            name: 'Test',
+            enabledInConfig: true,
+            enabledInLicense: false,
+            minimumLicenseRequired: 'enterprise',
+          },
+        ]}
+        reloadConnectors={() => {
+          return new Promise<void>(() => {});
         }}
-      >
-        <ConnectorAddFlyout
-          onClose={() => {}}
-          actionTypes={[
-            {
-              id: actionType.id,
-              enabled: true,
-              name: 'Test',
-              enabledInConfig: true,
-              enabledInLicense: true,
-              minimumLicenseRequired: 'basic',
-            },
-            {
-              id: disabledActionType.id,
-              enabled: true,
-              name: 'Test',
-              enabledInConfig: true,
-              enabledInLicense: false,
-              minimumLicenseRequired: 'enterprise',
-            },
-          ]}
-        />
-      </ActionsConnectorsContextProvider>
+      />
     );
     const callout = wrapper.find('UpgradeYourLicenseCallOut');
     expect(callout).toHaveLength(0);

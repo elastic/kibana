@@ -62,10 +62,7 @@ describe('action_connector_form', () => {
           connector={initialConnector}
           dispatch={() => {}}
           errors={{ name: [] }}
-          http={deps!.http}
           actionTypeRegistry={deps!.actionTypeRegistry}
-          docLinks={deps!.docLinks}
-          capabilities={deps!.capabilities}
         />
       );
     }

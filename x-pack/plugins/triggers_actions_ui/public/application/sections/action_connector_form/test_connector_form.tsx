@@ -20,8 +20,8 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { ActionConnector } from '../../../types';
-import { useActionsConnectorsContext } from '../../context/actions_connectors_context';
 import { ActionTypeExecutorResult } from '../../../../../actions/common';
+import { useKibana } from '../../../common/lib/kibana';
 
 export interface ConnectorAddFlyoutProps {
   connector: ActionConnector;
@@ -42,7 +42,7 @@ export const TestConnectorForm = ({
   onExecutAction,
   isExecutingAction,
 }: ConnectorAddFlyoutProps) => {
-  const { actionTypeRegistry, docLinks, http, toastNotifications } = useActionsConnectorsContext();
+  const { actionTypeRegistry, docLinks, http, toastNotifications } = useKibana().services;
   const actionTypeModel = actionTypeRegistry.get(connector.actionTypeId);
   const ParamsFieldsComponent = actionTypeModel.actionParamsFields;
 

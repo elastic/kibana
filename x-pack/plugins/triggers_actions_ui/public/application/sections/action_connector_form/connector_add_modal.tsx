@@ -17,7 +17,7 @@ import {
 import { EuiButtonEmpty } from '@elastic/eui';
 import { EuiOverlayMask } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { HttpSetup, ToastsApi, ApplicationStart, DocLinksStart } from 'kibana/public';
+import { ToastsApi } from 'kibana/public';
 import { ActionConnectorForm, validateBaseProperties } from './action_connector_form';
 import { connectorReducer } from './connector_reducer';
 import { createActionConnector } from '../../lib/action_connector_api';
@@ -29,19 +29,17 @@ import {
   IErrorObject,
   ActionTypeRegistryContract,
 } from '../../../types';
+import { useKibana } from '../../../common/lib/kibana';
 
 interface ConnectorAddModalProps {
   actionType: ActionType;
   onClose: () => void;
   postSaveEventHandler?: (savedAction: ActionConnector) => void;
-  http: HttpSetup;
   actionTypeRegistry: ActionTypeRegistryContract;
   toastNotifications: Pick<
     ToastsApi,
     'get$' | 'add' | 'remove' | 'addSuccess' | 'addWarning' | 'addDanger' | 'addError'
   >;
-  capabilities: ApplicationStart['capabilities'];
-  docLinks: DocLinksStart;
   consumer?: string;
 }
 
@@ -49,13 +47,11 @@ export const ConnectorAddModal = ({
   actionType,
   onClose,
   postSaveEventHandler,
-  http,
   toastNotifications,
   actionTypeRegistry,
-  capabilities,
-  docLinks,
   consumer,
 }: ConnectorAddModalProps) => {
+  const { http, capabilities } = useKibana().services;
   let hasErrors = false;
   const initialConnector = {
     actionTypeId: actionType.id,
@@ -148,9 +144,6 @@ export const ConnectorAddModal = ({
             serverError={serverError}
             errors={errors}
             actionTypeRegistry={actionTypeRegistry}
-            docLinks={docLinks}
-            http={http}
-            capabilities={capabilities}
             consumer={consumer}
           />
         </EuiModalBody>
