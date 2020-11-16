@@ -6,7 +6,7 @@
 
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiBadge } from '@elastic/eui';
+import { EuiButtonEmpty, EuiText } from '@elastic/eui';
 import { MonitorPageLink } from '../../../common/monitor_page_link';
 import { useGetUrlParams } from '../../../../hooks';
 import { stringifyUrlParams } from '../../../../lib/helper/stringify_url_params';
@@ -29,9 +29,9 @@ const parseCurrentFilters = (filters: string) => {
 
 const MONITOR_TYPES: Record<string, string> = {
   browser: 'Browser',
-  http: 'HTTP',
-  tcp: 'TCP',
-  icmp: 'ICMP',
+  http: 'HTTP Ping',
+  tcp: 'TCP Ping',
+  icmp: 'ICMP Ping',
 };
 
 export const MonitorNameColumn = ({ summary }: Props) => {
@@ -60,16 +60,17 @@ export const MonitorNameColumn = ({ summary }: Props) => {
           : `Unnamed - ${summary.monitor_id}`}
       </MonitorPageLink>
       <div>
-        <EuiBadge
+        <EuiButtonEmpty
+          color="text"
           title={filterLabel}
-          color="hollow"
           onClick={() => {
             setFilterType([summary.state.monitor.type]);
           }}
-          onClickAriaLabel={filterLabel}
+          size="xs"
+          flush="left"
         >
-          {MONITOR_TYPES[summary.state.monitor.type]}
-        </EuiBadge>
+          <EuiText size="xs">{MONITOR_TYPES[summary.state.monitor.type]}</EuiText>
+        </EuiButtonEmpty>
       </div>
     </div>
   );
