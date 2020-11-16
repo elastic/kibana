@@ -87,7 +87,7 @@ export const SOURCE_NAMES = {
     'xpack.enterpriseSearch.workplaceSearch.sources.sourceNames.jiraServer',
     { defaultMessage: 'Jira (Server)' }
   ),
-  ONE_DRIVE: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.sourceNames.oneDrive', {
+  ONEDRIVE: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.sourceNames.oneDrive', {
     defaultMessage: 'OneDrive',
   }),
   SALESFORCE: i18n.translate(
