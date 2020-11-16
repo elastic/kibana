@@ -13,7 +13,7 @@
 import { uniq } from 'lodash';
 
 import PropTypes from 'prop-types';
-import React, { Component, Fragment } from 'react';
+import React, { Component, Fragment, useContext } from 'react';
 import memoizeOne from 'memoize-one';
 import {
   EuiBadge,
@@ -41,11 +41,7 @@ import {
   isTimeSeriesViewJob,
 } from '../../../../../common/util/job_utils';
 
-import {
-  annotation$,
-  annotationsRefresh$,
-  annotationsRefreshed,
-} from '../../../services/annotations_service';
+import { annotationsRefresh$, annotationsRefreshed } from '../../../services/annotations_service';
 import {
   ANNOTATION_EVENT_USER,
   ANNOTATION_EVENT_DELAYED_DATA,
@@ -54,6 +50,7 @@ import { withKibana } from '../../../../../../../../src/plugins/kibana_react/pub
 import { ML_APP_URL_GENERATOR, ML_PAGES } from '../../../../../common/constants/ml_url_generator';
 import { PLUGIN_ID } from '../../../../../common/constants/app';
 import { timeFormatter } from '../../../../../common/util/date_utils';
+import { MlAnnotationUpdatesContext } from '../../../contexts/ml/use_ml_annotation_updates';
 
 const CURRENT_SERIES = 'current_series';
 /**
@@ -319,7 +316,11 @@ class AnnotationsTableUI extends Component {
   };
 
   render() {
-    const { isSingleMetricViewerLinkVisible = true, isNumberBadgeVisible = false } = this.props;
+    const {
+      isSingleMetricViewerLinkVisible = true,
+      isNumberBadgeVisible = false,
+      annotationUpdatesService,
+    } = this.props;
 
     const { queryText, searchError } = this.state;
 
@@ -474,7 +475,7 @@ class AnnotationsTableUI extends Component {
         return (
           <EuiToolTip position="bottom" content={editAnnotationsTooltipText}>
             <EuiButtonIcon
-              onClick={() => annotation$.next(originalAnnotation ?? annotation)}
+              onClick={() => annotationUpdatesService.setValue(originalAnnotation ?? annotation)}
               iconType="pencil"
               aria-label={editAnnotationsTooltipAriaLabelText}
             />
@@ -693,4 +694,7 @@ class AnnotationsTableUI extends Component {
   }
 }
 
-export const AnnotationsTable = withKibana(AnnotationsTableUI);
+export const AnnotationsTable = withKibana((props) => {
+  const { annotationUpdatesService } = useContext(MlAnnotationUpdatesContext);
+  return <AnnotationsTableUI annotationUpdatesService={annotationUpdatesService} {...props} />;
+});

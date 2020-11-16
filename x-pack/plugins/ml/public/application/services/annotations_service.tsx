@@ -81,8 +81,13 @@ export const annotationsRefresh$ = new BehaviorSubject(Date.now());
 export const annotationsRefreshed = () => annotationsRefresh$.next(Date.now());
 
 export class AnnotationUpdatesService {
-  private _annotation$: BehaviorSubject<AnnotationState> = annotation$;
+  private _annotation$: BehaviorSubject<AnnotationState> = new BehaviorSubject<AnnotationState>(
+    null
+  );
 
+  public get() {
+    return this._annotation$;
+  }
   public update$(): Observable<AnnotationState> {
     return this._annotation$.asObservable().pipe(
       distinctUntilChanged((prev, curr) => {

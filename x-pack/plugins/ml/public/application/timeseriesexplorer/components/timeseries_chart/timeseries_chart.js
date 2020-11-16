@@ -10,7 +10,7 @@
  */
 
 import PropTypes from 'prop-types';
-import React, { Component } from 'react';
+import React, { Component, useContext } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { isEqual, reduce, each, get } from 'lodash';
 import d3 from 'd3';
@@ -50,6 +50,7 @@ import {
   unhighlightFocusChartAnnotation,
   ANNOTATION_MIN_WIDTH,
 } from './timeseries_chart_annotations';
+import { MlAnnotationUpdatesContext } from '../../../contexts/ml/use_ml_annotation_updates';
 
 const focusZoomPanelHeight = 25;
 const focusChartHeight = 310;
@@ -739,7 +740,8 @@ class TimeseriesChartIntl extends Component {
       this.focusXScale,
       showAnnotations,
       showFocusChartTooltip,
-      hideFocusChartTooltip
+      hideFocusChartTooltip,
+      this.props.annotationUpdatesService
     );
 
     // disable brushing (creation of annotations) when annotations aren't shown
@@ -1797,11 +1799,17 @@ class TimeseriesChartIntl extends Component {
 }
 
 export const TimeseriesChart = (props) => {
-  const { annotationService } = props;
-  const annotationProp = useObservable(annotationService.update$());
+  const { annotationUpdatesService } = useContext(MlAnnotationUpdatesContext);
+  const annotationProp = useObservable(annotationUpdatesService.update$());
 
   if (annotationProp === undefined) {
     return null;
   }
-  return <TimeseriesChartIntl annotation={annotationProp} {...props} />;
+  return (
+    <TimeseriesChartIntl
+      annotation={annotationProp}
+      {...props}
+      annotationUpdatesService={annotationUpdatesService}
+    />
+  );
 };
