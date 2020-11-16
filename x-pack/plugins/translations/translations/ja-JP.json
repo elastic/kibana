@@ -12270,7 +12270,6 @@
     "xpack.ml.datavisualizer.page.fieldsPanelTitle": "フィールド",
     "xpack.ml.datavisualizer.page.metricsPanelTitle": "メトリック",
     "xpack.ml.datavisualizer.searchPanel.allOptionLabel": "すべて検索",
-    "xpack.ml.datavisualizer.searchPanel.documentsPerShardLabel": "合計ドキュメント数: {wrappedTotalCount}",
     "xpack.ml.datavisualizer.searchPanel.invalidKuerySyntaxErrorMessageQueryBar": "無効なクエリ",
     "xpack.ml.datavisualizer.searchPanel.queryBarPlaceholder": "小さいサンプルサイズを選択することで、クエリの実行時間を短縮しクラスターへの負荷を軽減できます。",
     "xpack.ml.datavisualizer.searchPanel.queryBarPlaceholderText": "検索… (例: status:200 AND extension:\"PHP\")",
