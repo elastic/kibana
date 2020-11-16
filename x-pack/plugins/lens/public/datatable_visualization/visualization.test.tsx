@@ -6,12 +6,13 @@
 
 import { Ast } from '@kbn/interpreter/common';
 import { buildExpression } from '../../../../../src/plugins/expressions/public';
-import { createMockDatasource } from '../editor_frame_service/mocks';
+import { createMockDatasource, createMockFramePublicAPI } from '../editor_frame_service/mocks';
 import { DatatableVisualizationState, datatableVisualization } from './visualization';
 import { Operation, DataType, FramePublicAPI, TableSuggestionColumn } from '../types';
 
 function mockFrame(): FramePublicAPI {
   return {
+    ...createMockFramePublicAPI(),
     addNewLayer: () => 'aaa',
     removeLayers: () => {},
     datasourceLayers: {},
@@ -356,7 +357,7 @@ describe('Datatable Visualization', () => {
       datasource.publicAPIMock.getTableSpec.mockReturnValue([{ columnId: 'c' }, { columnId: 'b' }]);
       datasource.publicAPIMock.getOperationForColumnId.mockReturnValue({
         dataType: 'string',
-        isBucketed: true,
+        isBucketed: false, // <= make them metrics
         label: 'label',
       });
 
@@ -364,12 +365,69 @@ describe('Datatable Visualization', () => {
         { layers: [layer] },
         frame.datasourceLayers
       ) as Ast;
+
       const tableArgs = buildExpression(expression).findFunction('lens_datatable_columns');
 
       expect(tableArgs).toHaveLength(1);
       expect(tableArgs[0].arguments).toEqual({
         columnIds: ['c', 'b'],
       });
+    });
+
+    it('returns no expression if the metric dimension is not defined', () => {
+      const datasource = createMockDatasource('test');
+      const layer = { layerId: 'a', columns: ['b', 'c'] };
+      const frame = mockFrame();
+      frame.datasourceLayers = { a: datasource.publicAPIMock };
+      datasource.publicAPIMock.getTableSpec.mockReturnValue([{ columnId: 'c' }, { columnId: 'b' }]);
+      datasource.publicAPIMock.getOperationForColumnId.mockReturnValue({
+        dataType: 'string',
+        isBucketed: true, // move it from the metric to the break down by side
+        label: 'label',
+      });
+
+      const expression = datatableVisualization.toExpression(
+        { layers: [layer] },
+        frame.datasourceLayers
+      );
+
+      expect(expression).toEqual(null);
+    });
+  });
+
+  describe('#getErrorMessages', () => {
+    it('returns undefined if the datasource is missing a metric dimension', () => {
+      const datasource = createMockDatasource('test');
+      const layer = { layerId: 'a', columns: ['b', 'c'] };
+      const frame = mockFrame();
+      frame.datasourceLayers = { a: datasource.publicAPIMock };
+      datasource.publicAPIMock.getTableSpec.mockReturnValue([{ columnId: 'c' }, { columnId: 'b' }]);
+      datasource.publicAPIMock.getOperationForColumnId.mockReturnValue({
+        dataType: 'string',
+        isBucketed: true, // move it from the metric to the break down by side
+        label: 'label',
+      });
+
+      const error = datatableVisualization.getErrorMessages({ layers: [layer] }, frame);
+
+      expect(error).not.toBeDefined();
+    });
+
+    it('returns undefined if the metric dimension is defined', () => {
+      const datasource = createMockDatasource('test');
+      const layer = { layerId: 'a', columns: ['b', 'c'] };
+      const frame = mockFrame();
+      frame.datasourceLayers = { a: datasource.publicAPIMock };
+      datasource.publicAPIMock.getTableSpec.mockReturnValue([{ columnId: 'c' }, { columnId: 'b' }]);
+      datasource.publicAPIMock.getOperationForColumnId.mockReturnValue({
+        dataType: 'string',
+        isBucketed: false, // keep it a metric
+        label: 'label',
+      });
+
+      const error = datatableVisualization.getErrorMessages({ layers: [layer] }, frame);
+
+      expect(error).not.toBeDefined();
     });
   });
 });

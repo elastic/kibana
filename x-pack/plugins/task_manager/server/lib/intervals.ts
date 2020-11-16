@@ -9,11 +9,15 @@ import { memoize } from 'lodash';
 export enum IntervalCadence {
   Minute = 'm',
   Second = 's',
+  Hour = 'h',
+  Day = 'd',
 }
 const VALID_CADENCE = new Set(Object.values(IntervalCadence));
 const CADENCE_IN_MS: Record<IntervalCadence, number> = {
   [IntervalCadence.Second]: 1000,
   [IntervalCadence.Minute]: 60 * 1000,
+  [IntervalCadence.Hour]: 60 * 60 * 1000,
+  [IntervalCadence.Day]: 24 * 60 * 60 * 1000,
 };
 
 function isCadence(cadence: IntervalCadence | string): cadence is IntervalCadence {

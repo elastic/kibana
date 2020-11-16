@@ -216,7 +216,7 @@ export const CustomUrlEditor: FC<CustomUrlEditorProps> = ({
           className="url-label"
           error={invalidLabelError}
           isInvalid={isInvalidLabel}
-          compressed
+          display="rowCompressed"
         >
           <EuiFieldText
             name="label"
@@ -231,7 +231,7 @@ export const CustomUrlEditor: FC<CustomUrlEditorProps> = ({
           label={
             <FormattedMessage id="xpack.ml.customUrlsEditor.linkToLabel" defaultMessage="Link to" />
           }
-          compressed
+          display="rowCompressed"
         >
           <EuiRadioGroup
             options={getLinkToOptions()}
@@ -249,7 +249,7 @@ export const CustomUrlEditor: FC<CustomUrlEditorProps> = ({
                 defaultMessage="Dashboard name"
               />
             }
-            compressed
+            display="rowCompressed"
           >
             <EuiSelect
               options={dashboardOptions}
@@ -268,7 +268,7 @@ export const CustomUrlEditor: FC<CustomUrlEditorProps> = ({
                 defaultMessage="Index pattern"
               />
             }
-            compressed
+            display="rowCompressed"
           >
             <EuiSelect
               options={indexPatternOptions}
@@ -314,7 +314,7 @@ export const CustomUrlEditor: FC<CustomUrlEditorProps> = ({
                     />
                   }
                   className="url-time-range"
-                  compressed
+                  display="rowCompressed"
                 >
                   <EuiSelect
                     options={timeRangeOptions}
@@ -336,7 +336,7 @@ export const CustomUrlEditor: FC<CustomUrlEditorProps> = ({
                     className="url-time-range"
                     error={invalidIntervalError}
                     isInvalid={isInvalidTimeRange}
-                    compressed
+                    display="rowCompressed"
                   >
                     <EuiFieldText
                       value={timeRange.interval}
@@ -356,7 +356,7 @@ export const CustomUrlEditor: FC<CustomUrlEditorProps> = ({
             label={
               <FormattedMessage id="xpack.ml.customUrlsEditor.urlLabel" defaultMessage="URL" />
             }
-            compressed
+            display="rowCompressed"
             fullWidth={true}
           >
             <EuiTextArea

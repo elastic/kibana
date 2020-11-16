@@ -16,6 +16,7 @@ import {
   CoreStart,
   ScopedHistory,
 } from 'kibana/public';
+import { KibanaFeature } from '../../../features/common';
 import { Section, routeToAlertDetails } from './constants';
 import { AppContextProvider } from './app_context';
 import { ActionTypeRegistryContract, AlertTypeRegistryContract } from '../types';
@@ -44,6 +45,7 @@ export interface AppDeps {
   actionTypeRegistry: ActionTypeRegistryContract;
   alertTypeRegistry: AlertTypeRegistryContract;
   history: ScopedHistory;
+  kibanaFeatures: KibanaFeature[];
 }
 
 export const App = (appDeps: AppDeps) => {

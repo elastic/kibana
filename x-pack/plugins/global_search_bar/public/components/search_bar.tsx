@@ -159,23 +159,36 @@ export function SearchBar({
     }
   };
 
-  const onChange = (selected: EuiSelectableTemplateSitewideOption[]) => {
-    // @ts-ignore - ts error is "union type is too complex to express"
-    const { url, type, key } = selected.find(({ checked }) => checked === 'on');
+  const onChange = (selection: EuiSelectableTemplateSitewideOption[]) => {
+    const selected = selection.find(({ checked }) => checked === 'on');
+    if (!selected) {
+      return;
+    }
 
-    if (type === 'application') {
-      trackUiMetric(METRIC_TYPE.CLICK, [
-        'user_navigated_to_application',
-        `user_navigated_to_application_${key.toLowerCase().replaceAll(' ', '_')}`, // which application
-      ]);
-    } else {
-      trackUiMetric(METRIC_TYPE.CLICK, [
-        'user_navigated_to_saved_object',
-        `user_navigated_to_saved_object_${type}`, // which type of saved object
-      ]);
+    // @ts-ignore - ts error is "union type is too complex to express"
+    const { url, type } = selected;
+
+    // errors in tracking should not prevent selection behavior
+    try {
+      if (type === 'application') {
+        const key = selected.keys ?? 'unknown';
+        trackUiMetric(METRIC_TYPE.CLICK, [
+          'user_navigated_to_application',
+          `user_navigated_to_application_${key.toLowerCase().replaceAll(' ', '_')}`, // which application
+        ]);
+      } else {
+        trackUiMetric(METRIC_TYPE.CLICK, [
+          'user_navigated_to_saved_object',
+          `user_navigated_to_saved_object_${type}`, // which type of saved object
+        ]);
+      }
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.log('Error trying to track searchbar metrics', e);
     }
 
     navigateToUrl(url);
+
     (document.activeElement as HTMLElement).blur();
     if (searchRef) {
       clearField(searchRef);
@@ -218,6 +231,7 @@ export function SearchBar({
       onChange={onChange}
       options={options}
       popoverButtonBreakpoints={['xs', 's']}
+      singleSelection={true}
       popoverButton={
         <EuiHeaderSectionItemButton
           aria-label={i18n.translate(

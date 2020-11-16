@@ -18,7 +18,7 @@
  */
 
 import { isMaster, isWorker } from 'cluster';
-import { Server } from 'hapi';
+import { Server } from '@hapi/hapi';
 import { LogRotator } from './log_rotator';
 import { KibanaConfig } from '../../kbn_server';
 

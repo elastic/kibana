@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { schema } from '@kbn/config-schema';
 import { ILegacyScopedClusterClient, SavedObject, RequestHandlerContext } from 'src/core/server';
 import { CoreSetup, Logger } from 'src/core/server';

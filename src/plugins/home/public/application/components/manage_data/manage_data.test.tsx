@@ -19,13 +19,19 @@
 
 import React from 'react';
 import { ManageData } from './manage_data';
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { shallowWithIntl } from '@kbn/test/jest';
 
 jest.mock('../app_navigation_handler', () => {
   return {
     createAppNavigationHandler: jest.fn(() => () => {}),
   };
 });
+
+jest.mock('../../kibana_services', () => ({
+  getServices: () => ({
+    trackUiMetric: jest.fn(),
+  }),
+}));
 
 beforeEach(() => {
   jest.clearAllMocks();

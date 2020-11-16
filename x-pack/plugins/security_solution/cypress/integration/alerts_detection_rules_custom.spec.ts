@@ -55,7 +55,6 @@ import {
   MITRE_ATTACK_DETAILS,
   REFERENCE_URLS_DETAILS,
   RISK_SCORE_DETAILS,
-  RULE_ABOUT_DETAILS_HEADER_TOGGLE,
   RULE_NAME_HEADER,
   RULE_TYPE_DETAILS,
   RUNS_EVERY_DETAILS,
@@ -180,7 +179,7 @@ describe('Custom detection rules creation', () => {
       getDetails(MITRE_ATTACK_DETAILS).should('have.text', expectedMitre);
       getDetails(TAGS_DETAILS).should('have.text', expectedTags);
     });
-    cy.get(RULE_ABOUT_DETAILS_HEADER_TOGGLE).eq(INVESTIGATION_NOTES_TOGGLE).click({ force: true });
+    cy.get(INVESTIGATION_NOTES_TOGGLE).click({ force: true });
     cy.get(ABOUT_INVESTIGATION_NOTES).should('have.text', INVESTIGATION_NOTES_MARKDOWN);
     cy.get(DEFINITION_DETAILS).within(() => {
       getDetails(INDEX_PATTERNS_DETAILS).should('have.text', indexPatterns.join(''));
@@ -333,9 +332,7 @@ describe('Custom detection rules deletion and edition', () => {
         getDetails(RISK_SCORE_DETAILS).should('have.text', editedRule.riskScore);
         getDetails(TAGS_DETAILS).should('have.text', expectedEditedtags);
       });
-      cy.get(RULE_ABOUT_DETAILS_HEADER_TOGGLE)
-        .eq(INVESTIGATION_NOTES_TOGGLE)
-        .click({ force: true });
+      cy.get(INVESTIGATION_NOTES_TOGGLE).click({ force: true });
       cy.get(ABOUT_INVESTIGATION_NOTES).should('have.text', editedRule.note);
       cy.get(DEFINITION_DETAILS).within(() => {
         getDetails(INDEX_PATTERNS_DETAILS).should(

@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { featuresPluginMock } from '../../../../features/public/mocks';
 import { chartPluginMock } from '../../../../../../src/plugins/charts/public/mocks';
 import { dataPluginMock } from '../../../../../../src/plugins/data/public/mocks';
 import { alertingPluginMock } from '../../../../alerts/public/mocks';
@@ -22,6 +23,8 @@ export async function getMockedAppDependencies() {
       application: { capabilities, navigateToApp },
     },
   ] = await coreSetupMock.getStartServices();
+  const kibanaFeatures = await featuresPluginMock.createStart().getFeatures();
+
   return {
     chrome,
     docLinks,
@@ -37,5 +40,6 @@ export async function getMockedAppDependencies() {
     setBreadcrumbs: jest.fn(),
     actionTypeRegistry,
     alertTypeRegistry,
+    kibanaFeatures,
   };
 }

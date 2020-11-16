@@ -8,7 +8,7 @@ import {
   EuiPanel,
   EuiProgress,
   EuiButtonGroup,
-  EuiButtonGroupOption,
+  EuiButtonGroupOptionProps,
   EuiSpacer,
   EuiFlexItem,
   EuiText,
@@ -46,14 +46,16 @@ const AboutContent = styled.div`
   height: 100%;
 `;
 
-const toggleOptions: EuiButtonGroupOption[] = [
+const toggleOptions: EuiButtonGroupOptionProps[] = [
   {
     id: 'details',
     label: i18n.ABOUT_PANEL_DETAILS_TAB,
+    'data-test-subj': 'stepAboutDetailsToggle-details',
   },
   {
     id: 'notes',
     label: i18n.ABOUT_PANEL_NOTES_TAB,
+    'data-test-subj': 'stepAboutDetailsToggle-notes',
   },
 ];
 
@@ -98,6 +100,7 @@ const StepAboutRuleToggleDetailsComponent: React.FC<StepPanelProps> = ({
                     setToggleOption(val);
                   }}
                   data-test-subj="stepAboutDetailsToggle"
+                  legend={i18n.ABOUT_CONTROL_LEGEND}
                 />
               )}
             </HeaderSection>

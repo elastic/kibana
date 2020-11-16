@@ -16,8 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { Server } from 'hapi';
-import HapiStaticFiles from 'inert';
+import { Server } from '@hapi/hapi';
+import HapiStaticFiles from '@hapi/inert';
 import url from 'url';
 import uuid from 'uuid';
 
@@ -245,8 +245,11 @@ export class HttpServer {
       return;
     }
 
-    this.log.debug('stopping http server');
-    await this.server.stop();
+    const hasStarted = this.server.info.started > 0;
+    if (hasStarted) {
+      this.log.debug('stopping http server');
+      await this.server.stop();
+    }
   }
 
   private getAuthOption(

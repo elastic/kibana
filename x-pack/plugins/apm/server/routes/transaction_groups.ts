@@ -5,7 +5,7 @@
  */
 
 import * as t from 'io-ts';
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { setupRequest } from '../lib/helpers/setup_request';
 import { getTransactionCharts } from '../lib/transactions/charts';
 import { getTransactionDistribution } from '../lib/transactions/distribution';

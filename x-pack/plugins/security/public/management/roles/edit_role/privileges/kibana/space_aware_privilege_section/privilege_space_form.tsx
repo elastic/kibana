@@ -222,6 +222,12 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
             idSelected={this.getDisplayedBasePrivilege()}
             isDisabled={!hasSelectedSpaces}
             onChange={this.onSpaceBasePrivilegeChange}
+            legend={i18n.translate(
+              'xpack.security.management.editRole.spacePrivilegeForm.basePrivilegeControlLegend',
+              {
+                defaultMessage: 'Privileges for all features',
+              }
+            )}
           />
         </EuiFormRow>
 

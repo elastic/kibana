@@ -49,7 +49,7 @@ export async function getMlBucketSize({
   };
 
   try {
-    const resp = await ml.mlSystem.mlAnomalySearch<ESResponse>(params);
+    const resp = await ml.mlSystem.mlAnomalySearch<ESResponse>(params, [jobId]);
     return resp.hits.hits[0]?._source.bucket_span;
   } catch (err) {
     const isHttpError = 'statusCode' in err;
