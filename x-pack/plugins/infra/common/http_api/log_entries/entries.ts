@@ -99,11 +99,17 @@ export type LogEntryContext = rt.TypeOf<typeof logEntryContextRT>;
 export type LogEntry = rt.TypeOf<typeof logEntryRT>;
 
 export const logEntriesResponseRT = rt.type({
-  data: rt.type({
-    entries: rt.array(logEntryRT),
-    topCursor: rt.union([logEntryCursorRT, rt.null]),
-    bottomCursor: rt.union([logEntryCursorRT, rt.null]),
-  }),
+  data: rt.intersection([
+    rt.type({
+      entries: rt.array(logEntryRT),
+      topCursor: rt.union([logEntryCursorRT, rt.null]),
+      bottomCursor: rt.union([logEntryCursorRT, rt.null]),
+    }),
+    rt.partial({
+      hasMoreBefore: rt.boolean,
+      hasMoreAfter: rt.boolean,
+    }),
+  ]),
 });
 
 export type LogEntriesResponse = rt.TypeOf<typeof logEntriesResponseRT>;
