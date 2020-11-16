@@ -31,11 +31,21 @@ import { UMServerLibs } from '../lib';
 
 const { MONITOR_STATUS } = ACTION_GROUP_DEFINITIONS;
 
+const getMonIdByLoc = (monitorId: string, location: string) => {
+  return monitorId + '-' + location;
+};
+
 const uniqueDownMonitorIds = (items: GetMonitorStatusResult[]): Set<string> =>
-  items.reduce((acc, { monitorId, location }) => acc.add(monitorId + location), new Set<string>());
+  items.reduce(
+    (acc, { monitorId, location }) => acc.add(getMonIdByLoc(monitorId, location)),
+    new Set<string>()
+  );
 
 const uniqueAvailMonitorIds = (items: GetMonitorAvailabilityResult[]): Set<string> =>
-  items.reduce((acc, { monitorId, location }) => acc.add(monitorId + location), new Set<string>());
+  items.reduce(
+    (acc, { monitorId, location }) => acc.add(getMonIdByLoc(monitorId, location)),
+    new Set<string>()
+  );
 
 export const getUniqueIdsByLoc = (
   downMonitorsByLocation: GetMonitorStatusResult[],
@@ -155,6 +165,21 @@ export const getStatusMessage = (
     );
   }
   return statusMessage + availabilityMessage;
+};
+
+const getInstanceId = (monitorInfo: Ping, monIdByLoc: string) => {
+  const normalizeText = (txt: string) => {
+    // replace url and name special characters with -
+    return txt.replace(/[^A-Z0-9]+/gi, '_').toLowerCase();
+  };
+  const urlText = normalizeText(monitorInfo.url?.full || '');
+
+  const monName = normalizeText(monitorInfo.monitor.name || '');
+
+  if (monName) {
+    return `${monName}_${urlText}_${monIdByLoc}`;
+  }
+  return `${urlText}_${monIdByLoc}`;
 };
 
 export const statusCheckAlertFactory: UptimeAlertTypeFactory = (_server, libs) =>
@@ -290,7 +315,9 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory = (_server, libs) =
         for (const monitorLoc of downMonitorsByLocation) {
           const monitorInfo = monitorLoc.monitorInfo;
 
-          const alertInstance = alertInstanceFactory(MONITOR_STATUS.id + monitorLoc.location);
+          const alertInstance = alertInstanceFactory(
+            getInstanceId(monitorInfo, monitorLoc.location)
+          );
 
           const monitorSummary = getMonitorSummary(monitorInfo);
           const statusMessage = getStatusMessage(monitorInfo);
@@ -320,18 +347,20 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory = (_server, libs) =
       const mergedIdsByLoc = getUniqueIdsByLoc(downMonitorsByLocation, availabilityResults);
 
       mergedIdsByLoc.forEach((monIdByLoc) => {
-        const alertInstance = alertInstanceFactory(MONITOR_STATUS.id + monIdByLoc);
-
         const availMonInfo = availabilityResults.find(
-          ({ monitorId, location }) => monitorId + location === monIdByLoc
+          ({ monitorId, location }) => getMonIdByLoc(monitorId, location) === monIdByLoc
         );
 
         const downMonInfo = downMonitorsByLocation.find(
-          ({ monitorId, location }) => monitorId + location === monIdByLoc
+          ({ monitorId, location }) => getMonIdByLoc(monitorId, location) === monIdByLoc
         )?.monitorInfo;
 
-        const monitorSummary = getMonitorSummary(downMonInfo || availMonInfo?.monitorInfo!);
+        const monitorInfo = downMonInfo || availMonInfo?.monitorInfo!;
+
+        const monitorSummary = getMonitorSummary(monitorInfo);
         const statusMessage = getStatusMessage(downMonInfo!, availMonInfo!, availability);
+
+        const alertInstance = alertInstanceFactory(getInstanceId(monitorInfo, monIdByLoc));
 
         alertInstance.replaceState({
           ...updateState(state, true),
