@@ -263,7 +263,6 @@ export const defaultTimelineToTimelineModel = (
       timeline.status === TimelineStatus.immutable &&
       timeline.timelineType === TimelineType.template
         ? {
-            ...timeline.dateRange,
             start: DEFAULT_FROM_MOMENT.toISOString(),
             end: DEFAULT_TO_MOMENT.toISOString(),
           }
