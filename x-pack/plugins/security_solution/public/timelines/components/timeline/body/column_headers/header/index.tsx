@@ -36,7 +36,7 @@ export const HeaderComponent: React.FC<Props> = ({
   const onClick = useCallback(
     () =>
       dispatch(
-        timelineActions.updateSort!({
+        timelineActions.updateSort({
           id: timelineId,
           sort: {
             columnId: header.id,

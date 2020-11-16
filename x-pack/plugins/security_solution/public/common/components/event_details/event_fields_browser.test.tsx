@@ -9,13 +9,23 @@ import React from 'react';
 import '../../mock/match_media';
 import { mockDetailItemData, mockDetailItemDataId } from '../../mock/mock_detail_item';
 import { TestProviders } from '../../mock/test_providers';
-
+import { timelineActions } from '../../../timelines/store/timeline';
 import { EventFieldsBrowser } from './event_fields_browser';
 import { mockBrowserFields } from '../../containers/source/mock';
 import { defaultHeaders } from '../../mock/header';
 import { useMountAppended } from '../../utils/use_mount_appended';
 
 jest.mock('../link_to');
+
+const mockDispatch = jest.fn();
+jest.mock('react-redux', () => {
+  const original = jest.requireActual('react-redux');
+
+  return {
+    ...original,
+    useDispatch: () => mockDispatch,
+  };
+});
 
 describe('EventFieldsBrowser', () => {
   const mount = useMountAppended();
@@ -109,7 +119,6 @@ describe('EventFieldsBrowser', () => {
 
     test('it invokes toggleColumn when the checkbox is clicked', () => {
       const field = '@timestamp';
-      const toggleColumn = jest.fn();
 
       const wrapper = mount(
         <TestProviders>
@@ -133,11 +142,12 @@ describe('EventFieldsBrowser', () => {
         });
       wrapper.update();
 
-      expect(toggleColumn).toBeCalledWith({
-        columnHeaderType: 'not-filtered',
-        id: '@timestamp',
-        width: 180,
-      });
+      expect(mockDispatch).toBeCalledWith(
+        timelineActions.removeColumn({
+          columnId: '@timestamp',
+          id: 'test',
+        })
+      );
     });
   });
 

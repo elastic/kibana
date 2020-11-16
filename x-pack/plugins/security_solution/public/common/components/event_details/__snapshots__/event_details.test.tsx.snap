@@ -693,7 +693,6 @@ In other use cases the message field can be used to concatenate different values
           eventId="Y-6TfmcB0WOhS6qyMv3s"
           onUpdateColumns={[MockFunction]}
           timelineId="test"
-          toggleColumn={[MockFunction]}
         />,
         "id": "table-view",
         "name": "Table",
@@ -1386,7 +1385,6 @@ In other use cases the message field can be used to concatenate different values
             eventId="Y-6TfmcB0WOhS6qyMv3s"
             onUpdateColumns={[MockFunction]}
             timelineId="test"
-            toggleColumn={[MockFunction]}
           />,
           "id": "table-view",
           "name": "Table",

@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButton, EuiNotificationBadge, EuiPanel } from '@elastic/eui';
+import { EuiPanel } from '@elastic/eui';
 import { rgba } from 'polished';
-import React, { useMemo } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
 
@@ -15,7 +15,6 @@ import { DataProvider } from '../../timeline/data_providers/data_provider';
 import { flattenIntoAndGroups } from '../../timeline/data_providers/helpers';
 import { DataProviders } from '../../timeline/data_providers';
 import { FlyoutHeaderPanel } from '../header';
-import * as i18n from './translations';
 import { useSourcererScope } from '../../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 

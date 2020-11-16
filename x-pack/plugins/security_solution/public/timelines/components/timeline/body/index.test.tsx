@@ -18,11 +18,22 @@ import { Sort } from './sort';
 import { waitFor } from '@testing-library/react';
 import { useMountAppended } from '../../../../common/utils/use_mount_appended';
 import { SELECTOR_TIMELINE_BODY_CLASS_NAME, TimelineBody } from '../styles';
+import { timelineActions } from '../../../store/timeline';
 
 const mockSort: Sort = {
   columnId: '@timestamp',
   sortDirection: Direction.desc,
 };
+
+const mockDispatch = jest.fn();
+jest.mock('react-redux', () => {
+  const original = jest.requireActual('react-redux');
+
+  return {
+    ...original,
+    useDispatch: () => mockDispatch,
+  };
+});
 
 jest.mock('../../../../common/hooks/use_selector', () => ({
   useShallowEqualSelector: jest.fn().mockReturnValue(mockTimelineModel),
@@ -62,7 +73,6 @@ describe('Body', () => {
     onEventToggled: jest.fn(),
     onRowSelected: jest.fn(),
     onSelectAll: jest.fn(),
-    onUpdateColumns: jest.fn(),
     pinnedEventIds: {},
     refetch: jest.fn(),
     rowRenderers,
@@ -166,14 +176,6 @@ describe('Body', () => {
   });
 
   describe('action on event', () => {
-    const dispatchAddNoteToEvent = jest.fn();
-    const dispatchOnPinEvent = jest.fn();
-    const testProps = {
-      ...props,
-      addNoteToEvent: dispatchAddNoteToEvent,
-      onPinEvent: dispatchOnPinEvent,
-    };
-
     const addaNoteToEvent = (wrapper: ReturnType<typeof mount>, note: string) => {
       wrapper.find('[data-test-subj="add-note"]').first().find('button').simulate('click');
       wrapper.update();
@@ -186,20 +188,39 @@ describe('Body', () => {
     };
 
     beforeEach(() => {
-      dispatchAddNoteToEvent.mockClear();
-      dispatchOnPinEvent.mockClear();
+      mockDispatch.mockClear();
     });
 
     test('Add a Note to an event', () => {
       const wrapper = mount(
         <TestProviders>
-          <Body {...testProps} />
+          <Body {...props} />
         </TestProviders>
       );
       addaNoteToEvent(wrapper, 'hello world');
 
-      expect(dispatchAddNoteToEvent).toHaveBeenCalled();
-      expect(dispatchOnPinEvent).toHaveBeenCalled();
+      expect(mockDispatch).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({
+          payload: {
+            eventId: '1',
+            id: 'timeline-test',
+            noteId: expect.anything(),
+          },
+          type: timelineActions.addNoteToEvent({
+            eventId: '1',
+            id: 'timeline-test',
+            noteId: '11',
+          }).type,
+        })
+      );
+      expect(mockDispatch).toHaveBeenNthCalledWith(
+        3,
+        timelineActions.pinEvent({
+          eventId: '1',
+          id: 'timeline-test',
+        })
+      );
     });
 
     test('Add two Note to an event', () => {
@@ -209,15 +230,33 @@ describe('Body', () => {
         </TestProviders>
       );
 
-      const wrapper = mount(<Proxy {...testProps} />);
+      const wrapper = mount(<Proxy {...props} />);
       addaNoteToEvent(wrapper, 'hello world');
-      dispatchAddNoteToEvent.mockClear();
-      dispatchOnPinEvent.mockClear();
+      mockDispatch.mockClear();
       wrapper.setProps({ pinnedEventIds: { 1: true } });
       wrapper.update();
       addaNoteToEvent(wrapper, 'new hello world');
-      expect(dispatchAddNoteToEvent).toHaveBeenCalled();
-      expect(dispatchOnPinEvent).not.toHaveBeenCalled();
+      expect(mockDispatch).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({
+          payload: {
+            eventId: '1',
+            id: 'timeline-test',
+            noteId: expect.anything(),
+          },
+          type: timelineActions.addNoteToEvent({
+            eventId: '1',
+            id: 'timeline-test',
+            noteId: '11',
+          }).type,
+        })
+      );
+      expect(mockDispatch).not.toHaveBeenCalledWith(
+        timelineActions.pinEvent({
+          eventId: '1',
+          id: 'timeline-test',
+        })
+      );
     });
   });
 });

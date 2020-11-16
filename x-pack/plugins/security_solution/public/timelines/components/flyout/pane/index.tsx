@@ -40,7 +40,7 @@ const FlyoutPaneComponent: React.FC<FlyoutPaneComponentProps> = ({
       onClose={onClose}
       size="l"
     >
-      <StatefulTimeline onClose={onClose} usersViewing={usersViewing} id={timelineId} />
+      <StatefulTimeline onClose={onClose} usersViewing={usersViewing} timelineId={timelineId} />
     </EuiFlyout>
   </EuiFlyoutContainer>
 );

@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount, shallow } from 'enzyme';
 import React from 'react';
+import { mount, shallow } from 'enzyme';
 
 import { TestProviders } from '../../../../common/mock/test_providers';
 
@@ -19,40 +19,44 @@ describe('Footer Timeline Component', () => {
 
   describe('rendering', () => {
     test('it renders the default timeline footer', () => {
-      const wrapper = shallow(
-        <FooterComponent
-          activePage={0}
-          updatedAt={updatedAt}
-          height={100}
-          id={'timeline-id'}
-          isLive={false}
-          isLoading={false}
-          itemsCount={itemsCount}
-          itemsPerPage={2}
-          itemsPerPageOptions={[1, 5, 10, 20]}
-          onChangePage={loadMore}
-          totalCount={serverSideEventCount}
-        />
+      const wrapper = mount(
+        <TestProviders>
+          <FooterComponent
+            activePage={0}
+            updatedAt={updatedAt}
+            height={100}
+            id={'timeline-id'}
+            isLive={false}
+            isLoading={false}
+            itemsCount={itemsCount}
+            itemsPerPage={2}
+            itemsPerPageOptions={[1, 5, 10, 20]}
+            onChangePage={loadMore}
+            totalCount={serverSideEventCount}
+          />
+        </TestProviders>
       );
 
-      expect(wrapper).toMatchSnapshot();
+      expect(wrapper.find('FooterContainer').exists()).toBeTruthy();
     });
 
     test('it renders the loading panel at the beginning ', () => {
       const wrapper = mount(
-        <FooterComponent
-          activePage={0}
-          updatedAt={updatedAt}
-          height={100}
-          id={'timeline-id'}
-          isLive={false}
-          isLoading={true}
-          itemsCount={itemsCount}
-          itemsPerPage={2}
-          itemsPerPageOptions={[1, 5, 10, 20]}
-          onChangePage={loadMore}
-          totalCount={serverSideEventCount}
-        />
+        <TestProviders>
+          <FooterComponent
+            activePage={0}
+            updatedAt={updatedAt}
+            height={100}
+            id={'timeline-id'}
+            isLive={false}
+            isLoading={true}
+            itemsCount={itemsCount}
+            itemsPerPage={2}
+            itemsPerPageOptions={[1, 5, 10, 20]}
+            onChangePage={loadMore}
+            totalCount={serverSideEventCount}
+          />
+        </TestProviders>
       );
 
       expect(wrapper.find('[data-test-subj="LoadingPanelTimeline"]').exists()).toBeTruthy();
@@ -112,19 +116,21 @@ describe('Footer Timeline Component', () => {
 
     test('it does NOT render the loadMore button because there is nothing else to fetch', () => {
       const wrapper = mount(
-        <FooterComponent
-          activePage={0}
-          updatedAt={updatedAt}
-          height={100}
-          id={'timeline-id'}
-          isLive={false}
-          isLoading={true}
-          itemsCount={itemsCount}
-          itemsPerPage={2}
-          itemsPerPageOptions={[1, 5, 10, 20]}
-          onChangePage={loadMore}
-          totalCount={serverSideEventCount}
-        />
+        <TestProviders>
+          <FooterComponent
+            activePage={0}
+            updatedAt={updatedAt}
+            height={100}
+            id={'timeline-id'}
+            isLive={false}
+            isLoading={true}
+            itemsCount={itemsCount}
+            itemsPerPage={2}
+            itemsPerPageOptions={[1, 5, 10, 20]}
+            onChangePage={loadMore}
+            totalCount={serverSideEventCount}
+          />
+        </TestProviders>
       );
 
       expect(wrapper.find('[data-test-subj="timeline-pagination"]').exists()).toBeFalsy();

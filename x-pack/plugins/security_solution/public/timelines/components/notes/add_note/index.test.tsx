@@ -4,11 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount, shallow } from 'enzyme';
+import { mount } from 'enzyme';
 import React from 'react';
 
+import { TestProviders } from '../../../../common/mock';
 import { AddNote } from '.';
-import { TimelineStatus } from '../../../../../common/types/timeline';
+
+const mockDispatch = jest.fn();
+jest.mock('react-redux', () => {
+  const original = jest.requireActual('react-redux');
+
+  return {
+    ...original,
+    useDispatch: () => mockDispatch,
+  };
+});
 
 describe('AddNote', () => {
   const note = 'The contents of a new note';
@@ -17,17 +27,23 @@ describe('AddNote', () => {
     newNote: note,
     onCancelAddNote: jest.fn(),
     updateNewNote: jest.fn(),
-    updateNote: jest.fn(),
-    status: TimelineStatus.active,
   };
 
   test('renders correctly', () => {
-    const wrapper = shallow(<AddNote {...props} />);
-    expect(wrapper).toMatchSnapshot();
+    const wrapper = mount(
+      <TestProviders>
+        <AddNote {...props} />
+      </TestProviders>
+    );
+    expect(wrapper.find('AddNote').exists()).toBeTruthy();
   });
 
   test('it renders the Cancel button when onCancelAddNote is provided', () => {
-    const wrapper = mount(<AddNote {...props} />);
+    const wrapper = mount(
+      <TestProviders>
+        <AddNote {...props} />
+      </TestProviders>
+    );
 
     expect(wrapper.find('[data-test-subj="cancel"]').exists()).toEqual(true);
   });
@@ -39,7 +55,11 @@ describe('AddNote', () => {
       onCancelAddNote,
     };
 
-    const wrapper = mount(<AddNote {...testProps} />);
+    const wrapper = mount(
+      <TestProviders>
+        <AddNote {...testProps} />
+      </TestProviders>
+    );
 
     wrapper.find('[data-test-subj="cancel"]').first().simulate('click');
 
@@ -53,7 +73,11 @@ describe('AddNote', () => {
       associateNote,
     };
 
-    const wrapper = mount(<AddNote {...testProps} />);
+    const wrapper = mount(
+      <TestProviders>
+        <AddNote {...testProps} />
+      </TestProviders>
+    );
 
     wrapper.find('[data-test-subj="cancel"]').first().simulate('click');
 
@@ -65,13 +89,21 @@ describe('AddNote', () => {
       ...props,
       onCancelAddNote: undefined,
     };
-    const wrapper = mount(<AddNote {...testProps} />);
+    const wrapper = mount(
+      <TestProviders>
+        <AddNote {...testProps} />
+      </TestProviders>
+    );
 
     expect(wrapper.find('[data-test-subj="cancel"]').exists()).toEqual(false);
   });
 
   test('it renders the contents of the note', () => {
-    const wrapper = mount(<AddNote {...props} />);
+    const wrapper = mount(
+      <TestProviders>
+        <AddNote {...props} />
+      </TestProviders>
+    );
 
     expect(
       wrapper.find('[data-test-subj="add-a-note"] .euiMarkdownEditorDropZone').first().text()
@@ -85,7 +117,11 @@ describe('AddNote', () => {
       newNote: note,
       associateNote,
     };
-    const wrapper = mount(<AddNote {...testProps} />);
+    const wrapper = mount(
+      <TestProviders>
+        <AddNote {...testProps} />
+      </TestProviders>
+    );
 
     wrapper.find('[data-test-subj="add-note"]').first().simulate('click');
 
@@ -113,7 +149,11 @@ describe('AddNote', () => {
       updateNewNote,
     };
 
-    const wrapper = mount(<AddNote {...testProps} />);
+    const wrapper = mount(
+      <TestProviders>
+        <AddNote {...testProps} />
+      </TestProviders>
+    );
 
     wrapper.find('[data-test-subj="add-note"]').first().simulate('click');
 
@@ -121,15 +161,14 @@ describe('AddNote', () => {
   });
 
   test('it invokes updateNote when the Add Note button is clicked', () => {
-    const updateNote = jest.fn();
-    const testProps = {
-      ...props,
-      updateNote,
-    };
-    const wrapper = mount(<AddNote {...testProps} />);
+    const wrapper = mount(
+      <TestProviders>
+        <AddNote {...props} />
+      </TestProviders>
+    );
 
     wrapper.find('[data-test-subj="add-note"]').first().simulate('click');
 
-    expect(updateNote).toBeCalled();
+    expect(mockDispatch).toBeCalled();
   });
 });

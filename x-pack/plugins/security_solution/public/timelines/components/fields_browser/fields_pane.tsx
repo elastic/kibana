@@ -12,7 +12,7 @@ import { useDispatch } from 'react-redux';
 import { BrowserFields } from '../../../common/containers/source';
 import { ColumnHeaderOptions } from '../../../timelines/store/timeline/model';
 import { timelineActions } from '../../../timelines/store/timeline';
-
+import { OnUpdateColumns } from '../timeline/events';
 import { Category } from './category';
 import { FieldBrowserProps } from './types';
 import { getFieldItems } from './field_items';
@@ -34,7 +34,7 @@ const NoFieldsFlexGroup = styled(EuiFlexGroup)`
 
 NoFieldsFlexGroup.displayName = 'NoFieldsFlexGroup';
 
-type Props = Pick<FieldBrowserProps, 'onFieldSelected' | 'onUpdateColumns' | 'timelineId'> & {
+type Props = Pick<FieldBrowserProps, 'onFieldSelected' | 'timelineId'> & {
   columnHeaders: ColumnHeaderOptions[];
   /**
    * A map of categoryId -> metadata about the fields in that category,
@@ -48,6 +48,8 @@ type Props = Pick<FieldBrowserProps, 'onFieldSelected' | 'onUpdateColumns' | 'ti
    */
   onCategorySelected: (categoryId: string) => void;
   /** The text displayed in the search input */
+  /** Invoked when a user chooses to view a new set of columns in the timeline */
+  onUpdateColumns: OnUpdateColumns;
   searchInput: string;
   /**
    * The category selected on the left-hand side of the field browser

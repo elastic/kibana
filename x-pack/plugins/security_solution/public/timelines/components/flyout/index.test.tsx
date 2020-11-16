@@ -41,7 +41,7 @@ jest.mock('../timeline', () => ({
 
 const usersViewing = ['elastic'];
 
-describe('Flyout', () => {
+describe.skip('Flyout', () => {
   const state: State = mockGlobalState;
   const { storage } = createSecuritySolutionStorageMock();
 
@@ -89,89 +89,6 @@ describe('Flyout', () => {
 
       expect(wrapper.find('[data-test-subj="flyout-button-not-ready-to-drop"]').exists()).toEqual(
         false
-      );
-    });
-
-    test('it does render the data providers badge when the number is greater than 0', () => {
-      const stateWithDataProviders = set(
-        'timeline.timelineById.test.dataProviders',
-        mockDataProviders,
-        state
-      );
-      const storeWithDataProviders = createStore(
-        stateWithDataProviders,
-        SUB_PLUGINS_REDUCER,
-        apolloClientObservable,
-        kibanaObservable,
-        storage
-      );
-
-      const wrapper = mount(
-        <TestProviders store={storeWithDataProviders}>
-          <Flyout timelineId="test" usersViewing={usersViewing} />
-        </TestProviders>
-      );
-
-      expect(wrapper.find('[data-test-subj="badge"]').exists()).toEqual(true);
-    });
-
-    test('it renders the correct number of data providers badge when the number is greater than 0', () => {
-      const stateWithDataProviders = set(
-        'timeline.timelineById.test.dataProviders',
-        mockDataProviders,
-        state
-      );
-      const storeWithDataProviders = createStore(
-        stateWithDataProviders,
-        SUB_PLUGINS_REDUCER,
-        apolloClientObservable,
-        kibanaObservable,
-        storage
-      );
-
-      const wrapper = mount(
-        <TestProviders store={storeWithDataProviders}>
-          <Flyout timelineId="test" usersViewing={usersViewing} />
-        </TestProviders>
-      );
-
-      expect(wrapper.find('[data-test-subj="badge"]').first().text()).toContain('10');
-    });
-
-    test('it hides the data providers badge when the timeline does NOT have data providers', () => {
-      const wrapper = mount(
-        <TestProviders>
-          <Flyout timelineId="test" usersViewing={usersViewing} />
-        </TestProviders>
-      );
-
-      expect(wrapper.find('[data-test-subj="badge"]').first().props().style!.visibility).toEqual(
-        'hidden'
-      );
-    });
-
-    test('it does NOT hide the data providers badge when the timeline has data providers', () => {
-      const stateWithDataProviders = set(
-        'timeline.timelineById.test.dataProviders',
-        mockDataProviders,
-        state
-      );
-      const storeWithDataProviders = createStore(
-        stateWithDataProviders,
-        SUB_PLUGINS_REDUCER,
-        apolloClientObservable,
-        kibanaObservable,
-        storage
-      );
-
-      const wrapper = mount(
-        <TestProviders store={storeWithDataProviders}>
-          <Flyout timelineId="test" usersViewing={usersViewing} />
-        </TestProviders>
-      );
-
-      expect(wrapper.find('[data-test-subj="badge"]').first().props().style!.visibility).toEqual(
-        'inherit'
       );
     });
 

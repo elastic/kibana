@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFieldText, EuiFlexItem } from '@elastic/eui';
+import { EuiFieldText } from '@elastic/eui';
 import styled, { keyframes } from 'styled-components';
 
 const fadeInEffect = keyframes`

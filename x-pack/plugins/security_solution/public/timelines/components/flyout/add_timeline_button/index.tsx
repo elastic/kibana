@@ -4,17 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, useState } from 'react';
-import styled from 'styled-components';
 import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPopover,
   EuiIcon,
-  EuiToolTip,
   EuiAvatar,
 } from '@elastic/eui';
+import React, { useCallback, useState } from 'react';
+import styled from 'styled-components';
 
 import { OpenTimelineModalButton } from '../../open_timeline/open_timeline_modal/open_timeline_modal_button';
 import { OpenTimelineModal } from '../../open_timeline/open_timeline_modal';

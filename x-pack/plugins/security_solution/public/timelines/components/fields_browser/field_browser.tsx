@@ -48,7 +48,7 @@ PanesFlexGroup.displayName = 'PanesFlexGroup';
 
 type Props = Pick<
   FieldBrowserProps,
-  'browserFields' | 'height' | 'onFieldSelected' | 'onUpdateColumns' | 'timelineId' | 'width'
+  'browserFields' | 'height' | 'onFieldSelected' | 'timelineId' | 'width'
 > & {
   /**
    * The current timeline column headers

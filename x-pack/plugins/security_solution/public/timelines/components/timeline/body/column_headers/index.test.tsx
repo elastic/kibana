@@ -36,7 +36,6 @@ describe('ColumnHeaders', () => {
             columnHeaders={defaultHeaders}
             isSelectAllChecked={false}
             onSelectAll={jest.fn}
-            onUpdateColumns={jest.fn()}
             showEventsSelect={false}
             showSelectAllCheckbox={false}
             sort={sort}
@@ -44,7 +43,7 @@ describe('ColumnHeaders', () => {
           />
         </TestProviders>
       );
-      expect(wrapper).toMatchSnapshot();
+      expect(wrapper.find('ColumnHeadersComponent')).toMatchSnapshot();
     });
 
     test('it renders the field browser', () => {
@@ -56,7 +55,6 @@ describe('ColumnHeaders', () => {
             columnHeaders={defaultHeaders}
             isSelectAllChecked={false}
             onSelectAll={jest.fn}
-            onUpdateColumns={jest.fn()}
             showEventsSelect={false}
             showSelectAllCheckbox={false}
             sort={sort}
@@ -77,7 +75,6 @@ describe('ColumnHeaders', () => {
             columnHeaders={defaultHeaders}
             isSelectAllChecked={false}
             onSelectAll={jest.fn}
-            onUpdateColumns={jest.fn()}
             showEventsSelect={false}
             showSelectAllCheckbox={false}
             sort={sort}

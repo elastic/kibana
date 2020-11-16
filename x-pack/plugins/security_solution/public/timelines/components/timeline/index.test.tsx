@@ -18,7 +18,7 @@ import {
   TestProviders,
 } from '../../../common/mock';
 
-import { StatefulTimeline, OwnProps as StatefulTimelineOwnProps } from './index';
+import { StatefulTimeline, Props as StatefulTimelineOwnProps } from './index';
 import { useTimelineEvents } from '../../containers/index';
 
 jest.mock('../../containers/index', () => ({
@@ -57,7 +57,7 @@ jest.mock('../../../common/containers/sourcerer', () => {
 });
 describe('StatefulTimeline', () => {
   const props: StatefulTimelineOwnProps = {
-    id: 'id',
+    timelineId: 'id',
     onClose: jest.fn(),
     usersViewing: [],
   };

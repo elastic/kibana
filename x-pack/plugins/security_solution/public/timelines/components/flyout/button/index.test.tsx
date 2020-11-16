@@ -12,7 +12,7 @@ import { twoGroups } from '../../timeline/data_providers/mock/mock_and_providers
 
 import { FlyoutButton, getBadgeCount } from '.';
 
-describe('FlyoutButton', () => {
+describe.skip('FlyoutButton', () => {
   describe('getBadgeCount', () => {
     test('it returns 0 when dataProviders is empty', () => {
       expect(getBadgeCount([])).toEqual(0);

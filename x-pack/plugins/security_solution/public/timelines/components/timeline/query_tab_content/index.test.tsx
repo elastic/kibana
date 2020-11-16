@@ -8,24 +8,27 @@ import { shallow } from 'enzyme';
 import React from 'react';
 import useResizeObserver from 'use-resize-observer/polyfilled';
 
-import { mockBrowserFields } from '../../../common/containers/source/mock';
-import { Direction } from '../../../graphql/types';
+import { mockBrowserFields } from '../../../../common/containers/source/mock';
+import { Direction } from '../../../../graphql/types';
 import {
   defaultHeaders,
   mockTimelineData,
   mockIndexPattern,
   mockIndexNames,
-} from '../../../common/mock';
-import '../../../common/mock/match_media';
-import { TestProviders } from '../../../common/mock/test_providers';
+} from '../../../../common/mock';
+import '../../../../common/mock/match_media';
+import { TestProviders } from '../../../../common/mock/test_providers';
 
-import { TimelineComponent, Props as TimelineComponentProps } from './timeline';
-import { Sort } from './body/sort';
-import { mockDataProviders } from './data_providers/mock/mock_data_providers';
-import { useMountAppended } from '../../../common/utils/use_mount_appended';
-import { TimelineId, TimelineStatus, TimelineType } from '../../../../common/types/timeline';
-import { useTimelineEvents } from '../../containers/index';
-import { useTimelineEventsDetails } from '../../containers/details/index';
+import {
+  TimelineQueryTabContentComponent,
+  Props as TimelineQueryTabContentComponentProps,
+} from './index';
+import { Sort } from '../body/sort';
+import { mockDataProviders } from '../data_providers/mock/mock_data_providers';
+import { useMountAppended } from '../../../../common/utils/use_mount_appended';
+import { TimelineId, TimelineStatus, TimelineType } from '../../../../../common/types/timeline';
+import { useTimelineEvents } from '../../../containers/index';
+import { useTimelineEventsDetails } from '../../../containers/details/index';
 
 jest.mock('../../containers/index', () => ({
   useTimelineEvents: jest.fn(),
@@ -66,7 +69,7 @@ jest.mock('../../../common/lib/kibana', () => {
   };
 });
 describe('Timeline', () => {
-  let props = {} as TimelineComponentProps;
+  let props = {} as TimelineQueryTabContentComponentProps;
   const sort: Sort = {
     columnId: '@timestamp',
     sortDirection: Direction.desc,
@@ -92,10 +95,8 @@ describe('Timeline', () => {
     (useTimelineEventsDetails as jest.Mock).mockReturnValue([false, {}]);
 
     props = {
-      browserFields: mockBrowserFields,
       columns: defaultHeaders,
       dataProviders: mockDataProviders,
-      docValueFields: [],
       end: endDate,
       filters: [],
       id: TimelineId.test,
@@ -105,7 +106,7 @@ describe('Timeline', () => {
       isSaving: false,
       itemsPerPage: 5,
       itemsPerPageOptions: [5, 10, 20],
-      kqlMode: 'search' as TimelineComponentProps['kqlMode'],
+      kqlMode: 'search' as TimelineQueryTabContentComponentProps['kqlMode'],
       kqlQueryExpression: '',
       loadingSourcerer: false,
       onClose: jest.fn(),
@@ -124,7 +125,7 @@ describe('Timeline', () => {
     test('renders correctly against snapshot', () => {
       const wrapper = shallow(
         <TestProviders>
-          <TimelineComponent {...props} />
+          <TimelineQueryTabContentComponent {...props} />
         </TestProviders>
       );
 
@@ -134,7 +135,7 @@ describe('Timeline', () => {
     test('it renders the timeline header', () => {
       const wrapper = mount(
         <TestProviders>
-          <TimelineComponent {...props} />
+          <TimelineQueryTabContentComponent {...props} />
         </TestProviders>
       );
 
@@ -144,7 +145,7 @@ describe('Timeline', () => {
     test('it renders the title field', () => {
       const wrapper = mount(
         <TestProviders>
-          <TimelineComponent {...props} />
+          <TimelineQueryTabContentComponent {...props} />
         </TestProviders>
       );
 
@@ -156,7 +157,7 @@ describe('Timeline', () => {
     test('it renders the timeline table', () => {
       const wrapper = mount(
         <TestProviders>
-          <TimelineComponent {...props} />
+          <TimelineQueryTabContentComponent {...props} />
         </TestProviders>
       );
 
@@ -166,7 +167,7 @@ describe('Timeline', () => {
     test('it does NOT render the timeline table when the source is loading', () => {
       const wrapper = mount(
         <TestProviders>
-          <TimelineComponent {...props} loadingSourcerer={true} />
+          <TimelineQueryTabContentComponent {...props} loadingSourcerer={true} />
         </TestProviders>
       );
 
@@ -176,7 +177,7 @@ describe('Timeline', () => {
     test('it does NOT render the timeline table when start is empty', () => {
       const wrapper = mount(
         <TestProviders>
-          <TimelineComponent {...props} start={''} />
+          <TimelineQueryTabContentComponent {...props} start={''} />
         </TestProviders>
       );
 
@@ -186,7 +187,7 @@ describe('Timeline', () => {
     test('it does NOT render the timeline table when end is empty', () => {
       const wrapper = mount(
         <TestProviders>
-          <TimelineComponent {...props} end={''} />
+          <TimelineQueryTabContentComponent {...props} end={''} />
         </TestProviders>
       );
 
@@ -196,7 +197,7 @@ describe('Timeline', () => {
     test('it does NOT render the paging footer when you do NOT have any data providers', () => {
       const wrapper = mount(
         <TestProviders>
-          <TimelineComponent {...props} />
+          <TimelineQueryTabContentComponent {...props} />
         </TestProviders>
       );
 
@@ -206,7 +207,7 @@ describe('Timeline', () => {
     it('it shows the timeline footer', () => {
       const wrapper = mount(
         <TestProviders>
-          <TimelineComponent {...props} />
+          <TimelineQueryTabContentComponent {...props} />
         </TestProviders>
       );
 

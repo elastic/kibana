@@ -136,7 +136,7 @@ interface OwnProps {
 
 export type Props = OwnProps & PropsFromRedux;
 
-const TimelineQueryTabContentComponent: React.FC<Props> = ({
+export const TimelineQueryTabContentComponent: React.FC<Props> = ({
   columns,
   dataProviders,
   end,
