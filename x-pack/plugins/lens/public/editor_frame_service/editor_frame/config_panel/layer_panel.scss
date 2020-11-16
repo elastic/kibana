@@ -81,28 +81,18 @@
   margin-right: $euiSizeS;
 }
 
-.lnsLayerPanel__triggerLink {
+.lnsLayerPanel__triggerText {
   width: 100%;
   padding: $euiSizeS;
   min-height: $euiSizeXXL - 2;
   word-break: break-word;
-
-  &:focus {
-    background-color: transparent !important; // sass-lint:disable-line no-important
-    outline: none !important; // sass-lint:disable-line no-important
-  }
-
-  &:focus .lnsLayerPanel__triggerLinkLabel,
-  &:focus-within .lnsLayerPanel__triggerLinkLabel {
-    background-color: transparentize($euiColorVis1, .9);
-  }
 }
 
-.lnsLayerPanel__triggerLinkLabel {
+.lnsLayerPanel__triggerTextLabel {
   transition: background-color $euiAnimSpeedFast ease-in-out;
 }
 
-.lnsLayerPanel__triggerLinkContent {
+.lnsLayerPanel__triggerTextContent {
   // Make EUI button content not centered
   justify-content: flex-start;
   padding: 0 !important; // sass-lint:disable-line no-important
@@ -139,5 +129,10 @@
   &:focus {
     background-color: transparent !important; // sass-lint:disable-line no-important
     outline: none !important; // sass-lint:disable-line no-important
+  }
+
+  &:focus .lnsLayerPanel__triggerTextLabel,
+  &:focus-within .lnsLayerPanel__triggerTextLabel {
+    background-color: transparentize($euiColorVis1, .9);
   }
 }

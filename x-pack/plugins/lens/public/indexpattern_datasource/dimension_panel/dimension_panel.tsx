@@ -66,10 +66,6 @@ export const IndexPatternDimensionTriggerComponent = function IndexPatternDimens
   }
   const formattedLabel = wrapOnDot(uniqueLabel);
 
-  const triggerLinkA11yText = i18n.translate('xpack.lens.configure.editConfig', {
-    defaultMessage: 'Click to edit configuration or drag to move',
-  });
-
   if (currentFieldIsInvalid) {
     return (
       <EuiToolTip
@@ -90,10 +86,8 @@ export const IndexPatternDimensionTriggerComponent = function IndexPatternDimens
           size="s"
           color="danger"
           id={columnId}
-          className="lnsLayerPanel__triggerLink"
+          className="lnsLayerPanel__triggerText"
           data-test-subj="lns-dimensionTrigger"
-          aria-label={triggerLinkA11yText}
-          title={triggerLinkA11yText}
         >
           <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>
@@ -110,14 +104,12 @@ export const IndexPatternDimensionTriggerComponent = function IndexPatternDimens
     <EuiText
       size="s"
       id={columnId}
-      className="lnsLayerPanel__triggerLink"
+      className="lnsLayerPanel__triggerText"
       data-test-subj="lns-dimensionTrigger"
-      aria-label={triggerLinkA11yText}
-      title={triggerLinkA11yText}
     >
       <EuiFlexItem grow={true}>
         <span>
-          <span className="lnsLayerPanel__triggerLinkLabel">{formattedLabel}</span>
+          <span className="lnsLayerPanel__triggerTextLabel">{formattedLabel}</span>
         </span>
       </EuiFlexItem>
     </EuiText>

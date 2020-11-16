@@ -184,6 +184,10 @@ export function LayerPanel(
           const newId = generateId();
           const isMissing = !isEmptyLayer && group.required && group.accessors.length === 0;
 
+          const triggerLinkA11yText = i18n.translate('xpack.lens.configure.editConfig', {
+            defaultMessage: 'Click to edit configuration or drag to move',
+          });
+
           return (
             <EuiFormRow
               className={
@@ -211,8 +215,7 @@ export function LayerPanel(
               <>
                 <ReorderProvider id={group.groupId} className={'lnsLayerPanel__group'}>
                   {group.accessors.map((accessorConfig) => {
-                    const accessor =
-                      typeof accessorConfig === 'string' ? accessorConfig : accessorConfig.columnId;
+                    const accessor = accessorConfig.columnId;
                     const { dragging } = dragDropContext;
                     const dragType =
                       isDraggedOperation(dragging) && accessor === dragging.columnId
@@ -324,6 +327,8 @@ export function LayerPanel(
                                 });
                               }
                             }}
+                            aria-label={triggerLinkA11yText}
+                            title={triggerLinkA11yText}
                           >
                             <ColorIndicator accessorConfig={accessorConfig}>
                               <NativeRenderer
@@ -423,12 +428,12 @@ export function LayerPanel(
                     >
                       <div className="lnsLayerPanel__dimension lnsLayerPanel__dimension--empty">
                         <EuiButtonEmpty
-                          className="lnsLayerPanel__triggerLink"
+                          className="lnsLayerPanel__triggerText"
                           color="text"
                           size="xs"
                           iconType="plusInCircleFilled"
                           contentProps={{
-                            className: 'lnsLayerPanel__triggerLinkContent',
+                            className: 'lnsLayerPanel__triggerTextContent',
                           }}
                           data-test-subj="lns-empty-dimension"
                           onClick={() => {
