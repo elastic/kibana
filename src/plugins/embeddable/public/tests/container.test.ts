@@ -18,7 +18,7 @@
  */
 
 import * as Rx from 'rxjs';
-import { skip } from 'rxjs/operators';
+import { first, skip } from 'rxjs/operators';
 import {
   isErrorEmbeddable,
   EmbeddableOutput,
@@ -112,11 +112,10 @@ test('Container initializes embeddables', async () => {
     },
   });
 
-  if (container.getOutput().embeddableLoaded['123']) {
-    const embeddable = container.getChild<ContactCardEmbeddable>('123');
-    expect(embeddable).toBeDefined();
-    expect(embeddable.id).toBe('123');
-  }
+  expect(container.getOutput().embeddableLoaded['123']).toBeTruthy();
+  const embeddable = container.getChild<ContactCardEmbeddable>('123');
+  expect(embeddable).toBeDefined();
+  expect(embeddable.id).toBe('123');
 });
 
 test('Container.addNewEmbeddable', async () => {
@@ -173,23 +172,20 @@ test('Container.removeEmbeddable removes and cleans up', async () => {
 
   embeddable.updateInput({ lastName: 'Z' });
 
-  container
-    .getOutput$()
-    .pipe(skip(1))
-    .subscribe(() => {
-      const noFind = container.getChild<ContactCardEmbeddable>(embeddable.id);
-      expect(noFind).toBeUndefined();
-
-      expect(container.getInput().panels[embeddable.id]).toBeUndefined();
-      if (isErrorEmbeddable(embeddable)) {
-        expect(false).toBe(true);
-      }
-
-      expect(() => embeddable.updateInput({ nameTitle: 'Sir' })).toThrowError();
-      expect(container.getOutput().embeddableLoaded[embeddable.id]).toBeUndefined();
-    });
-
   container.removeEmbeddable(embeddable.id);
+  const promise = container.getOutput$().pipe(first()).toPromise();
+  await promise;
+
+  const noFind = container.getChild<ContactCardEmbeddable>(embeddable.id);
+  expect(noFind).toBeUndefined();
+
+  expect(container.getInput().panels[embeddable.id]).toBeUndefined();
+  if (isErrorEmbeddable(embeddable)) {
+    expect(false).toBe(true);
+  }
+
+  expect(() => embeddable.updateInput({ nameTitle: 'Sir' })).toThrowError();
+  expect(container.getOutput().embeddableLoaded[embeddable.id]).toBeUndefined();
 });
 
 test('Container.input$ is notified when child embeddable input is updated', async () => {
@@ -398,12 +394,12 @@ test(`Can subscribe to children embeddable updates`, async () => {
 
   expect(isErrorEmbeddable(embeddable)).toBe(false);
 
-  const subscription = embeddable.getInput$().subscribe((input: ContactCardEmbeddableInput) => {
-    if (input.nameTitle === 'Dr.') {
-      subscription.unsubscribe();
-    }
-  });
   embeddable.updateInput({ nameTitle: 'Dr.' });
+
+  const promise = embeddable.getInput$().pipe(first()).toPromise();
+  await promise;
+
+  expect(embeddable.getInput().nameTitle).toEqual('Dr.');
 });
 
 test('Test nested reactions', async () => {
@@ -416,29 +412,27 @@ test('Test nested reactions', async () => {
 
   expect(isErrorEmbeddable(embeddable)).toBe(false);
 
-  const containerSubscription = container.getInput$().subscribe((input: any) => {
-    const embeddableNameTitle = embeddable.getInput().nameTitle;
-    const viewMode = input.viewMode;
-    const nameTitleFromContainer = container.getInputForChild<ContactCardEmbeddableInput>(
-      embeddable.id
-    ).nameTitle;
-    if (
-      embeddableNameTitle === 'Dr.' &&
-      nameTitleFromContainer === 'Dr.' &&
-      viewMode === ViewMode.EDIT
-    ) {
-      containerSubscription.unsubscribe();
-      embeddableSubscription.unsubscribe();
-    }
-  });
-
-  const embeddableSubscription = embeddable.getInput$().subscribe(() => {
-    if (embeddable.getInput().nameTitle === 'Dr.') {
-      container.updateInput({ viewMode: ViewMode.EDIT });
-    }
-  });
-
   embeddable.updateInput({ nameTitle: 'Dr.' });
+
+  const embeddablePromise = embeddable.getInput$().pipe(first()).toPromise();
+  await embeddablePromise;
+
+  expect(embeddable.getInput().nameTitle).toEqual('Dr.');
+
+  container.updateInput({ viewMode: ViewMode.EDIT });
+
+  const containerPromise: any = container.getInput$().pipe(first()).toPromise();
+  await containerPromise;
+
+  const embeddableNameTitle = embeddable.getInput().nameTitle;
+  const viewMode = container.getInput().viewMode;
+  const nameTitleFromContainer = container.getInputForChild<ContactCardEmbeddableInput>(
+    embeddable.id
+  ).nameTitle;
+
+  expect(embeddableNameTitle).toEqual('Dr.');
+  expect(nameTitleFromContainer).toEqual('Dr.');
+  expect(viewMode).toEqual(ViewMode.EDIT);
 });
 
 test('Explicit embeddable input mapped to undefined will default to inherited', async () => {
@@ -490,16 +484,11 @@ test('Explicit embeddable input mapped to undefined with no inherited value will
 
   expect(container.getInputForChild<FilterableEmbeddableInput>(embeddable.id).filters).toEqual([]);
 
-  const subscription = embeddable
-    .getInput$()
-    .pipe(skip(1))
-    .subscribe(() => {
-      if (embeddable.getInput().filters === undefined) {
-        subscription.unsubscribe();
-      }
-    });
-
   embeddable.updateInput({ filters: undefined });
+
+  expect(container.getInputForChild<FilterableEmbeddableInput>(embeddable.id).filters).toEqual(
+    undefined
+  );
 });
 
 test('Panel removed from input state', async () => {
@@ -632,12 +621,12 @@ test('container stores ErrorEmbeddables when a factory for a child cannot be fou
     viewMode: ViewMode.EDIT,
   });
 
-  container.getOutput$().subscribe(() => {
-    if (container.getOutput().embeddableLoaded['123']) {
-      const child = container.getChild('123');
-      expect(child.type).toBe(ERROR_EMBEDDABLE_TYPE);
-    }
-  });
+  const promise = container.getOutput$().pipe(first()).toPromise();
+  await promise;
+
+  expect(container.getOutput().embeddableLoaded['123']).toBeTruthy();
+  const child = container.getChild('123');
+  expect(child.type).toBe(ERROR_EMBEDDABLE_TYPE);
 });
 
 test('container stores ErrorEmbeddables when a saved object cannot be found', async () => {
@@ -652,12 +641,12 @@ test('container stores ErrorEmbeddables when a saved object cannot be found', as
     viewMode: ViewMode.EDIT,
   });
 
-  container.getOutput$().subscribe(() => {
-    if (container.getOutput().embeddableLoaded['123']) {
-      const child = container.getChild('123');
-      expect(child.type).toBe(ERROR_EMBEDDABLE_TYPE);
-    }
-  });
+  const promise = container.getOutput$().pipe(first()).toPromise();
+  await promise;
+
+  expect(container.getOutput().embeddableLoaded['123']).toBeTruthy();
+  const child = container.getChild('123');
+  expect(child.type).toBe(ERROR_EMBEDDABLE_TYPE);
 });
 
 test('ErrorEmbeddables get updated when parent does', async () => {
@@ -672,17 +661,18 @@ test('ErrorEmbeddables get updated when parent does', async () => {
     viewMode: ViewMode.EDIT,
   });
 
-  container.getOutput$().subscribe(() => {
-    if (container.getOutput().embeddableLoaded['123']) {
-      const embeddable = container.getChild('123');
+  const promise = container.getOutput$().pipe(first()).toPromise();
+  await promise;
 
-      expect(embeddable.getInput().viewMode).toBe(ViewMode.EDIT);
+  expect(container.getOutput().embeddableLoaded['123']).toBeTruthy();
 
-      container.updateInput({ viewMode: ViewMode.VIEW });
+  const embeddable = container.getChild('123');
 
-      expect(embeddable.getInput().viewMode).toBe(ViewMode.VIEW);
-    }
-  });
+  expect(embeddable.getInput().viewMode).toBe(ViewMode.EDIT);
+
+  container.updateInput({ viewMode: ViewMode.VIEW });
+
+  expect(embeddable.getInput().viewMode).toBe(ViewMode.VIEW);
 });
 
 test('untilEmbeddableLoaded() throws an error if there is no such child panel in the container', async () => {

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { skip } from 'rxjs/operators';
+import { take } from 'rxjs/operators';
 import { testPlugin } from './test_plugin';
 import {
   FILTERABLE_EMBEDDABLE,
@@ -109,16 +109,11 @@ test('Explicit embeddable input mapped to undefined with no inherited value will
 
   expect(container.getInputForChild<FilterableEmbeddableInput>(embeddable.id).filters).toEqual([]);
 
-  const subscription = embeddable
-    .getInput$()
-    .pipe(skip(1))
-    .subscribe(() => {
-      if (embeddable.getInput().filters === undefined) {
-        subscription.unsubscribe();
-      }
-    });
-
   embeddable.updateInput({ filters: undefined });
+
+  expect(container.getInputForChild<FilterableEmbeddableInput>(embeddable.id).filters).toEqual(
+    undefined
+  );
 });
 
 // The goal is to make sure that if the container input changes after `onPanelAdded` is called
