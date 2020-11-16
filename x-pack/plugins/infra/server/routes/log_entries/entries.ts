@@ -34,14 +34,21 @@ export const initLogEntriesRoute = ({ framework, logEntries }: InfraBackendLibs)
         } = payload;
 
         let entries;
+        let hasMoreBefore;
+        let hasMoreAfter;
+
         if ('center' in payload) {
-          entries = await logEntries.getLogEntriesAround(requestContext, sourceId, {
-            startTimestamp,
-            endTimestamp,
-            query: parseFilterQuery(query),
-            center: payload.center,
-            size,
-          });
+          ({ entries, hasMoreBefore, hasMoreAfter } = await logEntries.getLogEntriesAround(
+            requestContext,
+            sourceId,
+            {
+              startTimestamp,
+              endTimestamp,
+              query: parseFilterQuery(query),
+              center: payload.center,
+              size,
+            }
+          ));
         } else {
           let cursor: LogEntriesParams['cursor'];
           if ('before' in payload) {
@@ -50,13 +57,17 @@ export const initLogEntriesRoute = ({ framework, logEntries }: InfraBackendLibs)
             cursor = { after: payload.after };
           }
 
-          entries = await logEntries.getLogEntries(requestContext, sourceId, {
-            startTimestamp,
-            endTimestamp,
-            query: parseFilterQuery(query),
-            cursor,
-            size,
-          });
+          ({ entries, hasMoreBefore, hasMoreAfter } = await logEntries.getLogEntries(
+            requestContext,
+            sourceId,
+            {
+              startTimestamp,
+              endTimestamp,
+              query: parseFilterQuery(query),
+              cursor,
+              size,
+            }
+          ));
         }
 
         const hasEntries = entries.length > 0;
@@ -67,6 +78,8 @@ export const initLogEntriesRoute = ({ framework, logEntries }: InfraBackendLibs)
               entries,
               topCursor: hasEntries ? entries[0].cursor : null,
               bottomCursor: hasEntries ? entries[entries.length - 1].cursor : null,
+              hasMoreBefore,
+              hasMoreAfter,
             },
           }),
         });

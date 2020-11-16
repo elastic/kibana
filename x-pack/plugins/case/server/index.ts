@@ -8,6 +8,8 @@ import { PluginInitializerContext } from '../../../../src/core/server';
 import { ConfigSchema } from './config';
 import { CasePlugin } from './plugin';
 
+export { CASE_ACTION_TYPE_ID } from './connectors';
+export { CaseRequestContext } from './types';
 export const config = { schema: ConfigSchema };
 export const plugin = (initializerContext: PluginInitializerContext) =>
   new CasePlugin(initializerContext);

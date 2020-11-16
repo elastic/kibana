@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { renderWithIntl } from 'test_utils/enzyme_helpers';
+import { renderWithIntl } from '@kbn/test/jest';
 import { BytesUsage, BytesPercentageUsage } from '../helpers';
 
 describe('Bytes Usage', () => {
