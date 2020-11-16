@@ -97,7 +97,7 @@
     "**/typescript": "4.0.2"
   },
   "engines": {
-    "node": "12.19.0",
+    "node": "12.19.1",
     "yarn": "^1.21.1"
   },
   "dependencies": {
