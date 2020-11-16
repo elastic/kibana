@@ -429,7 +429,7 @@ describe('Data Streams tab', () => {
       ]);
     });
 
-    test('turning off "View managed" switch hides managed data streams', async () => {
+    test('turning off "Include managed" switch hides managed data streams', async () => {
       const { exists, actions, component, table } = testBed;
       let { tableCellsValues } = table.getMetaData('dataStreamTable');
 
@@ -441,7 +441,7 @@ describe('Data Streams tab', () => {
       expect(exists('includeManagedSwitch')).toBe(true);
 
       await act(async () => {
-        actions.clickViewManagedSwitch();
+        actions.clickIncludeManagedSwitch();
       });
       component.update();
 

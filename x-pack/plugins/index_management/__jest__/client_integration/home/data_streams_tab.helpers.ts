@@ -19,7 +19,7 @@ export interface DataStreamsTabTestBed extends TestBed<TestSubjects> {
     goToDataStreamsList: () => void;
     clickEmptyPromptIndexTemplateLink: () => void;
     clickIncludeStatsSwitch: () => void;
-    clickViewManagedSwitch: () => void;
+    clickIncludeManagedSwitch: () => void;
     clickReloadButton: () => void;
     clickNameAt: (index: number) => void;
     clickIndicesAt: (index: number) => void;
@@ -81,7 +81,7 @@ export const setup = async (overridingDependencies: any = {}): Promise<DataStrea
     find('includeStatsSwitch').simulate('click');
   };
 
-  const clickViewManagedSwitch = () => {
+  const clickIncludeManagedSwitch = () => {
     const { find } = testBed;
     find('includeManagedSwitch').simulate('click');
   };
@@ -189,7 +189,7 @@ export const setup = async (overridingDependencies: any = {}): Promise<DataStrea
       goToDataStreamsList,
       clickEmptyPromptIndexTemplateLink,
       clickIncludeStatsSwitch,
-      clickViewManagedSwitch,
+      clickIncludeManagedSwitch,
       clickReloadButton,
       clickNameAt,
       clickIndicesAt,
