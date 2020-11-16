@@ -6,9 +6,9 @@
 
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
-import { memoize } from 'lodash';
+import { memoize, isNumber } from 'lodash';
 import { NOT_AVAILABLE_LABEL } from '../../../common/i18n';
-import { asDecimalOrInteger, asInteger } from './formatters';
+import { asDecimalOrInteger, asInteger, asDecimal } from './formatters';
 import { TimeUnit } from './datetime';
 import { Maybe } from '../../../typings/common';
 
@@ -143,6 +143,29 @@ export const getDurationFormatter: TimeFormatterBuilder = memoize(
   }
 );
 
+export function asTransactionRate(value: Maybe<number>) {
+  if (!isNumber(value)) {
+    return NOT_AVAILABLE_LABEL;
+  }
+
+  let displayedValue: string;
+
+  if (value === 0) {
+    displayedValue = '0';
+  } else if (value <= 0.1) {
+    displayedValue = '< 0.1';
+  } else {
+    displayedValue = asDecimal(value);
+  }
+
+  return i18n.translate('xpack.apm.transactionRateLabel', {
+    defaultMessage: `{value} tpm`,
+    values: {
+      value: displayedValue,
+    },
+  });
+}
+
 /**
  * Converts value and returns it formatted - 00 unit
  */
@@ -157,7 +180,6 @@ export function asDuration(
   const formatter = getDurationFormatter(value);
   return formatter(value, { defaultValue }).formatted;
 }
-
 /**
  * Convert a microsecond value to decimal milliseconds. Normally we use
  * `asDuration`, but this is used in places like tables where we always want

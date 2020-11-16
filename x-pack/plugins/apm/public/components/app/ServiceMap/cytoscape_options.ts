@@ -16,7 +16,7 @@ import {
   ServiceHealthStatus,
 } from '../../../../common/service_health_status';
 import { FETCH_STATUS } from '../../../hooks/useFetcher';
-import { defaultIcon, iconForNode } from './icons';
+import { iconForNode } from './icons';
 
 export const popoverWidth = 280;
 
@@ -116,9 +116,7 @@ const getStyle = (theme: EuiTheme): cytoscape.Stylesheet[] => {
         'background-color': theme.eui.euiColorGhost,
         // The DefinitelyTyped definitions don't specify that a function can be
         // used here.
-        'background-image': isIE11
-          ? undefined
-          : (el: cytoscape.NodeSingular) => iconForNode(el) ?? defaultIcon,
+        'background-image': (el: cytoscape.NodeSingular) => iconForNode(el),
         'background-height': (el: cytoscape.NodeSingular) =>
           isService(el) ? '60%' : '40%',
         'background-width': (el: cytoscape.NodeSingular) =>

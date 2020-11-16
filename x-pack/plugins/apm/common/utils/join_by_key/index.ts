@@ -26,21 +26,41 @@ type JoinedReturnType<
   T extends Record<string, any>,
   U extends UnionToIntersection<T>,
   V extends keyof T & keyof U
-> = Array<Partial<U> & Record<V, U[V]>>;
+> = Array<
+  Partial<U> &
+    {
+      [k in keyof T]: T[k];
+    }
+>;
 
 export function joinByKey<
   T extends Record<string, any>,
   U extends UnionToIntersection<T>,
   V extends keyof T & keyof U
->(items: T[], key: V): JoinedReturnType<T, U, V> {
-  return items.reduce<JoinedReturnType<T, U, V>>((prev, current) => {
+>(items: T[], key: V): JoinedReturnType<T, U, V>;
+
+export function joinByKey<
+  T extends Record<string, any>,
+  U extends UnionToIntersection<T>,
+  V extends keyof T & keyof U,
+  W extends JoinedReturnType<T, U, V>,
+  X extends (a: T, b: T) => ValuesType<W>
+>(items: T[], key: V, mergeFn: X): W;
+
+export function joinByKey(
+  items: Array<Record<string, any>>,
+  key: string,
+  mergeFn: Function = (a: Record<string, any>, b: Record<string, any>) =>
+    Object.assign(a, b)
+) {
+  return items.reduce<Array<Record<string, any>>>((prev, current) => {
     let item = prev.find((prevItem) => isEqual(prevItem[key], current[key]));
 
     if (!item) {
-      item = { ...current } as ValuesType<JoinedReturnType<T, U, V>>;
+      item = { ...current };
       prev.push(item);
     } else {
-      Object.assign(item, current);
+      item = mergeFn(item, current);
     }
 
     return prev;

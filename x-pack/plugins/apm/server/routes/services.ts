@@ -18,6 +18,7 @@ import { getServiceAnnotations } from '../lib/services/annotations';
 import { dateAsStringRt } from '../../common/runtime_types/date_as_string_rt';
 import { getSearchAggregatedTransactions } from '../lib/helpers/aggregated_transactions';
 import { getServiceErrorGroups } from '../lib/services/get_service_error_groups';
+import { getServiceDependencies } from '../lib/services/get_service_dependencies';
 import { toNumberRt } from '../../common/runtime_types/to_number_rt';
 
 export const servicesRoute = createRoute(() => ({
@@ -236,6 +237,31 @@ export const serviceErrorGroupsRoute = createRoute(() => ({
       pageIndex,
       sortDirection,
       sortField,
+    });
+  },
+}));
+
+export const serviceDependenciesRoute = createRoute(() => ({
+  path: '/api/apm/services/{serviceName}/dependencies',
+  params: {
+    path: t.type({
+      serviceName: t.string,
+    }),
+    query: t.intersection([
+      rangeRt,
+      t.type({ environment: t.string, numBuckets: toNumberRt }),
+    ]),
+  },
+  handler: async ({ context, request }) => {
+    const setup = await setupRequest(context, request);
+
+    const { serviceName } = context.params.path;
+    const { environment, numBuckets } = context.params.query;
+    return getServiceDependencies({
+      serviceName,
+      environment,
+      setup,
+      numBuckets,
     });
   },
 }));
