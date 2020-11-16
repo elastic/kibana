@@ -39,23 +39,7 @@ export function defineRoutes({ router, featureRegistry }: RouteDefinitionParams)
             (f1, f2) =>
               (f1.order ?? Number.MAX_SAFE_INTEGER) - (f2.order ?? Number.MAX_SAFE_INTEGER)
           )
-          .map((feature) => {
-            const raw = feature.toRaw();
-            if (!currentLicense || request.query.ignoreValidLicenses) {
-              return raw;
-            }
-
-            raw.subFeatures?.forEach((subFeature) => {
-              subFeature.privilegeGroups.forEach((group) => {
-                group.privileges = group.privileges.filter(
-                  (privilege) =>
-                    !privilege.minimumLicense || currentLicense.hasAtLeast(privilege.minimumLicense)
-                );
-              });
-            });
-
-            return raw;
-          }),
+          .map((feature) => feature.toRaw()),
       });
     }
   );
