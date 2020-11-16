@@ -56,7 +56,7 @@ describe('DocumentDetailLogic', () => {
   describe('actions', () => {
     describe('setFields', () => {
       it('should set fields to the provided value and dataLoading to false', () => {
-        const fields = [{ name: 'name', value: 'python', type: 'string' }];
+        const fields = [{ name: 'foo', value: ['foo'], type: 'string' }];
 
         mount({
           dataLoading: true,
