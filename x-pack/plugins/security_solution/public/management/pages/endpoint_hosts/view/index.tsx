@@ -16,6 +16,7 @@ import {
   EuiSelectableProps,
   EuiSuperDatePicker,
   EuiSpacer,
+  EuiIcon,
   EuiPopover,
   EuiContextMenuItem,
   EuiContextMenuPanel,
@@ -350,18 +351,35 @@ export const EndpointList = () => {
           });
           const toRouteUrl = formatUrl(toRoutePath);
           return (
-            <EuiHealth
-              color={POLICY_STATUS_TO_HEALTH_COLOR[policy.status]}
-              className="eui-textTruncate"
-              data-test-subj="rowPolicyStatus"
-            >
-              <EndpointListNavLink
-                name={POLICY_STATUS_TO_TEXT[policy.status]}
-                href={toRouteUrl}
-                route={toRoutePath}
-                dataTestSubj="policyStatusCellLink"
-              />
-            </EuiHealth>
+            <>
+              <EuiHealth
+                color={POLICY_STATUS_TO_HEALTH_COLOR[policy.status]}
+                className="eui-textTruncate"
+                data-test-subj="rowPolicyStatus"
+              >
+                <EndpointListNavLink
+                  name={POLICY_STATUS_TO_TEXT[policy.status]}
+                  href={toRouteUrl}
+                  route={toRoutePath}
+                  dataTestSubj="policyStatusCellLink"
+                />
+              </EuiHealth>
+              {(item.metadata.Endpoint.policy.applied.version <
+                item.policy_versions.agent.applied ||
+                item.metadata.Endpoint.policy.applied.version <
+                  item.policy_versions.agent.configured ||
+                item.metadata.Endpoint.policy.applied.version < item.policy_versions.endpoint) && (
+                <EuiFlexItem grow={false}>
+                  <EuiText color="subdued" size="xs" className="eui-textNoWrap">
+                    <EuiIcon size="m" type="alert" color="warning" />
+                    <FormattedMessage
+                      id="xpack.fleet.securitySolution.endpoint.list.outOfDateLabel"
+                      defaultMessage="Out-of-date"
+                    />
+                  </EuiText>
+                </EuiFlexItem>
+              )}
+            </>
           );
         },
       },

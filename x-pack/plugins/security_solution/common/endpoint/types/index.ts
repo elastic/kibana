@@ -523,6 +523,13 @@ export enum MetadataQueryStrategyVersions {
 export type HostInfo = Immutable<{
   metadata: HostMetadata;
   host_status: HostStatus;
+  policy_versions: {
+    agent: {
+      configured: number; // current agentPolicy version
+      applied: number; // policy that the agent is currently reporting
+    };
+    endpoint: number; // current intended 'endpoint' package policy
+  };
   /* the version of the query strategy */
   query_strategy_version: MetadataQueryStrategyVersions;
 }>;
@@ -558,6 +565,7 @@ export type HostMetadata = Immutable<{
         id: string;
         status: HostPolicyResponseActionStatus;
         name: string;
+        version: number;
       };
     };
   };

@@ -282,9 +282,31 @@ async function enrichHostMetadata(
       throw e;
     }
   }
+
+  let policyVersions: HostInfo['policy_versions'];
+  try {
+    const agent = await metadataRequestContext.endpointAppContextService
+      ?.getAgentService()
+      ?.getAgent(
+        metadataRequestContext.requestHandlerContext.core.savedObjects.client,
+        elasticAgentId
+      );
+    policyVersions = {
+      agent: {
+        applied: agent?.policy_revision!,
+        configured: 0,
+      },
+      endpoint: 0,
+    };
+  } catch (e) {
+    log.error(e);
+    throw e;
+  }
+
   return {
     metadata: hostMetadata,
     host_status: hostStatus,
+    policy_versions: policyVersions,
     query_strategy_version: metadataQueryStrategyVersion,
   };
 }
