@@ -43,6 +43,7 @@ export const getFunctionDescription = async (
     selectedJobId
   );
   const criteriaFields = getCriteriaFields(selectedDetectorIndex, entityControls);
+
   try {
     const resp = await mlResultsService
       .getRecordsForCriteria([selectedJob.job_id], criteriaFields, 0, null, null, 1)

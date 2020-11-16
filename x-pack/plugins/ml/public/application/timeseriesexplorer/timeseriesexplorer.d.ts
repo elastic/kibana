@@ -7,6 +7,7 @@
 import { FC } from 'react';
 
 import { TimeRangeBounds } from '../explorer/explorer_utils';
+import { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
 
 declare const TimeSeriesExplorer: FC<{
   appStateHandler: (action: string, payload: any) => void;
@@ -22,3 +23,9 @@ declare const TimeSeriesExplorer: FC<{
   tableSeverity: number;
   zoom?: { from: string; to: string };
 }>;
+
+interface ViewableDetector {
+  index: number;
+  detector_description: string;
+}
+declare const getViewableDetectors: (selectedJob: CombinedJob) => ViewableDetector[];

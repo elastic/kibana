@@ -157,6 +157,15 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
     : +appState?.mlTimeSeriesExplorer?.detectorIndex || 0;
   const selectedEntities = isJobChange ? undefined : appState?.mlTimeSeriesExplorer?.entities;
   const selectedForecastId = isJobChange ? undefined : appState?.mlTimeSeriesExplorer?.forecastId;
+
+  const previousSelectedEntities = usePrevious(selectedEntities);
+  const isSelectedEntitiesChange = !isEqual(previousSelectedEntities, selectedEntities);
+
+  const selectedFunctionDescription =
+    isJobChange || isSelectedEntitiesChange
+      ? undefined
+      : appState?.mlTimeSeriesExplorer?.functionDescription;
+
   const zoom: AppStateZoom | undefined = isJobChange
     ? undefined
     : appState?.mlTimeSeriesExplorer?.zoom;
@@ -180,14 +189,19 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
           delete mlTimeSeriesExplorer.entities;
           delete mlTimeSeriesExplorer.forecastId;
           delete mlTimeSeriesExplorer.zoom;
+          delete mlTimeSeriesExplorer.functionDescription;
           break;
 
         case APP_STATE_ACTION.SET_DETECTOR_INDEX:
           mlTimeSeriesExplorer.detectorIndex = payload;
+          delete mlTimeSeriesExplorer.functionDescription;
+
           break;
 
         case APP_STATE_ACTION.SET_ENTITIES:
           mlTimeSeriesExplorer.entities = payload;
+          delete mlTimeSeriesExplorer.functionDescription;
+
           break;
 
         case APP_STATE_ACTION.SET_FORECAST_ID:
@@ -201,6 +215,10 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
 
         case APP_STATE_ACTION.UNSET_ZOOM:
           delete mlTimeSeriesExplorer.zoom;
+          break;
+
+        case APP_STATE_ACTION.SET_FUNCTION_DESCRIPTION:
+          mlTimeSeriesExplorer.functionDescription = payload;
           break;
       }
 
@@ -311,6 +329,7 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
         timefilter,
         zoom: zoomProp,
         invalidTimeRangeError,
+        functionDescription: selectedFunctionDescription,
       }}
     />
   );
