@@ -6,10 +6,10 @@
 
 import { resetContext } from 'kea';
 
-import { DocumentsLogic, DocumentsLogicValues } from './documents_logic';
+import { DocumentsLogic } from './documents_logic';
 
 describe('DocumentsLogic', () => {
-  const DEFAULT_VALUES: DocumentsLogicValues = {
+  const DEFAULT_VALUES = {
     isDocumentCreationOpen: false,
   };
 

@@ -6,11 +6,11 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-export interface DocumentsLogicValues {
+interface DocumentsLogicValues {
   isDocumentCreationOpen: boolean;
 }
 
-export interface DocumentsLogicActions {
+interface DocumentsLogicActions {
   closeDocumentCreation(): void;
   openDocumentCreation(): void;
 }

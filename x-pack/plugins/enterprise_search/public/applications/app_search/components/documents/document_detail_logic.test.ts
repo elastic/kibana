@@ -22,10 +22,10 @@ jest.mock('../../../shared/flash_messages', () => ({
 }));
 import { setQueuedSuccessMessage, flashAPIErrors } from '../../../shared/flash_messages';
 
-import { DocumentDetailLogic, DocumentDetailLogicValues } from './document_detail_logic';
+import { DocumentDetailLogic } from './document_detail_logic';
 
 describe('DocumentDetailLogic', () => {
-  const DEFAULT_VALUES: DocumentDetailLogicValues = {
+  const DEFAULT_VALUES = {
     dataLoading: true,
     fields: [],
   };

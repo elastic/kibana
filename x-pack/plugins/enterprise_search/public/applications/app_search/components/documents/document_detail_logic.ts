@@ -12,12 +12,12 @@ import { EngineLogic } from '../engine';
 import { flashAPIErrors, setQueuedSuccessMessage } from '../../../shared/flash_messages';
 import { FieldDetails } from './types';
 
-export interface DocumentDetailLogicValues {
+interface DocumentDetailLogicValues {
   dataLoading: boolean;
   fields: FieldDetails[];
 }
 
-export interface DocumentDetailLogicActions {
+interface DocumentDetailLogicActions {
   setFields(fields: FieldDetails[]): { fields: FieldDetails[] };
   deleteDocument(documentId: string): { documentId: string };
   getDocumentDetails(documentId: string): { documentId: string };
