@@ -429,7 +429,7 @@ describe('Data Streams tab', () => {
       ]);
     });
 
-    test('turning of "View managed" switch hides managed data streams', async () => {
+    test('turning off "View managed" switch hides managed data streams', async () => {
       const { exists, actions, component, table } = testBed;
       let { tableCellsValues } = table.getMetaData('dataStreamTable');
 
