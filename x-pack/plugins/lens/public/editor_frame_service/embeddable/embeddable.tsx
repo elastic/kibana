@@ -253,8 +253,10 @@ export class Embeddable
     if (!this.savedVis) {
       return;
     }
-    const promises = this.savedVis.references
-      .filter(({ type }) => type === 'index-pattern')
+    const promises = _.uniqBy(
+      this.savedVis.references.filter(({ type }) => type === 'index-pattern'),
+      'id'
+    )
       .map(async ({ id }) => {
         try {
           return await this.deps.indexPatternService.get(id);
