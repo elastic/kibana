@@ -8,7 +8,6 @@ import './advanced_editor.scss';
 
 import React, { useState, MouseEventHandler } from 'react';
 import { i18n } from '@kbn/i18n';
-import useDebounce from 'react-use/lib/useDebounce';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -31,6 +30,7 @@ import {
   DraggableBucketContainer,
   LabelInput,
 } from '../shared_components';
+import { useDebounceWithOptions } from '../helpers';
 
 const generateId = htmlIdGenerator();
 
@@ -213,12 +213,13 @@ export const AdvancedRangeEditor = ({
 
   const lastIndex = localRanges.length - 1;
 
-  // Update locally all the time, but bounce the parents prop function
-  // to avoid too many requests
-  useDebounce(
+  // Update locally all the time, but bounce the parents prop function to avoid too many requests
+  // Avoid to trigger on first render
+  useDebounceWithOptions(
     () => {
       setRanges(localRanges.map(({ id, ...rest }) => ({ ...rest })));
     },
+    { skipFirstRender: true },
     TYPING_DEBOUNCE_TIME,
     [localRanges]
   );
