@@ -28,4 +28,4 @@ export {
   SavedObjectsRawDoc,
   SavedObjectsRawDocSource,
 } from './types';
-export { SavedObjectsSerializer } from './serializer';
+export { SavedObjectsSerializer, generateSavedObjectId } from './serializer';

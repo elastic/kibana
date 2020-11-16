@@ -32,6 +32,7 @@ export {
   SavedObjectsRawDoc,
   SavedObjectSanitizedDoc,
   SavedObjectUnsanitizedDoc,
+  generateSavedObjectId,
 } from './serialization';
 
 export { SavedObjectsMigrationLogger } from './migrations/core/migration_logger';

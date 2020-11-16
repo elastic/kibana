@@ -45,7 +45,7 @@ export interface AuditEvent {
      */
     saved_object?: {
       type: string;
-      id?: string;
+      id: string;
     };
     /**
      * Any additional event specific fields.
@@ -178,7 +178,9 @@ export enum SavedObjectAction {
   REMOVE_REFERENCES = 'saved_object_remove_references',
 }
 
-const eventVerbs = {
+type VerbsTuple = [string, string, string];
+
+const eventVerbs: Record<SavedObjectAction, VerbsTuple> = {
   saved_object_create: ['create', 'creating', 'created'],
   saved_object_get: ['access', 'accessing', 'accessed'],
   saved_object_update: ['update', 'updating', 'updated'],
@@ -193,7 +195,7 @@ const eventVerbs = {
   ],
 };
 
-const eventTypes = {
+const eventTypes: Record<SavedObjectAction, EventType> = {
   saved_object_create: EventType.CREATION,
   saved_object_get: EventType.ACCESS,
   saved_object_update: EventType.CHANGE,
@@ -204,7 +206,7 @@ const eventTypes = {
   saved_object_remove_references: EventType.CHANGE,
 };
 
-export interface SavedObjectParams {
+export interface SavedObjectEventParams {
   action: SavedObjectAction;
   outcome?: EventOutcome;
   savedObject?: Required<Required<AuditEvent>['kibana']>['saved_object'];
@@ -220,7 +222,7 @@ export function savedObjectEvent({
   deleteFromSpaces,
   outcome,
   error,
-}: SavedObjectParams): AuditEvent | undefined {
+}: SavedObjectEventParams): AuditEvent | undefined {
   const doc = savedObject ? `${savedObject.type} [id=${savedObject.id}]` : 'saved objects';
   const [present, progressive, past] = eventVerbs[action];
   const message = error

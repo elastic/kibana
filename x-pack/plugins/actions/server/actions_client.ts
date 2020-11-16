@@ -10,10 +10,13 @@ import {
   SavedObjectAttributes,
   SavedObject,
   KibanaRequest,
-} from 'src/core/server';
+  generateSavedObjectId,
+} from '../../../../src/core/server';
 
 import { i18n } from '@kbn/i18n';
 import { omitBy, isUndefined } from 'lodash';
+import { AuditLogger, EventOutcome } from '../../security/server/audit';
+import { ActionType } from '../common';
 import { ActionTypeRegistry } from './action_type_registry';
 import { validateConfig, validateSecrets, ActionExecutorContract } from './lib';
 import {
@@ -30,11 +33,11 @@ import {
   ExecuteOptions as EnqueueExecutionOptions,
 } from './create_execute_function';
 import { ActionsAuthorization } from './authorization/actions_authorization';
-import { ActionType } from '../common';
 import {
   getAuthorizationModeBySource,
   AuthorizationMode,
 } from './authorization/get_authorization_mode_by_source';
+import { connectorEvent, ConnectorAction } from './lib/audit_events';
 
 // We are assuming there won't be many actions. This is why we will load
 // all the actions in advance and assume the total count to not go over 10000.
@@ -65,6 +68,7 @@ interface ConstructorOptions {
   executionEnqueuer: ExecutionEnqueuer;
   request: KibanaRequest;
   authorization: ActionsAuthorization;
+  auditLogger?: AuditLogger;
 }
 
 interface UpdateOptions {
@@ -82,6 +86,7 @@ export class ActionsClient {
   private readonly request: KibanaRequest;
   private readonly authorization: ActionsAuthorization;
   private readonly executionEnqueuer: ExecutionEnqueuer;
+  private readonly auditLogger?: AuditLogger;
 
   constructor({
     actionTypeRegistry,
@@ -93,6 +98,7 @@ export class ActionsClient {
     executionEnqueuer,
     request,
     authorization,
+    auditLogger,
   }: ConstructorOptions) {
     this.actionTypeRegistry = actionTypeRegistry;
     this.unsecuredSavedObjectsClient = unsecuredSavedObjectsClient;
@@ -103,6 +109,7 @@ export class ActionsClient {
     this.executionEnqueuer = executionEnqueuer;
     this.request = request;
     this.authorization = authorization;
+    this.auditLogger = auditLogger;
   }
 
   /**
@@ -111,7 +118,20 @@ export class ActionsClient {
   public async create({
     action: { actionTypeId, name, config, secrets },
   }: CreateOptions): Promise<ActionResult> {
-    await this.authorization.ensureAuthorized('create', actionTypeId);
+    const id = generateSavedObjectId();
+
+    try {
+      await this.authorization.ensureAuthorized('create', actionTypeId);
+    } catch (error) {
+      this.auditLogger?.log(
+        connectorEvent({
+          action: ConnectorAction.CREATE,
+          savedObject: { type: 'action', id },
+          error,
+        })
+      );
+      throw error;
+    }
 
     const actionType = this.actionTypeRegistry.get(actionTypeId);
     const validatedActionTypeConfig = validateConfig(actionType, config);
@@ -119,12 +139,24 @@ export class ActionsClient {
 
     this.actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
 
-    const result = await this.unsecuredSavedObjectsClient.create('action', {
-      actionTypeId,
-      name,
-      config: validatedActionTypeConfig as SavedObjectAttributes,
-      secrets: validatedActionTypeSecrets as SavedObjectAttributes,
-    });
+    this.auditLogger?.log(
+      connectorEvent({
+        action: ConnectorAction.CREATE,
+        savedObject: { type: 'action', id },
+        outcome: EventOutcome.UNKNOWN,
+      })
+    );
+
+    const result = await this.unsecuredSavedObjectsClient.create(
+      'action',
+      {
+        actionTypeId,
+        name,
+        config: validatedActionTypeConfig as SavedObjectAttributes,
+        secrets: validatedActionTypeSecrets as SavedObjectAttributes,
+      },
+      { id }
+    );
 
     return {
       id: result.id,
@@ -139,27 +171,36 @@ export class ActionsClient {
    * Update action
    */
   public async update({ id, action }: UpdateOptions): Promise<ActionResult> {
-    await this.authorization.ensureAuthorized('update');
+    try {
+      await this.authorization.ensureAuthorized('update');
 
-    if (
-      this.preconfiguredActions.find((preconfiguredAction) => preconfiguredAction.id === id) !==
-      undefined
-    ) {
-      throw new PreconfiguredActionDisabledModificationError(
-        i18n.translate('xpack.actions.serverSideErrors.predefinedActionUpdateDisabled', {
-          defaultMessage: 'Preconfigured action {id} is not allowed to update.',
-          values: {
-            id,
-          },
-        }),
-        'update'
+      if (
+        this.preconfiguredActions.find((preconfiguredAction) => preconfiguredAction.id === id) !==
+        undefined
+      ) {
+        throw new PreconfiguredActionDisabledModificationError(
+          i18n.translate('xpack.actions.serverSideErrors.predefinedActionUpdateDisabled', {
+            defaultMessage: 'Preconfigured action {id} is not allowed to update.',
+            values: {
+              id,
+            },
+          }),
+          'update'
+        );
+      }
+    } catch (error) {
+      this.auditLogger?.log(
+        connectorEvent({
+          action: ConnectorAction.UPDATE,
+          savedObject: { type: 'action', id },
+          error,
+        })
       );
+      throw error;
     }
-    const {
-      attributes,
-      references,
-      version,
-    } = await this.unsecuredSavedObjectsClient.get<RawAction>('action', id);
+    const { attributes, references, version } = await this.unsecuredSavedObjectsClient.get<
+      RawAction
+    >('action', id);
     const { actionTypeId } = attributes;
     const { name, config, secrets } = action;
     const actionType = this.actionTypeRegistry.get(actionTypeId);
@@ -167,6 +208,14 @@ export class ActionsClient {
     const validatedActionTypeSecrets = validateSecrets(actionType, secrets);
 
     this.actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
+
+    this.auditLogger?.log(
+      connectorEvent({
+        action: ConnectorAction.UPDATE,
+        savedObject: { type: 'action', id },
+        outcome: EventOutcome.UNKNOWN,
+      })
+    );
 
     const result = await this.unsecuredSavedObjectsClient.create<RawAction>(
       'action',
@@ -201,12 +250,30 @@ export class ActionsClient {
    * Get an action
    */
   public async get({ id }: { id: string }): Promise<ActionResult> {
-    await this.authorization.ensureAuthorized('get');
+    try {
+      await this.authorization.ensureAuthorized('get');
+    } catch (error) {
+      this.auditLogger?.log(
+        connectorEvent({
+          action: ConnectorAction.GET,
+          savedObject: { type: 'action', id },
+          error,
+        })
+      );
+      throw error;
+    }
 
     const preconfiguredActionsList = this.preconfiguredActions.find(
       (preconfiguredAction) => preconfiguredAction.id === id
     );
     if (preconfiguredActionsList !== undefined) {
+      this.auditLogger?.log(
+        connectorEvent({
+          action: ConnectorAction.GET,
+          savedObject: { type: 'action', id },
+        })
+      );
+
       return {
         id,
         actionTypeId: preconfiguredActionsList.actionTypeId,
@@ -214,7 +281,15 @@ export class ActionsClient {
         isPreconfigured: true,
       };
     }
+
     const result = await this.unsecuredSavedObjectsClient.get<RawAction>('action', id);
+
+    this.auditLogger?.log(
+      connectorEvent({
+        action: ConnectorAction.GET,
+        savedObject: { type: 'action', id },
+      })
+    );
 
     return {
       id,
@@ -229,7 +304,17 @@ export class ActionsClient {
    * Get all actions with preconfigured list
    */
   public async getAll(): Promise<FindActionResult[]> {
-    await this.authorization.ensureAuthorized('get');
+    try {
+      await this.authorization.ensureAuthorized('get');
+    } catch (error) {
+      this.auditLogger?.log(
+        connectorEvent({
+          action: ConnectorAction.FIND,
+          error,
+        })
+      );
+      throw error;
+    }
 
     const savedObjectsActions = (
       await this.unsecuredSavedObjectsClient.find<RawAction>({
@@ -237,6 +322,15 @@ export class ActionsClient {
         type: 'action',
       })
     ).saved_objects.map(actionFromSavedObject);
+
+    savedObjectsActions.forEach(({ id }) =>
+      this.auditLogger?.log(
+        connectorEvent({
+          action: ConnectorAction.FIND,
+          savedObject: { type: 'action', id },
+        })
+      )
+    );
 
     const mergedResult = [
       ...savedObjectsActions,
@@ -258,7 +352,20 @@ export class ActionsClient {
    * Get bulk actions with preconfigured list
    */
   public async getBulk(ids: string[]): Promise<ActionResult[]> {
-    await this.authorization.ensureAuthorized('get');
+    try {
+      await this.authorization.ensureAuthorized('get');
+    } catch (error) {
+      ids.forEach((id) =>
+        this.auditLogger?.log(
+          connectorEvent({
+            action: ConnectorAction.GET,
+            savedObject: { type: 'action', id },
+            error,
+          })
+        )
+      );
+      throw error;
+    }
 
     const actionResults = new Array<ActionResult>();
     for (const actionId of ids) {
@@ -283,6 +390,15 @@ export class ActionsClient {
     const bulkGetOpts = actionSavedObjectsIds.map((id) => ({ id, type: 'action' }));
     const bulkGetResult = await this.unsecuredSavedObjectsClient.bulkGet<RawAction>(bulkGetOpts);
 
+    ids.forEach((id) =>
+      this.auditLogger?.log(
+        connectorEvent({
+          action: ConnectorAction.GET,
+          savedObject: { type: 'action', id },
+        })
+      )
+    );
+
     for (const action of bulkGetResult.saved_objects) {
       if (action.error) {
         throw Boom.badRequest(
@@ -298,22 +414,42 @@ export class ActionsClient {
    * Delete action
    */
   public async delete({ id }: { id: string }) {
-    await this.authorization.ensureAuthorized('delete');
+    try {
+      await this.authorization.ensureAuthorized('delete');
 
-    if (
-      this.preconfiguredActions.find((preconfiguredAction) => preconfiguredAction.id === id) !==
-      undefined
-    ) {
-      throw new PreconfiguredActionDisabledModificationError(
-        i18n.translate('xpack.actions.serverSideErrors.predefinedActionDeleteDisabled', {
-          defaultMessage: 'Preconfigured action {id} is not allowed to delete.',
-          values: {
-            id,
-          },
-        }),
-        'delete'
+      if (
+        this.preconfiguredActions.find((preconfiguredAction) => preconfiguredAction.id === id) !==
+        undefined
+      ) {
+        throw new PreconfiguredActionDisabledModificationError(
+          i18n.translate('xpack.actions.serverSideErrors.predefinedActionDeleteDisabled', {
+            defaultMessage: 'Preconfigured action {id} is not allowed to delete.',
+            values: {
+              id,
+            },
+          }),
+          'delete'
+        );
+      }
+    } catch (error) {
+      this.auditLogger?.log(
+        connectorEvent({
+          action: ConnectorAction.DELETE,
+          savedObject: { type: 'action', id },
+          error,
+        })
       );
+      throw error;
     }
+
+    this.auditLogger?.log(
+      connectorEvent({
+        action: ConnectorAction.DELETE,
+        outcome: EventOutcome.UNKNOWN,
+        savedObject: { type: 'action', id },
+      })
+    );
+
     return await this.unsecuredSavedObjectsClient.delete('action', id);
   }
 

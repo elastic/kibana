@@ -130,7 +130,7 @@ export class SavedObjectsSerializer {
   public generateRawId(namespace: string | undefined, type: string, id?: string) {
     const namespacePrefix =
       namespace && this.registry.isSingleNamespace(type) ? `${namespace}:` : '';
-    return `${namespacePrefix}${type}:${id || uuid.v1()}`;
+    return `${namespacePrefix}${type}:${id || generateSavedObjectId()}`;
   }
 
   private trimIdPrefix(namespace: string | undefined, type: string, id: string) {
@@ -147,6 +147,10 @@ export class SavedObjectsSerializer {
 
     return id.slice(prefix.length);
   }
+}
+
+export function generateSavedObjectId() {
+  return uuid.v1();
 }
 
 function assertNonEmptyString(value: string, name: string) {

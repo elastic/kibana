@@ -314,6 +314,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
           isESOUsingEphemeralEncryptionKey: isESOUsingEphemeralEncryptionKey!,
           preconfiguredActions,
         }),
+        auditLogger: this.security?.audit.asScoped(request),
       });
     };
 
@@ -439,6 +440,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
       preconfiguredActions,
       actionExecutor,
       instantiateAuthorization,
+      security,
     } = this;
 
     return async function actionsRouteHandlerContext(context, request) {
@@ -468,6 +470,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
               isESOUsingEphemeralEncryptionKey: isESOUsingEphemeralEncryptionKey!,
               preconfiguredActions,
             }),
+            auditLogger: security?.audit.asScoped(request),
           });
         },
         listTypes: actionTypeRegistry!.list.bind(actionTypeRegistry!),

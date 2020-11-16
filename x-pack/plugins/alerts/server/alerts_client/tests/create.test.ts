@@ -14,7 +14,13 @@ import { actionsAuthorizationMock } from '../../../../actions/server/mocks';
 import { AlertsAuthorization } from '../../authorization/alerts_authorization';
 import { ActionsAuthorization, ActionsClient } from '../../../../actions/server';
 import { TaskStatus } from '../../../../task_manager/server';
+import { auditServiceMock } from '../../../../security/server/audit/index.mock';
+import { httpServerMock } from '../../../../../../src/core/server/mocks';
 import { getBeforeSetup, setGlobalDate } from './lib';
+
+jest.mock('../../../../../../src/core/server/saved_objects/serialization/serializer', () => ({
+  generateSavedObjectId: () => 'GENERATED_ID',
+}));
 
 const taskManager = taskManagerMock.createStart();
 const alertTypeRegistry = alertTypeRegistryMock.create();
@@ -22,6 +28,7 @@ const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
 const encryptedSavedObjects = encryptedSavedObjectsMock.createClient();
 const authorization = alertsAuthorizationMock.create();
 const actionsAuthorization = actionsAuthorizationMock.create();
+const auditLogger = auditServiceMock.create().asScoped(httpServerMock.createKibanaRequest());
 
 const kibanaVersion = 'v7.10.0';
 const alertsClientParams: jest.Mocked<ConstructorOptions> = {
@@ -39,10 +46,12 @@ const alertsClientParams: jest.Mocked<ConstructorOptions> = {
   getActionsClient: jest.fn(),
   getEventLogClient: jest.fn(),
   kibanaVersion,
+  auditLogger,
 };
 
 beforeEach(() => {
   getBeforeSetup(alertsClientParams, taskManager, alertTypeRegistry);
+  (auditLogger.log as jest.Mock).mockClear();
 });
 
 setGlobalDate();
@@ -181,6 +190,62 @@ describe('create()', () => {
       );
 
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith('myType', 'myApp', 'create');
+    });
+  });
+
+  describe('auditLogger', () => {
+    test('logs audit event when creating an alert', async () => {
+      const data = getMockData({
+        enabled: false,
+        actions: [],
+      });
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+        id: '1',
+        type: 'alert',
+        attributes: data,
+        references: [],
+      });
+      await alertsClient.create({ data });
+      expect(auditLogger.log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          event: expect.objectContaining({
+            action: 'alert_rule_create',
+            outcome: 'unknown',
+          }),
+          kibana: { saved_object: { id: 'GENERATED_ID', type: 'alert' } },
+        })
+      );
+    });
+
+    test('logs audit event when not authorised to create an alert', async () => {
+      authorization.ensureAuthorized.mockRejectedValue(new Error('Unauthorized'));
+
+      await expect(
+        alertsClient.create({
+          data: getMockData({
+            enabled: false,
+            actions: [],
+          }),
+        })
+      ).rejects.toThrow();
+      expect(auditLogger.log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          event: expect.objectContaining({
+            action: 'alert_rule_create',
+            outcome: 'failure',
+          }),
+          kibana: {
+            saved_object: {
+              id: 'GENERATED_ID',
+              type: 'alert',
+            },
+          },
+          error: {
+            code: 'Error',
+            message: 'Unauthorized',
+          },
+        })
+      );
     });
   });
 
@@ -336,16 +401,17 @@ describe('create()', () => {
       }
     `);
     expect(unsecuredSavedObjectsClient.create.mock.calls[0][2]).toMatchInlineSnapshot(`
-                                                                                                                  Object {
-                                                                                                                    "references": Array [
-                                                                                                                      Object {
-                                                                                                                        "id": "1",
-                                                                                                                        "name": "action_0",
-                                                                                                                        "type": "action",
-                                                                                                                      },
-                                                                                                                    ],
-                                                                                                                  }
-                                                                            `);
+      Object {
+        "id": "GENERATED_ID",
+        "references": Array [
+          Object {
+            "id": "1",
+            "name": "action_0",
+            "type": "action",
+          },
+        ],
+      }
+    `);
     expect(taskManager.schedule).toHaveBeenCalledTimes(1);
     expect(taskManager.schedule.mock.calls[0]).toMatchInlineSnapshot(`
                                                                         Array [
@@ -989,6 +1055,7 @@ describe('create()', () => {
         },
       },
       {
+        id: 'GENERATED_ID',
         references: [
           {
             id: '1',
@@ -1111,6 +1178,7 @@ describe('create()', () => {
         },
       },
       {
+        id: 'GENERATED_ID',
         references: [
           {
             id: '1',

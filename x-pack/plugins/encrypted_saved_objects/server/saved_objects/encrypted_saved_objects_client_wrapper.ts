@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import uuid from 'uuid';
 import {
   SavedObject,
   SavedObjectsBaseOptions,
@@ -25,7 +24,8 @@ import {
   SavedObjectsRemoveReferencesToOptions,
   ISavedObjectTypeRegistry,
   SavedObjectsRemoveReferencesToResponse,
-} from 'src/core/server';
+  generateSavedObjectId,
+} from '../../../../../src/core/server';
 import { AuthenticatedUser } from '../../../security/common/model';
 import { EncryptedSavedObjectsService } from '../crypto';
 import { getDescriptorNamespace } from './get_descriptor_namespace';
@@ -35,14 +35,6 @@ interface EncryptedSavedObjectsClientOptions {
   baseTypeRegistry: ISavedObjectTypeRegistry;
   service: Readonly<EncryptedSavedObjectsService>;
   getCurrentUser: () => AuthenticatedUser | undefined;
-}
-
-/**
- * Generates UUIDv4 ID for the any newly created saved object that is supposed to contain
- * encrypted attributes.
- */
-function generateID() {
-  return uuid.v4();
 }
 
 export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientContract {
@@ -79,7 +71,7 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
       );
     }
 
-    const id = options.id ?? generateID();
+    const id = options.id ?? generateSavedObjectId();
     const namespace = getDescriptorNamespace(
       this.options.baseTypeRegistry,
       type,
@@ -125,7 +117,7 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
           );
         }
 
-        const id = object.id ?? generateID();
+        const id = object.id ?? generateSavedObjectId();
         const namespace = getDescriptorNamespace(
           this.options.baseTypeRegistry,
           object.type,
