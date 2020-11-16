@@ -425,7 +425,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
         helpText={
           <FormattedMessage
             id="indexPatternManagement.customNameHelpText"
-            defaultMessage="Set a custom name to use when this field is displayed in Discover and Lens. Queries and filters don't currently support a custom name and will use the original field name."
+            defaultMessage="Set a custom name to use when this field is displayed in Discover and Visualize. Queries and filters don't currently support a custom name and will use the original field name."
           />
         }
       >
