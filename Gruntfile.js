@@ -17,6 +17,8 @@
  * under the License.
  */
 
+console.log('oh hello there');
+
 require('./src/setup_node_env');
 
 module.exports = function (grunt) {
