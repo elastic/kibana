@@ -98,10 +98,11 @@ export const Controls: FC<Props> = ({ analyticsId, details, getNodeData }) => {
   }
 
   const nodeDataButton =
-    analyticsId !== nodeLabel && nodeType === JOB_MAP_NODE_TYPES.ANALYTICS ? (
+    analyticsId !== nodeLabel &&
+    (nodeType === JOB_MAP_NODE_TYPES.ANALYTICS || nodeType === JOB_MAP_NODE_TYPES.INDEX) ? (
       <EuiButtonEmpty
         onClick={() => {
-          getNodeData(nodeLabel);
+          getNodeData({ id: nodeLabel, type: nodeType });
           setShowFlyout(false);
         }}
         iconType="branch"

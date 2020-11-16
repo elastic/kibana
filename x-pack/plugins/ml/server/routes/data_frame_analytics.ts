@@ -41,9 +41,13 @@ function getAnalyticsMap(mlClient: MlClient, client: IScopedClusterClient, analy
   return analytics.getAnalyticsMap(analyticsId);
 }
 
-function getExtendedMap(mlClient: MlClient, client: IScopedClusterClient, analyticsId: string) {
+function getExtendedMap(
+  mlClient: MlClient,
+  client: IScopedClusterClient,
+  { analyticsId, index }: { analyticsId?: string; index?: string }
+) {
   const analytics = new AnalyticsManager(mlClient, client.asInternalUser);
-  return analytics.extendAnalyticsMapForAnalyticsJob(analyticsId);
+  return analytics.extendAnalyticsMapForAnalyticsJob({ analyticsId, index });
 }
 
 /**
@@ -633,10 +637,17 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense, routeGuard }: Rout
       try {
         const { analyticsId } = request.params;
         const treatAsRoot = request.query?.treatAsRoot;
-        const caller =
-          treatAsRoot === 'true' || treatAsRoot === true ? getExtendedMap : getAnalyticsMap;
+        const type = request.query?.type;
 
-        const results = await caller(mlClient, client, analyticsId);
+        let results;
+        if (treatAsRoot === 'true' || treatAsRoot === true) {
+          results = await getExtendedMap(mlClient, client, {
+            analyticsId: type !== 'index' ? analyticsId : undefined,
+            index: type === 'index' ? analyticsId : undefined,
+          });
+        } else {
+          results = await getAnalyticsMap(mlClient, client, analyticsId);
+        }
 
         return response.ok({
           body: results,

@@ -80,11 +80,17 @@ export class AnalyticsManager {
     return models;
   }
 
-  private async getAnalyticsJobData(analyticsId: string) {
-    const resp = await this._mlClient.getDataFrameAnalytics({
-      id: analyticsId,
-    });
-    const jobData = resp?.body?.data_frame_analytics[0];
+  private async getAnalyticsData(analyticsId?: string) {
+    const options = analyticsId
+      ? {
+          id: analyticsId,
+        }
+      : undefined;
+    const resp = await this._mlClient.getDataFrameAnalytics(options);
+    const jobData = analyticsId
+      ? resp?.body?.data_frame_analytics[0]
+      : resp?.body?.data_frame_analytics;
+
     return jobData;
   }
 
@@ -130,7 +136,7 @@ export class AnalyticsManager {
         return { isWildcardIndexPattern, isIndexPattern: true, indexData, meta };
       } else if (type.includes(JOB_MAP_NODE_TYPES.ANALYTICS)) {
         // fetch job associated with this index
-        const jobData = await this.getAnalyticsJobData(id);
+        const jobData = await this.getAnalyticsData(id);
         return { jobData, isJob: true };
       } else if (type === JOB_MAP_NODE_TYPES.TRANSFORM) {
         // fetch transform so we can get original index pattern
@@ -155,12 +161,12 @@ export class AnalyticsManager {
     let edgeElement;
 
     if (analyticsModel !== undefined) {
-      const modelId = `${analyticsModel.model_id}-${JOB_MAP_NODE_TYPES.INFERENCE_MODEL}`;
+      const modelId = `${analyticsModel.model_id}-${JOB_MAP_NODE_TYPES.TRAINED_MODEL}`;
       modelElement = {
         data: {
           id: modelId,
           label: analyticsModel.model_id,
-          type: JOB_MAP_NODE_TYPES.INFERENCE_MODEL,
+          type: JOB_MAP_NODE_TYPES.TRAINED_MODEL,
         },
       };
       // Create edge for job and corresponding model
@@ -212,7 +218,7 @@ export class AnalyticsManager {
     try {
       await this.setInferenceModels();
       // Create first node for incoming analyticsId
-      let data = await this.getAnalyticsJobData(analyticsId);
+      let data = await this.getAnalyticsData(analyticsId);
       let nextLinkId = data?.source?.index[0];
       let nextType: JobMapNodeTypes = JOB_MAP_NODE_TYPES.INDEX;
       let complete = false;
@@ -361,8 +367,7 @@ export class AnalyticsManager {
 
       // fetch all jobs associated with root transform if defined, otherwise check root index
       if (rootTransform !== undefined || rootIndexPattern !== undefined) {
-        const analyticsJobs = await this._mlClient.getDataFrameAnalytics();
-        const jobs = analyticsJobs?.body?.data_frame_analytics || [];
+        const jobs = await this.getAnalyticsData();
         const comparator = rootTransform !== undefined ? rootTransform : rootIndexPattern;
 
         for (let i = 0; i < jobs.length; i++) {
@@ -412,56 +417,67 @@ export class AnalyticsManager {
     }
   }
 
-  async extendAnalyticsMapForAnalyticsJob(analyticsId: string): Promise<AnalyticsMapReturnType> {
+  async extendAnalyticsMapForAnalyticsJob({
+    analyticsId,
+    index,
+  }: {
+    analyticsId?: string;
+    index?: string;
+  }): Promise<AnalyticsMapReturnType> {
     const result: any = { elements: [], details: {}, error: null };
-
     try {
       await this.setInferenceModels();
+      const jobs = await this.getAnalyticsData();
+      let rootIndex;
+      let rootIndexNodeId;
 
-      const jobData = await this.getAnalyticsJobData(analyticsId);
-      const currentJobNodeId = `${jobData.id}-${JOB_MAP_NODE_TYPES.ANALYTICS}`;
-      const destIndex = Array.isArray(jobData?.dest?.index)
-        ? jobData?.dest?.index[0]
-        : jobData?.dest?.index;
-      const destIndexNodeId = `${destIndex}-${JOB_MAP_NODE_TYPES.INDEX}`;
-      const analyticsJobs = await this._mlClient.getDataFrameAnalytics();
-      const jobs = analyticsJobs?.body?.data_frame_analytics || [];
+      if (analyticsId !== undefined) {
+        const jobData = await this.getAnalyticsData(analyticsId);
+        const currentJobNodeId = `${jobData.id}-${JOB_MAP_NODE_TYPES.ANALYTICS}`;
+        rootIndex = Array.isArray(jobData?.dest?.index)
+          ? jobData?.dest?.index[0]
+          : jobData?.dest?.index;
+        rootIndexNodeId = `${rootIndex}-${JOB_MAP_NODE_TYPES.INDEX}`;
 
-      // Fetch inference model for incoming job id and add node and edge
-      const { modelElement, modelDetails, edgeElement } = this.getAnalyticsModelElements(
-        analyticsId
-      );
-      if (isAnalyticsMapNodeElement(modelElement)) {
-        result.elements.push(modelElement);
-        result.details[modelElement.data.id] = modelDetails;
+        // Fetch inference model for incoming job id and add node and edge
+        const { modelElement, modelDetails, edgeElement } = this.getAnalyticsModelElements(
+          analyticsId
+        );
+        if (isAnalyticsMapNodeElement(modelElement)) {
+          result.elements.push(modelElement);
+          result.details[modelElement.data.id] = modelDetails;
+        }
+        if (isAnalyticsMapEdgeElement(edgeElement)) {
+          result.elements.push(edgeElement);
+        }
+
+        // If rootIndex node has not been created, create it
+        const rootIndexDetails = await this.getIndexData(rootIndex);
+        result.elements.push({
+          data: {
+            id: rootIndexNodeId,
+            label: rootIndex,
+            type: JOB_MAP_NODE_TYPES.INDEX,
+          },
+        });
+        result.details[rootIndexNodeId] = rootIndexDetails;
+
+        // Connect incoming job to rootIndex
+        result.elements.push({
+          data: {
+            id: `${currentJobNodeId}~${rootIndexNodeId}`,
+            source: currentJobNodeId,
+            target: rootIndexNodeId,
+          },
+        });
+      } else {
+        rootIndex = index;
+        rootIndexNodeId = `${rootIndex}-${JOB_MAP_NODE_TYPES.INDEX}`;
       }
-      if (isAnalyticsMapEdgeElement(edgeElement)) {
-        result.elements.push(edgeElement);
-      }
-
-      // If destIndex node has not been created, create it
-      const destIndexDetails = await this.getIndexData(destIndex);
-      result.elements.push({
-        data: {
-          id: destIndexNodeId,
-          label: destIndex,
-          type: JOB_MAP_NODE_TYPES.INDEX,
-        },
-      });
-      result.details[destIndexNodeId] = destIndexDetails;
-
-      // Connect incoming job to destIndex
-      result.elements.push({
-        data: {
-          id: `${currentJobNodeId}~${destIndexNodeId}`,
-          source: currentJobNodeId,
-          target: destIndexNodeId,
-        },
-      });
 
       for (let i = 0; i < jobs.length; i++) {
         if (
-          jobs[i]?.source?.index[0] === destIndex &&
+          jobs[i]?.source?.index[0] === rootIndex &&
           this.isDuplicateElement(jobs[i].id, result.elements) === false
         ) {
           // Create node for associated job
@@ -478,8 +494,8 @@ export class AnalyticsManager {
 
           result.elements.push({
             data: {
-              id: `${destIndexNodeId}~${nodeId}`,
-              source: destIndexNodeId,
+              id: `${rootIndexNodeId}~${nodeId}`,
+              source: rootIndexNodeId,
               target: nodeId,
             },
           });

@@ -6,6 +6,7 @@
 
 import React, { FC } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { JOB_MAP_NODE_TYPES } from '../../../../../../common/constants/data_frame_analytics';
 
 export const JobMapLegend: FC = () => (
@@ -17,7 +18,10 @@ export const JobMapLegend: FC = () => (
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiText size="xs" color="subdued">
-            {JOB_MAP_NODE_TYPES.INDEX}
+            <FormattedMessage
+              id="xpack.ml.dataframe.analyticsMap.legend.indexLabel"
+              defaultMessage={JOB_MAP_NODE_TYPES.INDEX}
+            />
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -41,7 +45,10 @@ export const JobMapLegend: FC = () => (
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiText size="xs" color="subdued">
-            {JOB_MAP_NODE_TYPES.ANALYTICS}
+            <FormattedMessage
+              id="xpack.ml.dataframe.analyticsMap.legend.analyticsJobLabel"
+              defaultMessage={`${JOB_MAP_NODE_TYPES.ANALYTICS} job`}
+            />
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -49,11 +56,14 @@ export const JobMapLegend: FC = () => (
     <EuiFlexItem grow={false}>
       <EuiFlexGroup gutterSize="xs" alignItems="center">
         <EuiFlexItem grow={false}>
-          <span className="mlJobMapLegend__inferenceModel" />
+          <span className="mlJobMapLegend__trainedModel" />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiText size="xs" color="subdued">
-            {'inference model'}
+            <FormattedMessage
+              id="xpack.ml.dataframe.analyticsMap.legend.trainedModelLabel"
+              defaultMessage="trained model"
+            />
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>

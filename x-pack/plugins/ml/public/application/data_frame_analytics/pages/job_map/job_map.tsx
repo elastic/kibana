@@ -47,6 +47,11 @@ export const JobMapTitle: React.FC<{ analyticsId: string }> = ({ analyticsId }) 
   </EuiTitle>
 );
 
+interface GetDataObjectParameter {
+  id: string;
+  type: string;
+}
+
 interface Props {
   analyticsId: string;
 }
@@ -60,14 +65,16 @@ export const JobMap: FC<Props> = ({ analyticsId }) => {
     services: { notifications },
   } = useMlKibana();
 
-  const getData = async (id?: string) => {
+  const getData = async (params?: GetDataObjectParameter) => {
+    const { id, type } = params ?? {};
     const treatAsRoot = id !== undefined;
-    const idToUse = treatAsRoot ? id : analyticsId;
-    // Pass in treatAsRoot flag - endpoint will take job destIndex to grab jobs created from it
+    const idToUse = id !== undefined ? id : analyticsId;
+    // Pass in treatAsRoot flag - endpoint will take job or index to grab jobs created from it
     // TODO: update analyticsMap return type here
     const analyticsMap: any = await ml.dataFrameAnalytics.getDataFrameAnalyticsMap(
       idToUse,
-      treatAsRoot
+      treatAsRoot,
+      type
     );
 
     const { elements: nodeElements, details, error: fetchError } = analyticsMap;
