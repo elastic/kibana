@@ -6,36 +6,23 @@
 
 import { IScopedClusterClient } from 'kibana/server';
 import RE2 from 're2';
-import { Job } from '../../../common/types/anomaly_detection_jobs';
-import type { JobSpaceOverrides } from '../repair';
-import { mlLog } from '../../lib/log';
+import { mlLog } from '../../../lib/log';
+import { Job } from '../../../../common/types/anomaly_detection_jobs';
 
-// create a list of jobs and specific spaces to place them in
-// when the are being initialized.
-export async function createJobSpaceOverrides(
-  clusterClient: IScopedClusterClient
-): Promise<JobSpaceOverrides> {
-  const spaceOverrides: JobSpaceOverrides = {
-    overrides: {
-      'anomaly-detector': {},
-      'data-frame-analytics': {},
-    },
-  };
-  (await logJobsSpaces(clusterClient)).forEach(
-    (o) => (spaceOverrides.overrides['anomaly-detector'][o.id] = [o.space])
-  );
-  return spaceOverrides;
-}
+const GROUP = 'logs-ui';
+const MODULE_PREFIX = 'kibana-logs-ui';
+const SOURCES = ['default', 'internal-stack-monitoring'];
+const JOB_IDS = ['log-entry-rate', 'log-entry-categories-count'];
 
 // jobs created by the logs plugin will be in the logs-ui group
 // they contain the a space name in the job id, and so the id can be parsed
 // and the job assigned to the correct space.
-async function logJobsSpaces({
+export async function logJobsSpaces({
   asInternalUser,
 }: IScopedClusterClient): Promise<Array<{ id: string; space: string }>> {
   try {
     const { body } = await asInternalUser.ml.getJobs<{ jobs: Job[] }>({
-      job_id: 'logs-ui',
+      job_id: GROUP,
     });
     if (body.jobs.length === 0) {
       return [];
@@ -55,9 +42,7 @@ async function logJobsSpaces({
 }
 
 function findLogJobSpaceFactory() {
-  const sources = ['default', 'internal-stack-monitoring'];
-  const jobIds = ['log-entry-rate', 'log-entry-categories-count'];
-  const reg = new RE2(`kibana-logs-ui-(.+)-(${sources.join('|')})-(${jobIds.join('|')})`);
+  const reg = new RE2(`${MODULE_PREFIX}-(.+)-(${SOURCES.join('|')})-(${JOB_IDS.join('|')})`);
 
   return (jobId: string) => {
     const result = reg.exec(jobId);

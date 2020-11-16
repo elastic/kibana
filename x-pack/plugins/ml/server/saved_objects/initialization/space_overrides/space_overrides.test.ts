@@ -26,6 +26,12 @@ const jobs = [
   {
     job_id: 'kibana-logs-ui-other_space-default-dinosaur', // shouldn't match
   },
+  {
+    job_id: 'kibana-metrics-ui-default-default-k8s_memory_usage',
+  },
+  {
+    job_id: 'kibana-metrics-ui-other_space-default-hosts_network_in',
+  },
 ];
 
 const result = {
@@ -35,6 +41,8 @@ const result = {
       'kibana-logs-ui-other_space-default-log-entry-rate': ['other_space'],
       'kibana-logs-ui-other_space-default-log-entry-categories-count': ['other_space'],
       'kibana-logs-ui-other_space-internal-stack-monitoring-log-entry-rate': ['other_space'],
+      'kibana-metrics-ui-default-default-k8s_memory_usage': ['default'],
+      'kibana-metrics-ui-other_space-default-hosts_network_in': ['other_space'],
     },
     'data-frame-analytics': {},
   },
