@@ -4,19 +4,26 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ArchivePackage } from '../../../../common/types';
+import { ArchivePackage, AssetParts } from '../../../../common/types';
 import { PackageInvalidArchiveError, PackageUnsupportedMediaTypeError } from '../../../errors';
 import {
+  cacheGet,
   cacheSet,
   cacheDelete,
   getArchiveFilelist,
   setArchiveFilelist,
   deleteArchiveFilelist,
 } from './cache';
-import { ArchiveEntry, getBufferExtractor } from '../registry/extract';
+import { getBufferExtractor } from './extract';
 import { parseAndVerifyArchiveEntries } from './validation';
 
 export * from './cache';
+export { untarBuffer, unzipBuffer, getBufferExtractor } from './extract';
+
+export interface ArchiveEntry {
+  path: string;
+  buffer?: Buffer;
+}
 
 export async function getArchivePackage({
   archiveBuffer,
@@ -100,3 +107,40 @@ export const deletePackageCache = (name: string, version: string) => {
   // this has been populated in unpackArchiveToCache()
   paths?.forEach((path) => cacheDelete(path));
 };
+
+export function getPathParts(path: string): AssetParts {
+  let dataset;
+
+  let [pkgkey, service, type, file] = path.split('/');
+
+  // if it's a data stream
+  if (service === 'data_stream') {
+    // save the dataset name
+    dataset = type;
+    // drop the `data_stream/dataset-name` portion & re-parse
+    [pkgkey, service, type, file] = path.replace(`data_stream/${dataset}/`, '').split('/');
+  }
+
+  // This is to cover for the fields.yml files inside the "fields" directory
+  if (file === undefined) {
+    file = type;
+    type = 'fields';
+    service = '';
+  }
+
+  return {
+    pkgkey,
+    service,
+    type,
+    file,
+    dataset,
+    path,
+  } as AssetParts;
+}
+
+export function getAsset(key: string) {
+  const buffer = cacheGet(key);
+  if (buffer === undefined) throw new Error(`Cannot find asset ${key}`);
+
+  return buffer;
+}
