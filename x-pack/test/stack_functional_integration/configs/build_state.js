@@ -12,11 +12,14 @@ import { fromNullable } from '../../../../src/dev/code_coverage/ingest_coverage/
 // envObj :: path -> {}
 const envObj = (path) => dotEnv.config({ path });
 
+const split = (splitter) => (x) => x.split(splitter);
 const maybeUseExternalList = (obj) =>
-  fromNullable(obj.TESTS_LIST).fold(
-    () => ({ tests: testsList(obj), ...obj }), // Define in this repo
-    (tests) => ({ tests, ...obj }) // Use defs from external repo
-  );
+  fromNullable(obj.TESTS_LIST)
+    .map(split(' '))
+    .fold(
+      () => ({ tests: testsList(obj), ...obj }), // Define in this repo
+      (tests) => ({ tests, ...obj }) // Use defs from external repo
+    );
 
 // default fn :: path -> {}
 export default (path) => maybeUseExternalList(envObj(path).parsed);
