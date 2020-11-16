@@ -24,7 +24,7 @@ import { setQueuedSuccessMessage, flashAPIErrors } from '../../../shared/flash_m
 
 import { DocumentDetailLogic, DocumentDetailLogicValues } from './document_detail_logic';
 
-describe('DocumentsLogic', () => {
+describe('DocumentDetailLogic', () => {
   const DEFAULT_VALUES: DocumentDetailLogicValues = {
     dataLoading: true,
     fields: [],
