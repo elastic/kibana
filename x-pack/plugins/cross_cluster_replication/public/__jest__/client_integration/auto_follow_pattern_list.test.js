@@ -6,7 +6,7 @@
 
 import { getAutoFollowPatternMock } from './fixtures/auto_follow_pattern';
 import './mocks';
-import { setupEnvironment, pageHelpers, nextTick, getRandomString } from './helpers';
+import { setupEnvironment, pageHelpers, nextTick, delay, getRandomString } from './helpers';
 
 const { setup } = pageHelpers.autoFollowPatternList;
 
@@ -146,7 +146,7 @@ describe('<AutoFollowPatternList />', () => {
     afterEach(async () => {
       // The <EuiPopover /> updates are not all synchronouse
       // We need to wait for all the updates to ran before unmounting our component
-      await nextTick(100);
+      await delay(100);
     });
 
     test('should not display the empty prompt', () => {
