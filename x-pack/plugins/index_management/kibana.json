@@ -8,7 +8,8 @@
     "licensing",
     "management",
     "features",
-    "share"
+    "share",
+    "runtimeFields"
   ],
   "optionalPlugins": [
     "security",

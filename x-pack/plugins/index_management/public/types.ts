@@ -9,6 +9,7 @@ import { IngestManagerSetup } from '../../fleet/public';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
 import { ManagementSetup } from '../../../../src/plugins/management/public';
 import { SharePluginStart } from '../../../../src/plugins/share/public';
+import { RuntimeFieldsSetup } from '../../runtime_fields/public';
 
 export type IndexMgmtMetricsType = 'loaded' | 'click' | 'count';
 
@@ -20,6 +21,7 @@ export interface SetupDependencies {
   ingestManager?: IngestManagerSetup;
   usageCollection: UsageCollectionSetup;
   management: ManagementSetup;
+  runtimeFields: RuntimeFieldsSetup;
 }
 
 export interface StartDependencies {

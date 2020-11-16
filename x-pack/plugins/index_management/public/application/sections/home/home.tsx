@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useCallback, useRef } from 'react';
 import { Route, RouteComponentProps, Switch } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -17,13 +17,16 @@ import {
   EuiTab,
   EuiTabs,
   EuiTitle,
+  EuiButton,
 } from '@elastic/eui';
+import { RuntimeField } from '../../../../../runtime_fields/public';
 import { documentationService } from '../../services/documentation';
 import { DataStreamList } from './data_stream_list';
 import { IndexList } from './index_list';
 import { TemplateList } from './template_list';
 import { ComponentTemplateList } from '../../components/component_templates';
 import { breadcrumbService } from '../../services/breadcrumbs';
+import { useAppContext } from '../../app_context';
 
 export enum Section {
   Indices = 'indices',
@@ -42,6 +45,8 @@ export const homeSections = [
 interface MatchParams {
   section: Section;
 }
+
+const defaultRuntimeField: RuntimeField = { name: 'myField', type: 'date', script: 'test=123' };
 
 export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<MatchParams>> = ({
   match: {
@@ -87,8 +92,30 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
     history.push(`/${newSection}`);
   };
 
+  const {
+    plugins: { runtimeFields },
+  } = useAppContext();
+
+  const closeRuntimeFieldEditor = useRef(() => {});
+
+  const onSaveRuntimeField = useCallback((field: RuntimeField) => {
+    console.log('Updated field', field); //  eslint-disable-line
+  }, []);
+
+  const openRuntimeFieldEditor = useCallback(async () => {
+    const { openEditor } = await runtimeFields.loadEditor();
+    closeRuntimeFieldEditor.current = openEditor({
+      onSave: onSaveRuntimeField,
+      // defaultValue: defaultRuntimeField,
+    });
+  }, [onSaveRuntimeField, runtimeFields]);
+
   useEffect(() => {
     breadcrumbService.setBreadcrumbs('home');
+
+    return () => {
+      closeRuntimeFieldEditor.current();
+    };
   }, []);
 
   return (
@@ -116,6 +143,11 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
                   defaultMessage="Index Management docs"
                 />
               </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton onClick={openRuntimeFieldEditor} fill>
+                Create field
+              </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiTitle>
