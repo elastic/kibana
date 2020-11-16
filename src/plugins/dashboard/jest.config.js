@@ -21,4 +21,5 @@ module.exports = {
   preset: '@kbn/test',
   rootDir: '../../..',
   roots: ['<rootDir>/src/plugins/dashboard'],
+  testRunner: 'jasmine2',
 };

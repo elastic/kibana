@@ -21,4 +21,5 @@ module.exports = {
   preset: '@kbn/test',
   rootDir: '../../..',
   roots: ['<rootDir>/src/plugins/discover'],
+  testRunner: 'jasmine2',
 };

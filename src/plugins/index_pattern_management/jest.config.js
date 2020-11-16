@@ -21,4 +21,5 @@ module.exports = {
   preset: '@kbn/test',
   rootDir: '../../..',
   roots: ['<rootDir>/src/plugins/index_pattern_management'],
+  testRunner: 'jasmine2',
 };
