@@ -44,7 +44,7 @@ const ELASTICSEARCH_PASSWORD = 'ELASTICSEARCH_PASSWORD';
  */
 const LOGIN_API_ENDPOINT = '/internal/security/login';
 
-// these roles are derived from https://docs.google.com/spreadsheets/d/1SGjXVS3gQyRxCN1MF2Pq3pgos3vtfpROqTvi4z-0WiU/edit#gid=0
+// For the source of these roles please consult the PR these were introduced https://github.com/elastic/kibana/pull/81866#issue-511165754
 export const ROLES = {
   t1_analyst: 't1_analyst',
   t2_analyst: 't2_analyst',
