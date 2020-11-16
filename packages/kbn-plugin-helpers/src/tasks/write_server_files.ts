@@ -36,7 +36,7 @@ export async function writeServerFiles({
   buildDir,
   kibanaVersion,
 }: BuildContext) {
-  log.info('copying source into the build and converting with babel');
+  log.info('copying server source into the build and converting with babel');
 
   const KIBANA_VERSION_79 = semver.satisfies(kibanaVersion, '~7.9.0');
 
