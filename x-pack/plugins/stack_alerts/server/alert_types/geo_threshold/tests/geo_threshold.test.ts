@@ -58,7 +58,6 @@ describe('geo_threshold', () => {
   });
 
   describe('getMovedEntities', () => {
-    const trackingEvent = 'entered';
     it('should return empty array if only movements were within same shapes', async () => {
       const currLocationArr = [
         {
@@ -92,7 +91,7 @@ describe('geo_threshold', () => {
           shapeLocationId: 'sameShape2',
         },
       ];
-      const movedEntities = getMovedEntities(currLocationArr, prevLocationArr, trackingEvent);
+      const movedEntities = getMovedEntities(currLocationArr, prevLocationArr, 'entered');
       expect(movedEntities).toEqual([]);
     });
 
@@ -129,7 +128,7 @@ describe('geo_threshold', () => {
           shapeLocationId: 'thisOneDidntMove',
         },
       ];
-      const movedEntities = getMovedEntities(currLocationArr, prevLocationArr, trackingEvent);
+      const movedEntities = getMovedEntities(currLocationArr, prevLocationArr, 'entered');
       expect(movedEntities.length).toEqual(1);
     });
 
@@ -152,7 +151,7 @@ describe('geo_threshold', () => {
           shapeLocationId: 'oldShapeLocation',
         },
       ];
-      const movedEntities = getMovedEntities(currLocationArr, prevLocationArr, trackingEvent);
+      const movedEntities = getMovedEntities(currLocationArr, prevLocationArr, 'entered');
       expect(movedEntities).toEqual([]);
     });
 
@@ -177,6 +176,52 @@ describe('geo_threshold', () => {
       ];
       const movedEntities = getMovedEntities(currLocationArr, prevLocationArr, 'exited');
       expect(movedEntities).toEqual([]);
+    });
+
+    it('should not ignore "crossed" results from "other"', async () => {
+      const currLocationArr = [
+        {
+          dateInShape: '2020-09-28T18:01:41.190Z',
+          docId: 'N-ng1XQB6yyY-xQxnGSM',
+          entityName: '936',
+          location: [-82.8814151789993, 41.62806099653244],
+          shapeLocationId: 'newShapeLocation',
+        },
+      ];
+      const prevLocationArr = [
+        {
+          dateInShape: '2020-08-28T18:01:41.190Z',
+          docId: 'N-ng1XQB6yyY-xQxnGSM',
+          entityName: '936',
+          location: [-82.8814151789993, 40.62806099653244],
+          shapeLocationId: OTHER_CATEGORY,
+        },
+      ];
+      const movedEntities = getMovedEntities(currLocationArr, prevLocationArr, 'crossed');
+      expect(movedEntities.length).toEqual(1);
+    });
+
+    it('should not ignore "crossed" results to "other"', async () => {
+      const currLocationArr = [
+        {
+          dateInShape: '2020-08-28T18:01:41.190Z',
+          docId: 'N-ng1XQB6yyY-xQxnGSM',
+          entityName: '936',
+          location: [-82.8814151789993, 40.62806099653244],
+          shapeLocationId: OTHER_CATEGORY,
+        },
+      ];
+      const prevLocationArr = [
+        {
+          dateInShape: '2020-09-28T18:01:41.190Z',
+          docId: 'N-ng1XQB6yyY-xQxnGSM',
+          entityName: '936',
+          location: [-82.8814151789993, 41.62806099653244],
+          shapeLocationId: 'newShapeLocation',
+        },
+      ];
+      const movedEntities = getMovedEntities(currLocationArr, prevLocationArr, 'crossed');
+      expect(movedEntities.length).toEqual(1);
     });
   });
 });
