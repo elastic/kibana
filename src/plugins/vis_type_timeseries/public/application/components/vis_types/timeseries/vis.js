@@ -201,8 +201,6 @@ export class TimeseriesVisualization extends Component {
           seriesDataRow.useDefaultGroupDomain = !isCustomDomain;
         });
 
-      const tickFormatter = allSeriesHaveSameFormatters ? seriesGroupTickFormatter : (val) => val;
-
       if (isCustomDomain) {
         TimeseriesVisualization.addYAxis(yAxis, {
           domain,
@@ -217,7 +215,7 @@ export class TimeseriesVisualization extends Component {
         });
       } else if (!mainDomainAdded) {
         TimeseriesVisualization.addYAxis(yAxis, {
-          tickFormatter: series.length === 1 ? undefined : tickFormatter,
+          tickFormatter: allSeriesHaveSameFormatters ? seriesGroupTickFormatter : (val) => val,
           id: yAxisIdGenerator('main'),
           groupId: mainAxisGroupId,
           position: model.axis_position,
