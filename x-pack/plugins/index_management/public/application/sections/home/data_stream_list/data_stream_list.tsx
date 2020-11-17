@@ -27,12 +27,14 @@ import {
 } from '../../../../shared_imports';
 import { useAppContext } from '../../../app_context';
 import { SectionError, SectionLoading, Error } from '../../../components';
-import { useLoadDataStreams } from '../../../services/api';
+import { useLoadDataStreams, useLoadDataStreamsPrivileges } from '../../../services/api';
 import { documentationService } from '../../../services/documentation';
 import { Section } from '../home';
 import { DataStreamTable } from './data_stream_table';
 import { DataStreamDetailPanel } from './data_stream_detail_panel';
 import { filterDataStreams } from '../../../lib/data_streams';
+import { DataStream } from '../../../../../common/types';
+import { DELETE_INDEX_PRIVILEGE } from '../../../constants';
 
 interface MatchParams {
   dataStreamName?: string;
@@ -56,6 +58,11 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
   const [isIncludeManagedChecked, setIsIncludeManagedChecked] = useState(true);
   const { error, isLoading, data: dataStreams, resendRequest: reload } = useLoadDataStreams({
     includeStats: isIncludeStatsChecked,
+  });
+
+  const { data: deletePrivileges } = useLoadDataStreamsPrivileges<typeof DELETE_INDEX_PRIVILEGE>({
+    names: dataStreams ? dataStreams!.map((dataStream: DataStream) => dataStream.name) : [],
+    privileges: [DELETE_INDEX_PRIVILEGE],
   });
 
   let content;
@@ -249,6 +256,7 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
           reload={reload}
           history={history as ScopedHistory}
           includeStats={isIncludeStatsChecked}
+          deletePrivileges={deletePrivileges!}
         />
       </>
     );
@@ -273,6 +281,9 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
               reload();
             }
           }}
+          canDelete={
+            !deletePrivileges || deletePrivileges[attemptToURIDecode(dataStreamName)!]?.delete_index
+          }
         />
       )}
     </div>

@@ -24,6 +24,7 @@ export interface DataStreamsTabTestBed extends TestBed<TestSubjects> {
     clickNameAt: (index: number) => void;
     clickIndicesAt: (index: number) => void;
     clickDeleteActionAt: (index: number) => void;
+    selectDataStream: (name: string, selected: boolean) => void;
     clickConfirmDelete: () => void;
     clickDeleteDataStreamButton: () => void;
     clickDetailPanelIndexTemplateLink: () => void;
@@ -125,6 +126,13 @@ export const setup = async (overridingDependencies: any = {}): Promise<DataStrea
     findDeleteActionAt(index).simulate('click');
   };
 
+  const selectDataStream = (name: string, selected: boolean) => {
+    const {
+      form: { selectCheckBox },
+    } = testBed;
+    selectCheckBox(`checkboxSelectRow-${name}`, selected);
+  };
+
   const findDeleteConfirmationModal = () => {
     const { find } = testBed;
     return find('deleteDataStreamsConfirmation');
@@ -194,6 +202,7 @@ export const setup = async (overridingDependencies: any = {}): Promise<DataStrea
       clickNameAt,
       clickIndicesAt,
       clickDeleteActionAt,
+      selectDataStream,
       clickConfirmDelete,
       clickDeleteDataStreamButton,
       clickDetailPanelIndexTemplateLink,
