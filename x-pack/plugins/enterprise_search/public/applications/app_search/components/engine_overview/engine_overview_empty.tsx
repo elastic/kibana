@@ -8,7 +8,6 @@ import React from 'react';
 import { useValues } from 'kea';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiPageHeader,
   EuiPageHeaderSection,
@@ -17,16 +16,18 @@ import {
   EuiPageContentBody,
   EuiTitle,
   EuiText,
-  EuiCode,
-  EuiLink,
   EuiButton,
   EuiSpacer,
 } from '@elastic/eui';
 
-import { DOCS_PREFIX } from '../../routes';
-
 import { EngineLogic } from '../engine';
 
+import { DOCS_PREFIX } from '../../routes';
+import {
+  DOCUMENT_CREATION_DESCRIPTION,
+  DOCUMENT_API_INDEXING_TITLE,
+  DOCUMENT_API_INDEXING_DESCRIPTION,
+} from '../document_creation/constants';
 // TODO
 // import { DocumentCreationButtons, CodeExample } from '../document_creation'
 
@@ -67,22 +68,7 @@ export const EmptyEngineOverview: React.FC = () => {
         </EuiPageContentHeader>
         <EuiPageContentBody>
           <EuiText color="subdued">
-            <p>
-              <FormattedMessage
-                id="xpack.enterpriseSearch.appSearch.engine.overview.empty.description"
-                defaultMessage="There are three ways to send documents to your Engine for indexing. You can paste raw JSON, upload a {jsonCode} file, or {postCode} to the {documentsApiLink} endpoint. Click on your choice below or see {apiStrong}."
-                values={{
-                  jsonCode: <EuiCode>.json</EuiCode>,
-                  postCode: <EuiCode>POST</EuiCode>,
-                  documentsApiLink: (
-                    <EuiLink target="_blank" href={`${DOCS_PREFIX}/indexing-documents-guide.html`}>
-                      Documents API
-                    </EuiLink>
-                  ),
-                  apiStrong: <strong>Indexing by API</strong>,
-                }}
-              />
-            </p>
+            <p>{DOCUMENT_CREATION_DESCRIPTION}</p>
           </EuiText>
           <EuiSpacer />
           {/* TODO: <DocumentCreationButtons /> */}
@@ -90,39 +76,17 @@ export const EmptyEngineOverview: React.FC = () => {
 
         <EuiPageContentHeader>
           <EuiTitle>
-            <h3>
-              {i18n.translate(
-                'xpack.enterpriseSearch.appSearch.engine.overview.empty.api.heading',
-                { defaultMessage: 'Indexing by API' }
-              )}
-            </h3>
+            <h3>{DOCUMENT_API_INDEXING_TITLE}</h3>
           </EuiTitle>
         </EuiPageContentHeader>
         <EuiPageContentBody>
           <EuiText color="subdued">
+            <p>{DOCUMENT_API_INDEXING_DESCRIPTION}</p>
             <p>
-              <FormattedMessage
-                id="xpack.enterpriseSearch.appSearch.engine.overview.empty.api.description1"
-                defaultMessage="The {documentsApiLink} can be used to add new documents to your Engine, update documents, retrieve documents by id, and delete documents. There are a variety of {clientLibrariesLink} to help you get started."
-                values={{
-                  documentsApiLink: (
-                    <EuiLink target="_blank" href={`${DOCS_PREFIX}/indexing-documents-guide.html`}>
-                      Documents API
-                    </EuiLink>
-                  ),
-                  clientLibrariesLink: (
-                    <EuiLink target="_blank" href={`${DOCS_PREFIX}/api-clients.html`}>
-                      client libraries
-                    </EuiLink>
-                  ),
-                }}
-              />
-            </p>
-            <p>
-              <FormattedMessage
-                id="xpack.enterpriseSearch.appSearch.engine.overview.empty.api.description2"
-                defaultMessage="To see the API in action, you can experiment with the example request below using a command line or a client library."
-              />
+              {i18n.translate('xpack.enterpriseSearch.appSearch.engine.overview.empty.apiExample', {
+                defaultMessage:
+                  'To see the API in action, you can experiment with the example request below using a command line or a client library.',
+              })}
             </p>
           </EuiText>
           <EuiSpacer />
