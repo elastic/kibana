@@ -21,14 +21,7 @@ import { getTimezone, validateInterval } from './application';
 import { getUISettings, getDataStart, getCoreStart } from './services';
 import { MAX_BUCKETS_SETTING, ROUTES } from '../common/constants';
 
-export const metricsRequestHandler = async ({
-  uiState,
-  timeRange,
-  filters,
-  query,
-  visParams,
-  savedObjectId,
-}) => {
+export const metricsRequestHandler = async ({ uiState, timeRange, filters, query, visParams }) => {
   const config = getUISettings();
   const timezone = getTimezone(config);
   const uiStateObj = uiState.get(visParams.type, {});
@@ -52,7 +45,7 @@ export const metricsRequestHandler = async ({
         filters,
         panels: [visParams],
         state: uiStateObj,
-        savedObjectId: savedObjectId || 'unsaved',
+        savedObjectId: 'unsaved',
         sessionId: dataSearch.search.session.getSessionId(),
       }),
     });

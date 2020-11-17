@@ -30,7 +30,6 @@ type Output = Promise<Render<TimeseriesRenderValue>>;
 interface Arguments {
   params: string;
   uiState: string;
-  savedObjectId: string | null;
 }
 
 type VisParams = Required<Arguments>;
@@ -67,16 +66,10 @@ export const createMetricsFn = (): TimeseriesExpressionFunctionDefinition => ({
       default: '"{}"',
       help: '',
     },
-    savedObjectId: {
-      types: ['null', 'string'],
-      default: null,
-      help: '',
-    },
   },
   async fn(input, args) {
     const params = JSON.parse(args.params);
     const uiStateParams = JSON.parse(args.uiState);
-    const savedObjectId = args.savedObjectId;
     const { PersistedState } = await import('../../visualizations/public');
     const uiState = new PersistedState(uiStateParams);
 
@@ -86,7 +79,6 @@ export const createMetricsFn = (): TimeseriesExpressionFunctionDefinition => ({
       filters: get(input, 'filters', null),
       visParams: params,
       uiState,
-      savedObjectId,
     });
 
     response.visType = 'metrics';
