@@ -9,7 +9,7 @@ exports[`Storyshots components/Elements/ElementCard with click handler 1`] = `
   }
 >
   <div
-    className="euiCard euiCard--paddingMedium euiCard--leftAligned euiCard--isClickable euiCard--hasIcon canvasElementCard canvasElementCard--hasIcon"
+    className="euiCard euiCard--shadow euiCard--borderRadiusMedium euiCard--paddingMedium euiCard--leftAligned euiCard--isClickable euiCard--hasIcon canvasElementCard canvasElementCard--hasIcon"
     onClick={[Function]}
   >
     <div
@@ -61,7 +61,7 @@ exports[`Storyshots components/Elements/ElementCard with image 1`] = `
   }
 >
   <div
-    className="euiCard euiCard--paddingMedium euiCard--leftAligned canvasElementCard"
+    className="euiCard euiCard--shadow euiCard--borderRadiusMedium euiCard--paddingMedium euiCard--leftAligned canvasElementCard"
     onClick={[Function]}
   >
     <div
@@ -110,7 +110,7 @@ exports[`Storyshots components/Elements/ElementCard with tags 1`] = `
   }
 >
   <div
-    className="euiCard euiCard--paddingMedium euiCard--leftAligned euiCard--isClickable euiCard--hasIcon canvasElementCard canvasElementCard--hasIcon"
+    className="euiCard euiCard--shadow euiCard--borderRadiusMedium euiCard--paddingMedium euiCard--leftAligned euiCard--isClickable euiCard--hasIcon canvasElementCard canvasElementCard--hasIcon"
     onClick={[Function]}
   >
     <div
@@ -277,7 +277,7 @@ exports[`Storyshots components/Elements/ElementCard with title and description 1
   }
 >
   <div
-    className="euiCard euiCard--paddingMedium euiCard--leftAligned euiCard--hasIcon canvasElementCard canvasElementCard--hasIcon"
+    className="euiCard euiCard--shadow euiCard--borderRadiusMedium euiCard--paddingMedium euiCard--leftAligned euiCard--hasIcon canvasElementCard canvasElementCard--hasIcon"
     onClick={[Function]}
   >
     <div
