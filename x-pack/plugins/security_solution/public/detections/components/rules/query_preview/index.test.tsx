@@ -79,9 +79,9 @@ describe('PreviewQuery', () => {
     expect(
       wrapper.find('[data-test-subj="queryPreviewButton"] button').props().disabled
     ).toBeFalsy();
-    expect(wrapper.find('[data-test-subj="previewNonEqlQueryHistogram"]').exists()).toBeFalsy();
-    expect(wrapper.find('[data-test-subj="previewThresholdQueryHistogram"]').exists()).toBeFalsy();
-    expect(wrapper.find('[data-test-subj="previewEqlQueryHistogram"]').exists()).toBeFalsy();
+    expect(wrapper.find('[data-test-subj="queryPreviewCustomHistogram"]').exists()).toBeFalsy();
+    expect(wrapper.find('[data-test-subj="thresholdQueryPreviewHistogram"]').exists()).toBeFalsy();
+    expect(wrapper.find('[data-test-subj="queryPreviewEqlHistogram"]').exists()).toBeFalsy();
   });
 
   test('it renders preview button disabled if "isDisabled" is true', () => {
@@ -146,9 +146,9 @@ describe('PreviewQuery', () => {
     const mockCalls = (useKibana().services.data.search.search as jest.Mock).mock.calls;
 
     expect(mockCalls.length).toEqual(1);
-    expect(wrapper.find('[data-test-subj="previewNonEqlQueryHistogram"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="previewThresholdQueryHistogram"]').exists()).toBeFalsy();
-    expect(wrapper.find('[data-test-subj="previewEqlQueryHistogram"]').exists()).toBeFalsy();
+    expect(wrapper.find('[data-test-subj="queryPreviewCustomHistogram"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="thresholdQueryPreviewHistogram"]').exists()).toBeFalsy();
+    expect(wrapper.find('[data-test-subj="queryPreviewEqlHistogram"]').exists()).toBeFalsy();
   });
 
   test('it renders noise warning when rule type is query, timeframe is last hour and hit average is greater than 1/hour', async () => {
@@ -209,9 +209,9 @@ describe('PreviewQuery', () => {
     const mockCalls = (useKibana().services.data.search.search as jest.Mock).mock.calls;
 
     expect(mockCalls.length).toEqual(1);
-    expect(wrapper.find('[data-test-subj="previewNonEqlQueryHistogram"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="previewThresholdQueryHistogram"]').exists()).toBeFalsy();
-    expect(wrapper.find('[data-test-subj="previewEqlQueryHistogram"]').exists()).toBeFalsy();
+    expect(wrapper.find('[data-test-subj="queryPreviewCustomHistogram"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="thresholdQueryPreviewHistogram"]').exists()).toBeFalsy();
+    expect(wrapper.find('[data-test-subj="queryPreviewEqlHistogram"]').exists()).toBeFalsy();
   });
 
   test('it renders eql histogram when preview button clicked and rule type is eql', () => {
@@ -236,9 +236,9 @@ describe('PreviewQuery', () => {
     const mockCalls = (useKibana().services.data.search.search as jest.Mock).mock.calls;
 
     expect(mockCalls.length).toEqual(1);
-    expect(wrapper.find('[data-test-subj="previewNonEqlQueryHistogram"]').exists()).toBeFalsy();
-    expect(wrapper.find('[data-test-subj="previewThresholdQueryHistogram"]').exists()).toBeFalsy();
-    expect(wrapper.find('[data-test-subj="previewEqlQueryHistogram"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="queryPreviewCustomHistogram"]').exists()).toBeFalsy();
+    expect(wrapper.find('[data-test-subj="thresholdQueryPreviewHistogram"]').exists()).toBeFalsy();
+    expect(wrapper.find('[data-test-subj="queryPreviewEqlHistogram"]').exists()).toBeTruthy();
   });
 
   test('it renders noise warning when rule type is eql, timeframe is last hour and hit average is greater than 1/hour', async () => {
@@ -314,9 +314,9 @@ describe('PreviewQuery', () => {
 
     expect(mockCalls.length).toEqual(1);
     expect(wrapper.find('[data-test-subj="previewQueryWarning"]').exists()).toBeFalsy();
-    expect(wrapper.find('[data-test-subj="previewNonEqlQueryHistogram"]').exists()).toBeFalsy();
-    expect(wrapper.find('[data-test-subj="previewThresholdQueryHistogram"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="previewEqlQueryHistogram"]').exists()).toBeFalsy();
+    expect(wrapper.find('[data-test-subj="queryPreviewCustomHistogram"]').exists()).toBeFalsy();
+    expect(wrapper.find('[data-test-subj="thresholdQueryPreviewHistogram"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="queryPreviewEqlHistogram"]').exists()).toBeFalsy();
   });
 
   test('it renders noise warning when rule type is threshold, and threshold field is defined, timeframe is last hour and hit average is greater than 1/hour', async () => {
@@ -380,9 +380,9 @@ describe('PreviewQuery', () => {
     const mockCalls = (useKibana().services.data.search.search as jest.Mock).mock.calls;
 
     expect(mockCalls.length).toEqual(1);
-    expect(wrapper.find('[data-test-subj="previewNonEqlQueryHistogram"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="previewThresholdQueryHistogram"]').exists()).toBeFalsy();
-    expect(wrapper.find('[data-test-subj="previewEqlQueryHistogram"]').exists()).toBeFalsy();
+    expect(wrapper.find('[data-test-subj="queryPreviewCustomHistogram"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="thresholdQueryPreviewHistogram"]').exists()).toBeFalsy();
+    expect(wrapper.find('[data-test-subj="queryPreviewEqlHistogram"]').exists()).toBeFalsy();
   });
 
   test('it renders query histogram when preview button clicked, rule type is threshold, and threshold field is empty string', () => {
@@ -407,9 +407,9 @@ describe('PreviewQuery', () => {
     const mockCalls = (useKibana().services.data.search.search as jest.Mock).mock.calls;
 
     expect(mockCalls.length).toEqual(1);
-    expect(wrapper.find('[data-test-subj="previewNonEqlQueryHistogram"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="previewThresholdQueryHistogram"]').exists()).toBeFalsy();
-    expect(wrapper.find('[data-test-subj="previewEqlQueryHistogram"]').exists()).toBeFalsy();
+    expect(wrapper.find('[data-test-subj="queryPreviewCustomHistogram"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="thresholdQueryPreviewHistogram"]').exists()).toBeFalsy();
+    expect(wrapper.find('[data-test-subj="queryPreviewEqlHistogram"]').exists()).toBeFalsy();
   });
 
   test('it hides histogram when timeframe changes', () => {
@@ -431,13 +431,13 @@ describe('PreviewQuery', () => {
 
     wrapper.find('[data-test-subj="queryPreviewButton"] button').at(0).simulate('click');
 
-    expect(wrapper.find('[data-test-subj="previewNonEqlQueryHistogram"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="queryPreviewCustomHistogram"]').exists()).toBeTruthy();
 
     wrapper
       .find('[data-test-subj="queryPreviewTimeframeSelect"] select')
       .at(0)
       .simulate('change', { target: { value: 'd' } });
 
-    expect(wrapper.find('[data-test-subj="previewNonEqlQueryHistogram"]').exists()).toBeFalsy();
+    expect(wrapper.find('[data-test-subj="queryPreviewCustomHistogram"]').exists()).toBeFalsy();
   });
 });

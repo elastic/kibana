@@ -27,7 +27,7 @@ export function registerKibanaSettings(coreSetup: CoreSetup) {
         defaultMessage:
           'Sets the file size limit when importing data in the File Data Visualizer. The highest supported value for this setting is 1GB.',
       }),
-      category: ['Machine Learning'],
+      category: ['machineLearning'],
       schema: schema.string(),
       validation: {
         regexString: '\\d+[mMgG][bB]',
@@ -49,7 +49,7 @@ export function registerKibanaSettings(coreSetup: CoreSetup) {
             'Use the default time filter in the Single Metric Viewer and Anomaly Explorer. If not enabled, the results for the full time range of the job are displayed.',
         }
       ),
-      category: ['Machine Learning'],
+      category: ['machineLearning'],
     },
     [ANOMALY_DETECTION_DEFAULT_TIME_RANGE]: {
       name: i18n.translate('xpack.ml.advancedSettings.anomalyDetectionDefaultTimeRangeName', {
@@ -69,7 +69,7 @@ export function registerKibanaSettings(coreSetup: CoreSetup) {
         to: schema.string(),
       }),
       requiresPageReload: true,
-      category: ['Machine Learning'],
+      category: ['machineLearning'],
     },
   });
 }
