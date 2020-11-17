@@ -14,7 +14,7 @@ import { Annotation } from '../../../../../common/types/annotations';
 import { AnnotationUpdatesService } from '../../../services/annotations_service';
 
 import { AnnotationFlyout } from './index';
-import { MlAnnotationUpdatesContext } from '../../../contexts/ml/use_ml_annotation_updates';
+import { MlAnnotationUpdatesContext } from '../../../contexts/ml/ml_annotation_updates_context';
 
 jest.mock('../../../util/dependency_cache', () => ({
   getToastNotifications: () => ({ addSuccess: jest.fn(), addDanger: jest.fn() }),
@@ -24,7 +24,7 @@ const annotationUpdatesService = new AnnotationUpdatesService();
 
 const MlAnnotationUpdatesContextProvider = ({ children }: { children: React.ReactElement }) => {
   return (
-    <MlAnnotationUpdatesContext.Provider value={{ annotationUpdatesService }}>
+    <MlAnnotationUpdatesContext.Provider value={annotationUpdatesService}>
       <IntlProvider>{children}</IntlProvider>
     </MlAnnotationUpdatesContext.Provider>
   );

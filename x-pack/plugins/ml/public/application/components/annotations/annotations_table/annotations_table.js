@@ -50,7 +50,7 @@ import { withKibana } from '../../../../../../../../src/plugins/kibana_react/pub
 import { ML_APP_URL_GENERATOR, ML_PAGES } from '../../../../../common/constants/ml_url_generator';
 import { PLUGIN_ID } from '../../../../../common/constants/app';
 import { timeFormatter } from '../../../../../common/util/date_utils';
-import { MlAnnotationUpdatesContext } from '../../../contexts/ml/use_ml_annotation_updates';
+import { MlAnnotationUpdatesContext } from '../../../contexts/ml/ml_annotation_updates_context';
 
 const CURRENT_SERIES = 'current_series';
 /**
@@ -695,6 +695,6 @@ class AnnotationsTableUI extends Component {
 }
 
 export const AnnotationsTable = withKibana((props) => {
-  const { annotationUpdatesService } = useContext(MlAnnotationUpdatesContext);
+  const annotationUpdatesService = useContext(MlAnnotationUpdatesContext);
   return <AnnotationsTableUI annotationUpdatesService={annotationUpdatesService} {...props} />;
 });

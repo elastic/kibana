@@ -16,7 +16,7 @@ import { useMlKibana, useNotifications } from '../../../contexts/kibana';
 import { getBoundsRoundedToInterval } from '../../../util/time_buckets';
 import { ANNOTATION_EVENT_USER } from '../../../../../common/constants/annotations';
 import { getControlsForDetector } from '../../get_controls_for_detector';
-import { MlAnnotationUpdatesContext } from '../../../contexts/ml/use_ml_annotation_updates';
+import { MlAnnotationUpdatesContext } from '../../../contexts/ml/ml_annotation_updates_context';
 
 interface TimeSeriesChartWithTooltipsProps {
   bounds: any;
@@ -51,7 +51,7 @@ export const TimeSeriesChartWithTooltips: FC<TimeSeriesChartWithTooltipsProps> =
     },
   } = useMlKibana();
 
-  const { annotationUpdatesService } = useContext(MlAnnotationUpdatesContext);
+  const annotationUpdatesService = useContext(MlAnnotationUpdatesContext);
 
   const [annotationData, setAnnotationData] = useState<Annotation[]>([]);
 

@@ -50,7 +50,7 @@ import {
   unhighlightFocusChartAnnotation,
   ANNOTATION_MIN_WIDTH,
 } from './timeseries_chart_annotations';
-import { MlAnnotationUpdatesContext } from '../../../contexts/ml/use_ml_annotation_updates';
+import { MlAnnotationUpdatesContext } from '../../../contexts/ml/ml_annotation_updates_context';
 
 const focusZoomPanelHeight = 25;
 const focusChartHeight = 310;
@@ -1799,7 +1799,7 @@ class TimeseriesChartIntl extends Component {
 }
 
 export const TimeseriesChart = (props) => {
-  const { annotationUpdatesService } = useContext(MlAnnotationUpdatesContext);
+  const annotationUpdatesService = useContext(MlAnnotationUpdatesContext);
   const annotationProp = useObservable(annotationUpdatesService.isAnnotationInitialized$());
 
   if (annotationProp === undefined) {

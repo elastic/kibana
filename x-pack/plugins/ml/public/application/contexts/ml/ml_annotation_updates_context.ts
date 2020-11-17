@@ -7,10 +7,8 @@
 import { createContext } from 'react';
 import { AnnotationUpdatesService } from '../../services/annotations_service';
 
-export interface MlAnnotationUpdatesContextValue {
-  annotationUpdatesService: AnnotationUpdatesService;
-}
+export type MlAnnotationUpdatesContextValue = AnnotationUpdatesService;
 
-export const MlAnnotationUpdatesContext = createContext<MlAnnotationUpdatesContextValue>({
-  annotationUpdatesService: new AnnotationUpdatesService(),
-});
+export const MlAnnotationUpdatesContext = createContext<MlAnnotationUpdatesContextValue>(
+  new AnnotationUpdatesService()
+);

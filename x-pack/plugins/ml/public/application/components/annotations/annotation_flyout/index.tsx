@@ -47,7 +47,7 @@ import {
 } from '../../../../../common/types/annotations';
 import { PartitionFieldsType } from '../../../../../common/types/anomalies';
 import { PARTITION_FIELDS } from '../../../../../common/constants/anomalies';
-import { MlAnnotationUpdatesContext } from '../../../contexts/ml/use_ml_annotation_updates';
+import { MlAnnotationUpdatesContext } from '../../../contexts/ml/ml_annotation_updates_context';
 
 interface ViewableDetector {
   index: number;
@@ -415,7 +415,7 @@ export class AnnotationFlyoutUI extends Component<CommonProps & Props> {
 }
 
 export const AnnotationFlyout: FC<any> = (props) => {
-  const { annotationUpdatesService } = useContext(MlAnnotationUpdatesContext);
+  const annotationUpdatesService = useContext(MlAnnotationUpdatesContext);
   const annotationProp = useObservable(annotationUpdatesService.isAnnotationInitialized$());
 
   const cancelEditingHandler = useCallback(() => {
