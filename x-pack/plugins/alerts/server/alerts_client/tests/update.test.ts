@@ -141,8 +141,8 @@ describe('update()', () => {
         ],
         scheduledTaskId: 'task-123',
         createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
       },
-      updated_at: new Date().toISOString(),
       references: [
         {
           name: 'action_0',
@@ -292,6 +292,7 @@ describe('update()', () => {
           "foo",
         ],
         "throttle": null,
+        "updatedAt": "2019-02-12T21:01:22.479Z",
         "updatedBy": "elastic",
       }
     `);
@@ -354,6 +355,7 @@ describe('update()', () => {
           bar: true,
         },
         createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
         actions: [
           {
             group: 'default',
@@ -458,6 +460,7 @@ describe('update()', () => {
           "foo",
         ],
         "throttle": "5m",
+        "updatedAt": "2019-02-12T21:01:22.479Z",
         "updatedBy": "elastic",
       }
     `);
@@ -508,6 +511,7 @@ describe('update()', () => {
           bar: true,
         },
         createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
         actions: [
           {
             group: 'default',
@@ -613,6 +617,7 @@ describe('update()', () => {
           "foo",
         ],
         "throttle": "5m",
+        "updatedAt": "2019-02-12T21:01:22.479Z",
         "updatedBy": "elastic",
       }
     `);

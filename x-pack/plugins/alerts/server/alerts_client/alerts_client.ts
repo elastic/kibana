@@ -655,6 +655,7 @@ export class AlertsClient {
         await this.createAPIKey(this.generateAPIKeyName(attributes.alertTypeId, attributes.name)),
         username
       ),
+      updatedAt: new Date().toISOString(),
       updatedBy: username,
     });
     try {

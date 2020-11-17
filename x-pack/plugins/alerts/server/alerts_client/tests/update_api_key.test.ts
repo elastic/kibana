@@ -12,7 +12,7 @@ import { encryptedSavedObjectsMock } from '../../../../encrypted_saved_objects/s
 import { actionsAuthorizationMock } from '../../../../actions/server/mocks';
 import { AlertsAuthorization } from '../../authorization/alerts_authorization';
 import { ActionsAuthorization } from '../../../../actions/server';
-import { getBeforeSetup } from './lib';
+import { getBeforeSetup, setGlobalDate } from './lib';
 
 const taskManager = taskManagerMock.createStart();
 const alertTypeRegistry = alertTypeRegistryMock.create();
@@ -43,6 +43,8 @@ const alertsClientParams: jest.Mocked<ConstructorOptions> = {
 beforeEach(() => {
   getBeforeSetup(alertsClientParams, taskManager, alertTypeRegistry);
 });
+
+setGlobalDate();
 
 describe('updateApiKey()', () => {
   let alertsClient: AlertsClient;
@@ -104,6 +106,7 @@ describe('updateApiKey()', () => {
         apiKey: Buffer.from('234:abc').toString('base64'),
         apiKeyOwner: 'elastic',
         updatedBy: 'elastic',
+        updatedAt: '2019-02-12T21:01:22.479Z',
         actions: [
           {
             group: 'default',
@@ -142,6 +145,7 @@ describe('updateApiKey()', () => {
         enabled: true,
         apiKey: Buffer.from('234:abc').toString('base64'),
         apiKeyOwner: 'elastic',
+        updatedAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
         actions: [
           {

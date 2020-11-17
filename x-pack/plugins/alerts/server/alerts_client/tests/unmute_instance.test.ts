@@ -12,7 +12,7 @@ import { encryptedSavedObjectsMock } from '../../../../encrypted_saved_objects/s
 import { actionsAuthorizationMock } from '../../../../actions/server/mocks';
 import { AlertsAuthorization } from '../../authorization/alerts_authorization';
 import { ActionsAuthorization } from '../../../../actions/server';
-import { getBeforeSetup } from './lib';
+import { getBeforeSetup, setGlobalDate } from './lib';
 
 const taskManager = taskManagerMock.createStart();
 const alertTypeRegistry = alertTypeRegistryMock.create();
@@ -45,6 +45,8 @@ beforeEach(() => {
   getBeforeSetup(alertsClientParams, taskManager, alertTypeRegistry);
 });
 
+setGlobalDate();
+
 describe('unmuteInstance()', () => {
   test('unmutes an alert instance', async () => {
     const alertsClient = new AlertsClient(alertsClientParams);
@@ -70,6 +72,7 @@ describe('unmuteInstance()', () => {
       {
         mutedInstanceIds: [],
         updatedBy: 'elastic',
+        updatedAt: '2019-02-12T21:01:22.479Z',
       },
       { version: '123' }
     );

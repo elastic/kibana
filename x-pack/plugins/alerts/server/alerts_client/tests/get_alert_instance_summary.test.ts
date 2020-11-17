@@ -77,6 +77,7 @@ const BaseAlertInstanceSummarySavedObject: SavedObject<RawAlert> = {
     createdBy: null,
     updatedBy: null,
     createdAt: mockedDateString,
+    updatedAt: mockedDateString,
     apiKey: null,
     apiKeyOwner: null,
     throttle: null,
