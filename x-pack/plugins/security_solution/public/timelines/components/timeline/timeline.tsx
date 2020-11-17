@@ -187,7 +187,7 @@ export const TimelineComponent: React.FC<Props> = ({
 
     setExpanded((currentExpanded) => {
       if (currentExpanded.eventId === eventId) {
-        return {};
+        return {} as ActiveTimelineExpandedEvent;
       }
 
       return { eventId, indexName: event._index! };

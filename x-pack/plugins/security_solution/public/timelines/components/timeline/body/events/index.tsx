@@ -13,6 +13,7 @@ import {
   TimelineNonEcsData,
 } from '../../../../../../common/search_strategy/timeline';
 import { ColumnHeaderOptions } from '../../../../../timelines/store/timeline/model';
+import { ActiveTimelineExpandedEvent } from '../../../../containers/active_timeline_context';
 import { Note } from '../../../../../common/lib/note';
 import { AddNoteToEvent, UpdateNote } from '../../../notes/helpers';
 import { OnColumnResized, OnPinEvent, OnRowSelected, OnUnPinEvent } from '../../events';
@@ -29,14 +30,14 @@ interface Props {
   columnHeaders: ColumnHeaderOptions[];
   columnRenderers: ColumnRenderer[];
   data: TimelineItem[];
-  expanded: { eventId?: string; indexName?: string };
+  expanded: ActiveTimelineExpandedEvent;
   eventIdToNoteIds: Readonly<Record<string, string[]>>;
   getNotesByIds: (noteIds: string[]) => Note[];
   id: string;
   isEventViewer?: boolean;
   loadingEventIds: Readonly<string[]>;
   onColumnResized: OnColumnResized;
-  onEventToggled: () => void;
+  onEventToggled: (event: TimelineItem) => void;
   onPinEvent: OnPinEvent;
   onRowSelected: OnRowSelected;
   onUnPinEvent: OnUnPinEvent;
@@ -89,7 +90,7 @@ const EventsComponent: React.FC<Props> = ({
         getNotesByIds={getNotesByIds}
         isEventPinned={eventIsPinned({ eventId: event._id, pinnedEventIds })}
         isEventViewer={isEventViewer}
-        isExpanded={expanded.eventId === event._id}
+        isExpanded={expanded?.eventId === event._id}
         key={`${event._id}_${event._index}`}
         loadingEventIds={loadingEventIds}
         onColumnResized={onColumnResized}
