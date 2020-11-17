@@ -18826,14 +18826,14 @@ lmdb-store-0.9@0.7.3:
     node-gyp-build "^4.2.3"
     weak-lru-cache "^0.3.9"
 
-lmdb-store@^0.8.15:
-  version "0.8.15"
-  resolved "https://registry.yarnpkg.com/lmdb-store/-/lmdb-store-0.8.15.tgz#4efb0341c2df505dd6f3a7f26f834f0a142a80a2"
-  integrity sha512-4Q0WZh2FmcJC6esZRUWMfkCmNiz0WU9cOgrxt97ZMTnVfHyOdZhtrt0oOF5EQPfetxxJf/BorKY28aX92R6G6g==
+lmdb-store@^0.9.0:
+  version "0.9.0"
+  resolved "https://registry.yarnpkg.com/lmdb-store/-/lmdb-store-0.9.0.tgz#9a07735baaabcb8a46ee08c58ce1d578b69bdc12"
+  integrity sha512-5yxZ/s2J4w5mq3II5w2i4EiAAT+RvGZ3dtiWPYQDV/F8BpwqZOi7QmHdwawf15stvXv9P92Rm7t2WPbjOV9Xkg==
   dependencies:
     fs-extra "^9.0.1"
     lmdb-store-0.9 "0.7.3"
-    msgpackr "^0.5.4"
+    msgpackr "^0.6.0"
     nan "^2.14.1"
     node-gyp-build "^4.2.3"
     weak-lru-cache "^0.3.9"
@@ -20352,20 +20352,27 @@ ms@2.1.1, ms@^2.0.0, ms@^2.1.1:
   resolved "https://registry.yarnpkg.com/ms/-/ms-2.1.1.tgz#30a5864eb3ebb0a66f2ebe6d727af06a09d86e0a"
   integrity sha512-tgp+dl5cGk28utYktBsrFqA7HKgrhgPsg6Z/EfhWI4gl1Hwq8B/GmY/0oXZ6nF8hDVesS/FpnYaD/kOWhYQvyg==
 
-msgpackr-extract@^0.3.5:
-  version "0.3.5"
-  resolved "https://registry.yarnpkg.com/msgpackr-extract/-/msgpackr-extract-0.3.5.tgz#0f206da058bd3dad0f8605d324de001a8f4de967"
-  integrity sha512-zHhstybu+m/j3H6CVBMcILVIzATK6dWRGtlePJjsnSAj8kLT5joMa9i0v21Uc80BPNDcwFsnG/dz2318tfI81w==
+msgpackr-extract@^0.3.5, msgpackr-extract@^0.3.6:
+  version "0.3.6"
+  resolved "https://registry.yarnpkg.com/msgpackr-extract/-/msgpackr-extract-0.3.6.tgz#f20c0a278e44377471b1fa2a3a75a32c87693755"
+  integrity sha512-ASUrKn0MEFp2onn+xUBQhCNR6+RzzQAcs6p0RqKQ9sfqOZjzQ21a+ASyzgh+QAJrKcWBiZLN6L4+iXKPJV6pXg==
   dependencies:
     nan "^2.14.1"
     node-gyp-build "^4.2.3"
 
-msgpackr@^0.5.3, msgpackr@^0.5.4:
+msgpackr@^0.5.3:
   version "0.5.4"
   resolved "https://registry.yarnpkg.com/msgpackr/-/msgpackr-0.5.4.tgz#c21c03d5e132d2e54d0b9ced02a75b1f48413380"
   integrity sha512-ILEWtIWwd5ESWHKoVjJ4GP7JWkpuAUJ20qi2j2qEC6twecBmK4E6YG3QW847OpmvdAhMJGq2LoDJRn/kNERTeQ==
   optionalDependencies:
     msgpackr-extract "^0.3.5"
+
+msgpackr@^0.6.0:
+  version "0.6.0"
+  resolved "https://registry.yarnpkg.com/msgpackr/-/msgpackr-0.6.0.tgz#57f75f80247ed3bcb937b7b5b0c7ef48123bee80"
+  integrity sha512-GF+hXvh1mn9f43ndEigmyTwomeJ/5OQWaxJTMeFrXouGTCYvzEtnF7Bd1DTCxOHXO85BeWFgUVA7Ev61R2KkVw==
+  optionalDependencies:
+    msgpackr-extract "^0.3.6"
 
 multicast-dns-service-types@^1.1.0:
   version "1.1.0"
