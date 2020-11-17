@@ -267,7 +267,6 @@ export const visPayloadSchema = schema.object({
       })
     ),
   }),
-  savedObjectId: schema.maybe(schema.string()),
   timerange: schema.object({
     timezone: stringRequired,
     min: stringRequired,

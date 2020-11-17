@@ -17,16 +17,29 @@
  * under the License.
  */
 
+import { KibanaContext } from '../../data/public';
+
 import { getTimezone, validateInterval } from './application';
 import { getUISettings, getDataStart, getCoreStart } from './services';
 import { MAX_BUCKETS_SETTING, ROUTES } from '../common/constants';
+import { PanelSchema } from '../common/types';
 
-export const metricsRequestHandler = async ({ uiState, timeRange, filters, query, visParams }) => {
+interface MetricsRequestHandlerParams {
+  input: KibanaContext | null;
+  uiState: Record<string, any>;
+  visParams: PanelSchema;
+}
+
+export const metricsRequestHandler = async ({
+  input,
+  uiState,
+  visParams,
+}: MetricsRequestHandlerParams) => {
   const config = getUISettings();
   const timezone = getTimezone(config);
-  const uiStateObj = uiState.get(visParams.type, {});
+  const uiStateObj = uiState[visParams.type] ?? {};
   const dataSearch = getDataStart();
-  const parsedTimeRange = dataSearch.query.timefilter.timefilter.calculateBounds(timeRange);
+  const parsedTimeRange = dataSearch.query.timefilter.timefilter.calculateBounds(input?.timeRange!);
   const scaledDataFormat = config.get('dateFormat:scaled');
   const dateFormat = config.get('dateFormat');
 
@@ -41,11 +54,10 @@ export const metricsRequestHandler = async ({ uiState, timeRange, filters, query
           timezone,
           ...parsedTimeRange,
         },
-        query,
-        filters,
+        query: input?.query,
+        filters: input?.filters,
         panels: [visParams],
         state: uiStateObj,
-        savedObjectId: 'unsaved',
         sessionId: dataSearch.search.session.getSessionId(),
       }),
     });

@@ -20,7 +20,6 @@
 import { i18n } from '@kbn/i18n';
 
 import { EditorController } from './application';
-// @ts-ignore
 import { PANEL_TYPES } from '../common/panel_types';
 import { VIS_EVENT_TO_TRIGGER, VisGroups } from '../../visualizations/public';
 import { toExpressionAst } from './to_ast';

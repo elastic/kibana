@@ -21,16 +21,10 @@ import { buildExpression, buildExpressionFunction } from '../../expressions/publ
 import { Vis } from '../../visualizations/public';
 import { TimeseriesExpressionFunctionDefinition } from './metrics_fn';
 
-const prepareJson = (data: unknown) =>
-  JSON.stringify(data).replace(/\\/g, `\\\\`).replace(/'/g, `\\'`);
-
 export const toExpressionAst = (vis: Vis<any>) => {
-  const params = prepareJson(vis.params);
-  const uiState = prepareJson(vis.uiState);
-
   const timeseries = buildExpressionFunction<TimeseriesExpressionFunctionDefinition>('tsvb', {
-    params,
-    uiState,
+    params: JSON.stringify(vis.params),
+    uiState: JSON.stringify(vis.uiState),
   });
 
   const ast = buildExpression([timeseries]);

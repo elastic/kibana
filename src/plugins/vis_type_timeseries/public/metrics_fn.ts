@@ -17,11 +17,11 @@
  * under the License.
  */
 
-import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { KibanaContext } from '../../data/public';
 import { ExpressionFunctionDefinition, Render } from '../../expressions/public';
 
+import { PanelSchema } from '../common/types';
 import { metricsRequestHandler } from './request_handler';
 
 type Input = KibanaContext | null;
@@ -32,12 +32,10 @@ interface Arguments {
   uiState: string;
 }
 
-type VisParams = Required<Arguments>;
-
 export interface TimeseriesRenderValue {
   visType: 'metrics';
   visData: Input;
-  visConfig: VisParams;
+  visConfig: PanelSchema;
   uiState: any;
 }
 
@@ -68,16 +66,12 @@ export const createMetricsFn = (): TimeseriesExpressionFunctionDefinition => ({
     },
   },
   async fn(input, args) {
-    const params = JSON.parse(args.params);
-    const uiStateParams = JSON.parse(args.uiState);
-    const { PersistedState } = await import('../../visualizations/public');
-    const uiState = new PersistedState(uiStateParams);
+    const visParams: PanelSchema = JSON.parse(args.params);
+    const uiState = JSON.parse(args.uiState);
 
     const response = await metricsRequestHandler({
-      timeRange: get(input, 'timeRange', null),
-      query: get(input, 'query', null),
-      filters: get(input, 'filters', null),
-      visParams: params,
+      input,
+      visParams,
       uiState,
     });
 
@@ -89,7 +83,7 @@ export const createMetricsFn = (): TimeseriesExpressionFunctionDefinition => ({
       value: {
         uiState,
         visType: 'metrics',
-        visConfig: params,
+        visConfig: visParams,
         visData: response,
       },
     };
