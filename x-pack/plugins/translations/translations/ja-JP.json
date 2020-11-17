@@ -13213,7 +13213,6 @@
     "xpack.ml.newJob.wizard.pickFieldsStep.stoppedPartitionsErrorCallout": "停止したパーティションのリストの取得中にエラーが発生しました。",
     "xpack.ml.newJob.wizard.pickFieldsStep.stoppedPartitionsExistCallout": "パーティション単位の分類とstop_on_warn設定が有効です。ジョブ「{jobId}」の一部のパーティションは分類に適さず、さらなる分類または異常検知分析から除外されました。",
     "xpack.ml.newJob.wizard.pickFieldsStep.stoppedPartitionsPreviewColumnName": "停止したパーティション名",
-    "xpack.ml.newJob.wizard.pickFieldsStep.summaryCountField.description": "オプション。インプットデータが事前にまとめられている場合に使用、例: \\{docCountParam\\}。",
     "xpack.ml.newJob.wizard.pickFieldsStep.summaryCountField.title": "サマリーカウントフィールド",
     "xpack.ml.newJob.wizard.previewJsonButton": "JSON をプレビュー",
     "xpack.ml.newJob.wizard.previousStepButton": "前へ",
