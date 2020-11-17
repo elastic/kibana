@@ -7,7 +7,6 @@
 import React, { FC } from 'react';
 import { EuiToolTip, EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Link } from 'react-router-dom';
 import { MlSummaryJobs } from '../../../../../common/types/anomaly_detection_jobs';
 import { useCreateADLinks } from '../../../components/custom_hooks/use_create_ad_links';
 
@@ -27,20 +26,19 @@ export const ExplorerLink: FC<Props> = ({ jobsList }) => {
 
   return (
     <EuiToolTip position="bottom" content={openJobsInAnomalyExplorerText}>
-      <Link to={createLinkWithUserDefaults('explorer', jobsList)}>
-        <EuiButtonEmpty
-          color="text"
-          size="xs"
-          iconType="visTable"
-          aria-label={openJobsInAnomalyExplorerText}
-          className="results-button"
-          data-test-subj={`openOverviewJobsInAnomalyExplorer`}
-        >
-          {i18n.translate('xpack.ml.overview.anomalyDetection.viewActionName', {
-            defaultMessage: 'View',
-          })}
-        </EuiButtonEmpty>
-      </Link>
+      <EuiButtonEmpty
+        href={createLinkWithUserDefaults('explorer', jobsList)}
+        color="text"
+        size="xs"
+        iconType="visTable"
+        aria-label={openJobsInAnomalyExplorerText}
+        className="results-button"
+        data-test-subj={`openOverviewJobsInAnomalyExplorer`}
+      >
+        {i18n.translate('xpack.ml.overview.anomalyDetection.viewActionName', {
+          defaultMessage: 'View',
+        })}
+      </EuiButtonEmpty>
     </EuiToolTip>
   );
 };
