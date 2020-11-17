@@ -78,13 +78,8 @@ const getTypeLabel = (type?: DataType): string => {
 };
 
 export const getTypeLabelFromField = (field: Field) => {
-  const { type, runtime_type: runtimeType } = field;
+  const { type } = field;
   const typeLabel = getTypeLabel(type);
-
-  if (type === 'runtime') {
-    const runtimeTypeLabel = getTypeLabel(runtimeType);
-    return `${typeLabel} ${runtimeTypeLabel}`;
-  }
 
   return typeLabel;
 };
