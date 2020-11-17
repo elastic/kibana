@@ -1,18 +1,49 @@
 $colorBarHeight: 20px;
+$phaseMinWidth: 100px;
 
 .ilmTimeline {
-  &__hotPhase {
-    height: $colorBarHeight;
-    background-color: $euiColorVis9_behindText;
+  overflow: hidden;
+
+  background-color: $euiColorLightestShade;
+  padding: $euiSizeM;
+
+  &__phase {
+    display: inline-block;
   }
 
-  &__coldPhase {
-    height: $colorBarHeight;
-    background-color: $euiColorVis5_behindText;
+  &__hotPhase {
+    width: var(--ilm-hot-phase-width);
+    // min-width: $phaseMinWidth;
+
+    &__colorBar {
+      height: $colorBarHeight;
+      display: block;
+      background-color: $euiColorVis9_behindText;
+      width: 100%;
+    }
   }
 
   &__warmPhase {
-    height: $colorBarHeight;
-    background-color: $euiColorVis1_behindText;
+    width: var(--ilm-warm-phase-width);
+    // min-width: $phaseMinWidth;
+
+    &__colorBar {
+      height: $colorBarHeight;
+      display: block;
+      background-color: $euiColorVis5_behindText;
+      width: 100%;
+    }
+  }
+
+  &__coldPhase {
+    width: var(--ilm-cold-phase-width);
+    // min-width: $phaseMinWidth;
+
+    &__colorBar {
+      height: $colorBarHeight;
+      display: block;
+      background-color: $euiColorVis1_behindText;
+      width: 100%;
+    }
   }
 }
