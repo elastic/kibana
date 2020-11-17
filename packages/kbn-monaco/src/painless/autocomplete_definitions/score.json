@@ -1235,10 +1235,10 @@
       ]
     },
     {
-      "label": "Character$Subset",
+      "label": "Character.Subset",
       "kind": "class",
-      "documentation": "Class: Character$Subset",
-      "insertText": "Character$Subset",
+      "documentation": "Class: Character.Subset",
+      "insertText": "Character.Subset",
       "properties": [
         {
           "label": "equals",
@@ -1261,10 +1261,10 @@
       ]
     },
     {
-      "label": "Character$UnicodeBlock",
+      "label": "Character.UnicodeBlock",
       "kind": "class",
-      "documentation": "Class: Character$UnicodeBlock",
-      "insertText": "Character$UnicodeBlock",
+      "documentation": "Class: Character.UnicodeBlock",
+      "insertText": "Character.UnicodeBlock",
       "properties": [
         {
           "label": "AEGEAN_NUMBERS",
@@ -2619,10 +2619,10 @@
       ]
     },
     {
-      "label": "Character$UnicodeScript",
+      "label": "Character.UnicodeScript",
       "kind": "class",
-      "documentation": "Class: Character$UnicodeScript",
-      "insertText": "Character$UnicodeScript",
+      "documentation": "Class: Character.UnicodeScript",
+      "insertText": "Character.UnicodeScript",
       "properties": [
         {
           "label": "ARABIC",
@@ -8087,10 +8087,10 @@
       ]
     },
     {
-      "label": "AttributedCharacterIterator$Attribute",
+      "label": "AttributedCharacterIterator.Attribute",
       "kind": "class",
-      "documentation": "Class: AttributedCharacterIterator$Attribute",
-      "insertText": "AttributedCharacterIterator$Attribute",
+      "documentation": "Class: AttributedCharacterIterator.Attribute",
+      "insertText": "AttributedCharacterIterator.Attribute",
       "properties": [
         {
           "label": "INPUT_METHOD_SEGMENT",
@@ -9301,10 +9301,10 @@
       ]
     },
     {
-      "label": "DateFormat$Field",
+      "label": "DateFormat.Field",
       "kind": "class",
-      "documentation": "Class: DateFormat$Field",
-      "insertText": "DateFormat$Field",
+      "documentation": "Class: DateFormat.Field",
+      "insertText": "DateFormat.Field",
       "properties": [
         {
           "label": "AM_PM",
@@ -10231,10 +10231,10 @@
       ]
     },
     {
-      "label": "Format$Field",
+      "label": "Format.Field",
       "kind": "class",
-      "documentation": "Class: Format$Field",
-      "insertText": "Format$Field",
+      "documentation": "Class: Format.Field",
+      "insertText": "Format.Field",
       "properties": [
         {
           "label": "equals",
@@ -10379,10 +10379,10 @@
       ]
     },
     {
-      "label": "MessageFormat$Field",
+      "label": "MessageFormat.Field",
       "kind": "class",
-      "documentation": "Class: MessageFormat$Field",
-      "insertText": "MessageFormat$Field",
+      "documentation": "Class: MessageFormat.Field",
+      "insertText": "MessageFormat.Field",
       "properties": [
         {
           "label": "ARGUMENT",
@@ -10449,10 +10449,10 @@
       ]
     },
     {
-      "label": "Normalizer$Form",
+      "label": "Normalizer.Form",
       "kind": "class",
-      "documentation": "Class: Normalizer$Form",
-      "insertText": "Normalizer$Form",
+      "documentation": "Class: Normalizer.Form",
+      "insertText": "Normalizer.Form",
       "properties": [
         {
           "label": "NFC",
@@ -10729,10 +10729,10 @@
       ]
     },
     {
-      "label": "NumberFormat$Field",
+      "label": "NumberFormat.Field",
       "kind": "class",
-      "documentation": "Class: NumberFormat$Field",
-      "insertText": "NumberFormat$Field",
+      "documentation": "Class: NumberFormat.Field",
+      "insertText": "NumberFormat.Field",
       "properties": [
         {
           "label": "CURRENCY",
@@ -21191,10 +21191,10 @@
       ]
     },
     {
-      "label": "ZoneOffsetTransitionRule$TimeDefinition",
+      "label": "ZoneOffsetTransitionRule.TimeDefinition",
       "kind": "class",
-      "documentation": "Class: ZoneOffsetTransitionRule$TimeDefinition",
-      "insertText": "ZoneOffsetTransitionRule$TimeDefinition",
+      "documentation": "Class: ZoneOffsetTransitionRule.TimeDefinition",
+      "insertText": "ZoneOffsetTransitionRule.TimeDefinition",
       "properties": [
         {
           "label": "STANDARD",
@@ -22159,10 +22159,10 @@
       ]
     },
     {
-      "label": "AbstractMap$SimpleEntry",
+      "label": "AbstractMap.SimpleEntry",
       "kind": "class",
-      "documentation": "Class: AbstractMap$SimpleEntry",
-      "insertText": "AbstractMap$SimpleEntry",
+      "documentation": "Class: AbstractMap.SimpleEntry",
+      "insertText": "AbstractMap.SimpleEntry",
       "properties": [
         {
           "label": "equals",
@@ -22202,17 +22202,17 @@
         }
       ],
       "constructorDefinition": {
-        "label": "AbstractMap$SimpleEntry",
+        "label": "AbstractMap.SimpleEntry",
         "kind": "constructor",
-        "documentation": "Constructor: AbstractMap$SimpleEntry",
-        "insertText": "AbstractMap$SimpleEntry"
+        "documentation": "Constructor: AbstractMap.SimpleEntry",
+        "insertText": "AbstractMap.SimpleEntry"
       }
     },
     {
-      "label": "AbstractMap$SimpleImmutableEntry",
+      "label": "AbstractMap.SimpleImmutableEntry",
       "kind": "class",
-      "documentation": "Class: AbstractMap$SimpleImmutableEntry",
-      "insertText": "AbstractMap$SimpleImmutableEntry",
+      "documentation": "Class: AbstractMap.SimpleImmutableEntry",
+      "insertText": "AbstractMap.SimpleImmutableEntry",
       "properties": [
         {
           "label": "equals",
@@ -22252,10 +22252,10 @@
         }
       ],
       "constructorDefinition": {
-        "label": "AbstractMap$SimpleImmutableEntry",
+        "label": "AbstractMap.SimpleImmutableEntry",
         "kind": "constructor",
-        "documentation": "Constructor: AbstractMap$SimpleImmutableEntry",
-        "insertText": "AbstractMap$SimpleImmutableEntry"
+        "documentation": "Constructor: AbstractMap.SimpleImmutableEntry",
+        "insertText": "AbstractMap.SimpleImmutableEntry"
       }
     },
     {
@@ -23731,10 +23731,10 @@
       ]
     },
     {
-      "label": "Base64$Decoder",
+      "label": "Base64.Decoder",
       "kind": "class",
-      "documentation": "Class: Base64$Decoder",
-      "insertText": "Base64$Decoder",
+      "documentation": "Class: Base64.Decoder",
+      "insertText": "Base64.Decoder",
       "properties": [
         {
           "label": "decode",
@@ -23763,10 +23763,10 @@
       ]
     },
     {
-      "label": "Base64$Encoder",
+      "label": "Base64.Encoder",
       "kind": "class",
-      "documentation": "Class: Base64$Encoder",
-      "insertText": "Base64$Encoder",
+      "documentation": "Class: Base64.Encoder",
+      "insertText": "Base64.Encoder",
       "properties": [
         {
           "label": "encode",
@@ -24519,10 +24519,10 @@
       ]
     },
     {
-      "label": "Calendar$Builder",
+      "label": "Calendar.Builder",
       "kind": "class",
-      "documentation": "Class: Calendar$Builder",
-      "insertText": "Calendar$Builder",
+      "documentation": "Class: Calendar.Builder",
+      "insertText": "Calendar.Builder",
       "properties": [
         {
           "label": "build",
@@ -24616,10 +24616,10 @@
         }
       ],
       "constructorDefinition": {
-        "label": "Calendar$Builder",
+        "label": "Calendar.Builder",
         "kind": "constructor",
-        "documentation": "Constructor: Calendar$Builder",
-        "insertText": "Calendar$Builder"
+        "documentation": "Constructor: Calendar.Builder",
+        "insertText": "Calendar.Builder"
       }
     },
     {
@@ -26347,10 +26347,10 @@
       }
     },
     {
-      "label": "Formatter$BigDecimalLayoutForm",
+      "label": "Formatter.BigDecimalLayoutForm",
       "kind": "class",
-      "documentation": "Class: Formatter$BigDecimalLayoutForm",
-      "insertText": "Formatter$BigDecimalLayoutForm",
+      "documentation": "Class: Formatter.BigDecimalLayoutForm",
+      "insertText": "Formatter.BigDecimalLayoutForm",
       "properties": [
         {
           "label": "DECIMAL_FLOAT",
@@ -29765,10 +29765,10 @@
       }
     },
     {
-      "label": "Locale$Builder",
+      "label": "Locale.Builder",
       "kind": "class",
-      "documentation": "Class: Locale$Builder",
-      "insertText": "Locale$Builder",
+      "documentation": "Class: Locale.Builder",
+      "insertText": "Locale.Builder",
       "properties": [
         {
           "label": "addUnicodeLocaleAttribute",
@@ -29868,17 +29868,17 @@
         }
       ],
       "constructorDefinition": {
-        "label": "Locale$Builder",
+        "label": "Locale.Builder",
         "kind": "constructor",
-        "documentation": "Constructor: Locale$Builder",
-        "insertText": "Locale$Builder"
+        "documentation": "Constructor: Locale.Builder",
+        "insertText": "Locale.Builder"
       }
     },
     {
-      "label": "Locale$Category",
+      "label": "Locale.Category",
       "kind": "class",
-      "documentation": "Class: Locale$Category",
-      "insertText": "Locale$Category",
+      "documentation": "Class: Locale.Category",
+      "insertText": "Locale.Category",
       "properties": [
         {
           "label": "DISPLAY",
@@ -29943,10 +29943,10 @@
       ]
     },
     {
-      "label": "Locale$FilteringMode",
+      "label": "Locale.FilteringMode",
       "kind": "class",
-      "documentation": "Class: Locale$FilteringMode",
-      "insertText": "Locale$FilteringMode",
+      "documentation": "Class: Locale.FilteringMode",
+      "insertText": "Locale.FilteringMode",
       "properties": [
         {
           "label": "AUTOSELECT_FILTERING",
@@ -30029,10 +30029,10 @@
       ]
     },
     {
-      "label": "Locale$LanguageRange",
+      "label": "Locale.LanguageRange",
       "kind": "class",
-      "documentation": "Class: Locale$LanguageRange",
-      "insertText": "Locale$LanguageRange",
+      "documentation": "Class: Locale.LanguageRange",
+      "insertText": "Locale.LanguageRange",
       "properties": [
         {
           "label": "MAX_WEIGHT",
@@ -30090,10 +30090,10 @@
         }
       ],
       "constructorDefinition": {
-        "label": "Locale$LanguageRange",
+        "label": "Locale.LanguageRange",
         "kind": "constructor",
-        "documentation": "Constructor: Locale$LanguageRange",
-        "insertText": "Locale$LanguageRange"
+        "documentation": "Constructor: Locale.LanguageRange",
+        "insertText": "Locale.LanguageRange"
       }
     },
     {
@@ -30389,10 +30389,10 @@
       ]
     },
     {
-      "label": "Map$Entry",
+      "label": "Map.Entry",
       "kind": "class",
-      "documentation": "Class: Map$Entry",
-      "insertText": "Map$Entry",
+      "documentation": "Class: Map.Entry",
+      "insertText": "Map.Entry",
       "properties": [
         {
           "label": "comparingByKey",
@@ -31847,10 +31847,10 @@
       ]
     },
     {
-      "label": "PrimitiveIterator$OfDouble",
+      "label": "PrimitiveIterator.OfDouble",
       "kind": "class",
-      "documentation": "Class: PrimitiveIterator$OfDouble",
-      "insertText": "PrimitiveIterator$OfDouble",
+      "documentation": "Class: PrimitiveIterator.OfDouble",
+      "insertText": "PrimitiveIterator.OfDouble",
       "properties": [
         {
           "label": "equals",
@@ -31903,10 +31903,10 @@
       ]
     },
     {
-      "label": "PrimitiveIterator$OfInt",
+      "label": "PrimitiveIterator.OfInt",
       "kind": "class",
-      "documentation": "Class: PrimitiveIterator$OfInt",
-      "insertText": "PrimitiveIterator$OfInt",
+      "documentation": "Class: PrimitiveIterator.OfInt",
+      "insertText": "PrimitiveIterator.OfInt",
       "properties": [
         {
           "label": "equals",
@@ -31959,10 +31959,10 @@
       ]
     },
     {
-      "label": "PrimitiveIterator$OfLong",
+      "label": "PrimitiveIterator.OfLong",
       "kind": "class",
-      "documentation": "Class: PrimitiveIterator$OfLong",
-      "insertText": "PrimitiveIterator$OfLong",
+      "documentation": "Class: PrimitiveIterator.OfLong",
+      "insertText": "PrimitiveIterator.OfLong",
       "properties": [
         {
           "label": "equals",
@@ -33593,10 +33593,10 @@
       ]
     },
     {
-      "label": "Spliterator$OfDouble",
+      "label": "Spliterator.OfDouble",
       "kind": "class",
-      "documentation": "Class: Spliterator$OfDouble",
-      "insertText": "Spliterator$OfDouble",
+      "documentation": "Class: Spliterator.OfDouble",
+      "insertText": "Spliterator.OfDouble",
       "properties": [
         {
           "label": "characteristics",
@@ -33667,10 +33667,10 @@
       ]
     },
     {
-      "label": "Spliterator$OfInt",
+      "label": "Spliterator.OfInt",
       "kind": "class",
-      "documentation": "Class: Spliterator$OfInt",
-      "insertText": "Spliterator$OfInt",
+      "documentation": "Class: Spliterator.OfInt",
+      "insertText": "Spliterator.OfInt",
       "properties": [
         {
           "label": "characteristics",
@@ -33741,10 +33741,10 @@
       ]
     },
     {
-      "label": "Spliterator$OfLong",
+      "label": "Spliterator.OfLong",
       "kind": "class",
-      "documentation": "Class: Spliterator$OfLong",
-      "insertText": "Spliterator$OfLong",
+      "documentation": "Class: Spliterator.OfLong",
+      "insertText": "Spliterator.OfLong",
       "properties": [
         {
           "label": "characteristics",
@@ -33815,10 +33815,10 @@
       ]
     },
     {
-      "label": "Spliterator$OfPrimitive",
+      "label": "Spliterator.OfPrimitive",
       "kind": "class",
-      "documentation": "Class: Spliterator$OfPrimitive",
-      "insertText": "Spliterator$OfPrimitive",
+      "documentation": "Class: Spliterator.OfPrimitive",
+      "insertText": "Spliterator.OfPrimitive",
       "properties": [
         {
           "label": "characteristics",
@@ -37817,10 +37817,10 @@
       ]
     },
     {
-      "label": "Collector$Characteristics",
+      "label": "Collector.Characteristics",
       "kind": "class",
-      "documentation": "Class: Collector$Characteristics",
-      "insertText": "Collector$Characteristics",
+      "documentation": "Class: Collector.Characteristics",
+      "insertText": "Collector.Characteristics",
       "properties": [
         {
           "label": "CONCURRENT",
@@ -38303,10 +38303,10 @@
       ]
     },
     {
-      "label": "DoubleStream$Builder",
+      "label": "DoubleStream.Builder",
       "kind": "class",
-      "documentation": "Class: DoubleStream$Builder",
-      "insertText": "DoubleStream$Builder",
+      "documentation": "Class: DoubleStream.Builder",
+      "insertText": "DoubleStream.Builder",
       "properties": [
         {
           "label": "accept",
@@ -38631,10 +38631,10 @@
       ]
     },
     {
-      "label": "IntStream$Builder",
+      "label": "IntStream.Builder",
       "kind": "class",
-      "documentation": "Class: IntStream$Builder",
-      "insertText": "IntStream$Builder",
+      "documentation": "Class: IntStream.Builder",
+      "insertText": "IntStream.Builder",
       "properties": [
         {
           "label": "accept",
@@ -38953,10 +38953,10 @@
       ]
     },
     {
-      "label": "LongStream$Builder",
+      "label": "LongStream.Builder",
       "kind": "class",
-      "documentation": "Class: LongStream$Builder",
-      "insertText": "LongStream$Builder",
+      "documentation": "Class: LongStream.Builder",
+      "insertText": "LongStream.Builder",
       "properties": [
         {
           "label": "accept",
@@ -39251,10 +39251,10 @@
       ]
     },
     {
-      "label": "Stream$Builder",
+      "label": "Stream.Builder",
       "kind": "class",
-      "documentation": "Class: Stream$Builder",
-      "insertText": "Stream$Builder",
+      "documentation": "Class: Stream.Builder",
+      "insertText": "Stream.Builder",
       "properties": [
         {
           "label": "accept",
@@ -39407,10 +39407,10 @@
       ]
     },
     {
-      "label": "ScriptDocValues$Booleans",
+      "label": "ScriptDocValues.Booleans",
       "kind": "class",
-      "documentation": "Class: ScriptDocValues$Booleans",
-      "insertText": "ScriptDocValues$Booleans",
+      "documentation": "Class: ScriptDocValues.Booleans",
+      "insertText": "ScriptDocValues.Booleans",
       "properties": [
         {
           "label": "add",
@@ -39685,10 +39685,10 @@
       ]
     },
     {
-      "label": "ScriptDocValues$BytesRefs",
+      "label": "ScriptDocValues.BytesRefs",
       "kind": "class",
-      "documentation": "Class: ScriptDocValues$BytesRefs",
-      "insertText": "ScriptDocValues$BytesRefs",
+      "documentation": "Class: ScriptDocValues.BytesRefs",
+      "insertText": "ScriptDocValues.BytesRefs",
       "properties": [
         {
           "label": "add",
@@ -39963,10 +39963,10 @@
       ]
     },
     {
-      "label": "ScriptDocValues$Dates",
+      "label": "ScriptDocValues.Dates",
       "kind": "class",
-      "documentation": "Class: ScriptDocValues$Dates",
-      "insertText": "ScriptDocValues$Dates",
+      "documentation": "Class: ScriptDocValues.Dates",
+      "insertText": "ScriptDocValues.Dates",
       "properties": [
         {
           "label": "add",
@@ -40241,10 +40241,10 @@
       ]
     },
     {
-      "label": "ScriptDocValues$Doubles",
+      "label": "ScriptDocValues.Doubles",
       "kind": "class",
-      "documentation": "Class: ScriptDocValues$Doubles",
-      "insertText": "ScriptDocValues$Doubles",
+      "documentation": "Class: ScriptDocValues.Doubles",
+      "insertText": "ScriptDocValues.Doubles",
       "properties": [
         {
           "label": "add",
@@ -40519,10 +40519,10 @@
       ]
     },
     {
-      "label": "ScriptDocValues$GeoPoints",
+      "label": "ScriptDocValues.GeoPoints",
       "kind": "class",
-      "documentation": "Class: ScriptDocValues$GeoPoints",
-      "insertText": "ScriptDocValues$GeoPoints",
+      "documentation": "Class: ScriptDocValues.GeoPoints",
+      "insertText": "ScriptDocValues.GeoPoints",
       "properties": [
         {
           "label": "add",
@@ -40857,10 +40857,10 @@
       ]
     },
     {
-      "label": "ScriptDocValues$Longs",
+      "label": "ScriptDocValues.Longs",
       "kind": "class",
-      "documentation": "Class: ScriptDocValues$Longs",
-      "insertText": "ScriptDocValues$Longs",
+      "documentation": "Class: ScriptDocValues.Longs",
+      "insertText": "ScriptDocValues.Longs",
       "properties": [
         {
           "label": "add",
@@ -41135,10 +41135,10 @@
       ]
     },
     {
-      "label": "ScriptDocValues$Strings",
+      "label": "ScriptDocValues.Strings",
       "kind": "class",
-      "documentation": "Class: ScriptDocValues$Strings",
-      "insertText": "ScriptDocValues$Strings",
+      "documentation": "Class: ScriptDocValues.Strings",
+      "insertText": "ScriptDocValues.Strings",
       "properties": [
         {
           "label": "add",
@@ -41413,10 +41413,10 @@
       ]
     },
     {
-      "label": "IpFieldMapper$IpFieldType$IpScriptDocValues",
+      "label": "IpFieldMapper.IpFieldType$IpScriptDocValues",
       "kind": "class",
-      "documentation": "Class: IpFieldMapper$IpFieldType$IpScriptDocValues",
-      "insertText": "IpFieldMapper$IpFieldType$IpScriptDocValues",
+      "documentation": "Class: IpFieldMapper.IpFieldType$IpScriptDocValues",
+      "insertText": "IpFieldMapper.IpFieldType$IpScriptDocValues",
       "properties": [
         {
           "label": "add",
@@ -41691,10 +41691,10 @@
       ]
     },
     {
-      "label": "IntervalFilterScript$Interval",
+      "label": "IntervalFilterScript.Interval",
       "kind": "class",
-      "documentation": "Class: IntervalFilterScript$Interval",
-      "insertText": "IntervalFilterScript$Interval",
+      "documentation": "Class: IntervalFilterScript.Interval",
+      "insertText": "IntervalFilterScript.Interval",
       "properties": [
         {
           "label": "equals",
@@ -41735,10 +41735,10 @@
       ]
     },
     {
-      "label": "ScriptedSimilarity$Doc",
+      "label": "ScriptedSimilarity.Doc",
       "kind": "class",
-      "documentation": "Class: ScriptedSimilarity$Doc",
-      "insertText": "ScriptedSimilarity$Doc",
+      "documentation": "Class: ScriptedSimilarity.Doc",
+      "insertText": "ScriptedSimilarity.Doc",
       "properties": [
         {
           "label": "equals",
@@ -41773,10 +41773,10 @@
       ]
     },
     {
-      "label": "ScriptedSimilarity$Field",
+      "label": "ScriptedSimilarity.Field",
       "kind": "class",
-      "documentation": "Class: ScriptedSimilarity$Field",
-      "insertText": "ScriptedSimilarity$Field",
+      "documentation": "Class: ScriptedSimilarity.Field",
+      "insertText": "ScriptedSimilarity.Field",
       "properties": [
         {
           "label": "equals",
@@ -41817,10 +41817,10 @@
       ]
     },
     {
-      "label": "ScriptedSimilarity$Query",
+      "label": "ScriptedSimilarity.Query",
       "kind": "class",
-      "documentation": "Class: ScriptedSimilarity$Query",
-      "insertText": "ScriptedSimilarity$Query",
+      "documentation": "Class: ScriptedSimilarity.Query",
+      "insertText": "ScriptedSimilarity.Query",
       "properties": [
         {
           "label": "equals",
@@ -41849,10 +41849,10 @@
       ]
     },
     {
-      "label": "ScriptedSimilarity$Term",
+      "label": "ScriptedSimilarity.Term",
       "kind": "class",
-      "documentation": "Class: ScriptedSimilarity$Term",
-      "insertText": "ScriptedSimilarity$Term",
+      "documentation": "Class: ScriptedSimilarity.Term",
+      "insertText": "ScriptedSimilarity.Term",
       "properties": [
         {
           "label": "equals",
@@ -42451,10 +42451,10 @@
       ]
     },
     {
-      "label": "ScoreScript$ExplanationHolder",
+      "label": "ScoreScript.ExplanationHolder",
       "kind": "class",
-      "documentation": "Class: ScoreScript$ExplanationHolder",
-      "insertText": "ScoreScript$ExplanationHolder",
+      "documentation": "Class: ScoreScript.ExplanationHolder",
+      "insertText": "ScoreScript.ExplanationHolder",
       "properties": [
         {
           "label": "equals",

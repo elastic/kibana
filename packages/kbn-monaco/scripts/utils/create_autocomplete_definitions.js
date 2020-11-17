@@ -30,6 +30,20 @@ const parameterIndexToLetterMap = {
 };
 
 /**
+ * The suggestion name is sometimes prefixed by the Java package
+ * and needs to be removed for autocompletion.
+ *
+ * Some suggestions may also contain a "$" character, which indicates it is
+ * an inner class in Java. For Painless, the "$" needs to be converted to "."
+ * @param {string} name
+ * @returns {string}
+ */
+const getDisplayName = (name) => {
+  const displayName = name.split('.').pop() || name;
+  return displayName.replace('$', '.');
+};
+
+/**
  * Filters the context data by primitives and returns an array of primitive names
  * The current data structure from ES does not indicate if a field is
  * a primitive or class, so we infer this by checking
@@ -68,7 +82,7 @@ const getPrimitives = (contextData) => {
  *
  * Example of final format: pow(double a, double b): double
  *
- * Some methods support different parameter types, so this is also supported
+ * Some methods support different parameter types and return values, so this is also supported
  * and represented by the "|" character
  *
  * Example: Long.parseLong(String a, int b | String a): long
@@ -233,7 +247,7 @@ const getPainlessConstructorToAutocomplete = (constructors) => {
     // We only care about getting the constructor name for now, so we can access the first one in the array
     const { declaring } = constructors[0];
     // The constructor name is sometimes prefixed by the Java package and needs to be removed
-    const constructorName = declaring.split('.').pop() || declaring;
+    const constructorName = getDisplayName(declaring);
 
     return {
       label: constructorName,
@@ -264,7 +278,7 @@ const createAutocompleteDefinitions = (painlessClasses) => {
       constructors,
     }) => {
       // The name is often prefixed by the Java package (e.g., Java.lang.Math) and needs to be removed
-      const displayName = name.split('.').pop() || name;
+      const displayName = getDisplayName(name);
       const isType = getPrimitives(painlessClasses).includes(name);
 
       const properties = getPainlessClassToAutocomplete({
