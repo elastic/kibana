@@ -22,6 +22,8 @@ import {
   StackMode,
   VerticalAlignment,
   HorizontalAlignment,
+  ElementClickListener,
+  BrushEndListener,
 } from '@elastic/charts';
 import { I18nProvider } from '@kbn/i18n/react';
 import {
@@ -32,6 +34,7 @@ import {
 } from 'src/plugins/expressions/public';
 import { IconType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { RenderMode } from 'src/plugins/expressions';
 import {
   LensMultiTable,
   FormatFactory,
@@ -78,6 +81,7 @@ type XYChartRenderProps = XYChartProps & {
   histogramBarTarget: number;
   onClickValue: (data: LensFilterEvent['data']) => void;
   onSelectRange: (data: LensBrushEvent['data']) => void;
+  renderMode: RenderMode;
 };
 
 export const xyChart: ExpressionFunctionDefinition<
@@ -212,6 +216,7 @@ export const getXyChartRenderer = (dependencies: {
           histogramBarTarget={dependencies.histogramBarTarget}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
+          renderMode={handlers.getMode()}
         />
       </I18nProvider>,
       domNode,
@@ -280,6 +285,7 @@ export function XYChart({
   histogramBarTarget,
   onClickValue,
   onSelectRange,
+  renderMode,
 }: XYChartRenderProps) {
   const { legend, layers, fittingFunction, gridlinesVisibilitySettings, valueLabels } = args;
   const chartTheme = chartsThemeService.useChartsTheme();
@@ -435,6 +441,87 @@ export function XYChart({
 
   const colorAssignments = getColorAssignments(args.layers, data, formatFactory);
 
+  const clickHandler: ElementClickListener = ([[geometry, series]]) => {
+    // for xyChart series is always XYChartSeriesIdentifier and geometry is always type of GeometryValue
+    const xySeries = series as XYChartSeriesIdentifier;
+    const xyGeometry = geometry as GeometryValue;
+
+    const layer = filteredLayers.find((l) =>
+      xySeries.seriesKeys.some((key: string | number) => l.accessors.includes(key.toString()))
+    );
+    if (!layer) {
+      return;
+    }
+
+    const table = data.tables[layer.layerId];
+
+    const points = [
+      {
+        row: table.rows.findIndex((row) => {
+          if (layer.xAccessor) {
+            if (layersAlreadyFormatted[layer.xAccessor]) {
+              // stringify the value to compare with the chart value
+              return xAxisFormatter.convert(row[layer.xAccessor]) === xyGeometry.x;
+            }
+            return row[layer.xAccessor] === xyGeometry.x;
+          }
+        }),
+        column: table.columns.findIndex((col) => col.id === layer.xAccessor),
+        value: xyGeometry.x,
+      },
+    ];
+
+    if (xySeries.seriesKeys.length > 1) {
+      const pointValue = xySeries.seriesKeys[0];
+
+      points.push({
+        row: table.rows.findIndex(
+          (row) => layer.splitAccessor && row[layer.splitAccessor] === pointValue
+        ),
+        column: table.columns.findIndex((col) => col.id === layer.splitAccessor),
+        value: pointValue,
+      });
+    }
+
+    const xAxisFieldName = table.columns.find((el) => el.id === layer.xAccessor)?.meta?.field;
+    const timeFieldName = xDomain && xAxisFieldName;
+
+    const context: LensFilterEvent['data'] = {
+      data: points.map((point) => ({
+        row: point.row,
+        column: point.column,
+        value: point.value,
+        table,
+      })),
+      timeFieldName,
+    };
+    onClickValue(desanitizeFilterContext(context));
+  };
+
+  const brushHandler: BrushEndListener = ({ x }) => {
+    if (!x) {
+      return;
+    }
+    const [min, max] = x;
+    if (!xAxisColumn || !isHistogramViz) {
+      return;
+    }
+
+    const table = data.tables[filteredLayers[0].layerId];
+
+    const xAxisColumnIndex = table.columns.findIndex((el) => el.id === filteredLayers[0].xAccessor);
+
+    const timeFieldName = isTimeViz ? table.columns[xAxisColumnIndex]?.meta?.field : undefined;
+
+    const context: LensBrushEvent['data'] = {
+      range: [min, max],
+      table,
+      column: xAxisColumnIndex,
+      timeFieldName,
+    };
+    onSelectRange(context);
+  };
+
   return (
     <Chart>
       <Settings
@@ -461,89 +548,8 @@ export function XYChart({
         }}
         rotation={shouldRotate ? 90 : 0}
         xDomain={xDomain}
-        onBrushEnd={({ x }) => {
-          if (!x) {
-            return;
-          }
-          const [min, max] = x;
-          if (!xAxisColumn || !isHistogramViz) {
-            return;
-          }
-
-          const table = data.tables[filteredLayers[0].layerId];
-
-          const xAxisColumnIndex = table.columns.findIndex(
-            (el) => el.id === filteredLayers[0].xAccessor
-          );
-
-          const timeFieldName = isTimeViz
-            ? table.columns[xAxisColumnIndex]?.meta?.field
-            : undefined;
-
-          const context: LensBrushEvent['data'] = {
-            range: [min, max],
-            table,
-            column: xAxisColumnIndex,
-            timeFieldName,
-          };
-          onSelectRange(context);
-        }}
-        onElementClick={([[geometry, series]]) => {
-          // for xyChart series is always XYChartSeriesIdentifier and geometry is always type of GeometryValue
-          const xySeries = series as XYChartSeriesIdentifier;
-          const xyGeometry = geometry as GeometryValue;
-
-          const layer = filteredLayers.find((l) =>
-            xySeries.seriesKeys.some((key: string | number) => l.accessors.includes(key.toString()))
-          );
-          if (!layer) {
-            return;
-          }
-
-          const table = data.tables[layer.layerId];
-
-          const points = [
-            {
-              row: table.rows.findIndex((row) => {
-                if (layer.xAccessor) {
-                  if (layersAlreadyFormatted[layer.xAccessor]) {
-                    // stringify the value to compare with the chart value
-                    return xAxisFormatter.convert(row[layer.xAccessor]) === xyGeometry.x;
-                  }
-                  return row[layer.xAccessor] === xyGeometry.x;
-                }
-              }),
-              column: table.columns.findIndex((col) => col.id === layer.xAccessor),
-              value: xyGeometry.x,
-            },
-          ];
-
-          if (xySeries.seriesKeys.length > 1) {
-            const pointValue = xySeries.seriesKeys[0];
-
-            points.push({
-              row: table.rows.findIndex(
-                (row) => layer.splitAccessor && row[layer.splitAccessor] === pointValue
-              ),
-              column: table.columns.findIndex((col) => col.id === layer.splitAccessor),
-              value: pointValue,
-            });
-          }
-
-          const xAxisFieldName = table.columns.find((el) => el.id === layer.xAccessor)?.meta?.field;
-          const timeFieldName = xDomain && xAxisFieldName;
-
-          const context: LensFilterEvent['data'] = {
-            data: points.map((point) => ({
-              row: point.row,
-              column: point.column,
-              value: point.value,
-              table,
-            })),
-            timeFieldName,
-          };
-          onClickValue(desanitizeFilterContext(context));
-        }}
+        onBrushEnd={renderMode !== 'noInteractivity' ? brushHandler : undefined}
+        onElementClick={renderMode !== 'noInteractivity' ? clickHandler : undefined}
       />
 
       <Axis

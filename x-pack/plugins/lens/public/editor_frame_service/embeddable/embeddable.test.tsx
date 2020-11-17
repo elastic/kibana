@@ -262,6 +262,45 @@ describe('embeddable', () => {
     expect(expressionRenderer.mock.calls[0][0].searchSessionId).toBe(input.searchSessionId);
   });
 
+  it('should pass render mode to expression', async () => {
+    const timeRange: TimeRange = { from: 'now-15d', to: 'now' };
+    const query: Query = { language: 'kquery', query: '' };
+    const filters: Filter[] = [{ meta: { alias: 'test', negate: false, disabled: false } }];
+
+    const input = {
+      savedObjectId: '123',
+      timeRange,
+      query,
+      filters,
+      renderMode: 'noInteractivity',
+    } as LensEmbeddableInput;
+
+    const embeddable = new Embeddable(
+      {
+        timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
+        attributeService,
+        expressionRenderer,
+        basePath,
+        indexPatternService: {} as IndexPatternsContract,
+        editable: true,
+        getTrigger,
+        documentToExpression: () =>
+          Promise.resolve({
+            type: 'expression',
+            chain: [
+              { type: 'function', function: 'my', arguments: {} },
+              { type: 'function', function: 'expression', arguments: {} },
+            ],
+          }),
+      },
+      input
+    );
+    await embeddable.initializeSavedVis(input);
+    embeddable.render(mountpoint);
+
+    expect(expressionRenderer.mock.calls[0][0].renderMode).toEqual('noInteractivity');
+  });
+
   it('should merge external context with query and filters of the saved object', async () => {
     const timeRange: TimeRange = { from: 'now-15d', to: 'now' };
     const query: Query = { language: 'kquery', query: 'external filter' };

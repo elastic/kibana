@@ -530,7 +530,7 @@ export interface ExpressionRenderError extends Error {
 // @public (undocumented)
 export class ExpressionRenderHandler {
     // Warning: (ae-forgotten-export) The symbol "ExpressionRenderHandlerParams" needs to be exported by the entry point index.d.ts
-    constructor(element: HTMLElement, { onRenderError }?: Partial<ExpressionRenderHandlerParams>);
+    constructor(element: HTMLElement, { onRenderError, renderMode }?: Partial<ExpressionRenderHandlerParams>);
     // (undocumented)
     destroy: () => void;
     // (undocumented)
@@ -891,6 +891,10 @@ export interface IExpressionLoaderParams {
     //
     // (undocumented)
     onRenderError?: RenderErrorHandlerFnType;
+    // Warning: (ae-forgotten-export) The symbol "RenderMode" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    renderMode?: RenderMode;
     // (undocumented)
     searchContext?: SerializableState_2;
     // (undocumented)
@@ -908,6 +912,8 @@ export interface IInterpreterRenderHandlers {
     done: () => void;
     // (undocumented)
     event: (event: any) => void;
+    // (undocumented)
+    getMode: () => RenderMode;
     // (undocumented)
     onDestroy: (fn: () => void) => void;
     // (undocumented)
