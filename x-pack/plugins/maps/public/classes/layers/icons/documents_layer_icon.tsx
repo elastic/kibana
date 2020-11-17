@@ -6,7 +6,7 @@
 
 import React, { FunctionComponent } from 'react';
 
-export const EsDocumentsLayerIcon: FunctionComponent = () => (
+export const DocumentsLayerIcon: FunctionComponent = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     width="49"
