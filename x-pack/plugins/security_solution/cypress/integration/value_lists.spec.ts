@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { loginAndWaitForPageWithoutDateRange, ROLES } from '../tasks/login';
+import { deleteRoleAndUser, loginAndWaitForPageWithoutDateRange, ROLES } from '../tasks/login';
 import { DETECTIONS_URL } from '../urls/navigation';
 import {
   waitForAlertsPanelToBeLoaded,
@@ -225,6 +225,10 @@ describe('value lists', () => {
     beforeEach(() => {
       loginAndWaitForPageWithoutDateRange(DETECTIONS_URL, ROLES.t1_analyst);
       goToManageAlertsDetectionRules();
+    });
+
+    afterEach(() => {
+      deleteRoleAndUser(ROLES.t1_analyst);
     });
 
     it('Does not allow a t1 analyst user to upload a value list', () => {

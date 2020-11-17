@@ -87,13 +87,15 @@ export const getUrlWithRoute = (role: string, route: string) => {
   return theUrl;
 };
 
-export const postRoleAndUser = (role: string) => {
-  const env = {
-    ELASTICSEARCH_URL: Cypress.env('ELASTICSEARCH_URL'),
-    ELASTICSEARCH_USERNAME: Cypress.env('ELASTICSEARCH_USERNAME'),
-    ELASTICSEARCH_PASSWORD: Cypress.env('ELASTICSEARCH_PASSWORD'),
-    KIBANA_URL: Cypress.env('KIBANA_URL'),
-  };
+export const getCurlScriptEnvVars = () => ({
+  ELASTICSEARCH_URL: Cypress.env('ELASTICSEARCH_URL'),
+  ELASTICSEARCH_USERNAME: Cypress.env('ELASTICSEARCH_USERNAME'),
+  ELASTICSEARCH_PASSWORD: Cypress.env('ELASTICSEARCH_PASSWORD'),
+  KIBANA_URL: Cypress.env('KIBANA_URL'),
+});
+
+export const postRoleAndUser = (role: ROLES) => {
+  const env = getCurlScriptEnvVars();
   const detectionsRoleScriptPath = `./server/lib/detection_engine/scripts/roles_users/${role}/post_detections_role.sh`;
   const detectionsRoleJsonPath = `./server/lib/detection_engine/scripts/roles_users/${role}/detections_role.json`;
   const detectionsUserScriptPath = `./server/lib/detection_engine/scripts/roles_users/${role}/post_detections_user.sh`;
@@ -110,7 +112,17 @@ export const postRoleAndUser = (role: string) => {
   });
 };
 
-export const loginWithRole = async (role: string) => {
+export const deleteRoleAndUser = (role: ROLES) => {
+  const env = getCurlScriptEnvVars();
+  const detectionsUserDeleteScriptPath = `./server/lib/detection_engine/scripts/roles_users/${role}/delete_detections_user.sh`;
+
+  // delete the role
+  cy.exec(`bash ${detectionsUserDeleteScriptPath}`, {
+    env,
+  });
+};
+
+export const loginWithRole = async (role: ROLES) => {
   postRoleAndUser(role);
   const theUrl = Url.format({
     auth: `${role}:changeme`,
@@ -145,7 +157,7 @@ export const loginWithRole = async (role: string) => {
  * To speed the execution of tests, prefer this non-interactive authentication,
  * which is faster than authentication via Kibana's interactive login page.
  */
-export const login = (role?: string) => {
+export const login = (role?: ROLES) => {
   if (role != null) {
     loginWithRole(role);
   } else if (credentialsProvidedByEnvironment()) {
@@ -226,7 +238,7 @@ const loginViaConfig = () => {
  * Authenticates with Kibana, visits the specified `url`, and waits for the
  * Kibana global nav to be displayed before continuing
  */
-export const loginAndWaitForPage = (url: string, role?: string) => {
+export const loginAndWaitForPage = (url: string, role?: ROLES) => {
   login(role);
   cy.viewport('macbook-15');
   cy.visit(
@@ -235,14 +247,14 @@ export const loginAndWaitForPage = (url: string, role?: string) => {
   cy.get('[data-test-subj="headerGlobalNav"]');
 };
 
-export const loginAndWaitForPageWithoutDateRange = (url: string, role?: string) => {
+export const loginAndWaitForPageWithoutDateRange = (url: string, role?: ROLES) => {
   login(role);
   cy.viewport('macbook-15');
   cy.visit(role ? getUrlWithRoute(role, url) : url);
   cy.get('[data-test-subj="headerGlobalNav"]', { timeout: 120000 });
 };
 
-export const loginAndWaitForTimeline = (timelineId: string, role?: string) => {
+export const loginAndWaitForTimeline = (timelineId: string, role?: ROLES) => {
   const route = `/app/security/timelines?timeline=(id:'${timelineId}',isOpen:!t)`;
 
   login(role);
