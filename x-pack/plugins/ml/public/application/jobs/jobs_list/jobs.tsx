@@ -4,11 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, useCallback, useMemo } from 'react';
+import React, { FC } from 'react';
 import { NavigationMenu } from '../../components/navigation_menu';
 // @ts-ignore
 import { JobsListView } from './components/jobs_list_view/index';
-import { useUrlState } from '../../util/url_state';
+import { usePageUrlState } from '../../util/url_state';
+import { ML_PAGES } from '../../../../common/constants/ml_url_generator';
 
 interface JobsPageProps {
   blockRefresh?: boolean;
@@ -33,33 +34,15 @@ export const getDefaultAnomalyDetectionJobsListState = (): AnomalyDetectionJobsL
 });
 
 export const JobsPage: FC<JobsPageProps> = (props) => {
-  const [appState, setAppState] = useUrlState('_a');
-
-  const jobListState: AnomalyDetectionJobsListState = useMemo(() => {
-    return {
-      ...getDefaultAnomalyDetectionJobsListState(),
-      ...(appState ?? {}),
-    };
-  }, [appState]);
-
-  const onJobsViewStateUpdate = useCallback(
-    (update: Partial<AnomalyDetectionJobsListState>) => {
-      setAppState({
-        ...jobListState,
-        ...update,
-      });
-    },
-    [appState, setAppState]
+  const [pageState, setPageState] = usePageUrlState(
+    ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE,
+    getDefaultAnomalyDetectionJobsListState()
   );
 
   return (
     <div data-test-subj="mlPageJobManagement">
       <NavigationMenu tabId="anomaly_detection" />
-      <JobsListView
-        {...props}
-        jobsViewState={jobListState}
-        onJobsViewStateUpdate={onJobsViewStateUpdate}
-      />
+      <JobsListView {...props} jobsViewState={pageState} onJobsViewStateUpdate={setPageState} />
     </div>
   );
 };
