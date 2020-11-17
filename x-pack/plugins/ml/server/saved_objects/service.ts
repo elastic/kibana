@@ -62,14 +62,24 @@ export function jobSavedObjectServiceFactory(
 
   async function _createJob(jobType: JobType, jobId: string, datafeedId?: string) {
     await isMlReady();
+
     const job: JobObject = {
       job_id: jobId,
       datafeed_id: datafeedId ?? null,
       type: jobType,
     };
+
+    const id = savedObjectId(job);
+
+    try {
+      await savedObjectsClient.delete(ML_SAVED_OBJECT_TYPE, id, { force: true });
+    } catch (error) {
+      // the saved object may exist if a previous job with the same ID has been deleted.
+      // if not, this error will be throw which we ignore.
+    }
+
     await savedObjectsClient.create<JobObject>(ML_SAVED_OBJECT_TYPE, job, {
-      id: savedObjectId(job),
-      overwrite: true,
+      id,
     });
   }
 
