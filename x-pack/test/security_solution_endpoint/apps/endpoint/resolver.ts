@@ -287,7 +287,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.hosts.executeQueryAndOpenResolver('event.dataset : endpoint.alerts');
         await (await testSubjects.find('resolver:graph-controls:zoom-out')).click();
         await browser.setWindowSize(2100, 1500);
-        for (let i = 0; i < 2; i++) {
+        for (let i = 0; i < 3; i++) {
           await (await testSubjects.find('resolver:graph-controls:east-button')).click();
         }
         await pageObjects.hosts.runNodeEvents(expectedAlertData);
