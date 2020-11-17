@@ -26,7 +26,7 @@
 /src/plugins/vis_type_vislib/ @elastic/kibana-app
 /src/plugins/vis_type_xy/ @elastic/kibana-app
 /src/plugins/visualize/ @elastic/kibana-app
-/src/plugins/visualizations/ @elastic/kibana-application
+/src/plugins/visualizations/ @elastic/kibana-app
 
 # Application Services
 /examples/bfetch_explorer/ @elastic/kibana-app-arch
@@ -123,8 +123,8 @@
 # ML team owns and maintains the transform plugin despite it living in the Elasticsearch management section.
 /x-pack/plugins/transform/  @elastic/ml-ui
 /x-pack/test/functional/apps/transform/ @elastic/ml-ui
-/x-pack/test/functional/services/transform/ @elastic/ml-ui/
-x-pack/test/api_integration_basic/apis/ml/ @elastic/ml-ui
+/x-pack/test/functional/services/transform/ @elastic/ml-ui
+/x-pack/test/api_integration_basic/apis/ml/ @elastic/ml-ui
 /x-pack/test/functional_basic/apps/ml/ @elastic/ml-ui
 
 /x-pack/test/api_integration_basic/apis/transform/ @elastic/ml-ui
@@ -137,6 +137,7 @@ x-pack/test/api_integration_basic/apis/ml/ @elastic/ml-ui
 /x-pack/test/functional/es_archives/maps/ @elastic/kibana-gis
 /x-pack/test/visual_regression/tests/maps/index.js @elastic/kibana-gis
 #CC# /src/plugins/maps_legacy/ @elastic/kibana-gis
+#CC# /src/plugins/maps_oss/ @elastic/kibana-gis
 #CC# /x-pack/plugins/file_upload @elastic/kibana-gis
 #CC# /x-pack/plugins/maps_legacy_licensing @elastic/kibana-gis
 #CC# /src/plugins/home/server/tutorials @elastic/kibana-gis
@@ -157,7 +158,7 @@ x-pack/test/api_integration_basic/apis/ml/ @elastic/ml-ui
 /packages/kbn-ui-shared-deps/ @elastic/kibana-operations
 /packages/kbn-es-archiver/ @elastic/kibana-operations
 /packages/kbn-utils/ @elastic/kibana-operations
-/src/legacy/server/keystore/ @elastic/kibana-operations
+/src/cli/keystore/ @elastic/kibana-operations
 /src/legacy/server/warnings/ @elastic/kibana-operations
 /.ci/es-snapshots/ @elastic/kibana-operations
 /vars/ @elastic/kibana-operations
@@ -261,6 +262,7 @@ x-pack/plugins/telemetry_collection_xpack/schema/xpack_plugins.json @elastic/kib
 # Elasticsearch UI
 /src/plugins/dev_tools/ @elastic/es-ui
 /src/plugins/console/  @elastic/es-ui
+/src/plugins/es_ui_shared/  @elastic/es-ui
 /x-pack/plugins/cross_cluster_replication/  @elastic/es-ui
 /x-pack/plugins/index_lifecycle_management/  @elastic/es-ui
 /x-pack/plugins/console_extensions/  @elastic/es-ui

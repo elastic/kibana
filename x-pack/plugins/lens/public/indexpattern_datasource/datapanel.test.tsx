@@ -13,7 +13,7 @@ import { NoFieldsCallout } from './no_fields_callout';
 import { act } from 'react-dom/test-utils';
 import { coreMock } from 'src/core/public/mocks';
 import { IndexPatternPrivateState } from './types';
-import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl, shallowWithIntl } from '@kbn/test/jest';
 import { ChangeIndexPattern } from './change_indexpattern';
 import { EuiProgress, EuiLoadingSpinner } from '@elastic/eui';
 import { documentField } from './document_field';

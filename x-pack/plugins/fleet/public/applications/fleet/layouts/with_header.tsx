@@ -12,14 +12,14 @@ const Page = styled(EuiPage)`
   background: ${(props) => props.theme.eui.euiColorEmptyShade};
 `;
 
-interface Props extends HeaderProps {
+export interface WithHeaderLayoutProps extends HeaderProps {
   restrictWidth?: number;
   restrictHeaderWidth?: number;
   'data-test-subj'?: string;
   children?: React.ReactNode;
 }
 
-export const WithHeaderLayout: React.FC<Props> = ({
+export const WithHeaderLayout: React.FC<WithHeaderLayoutProps> = ({
   restrictWidth,
   restrictHeaderWidth,
   children,

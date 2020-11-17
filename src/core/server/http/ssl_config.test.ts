@@ -266,14 +266,19 @@ describe('#sslSchema', () => {
         certificate: '/path/to/certificate',
         enabled: true,
         key: '/path/to/key',
-        supportedProtocols: ['TLSv1', 'TLSv1.1', 'TLSv1.2'],
+        supportedProtocols: ['TLSv1', 'TLSv1.1', 'TLSv1.2', 'TLSv1.3'],
       };
 
       const singleKnownProtocolConfig = sslSchema.validate(singleKnownProtocol);
       expect(singleKnownProtocolConfig.supportedProtocols).toEqual(['TLSv1']);
 
       const allKnownProtocolsConfig = sslSchema.validate(allKnownProtocols);
-      expect(allKnownProtocolsConfig.supportedProtocols).toEqual(['TLSv1', 'TLSv1.1', 'TLSv1.2']);
+      expect(allKnownProtocolsConfig.supportedProtocols).toEqual([
+        'TLSv1',
+        'TLSv1.1',
+        'TLSv1.2',
+        'TLSv1.3',
+      ]);
     });
 
     test('rejects unknown protocols`', () => {
@@ -288,21 +293,23 @@ describe('#sslSchema', () => {
         certificate: '/path/to/certificate',
         enabled: true,
         key: '/path/to/key',
-        supportedProtocols: ['TLSv1', 'TLSv1.1', 'TLSv1.2', 'SOMEv100500'],
+        supportedProtocols: ['TLSv1', 'TLSv1.1', 'TLSv1.2', 'TLSv1.3', 'SOMEv100500'],
       };
 
       expect(() => sslSchema.validate(singleUnknownProtocol)).toThrowErrorMatchingInlineSnapshot(`
 "[supportedProtocols.0]: types that failed validation:
 - [supportedProtocols.0.0]: expected value to equal [TLSv1]
 - [supportedProtocols.0.1]: expected value to equal [TLSv1.1]
-- [supportedProtocols.0.2]: expected value to equal [TLSv1.2]"
+- [supportedProtocols.0.2]: expected value to equal [TLSv1.2]
+- [supportedProtocols.0.3]: expected value to equal [TLSv1.3]"
 `);
       expect(() => sslSchema.validate(allKnownWithOneUnknownProtocols))
         .toThrowErrorMatchingInlineSnapshot(`
-"[supportedProtocols.3]: types that failed validation:
-- [supportedProtocols.3.0]: expected value to equal [TLSv1]
-- [supportedProtocols.3.1]: expected value to equal [TLSv1.1]
-- [supportedProtocols.3.2]: expected value to equal [TLSv1.2]"
+"[supportedProtocols.4]: types that failed validation:
+- [supportedProtocols.4.0]: expected value to equal [TLSv1]
+- [supportedProtocols.4.1]: expected value to equal [TLSv1.1]
+- [supportedProtocols.4.2]: expected value to equal [TLSv1.2]
+- [supportedProtocols.4.3]: expected value to equal [TLSv1.3]"
 `);
     });
   });

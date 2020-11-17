@@ -72,7 +72,7 @@ export const MetricDistributionChart: FC<Props> = ({ width, height, chartData, f
   };
 
   return (
-    <div style={{ width, height }}>
+    <div style={{ width, height }} data-test-subj="mlFieldDataCardMetricDistributionChart">
       <Chart>
         <Settings
           theme={{
