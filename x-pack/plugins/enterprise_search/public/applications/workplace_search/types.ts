@@ -163,9 +163,3 @@ export interface CustomSource {
   name: string;
   id: string;
 }
-
-export type AnyType = string | number | boolean | object | undefined | null;
-
-export interface GenericObject {
-  [key: string]: AnyType | AnyType[];
-}
