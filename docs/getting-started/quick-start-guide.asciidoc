@@ -140,4 +140,4 @@ For more information, refer to <<lens, *Lens*>>.
 
 If you are you ready to add your own data, refer to <<connect-to-elasticsearch,Add data to {kib}>>.
 
-If you want to ingest your data, refer to {ingest-guide}/ingest-management-getting-started.html[Quick start: Get logs and metrics into the Elastic Stack].
+If you want to ingest your data, refer to {ingest-guide}/fleet-quick-start.html[Quick start: Get logs and metrics into the Elastic Stack].
