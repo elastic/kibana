@@ -74,6 +74,7 @@ export interface LegacyShimDependencies {
 
 export interface IBulkUploader {
   getKibanaStats: () => any;
+  stop: () => void;
 }
 
 export interface LegacyRequest {
