@@ -209,9 +209,32 @@ function throwBadControlState(controlState: any) {
   throw new Error('Unknown control state: ' + controlState);
 }
 
+/**
+ * Extracts the version number from a >= 7.11 index
+ * @param indexName A >= v7.11 index name
+ */
 function indexVersion(indexName?: string) {
   return (indexName?.match(/\.kibana_(\d+\.\d+\.\d+)_\d+/) || [])[1];
 }
+
+/**
+ * The current alias e.g. `.kibana`
+ * @param state
+ */
+const currentAlias = (state: InitState) => state.indexPrefix;
+/**
+ * The version alias e.g. `.kibana_7.11.0`
+ * @param state
+ */
+const versionAlias = (state: InitState) => state.indexPrefix + '_' + state.kibanaVersion;
+/**
+ * The name of the concrete legacy index e.g. `.kibana` for version < 6.5 or
+ * `.kibana_task_manager` for version < 7.4
+ * @param state
+ */
+const legacyIndex = (state: InitState) => state.indexPrefix;
+
+const versionIndex = (state: InitState) => `${state.indexPrefix}_${state.kibanaVersion}_001`;
 
 /**
  * Merge the _meta mappings of an index with the given target mappings.
@@ -318,15 +341,12 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
 
   if (stateP.controlState === 'INIT') {
     const res = resW as ResponseType<typeof stateP.controlState>;
-    const CURRENT_ALIAS = stateP.indexPrefix;
-    const VERSION_ALIAS = stateP.indexPrefix + '_' + stateP.kibanaVersion;
-    const LEGACY_INDEX = stateP.indexPrefix;
 
     if (Either.isRight(res)) {
       const indices = res.right;
       const aliases = Object.keys(indices).reduce((acc, index) => {
         Object.keys(indices[index].aliases || {}).forEach((alias) => {
-          // TODO handle multiple .kibana aliases pointing to the same index?
+          // TODO throw if multiple .kibana aliases point to the same index?
           acc[alias] = index;
         });
         return acc;
@@ -336,9 +356,9 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         // `.kibana` and the version specific aliases both exists and
         // are pointing to the same index. This version's migration has already
         // been completed.
-        aliases[CURRENT_ALIAS] != null &&
-        aliases[VERSION_ALIAS] != null &&
-        aliases[CURRENT_ALIAS] === aliases[VERSION_ALIAS]
+        aliases[currentAlias(stateP)] != null &&
+        aliases[versionAlias(stateP)] != null &&
+        aliases[currentAlias(stateP)] === aliases[versionAlias(stateP)]
       ) {
         stateP = {
           ...stateP,
@@ -352,32 +372,34 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           target: `${stateP.indexPrefix}_${stateP.kibanaVersion}_001`,
           targetMappings: mergeMappings(
             stateP.targetMappings,
-            indices[aliases[CURRENT_ALIAS]].mappings
+            indices[aliases[currentAlias(stateP)]].mappings
           ),
           versionIndexReadyActions: Option.none,
         };
       } else if (
         // `.kibana` is pointing to an index that belongs to a later
         // version of Kibana .e.g. a 7.11.0 node found `.kibana_7.12.0_001`
-        valid(indexVersion(aliases[CURRENT_ALIAS])) &&
-        gt(indexVersion(aliases[CURRENT_ALIAS]), stateP.kibanaVersion)
+        valid(indexVersion(aliases[currentAlias(stateP)])) &&
+        gt(indexVersion(aliases[currentAlias(stateP)]), stateP.kibanaVersion)
       ) {
         stateP = {
           ...stateP,
           controlState: 'FATAL',
           error: new Error(
-            `The ${CURRENT_ALIAS} alias is pointing to a newer version of Kibana: v${indexVersion(
-              aliases[CURRENT_ALIAS]
+            `The ${currentAlias(
+              stateP
+            )} alias is pointing to a newer version of Kibana: v${indexVersion(
+              aliases[currentAlias(stateP)]
             )}`
           ),
         };
       } else if (
         // If the `.kibana` alias exists
-        aliases[CURRENT_ALIAS] != null
+        aliases[currentAlias(stateP)] != null
       ) {
         // The source index is the index the `.kibana` alias points to
-        const source = aliases[CURRENT_ALIAS];
-        const target = `${stateP.indexPrefix}_${stateP.kibanaVersion}_001`;
+        const source = aliases[currentAlias(stateP)];
+        const target = versionIndex(stateP);
         stateP = {
           ...stateP,
           controlState: 'SET_SOURCE_WRITE_BLOCK',
@@ -385,12 +407,12 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           target,
           targetMappings: mergeMappings(stateP.targetMappings, indices[source].mappings),
           versionIndexReadyActions: Option.some([
-            { remove: { index: source, alias: CURRENT_ALIAS, must_exist: true } },
-            { add: { index: target, alias: CURRENT_ALIAS } },
-            { add: { index: target, alias: VERSION_ALIAS } },
+            { remove: { index: source, alias: currentAlias(stateP), must_exist: true } },
+            { add: { index: target, alias: currentAlias(stateP) } },
+            { add: { index: target, alias: versionAlias(stateP) } },
           ]),
         };
-      } else if (indices[LEGACY_INDEX] != null) {
+      } else if (indices[legacyIndex(stateP)] != null) {
         // Migrate from a legacy index
 
         // If the user used default index names we can narrow the version
@@ -408,31 +430,34 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           legacyVersion = 'pre' + stateP.kibanaVersion;
         }
 
-        const target = `${stateP.indexPrefix}_${stateP.kibanaVersion}_001`;
+        const target = versionIndex(stateP);
         stateP = {
           ...stateP,
           controlState: 'SET_LEGACY_WRITE_BLOCK',
           source: Option.some(`${stateP.indexPrefix}_${legacyVersion}_001`) as Option.Some<string>,
           target,
-          targetMappings: mergeMappings(stateP.targetMappings, indices[LEGACY_INDEX].mappings),
+          targetMappings: mergeMappings(
+            stateP.targetMappings,
+            indices[legacyIndex(stateP)].mappings
+          ),
           legacy: `.kibana`,
           versionIndexReadyActions: Option.some([
-            { add: { index: target, alias: CURRENT_ALIAS } },
-            { add: { index: target, alias: VERSION_ALIAS } },
+            { add: { index: target, alias: currentAlias(stateP) } },
+            { add: { index: target, alias: versionAlias(stateP) } },
           ]),
         };
       } else {
         // This cluster doesn't have an existing Saved Object index, create a
         // new version specific index.
-        const target = `${stateP.indexPrefix}_${stateP.kibanaVersion}_001`;
+        const target = versionIndex(stateP);
         stateP = {
           ...stateP,
           controlState: 'CREATE_NEW_TARGET',
           source: Option.none as Option.None,
           target,
           versionIndexReadyActions: Option.some([
-            { add: { index: target, alias: CURRENT_ALIAS } },
-            { add: { index: target, alias: VERSION_ALIAS } },
+            { add: { index: target, alias: currentAlias(stateP) } },
+            { add: { index: target, alias: versionAlias(stateP) } },
           ]),
         };
       }
@@ -592,10 +617,7 @@ export const nextActionMap = (
 ) => {
   return {
     INIT: (state: InitState) =>
-      Actions.fetchIndices(client, [
-        state.indexPrefix,
-        state.indexPrefix + '_' + state.kibanaVersion,
-      ]),
+      Actions.fetchIndices(client, [currentAlias(state), versionAlias(state)]),
     SET_SOURCE_WRITE_BLOCK: (state: SetSourceWriteBlockState) =>
       Actions.setIndexWriteBlock(client, state.source.value),
     CREATE_NEW_TARGET: (state: CreateNewTargetState) =>
