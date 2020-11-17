@@ -9,6 +9,7 @@ import { Adapters } from 'src/plugins/inspector/common';
 import { ApiResponse } from '@elastic/elasticsearch';
 import { Assign } from '@kbn/utility-types';
 import { BehaviorSubject } from 'rxjs';
+import { BfetchServerSetup } from 'src/plugins/bfetch/server';
 import { ConfigDeprecationProvider } from '@kbn/config';
 import { CoreSetup } from 'src/core/server';
 import { CoreSetup as CoreSetup_2 } from 'kibana/server';
@@ -936,7 +937,7 @@ export function parseInterval(interval: string): moment.Duration | null;
 export class Plugin implements Plugin_2<PluginSetup, PluginStart, DataPluginSetupDependencies, DataPluginStartDependencies> {
     constructor(initializerContext: PluginInitializerContext_2<ConfigSchema>);
     // (undocumented)
-    setup(core: CoreSetup<DataPluginStartDependencies, PluginStart>, { expressions, usageCollection }: DataPluginSetupDependencies): {
+    setup(core: CoreSetup<DataPluginStartDependencies, PluginStart>, { bfetch, expressions, usageCollection }: DataPluginSetupDependencies): {
         __enhance: (enhancements: DataEnhancements) => void;
         search: ISearchSetup;
         fieldFormats: {
@@ -1234,7 +1235,7 @@ export function usageProvider(core: CoreSetup_2): SearchUsage;
 // src/plugins/data/server/index.ts:284:1 - (ae-forgotten-export) The symbol "propFilter" needs to be exported by the entry point index.d.ts
 // src/plugins/data/server/index.ts:287:1 - (ae-forgotten-export) The symbol "toAbsoluteDates" needs to be exported by the entry point index.d.ts
 // src/plugins/data/server/index_patterns/index_patterns_service.ts:58:14 - (ae-forgotten-export) The symbol "IndexPatternsService" needs to be exported by the entry point index.d.ts
-// src/plugins/data/server/plugin.ts:88:66 - (ae-forgotten-export) The symbol "DataEnhancements" needs to be exported by the entry point index.d.ts
+// src/plugins/data/server/plugin.ts:90:74 - (ae-forgotten-export) The symbol "DataEnhancements" needs to be exported by the entry point index.d.ts
 // src/plugins/data/server/search/types.ts:104:5 - (ae-forgotten-export) The symbol "ISearchStartSearchSource" needs to be exported by the entry point index.d.ts
 
 // (No @packageDocumentation comment for this package)

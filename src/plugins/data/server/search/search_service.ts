@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { BehaviorSubject, Observable, of } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { pick } from 'lodash';
 import {
   CoreSetup,

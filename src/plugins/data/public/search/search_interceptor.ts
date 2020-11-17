@@ -71,7 +71,7 @@ export class SearchInterceptor {
    * @internal
    */
   protected application!: CoreStart['application'];
-  protected batchedFetch?: BatchedFunc<
+  private batchedFetch?: BatchedFunc<
     { request: IKibanaSearchRequest; strategy?: string },
     IKibanaSearchResponse
   >;
