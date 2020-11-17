@@ -11,9 +11,9 @@ import { getAvailableOperationsByMetadata } from '../operations';
 import { IndexPatternPrivateState } from '../types';
 
 export interface OperationSupportMatrix {
-  operationByField: Partial<Record<string, OperationType[]>>;
-  operationWithoutField: OperationType[];
-  fieldByOperation: Partial<Record<OperationType, string[]>>;
+  operationByField: Partial<Record<string, Set<OperationType>>>;
+  operationWithoutField: Set<OperationType>;
+  fieldByOperation: Partial<Record<OperationType, Set<string>>>;
 }
 
 type Props = Pick<
@@ -31,30 +31,30 @@ export const getOperationSupportMatrix = (props: Props): OperationSupportMatrix 
     currentIndexPattern
   ).filter((operation) => props.filterOperations(operation.operationMetaData));
 
-  const supportedOperationsByField: Partial<Record<string, OperationType[]>> = {};
-  const supportedOperationsWithoutField: OperationType[] = [];
-  const supportedFieldsByOperation: Partial<Record<OperationType, string[]>> = {};
+  const supportedOperationsByField: Partial<Record<string, Set<OperationType>>> = {};
+  const supportedOperationsWithoutField: Set<OperationType> = new Set();
+  const supportedFieldsByOperation: Partial<Record<OperationType, Set<string>>> = {};
 
   filteredOperationsByMetadata.forEach(({ operations }) => {
     operations.forEach((operation) => {
       if (operation.type === 'field') {
-        supportedOperationsByField[operation.field] = [
-          ...(supportedOperationsByField[operation.field] ?? []),
-          operation.operationType,
-        ];
+        if (!supportedOperationsByField[operation.field]) {
+          supportedOperationsByField[operation.field] = new Set();
+        }
+        supportedOperationsByField[operation.field]?.add(operation.operationType);
 
-        supportedFieldsByOperation[operation.operationType] = [
-          ...(supportedFieldsByOperation[operation.operationType] ?? []),
-          operation.field,
-        ];
+        if (!supportedFieldsByOperation[operation.operationType]) {
+          supportedFieldsByOperation[operation.operationType] = new Set();
+        }
+        supportedFieldsByOperation[operation.operationType]?.add(operation.field);
       } else if (operation.type === 'none') {
-        supportedOperationsWithoutField.push(operation.operationType);
+        supportedOperationsWithoutField.add(operation.operationType);
       }
     });
   });
   return {
-    operationByField: _.mapValues(supportedOperationsByField, _.uniq),
-    operationWithoutField: _.uniq(supportedOperationsWithoutField),
-    fieldByOperation: _.mapValues(supportedFieldsByOperation, _.uniq),
+    operationByField: supportedOperationsByField,
+    operationWithoutField: supportedOperationsWithoutField,
+    fieldByOperation: supportedFieldsByOperation,
   };
 };

@@ -5,14 +5,15 @@
  */
 
 import { of, merge, timer, throwError } from 'rxjs';
-import { takeWhile, switchMap, expand, mergeMap, tap } from 'rxjs/operators';
+import { map, takeWhile, switchMap, expand, mergeMap, tap } from 'rxjs/operators';
+import { ApiResponse } from '@elastic/elasticsearch';
 
 import {
-  AbortError,
   doSearch,
   IKibanaSearchResponse,
   isErrorResponse,
 } from '../../../../../../src/plugins/data/common';
+import { AbortError } from '../../../../../../src/plugins/kibana_utils/common';
 import type { IKibanaSearchRequest } from '../../../../../../src/plugins/data/common';
 import type { IAsyncSearchOptions } from '../../../common/search/types';
 
@@ -34,6 +35,15 @@ export const doPartialSearch = <SearchResponse = any>(
     expand(() => timer(pollInterval).pipe(switchMap(() => partialSearchMethod(requestId)))),
     takeWhile((response) => !isCompleteResponse(response), true)
   );
+
+export const normalizeEqlResponse = <SearchResponse extends ApiResponse = ApiResponse>() =>
+  map<SearchResponse, SearchResponse>((eqlResponse) => ({
+    ...eqlResponse,
+    body: {
+      ...eqlResponse.body,
+      ...eqlResponse,
+    },
+  }));
 
 export const throwOnEsError = () =>
   mergeMap((r: IKibanaSearchResponse) =>
