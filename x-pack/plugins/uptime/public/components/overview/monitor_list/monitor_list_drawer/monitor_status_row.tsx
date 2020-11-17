@@ -37,7 +37,7 @@ export const MonitorStatusRow = ({ locationNames, status }: MonitorStatusRowProp
   return (
     <span>
       <EuiBadge color={color}>{status}</EuiBadge>
-      <EuiSpacer size="s" />
+      <EuiSpacer size="xs" />
       {locations}
       <EuiSpacer size="xs" />
     </span>

@@ -118,7 +118,7 @@ export const getLocationStatus = (summaryPings: Ping[], status: string) => {
       statusMessage: i18n.translate(
         'xpack.uptime.monitorList.statusColumn.locStatusMessage.multiple',
         {
-          defaultMessage: 'in {noLoc} Locations',
+          defaultMessage: 'in {noLoc} locations',
           values: { noLoc: statusMessage },
         }
       ),
@@ -128,7 +128,7 @@ export const getLocationStatus = (summaryPings: Ping[], status: string) => {
 
   return {
     statusMessage: i18n.translate('xpack.uptime.monitorList.statusColumn.locStatusMessage', {
-      defaultMessage: 'in {noLoc} Location',
+      defaultMessage: 'in {noLoc} location',
       values: { noLoc: statusMessage },
     }),
     locTooltip: upsMessage + downMessage,
@@ -176,7 +176,7 @@ export const MonitorListStatusColumn = ({
         <EuiToolTip
           content={
             <EuiText color="ghost" size="xs">
-              {timestamp.toLocaleString()}
+              {timestamp.toLocaleString()},
             </EuiText>
           }
         >
