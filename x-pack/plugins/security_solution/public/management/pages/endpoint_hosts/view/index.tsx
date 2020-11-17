@@ -364,10 +364,13 @@ export const EndpointList = () => {
                   dataTestSubj="policyStatusCellLink"
                 />
               </EuiHealth>
-              {item.policy_versions &&
-                (policy.version < item.policy_versions.agent.applied ||
-                  policy.version < item.policy_versions.agent.configured ||
-                  policy.endpoint_policy_version < item.policy_versions.endpoint) && (
+              {item.policy_info &&
+                ((policy.id === item.policy_info.endpoint.id && // package policy wasn't changed
+                  item.policy_info.agent.configured.id === item.policy_info.agent.applied.id && // agent policy wasn't changed
+                  // all revisions match up
+                  policy.version >= item.policy_info.agent.applied.revision &&
+                  policy.version >= item.policy_info.agent.configured.revision &&
+                  policy.endpoint_policy_version >= item.policy_info.endpoint.revision) || (
                   <EuiFlexItem grow={false}>
                     <EuiText color="subdued" size="xs" className="eui-textNoWrap">
                       <EuiIcon size="m" type="alert" color="warning" />
@@ -377,7 +380,7 @@ export const EndpointList = () => {
                       />
                     </EuiText>
                   </EuiFlexItem>
-                )}
+                ))}
             </>
           );
         },

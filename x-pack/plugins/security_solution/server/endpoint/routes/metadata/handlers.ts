@@ -15,7 +15,7 @@ import {
   MetadataQueryStrategyVersions,
 } from '../../../../common/endpoint/types';
 import { getESQueryHostMetadataByID, kibanaRequestToMetadataListESQuery } from './query_builders';
-import { Agent, AgentStatus } from '../../../../../fleet/common/types/models';
+import { Agent, AgentStatus, PackagePolicy } from '../../../../../fleet/common/types/models';
 import { EndpointAppContext, HostListQueryResult } from '../../types';
 import { GetMetadataListRequestSchema, GetMetadataRequestSchema } from './index';
 import { findAllUnenrolledAgentIds } from './support/unenroll';
@@ -283,34 +283,40 @@ async function enrichHostMetadata(
     }
   }
 
-  let policyVersions: HostInfo['policy_versions'];
+  let policyInfo: HostInfo['policy_info'];
   try {
-    const [agent, endpointPolicy] = await Promise.all([
-      metadataRequestContext.endpointAppContextService
-        ?.getAgentService()
-        ?.getAgent(
-          metadataRequestContext.requestHandlerContext.core.savedObjects.client,
-          elasticAgentId
-        ),
-      metadataRequestContext.endpointAppContextService
-        .getPackagePolicyService()
-        ?.get(
-          metadataRequestContext.requestHandlerContext.core.savedObjects.client,
-          hostMetadata.Endpoint.policy.applied.id
-        ),
-    ]);
+    const agent = await metadataRequestContext.endpointAppContextService
+      ?.getAgentService()
+      ?.getAgent(
+        metadataRequestContext.requestHandlerContext.core.savedObjects.client,
+        elasticAgentId
+      );
     const agentPolicy = await metadataRequestContext.endpointAppContextService
       .getAgentPolicyService()
       ?.get(
         metadataRequestContext.requestHandlerContext.core.savedObjects.client,
-        agent?.policy_id!
+        agent?.policy_id!,
+        true
       );
-    policyVersions = {
+    const endpointPolicy = (agentPolicy?.package_policies as PackagePolicy[]).find(
+      (x: PackagePolicy) => x.package?.name === 'endpoint'
+    );
+
+    policyInfo = {
       agent: {
-        applied: agent?.policy_revision || 0,
-        configured: agentPolicy?.revision || 0,
+        applied: {
+          revision: agent?.policy_revision || 0,
+          id: agent?.policy_id || '',
+        },
+        configured: {
+          revision: agentPolicy?.revision || 0,
+          id: agentPolicy?.id || '',
+        },
       },
-      endpoint: endpointPolicy?.revision || 0,
+      endpoint: {
+        revision: endpointPolicy?.revision || 0,
+        id: endpointPolicy?.id || '',
+      },
     };
   } catch (e) {
     // this is a non-vital enrichment of expected policy revisions.
@@ -322,7 +328,7 @@ async function enrichHostMetadata(
   return {
     metadata: hostMetadata,
     host_status: hostStatus,
-    policy_versions: policyVersions,
+    policy_info: policyInfo,
     query_strategy_version: metadataQueryStrategyVersion,
   };
 }

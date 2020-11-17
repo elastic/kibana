@@ -520,15 +520,20 @@ export enum MetadataQueryStrategyVersions {
   VERSION_2 = 'v2',
 }
 
+export type PolicyInfo = Immutable<{
+  revision: number;
+  id: string;
+}>;
+
 export type HostInfo = Immutable<{
   metadata: HostMetadata;
   host_status: HostStatus;
-  policy_versions?: {
+  policy_info?: {
     agent: {
-      configured: number; // current agentPolicy version
-      applied: number; // policy that the agent is currently reporting
+      configured: PolicyInfo; // as set in kibana
+      applied: PolicyInfo; // last reported running in agent (may lag behind configured)
     };
-    endpoint: number; // current intended 'endpoint' package policy
+    endpoint: PolicyInfo; // current intended 'endpoint' package policy
   };
   /* the version of the query strategy */
   query_strategy_version: MetadataQueryStrategyVersions;
