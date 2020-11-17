@@ -405,16 +405,10 @@ export const renderTime = composeSelectors(
   (dataState: DataState) => dataState.renderTime
 );
 
-export const visibleNodes: (
-  state: ResolverState
-) => (time: number | undefined) => Set<string> | undefined = createSelector(
+export const visibleNodes: (state: ResolverState) => (time: number) => Set<string> = createSelector(
   visibleNodesAndEdgeLines,
   function (visibleNodesAndEdgeLinesAtTime) {
-    return defaultMemoize((time: number | undefined) => {
-      if (time === undefined) {
-        return undefined;
-      }
-
+    return defaultMemoize((time: number) => {
       const { processNodePositions } = visibleNodesAndEdgeLinesAtTime(time);
 
       const nodes: Set<string> = new Set();

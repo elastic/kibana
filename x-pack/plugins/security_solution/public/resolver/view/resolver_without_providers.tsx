@@ -25,6 +25,7 @@ import { SideEffectContext } from './side_effect_context';
 import { ResolverProps, ResolverState } from '../types';
 import { PanelRouter } from './panels';
 import { useColors } from './use_colors';
+import { useViewMoving } from './use_drag';
 
 /**
  * The highest level connected Resolver component. Needs a `Provider` in its ancestry to work.
@@ -46,10 +47,10 @@ export const ResolverWithoutProviders = React.memo(
 
     const { timestamp } = useContext(SideEffectContext);
 
+    // TODO: need to handle dispatching the changed view to handle the case where we just loaded
+
     // use this for the entire render in order to keep things in sync
     const timeAtRender = timestamp();
-
-    useRenderTime(timeAtRender);
 
     const {
       processNodePositions,
@@ -59,11 +60,15 @@ export const ResolverWithoutProviders = React.memo(
     );
     const terminatedProcesses = useSelector(selectors.terminatedProcesses);
     const { projectionMatrix, ref: cameraRef, onMouseDown } = useCamera();
+    const { isViewMoving, scrollWindowRef } = useViewMoving();
 
     const ref = useCallback(
       (element: HTMLDivElement | null) => {
         // Supply `useCamera` with the ref
         cameraRef(element);
+
+        // Supply `useViewMoving` with the ref
+        scrollWindowRef(element);
 
         // If a ref is being forwarded, populate that as well.
         if (typeof refToForward === 'function') {
@@ -72,7 +77,7 @@ export const ResolverWithoutProviders = React.memo(
           refToForward.current = element;
         }
       },
-      [cameraRef, refToForward]
+      [cameraRef, refToForward, scrollWindowRef]
     );
     const isLoading = useSelector(selectors.isTreeLoading);
     const hasError = useSelector(selectors.hadErrorLoadingTree);
@@ -118,8 +123,10 @@ export const ResolverWithoutProviders = React.memo(
             )}
             {[...processNodePositions].map(([processEvent, position]) => {
               const processEntityId = entityIDSafeVersion(processEvent);
+              // TODO: pass isViewMoving to ProcessEventDot
               return (
                 <ProcessEventDot
+                  isViewMoving={isViewMoving}
                   key={processEntityId}
                   position={position}
                   projectionMatrix={projectionMatrix}

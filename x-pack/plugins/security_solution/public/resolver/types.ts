@@ -240,9 +240,21 @@ export interface NodeEventsInCategoryState {
   error?: boolean;
 }
 
-export type IDToNodeEvents = Map<string, SafeResolverEvent[]>;
+export enum NodeDataRequestStatus {
+  Requested,
+  Received,
+  Error,
+}
+
+export interface NodeData {
+  events: SafeResolverEvent[];
+  status: NodeDataRequestStatus;
+}
+
+export type IDToNodeEvents = Map<string, NodeData>;
 
 export interface NodeDataState {
+  // expand the value of the map so that it contains whether we have a response and the current state of the request
   nodeData: IDToNodeEvents;
 
   error?: boolean;
@@ -327,6 +339,11 @@ export interface DataState {
    * TODO:
    */
   readonly nodeDataState?: NodeDataState;
+
+  /**
+   * TODO: Should this be collapsed into the NodeDataState?
+   */
+  readonly nodesLoading: Set<string>;
 
   readonly renderTime?: number;
 }

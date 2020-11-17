@@ -102,11 +102,24 @@ interface ServerReturnedNodeEventsInCategory {
   };
 }
 
+/**
+ * TODO:
+ */
 interface ServerReturnedNodeData {
   readonly type: 'serverReturnedNodeData';
   readonly payload: {
     renderTime: number;
     nodeData: Map<string, SafeResolverEvent[]>;
+  };
+}
+
+/**
+ * TODO:
+ */
+interface ServerRequestingNodeData {
+  readonly type: 'serverRequestingNodeData';
+  readonly payload: {
+    requestedNodes: Set<string>;
   };
 }
 
@@ -127,10 +140,10 @@ interface ServerReturnedCurrentRelatedEventData {
   readonly payload: SafeResolverEvent;
 }
 
-interface AppReceivedNewDragTime {
-  readonly type: 'appReceivedNewDragTime';
+interface AppReceivedNewViewPosition {
+  readonly type: 'appReceivedNewViewPosition';
   readonly payload: {
-    timestamp: number;
+    time: number;
   };
 }
 
@@ -148,4 +161,4 @@ export type DataAction =
   | AppAbortedResolverDataRequest
   | ServerReturnedNodeData
   | ServerFailedToReturnNodeData
-  | AppReceivedNewDragTime;
+  | AppReceivedNewViewPosition;

@@ -58,8 +58,8 @@ export function RelatedEventsFetcher(
             category: eventCategory,
             indexPatterns: ['logs-*'],
             timerange: {
-              from: new Date(2020, 11, 1),
-              to: new Date(2020, 11, 30),
+              from: new Date(2020, 10, 1),
+              to: new Date(2020, 10, 30),
             },
           });
         }

@@ -7,14 +7,14 @@
 import { useEffect } from 'react';
 import { useResolverDispatch } from './use_resolver_dispatch';
 
-export function useRenderTime(timestamp: number) {
+export function useRenderTime(time: number) {
   const dispatch = useResolverDispatch();
   useEffect(() => {
     dispatch({
-      type: 'appReceivedNewDragTime',
+      type: 'appReceivedNewViewPosition',
       payload: {
-        timestamp,
+        time,
       },
     });
-  }, [dispatch, timestamp]);
+  }, [dispatch, time]);
 }

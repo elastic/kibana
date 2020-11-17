@@ -218,10 +218,10 @@ export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialS
     }
 
     return state;
-  } else if (action.type === 'appReceivedNewDragTime') {
+  } else if (action.type === 'appReceivedNewViewPosition') {
     return {
       ...state,
-      renderTime: action.payload.timestamp,
+      renderTime: action.payload.time,
     };
   } else if (action.type === 'appRequestedCurrentRelatedEventData') {
     const nextState: DataState = {

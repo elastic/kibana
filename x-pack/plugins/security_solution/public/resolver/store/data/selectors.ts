@@ -17,6 +17,7 @@ import {
   VisibleEntites,
   TreeFetcherParameters,
   IsometricTaxiLayout,
+  IDToNodeEvents,
 } from '../../types';
 import { isGraphableProcess, isTerminatedProcess } from '../../models/process_event';
 import * as indexedProcessTreeModel from '../../models/indexed_process_tree';
@@ -115,8 +116,15 @@ export const isProcessTerminated = createSelector(terminatedProcesses, function 
 /**
  * TODO:
  */
-export const nodeData = (state: DataState): Map<string, SafeResolverEvent[]> | undefined => {
+export const nodeData = (state: DataState): IDToNodeEvents | undefined => {
   return state.nodeDataState?.nodeData;
+};
+
+/**
+ * TODO:
+ */
+export const nodesLoading = (state: DataState): Set<string> | undefined => {
+  return state.nodesLoading;
 };
 
 /**
@@ -550,6 +558,7 @@ export const nodesAndEdgelines: (
   /**
    * Memoized for performance and object reference equality.
    */
+  // TODO: passing the isEqual check for bounding box so caching would be better
   return defaultMemoize((boundingBox: AABB) => {
     const {
       minimum: [minX, minY],

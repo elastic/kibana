@@ -100,7 +100,7 @@ export function dataAccessLayerFactory(
     /**
      * TODO:
      */
-    eventsNodeData({
+    async eventsNodeData({
       ids,
       timerange,
       indexPatterns,
@@ -109,24 +109,28 @@ export function dataAccessLayerFactory(
       timerange: Timerange;
       indexPatterns: string[];
     }): Promise<SafeResolverEvent[]> {
-      return context.services.http.post('/api/endpoint/resolver/events', {
-        query: { limit: 5000 },
-        body: JSON.stringify({
-          timerange: {
-            from: timerange.from.toISOString(),
-            to: timerange.to.toISOString(),
-          },
-          indexPatterns,
-          filter: JSON.stringify({
-            bool: {
-              filter: [
-                { terms: { 'process.entity_id': ids } },
-                { term: { 'event.category': 'process' } },
-              ],
+      const response: ResolverPaginatedEvents = await context.services.http.post(
+        '/api/endpoint/resolver/events',
+        {
+          query: { limit: 5000 },
+          body: JSON.stringify({
+            timerange: {
+              from: timerange.from.toISOString(),
+              to: timerange.to.toISOString(),
             },
+            indexPatterns,
+            filter: JSON.stringify({
+              bool: {
+                filter: [
+                  { terms: { 'process.entity_id': ids } },
+                  { term: { 'event.category': 'process' } },
+                ],
+              },
+            }),
           }),
-        }),
-      });
+        }
+      );
+      return response.events;
     },
 
     /**
