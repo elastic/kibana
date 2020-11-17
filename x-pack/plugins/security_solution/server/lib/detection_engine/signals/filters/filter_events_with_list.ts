@@ -4,72 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { get } from 'lodash/fp';
-import { Logger } from 'src/core/server';
 
-import { ListClient } from '../../../../../lists/server';
-import { SignalSearchResponse } from './types';
-import { BuildRuleMessage } from './rule_messages';
 import {
   EntryList,
   ExceptionListItemSchema,
   entriesList,
-  Type,
-} from '../../../../../lists/common/schemas';
-import { hasLargeValueList } from '../../../../common/detection_engine/utils';
-import { SearchTypes } from '../../../../common/detection_engine/types';
-
-interface FilterEventsAgainstList {
-  listClient: ListClient;
-  exceptionsList: ExceptionListItemSchema[];
-  logger: Logger;
-  eventSearchResult: SignalSearchResponse;
-  buildRuleMessage: BuildRuleMessage;
-}
-
-export const createSetToFilterAgainst = async ({
-  events,
-  field,
-  listId,
-  listType,
-  listClient,
-  logger,
-  buildRuleMessage,
-}: {
-  events: SignalSearchResponse['hits']['hits'];
-  field: string;
-  listId: string;
-  listType: Type;
-  listClient: ListClient;
-  logger: Logger;
-  buildRuleMessage: BuildRuleMessage;
-}): Promise<Set<SearchTypes>> => {
-  // narrow unioned type to be single
-  const isStringableType = (val: SearchTypes) =>
-    ['string', 'number', 'boolean'].includes(typeof val);
-  const valuesFromSearchResultField = events.reduce((acc, searchResultItem) => {
-    const valueField = get(field, searchResultItem._source);
-    if (valueField != null && isStringableType(valueField)) {
-      acc.add(valueField.toString());
-    }
-    return acc;
-  }, new Set<string>());
-  logger.debug(
-    `number of distinct values from ${field}: ${[...valuesFromSearchResultField].length}`
-  );
-
-  // matched will contain any list items that matched with the
-  // values passed in from the Set.
-  const matchedListItems = await listClient.getListItemByValues({
-    listId,
-    type: listType,
-    value: [...valuesFromSearchResultField],
-  });
-
-  logger.debug(`number of matched items from list with id ${listId}: ${matchedListItems.length}`);
-  // create a set of list values that were a hit - easier to work with
-  const matchedListItemsSet = new Set<SearchTypes>(matchedListItems.map((item) => item.value));
-  return matchedListItemsSet;
-};
+} from '../../../../../../lists/common/schemas';
+import { hasLargeValueList } from '../../../../../common/detection_engine/utils';
+import { SignalSearchResponse } from '../types';
+import { createSetToFilterAgainst } from './create_set_to_filter_against';
+import { FilterEventsAgainstList } from './types';
 
 export const filterEventsAgainstList = async ({
   listClient,
@@ -139,7 +83,6 @@ export const filterEventsAgainstList = async ({
               listType: type,
               listClient,
               logger,
-              buildRuleMessage,
             });
 
             return Promise.resolve({ field, operator, matchedSet });

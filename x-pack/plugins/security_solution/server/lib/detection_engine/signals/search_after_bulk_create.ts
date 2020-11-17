@@ -6,7 +6,7 @@
 
 import { singleSearchAfter } from './single_search_after';
 import { singleBulkCreate } from './single_bulk_create';
-import { filterEventsAgainstList } from './filter_events_with_list';
+import { filterEventsAgainstList } from './filters/filter_events_with_list';
 import { sendAlertTelemetryEvents } from './send_telemetry_events';
 import {
   createSearchAfterReturnType,

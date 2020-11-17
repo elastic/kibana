@@ -6,22 +6,25 @@
 
 import uuid from 'uuid';
 import { filterEventsAgainstList } from './filter_events_with_list';
-import { buildRuleMessageFactory } from './rule_messages';
-import { mockLogger, repeatedSearchResultsWithSortId } from './__mocks__/es_results';
+import { buildRuleMessageFactory } from '../rule_messages';
+import { mockLogger, repeatedSearchResultsWithSortId } from '../__mocks__/es_results';
 
-import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
-import { getListItemResponseMock } from '../../../../../lists/common/schemas/response/list_item_schema.mock';
-import { listMock } from '../../../../../lists/server/mocks';
+import { getExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
+import { getListItemResponseMock } from '../../../../../../lists/common/schemas/response/list_item_schema.mock';
+import { listMock } from '../../../../../../lists/server/mocks';
 
 const someGuids = Array.from({ length: 13 }).map((x) => uuid.v4());
+
 const buildRuleMessage = buildRuleMessageFactory({
   id: 'fake id',
   ruleId: 'fake rule id',
   index: 'fakeindex',
   name: 'fake name',
 });
+
 describe('filterEventsAgainstList', () => {
   let listClient = listMock.getListClient();
+
   beforeEach(() => {
     jest.clearAllMocks();
     listClient = listMock.getListClient();

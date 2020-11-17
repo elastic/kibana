@@ -18,6 +18,7 @@ import {
 } from './operators';
 import { GetGenericComboBoxPropsReturn, OperatorOption } from './types';
 import * as i18n from './translations';
+import { ListSchema, Type } from '../../../lists_plugin_deps';
 
 /**
  * Returns the appropriate operators given a field type
@@ -138,3 +139,36 @@ export function getGenericComboBoxProps<T>({
     selectedComboOptions: newSelectedComboOptions,
   };
 }
+
+/**
+ * Given an array of lists and optionally a field this will return all
+ * the lists that match against the field based on the types from the field
+ * @param lists The lists to match against the field
+ * @param field The field to check against the list to see if they are compatible
+ */
+export const filterFieldToList = (lists: ListSchema[], field?: IFieldType) => {
+  if (field != null) {
+    const { esTypes = [] } = field;
+    return lists.filter(({ type }) => esTypes.some((esType) => typeMatch(type, esType)));
+  } else {
+    return [];
+  }
+};
+
+/**
+ * Given an input list type and a string based ES type this will match
+ * if they're exact or if they are compatible with a range
+ * @param type The type to match against the esType
+ * @param esType The ES type to match with
+ */
+export const typeMatch = (type: Type, esType: string) => {
+  return (
+    type === esType ||
+    (type === 'ip_range' && esType === 'ip') ||
+    (type === 'date_range' && esType === 'date') ||
+    (type === 'double_range' && esType === 'double') ||
+    (type === 'float_range' && esType === 'float') ||
+    (type === 'integer_range' && esType === 'integer') ||
+    (type === 'long_range' && esType === 'long')
+  );
+};
