@@ -7,13 +7,13 @@
 import { useParams } from 'react-router-dom';
 import { useFetcher } from './useFetcher';
 import { useUrlParams } from './useUrlParams';
+import { useTransactionType } from './use_transaction_type';
 
 export function useTransactionBreakdown() {
   const { serviceName } = useParams<{ serviceName?: string }>();
-  const {
-    urlParams: { start, end, transactionName, transactionType },
-    uiFilters,
-  } = useUrlParams();
+  const { urlParams, uiFilters } = useUrlParams();
+  const { start, end, transactionName } = urlParams;
+  const transactionType = useTransactionType();
 
   const { data = { timeseries: undefined }, error, status } = useFetcher(
     (callApmApi) => {

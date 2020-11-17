@@ -50,10 +50,24 @@ export const RUM_AGENT_NAMES: AgentName[] = [
   'opentelemetry/webjs',
 ];
 
-export function getDefaultTransactionTypeForAgentName(agentName?: string) {
+function getDefaultTransactionTypeForAgentName(agentName?: string) {
   return isRumAgentName(agentName)
     ? TRANSACTION_PAGE_LOAD
     : TRANSACTION_REQUEST;
+}
+
+export function getFirstTransactionType(
+  transactionTypes: string[],
+  agentName?: string
+) {
+  const defaultTransactionType = getDefaultTransactionTypeForAgentName(
+    agentName
+  );
+
+  return (
+    transactionTypes.find((type) => type === defaultTransactionType) ??
+    transactionTypes[0]
+  );
 }
 
 export function isRumAgentName(
