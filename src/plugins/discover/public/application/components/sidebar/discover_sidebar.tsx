@@ -39,7 +39,7 @@ import { IndexPatternAttributes } from '../../../../../data/common';
 import { SavedObject } from '../../../../../../core/types';
 import { FIELDS_LIMIT_SETTING } from '../../../../common';
 import { groupFields } from './lib/group_fields';
-import { IndexPatternField, IndexPattern, UI_SETTINGS } from '../../../../../data/public';
+import { IndexPatternField, IndexPattern } from '../../../../../data/public';
 import { getDetails } from './lib/get_details';
 import { FieldFilterState, getDefaultFieldFilter, setFieldFilterProp } from './lib/field_filter';
 import { getIndexPatternFieldList } from './lib/get_index_pattern_field_list';
@@ -144,7 +144,6 @@ export function DiscoverSidebar({
   );
 
   const popularLimit = services.uiSettings.get(FIELDS_LIMIT_SETTING);
-  const useShortDots = services.uiSettings.get(UI_SETTINGS.SHORT_DOTS_ENABLE);
 
   const {
     selected: selectedFields,
@@ -280,7 +279,6 @@ export function DiscoverSidebar({
                                     onAddFilter={onAddFilter}
                                     getDetails={getDetailsByField}
                                     selected={true}
-                                    useShortDots={useShortDots}
                                     mobile={mobile}
                                     trackUiMetric={trackUiMetric}
                                   />
@@ -341,7 +339,6 @@ export function DiscoverSidebar({
                                     onRemoveField={onRemoveField}
                                     onAddFilter={onAddFilter}
                                     getDetails={getDetailsByField}
-                                    useShortDots={useShortDots}
                                     mobile={mobile}
                                     trackUiMetric={trackUiMetric}
                                   />
@@ -370,7 +367,6 @@ export function DiscoverSidebar({
                                 onRemoveField={onRemoveField}
                                 onAddFilter={onAddFilter}
                                 getDetails={getDetailsByField}
-                                useShortDots={useShortDots}
                                 mobile={mobile}
                                 trackUiMetric={trackUiMetric}
                               />

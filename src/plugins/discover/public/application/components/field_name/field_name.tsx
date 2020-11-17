@@ -18,17 +18,16 @@
  */
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
-
 import { FieldIcon, FieldIconProps } from '../../../../../kibana_react/public';
-import { shortenDottedString } from '../../helpers';
 import { getFieldTypeName } from './field_type_name';
+import { FieldMapping } from '../../doc_views/doc_views_types';
 
 // properties fieldType and fieldName are provided in kbn_doc_view
 // this should be changed when both components are deangularized
 interface Props {
   fieldName: string;
   fieldType: string;
-  useShortDots?: boolean;
+  fieldMapping?: FieldMapping;
   fieldIconProps?: Omit<FieldIconProps, 'type'>;
   scripted?: boolean;
   className?: string;
@@ -36,14 +35,16 @@ interface Props {
 
 export function FieldName({
   fieldName,
+  fieldMapping,
   fieldType,
-  useShortDots,
   fieldIconProps,
   className,
   scripted = false,
 }: Props) {
   const typeName = getFieldTypeName(fieldType);
-  const displayName = useShortDots ? shortenDottedString(fieldName) : fieldName;
+  const displayName =
+    fieldMapping && fieldMapping.displayName ? fieldMapping.displayName : fieldName;
+  const tooltip = displayName !== fieldName ? `${fieldName} (${displayName})` : fieldName;
 
   return (
     <EuiFlexGroup className={className} alignItems="center" gutterSize="s" responsive={false}>
@@ -53,7 +54,7 @@ export function FieldName({
       <EuiFlexItem className="eui-textTruncate">
         <EuiToolTip
           position="top"
-          content={displayName}
+          content={tooltip}
           delay="long"
           anchorClassName="eui-textTruncate"
         >
