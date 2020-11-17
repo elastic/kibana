@@ -11,7 +11,6 @@ import { TestProviders } from '../../../../common/mock/test_providers';
 import { useMountAppended } from '../../../../common/utils/use_mount_appended';
 
 import { DataProviders } from '.';
-import { DataProvider } from './data_provider';
 import { mockDataProviders } from './mock/mock_data_providers';
 import { ManageGlobalTimeline, getTimelineDefaults } from '../../manage_timeline';
 import { FilterManager } from '../../../../../../../../src/plugins/data/public/query/filter_manager';
@@ -36,12 +35,7 @@ describe('DataProviders', () => {
       const wrapper = shallow(
         <TestProviders>
           <ManageGlobalTimeline manageTimelineForTesting={manageTimelineForTesting}>
-            <DataProviders
-              browserFields={{}}
-              data-test-subj="dataProviders-container"
-              dataProviders={mockDataProviders}
-              timelineId="foo"
-            />
+            <DataProviders data-test-subj="dataProviders-container" timelineId="foo" />
           </ManageGlobalTimeline>
         </TestProviders>
       );
@@ -49,11 +43,9 @@ describe('DataProviders', () => {
     });
 
     test('it should render a placeholder when there are zero data providers', () => {
-      const dataProviders: DataProvider[] = [];
-
       const wrapper = mount(
         <TestProviders>
-          <DataProviders browserFields={{}} timelineId="foo" dataProviders={dataProviders} />
+          <DataProviders timelineId="foo" />
         </TestProviders>
       );
 
@@ -63,7 +55,7 @@ describe('DataProviders', () => {
     test('it renders the data providers', () => {
       const wrapper = mount(
         <TestProviders>
-          <DataProviders browserFields={{}} timelineId="foo" dataProviders={mockDataProviders} />
+          <DataProviders timelineId="foo" />
         </TestProviders>
       );
 

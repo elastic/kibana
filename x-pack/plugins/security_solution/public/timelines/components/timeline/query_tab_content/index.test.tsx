@@ -9,12 +9,7 @@ import React from 'react';
 import useResizeObserver from 'use-resize-observer/polyfilled';
 
 import { Direction } from '../../../../graphql/types';
-import {
-  defaultHeaders,
-  mockTimelineData,
-  mockIndexPattern,
-  mockIndexNames,
-} from '../../../../common/mock';
+import { defaultHeaders, mockTimelineData } from '../../../../common/mock';
 import '../../../../common/mock/match_media';
 import { TestProviders } from '../../../../common/mock/test_providers';
 
@@ -76,8 +71,6 @@ describe('Timeline', () => {
   const startDate = '2018-03-23T18:49:23.132Z';
   const endDate = '2018-03-24T03:33:52.253Z';
 
-  const indexPattern = mockIndexPattern;
-
   const mount = useMountAppended();
 
   beforeEach(() => {
@@ -105,8 +98,6 @@ describe('Timeline', () => {
       itemsPerPageOptions: [5, 10, 20],
       kqlMode: 'search' as TimelineQueryTabContentComponentProps['kqlMode'],
       kqlQueryExpression: '',
-      loadingSourcerer: false,
-      onClose: jest.fn(),
       show: true,
       showCallOutUnauthorizedMsg: false,
       sort,
@@ -163,7 +154,7 @@ describe('Timeline', () => {
     test('it does NOT render the timeline table when the source is loading', () => {
       const wrapper = mount(
         <TestProviders>
-          <TimelineQueryTabContentComponent {...props} loadingSourcerer={true} />
+          <TimelineQueryTabContentComponent {...props} />
         </TestProviders>
       );
 

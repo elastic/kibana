@@ -24,11 +24,9 @@ describe.skip('FlyoutBottomBar', () => {
   });
 
   test('it renders the button when show is true', () => {
-    const onOpen = jest.fn();
-
     const wrapper = mount(
       <TestProviders>
-        <FlyoutBottomBar dataProviders={[]} onOpen={onOpen} show={true} timelineId="test" />
+        <FlyoutBottomBar show={true} timelineId="test" />
       </TestProviders>
     );
 
@@ -36,11 +34,9 @@ describe.skip('FlyoutBottomBar', () => {
   });
 
   test('it renders the expected button text', () => {
-    const onOpen = jest.fn();
-
     const wrapper = mount(
       <TestProviders>
-        <FlyoutBottomBar dataProviders={[]} onOpen={onOpen} show={true} timelineId="test" />
+        <FlyoutBottomBar show={true} timelineId="test" />
       </TestProviders>
     );
 
@@ -50,11 +46,9 @@ describe.skip('FlyoutBottomBar', () => {
   });
 
   test('it renders the data providers drop target area', () => {
-    const onOpen = jest.fn();
-
     const wrapper = mount(
       <TestProviders>
-        <FlyoutBottomBar dataProviders={[]} onOpen={onOpen} show={true} timelineId="test" />
+        <FlyoutBottomBar show={true} timelineId="test" />
       </TestProviders>
     );
 
@@ -62,29 +56,12 @@ describe.skip('FlyoutBottomBar', () => {
   });
 
   test('it does NOT render the button when show is false', () => {
-    const onOpen = jest.fn();
-
     const wrapper = mount(
       <TestProviders>
-        <FlyoutBottomBar dataProviders={[]} onOpen={onOpen} show={false} timelineId="test" />
+        <FlyoutBottomBar show={false} timelineId="test" />
       </TestProviders>
     );
 
     expect(wrapper.find('[data-test-subj="flyout-button-not-ready-to-drop"]').exists()).toBe(false);
-  });
-
-  test('it invokes `onOpen` when clicked', () => {
-    const onOpen = jest.fn();
-
-    const wrapper = mount(
-      <TestProviders>
-        <FlyoutBottomBar dataProviders={[]} onOpen={onOpen} show={true} timelineId="test" />
-      </TestProviders>
-    );
-
-    wrapper.find('[data-test-subj="flyout-button-not-ready-to-drop"]').first().simulate('click');
-    wrapper.update();
-
-    expect(onOpen).toBeCalled();
   });
 });

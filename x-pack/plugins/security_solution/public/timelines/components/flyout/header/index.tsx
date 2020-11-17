@@ -101,6 +101,11 @@ const StyledTimelineHeader = styled(EuiFlexGroup)`
   flex: 0;
 `;
 
+const RowFlexItem = styled(EuiFlexItem)`
+  flex-direction: row;
+  align-items: center;
+`;
+
 const FlyoutHeaderComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }) => {
   const getTimeline = timelineSelectors.getTimelineByIdSelector();
 
@@ -111,37 +116,19 @@ const FlyoutHeaderComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }) => {
   return (
     <StyledTimelineHeader alignItems="center" gutterSize="m">
       <EuiFlexItem>
-        <EuiFlexGroup data-test-subj="properties-left" gutterSize="s">
-          <EuiFlexItem>
-            <EuiFlexGroup direction="column" gutterSize="s">
-              <EuiFlexItem>
-                <EuiFlexGroup direction="row" alignItems="center">
-                  <EuiFlexItem grow={false}>
-                    <Name timelineId={timelineId} />
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <SaveTimelineButton timelineId={timelineId} />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-
-              <EuiFlexItem>
-                <EuiFlexGroup direction="row" alignItems="center">
-                  <EuiFlexItem grow={false}>
-                    <Description timelineId={timelineId} />
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <SaveTimelineButton timelineId={timelineId} />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            <EuiFlexGroup>
-              <EuiFlexItem>{/* KPIs PLACEHOLDER */}</EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
+        <EuiFlexGroup data-test-subj="properties-left" direction="column" gutterSize="s">
+          <RowFlexItem>
+            <Name timelineId={timelineId} />
+            <SaveTimelineButton timelineId={timelineId} />
+          </RowFlexItem>
+          <RowFlexItem>
+            <Description timelineId={timelineId} />
+            <SaveTimelineButton timelineId={timelineId} />
+          </RowFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
+
+      <EuiFlexItem grow={1}>{/* KPIs PLACEHOLDER */}</EuiFlexItem>
 
       <EuiFlexItem grow={false}>
         <EuiFlexGroup>
