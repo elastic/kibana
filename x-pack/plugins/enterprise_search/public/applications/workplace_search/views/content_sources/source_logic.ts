@@ -53,22 +53,22 @@ export interface SourceActions {
   removeContentSource(
     sourceId: string,
     successCallback: () => void
-  ): { sourceId: string; successCallback() };
+  ): { sourceId: string; successCallback(): void };
   createContentSource(
     serviceType: string,
     successCallback: () => void,
     errorCallback?: () => void
-  ): { serviceType: string; successCallback(); errorCallback?() };
+  ): { serviceType: string; successCallback(): void; errorCallback?(): void };
   saveSourceConfig(
     isUpdating: boolean,
     successCallback?: () => void
-  ): { isUpdating: boolean; successCallback?() };
+  ): { isUpdating: boolean; successCallback?(): void };
   initializeSource(sourceId: string, history: object): { sourceId: string; history: object };
   getSourceConfigData(serviceType: string): { serviceType: string };
   getSourceConnectData(
     serviceType: string,
     successCallback: (oauthUrl: string) => string
-  ): { serviceType: string; successCallback(oauthUrl: string) };
+  ): { serviceType: string; successCallback(oauthUrl: string): void };
   getSourceReConnectData(serviceType: string): { serviceType: string };
   getPreContentSourceConfigData(preContentSourceId: string): { preContentSourceId: string };
   setButtonNotLoading(): void;
