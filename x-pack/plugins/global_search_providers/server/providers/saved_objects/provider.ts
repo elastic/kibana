@@ -6,14 +6,15 @@
 
 import { from, combineLatest, of } from 'rxjs';
 import { map, takeUntil, first } from 'rxjs/operators';
+import { SavedObjectsFindOptionsReference } from 'src/core/server';
 import { GlobalSearchResultProvider } from '../../../../global_search/server';
 import { mapToResults } from './map_object_to_result';
 
 export const createSavedObjectsResultProvider = (): GlobalSearchResultProvider => {
   return {
     id: 'savedObjects',
-    find: ({ term, filters }, { aborted$, maxResults, preference }, { core }) => {
-      if (!term) {
+    find: ({ term, types, tags }, { aborted$, maxResults, preference }, { core }) => {
+      if (!term && !types && !tags) {
         return of([]);
       }
 
@@ -24,17 +25,22 @@ export const createSavedObjectsResultProvider = (): GlobalSearchResultProvider =
 
       const searchableTypes = typeRegistry
         .getVisibleTypes()
-        .filter(filters.types ? (type) => filters.types!.includes(type.name) : () => true)
+        .filter(types ? (type) => types!.includes(type.name) : () => true)
         .filter((type) => type.management?.defaultSearchField && type.management?.getInAppUrl);
 
       const searchFields = uniq(
         searchableTypes.map((type) => type.management!.defaultSearchField!)
       );
 
+      const references: SavedObjectsFindOptionsReference[] | undefined = tags
+        ? tags.map((tagId) => ({ type: 'tag', id: tagId }))
+        : undefined;
+
       const responsePromise = client.find({
         page: 1,
         perPage: maxResults,
         search: term ? `${term}*` : undefined,
+        ...(references ? { hasReference: references } : {}),
         preference,
         searchFields,
         type: searchableTypes.map((type) => type.name),

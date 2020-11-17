@@ -17,6 +17,7 @@ import {
   GlobalSearchProviderFindOptions,
   GlobalSearchProviderResult,
   GlobalSearchProviderFindParams,
+  GlobalSearchFindParams,
 } from '../common/types';
 import { SearchServiceSetup, SearchServiceStart } from './services';
 
@@ -32,7 +33,10 @@ export interface RouteHandlerGlobalSearchContext {
   /**
    * See {@link SearchServiceStart.find | the find API}
    */
-  find(term: string, options: GlobalSearchFindOptions): Observable<GlobalSearchBatchedResults>;
+  find(
+    params: GlobalSearchFindParams,
+    options: GlobalSearchFindOptions
+  ): Observable<GlobalSearchBatchedResults>;
 }
 
 /**

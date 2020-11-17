@@ -25,7 +25,12 @@ import useDebounce from 'react-use/lib/useDebounce';
 import useEvent from 'react-use/lib/useEvent';
 import useMountedState from 'react-use/lib/useMountedState';
 import { Subscription } from 'rxjs';
-import { GlobalSearchPluginStart, GlobalSearchResult } from '../../../global_search/public';
+import {
+  GlobalSearchPluginStart,
+  GlobalSearchResult,
+  GlobalSearchFindParams,
+} from '../../../global_search/public';
+import { parseSearchParams } from '../search_syntax';
 
 interface Props {
   globalSearch: GlobalSearchPluginStart['find'];
@@ -122,7 +127,15 @@ export function SearchBar({
       if (searchValue.length !== 0) {
         trackUiMetric(METRIC_TYPE.COUNT, 'search_request');
       }
-      searchSubscription.current = globalSearch(searchValue, {}).subscribe({
+
+      const rawParams = parseSearchParams(searchValue);
+      const searchParams: GlobalSearchFindParams = {
+        term: rawParams.term,
+        types: rawParams.filters.types,
+        tags: rawParams.filters.tags, // TODO: use savedObjectTagging API to retrieve ids from names.
+      };
+
+      searchSubscription.current = globalSearch(searchParams, {}).subscribe({
         next: ({ results }) => {
           if (searchValue.length > 0) {
             arr = [...results, ...arr].sort(sortByScore);

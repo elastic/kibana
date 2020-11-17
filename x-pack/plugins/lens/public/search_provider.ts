@@ -26,8 +26,8 @@ export const getSearchProvider: (
   uiCapabilities: Promise<ApplicationStart['capabilities']>
 ) => GlobalSearchResultProvider = (uiCapabilities) => ({
   id: 'lens',
-  find: ({ term = '', filters }) => {
-    if (filters.types && !filters.types.includes('application')) {
+  find: ({ term = '', types }) => {
+    if (types && !types.includes('application')) {
       return of([]);
     }
     return from(

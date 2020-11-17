@@ -116,7 +116,7 @@ describe('savedObjectsResultProvider', () => {
   });
 
   it('calls `savedObjectClient.find` with the correct parameters', async () => {
-    await provider.find('term', defaultOption, context).toPromise();
+    await provider.find({ term: 'term' }, defaultOption, context).toPromise();
 
     expect(context.core.savedObjects.client.find).toHaveBeenCalledTimes(1);
     expect(context.core.savedObjects.client.find).toHaveBeenCalledWith({
@@ -129,8 +129,42 @@ describe('savedObjectsResultProvider', () => {
     });
   });
 
-  it('does not call `savedObjectClient.find` if `term` is empty', async () => {
-    const results = await provider.find('', defaultOption, context).pipe(toArray()).toPromise();
+  it('filters searched types depending on the `types` parameter', async () => {
+    await provider.find({ term: 'term', types: ['typeA'] }, defaultOption, context).toPromise();
+
+    expect(context.core.savedObjects.client.find).toHaveBeenCalledTimes(1);
+    expect(context.core.savedObjects.client.find).toHaveBeenCalledWith({
+      page: 1,
+      perPage: defaultOption.maxResults,
+      search: 'term*',
+      preference: 'pref',
+      searchFields: ['title'],
+      type: ['typeA'],
+    });
+  });
+
+  it('calls `savedObjectClient.find` with the correct references when the `tags` option is set', async () => {
+    await provider
+      .find({ term: 'term', tags: ['tag-id-1', 'tag-id-2'] }, defaultOption, context)
+      .toPromise();
+
+    expect(context.core.savedObjects.client.find).toHaveBeenCalledTimes(1);
+    expect(context.core.savedObjects.client.find).toHaveBeenCalledWith({
+      page: 1,
+      perPage: defaultOption.maxResults,
+      search: 'term*',
+      preference: 'pref',
+      searchFields: ['title', 'description'],
+      hasReference: [
+        { type: 'tag', id: 'tag-id-1' },
+        { type: 'tag', id: 'tag-id-2' },
+      ],
+      type: ['typeA', 'typeB'],
+    });
+  });
+
+  it('does not call `savedObjectClient.find` if all params are empty', async () => {
+    const results = await provider.find({}, defaultOption, context).pipe(toArray()).toPromise();
 
     expect(context.core.savedObjects.client.find).not.toHaveBeenCalled();
     expect(results).toEqual([[]]);
@@ -144,7 +178,7 @@ describe('savedObjectsResultProvider', () => {
       ])
     );
 
-    const results = await provider.find('term', defaultOption, context).toPromise();
+    const results = await provider.find({ term: 'term' }, defaultOption, context).toPromise();
     expect(results).toEqual([
       {
         id: 'resultA',
@@ -172,7 +206,7 @@ describe('savedObjectsResultProvider', () => {
       );
 
       const resultObs = provider.find(
-        'term',
+        { term: 'term' },
         { ...defaultOption, aborted$: hot<undefined>('-(a|)', { a: undefined }) },
         context
       );

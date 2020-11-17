@@ -100,7 +100,7 @@ describe('SearchBar', () => {
     update();
 
     expect(searchService.find).toHaveBeenCalledTimes(1);
-    expect(searchService.find).toHaveBeenCalledWith('', {});
+    expect(searchService.find).toHaveBeenCalledWith({}, {});
     expect(getDisplayedOptionsTitle()).toMatchSnapshot();
 
     await simulateTypeChar('d');
@@ -108,7 +108,7 @@ describe('SearchBar', () => {
 
     expect(getDisplayedOptionsTitle()).toMatchSnapshot();
     expect(searchService.find).toHaveBeenCalledTimes(2);
-    expect(searchService.find).toHaveBeenCalledWith('d', {});
+    expect(searchService.find).toHaveBeenCalledWith({ term: 'd' }, {});
   });
 
   it('supports keyboard shortcuts', () => {

@@ -9,13 +9,16 @@ import { map, takeUntil } from 'rxjs/operators';
 import { duration } from 'moment';
 import { i18n } from '@kbn/i18n';
 import { HttpStart } from 'src/core/public';
-import { GlobalSearchProviderResult, GlobalSearchBatchedResults } from '../../common/types';
+import {
+  GlobalSearchFindParams,
+  GlobalSearchProviderResult,
+  GlobalSearchBatchedResults,
+} from '../../common/types';
 import { GlobalSearchFindError } from '../../common/errors';
 import { takeInArray } from '../../common/operators';
 import { defaultMaxProviderResults } from '../../common/constants';
 import { processProviderResult } from '../../common/process_result';
 import { ILicenseChecker } from '../../common/license_checker';
-import { parseSearchParams } from '../../common/search_syntax';
 import { GlobalSearchResultProvider } from '../types';
 import { GlobalSearchClientConfigType } from '../config';
 import { GlobalSearchFindOptions } from './types';
@@ -53,7 +56,7 @@ export interface SearchServiceStart {
    *
    * @example
    * ```ts
-   * startDeps.globalSearch.find('some term').subscribe({
+   * startDeps.globalSearch.find({term: 'some term'}).subscribe({
    *  next: ({ results }) => {
    *   addNewResultsToList(results);
    *  },
@@ -68,7 +71,10 @@ export interface SearchServiceStart {
    * Emissions from the resulting observable will only contains **new** results. It is the consumer's
    * responsibility to aggregate the emission and sort the results if required.
    */
-  find(term: string, options: GlobalSearchFindOptions): Observable<GlobalSearchBatchedResults>;
+  find(
+    params: GlobalSearchFindParams,
+    options: GlobalSearchFindOptions
+  ): Observable<GlobalSearchBatchedResults>;
 }
 
 interface SetupDeps {
@@ -111,11 +117,11 @@ export class SearchService {
     this.licenseChecker = licenseChecker;
 
     return {
-      find: (term, options) => this.performFind(term, options),
+      find: (params, options) => this.performFind(params, options),
     };
   }
 
-  private performFind(term: string, options: GlobalSearchFindOptions) {
+  private performFind(params: GlobalSearchFindParams, options: GlobalSearchFindOptions) {
     const licenseState = this.licenseChecker!.getState();
     if (!licenseState.valid) {
       return throwError(
@@ -143,15 +149,13 @@ export class SearchService {
     const processResult = (result: GlobalSearchProviderResult) =>
       processProviderResult(result, this.http!.basePath);
 
-    const serverResults$ = fetchServerResults(this.http!, term, {
+    const serverResults$ = fetchServerResults(this.http!, params, {
       preference,
       aborted$,
     });
 
-    const searchParams = parseSearchParams(term);
-
     const providersResults$ = [...this.providers.values()].map((provider) =>
-      provider.find(searchParams, providerOptions).pipe(
+      provider.find(params, providerOptions).pipe(
         takeInArray(this.maxProviderResults),
         takeUntil(aborted$),
         map((results) => results.map((r) => processResult(r)))

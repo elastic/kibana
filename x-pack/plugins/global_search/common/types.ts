@@ -7,12 +7,6 @@
 import { Observable } from 'rxjs';
 import { Serializable } from 'src/core/types';
 
-export {
-  FilterValues,
-  GlobalSearchProviderFindParams,
-  FilterValueType,
-} from './search_syntax/types';
-
 /**
  * Options provided to {@link GlobalSearchResultProvider | a result provider}'s `find` method.
  */
@@ -93,3 +87,28 @@ export interface GlobalSearchBatchedResults {
    */
   results: GlobalSearchResult[];
 }
+
+/**
+ * Search parameters for the {@link GlobalSearchPluginStart.find | `find` API}
+ *
+ * @public
+ */
+export interface GlobalSearchFindParams {
+  /**
+   * The term to search for. Can be undefined if searching by filters.
+   */
+  term?: string;
+  /**
+   * The types of results to search for.
+   */
+  types?: string[];
+  /**
+   * The tag ids to filter search by.
+   */
+  tags?: string[];
+}
+
+/**
+ * @public
+ */
+export type GlobalSearchProviderFindParams = GlobalSearchFindParams;

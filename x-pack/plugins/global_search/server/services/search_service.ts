@@ -8,12 +8,15 @@ import { Observable, timer, merge, throwError } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
 import { KibanaRequest, CoreStart, IBasePath } from 'src/core/server';
-import { GlobalSearchProviderResult, GlobalSearchBatchedResults } from '../../common/types';
+import {
+  GlobalSearchProviderResult,
+  GlobalSearchBatchedResults,
+  GlobalSearchFindParams,
+} from '../../common/types';
 import { GlobalSearchFindError } from '../../common/errors';
 import { takeInArray } from '../../common/operators';
 import { defaultMaxProviderResults } from '../../common/constants';
 import { ILicenseChecker } from '../../common/license_checker';
-import { parseSearchParams } from '../../common/search_syntax';
 import { processProviderResult } from '../../common/process_result';
 import { GlobalSearchConfigType } from '../config';
 import { getContextFactory, GlobalSearchContextFactory } from './context';
@@ -46,7 +49,7 @@ export interface SearchServiceStart {
    *
    * @example
    * ```ts
-   * startDeps.globalSearch.find('some term').subscribe({
+   * startDeps.globalSearch.find({ term: 'some term' }).subscribe({
    *  next: ({ results }) => {
    *   addNewResultsToList(results);
    *  },
@@ -64,7 +67,7 @@ export interface SearchServiceStart {
    * from the server-side `find` API.
    */
   find(
-    term: string,
+    params: GlobalSearchFindParams,
     options: GlobalSearchFindOptions,
     request: KibanaRequest
   ): Observable<GlobalSearchBatchedResults>;
@@ -115,11 +118,15 @@ export class SearchService {
     this.licenseChecker = licenseChecker;
     this.contextFactory = getContextFactory(core);
     return {
-      find: (term, options, request) => this.performFind(term, options, request),
+      find: (params, options, request) => this.performFind(params, options, request),
     };
   }
 
-  private performFind(term: string, options: GlobalSearchFindOptions, request: KibanaRequest) {
+  private performFind(
+    params: GlobalSearchFindParams,
+    options: GlobalSearchFindOptions,
+    request: KibanaRequest
+  ) {
     const licenseState = this.licenseChecker!.getState();
     if (!licenseState.valid) {
       return throwError(
@@ -137,7 +144,6 @@ export class SearchService {
 
     const timeout$ = timer(this.config!.search_timeout.asMilliseconds()).pipe(map(mapToUndefined));
     const aborted$ = options.aborted$ ? merge(options.aborted$, timeout$) : timeout$;
-    const findParams = parseSearchParams(term);
     const findOptions = {
       ...options,
       preference: options.preference ?? 'default',
@@ -149,7 +155,7 @@ export class SearchService {
       processProviderResult(result, basePath);
 
     const providersResults$ = [...this.providers.values()].map((provider) =>
-      provider.find(findParams, findOptions, context).pipe(
+      provider.find(params, findOptions, context).pipe(
         takeInArray(this.maxProviderResults),
         takeUntil(aborted$),
         map((results) => results.map((r) => processResult(r)))
