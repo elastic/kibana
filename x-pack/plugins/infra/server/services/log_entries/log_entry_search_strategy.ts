@@ -6,7 +6,7 @@
 
 import * as rt from 'io-ts';
 import { concat, defer, of } from 'rxjs';
-import { concatMap, filter, map, shareReplay } from 'rxjs/operators';
+import { concatMap, filter, map, shareReplay, take } from 'rxjs/operators';
 import type {
   IEsSearchRequest,
   IKibanaSearchRequest,
@@ -77,6 +77,7 @@ export const logEntrySearchStrategyProvider = ({
         );
 
         return concat(recoveredRequest$, initialRequest$).pipe(
+          take(1),
           concatMap((esRequest) => esSearchStrategy.search(esRequest, options, dependencies)),
           map((esResponse) => ({
             ...esResponse,

@@ -33,6 +33,7 @@ export const createAsyncRequestRTs = <StateCodec extends rt.Mixed, ParamsCodec e
   });
 
   const asyncSubmitRequestRT = rt.type({
+    id: rt.undefined,
     params: paramsCodec,
   });
 
