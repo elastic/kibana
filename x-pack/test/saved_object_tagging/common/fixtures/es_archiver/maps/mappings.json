@@ -200,6 +200,28 @@
               }
             }
           },
+          "map": {
+            "properties": {
+              "description": {
+                "type": "text"
+              },
+              "layerListJSON": {
+                "type": "text"
+              },
+              "mapStateJSON": {
+                "type": "text"
+              },
+              "title": {
+                "type": "text"
+              },
+              "uiStateJSON": {
+                "type": "text"
+              },
+              "version": {
+                "type": "integer"
+              }
+            }
+          },
           "migrationVersion": {
             "dynamic": "true",
             "properties": {
