@@ -24,7 +24,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 export function SplitTooltip() {
   return (
     <FormattedMessage
-      id="visTypeXy.splitChartWarning.content"
+      id="visTypeXy.splitTitle.tooltip"
       defaultMessage={`Split chart aggregation is not supported with the new charts library. Please disable the "Charts library" advanced setting to enable split chart aggregation.`}
     />
   );

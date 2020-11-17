@@ -195,8 +195,10 @@ export const getHistogramVisTypeDefinition = (
         aggFilter: ['!geohash_grid', '!geotile_grid', '!filter'],
         // TODO: Remove when split chart aggs are supported
         // https://github.com/elastic/kibana/issues/82496
-        disabled: true,
-        tooltip: <SplitTooltip />,
+        ...(showElasticChartsOptions && {
+          disabled: true,
+          tooltip: <SplitTooltip />,
+        }),
       },
     ]),
   },
