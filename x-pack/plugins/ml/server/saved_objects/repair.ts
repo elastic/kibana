@@ -7,7 +7,11 @@
 import Boom from '@hapi/boom';
 import { IScopedClusterClient } from 'kibana/server';
 import type { JobObject, JobSavedObjectService } from './service';
-import { JobType, RepairSavedObjectResponse } from '../../common/types/saved_objects';
+import {
+  JobType,
+  RepairSavedObjectResponse,
+  InitializeSavedObjectResponse,
+} from '../../common/types/saved_objects';
 import { checksFactory } from './checks';
 import { getSavedObjectClientError } from './util';
 
@@ -180,8 +184,11 @@ export function repairFactory(
     return results;
   }
 
-  async function initSavedObjects(simulate: boolean = false, spaceOverrides?: JobSpaceOverrides) {
-    const results: { jobs: Array<{ id: string; type: string }>; success: boolean; error?: any } = {
+  async function initSavedObjects(
+    simulate: boolean = false,
+    spaceOverrides?: JobSpaceOverrides
+  ): Promise<InitializeSavedObjectResponse> {
+    const results: InitializeSavedObjectResponse = {
       jobs: [],
       success: true,
     };
@@ -218,7 +225,6 @@ export function repairFactory(
           type: attributes.type,
         });
       });
-      return { jobs: jobs.map((j) => j.job.job_id) };
     } catch (error) {
       results.success = false;
       results.error = Boom.boomify(error).output;
