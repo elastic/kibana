@@ -62,7 +62,7 @@ const getDefaultFieldConfig = (
 };
 
 interface SeriesControlsProps {
-  selectedDetectorIndex: any;
+  selectedDetectorIndex: number;
   selectedJobId: JobId;
   bounds: any;
   appStateHandler: Function;

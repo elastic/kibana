@@ -40,7 +40,7 @@ export const PlotByFunctionControls = ({
 }: {
   functionDescription: undefined | string;
   setFunctionDescription: (func: string) => void;
-  selectedDetectorIndex: any;
+  selectedDetectorIndex: number;
   selectedJobId: string;
   selectedEntities: Record<string, any>;
 }) => {
