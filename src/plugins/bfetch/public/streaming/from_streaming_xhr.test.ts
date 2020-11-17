@@ -104,8 +104,8 @@ test('completes observable when request reaches end state', () => {
 
 test('completes observable when aborted', () => {
   const xhr = createXhr();
-  const abort$ = new Subject<boolean>();
-  const observable = fromStreamingXhr(xhr, abort$);
+  const abortController = new AbortController();
+  const observable = fromStreamingXhr(xhr, abortController.signal);
 
   const next = jest.fn();
   const complete = jest.fn();
@@ -123,7 +123,7 @@ test('completes observable when aborted', () => {
   expect(complete).toHaveBeenCalledTimes(0);
 
   (xhr as any).readyState = 2;
-  abort$.next(true);
+  abortController.abort();
 
   expect(complete).toHaveBeenCalledTimes(1);
 

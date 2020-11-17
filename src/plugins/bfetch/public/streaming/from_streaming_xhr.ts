@@ -28,7 +28,7 @@ export const fromStreamingXhr = (
     XMLHttpRequest,
     'onprogress' | 'onreadystatechange' | 'readyState' | 'status' | 'responseText' | 'abort'
   >,
-  abort$?: Observable<boolean>
+  signal?: AbortSignal
 ): Observable<string> => {
   const subject = new Subject<string>();
   let index = 0;
@@ -45,14 +45,16 @@ export const fromStreamingXhr = (
 
   xhr.onprogress = processBatch;
 
-  const sub = abort$?.subscribe((done) => {
-    if (done && xhr.readyState !== 4) {
+  const onBatchAbort = () => {
+    if (xhr.readyState !== 4) {
       aborted = true;
       xhr.abort();
       subject.complete();
-      sub?.unsubscribe();
+      signal?.removeEventListener('abort', onBatchAbort);
     }
-  });
+  };
+
+  signal?.addEventListener('abort', onBatchAbort);
 
   xhr.onreadystatechange = () => {
     // Older browsers don't support onprogress, so we need

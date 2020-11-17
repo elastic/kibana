@@ -135,10 +135,10 @@ test('completes stream observable when request finishes', async () => {
 
 test('completes stream observable when aborted', async () => {
   const env = setup();
-  const abort$ = new Subject<boolean>();
+  const abort = new AbortController();
   const { stream } = fetchStreaming({
     url: 'http://example.com',
-    abort$,
+    signal: abort.signal,
   });
 
   const spy = jest.fn();
@@ -151,7 +151,7 @@ test('completes stream observable when aborted', async () => {
   (env.xhr as any).responseText = 'foo';
   env.xhr.onprogress!({} as any);
 
-  abort$.next(true);
+  abort.abort();
 
   (env.xhr as any).readyState = 4;
   (env.xhr as any).status = 200;

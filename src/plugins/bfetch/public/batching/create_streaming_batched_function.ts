@@ -108,11 +108,15 @@ export const createStreamingBatchedFunction = <Payload, Result extends object>(
           return item.payload;
         });
 
+        // Prepare abort controller
+        const abortController = new AbortController();
+        getBatchDone$(items).subscribe(() => abortController.abort());
+
         const { stream } = fetchStreamingInjected({
           url,
           body: JSON.stringify({ batch }),
           method: 'POST',
-          abort$: getBatchDone$(items),
+          signal: abortController.signal,
         });
         stream.pipe(split('\n')).subscribe({
           next: (json: string) => {
