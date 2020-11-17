@@ -471,6 +471,13 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
     }
 
     /**
+     * This function returns the text displayed in the Table Vis header
+     */
+    public async getTableVisHeader() {
+      return await testSubjects.getVisibleText('paginated-table-header');
+    }
+
+    /**
      * This function is the newer function to retrieve data from within a table visualization.
      * It uses a better return format, than the old getTableVisData, by properly splitting
      * cell values into arrays. Please use this function for newer tests.

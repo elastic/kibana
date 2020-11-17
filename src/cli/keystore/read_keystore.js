@@ -17,10 +17,21 @@
  * under the License.
  */
 
-const DOT_PREFIX_RE = /(.).+?\./g;
+import { set } from '@elastic/safer-lodash-set';
 
-/**
- * Convert a dot.notated.string into a short
- * version (d.n.string)
- */
-export const shortenDottedString = (input: string) => input.replace(DOT_PREFIX_RE, '$1.');
+import { Keystore } from '../keystore';
+import { getKeystore } from '../../cli_keystore/get_keystore';
+
+export function readKeystore(keystorePath = getKeystore()) {
+  const keystore = new Keystore(keystorePath);
+  keystore.load();
+
+  const keys = Object.keys(keystore.data);
+  const data = {};
+
+  keys.forEach((key) => {
+    set(data, key, keystore.data[key]);
+  });
+
+  return data;
+}

@@ -289,16 +289,16 @@ function createNewLayerWithBucketAggregation(
   operation: OperationType
 ): IndexPatternLayer {
   return insertNewColumn({
-    op: 'count',
+    op: operation,
     layer: insertNewColumn({
-      op: operation,
+      op: 'count',
       layer: { indexPatternId: indexPattern.id, columns: {}, columnOrder: [] },
       columnId: generateId(),
-      field,
+      field: documentField,
       indexPattern,
     }),
     columnId: generateId(),
-    field: documentField,
+    field,
     indexPattern,
   });
 }
