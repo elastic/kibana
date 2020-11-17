@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiTextColor, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiTextColor, EuiLoadingContent, EuiTitle } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
@@ -36,6 +36,14 @@ interface Props {
   timelineId: string;
   toggleColumn: (column: ColumnHeaderOptions) => void;
 }
+
+export const ExpandableEventTitle = React.memo(() => (
+  <EuiTitle size="s">
+    <h4>{i18n.EVENT_DETAILS}</h4>
+  </EuiTitle>
+));
+
+ExpandableEventTitle.displayName = 'ExpandableEventTitle';
 
 export const ExpandableEvent = React.memo<Props>(
   ({ browserFields, docValueFields, event, timelineId, toggleColumn }) => {
@@ -88,7 +96,7 @@ export const ExpandableEvent = React.memo<Props>(
     }
 
     if (loading) {
-      return <EuiLoadingSpinner />;
+      return <EuiLoadingContent lines={10} />;
     }
 
     return (

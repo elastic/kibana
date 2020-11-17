@@ -41,7 +41,7 @@ interface Props {
   isExpanded: boolean;
   loadingEventIds: Readonly<string[]>;
   onColumnResized: OnColumnResized;
-  onEventToggled: () => void;
+  onEventToggled: (event: TimelineItem) => void;
   onPinEvent: OnPinEvent;
   onRowSelected: OnRowSelected;
   onUnPinEvent: OnUnPinEvent;
@@ -103,6 +103,8 @@ const StatefulEventComponent: React.FC<Props> = ({
     setShowNotes((prevShowNotes) => ({ ...prevShowNotes, [eventId]: !prevShowNotes[eventId] }));
   }, [event]);
 
+  const handleOnEventToggled = useCallback(() => onEventToggled(event), [event, onEventToggled]);
+
   const associateNote = useCallback(
     (noteId: string) => {
       addNoteToEvent({ eventId: event._id, noteId });
@@ -138,7 +140,7 @@ const StatefulEventComponent: React.FC<Props> = ({
         isEventViewer={isEventViewer}
         loadingEventIds={loadingEventIds}
         onColumnResized={onColumnResized}
-        onEventToggled={onEventToggled}
+        onEventToggled={handleOnEventToggled}
         onPinEvent={onPinEvent}
         onRowSelected={onRowSelected}
         onUnPinEvent={onUnPinEvent}

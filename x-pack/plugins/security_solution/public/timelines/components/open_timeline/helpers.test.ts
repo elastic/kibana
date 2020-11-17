@@ -1010,7 +1010,6 @@ describe('helpers', () => {
         templateTimelineId: null,
         templateTimelineVersion: null,
         version: '1',
-        width: 1100,
       });
     });
 
@@ -1109,7 +1108,6 @@ describe('helpers', () => {
         templateTimelineId: null,
         templateTimelineVersion: null,
         version: '1',
-        width: 1100,
       });
     });
   });

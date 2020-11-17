@@ -18,10 +18,15 @@ import { TimelineEventsAllRequestOptions } from '../../../common/search_strategy
  *
  */
 
-export interface ActiveTimelineExpandedEvent {
-  eventId?: string;
-  indexName?: string;
+export interface ActiveTimelineExpandedEventType {
+  eventId: string;
+  indexName: string;
 }
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type EmptyObject = Record<any, never>;
+
+export type ActiveTimelineExpandedEvent = ActiveTimelineExpandedEventType | EmptyObject;
 
 class ActiveTimelineEvents {
   private _activePage: number = 0;

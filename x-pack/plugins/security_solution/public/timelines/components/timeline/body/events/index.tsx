@@ -36,7 +36,7 @@ interface Props {
   isEventViewer?: boolean;
   loadingEventIds: Readonly<string[]>;
   onColumnResized: OnColumnResized;
-  onEventToggled: (event: TimelineItem) => void;
+  onEventToggled: () => void;
   onPinEvent: OnPinEvent;
   onRowSelected: OnRowSelected;
   onUnPinEvent: OnUnPinEvent;
@@ -98,7 +98,7 @@ const EventsComponent: React.FC<Props> = ({
         onUnPinEvent={onUnPinEvent}
         refetch={refetch}
         rowRenderers={rowRenderers}
-        onEventToggled={() => onEventToggled(event)}
+        onEventToggled={onEventToggled}
         onRuleChange={onRuleChange}
         selectedEventIds={selectedEventIds}
         showCheckboxes={showCheckboxes}

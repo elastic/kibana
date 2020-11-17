@@ -11,6 +11,7 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiProgress,
+  EuiSpacer,
 } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React, { useCallback, useState, useMemo, useEffect } from 'react';
@@ -42,7 +43,7 @@ import {
 import { useManageTimeline } from '../manage_timeline';
 import { TimelineType, TimelineStatusLiteral } from '../../../../common/types/timeline';
 import { requiredFieldsForActions } from '../../../detections/components/alerts_table/default_config';
-import { ExpandableEvent } from './expandable_event';
+import { ExpandableEvent, ExpandableEventTitle } from './expandable_event';
 import {
   activeTimeline,
   ActiveTimelineExpandedEvent,
@@ -107,6 +108,12 @@ const TimelineTemplateBadge = styled.div`
   color: #fff;
   padding: 10px 15px;
   font-size: 0.8em;
+`;
+
+const VerticalRule = styled.div`
+  width: 2px;
+  height: 100%;
+  background: ${({ theme }) => theme.eui.euiColorLightShade};
 `;
 
 export interface Props {
@@ -348,7 +355,10 @@ export const TimelineComponent: React.FC<Props> = ({
                 />
               </StyledEuiFlyoutFooter>
             </ScrollableFlexItem>
+            <VerticalRule />
             <ScrollableFlexItem grow={1}>
+              <ExpandableEventTitle />
+              <EuiSpacer />
               <ExpandableEvent
                 browserFields={browserFields}
                 docValueFields={docValueFields}

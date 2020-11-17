@@ -11,7 +11,6 @@ import {
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
-  EuiTitle,
 } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -46,7 +45,10 @@ import { ExitFullScreen } from '../exit_full_screen';
 import { useFullScreen } from '../../containers/use_full_screen';
 import { TimelineId, TimelineType } from '../../../../common/types/timeline';
 import { ActiveTimelineExpandedEvent } from '../../../timelines/containers/active_timeline_context';
-import { ExpandableEvent } from '../../../timelines/components/timeline/expandable_event';
+import {
+  ExpandableEvent,
+  ExpandableEventTitle,
+} from '../../../timelines/components/timeline/expandable_event';
 import { GraphOverlay } from '../../../timelines/components/graph_overlay';
 
 export const EVENTS_VIEWER_HEADER_HEIGHT = 90; // px
@@ -369,9 +371,7 @@ const EventsViewerComponent: React.FC<Props> = ({
       {expanded.eventId && (
         <EventDetailsFlyout size="s" onClose={handleClearSelection}>
           <EuiFlyoutHeader hasBorder>
-            <EuiTitle size="s">
-              <h2>{i18n.EVENT_DETAILS}</h2>
-            </EuiTitle>
+            <ExpandableEventTitle />
           </EuiFlyoutHeader>
           <EuiFlyoutBody>
             <ExpandableEvent
