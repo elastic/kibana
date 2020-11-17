@@ -19,9 +19,11 @@
 
 import { Plugin } from 'kibana/server';
 
-interface WindowWithCoverage extends Window {
-  __coverage__: any;
-  flushCoverageToLog: any;
+declare global {
+  interface Window {
+    __coverage__: any;
+    flushCoverageToLog: any;
+  }
 }
 
 export class CodeCoverageReportingPlugin implements Plugin {
@@ -30,18 +32,12 @@ export class CodeCoverageReportingPlugin implements Plugin {
   public start() {}
 
   public setup() {
-    (window as WindowWithCoverage & typeof globalThis).flushCoverageToLog = function () {
-      if ((window as WindowWithCoverage & typeof globalThis).__coverage__) {
+    window.flushCoverageToLog = function () {
+      if (window.__coverage__) {
         // eslint-disable-next-line no-console
-        console.log(
-          'coveragejson:' +
-            btoa(JSON.stringify((window as WindowWithCoverage & typeof globalThis).__coverage__))
-        );
+        console.log('coveragejson:' + btoa(JSON.stringify(window.__coverage__)));
       }
     };
-    window.addEventListener(
-      'beforeunload',
-      (window as WindowWithCoverage & typeof globalThis).flushCoverageToLog
-    );
+    window.addEventListener('beforeunload', window.flushCoverageToLog);
   }
 }
