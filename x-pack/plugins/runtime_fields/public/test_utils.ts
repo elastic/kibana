@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { registerTestBed, TestBed } from '../../../test_utils/testbed';
+export { registerTestBed, TestBed } from '@kbn/test/jest';
