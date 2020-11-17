@@ -372,7 +372,12 @@ export const EndpointList = () => {
                   policy.version >= item.policy_info.agent.configured.revision &&
                   policy.endpoint_policy_version >= item.policy_info.endpoint.revision) || (
                   <EuiFlexItem grow={false}>
-                    <EuiText color="subdued" size="xs" className="eui-textNoWrap">
+                    <EuiText
+                      color="subdued"
+                      size="xs"
+                      className="eui-textNoWrap"
+                      data-test-subj="rowPolicyOutOfDate"
+                    >
                       <EuiIcon size="m" type="alert" color="warning" />
                       <FormattedMessage
                         id="xpack.securitySolution.endpoint.list.outOfDateLabel"
