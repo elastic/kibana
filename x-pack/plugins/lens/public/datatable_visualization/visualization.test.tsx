@@ -284,7 +284,7 @@ describe('Datatable Visualization', () => {
           state: { layers: [layer] },
           frame,
         }).groups[1].accessors
-      ).toEqual(['c', 'b']);
+      ).toEqual([{ columnId: 'c' }, { columnId: 'b' }]);
     });
   });
 
