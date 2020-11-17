@@ -1960,6 +1960,7 @@ export const formattedDnsSearchStrategyResponse: MatrixHistogramStrategyResponse
                         },
                       ],
                       from: 0,
+                      size: 10,
                     },
                   },
                   unique_domains: {
