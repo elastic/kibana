@@ -212,6 +212,12 @@ export {
   FieldFormat,
 } from '../common';
 
+/**
+ * Exporters (CSV)
+ */
+
+export * from './exports';
+
 /*
  * Index patterns:
  */

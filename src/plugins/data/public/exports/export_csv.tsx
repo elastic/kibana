@@ -1,7 +1,20 @@
 /*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 // Inspired by the inspector CSV exporter
@@ -12,7 +25,6 @@ import pMap from 'p-map';
 
 import { FormatFactory } from 'src/plugins/data/common/field_formats/utils';
 import { Datatable } from 'src/plugins/expressions';
-import { TableInspectorAdapter } from '../types';
 
 const LINE_FEED_CHARACTER = '\r\n';
 const nonAlphaNumRE = /[^a-zA-Z0-9]/;
@@ -37,11 +49,13 @@ interface CSVOptions {
   csvSeparator: string;
   quoteValues: boolean;
   formatFactory: FormatFactory;
+  raw?: boolean;
+  asString?: boolean; // use it for testing
 }
 
 function buildCSV(
   { columns, rows }: Datatable,
-  { csvSeparator, quoteValues, formatFactory }: CSVOptions
+  { csvSeparator, quoteValues, formatFactory, raw }: Omit<CSVOptions, 'asString'>
 ) {
   // Build the header row by its names
   const header = columns.map((col) => escape(col.name, quoteValues));
@@ -57,7 +71,7 @@ function buildCSV(
   // Convert the array of row objects to an array of row arrays
   const csvRows = rows.map((row) => {
     return columns.map((column) =>
-      escape(formatters[column.id].convert(row[column.id]), quoteValues)
+      escape(raw ? row[column.id] : formatters[column.id].convert(row[column.id]), quoteValues)
     );
   });
 
@@ -69,9 +83,12 @@ function buildCSV(
 
 export function exportAsCSVs(
   filename: string,
-  datatables: TableInspectorAdapter = {},
-  options: CSVOptions
+  datatables: Record<string, Datatable> | undefined,
+  { asString, ...options }: CSVOptions
 ) {
+  if (datatables == null) {
+    return;
+  }
   // build a csv for datatable layer
   const csvs = Object.keys(datatables)
     .filter((layerId) => {
@@ -87,6 +104,16 @@ export function exportAsCSVs(
     }, {});
 
   const layerIds = Object.keys(csvs);
+
+  // useful for testing
+  if (asString) {
+    return layerIds.reduce<Record<string, string>>((memo, layerId, i) => {
+      const content = csvs[layerId];
+      const postFix = layerIds.length > 1 ? `-${i + 1}` : '';
+      memo[`${filename}${postFix}.csv`] = content;
+      return memo;
+    }, {});
+  }
 
   const downloadQueue = layerIds.map((layerId, i) => {
     const blob = new Blob([csvs[layerId]]);

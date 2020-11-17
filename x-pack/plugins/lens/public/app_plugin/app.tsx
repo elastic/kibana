@@ -11,6 +11,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { NotificationsStart } from 'kibana/public';
 import { EuiBreadcrumb } from '@elastic/eui';
+import { exportAsCSVs } from '../../../../../src/plugins/data/public';
 import {
   createKbnUrlStateStorage,
   withNotifyOnErrors,
@@ -37,7 +38,6 @@ import {
   LensByReferenceInput,
   LensEmbeddableInput,
 } from '../editor_frame_service/embeddable/embeddable';
-import { exportAsCSVs } from '../editor_frame_service/editor_frame/export_csv';
 
 export function App({
   history,
@@ -487,7 +487,7 @@ export function App({
     savingPermitted,
     actions: {
       exportToCSV: () => {
-        exportAsCSVs(lastKnownDoc?.title || 'unsaved', lastKnownDoc?.state.activeData, {
+        exportAsCSVs(lastKnownDoc?.title || 'unsaved', lastKnownDoc?.state?.activeData, {
           csvSeparator: uiSettings.get('csv:separator', ','),
           quoteValues: uiSettings.get('csv:quoteValues', true),
           formatFactory: data.fieldFormats.deserialize,
