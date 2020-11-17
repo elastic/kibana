@@ -109,7 +109,7 @@ export const buildDnsQuery = ({
   const { cursorStart, querySize } = pagination ?? {};
 
   const size = isHistogram
-    ? {}
+    ? { size: 10 }
     : {
         size: querySize,
       };
