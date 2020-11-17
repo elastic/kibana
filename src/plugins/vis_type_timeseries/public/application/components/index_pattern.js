@@ -27,25 +27,25 @@ import {
   EuiFlexItem,
   EuiFormRow,
   EuiComboBox,
+  EuiRange,
   EuiText,
 } from '@elastic/eui';
 import { FieldSelect } from './aggs/field_select';
 import { createSelectHandler } from './lib/create_select_handler';
 import { createTextHandler } from './lib/create_text_handler';
+import { createNumberHandler } from './lib/create_number_handler';
 import { YesNo } from './yes_no';
 import { KBN_FIELD_TYPES } from '../../../../../plugins/data/public';
 import { FormValidationContext } from '../contexts/form_validation_context';
-import {
-  isGteInterval,
-  validateReInterval,
-  isAutoInterval,
-  AUTO_INTERVAL,
-} from './lib/get_interval';
+import { isGteInterval, validateReInterval, isAutoInterval } from './lib/get_interval';
 import { i18n } from '@kbn/i18n';
 import { TIME_RANGE_DATA_MODES, TIME_RANGE_MODE_KEY } from '../../../common/timerange_data_modes';
 import { PANEL_TYPES } from '../../../common/panel_types';
 import { isTimerangeModeEnabled } from '../lib/check_ui_restrictions';
 import { VisDataContext } from '../contexts/vis_data_context';
+import { getUISettings } from '../../services';
+import { AUTO_INTERVAL } from '../../../common/constants';
+import { UI_SETTINGS } from '../../../../data/common';
 
 const RESTRICT_FIELDS = [KBN_FIELD_TYPES.DATE];
 
@@ -65,12 +65,24 @@ const htmlId = htmlIdGenerator();
 const isEntireTimeRangeActive = (model, isTimeSeries) =>
   !isTimeSeries && model[TIME_RANGE_MODE_KEY] === TIME_RANGE_DATA_MODES.ENTIRE_TIME_RANGE;
 
-export const IndexPattern = ({ fields, prefix, onChange, disabled, model: _model }) => {
+export const IndexPattern = ({
+  fields,
+  prefix,
+  onChange,
+  disabled,
+  model: _model,
+  allowsMaxBarsOption,
+}) => {
+  const config = getUISettings();
+
   const handleSelectChange = createSelectHandler(onChange);
   const handleTextChange = createTextHandler(onChange);
+  const handleNumberChange = createNumberHandler(onChange);
+
   const timeFieldName = `${prefix}time_field`;
   const indexPatternName = `${prefix}index_pattern`;
   const intervalName = `${prefix}interval`;
+  const maxBarsName = `${prefix}max_bars`;
   const dropBucketName = `${prefix}drop_last_bucket`;
   const updateControlValidity = useContext(FormValidationContext);
   const uiRestrictions = get(useContext(VisDataContext), 'uiRestrictions');
@@ -97,10 +109,12 @@ export const IndexPattern = ({ fields, prefix, onChange, disabled, model: _model
     [indexPatternName]: '*',
     [intervalName]: AUTO_INTERVAL,
     [dropBucketName]: 1,
+    [maxBarsName]: '',
     [TIME_RANGE_MODE_KEY]: timeRangeOptions[0].value,
   };
 
   const model = { ...defaults, ..._model };
+
   const isDefaultIndexPatternUsed = model.default_index_pattern && !model[indexPatternName];
   const intervalValidation = validateIntervalValue(model[intervalName]);
   const selectedTimeRangeOption = timeRangeOptions.find(
@@ -212,6 +226,33 @@ export const IndexPattern = ({ fields, prefix, onChange, disabled, model: _model
             />
           </EuiFormRow>
         </EuiFlexItem>
+        {allowsMaxBarsOption && (
+          <EuiFlexItem grow={false}>
+            <EuiFormRow
+              id={htmlId('maxBars')}
+              label={i18n.translate('visTypeTimeseries.indexPattern.maxBars', {
+                defaultMessage: 'Max bars',
+              })}
+            >
+              <EuiRange
+                id={htmlIdGenerator()()}
+                value={model[maxBarsName]}
+                onChange={handleNumberChange(maxBarsName)}
+                showInput="inputWithPopover"
+                showLabels={true}
+                disabled={
+                  disabled ||
+                  isEntireTimeRangeActive(model, isTimeSeries) ||
+                  !(model[intervalName] === AUTO_INTERVAL || !model[intervalName])
+                }
+                min={1}
+                placeholder={config.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET)}
+                max={config.get(UI_SETTINGS.HISTOGRAM_MAX_BARS)}
+                aria-label="An example of EuiDualRange with showInput prop"
+              />
+            </EuiFormRow>
+          </EuiFlexItem>
+        )}
         <EuiFlexItem grow={false}>
           <EuiFormRow
             id={htmlId('dropLastBucket')}
@@ -245,4 +286,5 @@ IndexPattern.propTypes = {
   prefix: PropTypes.string,
   disabled: PropTypes.bool,
   className: PropTypes.string,
+  allowsMaxBarsOption: PropTypes.bool,
 };

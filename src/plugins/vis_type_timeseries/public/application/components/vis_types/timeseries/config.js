@@ -554,7 +554,7 @@ export const TimeseriesConfig = injectI18n(function (props) {
             {...props}
             prefix="series_"
             disabled={!model.override_index_pattern}
-            with-interval={true}
+            allowsMaxBarsOption={true}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

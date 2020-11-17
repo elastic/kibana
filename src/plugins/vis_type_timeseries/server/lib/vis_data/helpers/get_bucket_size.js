@@ -65,20 +65,20 @@ const calculateBucketData = (timeInterval, capabilities) => {
   };
 };
 
-const calculateBucketSizeForAutoInterval = (req) => {
+const calculateBucketSizeForAutoInterval = (req, maxBars) => {
   const duration = getTimerangeDuration(req);
 
-  return calculateAuto.near(100, duration).asSeconds();
+  return calculateAuto.near(maxBars, duration).asSeconds();
 };
 
-export const getBucketSize = (req, interval, capabilities) => {
-  const bucketSize = calculateBucketSizeForAutoInterval(req);
+export const getBucketSize = (req, interval, capabilities, maxBars = 100) => {
+  const bucketSize = calculateBucketSizeForAutoInterval(req, maxBars);
   let intervalString = `${bucketSize}s`;
 
   const gteAutoMatch = Boolean(interval) && interval.match(GTE_INTERVAL_RE);
 
   if (gteAutoMatch) {
-    const bucketData = calculateBucketData(gteAutoMatch[1], capabilities);
+    const bucketData = calculateBucketData(gteAutoMatch[1], capabilities, maxBars);
 
     if (bucketData.bucketSize >= bucketSize) {
       return bucketData;
