@@ -8,6 +8,8 @@ import { keys, pickBy } from 'lodash';
 
 import { kea, MakeLogicType } from 'kea';
 
+import { i18n } from '@kbn/i18n';
+
 import { HttpLogic } from '../../../shared/http';
 import { KibanaLogic } from '../../../shared/kibana';
 
@@ -441,7 +443,15 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
 
       try {
         const response = await HttpLogic.values.http.delete(route);
-        setQueuedSuccessMessage(`Successfully deleted ${response.name}`);
+        setQueuedSuccessMessage(
+          i18n.translate(
+            'xpack.enterpriseSearch.workplaceSearch.sources.flashMessages.contentSourceRemoved',
+            {
+              defaultMessage: 'Successfully deleted {sourceName}.',
+              values: { sourceName: response.name },
+            }
+          )
+        );
         successCallback();
       } catch (e) {
         flashAPIErrors(e);
@@ -536,7 +546,16 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
         const response = await http(route, {
           body: JSON.stringify({ params }),
         });
-        if (isUpdating) setSuccessMessage('Successfully updated configuration.');
+        if (isUpdating) {
+          setSuccessMessage(
+            i18n.translate(
+              'xpack.enterpriseSearch.workplaceSearch.sources.flashMessages.contentSourceConfigUpdated',
+              {
+                defaultMessage: 'Successfully updated configuration.',
+              }
+            )
+          );
+        }
         actions.setSourceConfigData(response);
         if (successCallback) successCallback();
       } catch (e) {
@@ -586,7 +605,15 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
       }
     },
     onUpdateSourceName: (name: string) => {
-      setSuccessMessage(`Successfully changed name to ${name}`);
+      setSuccessMessage(
+        i18n.translate(
+          'xpack.enterpriseSearch.workplaceSearch.sources.flashMessages.contentSourceNameChanged',
+          {
+            defaultMessage: 'Successfully changed name to {sourceName}.',
+            values: { sourceName: name },
+          }
+        )
+      );
     },
     resetSourceState: () => {
       FlashMessagesLogic.actions.clearFlashMessages();
