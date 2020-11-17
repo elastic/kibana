@@ -50,7 +50,7 @@ export class GlobalSearchTestPlugin
 
     globalSearch.registerResultProvider({
       id: 'gs_test_client',
-      find: (term, options) => {
+      find: ({ term = '' }, options) => {
         if (term.includes('client')) {
           return of([
             createResult({
@@ -77,7 +77,7 @@ export class GlobalSearchTestPlugin
     return {
       findTest: (term) =>
         globalSearch
-          .find(term, {})
+          .find({ term }, {})
           .pipe(
             map((batch) => batch.results),
             // restrict to test type to avoid failure when real providers are present
@@ -87,7 +87,7 @@ export class GlobalSearchTestPlugin
           .toPromise(),
       findReal: (term) =>
         globalSearch
-          .find(term, {})
+          .find({ term }, {})
           .pipe(
             map((batch) => batch.results),
             // remove test types
