@@ -482,7 +482,7 @@ export function App({
         (dashboardFeatureFlag.allowByValueEmbeddables || Boolean(initialInput))
     ),
     enableExportToCSV: Boolean(
-      lastKnownDoc?.state.activeData && Object.keys(lastKnownDoc?.state.activeData).length
+      lastKnownDoc?.state?.activeData && Object.keys(lastKnownDoc.state.activeData).length
     ),
     isByValueMode: getIsByValueMode(),
     showCancel: Boolean(state.isLinkedToOriginatingApp),
