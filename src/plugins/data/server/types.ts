@@ -17,8 +17,14 @@
  * under the License.
  */
 
-export * from './fields';
-export * from './types';
-export { IndexPatternsService, IndexPatternsContract } from './index_patterns';
-export type { IndexPattern } from './index_patterns';
-export * from './errors';
+import type { IndexPatternsContract } from '../common';
+
+export interface IndexPatternsRequestHandlerContext {
+  indexPatterns: IndexPatternsContract;
+}
+
+declare module 'src/core/server' {
+  interface RequestHandlerContext {
+    indexPatterns?: IndexPatternsRequestHandlerContext;
+  }
+}
