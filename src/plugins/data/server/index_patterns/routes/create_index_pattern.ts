@@ -25,6 +25,67 @@ const serializedFieldFormatSchema = schema.object({
   params: schema.maybe(schema.any()),
 });
 
+const fieldSpecSchema = schema.object({
+  name: schema.string(),
+  type: schema.string(),
+  searchable: schema.boolean(),
+  aggregatable: schema.boolean(),
+  count: schema.maybe(schema.number()),
+  script: schema.maybe(schema.string()),
+  lang: schema.maybe(schema.string()),
+  conflictDescriptions: schema.maybe(
+    schema.recordOf(schema.string(), schema.arrayOf(schema.string()))
+  ),
+  format: schema.maybe(serializedFieldFormatSchema),
+  esTypes: schema.maybe(schema.arrayOf(schema.string())),
+  scripted: schema.maybe(schema.boolean()),
+  readFromDocValues: schema.maybe(schema.boolean()),
+  subType: schema.maybe(
+    schema.object({
+      multi: schema.maybe(
+        schema.object({
+          parent: schema.string(),
+        })
+      ),
+      nested: schema.maybe(
+        schema.object({
+          path: schema.string(),
+        })
+      ),
+    })
+  ),
+  indexed: schema.maybe(schema.boolean()),
+  customName: schema.maybe(schema.string()),
+  shortDotsEnable: schema.maybe(schema.boolean()),
+});
+
+const indexPatternSpecSchema = schema.object({
+  id: schema.maybe(schema.string()),
+  version: schema.maybe(schema.string()),
+  title: schema.maybe(schema.string()),
+  type: schema.maybe(schema.string()),
+  intervalName: schema.maybe(schema.string()),
+  timeFieldName: schema.maybe(schema.string()),
+  sourceFilters: schema.maybe(
+    schema.arrayOf(
+      schema.object({
+        value: schema.string(),
+      })
+    )
+  ),
+  fields: schema.maybe(schema.recordOf(schema.string(), fieldSpecSchema)),
+  typeMeta: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+  fieldFormats: schema.maybe(schema.recordOf(schema.string(), serializedFieldFormatSchema)),
+  fieldAttrs: schema.maybe(
+    schema.recordOf(
+      schema.string(),
+      schema.object({
+        customName: schema.string(),
+      })
+    )
+  ),
+});
+
 export const registerCreateIndexPatternRoute = (router: IRouter) => {
   router.post(
     {
@@ -33,71 +94,7 @@ export const registerCreateIndexPatternRoute = (router: IRouter) => {
         body: schema.object({
           skip_field_refresh: schema.maybe(schema.boolean({ defaultValue: false })),
           make_default: schema.maybe(schema.boolean({ defaultValue: false })),
-          index_pattern: schema.object({
-            id: schema.maybe(schema.string()),
-            version: schema.maybe(schema.string()),
-            title: schema.maybe(schema.string()),
-            type: schema.maybe(schema.string()),
-            intervalName: schema.maybe(schema.string()),
-            timeFieldName: schema.maybe(schema.string()),
-            sourceFilters: schema.maybe(
-              schema.arrayOf(
-                schema.object({
-                  value: schema.string(),
-                })
-              )
-            ),
-            fields: schema.maybe(
-              schema.recordOf(
-                schema.string(),
-                schema.object({
-                  name: schema.string(),
-                  type: schema.string(),
-                  searchable: schema.boolean(),
-                  aggregatable: schema.boolean(),
-                  count: schema.maybe(schema.number()),
-                  script: schema.maybe(schema.string()),
-                  lang: schema.maybe(schema.string()),
-                  conflictDescriptions: schema.maybe(
-                    schema.recordOf(schema.string(), schema.arrayOf(schema.string()))
-                  ),
-                  format: schema.maybe(serializedFieldFormatSchema),
-                  esTypes: schema.maybe(schema.arrayOf(schema.string())),
-                  scripted: schema.maybe(schema.boolean()),
-                  readFromDocValues: schema.maybe(schema.boolean()),
-                  subType: schema.maybe(
-                    schema.object({
-                      multi: schema.maybe(
-                        schema.object({
-                          parent: schema.string(),
-                        })
-                      ),
-                      nested: schema.maybe(
-                        schema.object({
-                          path: schema.string(),
-                        })
-                      ),
-                    })
-                  ),
-                  indexed: schema.maybe(schema.boolean()),
-                  customName: schema.maybe(schema.string()),
-                  shortDotsEnable: schema.maybe(schema.boolean()),
-                })
-              )
-            ),
-            typeMeta: schema.maybe(schema.object({}, { unknowns: 'allow' })),
-            fieldFormats: schema.maybe(
-              schema.recordOf(schema.string(), serializedFieldFormatSchema)
-            ),
-            fieldAttrs: schema.maybe(
-              schema.recordOf(
-                schema.string(),
-                schema.object({
-                  customName: schema.string(),
-                })
-              )
-            ),
-          }),
+          index_pattern: indexPatternSpecSchema,
         }),
       },
     },
