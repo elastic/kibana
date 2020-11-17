@@ -17,7 +17,7 @@ describe('annotations_service', () => {
     const annotationUpdatesService = new AnnotationUpdatesService();
     const subscriber = jest.fn();
 
-    annotationUpdatesService.get().subscribe(subscriber);
+    annotationUpdatesService.update$().subscribe(subscriber);
 
     // the subscriber should have been triggered with the initial value of null
     expect(subscriber.mock.calls).toHaveLength(1);

@@ -1800,7 +1800,7 @@ class TimeseriesChartIntl extends Component {
 
 export const TimeseriesChart = (props) => {
   const { annotationUpdatesService } = useContext(MlAnnotationUpdatesContext);
-  const annotationProp = useObservable(annotationUpdatesService.update$());
+  const annotationProp = useObservable(annotationUpdatesService.isAnnotationInitialized$());
 
   if (annotationProp === undefined) {
     return null;

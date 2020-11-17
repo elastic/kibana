@@ -85,10 +85,10 @@ export class AnnotationUpdatesService {
     null
   );
 
-  public get() {
-    return this._annotation$;
+  public update$() {
+    return this._annotation$.asObservable();
   }
-  public update$(): Observable<AnnotationState> {
+  public isAnnotationInitialized$(): Observable<AnnotationState> {
     return this._annotation$.asObservable().pipe(
       distinctUntilChanged((prev, curr) => {
         // prevent re-rendering

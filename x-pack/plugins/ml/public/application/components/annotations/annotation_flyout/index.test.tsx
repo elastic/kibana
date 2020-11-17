@@ -32,7 +32,7 @@ const MlAnnotationUpdatesContextProvider = ({ children }: { children: React.Reac
 
 // useObservable wraps the observable in a new component
 const ObservableComponent = (props: any) => {
-  const annotationProp = useObservable(annotationUpdatesService.update$());
+  const annotationProp = useObservable(annotationUpdatesService.isAnnotationInitialized$());
   if (annotationProp === undefined) {
     return null;
   }

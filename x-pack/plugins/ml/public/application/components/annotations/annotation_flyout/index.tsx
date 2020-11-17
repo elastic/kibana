@@ -87,7 +87,7 @@ export class AnnotationFlyoutUI extends Component<CommonProps & Props> {
 
   componentDidMount() {
     const { annotationUpdatesService } = this.props;
-    this.annotationSub = annotationUpdatesService.get().subscribe((v) => {
+    this.annotationSub = annotationUpdatesService.update$().subscribe((v) => {
       this.setState({
         annotationState: v,
       });
@@ -416,7 +416,7 @@ export class AnnotationFlyoutUI extends Component<CommonProps & Props> {
 
 export const AnnotationFlyout: FC<any> = (props) => {
   const { annotationUpdatesService } = useContext(MlAnnotationUpdatesContext);
-  const annotationProp = useObservable(annotationUpdatesService.update$());
+  const annotationProp = useObservable(annotationUpdatesService.isAnnotationInitialized$());
 
   const cancelEditingHandler = useCallback(() => {
     annotationUpdatesService.setValue(null);
