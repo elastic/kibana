@@ -42,7 +42,7 @@ For example, if you have a dashboard that shows data from a Github repository, y
 that opens Github from the dashboard.
 
 Some panels support multiple interactions, also known as triggers. 
-The <<variables,variables>> you use to create a <<url_templating, URL template>> depends on the trigger you choose. URL drilldowns support these types of triggers:
+The <<url-template-variables,variables>> you use to create a <<url_templating-language, URL template>> depends on the trigger you choose. URL drilldowns support these types of triggers:
 
 * *Single click* &mdash; A single data point in the visualization.
 

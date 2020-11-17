@@ -153,12 +153,10 @@ This content has moved. See {ref}/index-mgmt.html[Index management].
 
 This content has moved. See <<discover, **Discover**>>.
 
-
 [role="exclude",id="document-context"]
 == View a document in context
 
 This content has moved. See <<discover, **Discover**>>.
-
 
 [role="exclude",id="document-data"]
 == View document data
@@ -169,3 +167,19 @@ This content has moved. See <<discover, **Discover**>>.
 == View field data statistics
 
 This content has moved. See <<discover, **Discover**>>.
+
+[role="exclude",id="trigger-picker"]
+== Picking a trigger for a URL drilldown
+
+This content has moved. Refer to <<url-drilldown>>.
+
+[role="exclude",id="templating"]
+== URL templating language	
+
+This content has moved. Refer to <<url_templating-language>>.
+
+[role="exclude",id="variables"]
+== URL template variables
+
+This content has moved. Refer to <<url-template-variables>>.
+
