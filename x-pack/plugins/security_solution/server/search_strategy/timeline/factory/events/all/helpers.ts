@@ -18,7 +18,7 @@ export const formatTimelineData = (
       flattenedFields.node._id = hit._id;
       flattenedFields.node._index = hit._index;
       flattenedFields.node.ecs._id = hit._id;
-      flattenedFields.node.ecs.timestamp = toStringArray(hit.fields['@timestamp']);
+      flattenedFields.node.ecs.timestamp = (hit.fields['@timestamp'][0] ?? '') as string;
       flattenedFields.node.ecs._index = hit._index;
       if (hit.sort && hit.sort.length > 1) {
         flattenedFields.cursor.value = hit.sort[0];

@@ -27,7 +27,7 @@ interface ColumneHeaderProps {
   onColumnResized: OnColumnResized;
   isDragging: boolean;
   onFilterChange?: OnFilterChange;
-  sort: Sort;
+  sort: Sort[];
   timelineId: string;
 }
 
@@ -133,6 +133,6 @@ export const ColumnHeader = React.memo(
     prevProps.onColumnResized === nextProps.onColumnResized &&
     prevProps.onColumnSorted === nextProps.onColumnSorted &&
     prevProps.onFilterChange === nextProps.onFilterChange &&
-    prevProps.sort === nextProps.sort &&
+    deepEqual(prevProps.sort, nextProps.sort) &&
     deepEqual(prevProps.header, nextProps.header)
 );

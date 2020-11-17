@@ -73,7 +73,7 @@ export interface TimelineInput {
     filterQueryDraft: KueryFilterQuery | null;
   };
   show?: boolean;
-  sort?: Sort;
+  sort?: Sort[];
   showCheckboxes?: boolean;
   timelineType?: TimelineTypeLiteral;
   templateTimelineId?: string | null;
@@ -227,7 +227,7 @@ export const updateRange = actionCreator<{ id: string; start: string; end: strin
   'UPDATE_RANGE'
 );
 
-export const updateSort = actionCreator<{ id: string; sort: Sort }>('UPDATE_SORT');
+export const updateSort = actionCreator<{ id: string; sort: Sort[] }>('UPDATE_SORT');
 
 export const updateAutoSaveMsg = actionCreator<{
   timelineId: string | null;

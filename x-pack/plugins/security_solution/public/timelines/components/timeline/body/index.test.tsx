@@ -21,10 +21,12 @@ import { SELECTOR_TIMELINE_BODY_CLASS_NAME, TimelineBody } from '../styles';
 import { TimelineType } from '../../../../../common/types/timeline';
 
 const mockGetNotesByIds = (eventId: string[]) => [];
-const mockSort: Sort = {
-  columnId: '@timestamp',
-  sortDirection: Direction.desc,
-};
+const mockSort: Sort[] = [
+  {
+    columnId: '@timestamp',
+    sortDirection: Direction.desc,
+  },
+];
 
 jest.mock('../../../../common/hooks/use_selector', () => ({
   useShallowEqualSelector: jest.fn().mockReturnValue(mockTimelineModel),

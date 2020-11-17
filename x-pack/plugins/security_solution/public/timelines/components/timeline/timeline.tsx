@@ -108,7 +108,7 @@ export interface Props {
   onClose: () => void;
   show: boolean;
   showCallOutUnauthorizedMsg: boolean;
-  sort: Sort;
+  sort: Sort[];
   start: string;
   status: TimelineStatusLiteral;
   timelineType: TimelineType;
@@ -185,11 +185,12 @@ export const TimelineComponent: React.FC<Props> = ({
     return [...columnFields, ...requiredFieldsForActions];
   }, [columnsHeader]);
   const timelineQuerySortField = useMemo(
-    () => ({
-      field: sort.columnId,
-      direction: sort.sortDirection as Direction,
-    }),
-    [sort.columnId, sort.sortDirection]
+    () =>
+      sort.map(({ columnId, sortDirection }) => ({
+        field: columnId,
+        direction: sortDirection as Direction,
+      })),
+    [sort]
   );
   const [isQueryLoading, setIsQueryLoading] = useState(false);
   const { initializeTimeline, setIsTimelineLoading } = useManageTimeline();

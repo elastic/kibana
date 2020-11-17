@@ -237,7 +237,7 @@ export const mockGlobalState: State = {
         pinnedEventIds: {},
         pinnedEventsSaveObject: {},
         itemsPerPageOptions: [5, 10, 20],
-        sort: { columnId: '@timestamp', sortDirection: Direction.desc },
+        sort: [{ columnId: '@timestamp', sortDirection: Direction.desc }],
         width: DEFAULT_TIMELINE_WIDTH,
         isSaving: false,
         version: null,

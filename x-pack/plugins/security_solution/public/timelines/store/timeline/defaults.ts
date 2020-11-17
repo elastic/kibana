@@ -52,10 +52,12 @@ export const timelineDefaults: SubsetTimelineModel & Pick<TimelineModel, 'filter
   selectedEventIds: {},
   show: false,
   showCheckboxes: false,
-  sort: {
-    columnId: '@timestamp',
-    sortDirection: Direction.desc,
-  },
+  sort: [
+    {
+      columnId: '@timestamp',
+      sortDirection: Direction.desc,
+    },
+  ],
   status: TimelineStatus.draft,
   width: DEFAULT_TIMELINE_WIDTH,
   version: null,

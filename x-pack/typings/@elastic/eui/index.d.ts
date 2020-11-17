@@ -13,3 +13,8 @@ declare module '@elastic/eui/lib/services' {
 declare module '@elastic/eui/lib/services/format' {
   export const dateFormatAliases: any;
 }
+
+declare module '@elastic/eui/lib/components/datagrid/column_sorting' {
+  import { useColumnSorting } from '@elastic/eui/src/components/datagrid/column_sorting';
+  export { useColumnSorting };
+}

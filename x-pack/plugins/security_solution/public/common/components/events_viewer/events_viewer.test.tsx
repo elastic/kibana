@@ -76,10 +76,12 @@ const eventsViewerDefaultProps = {
     language: 'kql',
   },
   start: from,
-  sort: {
-    columnId: 'foo',
-    sortDirection: 'none' as SortDirection,
-  },
+  sort: [
+    {
+      columnId: 'foo',
+      sortDirection: 'none' as SortDirection,
+    },
+  ],
   scopeId: SourcererScopeName.timeline,
   toggleColumn: jest.fn(),
   utilityBar,

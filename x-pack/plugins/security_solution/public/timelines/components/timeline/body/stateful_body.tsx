@@ -43,7 +43,7 @@ interface OwnProps {
   docValueFields: DocValueFields[];
   id: string;
   isEventViewer?: boolean;
-  sort: Sort;
+  sort: Sort[];
   toggleColumn: (column: ColumnHeaderOptions) => void;
   refetch: inputsModel.Refetch;
   onRuleChange?: () => void;
@@ -243,7 +243,7 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
     prevProps.show === nextProps.show &&
     prevProps.selectedEventIds === nextProps.selectedEventIds &&
     prevProps.showCheckboxes === nextProps.showCheckboxes &&
-    prevProps.sort === nextProps.sort &&
+    deepEqual(prevProps.sort, nextProps.sort) &&
     prevProps.timelineType === nextProps.timelineType
 );
 

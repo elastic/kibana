@@ -21,7 +21,7 @@ interface Props {
   onColumnRemoved: OnColumnRemoved;
   onColumnSorted: OnColumnSorted;
   onFilterChange?: OnFilterChange;
-  sort: Sort;
+  sort: Sort[];
   timelineId: string;
 }
 
@@ -34,13 +34,15 @@ export const HeaderComponent: React.FC<Props> = ({
   timelineId,
 }) => {
   const onClick = useCallback(() => {
-    onColumnSorted!({
-      columnId: header.id,
-      sortDirection: getNewSortDirectionOnClick({
-        clickedHeader: header,
-        currentSort: sort,
-      }),
-    });
+    onColumnSorted!([
+      {
+        columnId: header.id,
+        sortDirection: getNewSortDirectionOnClick({
+          clickedHeader: header,
+          currentSort: sort,
+        }),
+      },
+    ]);
   }, [onColumnSorted, header, sort]);
   const { getManageTimelineById } = useManageTimeline();
   const isLoading = useMemo(() => getManageTimelineById(timelineId).isLoading, [

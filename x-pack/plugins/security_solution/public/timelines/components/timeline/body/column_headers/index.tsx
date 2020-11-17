@@ -4,10 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButtonIcon, EuiCheckbox, EuiToolTip } from '@elastic/eui';
+import { EuiButtonIcon, EuiCheckbox, EuiDataGridSorting, EuiToolTip } from '@elastic/eui';
+import { useColumnSorting } from '@elastic/eui/lib/components/datagrid/column_sorting';
+
+import deepEqual from 'fast-deep-equal';
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Droppable, DraggableChildrenFn } from 'react-beautiful-dnd';
-import deepEqual from 'fast-deep-equal';
 
 import { DragEffects } from '../../../../../common/components/drag_and_drop/draggable_wrapper';
 import { DraggableFieldBadge } from '../../../../../common/components/draggables/field_badge';
@@ -59,7 +61,7 @@ interface Props {
   onUpdateColumns: OnUpdateColumns;
   showEventsSelect: boolean;
   showSelectAllCheckbox: boolean;
-  sort: Sort;
+  sort: Sort[];
   timelineId: string;
   toggleColumn: (column: ColumnHeaderOptions) => void;
 }
@@ -216,6 +218,30 @@ export const ColumnHeadersComponent = ({
     [ColumnHeaderList]
   );
 
+  const myColumns = columnHeaders.map(({ aggregatable, label, id, type }) => ({
+    id,
+    isSortable: aggregatable,
+    displayAsText: label,
+    schema: type,
+  }));
+
+  const sortedColumns = {
+    onSort: (cols: EuiDataGridSorting['columns']) => {
+      console.error('sortedColumns', cols);
+    },
+    columns: sort.map<{ id: string; direction: 'asc' | 'desc' }>(({ columnId, sortDirection }) => ({
+      id: columnId,
+      direction: sortDirection as 'asc' | 'desc',
+    })),
+  };
+
+  const displayValues = columnHeaders.reduce(
+    (acc, ch) => ({ ...acc, [ch.id]: ch.label ?? ch.id }),
+    {}
+  );
+
+  const ColumnSorting = useColumnSorting(myColumns, sortedColumns, {}, [], displayValues);
+
   return (
     <EventsThead data-test-subj="column-headers">
       <EventsTrHeader>
@@ -274,6 +300,7 @@ export const ColumnHeadersComponent = ({
               </EuiToolTip>
             </EventsThContent>
           </EventsTh>
+          <EventsTh>{ColumnSorting}</EventsTh>
 
           {showEventsSelect && (
             <EventsTh>
@@ -311,7 +338,7 @@ export const ColumnHeaders = React.memo(
     prevProps.onUpdateColumns === nextProps.onUpdateColumns &&
     prevProps.showEventsSelect === nextProps.showEventsSelect &&
     prevProps.showSelectAllCheckbox === nextProps.showSelectAllCheckbox &&
-    prevProps.sort === nextProps.sort &&
+    deepEqual(prevProps.sort, nextProps.sort) &&
     prevProps.timelineId === nextProps.timelineId &&
     prevProps.toggleColumn === nextProps.toggleColumn &&
     deepEqual(prevProps.columnHeaders, nextProps.columnHeaders) &&

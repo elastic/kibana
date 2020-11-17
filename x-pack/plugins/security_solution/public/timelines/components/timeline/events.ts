@@ -36,7 +36,9 @@ export type OnRangeSelected = (range: string) => void;
 export type OnFilterChange = (filter: { columnId: ColumnId; filter: string }) => void;
 
 /** Invoked when a column is sorted */
-export type OnColumnSorted = (sorted: { columnId: ColumnId; sortDirection: SortDirection }) => void;
+export type OnColumnSorted = (
+  sorted: Array<{ columnId: ColumnId; sortDirection: SortDirection }>
+) => void;
 
 export type OnColumnRemoved = (columnId: ColumnId) => void;
 

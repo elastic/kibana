@@ -22,10 +22,12 @@ describe('ColumnHeaders', () => {
   const mount = useMountAppended();
 
   describe('rendering', () => {
-    const sort: Sort = {
-      columnId: 'fooColumn',
-      sortDirection: Direction.desc,
-    };
+    const sort: Sort[] = [
+      {
+        columnId: 'fooColumn',
+        sortDirection: Direction.desc,
+      },
+    ];
 
     test('renders correctly against snapshot', () => {
       const wrapper = shallow(

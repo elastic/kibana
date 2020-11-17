@@ -23,7 +23,6 @@ import {
   OnUpdateColumns,
 } from '../events';
 import { EventsTable, TimelineBody, TimelineBodyGlobalStyle } from '../styles';
-import { ColumnHeaders } from './column_headers';
 import { getActionsColumnWidth } from './column_headers/helpers';
 import { Events } from './events';
 import { ColumnRenderer } from './renderers/column_renderer';
@@ -32,6 +31,7 @@ import { Sort } from './sort';
 import { GraphOverlay } from '../../graph_overlay';
 import { DEFAULT_ICON_BUTTON_WIDTH } from '../helpers';
 import { TimelineEventsType, TimelineId, TimelineType } from '../../../../../common/types/timeline';
+import { ColumnHeaders } from './column_headers';
 
 export interface BodyProps {
   addNoteToEvent: AddNoteToEvent;
@@ -62,7 +62,7 @@ export interface BodyProps {
   selectedEventIds: Readonly<Record<string, TimelineNonEcsData[]>>;
   show: boolean;
   showCheckboxes: boolean;
-  sort: Sort;
+  sort: Sort[];
   timelineId: string;
   timelineType: TimelineType;
   toggleColumn: (column: ColumnHeaderOptions) => void;

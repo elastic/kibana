@@ -44,14 +44,11 @@ export const buildTimelineEventsAllQuery = ({
 
   const filter = [...filterClause, ...getTimerangeFilter(timerange), { match_all: {} }];
 
-  const getSortField = (sortField: SortField) => {
-    if (sortField.field) {
-      const field: string = sortField.field === 'timestamp' ? '@timestamp' : sortField.field;
-
-      return [{ [field]: sortField.direction }];
-    }
-    return [];
-  };
+  const getSortField = (sortFields: SortField[]) =>
+    sortFields.map((item) => {
+      const field: string = item.field === 'timestamp' ? '@timestamp' : item.field;
+      return { [field]: item.direction };
+    });
 
   const dslQuery = {
     allowNoIndices: true,

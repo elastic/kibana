@@ -22,7 +22,7 @@ interface HeaderContentProps {
   isLoading: boolean;
   isResizing: boolean;
   onClick: () => void;
-  sort: Sort;
+  sort: Sort[];
 }
 
 const HeaderContentComponent: React.FC<HeaderContentProps> = ({

@@ -106,7 +106,7 @@ interface Props {
   query: Query;
   onRuleChange?: () => void;
   start: string;
-  sort: Sort;
+  sort: Sort[];
   toggleColumn: (column: ColumnHeaderOptions) => void;
   utilityBar?: (refetch: inputsModel.Refetch, totalCount: number) => React.ReactNode;
   // If truthy, the graph viewer (Resolver) is showing
@@ -196,11 +196,12 @@ const EventsViewerComponent: React.FC<Props> = ({
   ]);
 
   const sortField = useMemo(
-    () => ({
-      field: sort.columnId,
-      direction: sort.sortDirection as Direction,
-    }),
-    [sort.columnId, sort.sortDirection]
+    () =>
+      sort.map(({ columnId, sortDirection }) => ({
+        field: columnId,
+        direction: sortDirection as Direction,
+      })),
+    [sort]
   );
 
   const [
@@ -339,7 +340,7 @@ export const EventsViewer = React.memo(
     prevProps.kqlMode === nextProps.kqlMode &&
     deepEqual(prevProps.query, nextProps.query) &&
     prevProps.start === nextProps.start &&
-    prevProps.sort === nextProps.sort &&
+    deepEqual(prevProps.sort, nextProps.sort) &&
     prevProps.utilityBar === nextProps.utilityBar &&
     prevProps.graphEventId === nextProps.graphEventId
 );

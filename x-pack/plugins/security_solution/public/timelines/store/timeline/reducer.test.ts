@@ -94,10 +94,12 @@ const basicTimeline: TimelineModel = {
   selectedEventIds: {},
   show: true,
   showCheckboxes: false,
-  sort: {
-    columnId: '@timestamp',
-    sortDirection: Direction.desc,
-  },
+  sort: [
+    {
+      columnId: '@timestamp',
+      sortDirection: Direction.desc,
+    },
+  ],
   status: TimelineStatus.active,
   templateTimelineId: null,
   templateTimelineVersion: null,
@@ -922,10 +924,12 @@ describe('Timeline', () => {
     beforeAll(() => {
       update = updateTimelineSort({
         id: 'foo',
-        sort: {
-          columnId: 'some column',
-          sortDirection: Direction.desc,
-        },
+        sort: [
+          {
+            columnId: 'some column',
+            sortDirection: Direction.desc,
+          },
+        ],
         timelineById: timelineByIdMock,
       });
     });
