@@ -6,9 +6,16 @@
 
 import React from 'react';
 
-import { EuiPageHeader, EuiPageHeaderSection, EuiTitle, EuiPageContentBody } from '@elastic/eui';
+import {
+  EuiPageHeader,
+  EuiPageHeaderSection,
+  EuiTitle,
+  EuiPageContent,
+  EuiPageContentBody,
+} from '@elastic/eui';
 
 import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
+import { FlashMessages } from '../../../shared/flash_messages';
 import { DOCUMENTS_TITLE } from './constants';
 
 interface Props {
@@ -26,7 +33,11 @@ export const Documents: React.FC<Props> = ({ engineBreadcrumb }) => {
           </EuiTitle>
         </EuiPageHeaderSection>
       </EuiPageHeader>
-      <EuiPageContentBody />
+      <EuiPageContent>
+        <EuiPageContentBody>
+          <FlashMessages />
+        </EuiPageContentBody>
+      </EuiPageContent>
     </>
   );
 };
