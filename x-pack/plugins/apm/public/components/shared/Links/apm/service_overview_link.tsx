@@ -9,10 +9,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import { APMLink, APMLinkExtendProps } from './APMLink';
+import { APMLink, APMLinkExtendProps, useAPMHref } from './APMLink';
 
 interface ServiceOverviewLinkProps extends APMLinkExtendProps {
   serviceName: string;
+}
+
+export function useServiceOverviewHref(serviceName: string) {
+  return useAPMHref(`/services/${serviceName}/overview`);
 }
 
 export function ServiceOverviewLink({
