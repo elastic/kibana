@@ -77,7 +77,7 @@ export const clustersLayerWizardConfig: LayerWizard = {
           [VECTOR_STYLES.ICON_SIZE]: {
             type: STYLE_TYPE.DYNAMIC,
             options: {
-              ...(defaultDynamicProperties[VECTOR_STYLES.ICON_SIZE]!.options as SizeDynamicOptions),
+              ...(defaultDynamicProperties[VECTOR_STYLES.ICON_SIZE].options as SizeDynamicOptions),
               field: {
                 name: COUNT_PROP_NAME,
                 origin: FIELD_ORIGIN.SOURCE,
@@ -87,7 +87,7 @@ export const clustersLayerWizardConfig: LayerWizard = {
           [VECTOR_STYLES.LABEL_TEXT]: {
             type: STYLE_TYPE.DYNAMIC,
             options: {
-              ...defaultDynamicProperties[VECTOR_STYLES.LABEL_TEXT]!.options,
+              ...defaultDynamicProperties[VECTOR_STYLES.LABEL_TEXT].options,
               field: {
                 name: COUNT_PROP_NAME,
                 origin: FIELD_ORIGIN.SOURCE,
