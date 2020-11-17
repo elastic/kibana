@@ -5,13 +5,15 @@
  */
 
 import _, { partition } from 'lodash';
+import { i18n } from '@kbn/i18n';
 import {
   operationDefinitionMap,
   operationDefinitions,
   OperationType,
   IndexPatternColumn,
+  RequiredReference,
 } from './definitions';
-import {
+import type {
   IndexPattern,
   IndexPatternField,
   IndexPatternLayer,
@@ -19,6 +21,7 @@ import {
 } from '../types';
 import { getSortScoreByPriority } from './operations';
 import { mergeLayer } from '../state_helpers';
+import { generateId } from '../../id_generator';
 
 interface ColumnChange {
   op: OperationType;
@@ -54,18 +57,87 @@ export function insertNewColumn({
     previousColumn: layer.columns[columnId],
   };
 
-  // TODO: Reference based operations require more setup to create the references
-
   if (operationDefinition.input === 'none') {
     const possibleOperation = operationDefinition.getPossibleOperation();
-    if (!possibleOperation) {
-      throw new Error('Tried to create an invalid operation');
-    }
     const isBucketed = Boolean(possibleOperation.isBucketed);
     if (isBucketed) {
       return addBucket(layer, operationDefinition.buildColumn(baseOptions), columnId);
     } else {
       return addMetric(layer, operationDefinition.buildColumn(baseOptions), columnId);
+    }
+  }
+
+  if (operationDefinition.input === 'fullReference') {
+    let tempLayer = { ...layer };
+    const referenceIds = operationDefinition.requiredReferences.map((validation) => {
+      const validOperations = Object.values(operationDefinitionMap).filter(({ type }) =>
+        isOperationAllowedAsReference({ validation, operationType: type })
+      );
+
+      if (!validOperations.length) {
+        throw new Error(
+          `Can't create reference, ${op} has a validation function which doesn't allow any operations`
+        );
+      }
+
+      const newId = generateId();
+      if (validOperations.length === 1) {
+        const def = validOperations[0];
+
+        const validFields =
+          def.input === 'field' ? indexPattern.fields.filter(def.getPossibleOperationForField) : [];
+
+        if (def.input === 'none') {
+          tempLayer = insertNewColumn({
+            layer: tempLayer,
+            columnId: newId,
+            op: def.type,
+            indexPattern,
+          });
+        } else if (validFields.length === 1) {
+          // Recursively update the layer for each new reference
+          tempLayer = insertNewColumn({
+            layer: tempLayer,
+            columnId: newId,
+            op: def.type,
+            indexPattern,
+            field: validFields[0],
+          });
+        } else {
+          tempLayer = {
+            ...tempLayer,
+            incompleteColumns: {
+              ...tempLayer.incompleteColumns,
+              [newId]: { operationType: def.type },
+            },
+          };
+        }
+      }
+      return newId;
+    });
+
+    const possibleOperation = operationDefinition.getPossibleOperation();
+    const isBucketed = Boolean(possibleOperation.isBucketed);
+    if (isBucketed) {
+      return addBucket(
+        tempLayer,
+        operationDefinition.buildColumn({
+          ...baseOptions,
+          columnOrder: layer.columnOrder,
+          referenceIds,
+        }),
+        columnId
+      );
+    } else {
+      return addMetric(
+        tempLayer,
+        operationDefinition.buildColumn({
+          ...baseOptions,
+          columnOrder: layer.columnOrder,
+          referenceIds,
+        }),
+        columnId
+      );
     }
   }
 
@@ -99,8 +171,9 @@ export function replaceColumn({
     throw new Error(`Can't replace column because there is no prior column`);
   }
 
-  const isNewOperation = Boolean(op) && op !== previousColumn.operationType;
-  const operationDefinition = operationDefinitionMap[op || previousColumn.operationType];
+  const isNewOperation = op !== previousColumn.operationType;
+  const operationDefinition = operationDefinitionMap[op];
+  const previousDefinition = operationDefinitionMap[previousColumn.operationType];
 
   if (!operationDefinition) {
     throw new Error('No suitable operation found for given parameters');
@@ -113,22 +186,48 @@ export function replaceColumn({
   };
 
   if (isNewOperation) {
-    // TODO: Reference based operations require more setup to create the references
+    let tempLayer = { ...layer };
+
+    if (previousDefinition.input === 'fullReference') {
+      // @ts-expect-error references are not statically analyzed
+      previousColumn.references.forEach((id: string) => {
+        tempLayer = deleteColumn({ layer: tempLayer, columnId: id });
+      });
+    }
+
+    if (operationDefinition.input === 'fullReference') {
+      const referenceIds = operationDefinition.requiredReferences.map(() => generateId());
+
+      const incompleteColumns = { ...(tempLayer.incompleteColumns || {}) };
+      delete incompleteColumns[columnId];
+      return {
+        ...tempLayer,
+        columns: {
+          ...tempLayer.columns,
+          [columnId]: operationDefinition.buildColumn({
+            ...baseOptions,
+            columns: tempLayer.columns,
+            columnOrder: tempLayer.columnOrder,
+            referenceIds,
+            previousColumn,
+          }),
+        },
+        incompleteColumns,
+      };
+    }
 
     if (operationDefinition.input === 'none') {
       const newColumn = operationDefinition.buildColumn(baseOptions);
-
       if (previousColumn.customLabel) {
         newColumn.customLabel = true;
         newColumn.label = previousColumn.label;
       }
 
+      const newColumns = { ...tempLayer.columns, [columnId]: newColumn };
       return {
-        ...layer,
-        columns: adjustColumnReferencesForChangedColumn(
-          { ...layer.columns, [columnId]: newColumn },
-          columnId
-        ),
+        ...tempLayer,
+        columnOrder: getColumnOrder({ ...tempLayer, columns: newColumns }),
+        columns: adjustColumnReferencesForChangedColumn(newColumns, columnId),
       };
     }
 
@@ -143,10 +242,10 @@ export function replaceColumn({
       newColumn.label = previousColumn.label;
     }
 
-    const newColumns = { ...layer.columns, [columnId]: newColumn };
+    const newColumns = { ...tempLayer.columns, [columnId]: newColumn };
     return {
-      ...layer,
-      columnOrder: getColumnOrder({ ...layer, columns: newColumns }),
+      ...tempLayer,
+      columnOrder: getColumnOrder({ ...tempLayer, columns: newColumns }),
       columns: adjustColumnReferencesForChangedColumn(newColumns, columnId),
     };
   } else if (
@@ -294,14 +393,36 @@ export function deleteColumn({
   layer: IndexPatternLayer;
   columnId: string;
 }): IndexPatternLayer {
+  const column = layer.columns[columnId];
+  if (!column) {
+    const newIncomplete = { ...(layer.incompleteColumns || {}) };
+    delete newIncomplete[columnId];
+    return {
+      ...layer,
+      columnOrder: layer.columnOrder.filter((id) => id !== columnId),
+      incompleteColumns: newIncomplete,
+    };
+  }
+
+  // @ts-expect-error this fails statically because there are no references added
+  const extraDeletions: string[] = 'references' in column ? column.references : [];
+
   const hypotheticalColumns = { ...layer.columns };
   delete hypotheticalColumns[columnId];
 
-  const newLayer = {
+  let newLayer = {
     ...layer,
     columns: adjustColumnReferencesForChangedColumn(hypotheticalColumns, columnId),
   };
-  return { ...newLayer, columnOrder: getColumnOrder(newLayer) };
+
+  extraDeletions.forEach((id) => {
+    newLayer = deleteColumn({ layer: newLayer, columnId: id });
+  });
+
+  const newIncomplete = { ...(newLayer.incompleteColumns || {}) };
+  delete newIncomplete[columnId];
+
+  return { ...newLayer, columnOrder: getColumnOrder(newLayer), incompleteColumns: newIncomplete };
 }
 
 export function getColumnOrder(layer: IndexPatternLayer): string[] {
@@ -341,4 +462,117 @@ export function updateLayerIndexPattern(
     columns: newColumns,
     columnOrder: newColumnOrder,
   };
+}
+
+/**
+ * Collects all errors from the columns in the layer, for display in the workspace. This includes:
+ *
+ * - All columns have complete references
+ * - All column references are valid
+ * - All prerequisites are met
+ */
+export function getErrorMessages(layer: IndexPatternLayer): string[] | undefined {
+  const errors: string[] = [];
+
+  Object.entries(layer.columns).forEach(([columnId, column]) => {
+    const def = operationDefinitionMap[column.operationType];
+    if (def.input === 'fullReference' && def.getErrorMessage) {
+      errors.push(...(def.getErrorMessage(layer, columnId) ?? []));
+    }
+
+    if ('references' in column) {
+      // @ts-expect-error references are not statically analyzed yet
+      column.references.forEach((referenceId, index) => {
+        if (!layer.columns[referenceId]) {
+          errors.push(
+            i18n.translate('xpack.lens.indexPattern.missingReferenceError', {
+              defaultMessage: 'Dimension {dimensionLabel} is incomplete',
+              values: {
+                // @ts-expect-error references are not statically analyzed yet
+                dimensionLabel: column.label,
+              },
+            })
+          );
+        } else {
+          const referenceColumn = layer.columns[referenceId]!;
+          const requirements =
+            // @ts-expect-error not statically analyzed
+            operationDefinitionMap[column.operationType].requiredReferences[index];
+          const isValid = isColumnValidAsReference({
+            validation: requirements,
+            column: referenceColumn,
+          });
+
+          if (!isValid) {
+            errors.push(
+              i18n.translate('xpack.lens.indexPattern.invalidReferenceConfiguration', {
+                defaultMessage: 'Dimension {dimensionLabel} does not have a valid configuration',
+                values: {
+                  // @ts-expect-error references are not statically analyzed yet
+                  dimensionLabel: column.label,
+                },
+              })
+            );
+          }
+        }
+      });
+    }
+  });
+
+  return errors.length ? errors : undefined;
+}
+
+export function isReferenced(layer: IndexPatternLayer, columnId: string): boolean {
+  const allReferences = Object.values(layer.columns).flatMap((col) =>
+    'references' in col
+      ? // @ts-expect-error not statically analyzed
+        col.references
+      : []
+  );
+  return allReferences.includes(columnId);
+}
+
+function isColumnValidAsReference({
+  column,
+  validation,
+}: {
+  column: IndexPatternColumn;
+  validation: RequiredReference;
+}): boolean {
+  if (!column) return false;
+  const operationType = column.operationType;
+  const operationDefinition = operationDefinitionMap[operationType];
+  return (
+    validation.input.includes(operationDefinition.input) &&
+    (!validation.specificOperations || validation.specificOperations.includes(operationType)) &&
+    validation.validateMetadata(column)
+  );
+}
+
+function isOperationAllowedAsReference({
+  operationType,
+  validation,
+  field,
+}: {
+  operationType: OperationType;
+  validation: RequiredReference;
+  field?: IndexPatternField;
+}): boolean {
+  const operationDefinition = operationDefinitionMap[operationType];
+
+  let hasValidMetadata = true;
+  if (field && operationDefinition.input === 'field') {
+    const metadata = operationDefinition.getPossibleOperationForField(field);
+    hasValidMetadata = Boolean(metadata) && validation.validateMetadata(metadata!);
+  } else if (operationDefinition.input !== 'field') {
+    const metadata = operationDefinition.getPossibleOperation();
+    hasValidMetadata = Boolean(metadata) && validation.validateMetadata(metadata!);
+  } else {
+    // TODO: How can we validate the metadata without a specific field?
+  }
+  return (
+    validation.input.includes(operationDefinition.input) &&
+    (!validation.specificOperations || validation.specificOperations.includes(operationType)) &&
+    hasValidMetadata
+  );
 }
