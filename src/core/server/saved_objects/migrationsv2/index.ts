@@ -209,8 +209,8 @@ function throwBadControlState(controlState: any) {
   throw new Error('Unknown control state: ' + controlState);
 }
 
-function indexVersion(indexName: string) {
-  return (indexName.match(/\.kibana_(\d+\.\d+\.\d+)_\d+/) || [])[1];
+function indexVersion(indexName?: string) {
+  return (indexName?.match(/\.kibana_(\d+\.\d+\.\d+)_\d+/) || [])[1];
 }
 
 /**
@@ -258,7 +258,7 @@ type ActionMap = ReturnType<typeof nextActionMap>;
  * E.g. given 'INIT', provides the response type of the action triggered by
  * `next` in the 'INIT' control state.
  */
-type ResponseType<ControlState extends AllActionStates> = Await<
+export type ResponseType<ControlState extends AllActionStates> = Await<
   ReturnType<ReturnType<ActionMap[ControlState]>>
 >;
 
@@ -326,6 +326,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       const indices = res.right;
       const aliases = Object.keys(indices).reduce((acc, index) => {
         Object.keys(indices[index].aliases || {}).forEach((alias) => {
+          // TODO handle multiple .kibana aliases pointing to the same index?
           acc[alias] = index;
         });
         return acc;
@@ -358,7 +359,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       } else if (
         // `.kibana` is pointing to an index that belongs to a later
         // version of Kibana .e.g. a 7.11.0 node found `.kibana_7.12.0_001`
-        valid(aliases[CURRENT_ALIAS]) &&
+        valid(indexVersion(aliases[CURRENT_ALIAS])) &&
         gt(indexVersion(aliases[CURRENT_ALIAS]), stateP.kibanaVersion)
       ) {
         stateP = {
@@ -604,7 +605,6 @@ export const nextActionMap = (
     UPDATE_TARGET_MAPPINGS: (state: UpdateTargetMappingsState) =>
       Actions.updateAndPickupMappings(client, state.target, state.targetMappings),
     UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK: (state: UpdateTargetMappingsWaitForTaskState) =>
-      // Wait for the updateTargetMappingsTaskId task to complete
       Actions.waitForTask(client, state.updateTargetMappingsTaskId, '60s'),
     OUTDATED_DOCUMENTS_SEARCH: (state: OutdatedDocumentsSearch) =>
       Actions.search(client, state.target, state.outdatedDocumentsQuery),
