@@ -15631,10 +15631,10 @@ node-version@1.1.0:
   resolved "https://registry.yarnpkg.com/node-version/-/node-version-1.1.0.tgz#f437d7ba407e65e2c4eaef8887b1718ba523d4f0"
   integrity sha512-t1V2RFiaTavaW3jtQO0A2nok6k7/Gghuvx2rjvICuT0B0dYaObBQ4U0xHL+ZTPFZodt1LMYG2Vi2nypfz4/AJg==
 
-nodemailer@^4.6.4:
-  version "4.6.4"
-  resolved "https://registry.yarnpkg.com/nodemailer/-/nodemailer-4.6.4.tgz#f0d72d0c6a6ec5f4369fa8f4bf5127a31baa2014"
-  integrity sha512-SD4uuX7NMzZ5f5m1XHDd13J4UC3SmdJk8DsmU1g6Nrs5h3x9LcXr6EBPZIqXRJ3LrF7RdklzGhZRF/TuylTcLg==
+nodemailer@^6.4.16:
+  version "6.4.16"
+  resolved "https://registry.yarnpkg.com/nodemailer/-/nodemailer-6.4.16.tgz#5cb6391b1d79ab7eff32d6f9f48366b5a7117293"
+  integrity sha512-68K0LgZ6hmZ7PVmwL78gzNdjpj5viqBdFqKrTtr9bZbJYj6BRj5W6WGkxXrEnUl3Co3CBXi3CZBUlpV/foGnOQ==
 
 nomnom@~1.6.2:
   version "1.6.2"
