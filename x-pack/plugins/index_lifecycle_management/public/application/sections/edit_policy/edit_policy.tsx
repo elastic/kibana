@@ -43,6 +43,7 @@ import {
   DeletePhase,
   HotPhase,
   WarmPhase,
+  Timeline,
 } from './components';
 
 import { schema, deserializer, createSerializer, createPolicyNameValidations } from './form';
@@ -254,6 +255,9 @@ export const EditPolicy: React.FunctionComponent<Props> = ({ history }) => {
                   />
                 </EuiDescribedFormGroup>
               ) : null}
+              <EuiSpacer />
+
+              <Timeline />
 
               <EuiSpacer />
 

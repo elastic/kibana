@@ -22,23 +22,26 @@ export interface ForcemergeFields {
   bestCompression: boolean;
 }
 
-interface HotPhaseMetaFields extends ForcemergeFields {
+export interface HotPhaseMetaFields extends ForcemergeFields {
   useRollover: boolean;
   maxStorageSizeUnit?: string;
   maxAgeUnit?: string;
 }
 
-interface WarmPhaseMetaFields extends DataAllocationMetaFields, MinAgeField, ForcemergeFields {
+export interface WarmPhaseMetaFields
+  extends DataAllocationMetaFields,
+    MinAgeField,
+    ForcemergeFields {
   enabled: boolean;
   warmPhaseOnRollover: boolean;
 }
 
-interface ColdPhaseMetaFields extends DataAllocationMetaFields, MinAgeField {
+export interface ColdPhaseMetaFields extends DataAllocationMetaFields, MinAgeField {
   enabled: boolean;
   freezeEnabled: boolean;
 }
 
-interface DeletePhaseMetaFields extends MinAgeField {
+export interface DeletePhaseMetaFields extends MinAgeField {
   enabled: boolean;
 }
 

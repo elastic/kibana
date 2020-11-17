@@ -1,0 +1,18 @@
+$colorBarHeight: 20px;
+
+.ilmTimeline {
+  &__hotPhase {
+    height: $colorBarHeight;
+    background-color: $euiColorVis9_behindText;
+  }
+
+  &__coldPhase {
+    height: $colorBarHeight;
+    background-color: $euiColorVis5_behindText;
+  }
+
+  &__warmPhase {
+    height: $colorBarHeight;
+    background-color: $euiColorVis1_behindText;
+  }
+}

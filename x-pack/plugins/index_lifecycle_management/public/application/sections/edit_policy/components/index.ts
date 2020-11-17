@@ -5,10 +5,17 @@
  */
 
 export { ActiveBadge } from './active_badge';
+
 export { ErrableFormRow } from './form_errors';
+
 export { LearnMoreLink } from './learn_more_link';
+
 export { OptionalLabel } from './optional_label';
+
 export { PolicyJsonFlyout } from './policy_json_flyout';
+
 export { DescribedFormField } from './described_form_field';
+
+export { Timeline } from './timeline';
 
 export * from './phases';
