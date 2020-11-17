@@ -1490,15 +1490,15 @@
     async-retry "^1.2.3"
     strip-ansi "^5.2.0"
 
-"@elastic/good@8.1.1-kibana2":
-  version "8.1.1-kibana2"
-  resolved "https://registry.yarnpkg.com/@elastic/good/-/good-8.1.1-kibana2.tgz#3ba7413da9fae4c67f128f3e9b1dc28f24523c7a"
-  integrity sha512-2AYmQMBjmh2896FePnnGr9nwoqRxZ6bTjregDRI0CB9r4sIpIzG6J7oMa0GztdDMlrk5CslX1g9SN5EihddPlw==
+"@elastic/good@^9.0.1-kibana1":
+  version "9.0.1-kibana1"
+  resolved "https://registry.yarnpkg.com/@elastic/good/-/good-9.0.1-kibana1.tgz#e2a8e2780aec6d95ea9e5d4d695d5aab982855ab"
+  integrity sha512-d+lmwkq4xoPoR+tjfjzC131qL1n9p+gxu9GLvUJzWBSVwUXh1idFJS3VZ9I8/xmpnm/8KdTOu4imq9R74HKfkQ==
   dependencies:
-    hoek "5.x.x"
-    joi "13.x.x"
-    oppsy "2.x.x"
-    pumpify "1.3.x"
+    "@hapi/hoek" "9.x.x"
+    "@hapi/oppsy" "3.x.x"
+    "@hapi/validate" "1.x.x"
+    pumpify "2.x.x"
 
 "@elastic/makelogs@^6.0.0":
   version "6.0.0"
@@ -1848,7 +1848,7 @@
   resolved "https://registry.yarnpkg.com/@hapi/hoek/-/hoek-8.5.1.tgz#fde96064ca446dec8c55a8c2f130957b070c6e06"
   integrity sha512-yN7kbciD87WzLGc5539Tn0sApjyiGHAJgKvG9W8C7O+6c7qmoQMfVs0W4bX17eqz6C78QJqqFrtgdK5EWf6Qow==
 
-"@hapi/hoek@^9.0.0":
+"@hapi/hoek@9.x.x", "@hapi/hoek@^9.0.0":
   version "9.1.0"
   resolved "https://registry.yarnpkg.com/@hapi/hoek/-/hoek-9.1.0.tgz#6c9eafc78c1529248f8f4d92b0799a712b6052c6"
   integrity sha512-i9YbZPN3QgfighY/1X1Pu118VUz2Fmmhd6b2n0/O8YVgGGfw0FbUYoA97k7FkpGJ+pLCFEDLUmAPPV4D1kpeFw==
@@ -1912,6 +1912,13 @@
   dependencies:
     "@hapi/hoek" "8.x.x"
     "@hapi/vise" "3.x.x"
+
+"@hapi/oppsy@3.x.x":
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/@hapi/oppsy/-/oppsy-3.0.0.tgz#1ae397e200e86d0aa41055f103238ed8652947ca"
+  integrity sha512-0kfUEAqIi21GzFVK2snMO07znMEBiXb+/pOx1dmgOO9TuvFstcfmHU5i56aDfiFP2DM5WzQCU2UWc2gK1lMDhQ==
+  dependencies:
+    "@hapi/hoek" "9.x.x"
 
 "@hapi/pez@^4.1.2":
   version "4.1.2"
@@ -2002,6 +2009,14 @@
   integrity sha512-tFJlT47db0kMqVm3H4nQYgn6Pwg10GTZHb1pwmSiv1K4ks6drQOtfEF5ZnPjkvC+y4/bUPHK+bc87QvLcL+WMw==
   dependencies:
     "@hapi/hoek" "^9.0.0"
+
+"@hapi/validate@1.x.x":
+  version "1.1.3"
+  resolved "https://registry.yarnpkg.com/@hapi/validate/-/validate-1.1.3.tgz#f750a07283929e09b51aa16be34affb44e1931ad"
+  integrity sha512-/XMR0N0wjw0Twzq2pQOzPBZlDzkekGcoCtzO314BpIEsbXdYGthQUbxgkGDf4nhk1+IPDAsXqWjMohRQYO06UA==
+  dependencies:
+    "@hapi/hoek" "^9.0.0"
+    "@hapi/topo" "^5.0.0"
 
 "@hapi/vise@3.x.x":
   version "3.1.1"
@@ -11995,6 +12010,16 @@ duplexify@^3.2.0, duplexify@^3.4.2, duplexify@^3.5.3:
     readable-stream "^2.0.0"
     stream-shift "^1.0.0"
 
+duplexify@^4.1.1:
+  version "4.1.1"
+  resolved "https://registry.yarnpkg.com/duplexify/-/duplexify-4.1.1.tgz#7027dc374f157b122a8ae08c2d3ea4d2d953aa61"
+  integrity sha512-DY3xVEmVHTv1wSzKNbwoU6nVjzI369Y6sPoqfYr0/xlx3IdX2n94xIszTcjPO8W8ZIv0Wb0PXNcjuZyT4wiICA==
+  dependencies:
+    end-of-stream "^1.4.1"
+    inherits "^2.0.3"
+    readable-stream "^3.1.1"
+    stream-shift "^1.0.0"
+
 duration@^0.2.0:
   version "0.2.2"
   resolved "https://registry.yarnpkg.com/duration/-/duration-0.2.2.tgz#ddf149bc3bc6901150fe9017111d016b3357f529"
@@ -21326,7 +21351,7 @@ opn@^5.5.0:
   dependencies:
     is-wsl "^1.1.0"
 
-oppsy@2.x.x, oppsy@^2.0.0:
+oppsy@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/oppsy/-/oppsy-2.0.0.tgz#3a194517adc24c3c61cdc56f35f4537e93a35e34"
   integrity sha1-OhlFF63CTDxhzcVvNfRTfpOjXjQ=
@@ -22747,7 +22772,16 @@ pump@^3.0.0:
     end-of-stream "^1.1.0"
     once "^1.3.1"
 
-pumpify@1.3.x, pumpify@^1.3.3, pumpify@^1.3.5:
+pumpify@2.x.x:
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/pumpify/-/pumpify-2.0.1.tgz#abfc7b5a621307c728b551decbbefb51f0e4aa1e"
+  integrity sha512-m7KOje7jZxrmutanlkS1daj1dS6z6BgslzOXmcSEpIlCxM3VJH7lG5QLeck/6hgF6F4crFf01UtQmNsJfweTAw==
+  dependencies:
+    duplexify "^4.1.1"
+    inherits "^2.0.3"
+    pump "^3.0.0"
+
+pumpify@^1.3.3, pumpify@^1.3.5:
   version "1.3.6"
   resolved "https://registry.yarnpkg.com/pumpify/-/pumpify-1.3.6.tgz#00d40e5ded0a3bf1e0788b1c0cf426a42882ab64"
   integrity sha512-BurGAcvezsINL5US9T9wGHHcLNrG6MCp//ECtxron3vcR+Rfx5Anqq7HbZXNJvFQli8FGVsWCAvywEJFV5Hx/Q==
