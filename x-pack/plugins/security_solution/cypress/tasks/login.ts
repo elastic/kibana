@@ -44,16 +44,27 @@ const ELASTICSEARCH_PASSWORD = 'ELASTICSEARCH_PASSWORD';
  */
 const LOGIN_API_ENDPOINT = '/internal/security/login';
 
-// For the source of these roles please consult the PR these were introduced https://github.com/elastic/kibana/pull/81866#issue-511165754
-export const ROLES = {
-  t1_analyst: 't1_analyst',
-  t2_analyst: 't2_analyst',
-  hunter: 'hunter',
-  rule_author: 'rule_author',
-  soc_manager: 'soc_manager',
-  detections_admin: 'detections_admin',
-  platform_engineer: 'platform_engineer',
+// https://basarat.gitbook.io/typescript/type-system/literal-types
+/** Utility function to create a K:V from a list of strings */
+const strEnum = <T extends string>(o: T[]): { [K in T]: K } => {
+  return o.reduce((res, key) => {
+    res[key] = key;
+    return res;
+  }, Object.create(null));
 };
+
+// For the source of these roles please consult the PR these were introduced https://github.com/elastic/kibana/pull/81866#issue-511165754
+export const ROLES = strEnum([
+  't1_analyst',
+  't2_analyst',
+  'hunter',
+  'rule_author',
+  'soc_manager',
+  'platform_engineer',
+  'detections_admin',
+]);
+
+export type ROLES = keyof typeof ROLES;
 
 /**
  * cy.visit will default to the baseUrl which uses the default kibana test user
