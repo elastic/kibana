@@ -14,7 +14,8 @@ function shouldReject({ table, keptLayerIds }: SuggestionRequest<PieVisualizatio
   return (
     keptLayerIds.length > 1 ||
     (keptLayerIds.length && table.layerId !== keptLayerIds[0]) ||
-    table.changeType === 'reorder'
+    table.changeType === 'reorder' ||
+    table.columns.some((col) => col.operation.scale === 'interval') // Histograms are not good for pie
   );
 }
 
@@ -142,9 +143,6 @@ export function suggestions({
     .sort((a, b) => a.score - b.score)
     .map((suggestion) => ({
       ...suggestion,
-      hide:
-        incompleteConfiguration ||
-        table.columns.some((col) => col.operation.scale === 'interval') || // Histograms are not good for pie
-        suggestion.hide,
+      hide: incompleteConfiguration || suggestion.hide,
     }));
 }
