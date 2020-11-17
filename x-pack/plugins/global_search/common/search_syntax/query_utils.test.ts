@@ -86,7 +86,6 @@ describe('getFieldValueMap', () => {
 describe('applyAliases', () => {
   const getValueMap = (entries: Record<string, FilterValues>) =>
     new Map([...Object.entries(entries)]);
-  const getAliasMap = (entries: Record<string, string[]>) => new Map([...Object.entries(entries)]);
 
   it('returns the map unchanged when no aliases are used', () => {
     const result = applyAliases(
@@ -94,7 +93,7 @@ describe('applyAliases', () => {
         tag: ['tag-1', 'tag-2'],
         type: ['dashboard'],
       }),
-      getAliasMap({})
+      {}
     );
 
     expect(result.size).toEqual(2);
@@ -109,9 +108,9 @@ describe('applyAliases', () => {
         tags: ['tag-2', 'tag-3'],
         type: ['dashboard'],
       }),
-      getAliasMap({
+      {
         tag: ['tags'],
-      })
+      }
     );
 
     expect(result.size).toEqual(2);
