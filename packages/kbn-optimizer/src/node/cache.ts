@@ -41,7 +41,7 @@ interface Lmdb<T> {
   get(key: string): T | undefined;
   put(key: string, value: T, version?: number, ifVersion?: number): Promise<boolean>;
   remove(key: string, ifVersion?: number): Promise<boolean>;
-  openDB<T>(options: { name: string; encoding: 'msgpack' | 'string' | 'json' | 'binary' }): Lmdb<T>;
+  openDB<U>(options: { name: string; encoding: 'msgpack' | 'string' | 'json' | 'binary' }): Lmdb<U>;
   getRange(options?: {
     start?: T;
     end?: T;
