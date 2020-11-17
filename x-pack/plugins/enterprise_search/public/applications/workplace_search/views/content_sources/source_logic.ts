@@ -21,7 +21,7 @@ import {
 import { DEFAULT_META } from '../../../shared/constants';
 import { AppLogic } from '../../app_logic';
 import { NOT_FOUND_PATH } from '../../routes';
-import { ContentSourceFullData, CustomSource, Meta } from '../../types';
+import { ContentSourceFullData, CustomSource, Meta, GenericObject } from '../../types';
 
 export interface SourceActions {
   onInitializeSource(contentSource: ContentSourceFullData): ContentSourceFullData;
@@ -118,8 +118,7 @@ interface SourceValues {
   newCustomSource: CustomSource;
   currentServiceType: string;
   githubOrganizations: string[];
-  selectedGithubOrganizationsMap: object;
-  selectedGithubOrganizations: object;
+  selectedGithubOrganizationsMap: GenericObject;
   selectedGithubOrganizations: string[];
 }
 
@@ -345,13 +344,13 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
       },
     ],
     selectedGithubOrganizationsMap: [
-      {},
+      {} as GenericObject,
       {
-        setSelectedGithubOrganizations: (state, option) => ({
+        setSelectedGithubOrganizations: (state: GenericObject, option) => ({
           ...state,
           ...{ [option]: !state[option] },
         }),
-        resetSourceState: () => [],
+        resetSourceState: () => ({}),
       },
     ],
   },
@@ -562,7 +561,7 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
         password: passwordValue || undefined,
         organizations: githubOrganizations.length > 0 ? githubOrganizations : undefined,
         indexPermissions: indexPermissionsValue || undefined,
-      };
+      } as GenericObject;
 
       // Remove undefined values from params
       Object.keys(params).forEach((key) => params[key] === undefined && delete params[key]);
