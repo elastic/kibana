@@ -17,211 +17,40 @@
  * under the License.
  */
 
-import { loadIndexPattern } from './resolve_index_pattern';
+import {
+  loadIndexPattern,
+  getFallbackIndexPatternId,
+  IndexPatternSavedObject,
+} from './resolve_index_pattern';
 import { indexPatternsMock } from '../../__mocks__/index_patterns';
+import { indexPatternMock } from '../../__mocks__/index_pattern';
 import { configMock } from '../../__mocks__/config';
 
 describe('Resolve index pattern tests', () => {
   test('returns valid data for an existing index pattern', async () => {
-    const result = await loadIndexPattern('the-index-pattern-id', indexPatternsMock, configMock);
-    expect(result).toMatchInlineSnapshot(`
-      Object {
-        "list": Array [
-          Object {
-            "fields": Array [
-              Object {
-                "filterable": true,
-                "name": "_index",
-                "scripted": false,
-                "type": "string",
-              },
-              Object {
-                "filterable": false,
-                "name": "message",
-                "scripted": false,
-                "type": "string",
-              },
-              Object {
-                "filterable": true,
-                "name": "extension",
-                "scripted": false,
-                "type": "string",
-              },
-              Object {
-                "filterable": true,
-                "name": "bytes",
-                "scripted": false,
-                "type": "number",
-              },
-              Object {
-                "filterable": false,
-                "name": "scripted",
-                "scripted": true,
-                "type": "number",
-              },
-            ],
-            "flattenHit": [Function],
-            "formatHit": [MockFunction],
-            "getComputedFields": [Function],
-            "getFieldByName": [Function],
-            "getSourceFiltering": [Function],
-            "id": "the-index-pattern-id",
-            "metaFields": Array [
-              "_index",
-              "_score",
-            ],
-            "title": "the-index-pattern-title",
-          },
-        ],
-        "loaded": Object {
-          "fields": Array [
-            Object {
-              "filterable": true,
-              "name": "_index",
-              "scripted": false,
-              "type": "string",
-            },
-            Object {
-              "filterable": false,
-              "name": "message",
-              "scripted": false,
-              "type": "string",
-            },
-            Object {
-              "filterable": true,
-              "name": "extension",
-              "scripted": false,
-              "type": "string",
-            },
-            Object {
-              "filterable": true,
-              "name": "bytes",
-              "scripted": false,
-              "type": "number",
-            },
-            Object {
-              "filterable": false,
-              "name": "scripted",
-              "scripted": true,
-              "type": "number",
-            },
-          ],
-          "flattenHit": [Function],
-          "formatHit": [MockFunction],
-          "getComputedFields": [Function],
-          "getFieldByName": [Function],
-          "getSourceFiltering": [Function],
-          "id": "the-index-pattern-id",
-          "metaFields": Array [
-            "_index",
-            "_score",
-          ],
-          "title": "the-index-pattern-title",
-        },
-        "stateVal": "the-index-pattern-id",
-        "stateValFound": true,
-      }
-    `);
+    const indexPatternId = 'the-index-pattern-id';
+    const result = await loadIndexPattern(indexPatternId, indexPatternsMock, configMock);
+    expect(result.loaded).toEqual(indexPatternMock);
+    expect(result.stateValFound).toEqual(true);
+    expect(result.stateVal).toEqual(indexPatternId);
   });
   test('returns fallback data for an invalid index pattern', async () => {
-    const result = await loadIndexPattern('invalid-id', indexPatternsMock, configMock);
-    expect(result).toMatchInlineSnapshot(`
-      Object {
-        "list": Array [
-          Object {
-            "fields": Array [
-              Object {
-                "filterable": true,
-                "name": "_index",
-                "scripted": false,
-                "type": "string",
-              },
-              Object {
-                "filterable": false,
-                "name": "message",
-                "scripted": false,
-                "type": "string",
-              },
-              Object {
-                "filterable": true,
-                "name": "extension",
-                "scripted": false,
-                "type": "string",
-              },
-              Object {
-                "filterable": true,
-                "name": "bytes",
-                "scripted": false,
-                "type": "number",
-              },
-              Object {
-                "filterable": false,
-                "name": "scripted",
-                "scripted": true,
-                "type": "number",
-              },
-            ],
-            "flattenHit": [Function],
-            "formatHit": [MockFunction],
-            "getComputedFields": [Function],
-            "getFieldByName": [Function],
-            "getSourceFiltering": [Function],
-            "id": "the-index-pattern-id",
-            "metaFields": Array [
-              "_index",
-              "_score",
-            ],
-            "title": "the-index-pattern-title",
-          },
-        ],
-        "loaded": Object {
-          "fields": Array [
-            Object {
-              "filterable": true,
-              "name": "_index",
-              "scripted": false,
-              "type": "string",
-            },
-            Object {
-              "filterable": false,
-              "name": "message",
-              "scripted": false,
-              "type": "string",
-            },
-            Object {
-              "filterable": true,
-              "name": "extension",
-              "scripted": false,
-              "type": "string",
-            },
-            Object {
-              "filterable": true,
-              "name": "bytes",
-              "scripted": false,
-              "type": "number",
-            },
-            Object {
-              "filterable": false,
-              "name": "scripted",
-              "scripted": true,
-              "type": "number",
-            },
-          ],
-          "flattenHit": [Function],
-          "formatHit": [MockFunction],
-          "getComputedFields": [Function],
-          "getFieldByName": [Function],
-          "getSourceFiltering": [Function],
-          "id": "the-index-pattern-id",
-          "metaFields": Array [
-            "_index",
-            "_score",
-          ],
-          "title": "the-index-pattern-title",
-        },
-        "stateVal": "invalid-id",
-        "stateValFound": false,
-      }
-    `);
+    const indexPatternId = 'invalid-id';
+    const result = await loadIndexPattern(indexPatternId, indexPatternsMock, configMock);
+    expect(result.loaded).toEqual(indexPatternMock);
+    expect(result.stateValFound).toBe(false);
+    expect(result.stateVal).toBe(indexPatternId);
+  });
+  test('getFallbackIndexPatternId with an empty indexPatterns array', async () => {
+    const result = await getFallbackIndexPatternId([], '');
+    expect(result).toBe('');
+  });
+  test('getFallbackIndexPatternId with an indexPatterns array', async () => {
+    const list = await indexPatternsMock.getCache();
+    const result = await getFallbackIndexPatternId(
+      (list as unknown) as IndexPatternSavedObject[],
+      ''
+    );
+    expect(result).toBe('the-index-pattern-id');
   });
 });

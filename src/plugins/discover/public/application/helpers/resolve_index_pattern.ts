@@ -21,7 +21,7 @@ import { IUiSettingsClient, SavedObject, ToastsStart } from 'kibana/public';
 import { IndexPattern } from '../../kibana_services';
 import { IndexPatternsService, SearchSource } from '../../../../data/common';
 
-type IndexPatternSavedObject = SavedObject & { title: string };
+export type IndexPatternSavedObject = SavedObject & { title: string };
 
 interface IndexPatternData {
   /**
@@ -63,7 +63,7 @@ export function getFallbackIndexPatternId(
   if (defaultIndex && findIndexPatternById(indexPatterns, defaultIndex)) {
     return defaultIndex;
   }
-  return !indexPatterns || !indexPatterns.length || !indexPatterns[0].id ? '' : indexPatterns[0].id;
+  return indexPatterns[0]?.id ? indexPatterns[0].id : '';
 }
 
 /**
