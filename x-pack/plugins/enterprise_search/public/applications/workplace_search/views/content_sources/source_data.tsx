@@ -59,7 +59,7 @@ import {
   CUSTOM_SOURCE_DOCS_URL,
 } from '../../routes';
 
-import { FeatureIds } from '../../types';
+import { FeatureIds, SourceDataItem } from '../../types';
 
 import { SOURCE_NAMES, SOURCE_OBJ_TYPES, GITHUB_LINK_TITLE } from '../../constants';
 
@@ -740,4 +740,4 @@ export const staticSourceData = [
     connectStepDescription: connectStepDescription.empty,
     accountContextOnly: false,
   },
-];
+] as SourceDataItem[];
