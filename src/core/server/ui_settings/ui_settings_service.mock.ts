@@ -22,7 +22,7 @@ import {
   InternalUiSettingsServiceSetup,
   InternalUiSettingsServiceStart,
 } from './types';
-import { UiSettingsService } from './ui_settings_service';
+import type { UiSettingsService } from './ui_settings_service';
 
 const createClientMock = () => {
   const mocked: jest.Mocked<IUiSettingsClient> = {

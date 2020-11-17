@@ -7,13 +7,11 @@
 import React from 'react';
 import { IndexPatternPrivateState } from './types';
 import { IndexPatternLayerPanelProps, LayerPanel } from './layerpanel';
-import { shallowWithIntl as shallow } from 'test_utils/enzyme_helpers';
+import { shallowWithIntl as shallow } from '@kbn/test/jest';
 import { ShallowWrapper } from 'enzyme';
 import { EuiSelectable } from '@elastic/eui';
 import { ChangeIndexPattern } from './change_indexpattern';
 import { getFieldByNameFactory } from './pure_helpers';
-
-jest.mock('./state_helpers');
 
 interface IndexPatternPickerOption {
   label: string;

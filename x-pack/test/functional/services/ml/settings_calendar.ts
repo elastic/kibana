@@ -267,7 +267,7 @@ export function MachineLearningSettingsCalendarProvider(
     },
 
     async assertApplyToAllJobsSwitchCheckState(expectedCheckState: boolean) {
-      const actualCheckState = this.getApplyToAllJobsSwitchCheckedState();
+      const actualCheckState = await this.getApplyToAllJobsSwitchCheckedState();
       expect(actualCheckState).to.eql(
         expectedCheckState,
         `Apply to all jobs switch check state should be '${expectedCheckState}' (got '${actualCheckState}')`
