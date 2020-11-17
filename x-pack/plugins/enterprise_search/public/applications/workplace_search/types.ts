@@ -36,6 +36,41 @@ export interface User {
   groupIds: string[];
 }
 
+export interface Features {
+  basicOrgContext?: FeatureIds[];
+  basicOrgContextExcludedFeatures?: FeatureIds[];
+  platinumOrgContext?: FeatureIds[];
+  platinumPrivateContext: FeatureIds[];
+}
+
+export interface Configuration {
+  isPublicKey: boolean;
+  needsBaseUrl: boolean;
+  needsSubdomain?: boolean;
+  needsConfiguration?: boolean;
+  hasOauthRedirect: boolean;
+  baseUrlTitle?: string;
+  helpText: string;
+  documentationUrl: string;
+  applicationPortalUrl?: string;
+  applicationLinkTitle?: string;
+}
+
+export interface SourceDataItem {
+  name: string;
+  serviceType: string;
+  configuration: Configuration;
+  configured?: boolean;
+  connected?: boolean;
+  features?: Features;
+  objTypes?: string[];
+  sourceDescription: string;
+  connectStepDescription: string;
+  addPath: string;
+  editPath: string;
+  accountContextOnly: boolean;
+}
+
 export interface ContentSource {
   id: string;
   serviceType: string;
@@ -52,6 +87,25 @@ export interface ContentSourceDetails extends ContentSource {
   errorReason: number;
   allowsReauth: boolean;
   boost: number;
+}
+
+export interface ContentSourceStatus {
+  id: string;
+  name: string;
+  service_type: string;
+  status: {
+    status: string;
+    synced_at: string;
+    error_reason: number;
+  };
+}
+
+export interface Connector {
+  serviceType: string;
+  name: string;
+  configured: boolean;
+  supportedByLicense: boolean;
+  accountContextOnly: boolean;
 }
 
 export interface SourcePriority {
