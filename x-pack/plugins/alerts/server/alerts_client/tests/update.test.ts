@@ -164,7 +164,7 @@ describe('update()', () => {
       id: '1',
       type: 'api_key_pending_invalidation',
       attributes: {
-        apiKeyId: 'MjM0',
+        apiKeyId: '234',
         createdAt: '2019-02-12T21:01:22.479Z',
       },
       references: [],
@@ -388,7 +388,7 @@ describe('update()', () => {
       id: '1',
       type: 'api_key_pending_invalidation',
       attributes: {
-        apiKeyId: 'MjM0',
+        apiKeyId: '234',
         createdAt: '2019-02-12T21:01:22.479Z',
       },
       references: [],
@@ -397,7 +397,7 @@ describe('update()', () => {
       id: '1',
       type: 'api_key_pending_invalidation',
       attributes: {
-        apiKeyId: 'MjM0',
+        apiKeyId: '234',
         createdAt: '2019-02-12T21:01:22.479Z',
       },
       references: [],
@@ -560,7 +560,7 @@ describe('update()', () => {
       id: '1',
       type: 'api_key_pending_invalidation',
       attributes: {
-        apiKeyId: 'MjM0',
+        apiKeyId: '234',
         createdAt: '2019-02-12T21:01:22.479Z',
       },
       references: [],
@@ -1002,7 +1002,7 @@ describe('update()', () => {
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"Fail"`);
     expect(
       (unsecuredSavedObjectsClient.create.mock.calls[1][1] as InvalidatePendingApiKey).apiKeyId
-    ).toBe('MjM0');
+    ).toBe('234');
   });
 
   describe('updating an alert schedule', () => {

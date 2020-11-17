@@ -31,13 +31,6 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
       .then((response: SupertestResponse) => response.body);
   }
 
-  function getAlertingApiKeysToInvalidate() {
-    return supertest
-      .get(`/api/alerts_fixture/api_keys_pending_invalidation`)
-      .expect(200)
-      .then((response: SupertestResponse) => response.body);
-  }
-
   describe('update', () => {
     const objectRemover = new ObjectRemover(supertest);
 
@@ -859,7 +852,6 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             })
             .expect(200);
           objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
-
           const updatedData = {
             name: 'bcd',
             tags: ['bar'],
@@ -910,9 +902,6 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
                 expect(alertTask.status).to.eql('idle');
                 // ensure the alert is rescheduled to a minute from now
                 ensureDatetimeIsWithinRange(Date.parse(alertTask.runAt), 60 * 1000);
-
-                const apiKeyIds = await getAlertingApiKeysToInvalidate();
-                expect(apiKeyIds.apiKeysToInvalidate.length).to.be(0);
               });
               break;
             default:

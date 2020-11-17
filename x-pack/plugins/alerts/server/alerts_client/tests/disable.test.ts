@@ -112,7 +112,7 @@ describe('disable()', () => {
       id: '1',
       type: 'api_key_pending_invalidation',
       attributes: {
-        apiKeyId: 'MTIz',
+        apiKeyId: '123',
         createdAt: '2019-02-12T21:01:22.479Z',
       },
       references: [],
@@ -156,7 +156,7 @@ describe('disable()', () => {
     expect(taskManager.remove).toHaveBeenCalledWith('task-123');
     expect(
       (unsecuredSavedObjectsClient.create.mock.calls[0][1] as InvalidatePendingApiKey).apiKeyId
-    ).toBe('MTIz');
+    ).toBe('123');
   });
 
   test('falls back when getDecryptedAsInternalUser throws an error', async () => {
@@ -165,7 +165,7 @@ describe('disable()', () => {
       id: '1',
       type: 'api_key_pending_invalidation',
       attributes: {
-        apiKeyId: 'MTIz',
+        apiKeyId: '123',
         createdAt: '2019-02-12T21:01:22.479Z',
       },
       references: [],
@@ -225,7 +225,7 @@ describe('disable()', () => {
       id: '1',
       type: 'api_key_pending_invalidation',
       attributes: {
-        apiKeyId: 'MTIz',
+        apiKeyId: '123',
         createdAt: '2019-02-12T21:01:22.479Z',
       },
       references: [],
@@ -242,7 +242,7 @@ describe('disable()', () => {
       id: '1',
       type: 'api_key_pending_invalidation',
       attributes: {
-        apiKeyId: 'MTIz',
+        apiKeyId: '123',
         createdAt: '2019-02-12T21:01:22.479Z',
       },
       references: [],
@@ -258,7 +258,7 @@ describe('disable()', () => {
       id: '1',
       type: 'api_key_pending_invalidation',
       attributes: {
-        apiKeyId: 'MTIz',
+        apiKeyId: '123',
         createdAt: '2019-02-12T21:01:22.479Z',
       },
       references: [],

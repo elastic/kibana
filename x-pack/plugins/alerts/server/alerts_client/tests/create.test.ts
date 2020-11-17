@@ -735,7 +735,7 @@ describe('create()', () => {
       id: '1',
       type: 'api_key_pending_invalidation',
       attributes: {
-        apiKeyId: 'MTIz',
+        apiKeyId: '123',
         createdAt,
       },
       references: [],
@@ -746,7 +746,7 @@ describe('create()', () => {
     expect(taskManager.schedule).not.toHaveBeenCalled();
     expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(2);
     expect(unsecuredSavedObjectsClient.create.mock.calls[1][1]).toStrictEqual({
-      apiKeyId: 'MTIz',
+      apiKeyId: '123',
       createdAt,
     });
   });

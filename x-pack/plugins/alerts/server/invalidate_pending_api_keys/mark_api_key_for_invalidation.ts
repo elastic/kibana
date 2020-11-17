@@ -14,9 +14,7 @@ export const markApiKeyForInvalidation = async (
     return;
   }
   try {
-    const apiKeyId = Buffer.from(Buffer.from(apiKey, 'base64').toString().split(':')[0]).toString(
-      'base64'
-    );
+    const apiKeyId = Buffer.from(apiKey, 'base64').toString().split(':')[0];
     await savedObjectsClient.create('api_key_pending_invalidation', {
       apiKeyId,
       createdAt: new Date().toISOString(),

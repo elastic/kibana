@@ -11,6 +11,7 @@ import {
   KibanaRequest,
   SavedObjectsClientContract,
 } from 'kibana/server';
+import { EncryptedSavedObjectsClient } from '../../../encrypted_saved_objects/server';
 import { InvalidateAPIKeyParams, SecurityPluginSetup } from '../../../security/server';
 import {
   RunContext,
@@ -129,7 +130,7 @@ function taskRunner(
         let totalInvalidated = 0;
         const configResult = await config;
         try {
-          const [{ savedObjects, http }] = await coreStartServices;
+          const [{ savedObjects, http }, { encryptedSavedObjects }] = await coreStartServices;
           const savedObjectsClient = savedObjects.getScopedClient(
             getFakeKibanaRequest(http.basePath.serverBasePath),
             {
@@ -137,7 +138,9 @@ function taskRunner(
               excludedWrappers: ['security'],
             }
           );
-
+          const encryptedSavedObjectsClient = encryptedSavedObjects.getClient({
+            includedHiddenTypes: ['api_key_pending_invalidation'],
+          });
           const configuredDelay = configResult.invalidateApiKeysTask.removalDelay;
           const delay = timePeriodBeforeDate(new Date(), configuredDelay).toISOString();
 
@@ -156,6 +159,7 @@ function taskRunner(
               logger,
               savedObjectsClient,
               apiKeysToInvalidate,
+              encryptedSavedObjectsClient,
               securityPluginSetup
             );
 
@@ -192,13 +196,16 @@ async function invalidateApiKeys(
   logger: Logger,
   savedObjectsClient: SavedObjectsClientContract,
   apiKeysToInvalidate: SavedObjectsFindResponse<InvalidatePendingApiKey>,
+  encryptedSavedObjectsClient: EncryptedSavedObjectsClient,
   securityPluginSetup?: SecurityPluginSetup
 ) {
   let totalInvalidated = 0;
   await Promise.all(
     apiKeysToInvalidate.saved_objects.map(async (apiKeyObj) => {
-      const apiKeyId = Buffer.from(apiKeyObj.attributes.apiKeyId, 'base64').toString();
-
+      const decryptedApiKey = await encryptedSavedObjectsClient.getDecryptedAsInternalUser<
+        InvalidatePendingApiKey
+      >('api_key_pending_invalidation', apiKeyObj.id);
+      const apiKeyId = decryptedApiKey.attributes.apiKeyId;
       const response = await invalidateAPIKey({ id: apiKeyId }, securityPluginSetup);
       if (response.apiKeysEnabled === true && response.result.error_count > 0) {
         logger.error(`Failed to invalidate API Key [id="${apiKeyObj.attributes.apiKeyId}"]`);

@@ -97,7 +97,7 @@ describe('delete()', () => {
       id: '1',
       type: 'api_key_pending_invalidation',
       attributes: {
-        apiKeyId: 'MTIz',
+        apiKeyId: '123',
         createdAt: '2019-02-12T21:01:22.479Z',
       },
       references: [],
@@ -121,7 +121,7 @@ describe('delete()', () => {
       id: '1',
       type: 'api_key_pending_invalidation',
       attributes: {
-        apiKeyId: 'MTIz',
+        apiKeyId: '123',
         createdAt: '2019-02-12T21:01:22.479Z',
       },
       references: [],
@@ -156,7 +156,7 @@ describe('delete()', () => {
       id: '1',
       type: 'api_key_pending_invalidation',
       attributes: {
-        apiKeyId: 'MTIz',
+        apiKeyId: '123',
         createdAt: '2019-02-12T21:01:22.479Z',
       },
       references: [],
@@ -189,7 +189,7 @@ describe('delete()', () => {
       id: '1',
       type: 'api_key_pending_invalidation',
       attributes: {
-        apiKeyId: 'MTIz',
+        apiKeyId: '123',
         createdAt: '2019-02-12T21:01:22.479Z',
       },
       references: [],

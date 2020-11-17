@@ -204,8 +204,6 @@ export function defineRoutes(
         const findResult = await savedObjectsWithTasksAndAlerts.find<InvalidatePendingApiKey>({
           type: 'api_key_pending_invalidation',
         });
-        // eslint-disable-next-line no-console
-        console.log(findResult);
         return res.ok({
           body: { apiKeysToInvalidate: findResult.saved_objects },
         });

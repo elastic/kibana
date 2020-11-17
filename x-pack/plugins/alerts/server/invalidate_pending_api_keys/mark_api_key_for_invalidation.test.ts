@@ -19,7 +19,7 @@ describe('markApiKeyForInvalidation', () => {
       },
       references: [],
     });
-    markApiKeyForInvalidation(
+    await markApiKeyForInvalidation(
       { apiKey: Buffer.from('123:abc').toString('base64') },
       loggingSystemMock.create().get(),
       unsecuredSavedObjectsClient
@@ -28,6 +28,20 @@ describe('markApiKeyForInvalidation', () => {
     expect(unsecuredSavedObjectsClient.create.mock.calls[0]).toHaveLength(2);
     expect(unsecuredSavedObjectsClient.create.mock.calls[0][0]).toEqual(
       'api_key_pending_invalidation'
+    );
+  });
+
+  test('should log the proper error when savedObjectsClient create failed', async () => {
+    const logger = loggingSystemMock.create().get();
+    const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
+    unsecuredSavedObjectsClient.create.mockRejectedValueOnce(new Error('Fail'));
+    await markApiKeyForInvalidation(
+      { apiKey: Buffer.from('123').toString('base64') },
+      logger,
+      unsecuredSavedObjectsClient
+    );
+    expect(logger.error).toHaveBeenCalledWith(
+      'Failed to mark for API key [id="MTIz"] for invalidation: Fail'
     );
   });
 });

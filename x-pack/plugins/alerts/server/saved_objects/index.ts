@@ -64,4 +64,10 @@ export function setupSavedObjects(
     attributesToEncrypt: new Set(['apiKey']),
     attributesToExcludeFromAAD: new Set(AlertAttributesExcludedFromAAD),
   });
+
+  // Encrypted attributes
+  encryptedSavedObjects.registerType({
+    type: 'api_key_pending_invalidation',
+    attributesToEncrypt: new Set(['apiKeyId']),
+  });
 }
