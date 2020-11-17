@@ -48,6 +48,76 @@ Coming soon.
 
 Coming soon.
 
+### Index Patterns HTTP API
+
+Index patterns provide Rest-like HTTP CRUD+ API with the following endpoints:
+
+- `POST /api/index_patterns/index_pattern` &mdash; create an index pattern
+
+#### Create an index pattern
+
+Create an index pattern with a custom title.
+
+```
+POST /api/index_patterns/index_pattern
+{
+    "index_pattern": {
+        "title": "hello"
+    }
+}
+```
+
+Customize creation behavior with:
+
+- `override` --- if set to `true`, replaces an existing index pattern if an
+  index pattern with the provided title already exists. Defaults to `false`.
+- `skip_field_refresh` --- if set to `true` skips reloading index pattern fields after
+  the index pattern is stored. Defaults to `false`.
+- `make_default` --- if set to `true`, makes the new index pattern the default
+  index pattern. Defaults to `true`.
+
+```
+POST /api/index_patterns/index_pattern
+{
+    "override": false,
+    "skip_field_refresh": false,
+    "make_default": true,
+    "index_pattern": {
+        "title": "hello"
+    }
+}
+```
+
+At creation all index pattern fields are option and you can provide them.
+
+```
+POST /api/index_patterns/index_pattern
+{
+    "index_pattern": {
+        "id": "...",
+        "version": "...",
+        "title": "...",
+        "type": "...",
+        "intervalName": "...",
+        "timeFieldName": "...",
+        "sourceFilters": [],
+        "fields": {},
+        "typeMeta": {},
+        "fieldFormats": {},
+        "fieldAttrs": {}
+    }
+}
+```
+
+The endpoint returns the created index pattern object.
+
+```json
+{
+    "index_pattern": {}
+}
+```
+
+
 ## Query
 
 The query service is responsible for managing the configuration of a search query (`QueryState`): filters, time range, query string, and settings such as the auto refresh behavior and saved queries.
