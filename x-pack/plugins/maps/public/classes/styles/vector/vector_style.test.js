@@ -68,7 +68,7 @@ describe('getDescriptorWithMissingStylePropsRemoved', () => {
     const vectorStyle = new VectorStyle({ properties }, new MockSource());
 
     const nextFields = [new MockField({ fieldName, dataType: 'number' })];
-    const { hasChanges } = await vectorStyle.getDescriptorWithMissingStylePropsRemoved(
+    const { hasChanges } = await vectorStyle.getDescriptorWithUpdatedStyleProps(
       nextFields,
       mapColors
     );
@@ -82,7 +82,7 @@ describe('getDescriptorWithMissingStylePropsRemoved', () => {
     const {
       hasChanges,
       nextStyleDescriptor,
-    } = await vectorStyle.getDescriptorWithMissingStylePropsRemoved(nextFields, mapColors);
+    } = await vectorStyle.getDescriptorWithUpdatedStyleProps(nextFields, mapColors);
     expect(hasChanges).toBe(true);
     expect(nextStyleDescriptor.properties[VECTOR_STYLES.LINE_COLOR]).toEqual({
       options: {},
@@ -104,7 +104,7 @@ describe('getDescriptorWithMissingStylePropsRemoved', () => {
     const {
       hasChanges,
       nextStyleDescriptor,
-    } = await vectorStyle.getDescriptorWithMissingStylePropsRemoved(nextFields, mapColors);
+    } = await vectorStyle.getDescriptorWithUpdatedStyleProps(nextFields, mapColors);
     expect(hasChanges).toBe(true);
     expect(nextStyleDescriptor.properties[VECTOR_STYLES.LINE_COLOR]).toEqual({
       options: {
@@ -129,7 +129,7 @@ describe('getDescriptorWithMissingStylePropsRemoved', () => {
     const {
       hasChanges,
       nextStyleDescriptor,
-    } = await vectorStyle.getDescriptorWithMissingStylePropsRemoved(nextFields, mapColors);
+    } = await vectorStyle.getDescriptorWithUpdatedStyleProps(nextFields, mapColors);
     expect(hasChanges).toBe(true);
     expect(nextStyleDescriptor.properties[VECTOR_STYLES.ICON_SIZE]).toEqual({
       options: {

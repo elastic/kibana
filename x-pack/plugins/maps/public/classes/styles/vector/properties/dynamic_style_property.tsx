@@ -26,12 +26,14 @@ import {
   FieldMetaOptions,
   RangeFieldMeta,
   StyleMetaData,
+  StylePropertyField,
 } from '../../../../../common/descriptor_types';
 import { IField } from '../../../fields/field';
 import { IVectorLayer } from '../../../layers/vector_layer/vector_layer';
 import { IJoin } from '../../../joins/join';
 import { IVectorStyle } from '../vector_style';
 import { getComputedFieldName } from '../style_util';
+import { IESAggField } from '../../../fields/agg';
 
 export interface IDynamicStyleProperty<T> extends IStyleProperty<T> {
   getFieldMetaOptions(): FieldMetaOptions;
@@ -48,6 +50,10 @@ export interface IDynamicStyleProperty<T> extends IStyleProperty<T> {
   pluckOrdinalStyleMetaFromFeatures(features: Feature[]): RangeFieldMeta | null;
   pluckCategoricalStyleMetaFromFeatures(features: Feature[]): CategoryFieldMeta | null;
   getValueSuggestions(query: string): Promise<string[]>;
+  rectifyFieldDescriptor(
+    currentField: IESAggField,
+    previousFieldDescriptor: StylePropertyField
+  ): StylePropertyField | null;
   enrichGeoJsonAndMbFeatureState(
     featureCollection: FeatureCollection,
     mbMap: MbMap,
@@ -238,6 +244,17 @@ export class DynamicStyleProperty<T>
           max,
           delta: max - min,
         } as RangeFieldMeta);
+  }
+
+  rectifyFieldDescriptor(
+    currentField: IESAggField,
+    previousFieldDescriptor: StylePropertyField
+  ): StylePropertyField | null {
+    // Todo: individual style property classes would need to override this with "smart" behavior
+    return {
+      origin: previousFieldDescriptor.origin,
+      name: currentField.getName(),
+    };
   }
 
   pluckCategoricalStyleMetaFromFeatures(features: Feature[]) {
