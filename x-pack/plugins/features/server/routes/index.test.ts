@@ -11,13 +11,76 @@ import { httpServerMock, httpServiceMock, coreMock } from '../../../../../src/co
 import { LicenseType } from '../../../licensing/server/';
 import { licensingMock } from '../../../licensing/server/mocks';
 import { RequestHandler } from '../../../../../src/core/server';
-import { KibanaFeatureConfig } from '../../common';
+import { FeatureKibanaPrivileges, KibanaFeatureConfig, SubFeatureConfig } from '../../common';
 
-function createContextMock(licenseType: LicenseType = 'gold') {
+function createContextMock(licenseType: LicenseType = 'platinum') {
   return {
     core: coreMock.createRequestHandlerContext(),
     licensing: licensingMock.createRequestHandlerContext({ license: { type: licenseType } }),
   };
+}
+
+function createPrivilege(partial: Partial<FeatureKibanaPrivileges> = {}): FeatureKibanaPrivileges {
+  return {
+    savedObject: {
+      all: [],
+      read: [],
+    },
+    ui: [],
+    ...partial,
+  };
+}
+
+function getExpectedSubFeatures(licenseType: LicenseType = 'platinum'): SubFeatureConfig[] {
+  return [
+    {
+      name: 'basicFeature',
+      privilegeGroups: [
+        {
+          groupType: 'independent',
+          privileges: [
+            {
+              id: 'basicSub1',
+              name: 'basic sub 1',
+              includeIn: 'all',
+              ...createPrivilege(),
+            },
+          ],
+        },
+      ],
+    },
+    {
+      name: 'platinumFeature',
+      privilegeGroups: [
+        {
+          groupType: 'independent',
+          privileges:
+            licenseType !== 'basic'
+              ? [
+                  {
+                    id: 'platinumFeatureSub1',
+                    name: 'platinum sub 1',
+                    includeIn: 'all',
+                    minimumLicense: 'platinum',
+                    ...createPrivilege(),
+                  },
+                ]
+              : [],
+        },
+        {
+          groupType: 'mutually_exclusive',
+          privileges: [
+            {
+              id: 'platinumFeatureMutExSub1',
+              name: 'platinum sub 1',
+              includeIn: 'all',
+              ...createPrivilege(),
+            },
+          ],
+        },
+      ],
+    },
+  ];
 }
 
 describe('GET /api/features', () => {
@@ -29,7 +92,11 @@ describe('GET /api/features', () => {
       name: 'Feature 1',
       app: [],
       category: { id: 'foo', label: 'foo' },
-      privileges: null,
+      privileges: {
+        all: createPrivilege(),
+        read: createPrivilege(),
+      },
+      subFeatures: getExpectedSubFeatures(),
     });
 
     featureRegistry.registerKibanaFeature({
@@ -76,7 +143,12 @@ describe('GET /api/features', () => {
     const [call] = mockResponse.ok.mock.calls;
     const body = call[0]!.body as KibanaFeatureConfig[];
 
-    const features = body.map((feature) => ({ id: feature.id, order: feature.order }));
+    const features = body.map((feature) => ({
+      id: feature.id,
+      order: feature.order,
+      subFeatures: feature.subFeatures,
+    }));
+
     expect(features).toEqual([
       {
         id: 'feature_3',
@@ -89,6 +161,7 @@ describe('GET /api/features', () => {
       {
         id: 'feature_1',
         order: undefined,
+        subFeatures: getExpectedSubFeatures(),
       },
       {
         id: 'licensed_feature',
@@ -105,7 +178,11 @@ describe('GET /api/features', () => {
     const [call] = mockResponse.ok.mock.calls;
     const body = call[0]!.body as KibanaFeatureConfig[];
 
-    const features = body.map((feature) => ({ id: feature.id, order: feature.order }));
+    const features = body.map((feature) => ({
+      id: feature.id,
+      order: feature.order,
+      subFeatures: feature.subFeatures,
+    }));
 
     expect(features).toEqual([
       {
@@ -119,6 +196,7 @@ describe('GET /api/features', () => {
       {
         id: 'feature_1',
         order: undefined,
+        subFeatures: getExpectedSubFeatures('basic'),
       },
     ]);
   });
@@ -135,7 +213,11 @@ describe('GET /api/features', () => {
     const [call] = mockResponse.ok.mock.calls;
     const body = call[0]!.body as KibanaFeatureConfig[];
 
-    const features = body.map((feature) => ({ id: feature.id, order: feature.order }));
+    const features = body.map((feature) => ({
+      id: feature.id,
+      order: feature.order,
+      subFeatures: feature.subFeatures,
+    }));
 
     expect(features).toEqual([
       {
@@ -149,6 +231,7 @@ describe('GET /api/features', () => {
       {
         id: 'feature_1',
         order: undefined,
+        subFeatures: getExpectedSubFeatures('basic'),
       },
     ]);
   });
@@ -165,7 +248,11 @@ describe('GET /api/features', () => {
     const [call] = mockResponse.ok.mock.calls;
     const body = call[0]!.body as KibanaFeatureConfig[];
 
-    const features = body.map((feature) => ({ id: feature.id, order: feature.order }));
+    const features = body.map((feature) => ({
+      id: feature.id,
+      order: feature.order,
+      subFeatures: feature.subFeatures,
+    }));
 
     expect(features).toEqual([
       {
@@ -179,6 +266,7 @@ describe('GET /api/features', () => {
       {
         id: 'feature_1',
         order: undefined,
+        subFeatures: getExpectedSubFeatures(),
       },
       {
         id: 'licensed_feature',
