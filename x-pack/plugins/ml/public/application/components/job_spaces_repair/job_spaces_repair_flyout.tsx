@@ -27,7 +27,7 @@ import {
   RepairSavedObjectResponse,
   SavedObjectResult,
 } from '../../../../common/types/saved_objects';
-import { RepairList } from './repair_results';
+import { RepairList } from './repair_list';
 import { useToastNotificationService } from '../../services/toast_notification_service';
 
 interface Props {
@@ -53,6 +53,7 @@ export const JobSpacesRepairFlyout: FC<Props> = ({ onClose }) => {
       // this shouldn't be hit as errors are returned per-repair task
       // as part of the response
       displayErrorToast(error);
+      setLoading(false);
     }
     return null;
   }
