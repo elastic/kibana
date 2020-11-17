@@ -29,7 +29,7 @@ export const findPotentialMatches = async (
   return {
     monitorIds,
     searchAfter: queryResult.aggregations?.monitors?.after_key,
-    totalMonitors: queryResult.aggregations?.totalMonitors?.value,
+    totalMonitors: queryResult.aggregations?.totalMonitors?.value ?? 33,
   };
 };
 
@@ -80,12 +80,12 @@ const queryBody = async (queryContext: QueryContext, size: number, index: number
       field: 'monitor.id',
     },
     _source: 'monitor.id',
-    aggs: {
-      totalMonitors: {
-        cardinality: {
-          field: 'monitor.id',
-        },
-      },
-    },
+    // aggs: {
+    //   totalMonitors: {
+    //     cardinality: {
+    //       field: 'monitor.id',
+    //     },
+    //   },
+    // },
   };
 };
