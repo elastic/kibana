@@ -173,12 +173,12 @@ export class AbstractLayer implements ILayer {
           metrics.forEach((metricsDescriptor: AggDescriptor) => {
             const originalJoinKey = getJoinAggKey({
               aggType: metricsDescriptor.type,
-              aggFieldName: metricsDescriptor.field ? metricsDescriptor.field : '',
+              aggFieldName: 'field' in metricsDescriptor ? metricsDescriptor.field : '',
               rightSourceId: originalJoinId,
             });
             const newJoinKey = getJoinAggKey({
               aggType: metricsDescriptor.type,
-              aggFieldName: metricsDescriptor.field ? metricsDescriptor.field : '',
+              aggFieldName: 'field' in metricsDescriptor ? metricsDescriptor.field : '',
               rightSourceId: joinDescriptor.right.id!,
             });
 
