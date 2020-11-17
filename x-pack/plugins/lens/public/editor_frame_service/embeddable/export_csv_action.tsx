@@ -5,15 +5,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { exportAsCSVs, FieldFormat } from 'src/plugins/data/public';
 import { IEmbeddable } from 'src/plugins/embeddable/public';
 // import { StartServicesGetter } from 'src/plugins/kibana_utils/public';
 import { Action } from 'src/plugins/ui_actions/public';
 
 export const ACTION_EXPORT_CSV = 'ACTION_EXPORT_CSV';
 
-export interface Params {
-  //   start: StartServicesGetter<unknown, unknown, unknown>;
-}
+// export interface Params {
+//   start: StartServicesGetter<unknown, unknown, unknown>;
+// }
 
 interface ExportContext {
   embeddable?: IEmbeddable;
@@ -30,7 +31,7 @@ export class ExportCSVAction implements Action<ExportContext, typeof ACTION_EXPO
 
   public readonly order = 200;
 
-  constructor(protected readonly params: Params) {}
+  constructor(protected readonly params: {} /* Params */) {}
 
   public getIconType() {
     return 'exportAction';
@@ -42,12 +43,17 @@ export class ExportCSVAction implements Action<ExportContext, typeof ACTION_EXPO
     });
 
   public async isCompatible(context: ExportContext): Promise<boolean> {
-    return context.embeddable?.type === 'lens';
+    return Boolean(context.embeddable && 'getInspectorAdapters' in context.embeddable);
   }
 
   protected readonly exportCSV = async (context: ExportContext): Promise<void> => {
-    // Call the Export CSV method on Lens here
-    console.log('Export CSV');
+    if (context.embeddable) {
+      exportAsCSVs(context.embeddable.getTitle()!, context.embeddable.getInspectorAdapters(), {
+        csvSeparator: ',',
+        quoteValues: true,
+        formatFactory: () => ({ convert: (v) => `${v}` } as FieldFormat),
+      });
+    }
   };
 
   public async execute(context: ExportContext): Promise<void> {
