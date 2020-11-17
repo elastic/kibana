@@ -56,7 +56,7 @@ describe('Actions Plugin', () => {
       await plugin.setup(coreSetup as any, pluginsSetup);
       expect(pluginsSetup.encryptedSavedObjects.usingEphemeralEncryptionKey).toEqual(true);
       expect(context.logger.get().warn).toHaveBeenCalledWith(
-        'APIs are disabled because the Encrypted Saved Objects plugin uses an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-key command.'
+        'APIs are disabled because the Encrypted Saved Objects plugin uses an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.'
       );
     });
 

@@ -52,7 +52,7 @@ describe('Alerting Plugin', () => {
       expect(statusMock.set).toHaveBeenCalledTimes(1);
       expect(encryptedSavedObjectsSetup.usingEphemeralEncryptionKey).toEqual(true);
       expect(context.logger.get().warn).toHaveBeenCalledWith(
-        'APIs are disabled because the Encrypted Saved Objects plugin uses an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-key command.'
+        'APIs are disabled because the Encrypted Saved Objects plugin uses an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.'
       );
     });
   });

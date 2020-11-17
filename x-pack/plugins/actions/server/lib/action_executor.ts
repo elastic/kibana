@@ -74,7 +74,7 @@ export class ActionExecutor {
 
     if (this.isESOUsingEphemeralEncryptionKey === true) {
       throw new Error(
-        `Unable to execute action because the Encrypted Saved Objects plugin uses an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-key command.`
+        `Unable to execute action because the Encrypted Saved Objects plugin uses an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.`
       );
     }
 

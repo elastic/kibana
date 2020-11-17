@@ -17,4 +17,5 @@
  * under the License.
  */
 
-require('../src/cli_encryption_key/dev');
+require('../setup_node_env/dist');
+require('./cli_encryption_keys');

@@ -26,4 +26,4 @@ if [ -f "${CONFIG_DIR}/node.options" ]; then
   KBN_NODE_OPTS="$(grep -v ^# < ${CONFIG_DIR}/node.options | xargs)"
 fi
 
-NODE_OPTIONS="$KBN_NODE_OPTS $NODE_OPTIONS" "${NODE}" "${DIR}/src/cli_ephemeral_encryption_key/dist" "$@"
+NODE_OPTIONS="$KBN_NODE_OPTS $NODE_OPTIONS" "${NODE}" "${DIR}/src/cli_encryption_keys/dist" "$@"

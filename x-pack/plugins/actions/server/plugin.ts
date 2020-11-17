@@ -171,7 +171,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
 
     if (this.isESOUsingEphemeralEncryptionKey) {
       this.logger.warn(
-        'APIs are disabled because the Encrypted Saved Objects plugin uses an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-key command.'
+        'APIs are disabled because the Encrypted Saved Objects plugin uses an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.'
       );
     }
 

@@ -138,7 +138,7 @@ describe('createConfig()', () => {
     expect(loggingSystemMock.collect(logger).warn).toMatchInlineSnapshot(`
       Array [
         Array [
-          "Generating a random key for xpack.encryptedSavedObjects.encryptionKey. To decrypt encrypted saved objects attributes after restart, please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-key command.",
+          "Generating a random key for xpack.encryptedSavedObjects.encryptionKey. To decrypt encrypted saved objects attributes after restart, please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.",
         ],
       ]
     `);
