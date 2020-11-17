@@ -76,7 +76,7 @@ export type CollectorFetchContext<WithKibanaRequest extends boolean | undefined 
        * The KibanaRequest that can be used to scope the requests:
        * It is provided only when your custom clients need to be scoped. If not available, you should use the Internal Client.
        * More information about when scoping is needed: {@link CollectorFetchContext}
-       * @remark You should only use this if you implement your collector to deal with both scenarios: when provided and, especially, when not because it's the actual situation when the telemetry payload is sent to the remote service.
+       * @remark You should only use this if you implement your collector to deal with both scenarios: when provided and, especially, when not provided. When telemetry payload is sent to the remote service the `kibanaRequest` will not be provided.
        */
       kibanaRequest?: KibanaRequest;
     }
