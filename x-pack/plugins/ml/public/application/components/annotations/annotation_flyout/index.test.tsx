@@ -39,8 +39,8 @@ const ObservableComponent = (props: any) => {
   return (
     <AnnotationFlyout
       annotation={annotationProp}
-      {...props}
       annotationUpdatesService={annotationUpdatesService}
+      {...props}
     />
   );
 };
