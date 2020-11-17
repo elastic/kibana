@@ -50,7 +50,7 @@ export function getLensTopNavConfig(options: {
     }),
     run: actions.exportToCSV,
     testId: 'lnsApp_downloadCSVButton',
-    description: i18n.translate('xpack.lens.app.cancelButtonAriaLabel', {
+    description: i18n.translate('xpack.lens.app.downloadButtonAriaLabel', {
       defaultMessage: 'Download the data as CSV file',
     }),
     disableButton: !enableExportToCSV,

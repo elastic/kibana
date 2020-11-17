@@ -41,6 +41,7 @@
 
 |  Function | Description |
 |  --- | --- |
+|  [exportAsCSVs(filename, datatables, { asString, ...options })](./kibana-plugin-plugins-data-public.exportascsvs.md) |  |
 |  [getDefaultQuery(language)](./kibana-plugin-plugins-data-public.getdefaultquery.md) |  |
 |  [getEsPreference(uiSettings, sessionId)](./kibana-plugin-plugins-data-public.getespreference.md) |  |
 |  [getSearchParamsFromRequest(searchRequest, dependencies)](./kibana-plugin-plugins-data-public.getsearchparamsfromrequest.md) |  |

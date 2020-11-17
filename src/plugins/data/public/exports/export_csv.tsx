@@ -81,6 +81,14 @@ function buildCSV(
   ); // Add \r\n after last line
 }
 
+/**
+ *
+ * @param filename - filename to use (either as is, or as prefix for multiple CSVs) for the files to download
+ * @param datatables - data (as a dictionary of Datatable) to be translated into CSVs. It can contain multiple tables.
+ * @param options - set of options for the exporter
+ *
+ * @returns undefined (download) - Record\<string, string\> (only for testing)
+ */
 export function exportAsCSVs(
   filename: string,
   datatables: Record<string, Datatable> | undefined,
