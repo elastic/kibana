@@ -15,7 +15,8 @@ import {
   RegistryVarsEntry,
 } from '../../../../common/types';
 import { PackageInvalidArchiveError } from '../../../errors';
-import { ArchiveEntry, pkgToPkgKey } from '../registry';
+import { unpackBufferEntries } from './index';
+import { pkgToPkgKey } from '../registry';
 
 const MANIFESTS: Record<string, Buffer> = {};
 const MANIFEST_NAME = 'manifest.yml';
@@ -23,9 +24,11 @@ const MANIFEST_NAME = 'manifest.yml';
 // TODO: everything below performs verification of manifest.yml files, and hence duplicates functionality already implemented in the
 // package registry. At some point this should probably be replaced (or enhanced) with verification based on
 // https://github.com/elastic/package-spec/
-export async function parseAndVerifyArchiveEntries(
-  entries: ArchiveEntry[]
-): Promise<{ paths: string[]; archivePackageInfo: ArchivePackage }> {
+export async function parseAndVerifyArchiveBuffer(
+  archiveBuffer: Buffer,
+  contentType: string
+): Promise<{ paths: string[]; packageInfo: ArchivePackage }> {
+  const entries = await unpackBufferEntries(archiveBuffer, contentType);
   const paths: string[] = [];
   entries.forEach(({ path, buffer }) => {
     paths.push(path);
@@ -33,12 +36,12 @@ export async function parseAndVerifyArchiveEntries(
   });
 
   return {
-    archivePackageInfo: parseAndVerifyArchive(paths),
+    packageInfo: parseAndVerifyArchive(paths),
     paths,
   };
 }
 
-export function parseAndVerifyArchive(paths: string[]): ArchivePackage {
+function parseAndVerifyArchive(paths: string[]): ArchivePackage {
   // The top-level directory must match pkgName-pkgVersion, and no other top-level files or directories may be present
   const toplevelDir = paths[0].split('/')[0];
   paths.forEach((path) => {
