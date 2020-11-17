@@ -468,16 +468,29 @@ export class IndexPatternsService {
   }
 
   /**
-   * Create a new index pattern and save it right away
+   * Create a new index pattern and save it right away and make the default
+   * index pattern.
+   *
    * @param spec
-   * @param override Overwrite if existing index pattern exists
-   * @param skipFetchFields
+   * @param override Overwrite if existing index pattern exists.
+   * @param skipFetchFields Whether to skip field refresh step.
+   * @param makeDefault Whether to make the new index pattern the default
+   *                    index pattern.
    */
 
-  async createAndSave(spec: IndexPatternSpec, override = false, skipFetchFields = false) {
+  async createAndSave(
+    spec: IndexPatternSpec,
+    override = false,
+    skipFetchFields = false,
+    makeDefault: boolean = true
+  ) {
     const indexPattern = await this.create(spec, skipFetchFields);
     await this.createSavedObject(indexPattern, override);
-    await this.setDefault(indexPattern.id as string);
+
+    if (makeDefault) {
+      await this.setDefault(indexPattern.id!);
+    }
+
     return indexPattern;
   }
 
