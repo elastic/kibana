@@ -163,8 +163,6 @@ export const TagManagementPage: FC<TagManagementPageParams> = ({
       if (confirmed) {
         await tagClient.delete(tag.id);
 
-        fetchTags();
-
         notifications.toasts.addSuccess({
           title: i18n.translate('xpack.savedObjectsTagging.notifications.deleteTagSuccessTitle', {
             defaultMessage: 'Deleted "{name}" tag',
@@ -173,6 +171,8 @@ export const TagManagementPage: FC<TagManagementPageParams> = ({
             },
           }),
         });
+
+        await fetchTags();
       }
     },
     [overlays, notifications, fetchTags, tagClient]
@@ -182,17 +182,18 @@ export const TagManagementPage: FC<TagManagementPageParams> = ({
     async (action: TagBulkAction) => {
       try {
         await action.execute(selectedTags.map(({ id }) => id));
-        if (action.refreshAfterExecute) {
-          await fetchTags();
-        }
       } catch (e) {
         notifications.toasts.addError(e, {
           title: i18n.translate('xpack.savedObjectsTagging.notifications.bulkActionError', {
             defaultMessage: 'An error occurred',
           }),
         });
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
+      if (action.refreshAfterExecute) {
+        await fetchTags();
+      }
     },
     [selectedTags, fetchTags, notifications]
   );
