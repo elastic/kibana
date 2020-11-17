@@ -18,6 +18,7 @@
  */
 
 export const MAX_BUCKETS_SETTING = 'metrics:max_buckets';
+export const INDEXES_SEPARATOR = ',';
 
 export const ROUTES = {
   VIS_DATA: '/api/metrics/vis/data',
