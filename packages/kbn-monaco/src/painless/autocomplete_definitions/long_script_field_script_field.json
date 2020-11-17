@@ -42501,10 +42501,10 @@
       ]
     },
     {
-      "label": "LongFieldScript",
+      "label": "org.elasticsearch.xpack.runtimefields.mapper.LongFieldScript",
       "kind": "class",
-      "documentation": "Class: LongFieldScript",
-      "insertText": "LongFieldScript",
+      "documentation": "Class: org.elasticsearch.xpack.runtimefields.mapper.LongFieldScript",
+      "insertText": "org.elasticsearch.xpack.runtimefields.mapper.LongFieldScript",
       "properties": [
         {
           "label": "equals",
@@ -42527,10 +42527,10 @@
       ]
     },
     {
-      "label": "LongFieldScript.Factory",
+      "label": "org.elasticsearch.xpack.runtimefields.mapper.LongFieldScript.Factory",
       "kind": "class",
-      "documentation": "Class: LongFieldScript.Factory",
-      "insertText": "LongFieldScript.Factory",
+      "documentation": "Class: org.elasticsearch.xpack.runtimefields.mapper.LongFieldScript.Factory",
+      "insertText": "org.elasticsearch.xpack.runtimefields.mapper.LongFieldScript.Factory",
       "properties": [
         {
           "label": "equals",

@@ -42425,10 +42425,10 @@
       ]
     },
     {
-      "label": "ScoreScript",
+      "label": "org.elasticsearch.script.ScoreScript",
       "kind": "class",
-      "documentation": "Class: ScoreScript",
-      "insertText": "ScoreScript",
+      "documentation": "Class: org.elasticsearch.script.ScoreScript",
+      "insertText": "org.elasticsearch.script.ScoreScript",
       "properties": [
         {
           "label": "equals",

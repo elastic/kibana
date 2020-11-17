@@ -42501,10 +42501,10 @@
       ]
     },
     {
-      "label": "DoubleFieldScript",
+      "label": "org.elasticsearch.xpack.runtimefields.mapper.DoubleFieldScript",
       "kind": "class",
-      "documentation": "Class: DoubleFieldScript",
-      "insertText": "DoubleFieldScript",
+      "documentation": "Class: org.elasticsearch.xpack.runtimefields.mapper.DoubleFieldScript",
+      "insertText": "org.elasticsearch.xpack.runtimefields.mapper.DoubleFieldScript",
       "properties": [
         {
           "label": "equals",
@@ -42527,10 +42527,10 @@
       ]
     },
     {
-      "label": "DoubleFieldScript.Factory",
+      "label": "org.elasticsearch.xpack.runtimefields.mapper.DoubleFieldScript.Factory",
       "kind": "class",
-      "documentation": "Class: DoubleFieldScript.Factory",
-      "insertText": "DoubleFieldScript.Factory",
+      "documentation": "Class: org.elasticsearch.xpack.runtimefields.mapper.DoubleFieldScript.Factory",
+      "insertText": "org.elasticsearch.xpack.runtimefields.mapper.DoubleFieldScript.Factory",
       "properties": [
         {
           "label": "equals",

@@ -38,8 +38,14 @@ const parameterIndexToLetterMap = {
  * @param {string} name
  * @returns {string}
  */
-const getDisplayName = (name) => {
-  const displayName = name.split('.').pop() || name;
+const getDisplayName = (name, imported) => {
+  let displayName = name;
+
+  // If imported === true, we assume it is a Java class and need the short name
+  if (imported) {
+    displayName = name.split('.').pop() || name;
+  }
+
   return displayName.replace('$', '.');
 };
 
@@ -241,13 +247,13 @@ const getPainlessClassToAutocomplete = (painlessClass) => {
   ];
 };
 
-const getPainlessConstructorToAutocomplete = (constructors) => {
+const getPainlessConstructorToAutocomplete = (constructors, imported) => {
   if (constructors.length) {
     // There are sometimes two constructor definitions if a parameter is accepted
     // We only care about getting the constructor name for now, so we can access the first one in the array
     const { declaring } = constructors[0];
     // The constructor name is sometimes prefixed by the Java package and needs to be removed
-    const constructorName = getDisplayName(declaring);
+    const constructorName = getDisplayName(declaring, imported);
 
     return {
       label: constructorName,
@@ -276,9 +282,10 @@ const createAutocompleteDefinitions = (painlessClasses) => {
       static_methods: staticMethods,
       methods,
       constructors,
+      imported,
     }) => {
       // The name is often prefixed by the Java package (e.g., Java.lang.Math) and needs to be removed
-      const displayName = getDisplayName(name);
+      const displayName = getDisplayName(name, imported);
       const isType = getPrimitives(painlessClasses).includes(name);
 
       const properties = getPainlessClassToAutocomplete({
@@ -288,7 +295,7 @@ const createAutocompleteDefinitions = (painlessClasses) => {
         methods,
       });
 
-      const constructorDefinition = getPainlessConstructorToAutocomplete(constructors);
+      const constructorDefinition = getPainlessConstructorToAutocomplete(constructors, imported);
 
       return {
         label: displayName,

@@ -42501,10 +42501,10 @@
       ]
     },
     {
-      "label": "DateFieldScript",
+      "label": "org.elasticsearch.xpack.runtimefields.mapper.DateFieldScript",
       "kind": "class",
-      "documentation": "Class: DateFieldScript",
-      "insertText": "DateFieldScript",
+      "documentation": "Class: org.elasticsearch.xpack.runtimefields.mapper.DateFieldScript",
+      "insertText": "org.elasticsearch.xpack.runtimefields.mapper.DateFieldScript",
       "properties": [
         {
           "label": "equals",
@@ -42527,10 +42527,10 @@
       ]
     },
     {
-      "label": "DateFieldScript.Factory",
+      "label": "org.elasticsearch.xpack.runtimefields.mapper.DateFieldScript.Factory",
       "kind": "class",
-      "documentation": "Class: DateFieldScript.Factory",
-      "insertText": "DateFieldScript.Factory",
+      "documentation": "Class: org.elasticsearch.xpack.runtimefields.mapper.DateFieldScript.Factory",
+      "insertText": "org.elasticsearch.xpack.runtimefields.mapper.DateFieldScript.Factory",
       "properties": [
         {
           "label": "equals",
