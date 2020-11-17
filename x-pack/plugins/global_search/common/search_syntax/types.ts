@@ -8,7 +8,7 @@ export type FilterValueType = string | boolean | number;
 
 export type FilterValues<ValueType extends FilterValueType = FilterValueType> = ValueType[];
 
-export interface SearchParams {
+export interface GlobalSearchProviderFindParams {
   /**
    * The parsed search term.
    * Can be undefined if the query was only composed of field terms.

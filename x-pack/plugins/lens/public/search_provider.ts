@@ -6,7 +6,7 @@
 
 import levenshtein from 'js-levenshtein';
 import { ApplicationStart } from 'kibana/public';
-import { from } from 'rxjs';
+import { from, of } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
 import { GlobalSearchResultProvider } from '../../global_search/public';
@@ -26,7 +26,10 @@ export const getSearchProvider: (
   uiCapabilities: Promise<ApplicationStart['capabilities']>
 ) => GlobalSearchResultProvider = (uiCapabilities) => ({
   id: 'lens',
-  find: (term) => {
+  find: ({ term = '', filters }) => {
+    if (filters.types && !filters.types.includes('application')) {
+      return of([]);
+    }
     return from(
       uiCapabilities.then(({ navLinks: { visualize: visualizeNavLink } }) => {
         if (!visualizeNavLink) {

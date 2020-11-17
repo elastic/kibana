@@ -5,4 +5,4 @@
  */
 
 export { parseSearchParams } from './parse_search_params';
-export { SearchParams, FilterValues, FilterValueType } from './types';
+export { GlobalSearchProviderFindParams, FilterValues, FilterValueType } from './types';

@@ -119,7 +119,9 @@ export function SearchBar({
       }
 
       let arr: GlobalSearchResult[] = [];
-      if (searchValue.length !== 0) trackUiMetric(METRIC_TYPE.COUNT, 'search_request');
+      if (searchValue.length !== 0) {
+        trackUiMetric(METRIC_TYPE.COUNT, 'search_request');
+      }
       searchSubscription.current = globalSearch(searchValue, {}).subscribe({
         next: ({ results }) => {
           if (searchValue.length > 0) {

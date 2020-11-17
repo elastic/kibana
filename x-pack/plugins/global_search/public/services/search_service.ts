@@ -15,6 +15,7 @@ import { takeInArray } from '../../common/operators';
 import { defaultMaxProviderResults } from '../../common/constants';
 import { processProviderResult } from '../../common/process_result';
 import { ILicenseChecker } from '../../common/license_checker';
+import { parseSearchParams } from '../../common/search_syntax';
 import { GlobalSearchResultProvider } from '../types';
 import { GlobalSearchClientConfigType } from '../config';
 import { GlobalSearchFindOptions } from './types';
@@ -147,8 +148,10 @@ export class SearchService {
       aborted$,
     });
 
+    const searchParams = parseSearchParams(term);
+
     const providersResults$ = [...this.providers.values()].map((provider) =>
-      provider.find(term, providerOptions).pipe(
+      provider.find(searchParams, providerOptions).pipe(
         takeInArray(this.maxProviderResults),
         takeUntil(aborted$),
         map((results) => results.map((r) => processResult(r)))

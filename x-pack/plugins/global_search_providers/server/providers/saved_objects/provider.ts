@@ -12,7 +12,7 @@ import { mapToResults } from './map_object_to_result';
 export const createSavedObjectsResultProvider = (): GlobalSearchResultProvider => {
   return {
     id: 'savedObjects',
-    find: (term, { aborted$, maxResults, preference }, { core }) => {
+    find: ({ term, filters }, { aborted$, maxResults, preference }, { core }) => {
       if (!term) {
         return of([]);
       }
@@ -24,7 +24,9 @@ export const createSavedObjectsResultProvider = (): GlobalSearchResultProvider =
 
       const searchableTypes = typeRegistry
         .getVisibleTypes()
+        .filter(filters.types ? (type) => filters.types!.includes(type.name) : () => true)
         .filter((type) => type.management?.defaultSearchField && type.management?.getInAppUrl);
+
       const searchFields = uniq(
         searchableTypes.map((type) => type.management!.defaultSearchField!)
       );

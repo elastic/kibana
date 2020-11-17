@@ -4,9 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Query } from '@elastic/eui';
+// @ts-expect-error need nested import, as this is also used on the server-side.
+//                  importing from eui entrypoint causes errors.
+import { Query } from '@elastic/eui/lib/components/search_bar/query';
 import { getSearchTerm, getFieldValueMap, applyAliases } from './query_utils';
-import { FilterValues, SearchParams } from './types';
+import { FilterValues, GlobalSearchProviderFindParams } from './types';
 
 const knownFilters = ['tag', 'type'];
 
@@ -15,7 +17,7 @@ const aliasMap = {
   type: ['types'],
 };
 
-export const parseSearchParams = (term: string): SearchParams => {
+export const parseSearchParams = (term: string): GlobalSearchProviderFindParams => {
   let query: Query;
 
   try {

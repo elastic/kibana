@@ -16,6 +16,7 @@ import {
   GlobalSearchBatchedResults,
   GlobalSearchProviderFindOptions,
   GlobalSearchProviderResult,
+  GlobalSearchProviderFindParams,
 } from '../common/types';
 import { SearchServiceSetup, SearchServiceStart } from './services';
 
@@ -97,7 +98,7 @@ export interface GlobalSearchResultProvider {
    * // returning all results in a single batch
    * setupDeps.globalSearch.registerResultProvider({
    *   id: 'my_provider',
-   *   find: (term, { aborted$, preference, maxResults }, context) => {
+   *   find: ({term, filters }, { aborted$, preference, maxResults }, context) => {
    *     const resultPromise = myService.search(term, { preference, maxResults }, context.core.savedObjects.client);
    *     return from(resultPromise).pipe(takeUntil(aborted$));
    *   },
@@ -105,7 +106,7 @@ export interface GlobalSearchResultProvider {
    * ```
    */
   find(
-    term: string,
+    search: GlobalSearchProviderFindParams,
     options: GlobalSearchProviderFindOptions,
     context: GlobalSearchProviderContext
   ): Observable<GlobalSearchProviderResult[]>;

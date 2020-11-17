@@ -7,6 +7,12 @@
 import { Observable } from 'rxjs';
 import { Serializable } from 'src/core/types';
 
+export {
+  FilterValues,
+  GlobalSearchProviderFindParams,
+  FilterValueType,
+} from './search_syntax/types';
+
 /**
  * Options provided to {@link GlobalSearchResultProvider | a result provider}'s `find` method.
  */
