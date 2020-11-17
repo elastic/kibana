@@ -69,8 +69,8 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
       params: newParams,
     };
   },
-  getPossibleOperationForField: ({ aggregationRestrictions, aggregatable, type }) => {
-    if (supportedTypes.has(type)) {
+  getPossibleOperationForField: ({ aggregationRestrictions, type }) => {
+    if (supportedTypes.has(type) && !aggregationRestrictions) {
       return { dataType: type as DataType, isBucketed: false, scale: 'ordinal' };
     }
   },
