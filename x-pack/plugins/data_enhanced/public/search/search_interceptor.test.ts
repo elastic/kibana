@@ -392,7 +392,7 @@ describe('EnhancedSearchInterceptor', () => {
 
       await timeTravel();
 
-      const areAllRequestsAborted = fetchMock.mock.calls.every(([{ signal }]) => signal?.aborted);
+      const areAllRequestsAborted = fetchMock.mock.calls.every((callArgs) => callArgs[1]?.aborted);
       expect(areAllRequestsAborted).toBe(true);
       expect(mockUsageCollector.trackQueriesCancelled).toBeCalledTimes(1);
     });
