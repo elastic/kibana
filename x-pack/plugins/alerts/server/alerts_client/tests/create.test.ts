@@ -34,7 +34,6 @@ const alertsClientParams: jest.Mocked<ConstructorOptions> = {
   namespace: 'default',
   getUserName: jest.fn(),
   createAPIKey: jest.fn(),
-  invalidateAPIKey: jest.fn(),
   logger: loggingSystemMock.create().get(),
   encryptedSavedObjectsClient: encryptedSavedObjects,
   getActionsClient: jest.fn(),
@@ -716,7 +715,7 @@ describe('create()', () => {
     expect(taskManager.schedule).not.toHaveBeenCalled();
   });
 
-  test('throws error and invalidates API key when create saved object fails', async () => {
+  test('throws error and add API key to invalidatePendingApiKey SO when create saved object fails', async () => {
     const data = getMockData();
     alertsClientParams.createAPIKey.mockResolvedValueOnce({
       apiKeysEnabled: true,
@@ -736,11 +735,25 @@ describe('create()', () => {
       ],
     });
     unsecuredSavedObjectsClient.create.mockRejectedValueOnce(new Error('Test failure'));
+    const createdAt = new Date().toISOString();
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: '1',
+      type: 'api_key_pending_invalidation',
+      attributes: {
+        apiKeyId: '123',
+        createdAt,
+      },
+      references: [],
+    });
     await expect(alertsClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Test failure"`
     );
     expect(taskManager.schedule).not.toHaveBeenCalled();
-    expect(alertsClientParams.invalidateAPIKey).toHaveBeenCalledWith({ id: '123' });
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(2);
+    expect(unsecuredSavedObjectsClient.create.mock.calls[1][1]).toStrictEqual({
+      apiKeyId: '123',
+      createdAt,
+    });
   });
 
   test('attempts to remove saved object if scheduling failed', async () => {
