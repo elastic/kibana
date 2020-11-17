@@ -15,6 +15,7 @@ import {
 } from '../../../common/types/alerts';
 import { PanelItem } from '../types';
 import { getFormattedDateForAlertState } from './get_formatted_date_for_alert_state';
+import { sortByNewestAlert } from './sort_by_newest_alert';
 
 export function getAlertPanelsByNode(
   panelTitle: string,
@@ -50,6 +51,12 @@ export function getAlertPanelsByNode(
       ][type] || { alert, states: [], count: 0 };
       alertsByNodes[state.stackProductUuid][type].count++;
       alertsByNodes[state.stackProductUuid][type].states.push(alertState);
+    }
+  }
+
+  for (const types of Object.values(alertsByNodes)) {
+    for (const { states } of Object.values(types)) {
+      states.sort(sortByNewestAlert);
     }
   }
 

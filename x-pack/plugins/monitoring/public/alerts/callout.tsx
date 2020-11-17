@@ -12,6 +12,9 @@ import {
   EuiListGroup,
   EuiListGroupItem,
   EuiTextColor,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
 } from '@elastic/eui';
 import { replaceTokens } from './lib/replace_tokens';
 import { AlertMessage, AlertState } from '../../common/types/alerts';
@@ -48,7 +51,19 @@ export const AlertsCallout: React.FC<Props> = (props: Props) => {
 
   const accordions = list.map((status, index) => {
     const buttonContent = (
-      <EuiTextColor color="danger">{replaceTokens(status.state.state.ui.message)}</EuiTextColor>
+      <div>
+        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiIcon type="alert" size="m" color="danger" />
+          </EuiFlexItem>
+
+          <EuiFlexItem>
+            <EuiTextColor color="danger">
+              {replaceTokens(status.state.state.ui.message)}
+            </EuiTextColor>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </div>
     );
 
     const accordion = (
@@ -62,7 +77,12 @@ export const AlertsCallout: React.FC<Props> = (props: Props) => {
           bordered={true}
           gutterSize="m"
           size="xs"
-          style={{ marginTop: '0.5rem', paddingTop: '0.5rem', paddingBottom: '0.5rem' }}
+          style={{
+            marginTop: '0.5rem',
+            paddingTop: '0.5rem',
+            paddingBottom: '0.5rem',
+            paddingLeft: `0.5rem`,
+          }}
         >
           {(status.state.state.ui.message.nextSteps || [])
             .filter(nextStepsFilter)
@@ -71,7 +91,6 @@ export const AlertsCallout: React.FC<Props> = (props: Props) => {
             })}
           <EuiListGroupItem label={<AlertConfiguration alert={status.alert.alert} compressed />} />
         </EuiListGroup>
-        {/* <EuiSpacer /> */}
       </EuiAccordion>
     );
 

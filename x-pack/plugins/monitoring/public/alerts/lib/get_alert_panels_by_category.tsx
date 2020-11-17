@@ -11,6 +11,7 @@ import { IAlertsContext } from '../context';
 import { AlertMessage, AlertState, CommonAlertStatus } from '../../../common/types/alerts';
 import { PanelItem } from '../types';
 import { getFormattedDateForAlertState } from './get_formatted_date_for_alert_state';
+import { sortByNewestAlert } from './sort_by_newest_alert';
 
 export function getAlertPanelsByCategory(
   panelTitle: string,
@@ -70,6 +71,12 @@ export function getAlertPanelsByCategory(
           alerts: firingAlertsInCategory,
         });
       }
+    }
+  }
+
+  for (const item of menu) {
+    for (const alert of item.alerts) {
+      alert.firingStates.sort(sortByNewestAlert);
     }
   }
 
