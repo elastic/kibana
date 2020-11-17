@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, of } from 'rxjs';
 import { pick } from 'lodash';
 import {
   CoreSetup,
@@ -29,7 +29,7 @@ import {
   SharedGlobalConfig,
   StartServicesAccessor,
 } from 'src/core/server';
-import { first } from 'rxjs/operators';
+import { catchError, first } from 'rxjs/operators';
 import { BfetchServerSetup } from 'src/plugins/bfetch/server';
 import { ExpressionsServerSetup } from 'src/plugins/expressions/server';
 import {
@@ -153,7 +153,21 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
               .search(requestData, {
                 strategy,
               })
-              .pipe(first())
+              .pipe(
+                first(),
+                catchError((err) => {
+                  // eslint-disable-next-line no-throw-literal
+                  throw {
+                    statusCode: err.statusCode || 500,
+                    body: {
+                      message: err.message,
+                      attributes: {
+                        error: err.body?.error || err.message,
+                      },
+                    },
+                  };
+                })
+              )
               .toPromise();
           },
         };
