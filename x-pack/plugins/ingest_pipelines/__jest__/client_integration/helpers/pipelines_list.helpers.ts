@@ -6,12 +6,7 @@
 
 import { act } from 'react-dom/test-utils';
 
-import {
-  registerTestBed,
-  TestBed,
-  TestBedConfig,
-  findTestSubject,
-} from '../../../../../test_utils';
+import { registerTestBed, TestBed, TestBedConfig, findTestSubject } from '@kbn/test/jest';
 import { PipelinesList } from '../../../public/application/sections/pipelines_list';
 import { WithAppDependencies } from './setup_environment';
 import { getListPath, ROUTES } from '../../../public/application/services/navigation';

@@ -13,7 +13,7 @@ import {
   IndexPatternDimensionEditorComponent,
   IndexPatternDimensionEditorProps,
 } from './dimension_panel';
-import { mountWithIntl as mount, shallowWithIntl as shallow } from 'test_utils/enzyme_helpers';
+import { mountWithIntl as mount, shallowWithIntl as shallow } from '@kbn/test/jest';
 import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup, CoreSetup } from 'kibana/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { IndexPatternPrivateState } from '../types';
