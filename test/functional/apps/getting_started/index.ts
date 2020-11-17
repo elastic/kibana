@@ -34,14 +34,14 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     describe('chartsLibrary', function () {
       before(async () => {
         await kibanaServer.uiSettings.update({
-          'visualization.visualize:chartsLibrary': true,
+          'visualization:visualize:chartsLibrary': true,
         });
         await browser.refresh();
       });
 
       after(async () => {
         await kibanaServer.uiSettings.update({
-          'visualization.visualize:chartsLibrary': false,
+          'visualization:visualize:chartsLibrary': false,
         });
         await browser.refresh();
       });

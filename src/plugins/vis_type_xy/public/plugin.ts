@@ -31,6 +31,7 @@ import {
   setColorsService,
   setTimefilter,
   setUISettings,
+  setDocLinks,
 } from './services';
 import { visTypesDefinitions } from './vis_types';
 import { CHARTS_LIBRARY } from '../common';
@@ -87,6 +88,7 @@ export class VisTypeXyPlugin
     setFormatService(data.fieldFormats);
     setDataActions(data.actions);
     setTimefilter(data.query.timefilter.timefilter);
+    setDocLinks(core.docLinks);
 
     return {};
   }

@@ -25,7 +25,10 @@ export function SplitTooltip() {
   return (
     <FormattedMessage
       id="visTypeXy.splitTitle.tooltip"
-      defaultMessage={`Split chart aggregation is not supported with the new charts library. Please disable the "Charts library" advanced setting to enable split chart aggregation.`}
+      defaultMessage="Split chart aggregation is not supported with the new {setting}. Please disable the {setting} advanced setting to enable split chart aggregation"
+      values={{
+        setting: <strong>charts library</strong>,
+      }}
     />
   );
 }

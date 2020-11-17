@@ -453,6 +453,9 @@ of buckets to try to represent.
 ==== Visualization
 
 [horizontal]
+[[visualization-visualize-chartslibrary]]`visualization:visualize:chartsLibrary`::
+Enables new charts library for areas, lines and bars in visualize. Currently, does *not* support split chart aggregation.
+
 [[visualization-colormapping]]`visualization:colorMapping`::
 Maps values to specified colors in visualizations.
 

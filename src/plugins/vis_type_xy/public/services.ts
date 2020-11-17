@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { CoreSetup } from '../../../core/public';
+import { CoreSetup, DocLinksStart } from '../../../core/public';
 import { createGetterSetter } from '../../kibana_utils/public';
 import { DataPublicPluginStart } from '../../data/public';
 import { ChartsPluginSetup } from '../../charts/public';
@@ -45,3 +45,5 @@ export const [getThemeService, setThemeService] = createGetterSetter<ChartsPlugi
 export const [getColorsService, setColorsService] = createGetterSetter<
   ChartsPluginSetup['legacyColors']
 >('xy charts.color');
+
+export const [getDocLinks, setDocLinks] = createGetterSetter<DocLinksStart>('DocLinks');

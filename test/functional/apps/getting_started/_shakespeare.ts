@@ -64,7 +64,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       if (isNewChartUiEnabled) {
         await kibanaServer.uiSettings.update({
-          'visualization.visualize:chartsLibrary': true,
+          'visualization:visualize:chartsLibrary': true,
         });
         await browser.refresh();
       }

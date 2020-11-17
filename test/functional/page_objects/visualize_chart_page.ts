@@ -45,7 +45,7 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
      */
     public async isNewChartUiEnabled(): Promise<boolean> {
       const enabled =
-        Boolean(await kibanaServer.uiSettings.get('visualization.visualize:chartsLibrary')) ??
+        Boolean(await kibanaServer.uiSettings.get('visualization:visualize:chartsLibrary')) ??
         false;
       log.debug(`-- isNewChartUiEnabled = ${enabled}`);
 

@@ -23,7 +23,11 @@ import { EuiLink, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
+import { getDocLinks } from '../services';
+
 export const SplitChartWarning: FC = () => {
+  const advancedSettingsLink = getDocLinks().links.management.visualizationSettings;
+
   return (
     <EuiCallOut
       title={i18n.translate('visTypeXy.splitChartWarning.title', {
@@ -34,14 +38,10 @@ export const SplitChartWarning: FC = () => {
     >
       <FormattedMessage
         id="visTypeXy.splitChartWarning.content"
-        defaultMessage="Split chart aggregation is not supported with the new charts library. Please disable the {link} advanced setting to enable split chart aggregation."
+        defaultMessage="The new charts library does not support split chart aggregation. Please disable the {link} advanced setting to use split chart aggregation."
         values={{
           link: (
-            <EuiLink
-              href="/app/management/kibana/settings/charts%20library"
-              target="_blank"
-              external
-            >
+            <EuiLink href={advancedSettingsLink} target="_blank" external>
               <FormattedMessage
                 id="visTypeXy.splitChartWarning.link"
                 defaultMessage="Charts library"
