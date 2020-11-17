@@ -26,28 +26,11 @@ import {
 } from '../../../common/search_strategies/log_entries/log_entry';
 import type { IInfraSources } from '../../lib/sources';
 import { ShardFailure } from '../../utils/elasticsearch_runtime_types';
-import { jsonFromBase64StringRT } from '../../utils/typed_search_strategy';
+import { createAsyncRequestRTs, jsonFromBase64StringRT } from '../../utils/typed_search_strategy';
 import { createGetLogEntryQuery, getLogEntryResponseRT, LogEntryHit } from './queries/log_entry';
 
 type LogEntrySearchRequest = IKibanaSearchRequest<LogEntrySearchRequestParams>;
 type LogEntrySearchResponse = IKibanaSearchResponse<LogEntrySearchResponsePayload>;
-
-export const logEntrySearchRequestStateRT = rt.string.pipe(jsonFromBase64StringRT).pipe(
-  rt.type({
-    esRequestId: rt.string,
-  })
-);
-
-const asyncGetRequestRT = rt.type({
-  id: logEntrySearchRequestStateRT,
-  params: logEntrySearchRequestParamsRT,
-});
-
-const asyncSubmitRequestRT = rt.type({
-  params: logEntrySearchRequestParamsRT,
-});
-
-const asyncRequestRT = rt.union([asyncGetRequestRT, asyncSubmitRequestRT]);
 
 export const logEntrySearchStrategyProvider = ({
   data,
@@ -117,6 +100,18 @@ export const logEntrySearchStrategyProvider = ({
     },
   };
 };
+
+// exported for tests
+export const logEntrySearchRequestStateRT = rt.string.pipe(jsonFromBase64StringRT).pipe(
+  rt.type({
+    esRequestId: rt.string,
+  })
+);
+
+const { asyncGetRequestRT, asyncRequestRT, asyncSubmitRequestRT } = createAsyncRequestRTs(
+  logEntrySearchRequestStateRT,
+  logEntrySearchRequestParamsRT
+);
 
 const createLogEntryFromHit = (hit: LogEntryHit) => ({
   id: hit._id,

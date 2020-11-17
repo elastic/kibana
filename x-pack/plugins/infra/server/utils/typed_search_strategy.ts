@@ -20,3 +20,25 @@ export const jsonFromBase64StringRT = new rt.Type<JsonValue, string, string>(
   },
   (a) => Buffer.from(stringify(a)).toString('base64')
 );
+
+export const createAsyncRequestRTs = <StateCodec extends rt.Mixed, ParamsCodec extends rt.Mixed>(
+  stateCodec: StateCodec,
+  paramsCodec: ParamsCodec
+) => {
+  const asyncGetRequestRT = rt.type({
+    id: stateCodec,
+    params: paramsCodec,
+  });
+
+  const asyncSubmitRequestRT = rt.type({
+    params: paramsCodec,
+  });
+
+  const asyncRequestRT = rt.union([asyncGetRequestRT, asyncSubmitRequestRT]);
+
+  return {
+    asyncGetRequestRT,
+    asyncRequestRT,
+    asyncSubmitRequestRT,
+  };
+};
