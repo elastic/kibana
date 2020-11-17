@@ -42,7 +42,7 @@ interface Props {
 }
 
 const INCLUDE_RELATED_DEFAULT = true;
-const CREATE_NEW_COPIES_DEFAULT = false;
+const CREATE_NEW_COPIES_DEFAULT = true;
 const OVERWRITE_ALL_DEFAULT = true;
 
 export const CopySavedObjectsToSpaceFlyout = (props: Props) => {

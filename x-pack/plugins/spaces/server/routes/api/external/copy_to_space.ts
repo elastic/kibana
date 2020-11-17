@@ -70,7 +70,7 @@ export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
             ),
             includeReferences: schema.boolean({ defaultValue: false }),
             overwrite: schema.boolean({ defaultValue: false }),
-            createNewCopies: schema.boolean({ defaultValue: false }),
+            createNewCopies: schema.boolean({ defaultValue: true }),
           },
           {
             validate: (object) => {
@@ -152,7 +152,7 @@ export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
             }
           ),
           includeReferences: schema.boolean({ defaultValue: false }),
-          createNewCopies: schema.boolean({ defaultValue: false }),
+          createNewCopies: schema.boolean({ defaultValue: true }),
         }),
       },
     },
