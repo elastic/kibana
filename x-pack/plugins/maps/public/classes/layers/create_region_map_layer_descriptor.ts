@@ -69,7 +69,7 @@ export function createRegionMapLayerDescriptor({
   const joinId = uuid();
   const joinKey = getJoinAggKey({
     aggType: metricsDescriptor.type,
-    aggFieldName: metricsDescriptor.field ? metricsDescriptor.field : '',
+    aggFieldName: 'field' in metricsDescriptor ? metricsDescriptor.field : '',
     rightSourceId: joinId,
   });
   const colorPallette = NUMERICAL_COLOR_PALETTES.find((pallette) => {
