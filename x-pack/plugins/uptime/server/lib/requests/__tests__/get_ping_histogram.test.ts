@@ -7,8 +7,13 @@
 import { getPingHistogram } from '../get_ping_histogram';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../common/constants';
 import { elasticsearchServiceMock } from '../../../../../../../src/core/server/mocks';
+import * as intervalHelper from '../../helper/get_histogram_interval';
 
 describe('getPingHistogram', () => {
+  beforeEach(() => {
+    jest.spyOn(intervalHelper, 'getHistogramInterval').mockReturnValue(36000);
+  });
+
   const standardMockResponse: any = {
     aggregations: {
       timeseries: {
