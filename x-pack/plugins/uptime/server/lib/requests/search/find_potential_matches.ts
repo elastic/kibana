@@ -81,11 +81,6 @@ const queryBody = async (queryContext: QueryContext, size: number, index: number
     },
     _source: 'monitor.id',
     aggs: {
-      has_timespan: {
-        filter: {
-          exists: { field: 'monitor.timespan' },
-        },
-      },
       totalMonitors: {
         cardinality: {
           field: 'monitor.id',

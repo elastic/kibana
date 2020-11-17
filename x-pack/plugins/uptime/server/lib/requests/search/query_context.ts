@@ -52,7 +52,8 @@ export class QueryContext {
 
   async count(params: any): Promise<any> {
     params.index = this.heartbeatIndices;
-    return this.callES.count(params);
+    const { body: result } = await this.callES.count(params);
+    return result;
   }
 
   async dateAndCustomFilters(): Promise<any[]> {
