@@ -16,12 +16,16 @@ import { i18n } from '@kbn/i18n';
 import { FormattedRelative } from '@kbn/i18n/react';
 import { useGetPackageInstallStatus } from '../../hooks';
 import { InstallStatus, PackagePolicy } from '../../../../types';
-import { useGetPackagePolicies, useLink } from '../../../../hooks';
+import { useLink } from '../../../../hooks';
 import {
   AGENT_SAVED_OBJECT_TYPE,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
 } from '../../../../../../../common/constants';
 import { useUrlPagination } from '../../../../hooks';
+import {
+  PackagePolicyEnriched,
+  useGetEnrichedPackagePolicies,
+} from './use_get_enriched_package_policies';
 
 const IntegrationDetailsLink = memo<{
   integrationPolicy: PackagePolicy;
@@ -81,7 +85,7 @@ export const PackagePoliciesPanel = ({ name, version }: PackagePoliciesPanelProp
   const getPackageInstallStatus = useGetPackageInstallStatus();
   const packageInstallStatus = getPackageInstallStatus(name);
   const { pagination, pageSizeOptions, setPagination } = useUrlPagination();
-  const { data } = useGetPackagePolicies({
+  const { data } = useGetEnrichedPackagePolicies({
     page: pagination.currentPage,
     perPage: pagination.pageSize,
     kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: ${name}`,
@@ -97,7 +101,7 @@ export const PackagePoliciesPanel = ({ name, version }: PackagePoliciesPanelProp
     [setPagination]
   );
 
-  const columns: Array<EuiTableFieldDataColumnType<PackagePolicy>> = useMemo(
+  const columns: Array<EuiTableFieldDataColumnType<PackagePolicyEnriched>> = useMemo(
     () => [
       {
         field: 'name',
@@ -121,8 +125,12 @@ export const PackagePoliciesPanel = ({ name, version }: PackagePoliciesPanelProp
           defaultMessage: 'Agent policy',
         }),
         truncateText: true,
-        render(id) {
-          return <AgentPolicyDetailLink agentPolicyId={id}>{id}</AgentPolicyDetailLink>;
+        render(id, packagePolicy) {
+          return (
+            <AgentPolicyDetailLink agentPolicyId={id}>
+              {packagePolicy._agentPolicy?.name ?? id}
+            </AgentPolicyDetailLink>
+          );
         },
       },
       {
@@ -133,10 +141,12 @@ export const PackagePoliciesPanel = ({ name, version }: PackagePoliciesPanelProp
         truncateText: true,
         align: 'right',
         width: '8ch',
-        render(packagePolicy) {
+        render(packagePolicy: PackagePolicyEnriched) {
           return (
             <PolicyAgentListLink agentPolicyId={packagePolicy.policy_id}>
-              <span>{'??'}</span>
+              {/* Fixme:PT follow up as to why `agents` is not part of the type */}
+              {/* @ts-ignore */}
+              {packagePolicy._agentPolicy?.agents ?? 0}
             </PolicyAgentListLink>
           );
         },
