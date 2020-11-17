@@ -983,6 +983,8 @@ export interface IFieldType {
     // (undocumented)
     count?: number;
     // (undocumented)
+    customName?: string;
+    // (undocumented)
     displayName?: string;
     // (undocumented)
     esTypes?: string[];
@@ -1104,6 +1106,10 @@ export class IndexPattern implements IIndexPattern {
     addScriptedField(name: string, script: string, fieldType?: string): Promise<void>;
     // (undocumented)
     deleteFieldFormat: (fieldName: string) => void;
+    // Warning: (ae-forgotten-export) The symbol "FieldAttrs" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    fieldAttrs: FieldAttrs;
     // (undocumented)
     fieldFormatMap: Record<string, any>;
     // (undocumented)
@@ -1129,6 +1135,7 @@ export class IndexPattern implements IIndexPattern {
         time_zone?: string | undefined;
     }>> | undefined;
     getAsSavedObjectBody(): {
+        fieldAttrs: string | undefined;
         title: string;
         timeFieldName: string | undefined;
         intervalName: string | undefined;
@@ -1148,12 +1155,19 @@ export class IndexPattern implements IIndexPattern {
         }[];
     };
     // (undocumented)
+    getFieldAttrs: () => {
+        [x: string]: {
+            customName: string;
+        };
+    };
+    // (undocumented)
     getFieldByName(name: string): IndexPatternField | undefined;
     getFormatterForField(field: IndexPatternField | IndexPatternField['spec'] | IFieldType): FieldFormat;
     getFormatterForFieldNoDefault(fieldname: string): FieldFormat | undefined;
     // (undocumented)
     getNonScriptedFields(): IndexPatternField[];
     getOriginalSavedObjectBody: () => {
+        fieldAttrs?: string | undefined;
         title?: string | undefined;
         timeFieldName?: string | undefined;
         intervalName?: string | undefined;
@@ -1219,6 +1233,8 @@ export type IndexPatternAggRestrictions = Record<string, {
 // @public (undocumented)
 export interface IndexPatternAttributes {
     // (undocumented)
+    fieldAttrs?: string;
+    // (undocumented)
     fieldFormatMap?: string;
     // (undocumented)
     fields: string;
@@ -1240,7 +1256,7 @@ export interface IndexPatternAttributes {
 //
 // @public (undocumented)
 export class IndexPatternField implements IFieldType {
-    constructor(spec: FieldSpec, displayName: string);
+    constructor(spec: FieldSpec);
     // (undocumented)
     get aggregatable(): boolean;
     get conflictDescriptions(): Record<string, string[]> | undefined;
@@ -1248,7 +1264,10 @@ export class IndexPatternField implements IFieldType {
     get count(): number;
     set count(count: number);
     // (undocumented)
-    readonly displayName: string;
+    get customName(): string | undefined;
+    set customName(label: string | undefined);
+    // (undocumented)
+    get displayName(): string;
     // (undocumented)
     get esTypes(): string[] | undefined;
     // (undocumented)
@@ -1285,6 +1304,7 @@ export class IndexPatternField implements IFieldType {
         aggregatable: boolean;
         readFromDocValues: boolean;
         subType: import("../types").IFieldSubType | undefined;
+        customName: string | undefined;
     };
     // (undocumented)
     toSpec({ getFormatterForField, }?: {
@@ -1333,6 +1353,8 @@ export type IndexPatternSelectProps = Required<Omit<EuiComboBoxProps<any>, 'isLo
 // @public (undocumented)
 export interface IndexPatternSpec {
     // (undocumented)
+    fieldAttrs?: FieldAttrs;
+    // (undocumented)
     fieldFormats?: Record<string, SerializedFieldFormat>;
     // (undocumented)
     fields?: IndexPatternFieldMap;
@@ -1369,7 +1391,7 @@ export class IndexPatternsService {
     //
     // (undocumented)
     ensureDefaultIndexPattern: EnsureDefaultIndexPattern;
-    fieldArrayToMap: (fields: FieldSpec[]) => Record<string, FieldSpec>;
+    fieldArrayToMap: (fields: FieldSpec[], fieldAttrs?: FieldAttrs | undefined) => Record<string, FieldSpec>;
     get: (id: string) => Promise<IndexPattern>;
     // Warning: (ae-forgotten-export) The symbol "IndexPatternSavedObjectAttrs" needs to be exported by the entry point index.d.ts
     //
@@ -2333,7 +2355,7 @@ export const UI_SETTINGS: {
 // src/plugins/data/common/es_query/filters/meta_filter.ts:54:3 - (ae-forgotten-export) The symbol "FilterMeta" needs to be exported by the entry point index.d.ts
 // src/plugins/data/common/es_query/filters/phrase_filter.ts:33:3 - (ae-forgotten-export) The symbol "PhraseFilterMeta" needs to be exported by the entry point index.d.ts
 // src/plugins/data/common/es_query/filters/phrases_filter.ts:31:3 - (ae-forgotten-export) The symbol "PhrasesFilterMeta" needs to be exported by the entry point index.d.ts
-// src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts:62:5 - (ae-forgotten-export) The symbol "FormatFieldFn" needs to be exported by the entry point index.d.ts
+// src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts:64:5 - (ae-forgotten-export) The symbol "FormatFieldFn" needs to be exported by the entry point index.d.ts
 // src/plugins/data/common/search/aggs/types.ts:113:51 - (ae-forgotten-export) The symbol "AggTypesRegistryStart" needs to be exported by the entry point index.d.ts
 // src/plugins/data/public/field_formats/field_formats_service.ts:67:3 - (ae-forgotten-export) The symbol "FormatFactory" needs to be exported by the entry point index.d.ts
 // src/plugins/data/public/index.ts:66:23 - (ae-forgotten-export) The symbol "FILTERS" needs to be exported by the entry point index.d.ts

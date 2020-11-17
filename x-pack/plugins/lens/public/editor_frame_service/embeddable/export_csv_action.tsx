@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { DataPublicPluginStart, exportAsCSVs, FieldFormat } from 'src/plugins/data/public';
+import { DataPublicPluginStart, exportAsCSVs } from 'src/plugins/data/public';
 import { IEmbeddable } from 'src/plugins/embeddable/public';
 import { Action } from 'src/plugins/ui_actions/public';
 import { CoreStart } from 'src/core/public';
