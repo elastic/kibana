@@ -7,12 +7,12 @@
 import * as rt from 'io-ts';
 import { concat, defer, of } from 'rxjs';
 import { concatMap, filter, map, shareReplay } from 'rxjs/operators';
-import {
+import type {
   IEsSearchRequest,
   IKibanaSearchRequest,
   IKibanaSearchResponse,
 } from '../../../../../../src/plugins/data/common';
-import {
+import type {
   ISearchStrategy,
   PluginStart as DataPluginStart,
 } from '../../../../../../src/plugins/data/server';
@@ -25,8 +25,11 @@ import {
   logEntrySearchResponsePayloadRT,
 } from '../../../common/search_strategies/log_entries/log_entry';
 import type { IInfraSources } from '../../lib/sources';
-import { ShardFailure } from '../../utils/elasticsearch_runtime_types';
-import { createAsyncRequestRTs, jsonFromBase64StringRT } from '../../utils/typed_search_strategy';
+import {
+  createAsyncRequestRTs,
+  createErrorFromShardFailure,
+  jsonFromBase64StringRT,
+} from '../../utils/typed_search_strategy';
 import { createGetLogEntryQuery, getLogEntryResponseRT, LogEntryHit } from './queries/log_entry';
 
 type LogEntrySearchRequest = IKibanaSearchRequest<LogEntrySearchRequestParams>;
@@ -117,14 +120,4 @@ const createLogEntryFromHit = (hit: LogEntryHit) => ({
   index: hit._index,
   key: getLogEntryCursorFromHit(hit),
   fields: Object.entries(hit.fields).map(([field, value]) => ({ field, value })),
-});
-
-const createErrorFromShardFailure = (failure: ShardFailure) => ({
-  type: 'shardFailure' as const,
-  shardInfo: {
-    index: failure.index,
-    node: failure.node,
-    shard: failure.shard,
-  },
-  message: failure.reason.reason,
 });

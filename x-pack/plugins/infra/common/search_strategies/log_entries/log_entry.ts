@@ -7,7 +7,7 @@
 import * as rt from 'io-ts';
 import { logEntryCursorRT } from '../../log_entry';
 import { jsonArrayRT } from '../../typed_json';
-import { errorRT } from '../common/errors';
+import { searchStrategyErrorRT } from '../common/errors';
 
 export const LOG_ENTRY_SEARCH_STRATEGY = 'infra-log-entry';
 
@@ -39,7 +39,7 @@ export const logEntrySearchResponsePayloadRT = rt.intersection([
     data: rt.union([logEntryRT, rt.null]),
   }),
   rt.partial({
-    errors: rt.array(errorRT),
+    errors: rt.array(searchStrategyErrorRT),
   }),
 ]);
 

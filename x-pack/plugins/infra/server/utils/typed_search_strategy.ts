@@ -7,6 +7,8 @@
 import * as rt from 'io-ts';
 import stringify from 'json-stable-stringify';
 import { JsonValue, jsonValueRT } from '../../common/typed_json';
+import { SearchStrategyError } from '../../common/search_strategies/common/errors';
+import { ShardFailure } from './elasticsearch_runtime_types';
 
 export const jsonFromBase64StringRT = new rt.Type<JsonValue, string, string>(
   'JSONFromBase64String',
@@ -42,3 +44,13 @@ export const createAsyncRequestRTs = <StateCodec extends rt.Mixed, ParamsCodec e
     asyncSubmitRequestRT,
   };
 };
+
+export const createErrorFromShardFailure = (failure: ShardFailure): SearchStrategyError => ({
+  type: 'shardFailure' as const,
+  shardInfo: {
+    index: failure.index,
+    node: failure.node,
+    shard: failure.shard,
+  },
+  message: failure.reason.reason,
+});

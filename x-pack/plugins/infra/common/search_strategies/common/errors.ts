@@ -6,7 +6,12 @@
 
 import * as rt from 'io-ts';
 
-export const errorRT = rt.type({
+const genericErrorRT = rt.type({
+  type: rt.literal('generic'),
+  message: rt.string,
+});
+
+const shardFailureErrorRT = rt.type({
   type: rt.literal('shardFailure'),
   shardInfo: rt.type({
     shard: rt.number,
@@ -15,3 +20,7 @@ export const errorRT = rt.type({
   }),
   message: rt.string,
 });
+
+export const searchStrategyErrorRT = rt.union([genericErrorRT, shardFailureErrorRT]);
+
+export type SearchStrategyError = rt.TypeOf<typeof searchStrategyErrorRT>;
