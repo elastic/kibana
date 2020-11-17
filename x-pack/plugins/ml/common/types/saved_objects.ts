@@ -5,3 +5,13 @@
  */
 
 export type JobType = 'anomaly-detector' | 'data-frame-analytics';
+export const ML_SAVED_OBJECT_TYPE = 'ml-job';
+
+type Result = Record<string, { success: boolean; error?: any }>;
+
+export interface RepairSavedObjectResponse {
+  savedObjectsCreated: Result;
+  savedObjectsDeleted: Result;
+  datafeedsAdded: Result;
+  datafeedsRemoved: Result;
+}

@@ -16,16 +16,16 @@ import {
 import { ConfigType } from '../index';
 import { JSON_HEADER, READ_ONLY_MODE_HEADER } from '../../common/constants';
 
-interface IConstructorDependencies {
+interface ConstructorDependencies {
   config: ConfigType;
   log: Logger;
 }
-interface IRequestParams<ResponseBody> {
+interface RequestParams<ResponseBody> {
   path: string;
   params?: object;
   hasValidData?: (body?: ResponseBody) => boolean;
 }
-interface IErrorResponse {
+interface ErrorResponse {
   message: string;
   attributes: {
     errors: string[];
@@ -48,7 +48,7 @@ export class EnterpriseSearchRequestHandler {
   private log: Logger;
   private headers: Record<string, string> = {};
 
-  constructor({ config, log }: IConstructorDependencies) {
+  constructor({ config, log }: ConstructorDependencies) {
     this.log = log;
     this.enterpriseSearchUrl = config.host as string;
   }
@@ -57,7 +57,7 @@ export class EnterpriseSearchRequestHandler {
     path,
     params = {},
     hasValidData = () => true,
-  }: IRequestParams<ResponseBody>) {
+  }: RequestParams<ResponseBody>) {
     return async (
       _context: RequestHandlerContext,
       request: KibanaRequest<unknown, unknown, unknown>,
@@ -136,7 +136,7 @@ export class EnterpriseSearchRequestHandler {
     const contentType = apiResponse.headers.get('content-type') || '';
 
     // Default response
-    let body: IErrorResponse = {
+    let body: ErrorResponse = {
       message: statusText,
       attributes: { errors: [statusText] },
     };

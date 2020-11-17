@@ -12,6 +12,7 @@ import {
   getDatasourceSuggestionsFromCurrentState,
   getDatasourceSuggestionsForVisualizeField,
 } from './indexpattern_suggestions';
+import { documentField } from './document_field';
 import { getFieldByNameFactory } from './pure_helpers';
 
 jest.mock('./loader');
@@ -60,6 +61,7 @@ const fieldsOne = [
     aggregatable: true,
     searchable: true,
   },
+  documentField,
 ];
 
 const fieldsTwo = [
@@ -116,6 +118,7 @@ const fieldsTwo = [
       },
     },
   },
+  documentField,
 ];
 
 const expectedIndexPatterns = {
@@ -290,13 +293,13 @@ describe('IndexPattern Data Source suggestions', () => {
             state: expect.objectContaining({
               layers: {
                 id1: expect.objectContaining({
-                  columnOrder: ['id2', 'id3'],
+                  columnOrder: ['id3', 'id2'],
                   columns: {
-                    id2: expect.objectContaining({
+                    id3: expect.objectContaining({
                       operationType: 'date_histogram',
                       sourceField: 'timestamp',
                     }),
-                    id3: expect.objectContaining({
+                    id2: expect.objectContaining({
                       operationType: 'avg',
                       sourceField: 'bytes',
                     }),
@@ -310,10 +313,10 @@ describe('IndexPattern Data Source suggestions', () => {
               isMultiRow: true,
               columns: [
                 expect.objectContaining({
-                  columnId: 'id2',
+                  columnId: 'id3',
                 }),
                 expect.objectContaining({
-                  columnId: 'id3',
+                  columnId: 'id2',
                 }),
               ],
               layerId: 'id1',
@@ -510,13 +513,13 @@ describe('IndexPattern Data Source suggestions', () => {
             state: expect.objectContaining({
               layers: {
                 previousLayer: expect.objectContaining({
-                  columnOrder: ['id1', 'id2'],
+                  columnOrder: ['id2', 'id1'],
                   columns: {
-                    id1: expect.objectContaining({
+                    id2: expect.objectContaining({
                       operationType: 'date_histogram',
                       sourceField: 'timestamp',
                     }),
-                    id2: expect.objectContaining({
+                    id1: expect.objectContaining({
                       operationType: 'avg',
                       sourceField: 'bytes',
                     }),
@@ -530,10 +533,10 @@ describe('IndexPattern Data Source suggestions', () => {
               isMultiRow: true,
               columns: [
                 expect.objectContaining({
-                  columnId: 'id1',
+                  columnId: 'id2',
                 }),
                 expect.objectContaining({
-                  columnId: 'id2',
+                  columnId: 'id1',
                 }),
               ],
               layerId: 'previousLayer',
@@ -757,9 +760,9 @@ describe('IndexPattern Data Source suggestions', () => {
               layers: {
                 previousLayer: initialState.layers.previousLayer,
                 currentLayer: expect.objectContaining({
-                  columnOrder: ['id1', 'colb'],
+                  columnOrder: ['cola', 'colb'],
                   columns: {
-                    id1: expect.objectContaining({
+                    cola: expect.objectContaining({
                       operationType: 'date_histogram',
                       sourceField: 'start_date',
                     }),
@@ -867,7 +870,7 @@ describe('IndexPattern Data Source suggestions', () => {
         );
       });
 
-      it('replaces a metric column on a number field if only one other metric is already set', () => {
+      it('suggests both replacing and adding metric if only one other metric is set', () => {
         const initialState = stateWithNonEmptyTables();
         const suggestions = getDatasourceSuggestionsForField(initialState, '1', {
           name: 'memory',
@@ -886,6 +889,26 @@ describe('IndexPattern Data Source suggestions', () => {
                   columns: {
                     cola: initialState.layers.currentLayer.columns.cola,
                     colb: expect.objectContaining({
+                      operationType: 'avg',
+                      sourceField: 'memory',
+                    }),
+                  },
+                }),
+              }),
+            }),
+          })
+        );
+
+        expect(suggestions).toContainEqual(
+          expect.objectContaining({
+            state: expect.objectContaining({
+              layers: expect.objectContaining({
+                currentLayer: expect.objectContaining({
+                  columnOrder: ['cola', 'colb', 'id1'],
+                  columns: {
+                    cola: initialState.layers.currentLayer.columns.cola,
+                    colb: initialState.layers.currentLayer.columns.colb,
+                    id1: expect.objectContaining({
                       operationType: 'avg',
                       sourceField: 'memory',
                     }),
@@ -941,7 +964,20 @@ describe('IndexPattern Data Source suggestions', () => {
         );
       });
 
-      it('adds a metric column on a number field if 2 or more other metric', () => {
+      it('skips duplicates when the field is already in use', () => {
+        const initialState = stateWithNonEmptyTables();
+        const suggestions = getDatasourceSuggestionsForField(initialState, '1', {
+          name: 'bytes',
+          displayName: 'bytes',
+          type: 'number',
+          aggregatable: true,
+          searchable: true,
+        });
+
+        expect(suggestions).not.toContain(expect.objectContaining({ changeType: 'extended' }));
+      });
+
+      it('skips duplicates when the document-specific field is already in use', () => {
         const initialState = stateWithNonEmptyTables();
         const modifiedState: IndexPatternPrivateState = {
           ...initialState,
@@ -951,45 +987,20 @@ describe('IndexPattern Data Source suggestions', () => {
               ...initialState.layers.currentLayer,
               columns: {
                 ...initialState.layers.currentLayer.columns,
-                colc: {
-                  dataType: 'number',
+                colb: {
+                  label: 'Count of records',
+                  dataType: 'document',
                   isBucketed: false,
-                  sourceField: 'dest',
-                  label: 'Unique count of dest',
-                  operationType: 'cardinality',
+
+                  operationType: 'count',
+                  sourceField: 'Records',
                 },
               },
-              columnOrder: ['cola', 'colb', 'colc'],
             },
           },
         };
-        const suggestions = getDatasourceSuggestionsForField(modifiedState, '1', {
-          name: 'memory',
-          displayName: 'memory',
-          type: 'number',
-          aggregatable: true,
-          searchable: true,
-        });
-
-        expect(suggestions).toContainEqual(
-          expect.objectContaining({
-            state: expect.objectContaining({
-              layers: {
-                previousLayer: modifiedState.layers.previousLayer,
-                currentLayer: expect.objectContaining({
-                  columnOrder: ['cola', 'colb', 'colc', 'id1'],
-                  columns: {
-                    ...modifiedState.layers.currentLayer.columns,
-                    id1: expect.objectContaining({
-                      operationType: 'avg',
-                      sourceField: 'memory',
-                    }),
-                  },
-                }),
-              },
-            }),
-          })
-        );
+        const suggestions = getDatasourceSuggestionsForField(modifiedState, '1', documentField);
+        expect(suggestions).not.toContain(expect.objectContaining({ changeType: 'extended' }));
       });
     });
 

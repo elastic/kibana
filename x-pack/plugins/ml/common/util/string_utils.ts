@@ -39,3 +39,11 @@ export function stringHash(str: string): number {
   }
   return hash < 0 ? hash * -2 : hash;
 }
+
+export function getGroupQueryText(groupIds: string[]): string {
+  return `groups:(${groupIds.join(' or ')})`;
+}
+
+export function getJobQueryText(jobIds: string | string[]): string {
+  return Array.isArray(jobIds) ? `id:(${jobIds.join(' OR ')})` : jobIds;
+}
