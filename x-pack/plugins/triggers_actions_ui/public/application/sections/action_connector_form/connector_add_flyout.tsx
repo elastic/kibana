@@ -56,6 +56,7 @@ export const ConnectorAddFlyout = ({
   const [hasActionsUpgradeableByTrial, setHasActionsUpgradeableByTrial] = useState<boolean>(false);
 
   // hooks
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const initialConnector = {
     actionTypeId: actionType?.id ?? '',
     config: {},
