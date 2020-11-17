@@ -407,7 +407,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           target,
           targetMappings: mergeMappings(stateP.targetMappings, indices[source].mappings),
           versionIndexReadyActions: Option.some([
-            { remove: { index: source, alias: currentAlias(stateP), must_exist: true } },
+            { remove: { index: source, alias: currentAlias(stateP) /* must_exist: true*/ } }, // TODO: blocked by https://github.com/elastic/elasticsearch/issues/62642
             { add: { index: target, alias: currentAlias(stateP) } },
             { add: { index: target, alias: versionAlias(stateP) } },
           ]),
@@ -603,6 +603,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       };
     }
   } else if (stateP.controlState === 'MARK_VERSION_INDEX_READY') {
+    // TODO Handle "required alias [.kibana] does not exist" errors blocked by https://github.com/elastic/elasticsearch/issues/62642
     return { ...stateP, controlState: 'DONE' };
   } else if (stateP.controlState === 'DONE' || stateP.controlState === 'FATAL') {
     return stateP;
@@ -803,13 +804,12 @@ export async function migrationStateMachine({
       throw new Error("Control state didn't change after 10 steps aborting.");
     }
     state = newState;
-    console.log(
-      chalk.magentaBright(`${state.controlState}:${state.indexPrefix}` + '\n'),
-      JSON.stringify(state)
-    );
+    // @ts-expect-error
+    const { outdatedDocuments, ...logState } = state;
+    console.log(chalk.magentaBright(`${state.controlState}:${state.indexPrefix}` + '\n'), logState);
 
     nextAction = next(client, transformRawDocs, state);
   }
 
-  console.log(chalk.greenBright('DONE\n'), state);
+  console.log(chalk.greenBright('DONE\n'));
 }

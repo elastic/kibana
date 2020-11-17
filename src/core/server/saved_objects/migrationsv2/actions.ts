@@ -397,7 +397,7 @@ export interface UpdateAliasesResponse {}
 
 export type AliasAction =
   | { remove_index: { index: string } }
-  | { remove: { index: string; alias: string; must_exist: boolean } }
+  | { remove: { index: string; alias: string /* must_exist: boolean*/ } }
   | { add: { index: string; alias: string } };
 
 /**
@@ -409,7 +409,6 @@ export const updateAliases = (
   client: ElasticsearchClient,
   aliasActions: AliasAction[]
 ): TaskEither.TaskEither<ExpectedErrors, UpdateAliasesResponse> => () => {
-  console.log(JSON.stringify(aliasActions));
   return client.indices
     .updateAliases({
       body: {
@@ -417,7 +416,6 @@ export const updateAliases = (
       },
     })
     .then((res) => {
-      console.log(res);
       return Either.right({});
     })
     .catch((err) => {
@@ -633,7 +631,6 @@ export const search = (
       ],
     })
     .then((res) => {
-      console.log(res.body.hits.hits);
       // Check that all shards successfully executed the query
       // Kibana uses a single shard by default but users can override this
       if (res.body._shards.successful < res.body._shards.total) {
@@ -667,7 +664,6 @@ export const scroll = (
       scroll_id: scrollId,
     })
     .then((res) => {
-      console.log(res);
       // Check that all shards successfully executed the query
       // Kibana uses a single shard by default but users can override this
       if (res.body._shards.successful < res.body._shards.total) {
@@ -740,7 +736,6 @@ export const bulkIndex = (
       }),
     })
     .then((res) => {
-      console.log(res.body.errors, res.body?.items?.[0]);
       // TODO follow-up with es-distrib team: update operations can cause
       // version conflicts even when no seq_no is specified, can we be sure
       // that a bulk index version conflict can _only_ be caused by another

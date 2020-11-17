@@ -9,6 +9,11 @@
    (e.g. in `.kibana`, `.kibana_N` or perhaps a combination of both). We can
    prepare a `.kibana_7.11.0_001` index and ask users to manually reindex
    documents into this index.
+ - [ ] The ES docs added a new recommendation to use search_after instead of
+   scroll searches for paging through > 10k results. We don't actually need a
+   "search context", a "point in time" or stable sorting so we could just
+   perform a new search for the next batch of unmigrated documents and repeat
+   this until there are no more unmigrated documents.
 
 ## Manual QA Test Plan
 ### 1. Legacy pre-migration
@@ -25,8 +30,8 @@ We have the following potential legacy indices:
    using Saved Objects in v7.4 https://github.com/elastic/kibana/pull/39829)
 
 Test plan:
-1. Ensure that the different versions of Kibana can successfully upgrade to
-   7.11. Testing upgrades from 6.4 and 7.3 are particularly important.
+1. Ensure that the different versions of Kibana listed above can successfully
+   upgrade to 7.11.
 2. Ensure that multiple Kibana nodes can migrate a legacy index in parallel
    (choose a representative legacy version to test with e.g. v6.4). Add a lot
    of Saved Objects to Kibana to increase the time it takes for a migration to

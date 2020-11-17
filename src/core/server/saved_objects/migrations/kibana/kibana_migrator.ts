@@ -71,7 +71,8 @@ export interface KibanaMigratorStatus {
  */
 export class KibanaMigrator {
   private readonly client: ElasticsearchClient;
-  private readonly savedObjectsConfig: SavedObjectsMigrationConfigType;
+  // TODO migrationsV2: make private once we release migrations v2
+  public readonly savedObjectsConfig: SavedObjectsMigrationConfigType;
   private readonly documentMigrator: VersionedTransformer;
   private readonly kibanaConfig: KibanaConfigType;
   private readonly log: Logger;
@@ -84,7 +85,8 @@ export class KibanaMigrator {
   });
   private readonly activeMappings: IndexMapping;
   private migrationsRetryDelay?: number;
-  private kibanaVersion: string;
+  // TODO migrationsV2: make private once we release migrations v2
+  public kibanaVersion: string;
 
   /**
    * Creates an instance of KibanaMigrator.
@@ -170,8 +172,8 @@ export class KibanaMigrator {
     });
 
     const migrators = Object.keys(indexMap).map((index) => {
-      // [Object.keys(indexMap)[0]].map((index) => {
-      if (true) {
+      // TODO migrationsV2: remove once we release migrations v2
+      if (this.savedObjectsConfig.enableV2) {
         return {
           migrate: (): Promise<MigrationResult> => {
             return migrationStateMachine({
