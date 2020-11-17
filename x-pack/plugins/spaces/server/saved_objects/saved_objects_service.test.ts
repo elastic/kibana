@@ -5,6 +5,7 @@
  */
 
 import { coreMock } from 'src/core/server/mocks';
+import { SPACES_TELEMETRY_TYPE } from '../constants';
 import { spacesServiceMock } from '../spaces_service/spaces_service.mock';
 import { SpacesSavedObjectsService } from './saved_objects_service';
 
@@ -17,51 +18,15 @@ describe('SpacesSavedObjectsService', () => {
       const service = new SpacesSavedObjectsService();
       service.setup({ core, getSpacesService: () => spacesService });
 
-      expect(core.savedObjects.registerType).toHaveBeenCalledTimes(1);
-      expect(core.savedObjects.registerType.mock.calls[0]).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "hidden": true,
-            "mappings": Object {
-              "properties": Object {
-                "_reserved": Object {
-                  "type": "boolean",
-                },
-                "color": Object {
-                  "type": "keyword",
-                },
-                "description": Object {
-                  "type": "text",
-                },
-                "disabledFeatures": Object {
-                  "type": "keyword",
-                },
-                "imageUrl": Object {
-                  "index": false,
-                  "type": "text",
-                },
-                "initials": Object {
-                  "type": "keyword",
-                },
-                "name": Object {
-                  "fields": Object {
-                    "keyword": Object {
-                      "ignore_above": 2048,
-                      "type": "keyword",
-                    },
-                  },
-                  "type": "text",
-                },
-              },
-            },
-            "migrations": Object {
-              "6.6.0": [Function],
-            },
-            "name": "space",
-            "namespaceType": "agnostic",
-          },
-        ]
-      `);
+      expect(core.savedObjects.registerType).toHaveBeenCalledTimes(2);
+      expect(core.savedObjects.registerType).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({ name: 'space' })
+      );
+      expect(core.savedObjects.registerType).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({ name: SPACES_TELEMETRY_TYPE })
+      );
     });
 
     it('registers the client wrapper', () => {

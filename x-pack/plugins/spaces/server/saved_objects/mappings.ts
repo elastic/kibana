@@ -38,3 +38,46 @@ export const SpacesSavedObjectMappings = deepFreeze({
     },
   },
 });
+
+export const SpacesTelemetryMappings = deepFreeze({
+  properties: {
+    apiCalls: {
+      type: 'object',
+      properties: {
+        copySavedObjects: {
+          type: 'object',
+          properties: {
+            total: { type: 'long' },
+            createNewCopies: {
+              type: 'object',
+              properties: {
+                enabled: { type: 'long' },
+                disabled: { type: 'long' },
+              },
+            },
+            overwrite: {
+              type: 'object',
+              properties: {
+                enabled: { type: 'long' },
+                disabled: { type: 'long' },
+              },
+            },
+          },
+        },
+        resolveCopySavedObjectsErrors: {
+          type: 'object',
+          properties: {
+            total: { type: 'long' },
+            createNewCopies: {
+              type: 'object',
+              properties: {
+                enabled: { type: 'long' },
+                disabled: { type: 'long' },
+              },
+            },
+          },
+        },
+      },
+    },
+  },
+});

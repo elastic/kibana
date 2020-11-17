@@ -20,8 +20,8 @@ import {
 import { LicensingPluginSetup } from '../../licensing/server';
 import { createSpacesTutorialContextFactory } from './lib/spaces_tutorial_context_factory';
 import { registerSpacesUsageCollector } from './usage_collection';
-import { SpacesService, SpacesServiceStart } from './spaces_service';
-import { SpacesServiceSetup } from './spaces_service';
+import { SpacesService, SpacesServiceSetup, SpacesServiceStart } from './spaces_service';
+import { TelemetryService } from './telemetry_service';
 import { ConfigType } from './config';
 import { initSpacesRequestInterceptors } from './lib/request_interceptors';
 import { initExternalSpacesApi } from './routes/api/external';
@@ -99,6 +99,10 @@ export class Plugin {
       return this.spacesServiceStart;
     };
 
+    const telemetryServicePromise = new TelemetryService(this.log).setup({
+      getStartServices: core.getStartServices,
+    });
+
     const savedObjectsService = new SpacesSavedObjectsService();
     savedObjectsService.setup({ core, getSpacesService });
 
@@ -126,6 +130,7 @@ export class Plugin {
       getStartServices: core.getStartServices,
       getImportExportObjectLimit: core.savedObjects.getImportExportObjectLimit,
       getSpacesService,
+      telemetryServicePromise,
     });
 
     const internalRouter = core.http.createRouter();
@@ -148,6 +153,7 @@ export class Plugin {
         kibanaIndexConfig$: this.kibanaIndexConfig$,
         features: plugins.features,
         licensing: plugins.licensing,
+        telemetryServicePromise,
       });
     }
 

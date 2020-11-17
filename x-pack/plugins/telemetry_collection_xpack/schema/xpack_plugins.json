@@ -3337,6 +3337,54 @@
         },
         "count": {
           "type": "long"
+        },
+        "apiCalls": {
+          "properties": {
+            "copySavedObjects": {
+              "properties": {
+                "total": {
+                  "type": "long"
+                },
+                "createNewCopies": {
+                  "properties": {
+                    "enabled": {
+                      "type": "long"
+                    },
+                    "disabled": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "overwrite": {
+                  "properties": {
+                    "enabled": {
+                      "type": "long"
+                    },
+                    "disabled": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "resolveCopySavedObjectsErrors": {
+              "properties": {
+                "total": {
+                  "type": "long"
+                },
+                "createNewCopies": {
+                  "properties": {
+                    "enabled": {
+                      "type": "long"
+                    },
+                    "disabled": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            }
+          }
         }
       }
     },

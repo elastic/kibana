@@ -21,6 +21,7 @@ import {
 import { SpacesService } from '../../../spaces_service';
 import { spacesConfig } from '../../../lib/__fixtures__';
 import { SpacesClientService } from '../../../spaces_client';
+import { telemetryServiceMock } from '../../../telemetry_service/telemetry_service.mock';
 
 describe('GET space', () => {
   const spacesSavedObjects = createSpaces();
@@ -46,6 +47,8 @@ describe('GET space', () => {
       basePath: httpService.basePath,
     });
 
+    const telemetryServicePromise = Promise.resolve(telemetryServiceMock.createSetupContract());
+
     const clientServiceStart = clientService.start(coreStart);
 
     const spacesServiceStart = service.start({
@@ -59,6 +62,7 @@ describe('GET space', () => {
       getImportExportObjectLimit: () => 1000,
       log,
       getSpacesService: () => spacesServiceStart,
+      telemetryServicePromise,
     });
 
     return {

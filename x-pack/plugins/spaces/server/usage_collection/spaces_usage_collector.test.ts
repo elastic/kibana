@@ -9,6 +9,9 @@ import * as Rx from 'rxjs';
 import { PluginsSetup } from '../plugin';
 import { KibanaFeature } from '../../../features/server';
 import { ILicense, LicensingPluginSetup } from '../../../licensing/server';
+import { telemetryClientMock } from '../lib/telemetry_client/telemetry_client.mock';
+import { SpacesTelemetry } from '../model/spaces_telemetry';
+import { telemetryServiceMock } from '../telemetry_service/telemetry_service.mock';
 import { pluginInitializerContextConfigMock } from 'src/core/server/mocks';
 import { createCollectorFetchContextMock } from 'src/plugins/usage_collection/server/mocks';
 
@@ -16,6 +19,20 @@ interface SetupOpts {
   license?: Partial<ILicense>;
   features?: KibanaFeature[];
 }
+
+const MOCK_TELEMETRY_DATA: SpacesTelemetry = {
+  apiCalls: {
+    copySavedObjects: {
+      total: 5,
+      createNewCopies: { enabled: 2, disabled: 3 },
+      overwrite: { enabled: 1, disabled: 4 },
+    },
+    resolveCopySavedObjectsErrors: {
+      total: 13,
+      createNewCopies: { enabled: 6, disabled: 7 },
+    },
+  },
+};
 
 function setup({
   license = { isAvailable: true },
@@ -41,12 +58,18 @@ function setup({
     getKibanaFeatures: jest.fn().mockReturnValue(features),
   } as unknown) as PluginsSetup['features'];
 
+  const telemetryClient = telemetryClientMock.create();
+  telemetryClient.getTelemetryData.mockResolvedValue(MOCK_TELEMETRY_DATA);
+  const telemetryService = telemetryServiceMock.createSetupContract(telemetryClient);
+
   return {
     licensing,
     features: featuresSetup,
     usageCollection: {
       makeUsageCollector: (options: any) => new MockUsageCollector(options),
     },
+    telemetryService,
+    telemetryClient,
   };
 }
 
@@ -77,26 +100,28 @@ const getMockFetchContext = (mockedCallCluster: jest.Mock) => {
 
 describe('error handling', () => {
   it('handles a 404 when searching for space usage', async () => {
-    const { features, licensing, usageCollection } = setup({
+    const { features, licensing, usageCollection, telemetryService } = setup({
       license: { isAvailable: true, type: 'basic' },
     });
     const collector = getSpacesUsageCollector(usageCollection as any, {
       kibanaIndexConfig$: Rx.of({ kibana: { index: '.kibana' } }),
       features,
       licensing,
+      telemetryServicePromise: Promise.resolve(telemetryService),
     });
 
     await collector.fetch(getMockFetchContext(jest.fn().mockRejectedValue({ status: 404 })));
   });
 
   it('throws error for a non-404', async () => {
-    const { features, licensing, usageCollection } = setup({
+    const { features, licensing, usageCollection, telemetryService } = setup({
       license: { isAvailable: true, type: 'basic' },
     });
     const collector = getSpacesUsageCollector(usageCollection as any, {
       kibanaIndexConfig$: Rx.of({ kibana: { index: '.kibana' } }),
       features,
       licensing,
+      telemetryServicePromise: Promise.resolve(telemetryService),
     });
 
     const statusCodes = [401, 402, 403, 500];
@@ -111,14 +136,16 @@ describe('error handling', () => {
 
 describe('with a basic license', () => {
   let usageStats: UsageStats;
+  const { features, licensing, usageCollection, telemetryService, telemetryClient } = setup({
+    license: { isAvailable: true, type: 'basic' },
+  });
+
   beforeAll(async () => {
-    const { features, licensing, usageCollection } = setup({
-      license: { isAvailable: true, type: 'basic' },
-    });
     const collector = getSpacesUsageCollector(usageCollection as any, {
       kibanaIndexConfig$: pluginInitializerContextConfigMock({}).legacy.globalConfig$,
       features,
       licensing,
+      telemetryServicePromise: Promise.resolve(telemetryService),
     });
     usageStats = await collector.fetch(getMockFetchContext(defaultCallClusterMock));
 
@@ -157,16 +184,26 @@ describe('with a basic license', () => {
       feature2: 0,
     });
   });
+
+  test('fetches telemetry data', () => {
+    expect(telemetryService.getClient).toHaveBeenCalledTimes(1);
+    expect(telemetryClient.getTelemetryData).toHaveBeenCalledTimes(1);
+    expect(usageStats).toEqual(expect.objectContaining(MOCK_TELEMETRY_DATA));
+  });
 });
 
 describe('with no license', () => {
   let usageStats: UsageStats;
+  const { features, licensing, usageCollection, telemetryService, telemetryClient } = setup({
+    license: { isAvailable: false },
+  });
+
   beforeAll(async () => {
-    const { features, licensing, usageCollection } = setup({ license: { isAvailable: false } });
     const collector = getSpacesUsageCollector(usageCollection as any, {
       kibanaIndexConfig$: pluginInitializerContextConfigMock({}).legacy.globalConfig$,
       features,
       licensing,
+      telemetryServicePromise: Promise.resolve(telemetryService),
     });
     usageStats = await collector.fetch(getMockFetchContext(defaultCallClusterMock));
   });
@@ -186,18 +223,26 @@ describe('with no license', () => {
   test('does not set feature control usage', () => {
     expect(usageStats.usesFeatureControls).toBeUndefined();
   });
+
+  test('does not fetch telemetry data', () => {
+    expect(telemetryService.getClient).not.toHaveBeenCalled();
+    expect(telemetryClient.getTelemetryData).not.toHaveBeenCalled();
+    expect(usageStats).not.toEqual(expect.objectContaining(MOCK_TELEMETRY_DATA));
+  });
 });
 
 describe('with platinum license', () => {
   let usageStats: UsageStats;
+  const { features, licensing, usageCollection, telemetryService, telemetryClient } = setup({
+    license: { isAvailable: true, type: 'platinum' },
+  });
+
   beforeAll(async () => {
-    const { features, licensing, usageCollection } = setup({
-      license: { isAvailable: true, type: 'platinum' },
-    });
     const collector = getSpacesUsageCollector(usageCollection as any, {
       kibanaIndexConfig$: pluginInitializerContextConfigMock({}).legacy.globalConfig$,
       features,
       licensing,
+      telemetryServicePromise: Promise.resolve(telemetryService),
     });
     usageStats = await collector.fetch(getMockFetchContext(defaultCallClusterMock));
   });
@@ -220,5 +265,11 @@ describe('with platinum license', () => {
       feature1: 1,
       feature2: 0,
     });
+  });
+
+  test('fetches telemetry data', () => {
+    expect(telemetryService.getClient).toHaveBeenCalledTimes(1);
+    expect(telemetryClient.getTelemetryData).toHaveBeenCalledTimes(1);
+    expect(usageStats).toEqual(expect.objectContaining(MOCK_TELEMETRY_DATA));
   });
 });

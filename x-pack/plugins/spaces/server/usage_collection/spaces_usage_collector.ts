@@ -10,6 +10,8 @@ import { CollectorFetchContext, UsageCollectionSetup } from 'src/plugins/usage_c
 import { Observable } from 'rxjs';
 import { KIBANA_STATS_TYPE_MONITORING } from '../../../monitoring/common/constants';
 import { PluginsSetup } from '../plugin';
+import { SpacesTelemetry } from '../model/spaces_telemetry';
+import { TelemetryServiceSetup } from '../telemetry_service';
 
 type CallCluster = <T = unknown>(
   endpoint: string,
@@ -113,7 +115,19 @@ async function getSpacesUsage(
   } as UsageStats;
 }
 
-export interface UsageStats {
+async function getSpacesTelemetry(
+  telemetryServicePromise: Promise<TelemetryServiceSetup>,
+  spacesAvailable: boolean
+) {
+  if (!spacesAvailable) {
+    return null;
+  }
+
+  const telemetryClient = await telemetryServicePromise.then(({ getClient }) => getClient());
+  return telemetryClient.getTelemetryData();
+}
+
+export interface UsageStats extends SpacesTelemetry {
   available: boolean;
   enabled: boolean;
   count?: number;
@@ -144,6 +158,7 @@ interface CollectorDeps {
   kibanaIndexConfig$: Observable<{ kibana: { index: string } }>;
   features: PluginsSetup['features'];
   licensing: PluginsSetup['licensing'];
+  telemetryServicePromise: Promise<TelemetryServiceSetup>;
 }
 
 interface BulkUpload {
@@ -187,19 +202,42 @@ export function getSpacesUsageCollector(
       available: { type: 'boolean' },
       enabled: { type: 'boolean' },
       count: { type: 'long' },
+      apiCalls: {
+        copySavedObjects: {
+          total: { type: 'long' },
+          createNewCopies: {
+            enabled: { type: 'long' },
+            disabled: { type: 'long' },
+          },
+          overwrite: {
+            enabled: { type: 'long' },
+            disabled: { type: 'long' },
+          },
+        },
+        resolveCopySavedObjectsErrors: {
+          total: { type: 'long' },
+          createNewCopies: {
+            enabled: { type: 'long' },
+            disabled: { type: 'long' },
+          },
+        },
+      },
     },
     fetch: async ({ callCluster }: CollectorFetchContext) => {
-      const license = await deps.licensing.license$.pipe(take(1)).toPromise();
+      const { licensing, kibanaIndexConfig$, features, telemetryServicePromise } = deps;
+      const license = await licensing.license$.pipe(take(1)).toPromise();
       const available = license.isAvailable; // some form of spaces is available for all valid licenses
 
-      const kibanaIndex = (await deps.kibanaIndexConfig$.pipe(take(1)).toPromise()).kibana.index;
+      const kibanaIndex = (await kibanaIndexConfig$.pipe(take(1)).toPromise()).kibana.index;
 
-      const usageStats = await getSpacesUsage(callCluster, kibanaIndex, deps.features, available);
+      const usageStats = await getSpacesUsage(callCluster, kibanaIndex, features, available);
+      const telemetryData = await getSpacesTelemetry(telemetryServicePromise, available);
 
       return {
         available,
         enabled: available,
         ...usageStats,
+        ...telemetryData,
       } as UsageStats;
     },
 

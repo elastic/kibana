@@ -22,6 +22,8 @@ import {
   coreMock,
 } from 'src/core/server/mocks';
 import { SpacesService } from '../../../spaces_service';
+import { telemetryClientMock } from '../../../lib/telemetry_client/telemetry_client.mock';
+import { telemetryServiceMock } from '../../../telemetry_service/telemetry_service.mock';
 import { initCopyToSpacesApi } from './copy_to_space';
 import { spacesConfig } from '../../../lib/__fixtures__';
 import { ObjectType } from '@kbn/config-schema';
@@ -82,6 +84,11 @@ describe('copy to space', () => {
       basePath: httpService.basePath,
     });
 
+    const telemetryClient = telemetryClientMock.create();
+    const telemetryServicePromise = Promise.resolve(
+      telemetryServiceMock.createSetupContract(telemetryClient)
+    );
+
     const clientServiceStart = clientService.start(coreStart);
 
     const spacesServiceStart = service.start({
@@ -95,6 +102,7 @@ describe('copy to space', () => {
       getImportExportObjectLimit: () => 1000,
       log,
       getSpacesService: () => spacesServiceStart,
+      telemetryServicePromise,
     });
 
     const [
@@ -113,6 +121,7 @@ describe('copy to space', () => {
         routeHandler: resolveRouteHandler,
       },
       savedObjectsRepositoryMock,
+      telemetryClient,
     };
   };
 
@@ -133,6 +142,26 @@ describe('copy to space', () => {
       expect(response.status).toEqual(403);
       expect(response.payload).toEqual({
         message: 'License is invalid for spaces',
+      });
+    });
+
+    it(`records telemetry data`, async () => {
+      const createNewCopies = Symbol();
+      const overwrite = Symbol();
+      const payload = { spaces: ['a-space'], objects: [], createNewCopies, overwrite };
+
+      const { copyToSpace, telemetryClient } = await setup();
+
+      const request = httpServerMock.createKibanaRequest({
+        body: payload,
+        method: 'post',
+      });
+
+      await copyToSpace.routeHandler(mockRouteContext, request, kibanaResponseFactory);
+
+      expect(telemetryClient.incrementCopySavedObjects).toHaveBeenCalledWith({
+        createNewCopies,
+        overwrite,
       });
     });
 
@@ -269,6 +298,24 @@ describe('copy to space', () => {
       expect(response.status).toEqual(403);
       expect(response.payload).toEqual({
         message: 'License is invalid for spaces',
+      });
+    });
+
+    it(`records telemetry data`, async () => {
+      const createNewCopies = Symbol();
+      const payload = { retries: {}, objects: [], createNewCopies };
+
+      const { resolveConflicts, telemetryClient } = await setup();
+
+      const request = httpServerMock.createKibanaRequest({
+        body: payload,
+        method: 'post',
+      });
+
+      await resolveConflicts.routeHandler(mockRouteContext, request, kibanaResponseFactory);
+
+      expect(telemetryClient.incrementResolveCopySavedObjectsErrors).toHaveBeenCalledWith({
+        createNewCopies,
       });
     });
 
