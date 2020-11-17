@@ -18793,16 +18793,28 @@ livereload-js@^2.3.0:
   resolved "https://registry.yarnpkg.com/livereload-js/-/livereload-js-2.4.0.tgz#447c31cf1ea9ab52fc20db615c5ddf678f78009c"
   integrity sha512-XPQH8Z2GDP/Hwz2PCDrh2mth4yFejwA1OZ/81Ti3LgKyhDcEjsSsqFWZojHG0va/duGd+WyosY7eXLDoOyqcPw==
 
-lmdb-store@^0.6.10:
-  version "0.6.10"
-  resolved "https://registry.yarnpkg.com/lmdb-store/-/lmdb-store-0.6.10.tgz#db8efde6e052aabd17ebc63c8a913e1f31694129"
-  integrity sha512-ZLvp3qbBQ5VlBmaWa4EUAPyYEZ8qdUHsW69HmxkDi84pFQ37WMxYhFaF/7PQkdtxS/vyiKkZigd9TFgHjek1Nw==
+lmdb-store-0.9@0.7.2:
+  version "0.7.2"
+  resolved "https://registry.yarnpkg.com/lmdb-store-0.9/-/lmdb-store-0.9-0.7.2.tgz#45b907a46d0a676fee955629bd2f70f06efb26bb"
+  integrity sha512-/MO8G6p4l7ku1ltCCdE/2ZOtSQBSM0B02vIemMHjoKgjE/fooanJYXIFwtZYM5r/hBDxmO+L3q5ASAXbfHQ6pQ==
   dependencies:
     fs-extra "^9.0.1"
-    msgpackr "^0.5.0"
+    msgpackr "^0.5.3"
     nan "^2.14.1"
     node-gyp-build "^4.2.3"
     weak-lru-cache "^0.2.0"
+
+lmdb-store@^0.8.11:
+  version "0.8.11"
+  resolved "https://registry.yarnpkg.com/lmdb-store/-/lmdb-store-0.8.11.tgz#7f7c756a115ceab32c51c0948444bfd5d1716ab3"
+  integrity sha512-CFgxh2/TL1NXyJ8FQPXY50O/gADxih7Gx0RjKRScGlyxihqSLd/fGzMkbvDdeAOAS8bsnYpLojAMTSeNiwN8dQ==
+  dependencies:
+    fs-extra "^9.0.1"
+    lmdb-store-0.9 "0.7.2"
+    msgpackr "^0.5.4"
+    nan "^2.14.1"
+    node-gyp-build "^4.2.3"
+    weak-lru-cache "^0.3.9"
 
 load-bmfont@^1.3.1, load-bmfont@^1.4.0:
   version "1.4.0"
@@ -20318,20 +20330,20 @@ ms@2.1.1, ms@^2.0.0, ms@^2.1.1:
   resolved "https://registry.yarnpkg.com/ms/-/ms-2.1.1.tgz#30a5864eb3ebb0a66f2ebe6d727af06a09d86e0a"
   integrity sha512-tgp+dl5cGk28utYktBsrFqA7HKgrhgPsg6Z/EfhWI4gl1Hwq8B/GmY/0oXZ6nF8hDVesS/FpnYaD/kOWhYQvyg==
 
-msgpackr-extract@^0.3.4:
-  version "0.3.4"
-  resolved "https://registry.yarnpkg.com/msgpackr-extract/-/msgpackr-extract-0.3.4.tgz#8ee5e73d1135340e564c498e8c593134365eb060"
-  integrity sha512-d3+qwTJzgqqsq2L2sQuH0SoO4StvpUhMqMAKy6tMimn7XdBaRtDlquFzRJsp0iMGt2hnU4UOqD8Tz9mb0KglTA==
+msgpackr-extract@^0.3.5:
+  version "0.3.5"
+  resolved "https://registry.yarnpkg.com/msgpackr-extract/-/msgpackr-extract-0.3.5.tgz#0f206da058bd3dad0f8605d324de001a8f4de967"
+  integrity sha512-zHhstybu+m/j3H6CVBMcILVIzATK6dWRGtlePJjsnSAj8kLT5joMa9i0v21Uc80BPNDcwFsnG/dz2318tfI81w==
   dependencies:
     nan "^2.14.1"
     node-gyp-build "^4.2.3"
 
-msgpackr@^0.5.0:
-  version "0.5.1"
-  resolved "https://registry.yarnpkg.com/msgpackr/-/msgpackr-0.5.1.tgz#7eecbf342645b7718dd2e3386894368d06732b3f"
-  integrity sha512-nK2uJl67Q5KU3MWkYBUlYynqKS1UUzJ5M1h6TQejuJtJzD3hW2Suv2T1pf01E9lUEr93xaLokf/xC+jwBShMPQ==
+msgpackr@^0.5.3, msgpackr@^0.5.4:
+  version "0.5.4"
+  resolved "https://registry.yarnpkg.com/msgpackr/-/msgpackr-0.5.4.tgz#c21c03d5e132d2e54d0b9ced02a75b1f48413380"
+  integrity sha512-ILEWtIWwd5ESWHKoVjJ4GP7JWkpuAUJ20qi2j2qEC6twecBmK4E6YG3QW847OpmvdAhMJGq2LoDJRn/kNERTeQ==
   optionalDependencies:
-    msgpackr-extract "^0.3.4"
+    msgpackr-extract "^0.3.5"
 
 multicast-dns-service-types@^1.1.0:
   version "1.1.0"
@@ -29128,6 +29140,11 @@ weak-lru-cache@^0.2.0:
   version "0.2.0"
   resolved "https://registry.yarnpkg.com/weak-lru-cache/-/weak-lru-cache-0.2.0.tgz#447379ccff6dfda1b7a9566c9ef168260be859d1"
   integrity sha512-M1l5CzKvM7maa7tCbtL0NW6sOnp8gqup853+9Aq7GL0XNWKNnFOkeE3v3Z5X2IeMzedPwQyPbi4RlFvD6rxs7A==
+
+weak-lru-cache@^0.3.9:
+  version "0.3.9"
+  resolved "https://registry.yarnpkg.com/weak-lru-cache/-/weak-lru-cache-0.3.9.tgz#9e56920d4115e8542625d8ef8cc278cbd97f7624"
+  integrity sha512-WqAu3wzbHQvjSi/vgYhidZkf2p7L3Z8iDEIHnqvE31EQQa7Vh7PDOphrRJ1oxlW8JIjgr2HvMcRe9Q1GhW2NPw==
 
 web-namespaces@^1.0.0:
   version "1.1.4"

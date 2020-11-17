@@ -63,6 +63,7 @@ export const SideNav: React.FC<SideNavProps> = ({ product, children }) => {
 
 interface SideNavLinkProps {
   to: string;
+  shouldShowActiveForSubroutes?: boolean;
   isExternal?: boolean;
   className?: string;
   isRoot?: boolean;
@@ -70,8 +71,9 @@ interface SideNavLinkProps {
 }
 
 export const SideNavLink: React.FC<SideNavLinkProps> = ({
-  isExternal,
   to,
+  shouldShowActiveForSubroutes = false,
+  isExternal,
   children,
   className,
   isRoot,
@@ -82,7 +84,10 @@ export const SideNavLink: React.FC<SideNavLinkProps> = ({
 
   const { pathname } = useLocation();
   const currentPath = stripTrailingSlash(pathname);
-  const isActive = currentPath === to || (isRoot && currentPath === '');
+  const isActive =
+    currentPath === to ||
+    (shouldShowActiveForSubroutes && currentPath.startsWith(to)) ||
+    (isRoot && currentPath === '');
 
   const classes = classNames('enterpriseSearchNavLinks__item', className, {
     'enterpriseSearchNavLinks__item--isActive': !isExternal && isActive, // eslint-disable-line @typescript-eslint/naming-convention
