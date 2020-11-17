@@ -7,10 +7,10 @@
 .enterpriseSearchDataType {
   &--number,
   &--float {
-    color: #e53959;
+    color: $euiColorDanger;
   }
 
   &--location {
-    color: #2ba652;
+    color: $euiColorSecondary;
   }
 }
