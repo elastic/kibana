@@ -63,7 +63,7 @@ export function ChangeIndexPattern({
               defaultMessage: 'Change index pattern',
             })}
           </EuiPopoverTitle>
-          <EuiSelectable
+          <EuiSelectable<{ value: string }>
             {...selectableProps}
             searchable
             singleSelection="always"
@@ -81,7 +81,6 @@ export function ChangeIndexPattern({
               onChangeIndexPattern(choice.value);
               setPopoverIsOpen(false);
             }}
-            // @ts-expect-error Property 'value' is missing in type '...'
             searchProps={{
               compressed: true,
               ...(selectableProps ? selectableProps.searchProps : undefined),
