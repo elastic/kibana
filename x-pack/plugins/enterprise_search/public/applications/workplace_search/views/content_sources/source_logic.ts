@@ -12,13 +12,13 @@ import http from 'shared/http';
 import routes from 'workplace_search/routes';
 
 import { handleAPIError } from 'app_search/utils/handleAPIError';
-import { DEFAULT_META } from 'shared/constants/defaultMeta';
-import { IMeta, IFlashMessagesProps } from 'shared/types';
-import { AppLogic } from 'workplace_search/App/AppLogic';
-import { NOT_FOUND_PATH } from 'workplace_search/utils/routePaths';
-import { IObject, ContentSourceFullData, CustomSource } from 'workplace_search/types';
+import { IFlashMessagesProps } from 'shared/types';
+import { DEFAULT_META } from '../../../shared/constants';
+import { AppLogic } from '../../app_logic';
+import { NOT_FOUND_PATH } from '../../routes';
+import { ContentSourceFullData, CustomSource, Meta } from '../../types';
 
-import { SourcesLogic } from './SourcesLogic';
+import { SourcesLogic } from './sources_logic';
 
 export interface SourceActions {
   onInitializeSource(contentSource: ContentSourceFullData): ContentSourceFullData;
@@ -28,7 +28,7 @@ export interface SourceActions {
   setFlashMessages(flashMessages: IFlashMessagesProps): { flashMessages: IFlashMessagesProps };
   setSearchResults(searchResultsResponse: SearchResultsResponse): SearchResultsResponse;
   initializeFederatedSummary(sourceId: string): { sourceId: string };
-  onUpdateSummary(summary: IObject[]): IObject[];
+  onUpdateSummary(summary: object[]): object[];
   setContentFilterValue(contentFilterValue: string): string;
   setActivePage(activePage: number): number;
   setClientIdValue(clientIdValue: string): string;
@@ -61,7 +61,7 @@ export interface SourceActions {
     isUpdating: boolean,
     successCallback?: () => void
   ): { isUpdating: boolean; successCallback?() };
-  initializeSource(sourceId: string, history: IObject): { sourceId: string; history: IObject };
+  initializeSource(sourceId: string, history: object): { sourceId: string; history: object };
   getSourceConfigData(serviceType: string): { serviceType: string };
   getSourceConnectData(
     serviceType: string,
@@ -100,8 +100,8 @@ interface SourceValues {
   dataLoading: boolean;
   sectionLoading: boolean;
   buttonLoading: boolean;
-  contentItems: IObject[];
-  contentMeta: IMeta;
+  contentItems: object[];
+  contentMeta: Meta;
   contentFilterValue: string;
   customSourceNameValue: string;
   clientIdValue: string;
@@ -116,13 +116,13 @@ interface SourceValues {
   newCustomSource: CustomSource;
   currentServiceType: string;
   githubOrganizations: string[];
-  selectedGithubOrganizationsMap: IObject;
-  selectedGithubOrganizations: IObject;
+  selectedGithubOrganizationsMap: object;
+  selectedGithubOrganizations: object;
 }
 
 interface SearchResultsResponse {
-  results: IObject[];
-  meta: IMeta;
+  results: object[];
+  meta: Meta;
 }
 
 interface PreContentSourceResponse {
@@ -137,7 +137,7 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
     onUpdateSourceName: (name: string) => name,
     setSourceConfigData: (sourceConfigData: SourceConfigData) => sourceConfigData,
     setSourceConnectData: (sourceConnectData: SourceConnectData) => sourceConnectData,
-    onUpdateSummary: (summary: IObject[]) => summary,
+    onUpdateSummary: (summary: object[]) => summary,
     setFlashMessages: (flashMessages: IFlashMessagesProps) => ({ flashMessages }),
     setSearchResults: (searchResultsResponse: SearchResultsResponse) => searchResultsResponse,
     setContentFilterValue: (contentFilterValue: string) => contentFilterValue,
@@ -153,7 +153,7 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
     setCustomSourceData: (data: CustomSource) => data,
     setPreContentSourceConfigData: (data: PreContentSourceResponse) => data,
     setSelectedGithubOrganizations: (option: string) => option,
-    initializeSource: (sourceId: string, history: IObject) => ({ sourceId, history }),
+    initializeSource: (sourceId: string, history: object) => ({ sourceId, history }),
     initializeFederatedSummary: (sourceId: string) => ({ sourceId }),
     searchContentSourceDocuments: (sourceId: string) => ({ sourceId }),
     updateContentSource: (sourceId: string, source: { name: string }) => ({ sourceId, source }),
@@ -571,7 +571,7 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
   }),
 });
 
-const setPage = (state: IMeta, page: number) => ({
+const setPage = (state: Meta, page: number) => ({
   ...state,
   page: {
     ...state.page,
