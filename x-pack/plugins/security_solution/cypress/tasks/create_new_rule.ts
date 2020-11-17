@@ -61,7 +61,11 @@ import {
   THRESHOLD_TYPE,
   EQL_TYPE,
   EQL_QUERY_INPUT,
+  QUERY_PREVIEW_BUTTON,
+  EQL_QUERY_PREVIEW_HISTOGRAM,
+  EQL_QUERY_VALIDATION_SPINNER,
 } from '../screens/create_new_rule';
+import { NOTIFICATION_TOASTS, TOAST_ERROR_CLASS } from '../screens/shared';
 import { TIMELINE } from '../screens/timelines';
 import { refreshPage } from './security_header';
 
@@ -225,8 +229,12 @@ export const fillDefineThresholdRuleAndContinue = (rule: ThresholdRule) => {
 
 export const fillDefineEqlRuleAndContinue = (rule: CustomRule) => {
   cy.get(EQL_QUERY_INPUT).type(rule.customQuery);
-  cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click({ force: true });
+  cy.get(EQL_QUERY_VALIDATION_SPINNER).should('not.exist');
+  cy.get(QUERY_PREVIEW_BUTTON).should('not.be.disabled').click({ force: true });
+  cy.get(EQL_QUERY_PREVIEW_HISTOGRAM).should('contain.text', 'Hits');
+  cy.get(NOTIFICATION_TOASTS).children().should('not.have.class', TOAST_ERROR_CLASS); // asserts no error toast on page
 
+  cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click({ force: true });
   cy.get(EQL_QUERY_INPUT).should('not.exist');
 };
 
