@@ -18,10 +18,7 @@ import { useColors } from './use_colors';
 /**
  * Provides colors and HTML IDs used to render the 'cube' graphic that accompanies nodes.
  */
-export function useCubeAssets(
-  isNodeInactive: boolean,
-  isProcessTrigger: boolean
-): NodeStyleConfig {
+export function useCubeAssets(isNodeInactive: boolean, isProcessTrigger: boolean): NodeStyleConfig {
   const SymbolIds = useSymbolIDs();
   const isDarkMode = useUiSetting('theme:darkMode');
   const theme = isDarkMode ? euiThemeAmsterdamDark : euiThemeAmsterdamLight;

@@ -152,13 +152,13 @@ export const graph = createSelector(graphableNodes, originID, function indexedGr
  * This returns a map of nodeIds to the associated stats provided by the datasource.
  * @deprecated - TODO: looks like this is still used though??
  */
-export const nodeRelatedStats: (
+export const nodeStats: (
   state: DataState
 ) => (nodeID: string) => EventStats | undefined = createSelector(
   resolverGraphResponse,
   (resolverGraph?: ResolverGraph) => {
     if (resolverGraph) {
-      const map = resolverGraphModel.nodeRelatedStats(resolverGraph);
+      const map = resolverGraphModel.nodeStats(resolverGraph);
       return (nodeId: string) => map.get(nodeId);
     } else {
       return () => undefined;
@@ -171,9 +171,9 @@ export const nodeRelatedStats: (
  */
 export const relatedEventTotalCount: (
   state: DataState
-) => (entityID: string) => number | undefined = createSelector(nodeRelatedStats, (relatedStats) => {
+) => (entityID: string) => number | undefined = createSelector(nodeStats, (getNodeStats) => {
   return (nodeId) => {
-    return relatedStats(nodeId)?.total;
+    return getNodeStats(nodeId)?.total;
   };
 });
 
@@ -202,10 +202,10 @@ export function currentRelatedEventData(state: DataState): ResolverGraphNode | n
 export const relatedEventCountByCategory: (
   state: DataState
 ) => (nodeID: string, eventCategory: string) => number | undefined = createSelector(
-  nodeRelatedStats,
-  (statsMap) => {
+  nodeStats,
+  (getNodeStats) => {
     return (nodeID: string, eventCategory: string): number | undefined => {
-      const stats = statsMap(nodeID);
+      const stats = getNodeStats(nodeID);
       if (stats) {
         const value = Object.prototype.hasOwnProperty.call(stats.byCategory, eventCategory);
         if (typeof value === 'number' && Number.isFinite(value)) {
@@ -500,13 +500,13 @@ export function treeRequestParametersToAbort(state: DataState): TreeFetcherParam
  */
 export const statsTotalForNode: (
   state: DataState
-) => (event: ResolverGraphNode) => number | null = createSelector(nodeRelatedStats, (nodeStats) => {
+) => (event: ResolverGraphNode) => number | null = createSelector(nodeStats, (getNodeStats) => {
   return (node: ResolverGraphNode) => {
     const nodeID = nodeModel.nodeID(node);
     if (nodeID === undefined) {
       return null;
     }
-    const stats = nodeStats(nodeID);
+    const stats = getNodeStats(nodeID);
     if (!stats) {
       return null;
     }
@@ -521,9 +521,9 @@ export const statsTotalForNode: (
 export const totalRelatedEventCountForNode: (
   state: DataState
 ) => (nodeID: string) => number | undefined = createSelector(
-  nodeRelatedStats,
-  (nodeStats) => (nodeID: string) => {
-    const stats = nodeStats(nodeID);
+  nodeStats,
+  (getNodeStats) => (nodeID: string) => {
+    const stats = getNodeStats(nodeID);
     return stats === undefined ? undefined : stats.total;
   }
 );
@@ -535,13 +535,13 @@ export const totalRelatedEventCountForNode: (
 export const relatedEventCountOfTypeForNode: (
   state: DataState
 ) => (nodeID: string, category: string) => number | undefined = createSelector(
-  nodeRelatedStats,
-  (stats) => (nodeID: string, category: string) => {
-    const nodeStats = stats(nodeID);
-    if (!nodeStats) {
+  nodeStats,
+  (getNodeStats) => (nodeID: string, category: string) => {
+    const stats = getNodeStats(nodeID);
+    if (!stats) {
       return undefined;
     } else {
-      return nodeStats.byCategory[category];
+      return stats.byCategory[category];
     }
   }
 );

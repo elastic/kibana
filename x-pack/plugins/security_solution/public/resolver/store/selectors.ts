@@ -99,11 +99,11 @@ export const inactiveNodes = composeSelectors(dataStateSelector, dataSelectors.i
 /**
  * This returns a map of nodeIds to the associated stats provided by the datasource.
  */
-export const nodeRelatedStats: (
+export const nodeStats: (
   state: ResolverState
 ) => (nodeID: string) => EventStats | undefined = composeSelectors(
   dataStateSelector,
-  dataSelectors.nodeRelatedStats
+  dataSelectors.nodeStats
 );
 
 /**

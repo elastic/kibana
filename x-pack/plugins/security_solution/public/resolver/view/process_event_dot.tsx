@@ -12,9 +12,9 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { NodeSubMenu } from './styles';
 import { applyMatrix3 } from '../models/vector2';
 import { Vector2, Matrix3, ResolverState } from '../types';
-import { SafeResolverEvent } from '../../../common/endpoint/types';
+import { ResolverGraphNode } from '../../../common/endpoint/types';
 import { useResolverDispatch } from './use_resolver_dispatch';
-import * as eventModel from '../../../common/endpoint/models/event';
+import * as nodeModel from '../../../common/endpoint/models/node';
 import * as selectors from '../store/selectors';
 import { fontSize } from './font_size';
 import { useCubeAssets } from './use_cube_assets';
@@ -77,9 +77,10 @@ const UnstyledProcessEventDot = React.memo(
   ({
     className,
     position,
-    event,
+    node,
+    nodeID,
     projectionMatrix,
-    isProcessTerminated,
+    isNodeInactive,
     timeAtRender,
   }: {
     /**
@@ -87,27 +88,34 @@ const UnstyledProcessEventDot = React.memo(
      */
     className?: string;
     /**
-     * The positon of the process node, in 'world' coordinates.
+     * The positon of the graph node, in 'world' coordinates.
      */
     position: Vector2;
     /**
-     * An event which contains details about the process node.
+     * An event which contains details about the graph node.
      */
-    event: SafeResolverEvent;
+    node: ResolverGraphNode;
+    /**
+     * The unique identifier for the node based on a datasource id
+     */
+    nodeID: string | undefined;
     /**
      * projectionMatrix which can be used to convert `position` to screen coordinates.
      */
     projectionMatrix: Matrix3;
     /**
-     * Whether or not to show the process as terminated.
+     * Whether or not to show the node in the inactive state.
      */
-    isProcessTerminated: boolean;
+    isNodeInactive: boolean;
 
     /**
      * The time (unix epoch) at render.
      */
     timeAtRender: number;
   }) => {
+    if (nodeID === undefined) {
+      throw new Error('Tried to render a node with no ID');
+    }
     const resolverComponentInstanceID = useSelector(selectors.resolverComponentInstanceID);
     // This should be unique to each instance of Resolver
     const htmlIDPrefix = `resolver:${resolverComponentInstanceID}`;
@@ -125,14 +133,7 @@ const UnstyledProcessEventDot = React.memo(
     const ariaActiveDescendant = useSelector(selectors.ariaActiveDescendant);
     const selectedNode = useSelector(selectors.selectedNode);
     const originID = useSelector(selectors.originID);
-    const nodeID: string | undefined = eventModel.entityIDSafeVersion(event);
-    if (nodeID === undefined) {
-      // NB: this component should be taking nodeID as a `string` instead of handling this logic here
-      throw new Error('Tried to render a node with no ID');
-    }
-    const relatedEventStats = useSelector((state: ResolverState) =>
-      selectors.relatedEventsStats(state)(nodeID)
-    );
+    const nodeStats = useSelector((state: ResolverState) => selectors.nodeStats(state)(nodeID));
 
     // define a standard way of giving HTML IDs to nodes based on their entity_id/nodeID.
     // this is used to link nodes via aria attributes
@@ -226,9 +227,10 @@ const UnstyledProcessEventDot = React.memo(
       labelButtonFill,
       strokeColor,
     } = useCubeAssets(
-      isProcessTerminated,
+      isNodeInactive,
       /**
        * There is no definition for 'trigger process' yet. return false.
+       * TODO: Define what the standard library of cubes will be and allow users to define what data is what color
        */ false
     );
 
@@ -267,7 +269,7 @@ const UnstyledProcessEventDot = React.memo(
     );
 
     const grandTotal: number | null = useSelector((state: ResolverState) =>
-      selectors.relatedEventTotalForProcess(state)(event)
+      selectors.statsTotalForNode(state)(node)
     );
 
     /* eslint-disable jsx-a11y/click-events-have-key-events */
@@ -405,13 +407,15 @@ const UnstyledProcessEventDot = React.memo(
                 maxWidth: `${isShowingEventActions ? 400 : 210 * xScale}px`,
               }}
               tabIndex={-1}
-              title={eventModel.processNameSafeVersion(event)}
+              // TODO: switch to use name when we have it
+              title={nodeModel.nodeID(node)}
               data-test-subj="resolver:node:primary-button"
               data-test-resolver-node-id={nodeID}
             >
               <span className="euiButton__content">
                 <span className="euiButton__text" data-test-subj={'euiButton__text'}>
-                  {eventModel.processNameSafeVersion(event)}
+                  {/* TODO: switch to use name when we have it */}
+                  {nodeModel.nodeID(node)}
                 </span>
               </span>
             </EuiButton>
@@ -431,7 +435,7 @@ const UnstyledProcessEventDot = React.memo(
               {grandTotal !== null && grandTotal > 0 && (
                 <NodeSubMenu
                   buttonFill={colorMap.resolverBackground}
-                  relatedEventStats={relatedEventStats}
+                  nodeStats={nodeStats}
                   nodeID={nodeID}
                 />
               )}

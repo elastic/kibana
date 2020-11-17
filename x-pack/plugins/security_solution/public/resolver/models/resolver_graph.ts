@@ -33,18 +33,16 @@ export function nodesToShowAsInactive(
 /**
  * This returns a map of nodeIds to the associated stats provided by the datasource.
  */
-export function nodeRelatedStats(
-  graph: ResolverGraph
-): Map<ResolverGraphNode['nodeId'], EventStats> {
-  const nodeStats = new Map();
+export function nodeStats(graph: ResolverGraph): Map<ResolverGraphNode['nodeId'], EventStats> {
+  const stats = new Map();
 
   for (const node of graph.nodes) {
     if (node.stats) {
       const nodeId = nodeModel.nodeID(node);
-      nodeStats.set(nodeId, node.stats);
+      stats.set(nodeId, node.stats);
     }
   }
-  return nodeStats;
+  return stats;
 }
 
 // TODO: Update mock to match new structure

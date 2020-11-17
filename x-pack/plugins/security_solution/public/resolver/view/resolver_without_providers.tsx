@@ -19,10 +19,10 @@ import { useCamera } from './use_camera';
 import { SymbolDefinitions } from './symbol_definitions';
 import { useStateSyncingActions } from './use_state_syncing_actions';
 import { StyledMapContainer, GraphContainer } from './styles';
-import { entityIDSafeVersion } from '../../../common/endpoint/models/event';
+import { nodeID } from '../../../common/endpoint/models/node';
 import { SideEffectContext } from './side_effect_context';
 import { ResolverProps, ResolverState } from '../types';
-import { PanelRouter } from './panels';
+// import { PanelRouter } from './panels';
 import { useColors } from './use_colors';
 
 /**
@@ -48,13 +48,10 @@ export const ResolverWithoutProviders = React.memo(
     // use this for the entire render in order to keep things in sync
     const timeAtRender = timestamp();
 
-    const {
-      processNodePositions,
-      connectingEdgeLineSegments,
-    } = useSelector((state: ResolverState) =>
+    const { graphNodePositions, connectingEdgeLineSegments } = useSelector((state: ResolverState) =>
       selectors.visibleNodesAndEdgeLines(state)(timeAtRender)
     );
-    const terminatedProcesses = useSelector(selectors.terminatedProcesses);
+    const inactiveNodes = useSelector(selectors.inactiveNodes);
     const { projectionMatrix, ref: cameraRef, onMouseDown } = useCamera();
 
     const ref = useCallback(
@@ -71,8 +68,8 @@ export const ResolverWithoutProviders = React.memo(
       },
       [cameraRef, refToForward]
     );
-    const isLoading = useSelector(selectors.isTreeLoading);
-    const hasError = useSelector(selectors.hadErrorLoadingTree);
+    const isLoading = useSelector(selectors.isGraphLoading);
+    const hasError = useSelector(selectors.hadErrorLoadingGraph);
     const activeDescendantId = useSelector(selectors.ariaActiveDescendant);
     const colorMap = useColors();
 
@@ -113,22 +110,23 @@ export const ResolverWithoutProviders = React.memo(
                 />
               )
             )}
-            {[...processNodePositions].map(([processEvent, position]) => {
-              const processEntityId = entityIDSafeVersion(processEvent);
+            {[...graphNodePositions].map(([graphNode, position]) => {
+              const nodeId = nodeID(graphNode);
               return (
                 <ProcessEventDot
-                  key={processEntityId}
+                  key={nodeId}
+                  nodeID={nodeId}
                   position={position}
                   projectionMatrix={projectionMatrix}
-                  event={processEvent}
-                  isProcessTerminated={terminatedProcesses.has(processEntityId)}
+                  node={graphNode}
+                  isNodeInactive={inactiveNodes.has(nodeId)}
                   timeAtRender={timeAtRender}
                 />
               );
             })}
           </GraphContainer>
         )}
-        <PanelRouter />
+        {/* <PanelRouter /> */}
         <GraphControls />
         <SymbolDefinitions />
       </StyledMapContainer>
