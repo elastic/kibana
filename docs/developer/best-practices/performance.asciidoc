@@ -17,7 +17,7 @@ However, it’s usually not necessary that the whole plugin code should be loade
 and initialized at once. The plugin could keep on loading code covering API functionality
 on {kib} bootstrap, but load UI related code lazily on-demand, when an
 application page or management section is mounted.
-Always prefer to require UI root components lazily when possible (such as in `mount`
+Always prefer to import UI root components lazily when possible (such as in `mount`
 handlers). Even if their size may seem negligible, they are likely using
 some heavy-weight libraries that will also be removed from the initial
 plugin bundle, therefore, reducing its size by a significant amount.

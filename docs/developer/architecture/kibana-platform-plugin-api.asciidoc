@@ -3,7 +3,7 @@
 
 experimental[]
 
-{kib} platform plugins introduction is a significant step towards stabilizing {kib} architecture for all the developers.
+{kib} platform plugins are a significant step toward stabilizing {kib} architecture for all the developers.
 We made sure plugins could continue to use most of the same technologies they use today, at least from a technical perspective.
 
 === Anatomy of a plugin
