@@ -40,7 +40,6 @@ import {
   getDurationUnitValue,
 } from '../../../../../alerts/common/parse_duration';
 import { loadAlertTypes } from '../../lib/alert_api';
-import { actionVariablesFromAlertType } from '../../lib/action_variables';
 import { AlertReducerAction } from './alert_reducer';
 import {
   AlertTypeModel,
@@ -458,9 +457,7 @@ export const AlertForm = ({
           actions={alert.actions}
           setHasActionsDisabled={setHasActionsDisabled}
           setHasActionsWithBrokenConnector={setHasActionsWithBrokenConnector}
-          messageVariables={actionVariablesFromAlertType(
-            alertTypesIndex.get(alert.alertTypeId)!
-          ).sort((a, b) => a.name.toUpperCase().localeCompare(b.name.toUpperCase()))}
+          messageVariables={alertTypesIndex.get(alert.alertTypeId)!.actionVariables}
           defaultActionGroupId={defaultActionGroupId}
           actionGroups={alertTypesIndex.get(alert.alertTypeId)!.actionGroups}
           setActionIdByIndex={(id: string, index: number) => setActionProperty('id', id, index)}
