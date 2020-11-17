@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { PainlessCompletionService } from './completion';
+export { getAutocompleteSuggestions } from './autocomplete';

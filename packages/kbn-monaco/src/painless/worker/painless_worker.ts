@@ -19,44 +19,22 @@
 
 import { PainlessCompletionResult, PainlessContext, Field } from '../types';
 
-import { PainlessCompletionService } from './services';
-
-import {
-  isDeclaringField,
-  isConstructorInstance,
-  isAccessingProperty,
-  showStaticSuggestions,
-} from './utils';
+import { getAutocompleteSuggestions } from './lib';
 
 export class PainlessWorker {
-  async provideAutocompleteSuggestions(
+  provideAutocompleteSuggestions(
     currentLineChars: string,
     context: PainlessContext,
     fields?: Field[]
   ): Promise<PainlessCompletionResult> {
-    const completionService = new PainlessCompletionService(context);
     // Array of the active line words, e.g., [boolean, isTrue, =, true]
     const words = currentLineChars.replace('\t', '').split(' ');
-    // What the user is currently typing
-    const activeTyping = words[words.length - 1];
 
-    const primitives = completionService.getPrimitives();
-
-    let autocompleteSuggestions: PainlessCompletionResult = {
-      isIncomplete: false,
-      suggestions: [],
-    };
-
-    if (isConstructorInstance(words)) {
-      autocompleteSuggestions = completionService.getConstructorSuggestions();
-    } else if (fields && isDeclaringField(activeTyping)) {
-      autocompleteSuggestions = completionService.getFieldSuggestions(fields);
-    } else if (isAccessingProperty(activeTyping)) {
-      const className = activeTyping.substring(0, activeTyping.length - 1).split('.')[0];
-      autocompleteSuggestions = completionService.getClassMemberSuggestions(className);
-    } else if (showStaticSuggestions(activeTyping, words, primitives)) {
-      autocompleteSuggestions = completionService.getStaticSuggestions(Boolean(fields?.length));
-    }
+    const autocompleteSuggestions: PainlessCompletionResult = getAutocompleteSuggestions(
+      context,
+      words,
+      fields
+    );
 
     return Promise.resolve(autocompleteSuggestions);
   }

@@ -20,7 +20,14 @@
 import { PainlessCompletionItem } from '../../types';
 import { lexerRules } from '../../lexer_rules';
 
-import { PainlessCompletionService, Suggestion } from './completion';
+import {
+  getStaticSuggestions,
+  getFieldSuggestions,
+  getClassMemberSuggestions,
+  getPrimitives,
+  getConstructorSuggestions,
+  Suggestion,
+} from './autocomplete';
 
 const keywords: PainlessCompletionItem[] = lexerRules.keywords.map((keyword) => {
   return {
@@ -91,23 +98,10 @@ const testSuggestions: Suggestion[] = [
   },
 ];
 
-// We're extending the completion service class so that we can provide our own context data for tests
-// The real context data is quite large and difficult to assert against
-class TestPainlessCompletionService extends PainlessCompletionService {
-  suggestions: Suggestion[];
-
-  constructor() {
-    super('painless_test');
-    this.suggestions = testSuggestions;
-  }
-}
-
-const testPainlessCompletionService = new TestPainlessCompletionService();
-
-describe('PainlessCompletionService', () => {
-  describe('getStaticSuggestions()', () => {
+describe('Autocomplete lib', () => {
+  describe('Static suggestions', () => {
     test('returns static suggestions', () => {
-      expect(testPainlessCompletionService.getStaticSuggestions(false)).toEqual({
+      expect(getStaticSuggestions(testSuggestions, false)).toEqual({
         isIncomplete: false,
         suggestions: [
           {
@@ -140,7 +134,7 @@ describe('PainlessCompletionService', () => {
     });
 
     test('returns doc keyword when fields exist', () => {
-      const autocompletion = testPainlessCompletionService.getStaticSuggestions(true);
+      const autocompletion = getStaticSuggestions(testSuggestions, true);
       const docSuggestion = autocompletion.suggestions.find(
         (suggestion) => suggestion.label === 'doc'
       );
@@ -150,13 +144,13 @@ describe('PainlessCompletionService', () => {
 
   describe('getPrimitives()', () => {
     test('returns primitive values', () => {
-      expect(testPainlessCompletionService.getPrimitives()).toEqual(['boolean', 'int']);
+      expect(getPrimitives(testSuggestions)).toEqual(['boolean', 'int']);
     });
   });
 
   describe('getClassMemberSuggestions()', () => {
     test('returns class member suggestions', () => {
-      expect(testPainlessCompletionService.getClassMemberSuggestions('Math')).toEqual({
+      expect(getClassMemberSuggestions(testSuggestions, 'Math')).toEqual({
         isIncomplete: false,
         suggestions: [
           {
@@ -176,7 +170,7 @@ describe('PainlessCompletionService', () => {
     });
 
     test('returns an empty suggestions array if class does not exist', () => {
-      expect(testPainlessCompletionService.getClassMemberSuggestions('foobar')).toEqual({
+      expect(getClassMemberSuggestions(testSuggestions, 'foobar')).toEqual({
         isIncomplete: false,
         suggestions: [],
       });
@@ -196,7 +190,7 @@ describe('PainlessCompletionService', () => {
         },
       ];
 
-      expect(testPainlessCompletionService.getFieldSuggestions(fields)).toEqual({
+      expect(getFieldSuggestions(fields)).toEqual({
         isIncomplete: false,
         suggestions: [
           {
@@ -218,7 +212,7 @@ describe('PainlessCompletionService', () => {
 
   describe('getConstructorSuggestions()', () => {
     test('returns constructor suggestions', () => {
-      expect(testPainlessCompletionService.getConstructorSuggestions()).toEqual({
+      expect(getConstructorSuggestions(testSuggestions)).toEqual({
         isIncomplete: false,
         suggestions: [
           {

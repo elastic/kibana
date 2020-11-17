@@ -23,7 +23,7 @@ import {
   hasDeclaredType,
   isAccessingProperty,
   showStaticSuggestions,
-} from './utils';
+} from './autocomplete_utils';
 
 const primitives = ['boolean', 'int', 'char', 'float', 'double'];
 
