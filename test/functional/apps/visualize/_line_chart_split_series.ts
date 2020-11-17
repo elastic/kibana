@@ -211,19 +211,22 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visEditor.changeYAxisFilterLabelsCheckbox(axisId, false);
         await PageObjects.visEditor.clickGo();
         const labels = await PageObjects.visChart.getYAxisLabels();
-        const expectedLabels = [
-          '0',
-          '1,000',
-          '2,000',
-          '3,000',
-          '4,000',
-          '5,000',
-          '6,000',
-          '7,000',
-          '8,000',
-          '9,000',
-          '10,000',
-        ];
+        const expectedLabels = await PageObjects.visChart.getExpectedValue(
+          [
+            '0',
+            '1,000',
+            '2,000',
+            '3,000',
+            '4,000',
+            '5,000',
+            '6,000',
+            '7,000',
+            '8,000',
+            '9,000',
+            '10,000',
+          ],
+          ['0', '1,000', '2,000', '3,000', '4,000', '5,000', '6,000', '7,000', '8,000', '9,000']
+        );
         expect(labels).to.eql(expectedLabels);
       });
 
@@ -232,7 +235,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visEditor.clickGo();
         const labels = await PageObjects.visChart.getYAxisLabels();
         const expectedLabels = await PageObjects.visChart.getExpectedValue(
-          ['2,000', '4,000', '6,000', '8,000'],
+          ['1,000', '2,000', '3,000', '4,000', '5,000', '6,000', '7,000', '8,000', '9,000'],
           ['0', '1,000', '2,000', '3,000', '4,000', '5,000', '6,000', '7,000', '8,000', '9,000']
         );
         expect(labels).to.eql(expectedLabels);
@@ -245,7 +248,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const labels = await PageObjects.visChart.getYAxisLabels();
         log.debug(labels);
         const expectedLabels = await PageObjects.visChart.getExpectedValue(
-          ['0', '2,000', '4,000', '6,000', '8,000', '10,000'],
+          [
+            '0',
+            '1,000',
+            '2,000',
+            '3,000',
+            '4,000',
+            '5,000',
+            '6,000',
+            '7,000',
+            '8,000',
+            '9,000',
+            '10,000',
+          ],
           ['0', '1,000', '2,000', '3,000', '4,000', '5,000', '6,000', '7,000', '8,000', '9,000']
         );
         expect(labels).to.eql(expectedLabels);
@@ -256,7 +271,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visEditor.clickGo();
         const labels = await PageObjects.visChart.getYAxisLabels();
         const expectedLabels = await PageObjects.visChart.getExpectedValue(
-          ['2,000', '4,000', '6,000', '8,000'],
+          ['1,000', '2,000', '3,000', '4,000', '5,000', '6,000', '7,000', '8,000', '9,000'],
           ['0', '1,000', '2,000', '3,000', '4,000', '5,000', '6,000', '7,000', '8,000', '9,000']
         );
         expect(labels).to.eql(expectedLabels);
