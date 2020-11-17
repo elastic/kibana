@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl, shallowWithIntl } from '@kbn/test/jest';
 import { DocumentationLinksService } from '../../../documentation_links';
 import { RoleValidator } from '../../validate_role';
 import { ClusterPrivileges } from './cluster_privileges';
