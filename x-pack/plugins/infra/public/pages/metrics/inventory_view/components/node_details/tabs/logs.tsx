@@ -52,15 +52,15 @@ const TabComponent = (props: TabProps) => {
   return (
     <TabContent>
       <EuiFlexGroup gutterSize={'none'} alignItems="center">
-        <EuiFlexItem grow={true}>
+        <EuiFlexItem>
           <QueryWrapper>
             <EuiFieldSearch
-              fullWidth={true}
+              fullWidth
               placeholder={i18n.translate('xpack.infra.nodeDetails.logs.textFieldPlaceholder', {
                 defaultMessage: 'Search for log entries...',
               })}
               value={textQuery}
-              isClearable={true}
+              isClearable
               onChange={onQueryChange}
             />
           </QueryWrapper>
