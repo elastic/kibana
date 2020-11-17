@@ -17,10 +17,11 @@
  * under the License.
  */
 
-const DOT_PREFIX_RE = /(.).+?\./g;
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-/**
- * Convert a dot.notated.string into a short
- * version (d.n.string)
- */
-export const shortenDottedString = (input: string) => input.replace(DOT_PREFIX_RE, '$1.');
+export default function ({ loadTestFile }: FtrProviderContext) {
+  describe('core', () => {
+    loadTestFile(require.resolve('./compression'));
+    loadTestFile(require.resolve('./translations'));
+  });
+}

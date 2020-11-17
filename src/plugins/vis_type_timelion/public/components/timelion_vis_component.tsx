@@ -48,7 +48,7 @@ import { tickFormatters } from '../helpers/tick_formatters';
 import { Series, Sheet } from '../helpers/timelion_request_handler';
 import { TimelionVisDependencies } from '../plugin';
 
-import './index.scss';
+import './timelion_vis.scss';
 
 const GRID_LINE_STROKE = 'rgba(125,125,125,0.3)';
 
