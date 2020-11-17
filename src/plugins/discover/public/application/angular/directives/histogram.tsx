@@ -289,6 +289,7 @@ export class DiscoverHistogram extends Component<DiscoverHistogramProps, Discove
       headerFormatter: this.renderBarTooltip(xInterval, domainStart, domainEnd),
       type: TooltipType.VerticalCursor,
     };
+
     return (
       <Chart size="100%">
         <Settings
