@@ -59,6 +59,7 @@ export const Page: FC = () => {
   const location = useLocation();
   const selectedTabId = useMemo(() => location.pathname.split('/').pop(), [location]);
   const mapJobId = globalState?.ml?.jobId;
+  const mapModelId = globalState?.ml?.modelId;
 
   return (
     <Fragment>
@@ -107,7 +108,9 @@ export const Page: FC = () => {
 
           <EuiPageContent>
             <AnalyticsNavigationBar selectedTabId={selectedTabId} jobId={mapJobId} />
-            {selectedTabId === 'map' && mapJobId && <JobMap analyticsId={mapJobId} />}
+            {selectedTabId === 'map' && (mapJobId || mapModelId) && (
+              <JobMap analyticsId={mapJobId} modelId={mapModelId} />
+            )}
             {selectedTabId === 'data_frame_analytics' && (
               <DataFrameAnalyticsList
                 blockRefresh={blockRefresh}

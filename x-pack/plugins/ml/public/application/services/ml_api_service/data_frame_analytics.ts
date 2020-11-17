@@ -83,10 +83,10 @@ export const dataFrameAnalytics = {
       body,
     });
   },
-  getDataFrameAnalyticsMap(analyticsId: string, treatAsRoot: boolean, type?: string) {
-    const analyticsIdString = analyticsId !== undefined ? `/${analyticsId}` : '';
+  getDataFrameAnalyticsMap(id: string, treatAsRoot: boolean, type?: string) {
+    const idString = id !== undefined ? `/${id}` : '';
     return http({
-      path: `${basePath()}/data_frame/analytics/map${analyticsIdString}`,
+      path: `${basePath()}/data_frame/analytics/map${idString}`,
       method: 'GET',
       query: { treatAsRoot, type },
     });

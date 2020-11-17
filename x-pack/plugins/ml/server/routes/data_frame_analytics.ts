@@ -8,6 +8,7 @@ import { RequestHandlerContext, IScopedClusterClient } from 'kibana/server';
 import { wrapError } from '../client/error_wrapper';
 import { analyticsAuditMessagesProvider } from '../models/data_frame_analytics/analytics_audit_messages';
 import { RouteInitialization } from '../types';
+import { JOB_MAP_NODE_TYPES } from '../../common/constants/data_frame_analytics';
 import {
   dataAnalyticsJobConfigSchema,
   dataAnalyticsJobUpdateSchema,
@@ -36,9 +37,13 @@ function deleteDestIndexPatternById(context: RequestHandlerContext, indexPattern
   return iph.deleteIndexPatternById(indexPatternId);
 }
 
-function getAnalyticsMap(mlClient: MlClient, client: IScopedClusterClient, analyticsId: string) {
+function getAnalyticsMap(
+  mlClient: MlClient,
+  client: IScopedClusterClient,
+  { analyticsId, modelId }: { analyticsId?: string; modelId?: string }
+) {
   const analytics = new AnalyticsManager(mlClient, client.asInternalUser);
-  return analytics.getAnalyticsMap(analyticsId);
+  return analytics.getAnalyticsMap({ analyticsId, modelId });
 }
 
 function getExtendedMap(
@@ -642,11 +647,14 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense, routeGuard }: Rout
         let results;
         if (treatAsRoot === 'true' || treatAsRoot === true) {
           results = await getExtendedMap(mlClient, client, {
-            analyticsId: type !== 'index' ? analyticsId : undefined,
-            index: type === 'index' ? analyticsId : undefined,
+            analyticsId: type !== JOB_MAP_NODE_TYPES.INDEX ? analyticsId : undefined,
+            index: type === JOB_MAP_NODE_TYPES.INDEX ? analyticsId : undefined,
           });
         } else {
-          results = await getAnalyticsMap(mlClient, client, analyticsId);
+          results = await getAnalyticsMap(mlClient, client, {
+            analyticsId: type !== JOB_MAP_NODE_TYPES.TRAINED_MODEL ? analyticsId : undefined,
+            modelId: type === JOB_MAP_NODE_TYPES.TRAINED_MODEL ? analyticsId : undefined,
+          });
         }
 
         return response.ok({

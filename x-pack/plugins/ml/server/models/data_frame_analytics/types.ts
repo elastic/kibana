@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { JobMapNodeTypes } from '../../../common/constants/data_frame_analytics';
+
 export interface IndexPatternLinkReturnType {
   isWildcardIndexPattern: boolean;
   isIndexPattern: boolean;
@@ -28,6 +30,16 @@ export interface AnalyticsMapReturnType {
   elements: MapElements[];
   details: object; // transform, job, or index details
   error: null | any;
+}
+
+export interface InitialElementsReturnType {
+  data: any;
+  details: object;
+  resultElements: MapElements[];
+  modelElements: MapElements[];
+  nextLinkId?: string;
+  nextType?: JobMapNodeTypes;
+  previousNodeId?: string;
 }
 export interface AnalyticsMapNodeElement {
   data: {

@@ -28,7 +28,8 @@ import { JOB_MAP_NODE_TYPES } from '../../../../../../common/constants/data_fram
 // import { DeleteButton } from './delete_button';
 
 interface Props {
-  analyticsId: string;
+  analyticsId?: string;
+  modelId?: string;
   details: any;
   getNodeData: any;
 }
@@ -56,7 +57,7 @@ function getListItems(details: object): EuiDescriptionListProps['listItems'] {
   });
 }
 
-export const Controls: FC<Props> = ({ analyticsId, details, getNodeData }) => {
+export const Controls: FC<Props> = ({ analyticsId, modelId, details, getNodeData }) => {
   const [showFlyout, setShowFlyout] = useState<boolean>(false);
   const [selectedNode, setSelectedNode] = useState<cytoscape.NodeSingular | undefined>();
 
@@ -99,6 +100,7 @@ export const Controls: FC<Props> = ({ analyticsId, details, getNodeData }) => {
 
   const nodeDataButton =
     analyticsId !== nodeLabel &&
+    modelId !== nodeLabel &&
     (nodeType === JOB_MAP_NODE_TYPES.ANALYTICS || nodeType === JOB_MAP_NODE_TYPES.INDEX) ? (
       <EuiButtonEmpty
         onClick={() => {
