@@ -84,7 +84,7 @@ export function createSavedDashboardClass(
           attributes: SavedObjectAttributes;
           references: SavedObjectReference[];
         }) => extractReferences(opts, { embeddablePersistableStateService: embeddableStart }),
-        injectReferences: (so: SavedObjectDashboard, references: SavedObjectReference[]) => {
+        injectReferences: (so: DashboardSavedObject, references: SavedObjectReference[]) => {
           const newAttributes = injectReferences(
             { attributes: so._serialize().attributes, references },
             {

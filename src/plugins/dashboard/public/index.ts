@@ -42,7 +42,7 @@ export {
   createDashboardUrlGenerator,
   DashboardUrlGeneratorState,
 } from './url_generator';
-export { DashboardSavedObject as SavedObjectDashboard } from './saved_dashboards';
+export { DashboardSavedObject } from './saved_dashboards';
 export { SavedDashboardPanel } from './types';
 
 export function plugin(initializerContext: PluginInitializerContext) {

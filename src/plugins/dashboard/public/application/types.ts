@@ -44,7 +44,7 @@ import { DashboardSetupDependencies, DashboardStart, DashboardStartDependencies 
 import { IKbnUrlStateStorage, Storage } from '../../../kibana_utils/public';
 import { DashboardStateManager } from './dashboard_state_manager';
 import { SavedObjectsTaggingApi } from '../../../saved_objects_tagging_oss/public';
-import { DashboardContainer, SavedObjectDashboard } from '..';
+import { DashboardContainer, DashboardSavedObject } from '..';
 
 export type DashboardRedirect = (props: RedirectToProps) => void;
 export type RedirectToProps =
@@ -76,7 +76,7 @@ export interface DashboardSaveOptions {
 }
 
 export interface DashboardAppComponentState {
-  savedDashboard?: SavedObjectDashboard;
+  savedDashboard?: DashboardSavedObject;
   dashboardStateManager?: DashboardStateManager;
   dashboardContainer?: DashboardContainer;
   indexPatterns?: IndexPattern[];

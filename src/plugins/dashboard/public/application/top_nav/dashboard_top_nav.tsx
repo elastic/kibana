@@ -23,7 +23,6 @@ import { EuiCheckboxGroupIdToSelectedMap } from '@elastic/eui/src/components/for
 import { i18n } from '@kbn/i18n';
 import angular from 'angular';
 import React, { ReactElement, useCallback, useEffect, useMemo, useState } from 'react';
-import { createDashboardEditUrl, DashboardConstants } from '../..';
 import { SavedQuery } from '../../../../data/public';
 
 import { ViewMode } from '../../../../embeddable/public';
@@ -113,17 +112,7 @@ export function DashboardTopNav({
           dashboardStateManager.syncTimefilterWithDashboardTime(timefilter);
           dashboardStateManager.syncTimefilterWithDashboardRefreshInterval(timefilter);
         }
-
-        // Angular's $location skips this update because of history updates from syncState which happen simultaneously
-        // when calling kbnUrl.change() angular schedules url update and when angular finally starts to process it,
-        // the update is considered outdated and angular skips it
-        // so have to use implementation of dashboardStateManager.changeDashboardUrl, which workarounds those issues
         redirectTo({ destination: 'dashboard', id: savedDashboard.id });
-        // dashboardStateManager.changeDashboardUrl(
-        //   savedDashboard.id
-        //     ? createDashboardEditUrl(savedDashboard.id)
-        //     : DashboardConstants.CREATE_NEW_DASHBOARD_URL
-        // );
       }
 
       core.overlays

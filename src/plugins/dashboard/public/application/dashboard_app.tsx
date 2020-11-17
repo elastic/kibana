@@ -77,12 +77,7 @@ import {
 import { DashboardPanelState, DASHBOARD_CONTAINER_TYPE } from '.';
 import { convertSavedDashboardPanelToPanelState } from '../../common/embeddable/embeddable_saved_object_converters';
 import { DashboardTopNav } from './top_nav/dashboard_top_nav';
-import {
-  dashboardBreadcrumb,
-  dashboardReadonlyBadge,
-  getDashboardTitle,
-  leaveConfirmStrings,
-} from './dashboard_strings';
+import { dashboardBreadcrumb, getDashboardTitle, leaveConfirmStrings } from './dashboard_strings';
 import type { TagDecoratedSavedObject } from '../../../saved_objects_tagging_oss/public';
 import { DashboardEmptyScreen } from './empty_screen/dashboard_empty_screen';
 import {
@@ -190,13 +185,16 @@ const getDashboardContainerInput = ({
   };
 };
 
-const getInputSubscription = (props: {
+const getInputSubscription = ({
+  dashboardContainer,
+  dashboardStateManager,
+  filterManager,
+}: {
   dashboardContainer: DashboardContainer;
   dashboardStateManager: DashboardStateManager;
   filterManager: FilterManager;
-}) => {
-  const { dashboardContainer, dashboardStateManager, filterManager } = props;
-  return dashboardContainer.getInput$().subscribe(() => {
+}) =>
+  dashboardContainer.getInput$().subscribe(() => {
     // This has to be first because handleDashboardContainerChanges causes
     // appState.save which will cause refreshDashboardContainer to be called.
 
@@ -218,15 +216,16 @@ const getInputSubscription = (props: {
 
     dashboardStateManager.handleDashboardContainerChanges(dashboardContainer);
   });
-};
 
-const getOutputSubscription = (props: {
+const getOutputSubscription = ({
+  dashboardContainer,
+  indexPatterns,
+  onUpdateIndexPatterns,
+}: {
   dashboardContainer: DashboardContainer;
   indexPatterns: IndexPatternsContract;
   onUpdateIndexPatterns: (newIndexPatterns: IndexPattern[]) => void;
 }) => {
-  const { dashboardContainer, indexPatterns, onUpdateIndexPatterns } = props;
-
   const updateIndexPatternsOperator = pipe(
     filter((container: DashboardContainer) => !!container && !isErrorEmbeddable(container)),
     map((container: DashboardContainer): IndexPattern[] => {
@@ -286,12 +285,13 @@ const getOutputSubscription = (props: {
     .subscribe();
 };
 
-const getFiltersSubscription = (props: {
+const getFiltersSubscription = ({
+  query,
+  dashboardStateManager,
+}: {
   query: QueryStart;
-  dashboardContainer: DashboardContainer;
   dashboardStateManager: DashboardStateManager;
 }) => {
-  const { dashboardStateManager, query } = props;
   return merge(query.filterManager.getUpdates$(), query.queryString.getUpdates$())
     .pipe(debounceTime(100))
     .subscribe(() => {
@@ -305,14 +305,9 @@ const getFiltersSubscription = (props: {
 const getSearchSessionIdFromURL = (history: History): string | undefined =>
   getQueryParams(history.location)[DashboardConstants.SEARCH_SESSION_ID] as string | undefined;
 
-const isActiveState = (
-  testState: DashboardAppComponentState
-): testState is DashboardAppComponentActiveState => {
+const isActiveState = (s: DashboardAppComponentState): s is DashboardAppComponentActiveState => {
   return Boolean(
-    testState.dashboardContainer &&
-      testState.dashboardStateManager &&
-      testState.indexPatterns &&
-      testState.savedDashboard
+    s.dashboardContainer && s.dashboardStateManager && s.indexPatterns && s.savedDashboard
   );
 };
 
@@ -364,7 +359,6 @@ export function DashboardApp({
 
         state.dashboardContainer.updateInput({
           ...changes,
-          searchSessionId: data.search.session.start(),
         });
       }
     },
@@ -641,6 +635,7 @@ export function DashboardApp({
 
     const dashboardStateManager = state.dashboardStateManager;
     const dashboardContainer = state.dashboardContainer;
+    const timeFilter = data.query.timefilter.timefilter;
     const subscriptions = new Subscription();
 
     subscriptions.add(
@@ -661,9 +656,13 @@ export function DashboardApp({
     subscriptions.add(
       getFiltersSubscription({
         query: data.query,
-        dashboardContainer,
         dashboardStateManager,
       })
+    );
+    subscriptions.add(
+      merge(timeFilter.getRefreshIntervalUpdate$(), timeFilter.getTimeUpdate$()).subscribe(() =>
+        refreshDashboardContainer()
+      )
     );
     dashboardStateManager.registerChangeListener(() => {
       // we aren't checking dirty state because there are changes the container needs to know about
@@ -710,17 +709,10 @@ export function DashboardApp({
     state.dashboardStateManager,
   ]);
 
-  // Sync breadcrumbs & badge when Dashboard State Manager changes
+  // Sync breadcrumbs when Dashboard State Manager changes
   useEffect(() => {
     if (!state.dashboardStateManager) {
       return;
-    }
-    if (!dashboardCapabilities.showWriteControls) {
-      chrome.setBadge({
-        text: dashboardReadonlyBadge.text,
-        tooltip: dashboardReadonlyBadge.tooltip,
-        iconType: 'glasses',
-      });
     }
     chrome.setBreadcrumbs([
       {
@@ -800,11 +792,12 @@ export function DashboardApp({
           dashboardContainer={state.dashboardContainer}
           dashboardStateManager={state.dashboardStateManager}
           onQuerySubmit={(_payload, isUpdate) => {
-            // The user can still request a reload in the query bar, even if the
-            // query is the same, and in that case, we have to explicitly ask for
-            // a reload, since no state changes will cause it.
-            const reloadRequest = isUpdate ? undefined : new Date().getTime();
-            refreshDashboardContainer(reloadRequest);
+            if (isUpdate === false) {
+              // The user can still request a reload in the query bar, even if the
+              // query is the same, and in that case, we have to explicitly ask for
+              // a reload, since no state changes will cause it.
+              refreshDashboardContainer(new Date().getTime());
+            }
           }}
         />
       )}

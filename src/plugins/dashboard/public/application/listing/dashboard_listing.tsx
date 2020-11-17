@@ -17,13 +17,13 @@
  * under the License.
  */
 
-import React, { Fragment, useEffect } from 'react';
+import React, { Fragment, useCallback, useEffect, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { EuiLink, EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 import { DashboardAppServices, DashboardListingProps } from '../types';
 import { TableListView, useKibana } from '../../../../kibana_react/public';
-import { ApplicationStart } from '../../../../../core/public';
+import { ApplicationStart, SavedObjectsFindOptionsReference } from '../../../../../core/public';
 import { DashboardSavedObject } from '../../saved_dashboards';
 import { syncQueryStateWithUrl } from '../../../../data/public';
 import { SavedObjectsTaggingApi } from '../../../../saved_objects_tagging_oss/public';
@@ -54,6 +54,7 @@ export const DashboardListing = ({
     },
   } = useKibana<DashboardAppServices>();
 
+  // Set breadcrumbs useEffect
   useEffect(() => {
     chrome.setBreadcrumbs([
       {
@@ -64,6 +65,7 @@ export const DashboardListing = ({
     ]);
   }, [chrome]);
 
+  // Load by Title useEffect
   useEffect(() => {
     // syncs `_g` portion of url with query services
     const { stop: stopSyncingQueryServiceStateWithUrl } = syncQueryStateWithUrl(
@@ -89,12 +91,6 @@ export const DashboardListing = ({
               id: matchingDashboards[0].id,
               useReplace: true,
             });
-          } else {
-            redirectTo({
-              destination: 'listing',
-              useReplace: true,
-              filter: title,
-            });
           }
         });
     }
@@ -106,40 +102,74 @@ export const DashboardListing = ({
 
   const hideWriteControls = dashboardCapabilities.hideWriteControls;
   const listingLimit = savedObjects.settings.getListingLimit();
+  const defaultFilter = title ? `"${title}"` : '';
 
-  const tableColumns = getTableColumns(
-    (id) => redirectTo({ destination: 'dashboard', id }),
-    savedObjectsTagging
+  const tableColumns = useMemo(
+    () =>
+      getTableColumns((id) => redirectTo({ destination: 'dashboard', id }), savedObjectsTagging),
+    [savedObjectsTagging, redirectTo]
   );
-  const noItemsFragment = getNoItemsMessage(hideWriteControls, core.application, () =>
-    redirectTo({ destination: 'dashboard' })
+
+  const noItemsFragment = useMemo(
+    () =>
+      getNoItemsMessage(hideWriteControls, core.application, () =>
+        redirectTo({ destination: 'dashboard' })
+      ),
+    [redirectTo, core.application, hideWriteControls]
   );
+
+  const fetchItems = useCallback(
+    (filter: string) => {
+      let searchTerm = filter;
+      let references: SavedObjectsFindOptionsReference[] | undefined;
+
+      if (savedObjectsTagging) {
+        const parsed = savedObjectsTagging.ui.parseSearchQuery(filter, {
+          useName: true,
+        });
+        searchTerm = parsed.searchTerm;
+        references = parsed.tagReferences;
+      }
+
+      return savedDashboards.find(searchTerm, {
+        size: listingLimit,
+        hasReference: references,
+      });
+    },
+    [listingLimit, savedDashboards, savedObjectsTagging]
+  );
+
+  const deleteItems = useCallback(
+    (dashboards: Array<{ id: string }>) => savedDashboards.delete(dashboards.map((d) => d.id)),
+    [savedDashboards]
+  );
+
+  const editItem = useCallback(
+    ({ id }: { id: string | undefined }) => redirectTo({ destination: 'dashboard', id }),
+    [redirectTo]
+  );
+
+  const searchFilters = useMemo(() => {
+    return savedObjectsTagging
+      ? [savedObjectsTagging.ui.getSearchBarFilter({ useName: true })]
+      : [];
+  }, [savedObjectsTagging]);
 
   return (
     <TableListView
-      headingId="dashboardListingHeading"
-      rowHeader="title"
       createItem={hideWriteControls ? undefined : () => redirectTo({ destination: 'dashboard' })}
-      findItems={(search) => savedDashboards.find(search, listingLimit)}
-      deleteItems={
-        hideWriteControls
-          ? undefined
-          : (dashboards: Array<{ id: string }>) =>
-              savedDashboards.delete(dashboards.map((d) => d.id))
-      }
-      editItem={
-        hideWriteControls
-          ? undefined
-          : ({ id }: { id: string | undefined }) => redirectTo({ destination: 'dashboard', id })
-      }
-      searchFilters={
-        savedObjectsTagging ? [savedObjectsTagging.ui.getSearchBarFilter({ useName: true })] : []
-      }
+      deleteItems={hideWriteControls ? undefined : deleteItems}
+      initialPageSize={savedObjects.settings.getPerPage()}
+      editItem={hideWriteControls ? undefined : editItem}
+      initialFilter={initialFilter ?? defaultFilter}
+      toastNotifications={core.notifications.toasts}
+      headingId="dashboardListingHeading"
+      noItemsFragment={noItemsFragment}
+      searchFilters={searchFilters}
       tableColumns={tableColumns}
       listingLimit={listingLimit}
-      initialPageSize={savedObjects.settings.getPerPage()}
-      initialFilter={initialFilter ?? ''}
-      noItemsFragment={noItemsFragment}
+      findItems={fetchItems}
+      rowHeader="title"
       entityName={i18n.translate('dashboard.listing.table.entityName', {
         defaultMessage: 'dashboard',
       })}
@@ -152,7 +182,6 @@ export const DashboardListing = ({
       tableCaption={i18n.translate('dashboard.listing.dashboardsTitle', {
         defaultMessage: 'Dashboards',
       })}
-      toastNotifications={core.notifications.toasts}
     />
   );
 };

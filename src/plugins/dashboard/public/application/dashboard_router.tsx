@@ -40,6 +40,7 @@ import {
 } from './types';
 import { DashboardApp } from './dashboard_app';
 import { createDashboardListingFilterUrl } from '../dashboard_constants';
+import { dashboardReadonlyBadge } from './dashboard_strings';
 import { createDashboardEditUrl, DashboardConstants } from '..';
 
 export enum UrlParams {
@@ -146,7 +147,18 @@ export async function mountApp({
     };
   };
 
+  const setBadge = () => {
+    if (!coreStart.application.capabilities.dashboard.showWriteControls) {
+      coreStart.chrome.setBadge({
+        text: dashboardReadonlyBadge.text,
+        tooltip: dashboardReadonlyBadge.tooltip,
+        iconType: 'glasses',
+      });
+    }
+  };
+
   const renderDashboard = (routeProps: RouteComponentProps<{ id?: string }>) => {
+    setBadge();
     const routeParams = parse(routeProps.history.location.search);
     const embedSettings = getDashboardEmbedSettings(routeParams);
     return (
@@ -160,6 +172,7 @@ export async function mountApp({
   };
 
   const renderListingPage = (routeProps: RouteComponentProps) => {
+    setBadge();
     coreStart.chrome.docTitle.change(
       i18n.translate('dashboard.dashboardPageTitle', { defaultMessage: 'Dashboards' })
     );
