@@ -24,5 +24,6 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
     loadTestFile(require.resolve('./visualize_integration'));
     loadTestFile(require.resolve('./dashboard_integration'));
     loadTestFile(require.resolve('./feature_control'));
+    loadTestFile(require.resolve('./maps_integration'));
   });
 }
