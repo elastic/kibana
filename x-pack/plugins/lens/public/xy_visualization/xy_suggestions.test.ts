@@ -5,12 +5,7 @@
  */
 
 import { getSuggestions } from './xy_suggestions';
-import {
-  TableSuggestionColumn,
-  VisualizationSuggestion,
-  DataType,
-  TableSuggestion,
-} from '../types';
+import { TableSuggestionColumn, VisualizationSuggestion, TableSuggestion } from '../types';
 import { State, XYState, visualizationTypes } from './types';
 import { generateId } from '../id_generator';
 import { getXyVisualization } from './xy_visualization';
@@ -87,12 +82,7 @@ describe('xy_suggestions', () => {
     jest.resetAllMocks();
   });
 
-  test('ignores invalid combinations', () => {
-    const unknownCol = () => {
-      const str = strCol('foo');
-      return { ...str, operation: { ...str.operation, dataType: 'wonkies' as DataType } };
-    };
-
+  test('partially maps invalid combinations, but hides them', () => {
     expect(
       ([
         {
@@ -109,18 +99,14 @@ describe('xy_suggestions', () => {
         },
         {
           isMultiRow: false,
-          columns: [strCol('foo'), numCol('bar')],
-          layerId: 'first',
-          changeType: 'unchanged',
-        },
-        {
-          isMultiRow: true,
-          columns: [unknownCol(), numCol('bar')],
+          columns: [numCol('bar')],
           layerId: 'first',
           changeType: 'unchanged',
         },
       ] as TableSuggestion[]).map((table) =>
-        expect(getSuggestions({ table, keptLayerIds: [] })).toEqual([])
+        expect(
+          getSuggestions({ table, keptLayerIds: [] }).every((suggestion) => suggestion.hide)
+        ).toEqual(true)
       )
     );
   });
@@ -913,8 +899,9 @@ describe('xy_suggestions', () => {
         Object {
           "seriesType": "bar_stacked",
           "splitAccessor": undefined,
-          "x": "quantity",
+          "x": undefined,
           "y": Array [
+            "quantity",
             "price",
           ],
         },
