@@ -5,18 +5,19 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { exportAsCSVs, FieldFormat } from 'src/plugins/data/public';
+import { DataPublicPluginStart, exportAsCSVs, FieldFormat } from 'src/plugins/data/public';
 import { IEmbeddable } from 'src/plugins/embeddable/public';
-// import { StartServicesGetter } from 'src/plugins/kibana_utils/public';
 import { Action } from 'src/plugins/ui_actions/public';
+import { CoreStart } from 'src/core/public';
 
 export const ACTION_EXPORT_CSV = 'ACTION_EXPORT_CSV';
 
-// export interface Params {
-//   start: StartServicesGetter<unknown, unknown, unknown>;
-// }
+export interface Params {
+  core: CoreStart;
+  data: DataPublicPluginStart;
+}
 
-interface ExportContext {
+export interface ExportContext {
   embeddable?: IEmbeddable;
 }
 
@@ -31,7 +32,7 @@ export class ExportCSVAction implements Action<ExportContext, typeof ACTION_EXPO
 
   public readonly order = 200;
 
-  constructor(protected readonly params: {} /* Params */) {}
+  constructor(protected readonly params: Params) {}
 
   public getIconType() {
     return 'exportAction';
@@ -49,16 +50,14 @@ export class ExportCSVAction implements Action<ExportContext, typeof ACTION_EXPO
   protected readonly exportCSV = async (context: ExportContext): Promise<void> => {
     if (context.embeddable) {
       exportAsCSVs(context.embeddable.getTitle()!, context.embeddable.getInspectorAdapters(), {
-        csvSeparator: ',',
-        quoteValues: true,
-        formatFactory: () => ({ convert: (v) => `${v}` } as FieldFormat),
+        csvSeparator: this.params.core.uiSettings.get('csv:separator', ','),
+        quoteValues: this.params.core.uiSettings.get('csv:quoteValues', true),
+        formatFactory: this.params.data.fieldFormats.deserialize,
       });
     }
   };
 
   public async execute(context: ExportContext): Promise<void> {
-    // const { core } = this.params.start();
-
     await this.exportCSV(context);
   }
 }
