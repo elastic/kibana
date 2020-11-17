@@ -107,9 +107,6 @@
             },
             "title": {
               "type": "text"
-            },
-            "attributes": {
-              "type": "object"
             }
           }
         },
