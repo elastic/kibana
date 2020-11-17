@@ -2,7 +2,7 @@
 
 source src/dev/ci_setup/setup_env.sh
 
-run_quick_commit_checks() {
+function run_quick_commit_checks() {
   node scripts/precommit_hook.js \
     --ref HEAD~1..HEAD \
     --max-files 200 \
