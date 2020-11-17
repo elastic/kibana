@@ -1386,13 +1386,13 @@ describe('xy_expression', () => {
             yAccessor: 'a',
             seriesKeys: ['a'],
           })
-        ).toEqual('black');
+        ).toEqual('blue');
         expect(
           (component.find(LineSeries).at(1).prop('color') as Function)!({
             yAccessor: 'c',
             seriesKeys: ['c'],
           })
-        ).toEqual('black');
+        ).toEqual('blue');
       });
     });
 
