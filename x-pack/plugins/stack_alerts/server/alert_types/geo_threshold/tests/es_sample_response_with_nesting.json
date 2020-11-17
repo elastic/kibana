@@ -13,48 +13,7 @@
       "relation" : "gte"
     },
     "max_score" : 0.0,
-    "hits" : [
-      {
-        "_index" : "flight_tracks",
-        "_id" : "XOng1XQB6yyY-xQxbwWM",
-        "_score" : 0.0,
-        "fields" : {
-          "@timestamp" : [
-            "2020-09-28T18:01:29.580Z"
-          ]
-        }
-      },
-      {
-        "_index" : "flight_tracks",
-        "_id" : "Xeng1XQB6yyY-xQxbwWM",
-        "_score" : 0.0,
-        "fields" : {
-          "@timestamp" : [
-            "2020-09-28T18:01:29.580Z"
-          ]
-        }
-      },
-      {
-        "_index" : "flight_tracks",
-        "_id" : "Xung1XQB6yyY-xQxbwWM",
-        "_score" : 0.0,
-        "fields" : {
-          "@timestamp" : [
-            "2020-09-28T18:01:29.580Z"
-          ]
-        }
-      },
-      {
-        "_index" : "flight_tracks",
-        "_id" : "UOjg1XQB6yyY-xQxZvMz",
-        "_score" : 0.0,
-        "fields" : {
-          "@timestamp" : [
-            "2020-09-28T18:01:27.266Z"
-          ]
-        }
-      }
-    ]
+    "hits" : []
   },
   "aggregations" : {
     "shapes" : {
