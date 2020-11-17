@@ -31,7 +31,7 @@ export async function generate(encryptionConfig, command) {
     if (!command.quiet) {
       logger.log('## Kibana Encryption Key Generation Utility\n');
       logger.log(
-        `The 'generate' command guides you through the process of setting encryption keys for: `
+        `The 'generate' command guides you through the process of setting encryption keys for:\n`
       );
       logger.log(encryptionConfig.docs());
       logger.log(
