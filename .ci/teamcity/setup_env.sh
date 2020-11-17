@@ -24,6 +24,8 @@ tc_set_env NODE_OPTIONS "${NODE_OPTIONS:-} --max-old-space-size=4096"
 tc_set_env FORCE_COLOR 1
 tc_set_env TEST_BROWSER_HEADLESS 1
 
+tc_set_env ELASTIC_APM_ENVIRONMENT ci
+
 if [[ "${KIBANA_CI_REPORTER_KEY_BASE64-}" ]]; then
   tc_set_env KIBANA_CI_REPORTER_KEY "$(echo "$KIBANA_CI_REPORTER_KEY_BASE64" | base64 -d)"
 fi
@@ -40,7 +42,7 @@ else
   tc_set_env CHECKS_REPORTER_ACTIVE false
 fi
 
-tc_set_env INGEST_MANAGEMENT_PACKAGE_REGISTRY_PORT 6104 # Any unused port is fine, used by ingest manager tests
+tc_set_env FLEET_PACKAGE_REGISTRY_PORT 6104 # Any unused port is fine, used by ingest manager tests
 
 if [[ "$(which google-chrome-stable)" || "$(which google-chrome)" ]]; then
   echo "Chrome detected, setting DETECT_CHROMEDRIVER_VERSION=true"
