@@ -14,7 +14,7 @@ import {
   ERROR_CODE,
 } from '../../../../shared_imports';
 import { IMitreEnterpriseAttack, AboutStepRule } from '../../../pages/detection_engine/rules/types';
-import { isMitreAttackInvalid } from '../mitre/helpers';
+import { isMitreAttackInvalid, isMitreTechniqueInvalid } from '../mitre/helpers';
 import { OptionalFieldLabel } from '../optional_field_label';
 import { isUrlInvalid } from '../../../../common/utils/validators';
 import * as I18n from './translations';
@@ -198,17 +198,39 @@ export const schema: FormSchema<AboutStepRule> = {
           ...args: Parameters<ValidationFunc>
         ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
           const [{ value, path }] = args;
-          let hasError = false;
+          let hasTechniqueError = false;
           (value as IMitreEnterpriseAttack[]).forEach((v) => {
             if (isMitreAttackInvalid(v.tactic.name, v.technique)) {
-              hasError = true;
+              hasTechniqueError = true;
             }
           });
-          return hasError
+          return hasTechniqueError
             ? {
                 code: 'ERR_FIELD_MISSING',
                 path,
                 message: I18n.CUSTOM_MITRE_ATTACK_TECHNIQUES_REQUIRED,
+              }
+            : undefined;
+        },
+      },
+      {
+        validator: (
+          ...args: Parameters<ValidationFunc>
+        ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
+          const [{ value, path }] = args;
+          let hasSubtechniqueError = false;
+          (value as IMitreEnterpriseAttack[]).forEach((v) => {
+            v.technique.forEach((t) => {
+              if (isMitreTechniqueInvalid(v.tactic.name, t)) {
+                hasSubtechniqueError = true;
+              }
+            });
+          });
+          return hasSubtechniqueError
+            ? {
+                code: 'ERR_FIELD_MISSING',
+                path,
+                message: I18n.CUSTOM_MITRE_ATTACK_SUBTECHNIQUES_REQUIRED,
               }
             : undefined;
         },

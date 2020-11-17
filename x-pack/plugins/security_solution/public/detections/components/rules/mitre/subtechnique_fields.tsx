@@ -54,18 +54,16 @@ export const MitreSubtechniqueFields: React.FC<AddSubtechniqueProps> = ({
     (index: number) => {
       const threats = [...(field.value as IMitreEnterpriseAttack[])];
       const subtechniques = threats[threatIndex].technique[techniqueIndex].subtechnique;
-      if (subtechniques != null) {
-        const newSubtechniques = [
-          ...subtechniques.slice(0, index),
-          ...subtechniques.slice(index + 1),
-        ];
+      const newSubtechniques = [
+        ...subtechniques.slice(0, index),
+        ...subtechniques.slice(index + 1),
+      ];
 
-        threats[threatIndex].technique[techniqueIndex] = {
-          ...threats[threatIndex].technique[techniqueIndex],
-          subtechnique: newSubtechniques,
-        };
-        onFieldChange(threats);
-      }
+      threats[threatIndex].technique[techniqueIndex] = {
+        ...threats[threatIndex].technique[techniqueIndex],
+        subtechnique: newSubtechniques,
+      };
+      onFieldChange(threats);
     },
     [field, threatIndex, onFieldChange, techniqueIndex]
   );
@@ -77,11 +75,7 @@ export const MitreSubtechniqueFields: React.FC<AddSubtechniqueProps> = ({
 
     threats[threatIndex].technique[techniqueIndex] = {
       ...threats[threatIndex].technique[techniqueIndex],
-      subtechnique: [
-        ...(subtechniques != null
-          ? [...subtechniques, { id: 'none', name: 'none', reference: 'none' }]
-          : [{ id: 'none', name: 'none', reference: 'none' }]),
-      ],
+      subtechnique: [...subtechniques, { id: 'none', name: 'none', reference: 'none' }],
     };
 
     onFieldChange(threats);
@@ -97,31 +91,29 @@ export const MitreSubtechniqueFields: React.FC<AddSubtechniqueProps> = ({
       };
       const subtechniques = threats[threatIndex].technique[techniqueIndex].subtechnique;
 
-      if (subtechniques != null) {
-        onFieldChange([
-          ...threats.slice(0, threatIndex),
-          {
-            ...threats[threatIndex],
-            technique: [
-              ...threats[threatIndex].technique.slice(0, techniqueIndex),
-              {
-                ...threats[threatIndex].technique[techniqueIndex],
-                subtechnique: [
-                  ...subtechniques.slice(0, index),
-                  {
-                    id,
-                    reference,
-                    name,
-                  },
-                  ...subtechniques.slice(index + 1),
-                ],
-              },
-              ...threats[threatIndex].technique.slice(techniqueIndex + 1),
-            ],
-          },
-          ...threats.slice(threatIndex + 1),
-        ]);
-      }
+      onFieldChange([
+        ...threats.slice(0, threatIndex),
+        {
+          ...threats[threatIndex],
+          technique: [
+            ...threats[threatIndex].technique.slice(0, techniqueIndex),
+            {
+              ...threats[threatIndex].technique[techniqueIndex],
+              subtechnique: [
+                ...subtechniques.slice(0, index),
+                {
+                  id,
+                  reference,
+                  name,
+                },
+                ...subtechniques.slice(index + 1),
+              ],
+            },
+            ...threats[threatIndex].technique.slice(techniqueIndex + 1),
+          ],
+        },
+        ...threats.slice(threatIndex + 1),
+      ]);
     },
     [threatIndex, techniqueIndex, onFieldChange, field]
   );
@@ -167,7 +159,7 @@ export const MitreSubtechniqueFields: React.FC<AddSubtechniqueProps> = ({
 
   return (
     <SubtechniqueContainer>
-      {technique.subtechnique?.map((subtechnique, index) => (
+      {technique.subtechnique.map((subtechnique, index) => (
         <div key={index}>
           <EuiSpacer size="s" />
           <EuiFormRow

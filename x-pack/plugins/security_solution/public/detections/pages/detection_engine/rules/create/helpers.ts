@@ -27,6 +27,9 @@ import {
   ActionsStepRuleJson,
   RuleStepsFormData,
   RuleStep,
+  IMitreEnterpriseAttack,
+  IMitreAttack,
+  IMitreAttackTechnique,
 } from '../types';
 
 export const getTimeTypeValue = (time: string): { unit: string; value: number } => {
@@ -161,6 +164,29 @@ export const filterRuleFieldsForType = <T extends Partial<RuleFields>>(
   assertUnreachable(type);
 };
 
+function filterThreatByName<T extends IMitreAttack | IMitreAttackTechnique>(filterable: T[]): T[] {
+  return filterable.filter((item) => item.name !== 'none');
+}
+
+/**
+ * Filter out unfilled/empty threat, technique, and subtechnique fields based on if their name is `none`
+ */
+export const filterEmptyThreats = (threats: IMitreEnterpriseAttack[]): IMitreEnterpriseAttack[] => {
+  return threats
+    .filter((singleThreat) => singleThreat.tactic.name !== 'none')
+    .map((threat) => {
+      return {
+        ...threat,
+        technique: filterThreatByName(threat.technique).map((technique) => {
+          return {
+            ...technique,
+            subtechnique: filterThreatByName(technique.subtechnique),
+          };
+        }),
+      };
+    });
+};
+
 export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStepRuleJson => {
   const ruleFields = filterRuleFieldsForType(defineStepData, defineStepData.ruleType);
   const { ruleType, timeline } = ruleFields;
@@ -293,16 +319,10 @@ export const formatAboutStepData = (
     severity_mapping: severity.isMappingChecked
       ? severity.mapping.filter((m) => m.field != null && m.field !== '' && m.value != null)
       : [],
-    threat: threat
-      .filter((singleThreat) => singleThreat.tactic.name !== 'none')
-      .map((singleThreat) => ({
-        ...singleThreat,
-        framework: 'MITRE ATT&CK',
-        technique: singleThreat.technique.map((technique) => {
-          const { id, name, reference } = technique;
-          return { id, name, reference };
-        }),
-      })),
+    threat: filterEmptyThreats(threat).map((singleThreat) => ({
+      ...singleThreat,
+      framework: 'MITRE ATT&CK',
+    })),
     timestamp_override: timestampOverride !== '' ? timestampOverride : undefined,
     ...(!isEmpty(note) ? { note } : {}),
     ...rest,

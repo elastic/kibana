@@ -11,7 +11,6 @@ import {
   EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiText,
 } from '@elastic/eui';
 import { kebabCase, camelCase } from 'lodash/fp';
 import React, { useCallback, useState } from 'react';
@@ -25,7 +24,7 @@ import {
   IMitreEnterpriseAttack,
 } from '../../../pages/detection_engine/rules/types';
 import { MyAddItemButton } from '../add_item_form';
-import { hasSubtechniques, isMitreAttackInvalid } from './helpers';
+import { hasSubtechniqueOptions, isMitreTechniqueInvalid } from './helpers';
 import * as i18n from './translations';
 import { MitreSubtechniqueFields } from './subtechnique_fields';
 
@@ -101,6 +100,7 @@ export const MitreTechniqueFields: React.FC<AddTechniqueProps> = ({
               id,
               reference,
               name,
+              subtechnique: [],
             },
             ...threats[threatIndex].technique.slice(index + 1),
           ],
@@ -111,11 +111,13 @@ export const MitreTechniqueFields: React.FC<AddTechniqueProps> = ({
     [threatIndex, onFieldChange, field]
   );
 
+  const isTechniqueInvalid = useCallback((tacticName: string, technique: IMitreAttackTechnique) => {
+    return isMitreTechniqueInvalid(tacticName, technique);
+  }, []);
+
   const getSelectTechnique = useCallback(
     (tacticName: string, index: number, disabled: boolean, technique: IMitreAttackTechnique) => {
       const options = techniquesOptions.filter((t) => t.tactics.includes(kebabCase(tacticName)));
-      const invalid = isMitreAttackInvalid(tacticName, values[threatIndex].technique);
-
       return (
         <>
           <EuiSuperSelect
@@ -142,20 +144,15 @@ export const MitreTechniqueFields: React.FC<AddTechniqueProps> = ({
             fullWidth={true}
             valueOfSelected={camelCase(technique.name)}
             data-test-subj="mitreTactic"
-            isInvalid={showValidation && invalid}
+            isInvalid={showValidation && isTechniqueInvalid(tacticName, technique)}
             onBlur={() => setShowValidation(true)}
             disabled={disabled}
             placeholder={i18n.TECHNIQUE_PLACEHOLDER}
           />
-          {showValidation && invalid && (
-            <EuiText color="danger" size="xs">
-              <p>{errorMessage}</p>
-            </EuiText>
-          )}
         </>
       );
     },
-    [errorMessage, field, showValidation, threatIndex, updateTechnique, values]
+    [field, showValidation, updateTechnique, isTechniqueInvalid]
   );
 
   return (
@@ -164,9 +161,12 @@ export const MitreTechniqueFields: React.FC<AddTechniqueProps> = ({
         <div key={index}>
           <EuiSpacer size="s" />
           <EuiFormRow
-            isInvalid={showValidation && isInvalid}
+            isInvalid={
+              showValidation && isTechniqueInvalid(values[threatIndex].tactic.name, technique)
+            }
             fullWidth
             describedByIds={idAria ? [`${idAria} ${i18n.TECHNIQUE}`] : undefined}
+            error={errorMessage}
           >
             <EuiFlexGroup gutterSize="s" alignItems="center">
               <EuiFlexItem grow>
@@ -188,7 +188,7 @@ export const MitreTechniqueFields: React.FC<AddTechniqueProps> = ({
             field={field}
             idAria={idAria}
             isDisabled={
-              isDisabled || technique.name === 'none' || hasSubtechniques(technique) === false
+              isDisabled || technique.name === 'none' || hasSubtechniqueOptions(technique) === false
             }
             threatIndex={threatIndex}
             techniqueIndex={index}

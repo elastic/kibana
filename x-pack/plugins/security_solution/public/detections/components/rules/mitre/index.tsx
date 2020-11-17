@@ -6,18 +6,19 @@
 
 import { EuiButtonIcon, EuiFormRow, EuiSuperSelect, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { isEmpty, camelCase } from 'lodash/fp';
-import React, { memo, useCallback } from 'react';
+import React, { memo, useCallback, useState } from 'react';
 import styled from 'styled-components';
 
 import { isEqual } from 'lodash';
 import { tacticsOptions } from '../../../mitre/mitre_tactics_techniques';
 import * as Rulei18n from '../../../pages/detection_engine/rules/translations';
-import { FieldHook } from '../../../../shared_imports';
+import { FieldHook, getFieldValidityAndErrorMessage } from '../../../../shared_imports';
 import { threatDefault } from '../step_about_rule/default_value';
 import { IMitreEnterpriseAttack } from '../../../pages/detection_engine/rules/types';
 import { MyAddItemButton } from '../add_item_form';
 import * as i18n from './translations';
 import { MitreTechniqueFields } from './technique_fields';
+import { isMitreAttackInvalid } from './helpers';
 
 const MitreContainer = styled.div`
   margin-top: 16px;
@@ -39,9 +40,12 @@ interface AddItemProps {
 }
 
 export const AddMitreThreat = memo(({ field, idAria, isDisabled }: AddItemProps) => {
+  const [showValidation, setShowValidation] = useState(false);
+  const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
+
   const removeTactic = useCallback(
     (index: number) => {
-      const values = field.value as string[];
+      const values = [...(field.value as IMitreEnterpriseAttack[])];
       const newValues = [...values.slice(0, index), ...values.slice(index + 1)];
       if (isEmpty(newValues)) {
         field.setValue(threatDefault);
@@ -53,7 +57,7 @@ export const AddMitreThreat = memo(({ field, idAria, isDisabled }: AddItemProps)
   );
 
   const addMitreTactic = useCallback(() => {
-    const values = field.value as IMitreEnterpriseAttack[];
+    const values = [...(field.value as IMitreEnterpriseAttack[])];
     if (!isEmpty(values[values.length - 1])) {
       field.setValue([
         ...values,
@@ -66,7 +70,7 @@ export const AddMitreThreat = memo(({ field, idAria, isDisabled }: AddItemProps)
 
   const updateTactic = useCallback(
     (index: number, value: string) => {
-      const values = field.value as IMitreEnterpriseAttack[];
+      const values = [...(field.value as IMitreEnterpriseAttack[])];
       const { id, reference, name } = tacticsOptions.find((t) => t.value === value) || {
         id: '',
         name: '',
@@ -85,49 +89,63 @@ export const AddMitreThreat = memo(({ field, idAria, isDisabled }: AddItemProps)
     [field]
   );
 
-  const values = field.value as IMitreEnterpriseAttack[];
+  const values = [...(field.value as IMitreEnterpriseAttack[])];
 
-  const getSelectTactic = (tacticName: string, index: number, disabled: boolean) => (
-    <EuiFlexGroup gutterSize="s" alignItems="center">
-      <EuiFlexItem grow>
-        <EuiSuperSelect
-          id="selectDocExample"
-          options={[
-            ...(tacticName === 'none'
-              ? [
-                  {
-                    inputDisplay: <>{i18n.TACTIC_PLACEHOLDER}</>,
-                    value: 'none',
-                    disabled,
-                  },
-                ]
-              : []),
-            ...tacticsOptions.map((t) => ({
-              inputDisplay: <>{t.text}</>,
-              value: t.value,
-              disabled,
-            })),
-          ]}
-          prepend={`${field.label} ${i18n.TACTIC}`}
-          aria-label=""
-          onChange={updateTactic.bind(null, index)}
-          fullWidth={true}
-          valueOfSelected={camelCase(tacticName)}
-          data-test-subj="mitreTactic"
-          placeholder={i18n.TACTIC_PLACEHOLDER}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiButtonIcon
-          color="danger"
-          iconType="trash"
-          isDisabled={isDisabled || isEqual(values, threatDefault)}
-          onClick={() => removeTactic(index)}
-          aria-label={Rulei18n.DELETE}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+  const isTacticValid = useCallback((threat: IMitreEnterpriseAttack) => {
+    return isMitreAttackInvalid(threat.tactic.name, threat.technique);
+  }, []);
+
+  const getSelectTactic = useCallback(
+    (threat: IMitreEnterpriseAttack, index: number, disabled: boolean) => {
+      const tacticName = threat.tactic.name;
+      return (
+        <EuiFlexGroup gutterSize="s" alignItems="center">
+          <EuiFlexItem grow>
+            <EuiSuperSelect
+              id="selectDocExample"
+              options={[
+                ...(tacticName === 'none'
+                  ? [
+                      {
+                        inputDisplay: <>{i18n.TACTIC_PLACEHOLDER}</>,
+                        value: 'none',
+                        disabled,
+                      },
+                    ]
+                  : []),
+                ...tacticsOptions.map((t) => ({
+                  inputDisplay: <>{t.text}</>,
+                  value: t.value,
+                  disabled,
+                })),
+              ]}
+              prepend={`${field.label} ${i18n.TACTIC}`}
+              aria-label=""
+              onChange={updateTactic.bind(null, index)}
+              fullWidth={true}
+              valueOfSelected={camelCase(tacticName)}
+              data-test-subj="mitreTactic"
+              placeholder={i18n.TACTIC_PLACEHOLDER}
+              isInvalid={showValidation && isTacticValid(threat)}
+              onBlur={() => setShowValidation(true)}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonIcon
+              color="danger"
+              iconType="trash"
+              isDisabled={isDisabled || isEqual(values, threatDefault)}
+              onClick={() => removeTactic(index)}
+              aria-label={Rulei18n.DELETE}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      );
+    },
+    [field, isDisabled, removeTactic, showValidation, updateTactic, values, isTacticValid]
   );
+
+  console.log(errorMessage, showValidation, isInvalid);
 
   /**
    * Uses the fieldhook to set a new field value
@@ -151,11 +169,20 @@ export const AddMitreThreat = memo(({ field, idAria, isDisabled }: AddItemProps)
               label={`${field.label} ${i18n.THREATS}`}
               labelAppend={field.labelAppend}
               describedByIds={idAria ? [`${idAria} ${i18n.TACTIC}`] : undefined}
+              isInvalid={showValidation && isTacticValid(threat)}
+              error={errorMessage}
             >
-              <>{getSelectTactic(threat.tactic.name, index, isDisabled)}</>
+              <>{getSelectTactic(threat, index, isDisabled)}</>
             </InitialMitreFormRow>
           ) : (
-            getSelectTactic(threat.tactic.name, index, isDisabled)
+            <EuiFormRow
+              fullWidth
+              isInvalid={showValidation && isTacticValid(threat)}
+              error={errorMessage}
+              describedByIds={idAria ? [`${idAria} ${i18n.TACTIC}`] : undefined}
+            >
+              {getSelectTactic(threat, index, isDisabled)}
+            </EuiFormRow>
           )}
 
           <MitreTechniqueFields
