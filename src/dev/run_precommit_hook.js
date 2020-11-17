@@ -27,6 +27,8 @@ run(
     const files = await getFilesForCommit(flags.ref);
     const errors = [];
 
+    debugger;
+
     const maxFilesCount = flags['max-files']
       ? Number.parseInt(String(flags['max-files']), 10)
       : undefined;
