@@ -8,13 +8,15 @@ import { SuperTest } from 'supertest';
 import supertestAsPromised from 'supertest-as-promised';
 import { Client } from '@elastic/elasticsearch';
 
+import { getImportListItemAsBuffer } from '../../plugins/lists/common/schemas/request/import_list_item_schema.mock';
 import {
   ListItemSchema,
   ExceptionListSchema,
   ExceptionListItemSchema,
+  Type,
 } from '../../plugins/lists/common/schemas';
 import { ListSchema } from '../../plugins/lists/common';
-import { LIST_INDEX } from '../../plugins/lists/common/constants';
+import { LIST_INDEX, LIST_ITEM_URL } from '../../plugins/lists/common/constants';
 import { countDownES, countDownTest } from '../detection_engine_api_integration/utils';
 
 /**
@@ -163,4 +165,65 @@ export const deleteAllExceptions = async (es: Client): Promise<void> => {
       body: {},
     });
   }, 'deleteAllExceptions');
+};
+
+/**
+ * Convenience function for quickly importing a given type and contents and then
+ * waiting to ensure they're there before continuing
+ * @param supertest The super test agent
+ * @param type The type to import as
+ * @param contents The contents of the import
+ * @param fileName filename to import as
+ */
+export const importFile = async (
+  supertest: SuperTest<supertestAsPromised.Test>,
+  type: Type,
+  contents: string[],
+  fileName: string
+): Promise<void> => {
+  await supertest
+    .post(`${LIST_ITEM_URL}/_import?type=${type}`)
+    .set('kbn-xsrf', 'true')
+    .attach('file', getImportListItemAsBuffer(contents), fileName)
+    .expect('Content-Type', 'application/json; charset=utf-8')
+    .expect(200);
+
+  // although we have pushed the list and its items, it is async so we
+  // have to wait for the contents before continuing
+  await waitForListItems(supertest, contents, fileName);
+};
+
+/**
+ * Convenience function for waiting for a particular file uploaded
+ * and a particular item value to be available before continuing.
+ * @param supertest The super test agent
+ * @param fileName The filename imported
+ * @param itemValue The item value to wait for
+ */
+export const waitForListItem = async (
+  supertest: SuperTest<supertestAsPromised.Test>,
+  itemValue: string,
+  fileName: string
+): Promise<void> => {
+  await waitFor(async () => {
+    const { status } = await supertest
+      .get(`${LIST_ITEM_URL}?list_id=${fileName}&value=${itemValue}`)
+      .send();
+    return status !== 404;
+  });
+};
+
+/**
+ * Convenience function for waiting for a particular file uploaded
+ * and particular item values to be available before continuing.
+ * @param supertest The super test agent
+ * @param fileName The filename imported
+ * @param itemValue The item value to wait for
+ */
+export const waitForListItems = async (
+  supertest: SuperTest<supertestAsPromised.Test>,
+  itemValues: string[],
+  fileName: string
+): Promise<void> => {
+  await Promise.all(itemValues.map((item) => waitForListItem(supertest, item, fileName)));
 };

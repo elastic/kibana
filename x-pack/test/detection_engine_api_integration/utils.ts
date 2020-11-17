@@ -9,6 +9,8 @@ import { SuperTest } from 'supertest';
 import supertestAsPromised from 'supertest-as-promised';
 import { Context } from '@elastic/elasticsearch/lib/Transport';
 import { SearchResponse } from 'elasticsearch';
+import { NonEmptyEntriesArray } from '../../plugins/lists/common/schemas';
+import { getCreateExceptionListDetectionSchemaMock } from '../../plugins/lists/common/schemas/request/create_exception_list_schema.mock';
 import {
   CreateRulesSchema,
   UpdateRulesSchema,
@@ -35,6 +37,7 @@ import {
   DETECTION_ENGINE_RULES_URL,
   INTERNAL_RULE_ID_KEY,
 } from '../../plugins/security_solution/common/constants';
+import { getCreateExceptionListItemMinimalSchemaMockWithoutId } from '../../plugins/lists/common/schemas/request/create_exception_list_item_schema.mock';
 
 /**
  * This will remove server generated properties such as date times, etc...
@@ -841,6 +844,7 @@ export const getAllSignals = async (
 ): Promise<
   SearchResponse<{
     signal: Signal;
+    [x: string]: unknown;
   }>
 > => {
   const { body: signalsOpen }: { body: SearchResponse<{ signal: Signal }> } = await supertest
@@ -857,6 +861,7 @@ export const getSignalsByRuleIds = async (
 ): Promise<
   SearchResponse<{
     signal: Signal;
+    [x: string]: unknown;
   }>
 > => {
   const { body: signalsOpen }: { body: SearchResponse<{ signal: Signal }> } = await supertest
@@ -871,4 +876,69 @@ export const installPrePackagedRules = async (
   supertest: SuperTest<supertestAsPromised.Test>
 ): Promise<void> => {
   await supertest.put(DETECTION_ENGINE_PREPACKAGED_URL).set('kbn-xsrf', 'true').send().expect(200);
+};
+
+/**
+ * Convenience testing function where you can pass in just the entries and you will
+ * get a rule created with the entries added to an exception list and exception list item
+ * all auto-created at once.
+ * @param supertest super test agent
+ * @param rule The rule to create and attach an exception list to
+ * @param entries The entries to create the rule and exception list from
+ */
+export const createRuleWithExceptionEntries = async (
+  supertest: SuperTest<supertestAsPromised.Test>,
+  rule: QueryCreateSchema,
+  entries: NonEmptyEntriesArray[]
+): Promise<FullResponseSchema> => {
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  const { id, list_id, namespace_type, type } = await createExceptionList(
+    supertest,
+    getCreateExceptionListDetectionSchemaMock()
+  );
+
+  await Promise.all(
+    entries.map((entry) => {
+      const exceptionListItem: CreateExceptionListItemSchema = {
+        ...getCreateExceptionListItemMinimalSchemaMockWithoutId(),
+        entries: entry,
+      };
+      return createExceptionListItem(supertest, exceptionListItem);
+    })
+  );
+
+  // To reduce the odds of in-determinism and/or bugs we ensure we have
+  // the same length of entries before continuing.
+  await waitFor(async () => {
+    const { body } = await supertest.get(
+      `${EXCEPTION_LIST_ITEM_URL}/_find?list_id=${
+        getCreateExceptionListDetectionSchemaMock().list_id
+      }`
+    );
+    return body.data.length === entries.length;
+  });
+
+  // create the rule but don't run it immediately as running it immediately can cause
+  // the rule to sometimes not filter correctly the first time with an exception list
+  // or other timing issues.
+  const ruleWithException: QueryCreateSchema = {
+    ...rule,
+    enabled: false,
+    exceptions_list: [
+      {
+        id,
+        list_id,
+        namespace_type,
+        type,
+      },
+    ],
+  };
+  const ruleResponse = await createRule(supertest, ruleWithException);
+  await supertest
+    .patch(DETECTION_ENGINE_RULES_URL)
+    .set('kbn-xsrf', 'true')
+    .send({ rule_id: ruleResponse.rule_id, enabled: true })
+    .expect(200);
+
+  return ruleResponse;
 };
