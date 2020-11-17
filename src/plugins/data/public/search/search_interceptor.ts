@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { get, memoize, trimEnd } from 'lodash';
+import { get, memoize } from 'lodash';
 import { BehaviorSubject, throwError, timer, defer, from, Observable, NEVER } from 'rxjs';
 import { catchError, finalize } from 'rxjs/operators';
 import { PublicMethodsOf } from '@kbn/utility-types';
@@ -29,7 +29,6 @@ import {
   IKibanaSearchResponse,
   ISearchOptions,
   ISessionService,
-  ES_SEARCH_STRATEGY,
 } from '../../common';
 import { SearchUsageCollector } from './collectors';
 import {
@@ -71,7 +70,7 @@ export class SearchInterceptor {
    * @internal
    */
   protected application!: CoreStart['application'];
-  private batchedFetch?: BatchedFunc<
+  private batchedFetch!: BatchedFunc<
     { request: IKibanaSearchRequest; strategy?: string },
     IKibanaSearchResponse
   >;
@@ -139,20 +138,7 @@ export class SearchInterceptor {
     signal: AbortSignal,
     strategy?: string
   ): Promise<IKibanaSearchResponse> {
-    if (this.batchedFetch) {
-      return this.batchedFetch({ request, strategy }, signal);
-    } else {
-      const { id, ...searchRequest } = request;
-      const path = trimEnd(`/internal/search/${strategy || ES_SEARCH_STRATEGY}/${id || ''}`, '/');
-      const body = JSON.stringify(searchRequest);
-
-      return this.deps.http.fetch({
-        method: 'POST',
-        path,
-        body,
-        signal,
-      });
-    }
+    return this.batchedFetch({ request, strategy }, signal);
   }
 
   /**
