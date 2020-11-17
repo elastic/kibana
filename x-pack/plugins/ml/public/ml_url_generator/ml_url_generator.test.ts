@@ -30,7 +30,7 @@ describe('MlUrlGenerator', () => {
             jobId: 'fq_single_1',
           },
         });
-        expect(url).toBe('/app/ml/jobs?_a=(queryText:fq_single_1)');
+        expect(url).toBe("/app/ml/jobs?_a=(queryText:'id:fq_single_1')");
       });
 
       it('should generate valid URL for the Anomaly Detection job management page for groupIds', async () => {
@@ -181,7 +181,7 @@ describe('MlUrlGenerator', () => {
           },
         });
         expect(url).toBe(
-          '/app/ml/data_frame_analytics?_a=(data_frame_analytics:(queryText:grid_regression_1))'
+          "/app/ml/data_frame_analytics?_a=(data_frame_analytics:(queryText:'id:grid_regression_1'))"
         );
       });
 
