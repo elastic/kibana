@@ -19,5 +19,5 @@ export class LogEntriesService {
     });
   }
 
-  public start(startDeps: LogEntriesServiceStartDeps) {}
+  public start(_startDeps: LogEntriesServiceStartDeps) {}
 }
