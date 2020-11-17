@@ -24,7 +24,7 @@ import {
   ISavedObjectsRepository,
   SavedObjectsClientContract,
   KibanaRequest,
-} from 'kibana/server';
+} from 'src/core/server';
 
 export type CollectorFormatForBulkUpload<T, U> = (result: T) => { type: string; payload: U };
 

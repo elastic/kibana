@@ -25,7 +25,7 @@ import {
   ISavedObjectsRepository,
   SavedObjectsClientContract,
   KibanaRequest,
-} from 'kibana/server';
+} from 'src/core/server';
 import { Collector, CollectorOptions } from './collector';
 import { UsageCollector, UsageCollectorOptions } from './usage_collector';
 
@@ -94,12 +94,7 @@ export class CollectorSet {
    * Registers a collector to be used when collecting all the usage and stats data
    * @param collector Collector to be added to the set (previously created via `makeUsageCollector` or `makeStatsCollector`)
    */
-  public registerCollector = <
-    TFetchReturn,
-    TFormatForBulkUpload,
-    WithKibanaRequest extends boolean,
-    ExtraOptions extends object
-  >(
+  public registerCollector = <TFetchReturn, TFormatForBulkUpload, ExtraOptions extends object>(
     collector: Collector<TFetchReturn, TFormatForBulkUpload, ExtraOptions>
   ) => {
     // check instanceof

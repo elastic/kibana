@@ -31,7 +31,7 @@ Then you need to make the Telemetry service aware of the collector by registerin
     ```ts
     // server/plugin.ts
     import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-    import { CoreSetup, CoreStart } from 'kibana/server';
+    import { CoreSetup, CoreStart } from 'src/core/server';
 
     class Plugin {
       public setup(core: CoreSetup, plugins: { usageCollection?: UsageCollectionSetup }) {
@@ -46,7 +46,7 @@ Then you need to make the Telemetry service aware of the collector by registerin
     ```ts
     // server/collectors/register.ts
     import { UsageCollectionSetup, CollectorFetchContext } from 'src/plugins/usage_collection/server';
-    import { APICluster } from 'kibana/server';
+    import { APICluster } from 'src/core/server';
 
     interface Usage {
       my_objects: {
@@ -105,7 +105,7 @@ In the case of using a custom SavedObjects client, it is up to the plugin to ini
 ```ts
 // server/plugin.ts
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { CoreSetup, CoreStart } from 'kibana/server';
+import { CoreSetup, CoreStart } from 'src/core/server';
 
 class Plugin {
   private savedObjectsRepository?: ISavedObjectsRepository;
