@@ -30,7 +30,7 @@ import {
   StyledLabelContainer,
   StyledButtonTextContainer,
 } from './styles';
-import * as eventModel from '../../../../common/endpoint/models/event';
+import * as nodeModel from '../../../../common/endpoint/models/node';
 import * as selectors from '../../store/selectors';
 import { Breadcrumbs } from './breadcrumbs';
 import { CubeForProcess } from './cube_for_process';
@@ -88,15 +88,15 @@ export const NodeList = memo(() => {
 
   const processTableView: ProcessTableView[] = useSelector(
     useCallback((state: ResolverState) => {
-      const { processNodePositions } = selectors.layout(state);
+      const { graphNodePositions } = selectors.layout(state);
       const view: ProcessTableView[] = [];
-      for (const processEvent of processNodePositions.keys()) {
-        const name = eventModel.processNameSafeVersion(processEvent);
-        const nodeID = eventModel.entityIDSafeVersion(processEvent);
+      for (const graphNode of graphNodePositions.keys()) {
+        const name = nodeModel.nodeID(graphNode); // TODO: get nodeName rather than -> eventModel.processNameSafeVersion(graphNode);
+        const nodeID = nodeModel.nodeID(graphNode);
         if (nodeID !== undefined) {
           view.push({
             name,
-            timestamp: eventModel.timestampAsDateSafeVersion(processEvent),
+            timestamp: nodeModel.nodeDataTimestamp(graphNode),
             nodeID,
           });
         }
@@ -142,7 +142,7 @@ function NodeDetailLink({ name, nodeID }: { name?: string; nodeID: string }) {
     return selectors.originID(state) === nodeID;
   });
   const isTerminated = useSelector((state: ResolverState) =>
-    nodeID === undefined ? false : selectors.isProcessTerminated(state)(nodeID)
+    nodeID === undefined ? false : selectors.isNodeInactive(state)(nodeID)
   );
   const { descriptionText } = useColors();
   const linkProps = useLinkProps({ panelView: 'nodeDetail', panelParameters: { nodeID } });

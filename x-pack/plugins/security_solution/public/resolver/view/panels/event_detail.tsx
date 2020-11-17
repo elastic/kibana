@@ -48,13 +48,13 @@ export const EventDetail = memo(function EventDetail({
   eventCategory: string;
 }) {
   const isEventLoading = useSelector(selectors.isCurrentRelatedEventLoading);
-  const isProcessTreeLoading = useSelector(selectors.isTreeLoading);
+  const isGraphLoading = useSelector(selectors.isGraphLoading);
 
-  const isLoading = isEventLoading || isProcessTreeLoading;
+  const isLoading = isEventLoading || isGraphLoading;
 
   const event = useSelector(selectors.currentRelatedEventData);
   const processEvent = useSelector((state: ResolverState) =>
-    selectors.processEventForID(state)(nodeID)
+    selectors.graphNodeForId(state)(nodeID)
   );
   return isLoading ? (
     <StyledPanel>

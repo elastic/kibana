@@ -115,7 +115,7 @@ export const getEventType = (event: Ecs): Omit<TimelineEventsType, 'all'> => {
 };
 
 export const isInvestigateInResolverActionEnabled = (ecsData?: Ecs) =>
-  get(['agent', 'type', 0], ecsData) === 'endpoint' &&
+  // get(['event', 'category', 0], ecsData) === 'process' &&
   get(['process', 'entity_id'], ecsData)?.length === 1 &&
   get(['process', 'entity_id', 0], ecsData) !== '';
 

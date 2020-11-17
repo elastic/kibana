@@ -43,7 +43,7 @@ export const NodeEventsInCategory = memo(function ({
   eventCategory: string;
 }) {
   const processEvent = useSelector((state: ResolverState) =>
-    selectors.processEventForID(state)(nodeID)
+    selectors.graphNodeForId(state)(nodeID)
   );
   const eventCount = useSelector((state: ResolverState) =>
     selectors.totalRelatedEventCountForNode(state)(nodeID)

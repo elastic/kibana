@@ -22,7 +22,7 @@ import { StyledMapContainer, GraphContainer } from './styles';
 import { nodeID } from '../../../common/endpoint/models/node';
 import { SideEffectContext } from './side_effect_context';
 import { ResolverProps, ResolverState } from '../types';
-// import { PanelRouter } from './panels';
+import { PanelRouter } from './panels';
 import { useColors } from './use_colors';
 
 /**
@@ -126,7 +126,7 @@ export const ResolverWithoutProviders = React.memo(
             })}
           </GraphContainer>
         )}
-        {/* <PanelRouter /> */}
+        <PanelRouter />
         <GraphControls />
         <SymbolDefinitions />
       </StyledMapContainer>

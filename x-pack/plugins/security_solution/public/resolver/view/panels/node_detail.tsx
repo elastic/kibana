@@ -21,7 +21,7 @@ import { CopyablePanelField } from './copyable_panel_field';
 import { Breadcrumbs } from './breadcrumbs';
 import { processPath, processPID } from '../../models/process_event';
 import { CubeForProcess } from './cube_for_process';
-import { SafeResolverEvent } from '../../../../common/endpoint/types';
+import { ResolverGraphNode, SafeResolverEvent } from '../../../../common/endpoint/types';
 import { useCubeAssets } from '../use_cube_assets';
 import { ResolverState } from '../../types';
 import { PanelLoading } from './panel_loading';
@@ -29,24 +29,23 @@ import { StyledPanel } from '../styles';
 import { useLinkProps } from '../use_link_props';
 import { useFormattedDate } from './use_formatted_date';
 
+// TODO: THIS DOES NOT CURRENTLY WORK. NEED to update this once we have the events data.
 const StyledCubeForProcess = styled(CubeForProcess)`
   position: relative;
   top: 0.75em;
 `;
 
 export const NodeDetail = memo(function ({ nodeID }: { nodeID: string }) {
-  const processEvent = useSelector((state: ResolverState) =>
-    selectors.processEventForID(state)(nodeID)
-  );
+  const graphNode = useSelector((state: ResolverState) => selectors.graphNodeForId(state)(nodeID));
   return (
     <>
-      {processEvent === null ? (
+      {graphNode === null ? (
         <StyledPanel>
           <PanelLoading />
         </StyledPanel>
       ) : (
         <StyledPanel data-test-subj="resolver:panel:node-detail">
-          <NodeDetailView nodeID={nodeID} processEvent={processEvent} />
+          <NodeDetailView nodeID={nodeID} graphNode={graphNode} />
         </StyledPanel>
       )}
     </>
@@ -58,20 +57,20 @@ export const NodeDetail = memo(function ({ nodeID }: { nodeID: string }) {
  * Created, PID, User/Domain, etc.
  */
 const NodeDetailView = memo(function ({
-  processEvent,
+  graphNode,
   nodeID,
 }: {
-  processEvent: SafeResolverEvent;
+  graphNode: ResolverGraphNode;
   nodeID: string;
 }) {
-  const processName = eventModel.processNameSafeVersion(processEvent);
-  const isProcessTerminated = useSelector((state: ResolverState) =>
-    selectors.isProcessTerminated(state)(nodeID)
+  const processName = eventModel.processNameSafeVersion(graphNode);
+  const isNodeInactive = useSelector((state: ResolverState) =>
+    selectors.isNodeInactive(state)(nodeID)
   );
   const relatedEventTotal = useSelector((state: ResolverState) => {
     return selectors.relatedEventTotalCount(state)(nodeID);
   });
-  const eventTime = eventModel.eventTimestamp(processEvent);
+  const eventTime = eventModel.eventTimestamp(graphNode);
   const dateTime = useFormattedDate(eventTime);
 
   const processInfoEntry: EuiDescriptionListProps['listItems'] = useMemo(() => {
@@ -82,37 +81,37 @@ const NodeDetailView = memo(function ({
 
     const pathEntry = {
       title: 'process.executable',
-      description: processPath(processEvent),
+      description: processPath(graphNode),
     };
 
     const pidEntry = {
       title: 'process.pid',
-      description: processPID(processEvent),
+      description: processPID(graphNode),
     };
 
     const userEntry = {
       title: 'user.name',
-      description: eventModel.userName(processEvent),
+      description: eventModel.userName(graphNode),
     };
 
     const domainEntry = {
       title: 'user.domain',
-      description: eventModel.userDomain(processEvent),
+      description: eventModel.userDomain(graphNode),
     };
 
     const parentPidEntry = {
       title: 'process.parent.pid',
-      description: eventModel.parentPID(processEvent),
+      description: eventModel.parentPID(graphNode),
     };
 
     const md5Entry = {
       title: 'process.hash.md5',
-      description: eventModel.md5HashForProcess(processEvent),
+      description: eventModel.md5HashForProcess(graphNode),
     };
 
     const commandLineEntry = {
       title: 'process.args',
-      description: eventModel.argsForProcess(processEvent),
+      description: eventModel.argsForProcess(graphNode),
     };
 
     // This is the data in {title, description} form for the EuiDescriptionList to display
@@ -142,7 +141,7 @@ const NodeDetailView = memo(function ({
       });
 
     return processDescriptionListData;
-  }, [dateTime, processEvent]);
+  }, [dateTime, graphNode]);
 
   const nodesLinkNavProps = useLinkProps({
     panelView: 'nodes',
@@ -171,7 +170,7 @@ const NodeDetailView = memo(function ({
       },
     ];
   }, [processName, nodesLinkNavProps]);
-  const { descriptionText } = useCubeAssets(isProcessTerminated, false);
+  const { descriptionText } = useCubeAssets(isNodeInactive, false);
 
   const nodeDetailNavProps = useLinkProps({
     panelView: 'nodeEvents',
@@ -187,7 +186,7 @@ const NodeDetailView = memo(function ({
         <StyledTitle aria-describedby={titleID}>
           <StyledCubeForProcess
             data-test-subj="resolver:node-detail:title-icon"
-            running={!isProcessTerminated}
+            running={!isNodeInactive}
           />
           <span data-test-subj="resolver:node-detail:title">
             <GeneratedText>{processName}</GeneratedText>
