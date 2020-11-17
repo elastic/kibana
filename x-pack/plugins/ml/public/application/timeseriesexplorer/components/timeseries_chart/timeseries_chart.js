@@ -571,7 +571,6 @@ class TimeseriesChartIntl extends Component {
   }
 
   renderFocusChart() {
-    console.log('renderFocusChart');
     const {
       focusAggregationInterval,
       focusAnnotationData: focusAnnotationDataOriginalPropValue,
