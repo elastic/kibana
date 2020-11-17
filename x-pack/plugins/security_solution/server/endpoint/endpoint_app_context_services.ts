@@ -14,6 +14,7 @@ import {
   AgentService,
   FleetStartContract,
   PackageService,
+  AgentPolicyService,
   PackagePolicyServiceInterface,
 } from '../../../fleet/server';
 import { PluginStartContract as AlertsPluginStartContract } from '../../../alerts/server';
@@ -71,7 +72,10 @@ export const createMetadataService = (packageService: PackageService): MetadataS
 };
 
 export type EndpointAppContextServiceStartContract = Partial<
-  Pick<FleetStartContract, 'agentService' | 'packageService' | 'packagePolicyService'>
+  Pick<
+  FleetStartContract,
+    'agentService' | 'packageService' | 'packagePolicyService' | 'agentPolicyService'
+  >
 > & {
   logger: Logger;
   manifestManager?: ManifestManager;
@@ -91,12 +95,14 @@ export class EndpointAppContextService {
   private agentService: AgentService | undefined;
   private manifestManager: ManifestManager | undefined;
   private packagePolicyService: PackagePolicyServiceInterface | undefined;
+  private agentPolicyService: AgentPolicyService | undefined;
   private savedObjectsStart: SavedObjectsServiceStart | undefined;
   private metadataService: MetadataService | undefined;
 
   public start(dependencies: EndpointAppContextServiceStartContract) {
     this.agentService = dependencies.agentService;
     this.packagePolicyService = dependencies.packagePolicyService;
+    this.agentPolicyService = dependencies.agentPolicyService;
     this.manifestManager = dependencies.manifestManager;
     this.savedObjectsStart = dependencies.savedObjectsStart;
     this.metadataService = createMetadataService(dependencies.packageService!);
@@ -124,6 +130,10 @@ export class EndpointAppContextService {
 
   public getPackagePolicyService(): PackagePolicyServiceInterface | undefined {
     return this.packagePolicyService;
+  }
+
+  public getAgentPolicyService(): AgentPolicyService | undefined {
+    return this.agentPolicyService;
   }
 
   public getMetadataService(): MetadataService | undefined {

@@ -283,30 +283,46 @@ async function enrichHostMetadata(
     }
   }
 
-  let policyVersions: HostInfo['policy_versions'];
+  let policyVersions: HostInfo['policy_versions'] = {
+    agent: {
+      applied: 0,
+      configured: 0,
+    },
+    endpoint: 0,
+  };
   try {
-    const agent = await metadataRequestContext.endpointAppContextService
-      ?.getAgentService()
-      ?.getAgent(
-        metadataRequestContext.requestHandlerContext.core.savedObjects.client,
-        elasticAgentId
-      );
-    const endpointPolicy = await metadataRequestContext.endpointAppContextService
-      .getPackagePolicyService()
+    const [agent, endpointPolicy] = await Promise.all([
+      metadataRequestContext.endpointAppContextService
+        ?.getAgentService()
+        ?.getAgent(
+          metadataRequestContext.requestHandlerContext.core.savedObjects.client,
+          elasticAgentId
+        ),
+      metadataRequestContext.endpointAppContextService
+        .getPackagePolicyService()
+        ?.get(
+          metadataRequestContext.requestHandlerContext.core.savedObjects.client,
+          hostMetadata.Endpoint.policy.applied.id
+        ),
+    ]);
+    const agentPolicy = await metadataRequestContext.endpointAppContextService
+      .getAgentPolicyService()
       ?.get(
         metadataRequestContext.requestHandlerContext.core.savedObjects.client,
-        hostMetadata.Endpoint.policy.applied.id
+        agent?.policy_id!
       );
     policyVersions = {
       agent: {
         applied: agent?.policy_revision || 0,
-        configured: 0,
+        configured: agentPolicy?.revision || 0,
       },
       endpoint: endpointPolicy?.revision || 0,
     };
   } catch (e) {
+    // this is a non-vital enrichment of expected policy revisions.
+    // if we fail just fetching these, the rest of the endpoint
+    // data should still be returned. log the error and move on
     log.error(e);
-    throw e;
   }
 
   return {

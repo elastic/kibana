@@ -58,6 +58,7 @@ import {
   ESIndexPatternSavedObjectService,
   ESIndexPatternService,
   AgentService,
+  agentPolicyService,
   packagePolicyService,
   PackageService,
 } from './services';
@@ -134,6 +135,7 @@ export interface FleetStartContract {
    * Services for Fleet's package policies
    */
   packagePolicyService: typeof packagePolicyService;
+  agentPolicyService: typeof agentPolicyService;
   /**
    * Register callbacks for inclusion in fleet API processing
    * @param args
@@ -292,6 +294,7 @@ export class FleetPlugin
         getAgentStatusById,
         authenticateAgentWithAccessToken,
       },
+      agentPolicyService,
       packagePolicyService,
       registerExternalCallback: (...args: ExternalCallback) => {
         return appContextService.addExternalCallback(...args);
