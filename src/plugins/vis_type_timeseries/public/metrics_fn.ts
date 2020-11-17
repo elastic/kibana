@@ -32,10 +32,12 @@ interface Arguments {
   uiState: string;
 }
 
+export type TimeseriesVisParams = PanelSchema;
+
 export interface TimeseriesRenderValue {
   visType: 'metrics';
   visData: Input;
-  visConfig: PanelSchema;
+  visParams: TimeseriesVisParams;
   uiState: any;
 }
 
@@ -83,7 +85,7 @@ export const createMetricsFn = (): TimeseriesExpressionFunctionDefinition => ({
       value: {
         uiState,
         visType: 'metrics',
-        visConfig: visParams,
+        visParams,
         visData: response,
       },
     };

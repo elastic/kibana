@@ -44,7 +44,7 @@ export const getTimeseriesVisRenderer: (deps: {
       unmountComponentAtNode(domNode);
     });
 
-    const showNoResult = !checkIfDataExists(config.visData, config.visConfig);
+    const showNoResult = !checkIfDataExists(config.visData, config.visParams);
 
     render(
       <VisualizationContainer handlers={handlers} showNoResult={showNoResult}>
@@ -52,7 +52,7 @@ export const getTimeseriesVisRenderer: (deps: {
           dateFormat={uiSettings.get('dateFormat')}
           getConfig={uiSettings.get}
           handlers={handlers}
-          model={config.visConfig}
+          model={config.visParams}
           visData={config.visData}
           uiState={handlers.uiState!}
         />
