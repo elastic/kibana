@@ -11,12 +11,17 @@ import { SpacesManager, Space } from '../../../../../spaces/public';
 export interface SpacesContextValue {
   spacesManager: SpacesManager;
   allSpaces: Space[];
+  spacesEnabled: boolean;
 }
 
 export const SpacesContext = createContext<Partial<SpacesContextValue>>({});
 
 export function createSpacesContext(http: HttpSetup) {
-  return { spacesManager: new SpacesManager(http), allSpaces: [] } as SpacesContextValue;
+  return {
+    spacesManager: new SpacesManager(http),
+    allSpaces: [],
+    spacesEnabled: false,
+  } as SpacesContextValue;
 }
 
 export function useSpacesContext() {

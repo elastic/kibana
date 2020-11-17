@@ -83,11 +83,13 @@ function getItemIdToExpandedRowMap(
 interface Props {
   isManagementTable?: boolean;
   isMlEnabledInSpace?: boolean;
+  spacesEnabled?: boolean;
   blockRefresh?: boolean;
 }
 export const DataFrameAnalyticsList: FC<Props> = ({
   isManagementTable = false,
   isMlEnabledInSpace = true,
+  spacesEnabled = false,
   blockRefresh = false,
 }) => {
   const [isInitialized, setIsInitialized] = useState(false);
@@ -180,6 +182,7 @@ export const DataFrameAnalyticsList: FC<Props> = ({
     setExpandedRowItemIds,
     isManagementTable,
     isMlEnabledInSpace,
+    spacesEnabled,
     refresh
   );
 

@@ -149,6 +149,7 @@ export const useColumns = (
   setExpandedRowItemIds: React.Dispatch<React.SetStateAction<DataFrameAnalyticsId[]>>,
   isManagementTable: boolean = false,
   isMlEnabledInSpace: boolean = true,
+  spacesEnabled: boolean = true,
   refresh: () => void = () => {}
 ) => {
   const { actions, modals } = useActions(isManagementTable);
@@ -275,23 +276,24 @@ export const useColumns = (
   ];
 
   if (isManagementTable === true) {
-    // insert before last column
-    columns.splice(columns.length - 1, 0, {
-      name: i18n.translate('xpack.ml.jobsList.analyticsSpacesLabel', {
-        defaultMessage: 'Spaces',
-      }),
-      render: (item: DataFrameAnalyticsListRow) =>
-        Array.isArray(item.spaceIds) ? (
-          <JobSpacesList
-            spaceIds={item.spaceIds ?? []}
-            jobId={item.id}
-            jobType="data-frame-analytics"
-            refresh={refresh}
-          />
-        ) : null,
-      width: '90px',
-    });
-
+    if (spacesEnabled === true) {
+      // insert before last column
+      columns.splice(columns.length - 1, 0, {
+        name: i18n.translate('xpack.ml.jobsList.analyticsSpacesLabel', {
+          defaultMessage: 'Spaces',
+        }),
+        render: (item: DataFrameAnalyticsListRow) =>
+          Array.isArray(item.spaceIds) ? (
+            <JobSpacesList
+              spaceIds={item.spaceIds ?? []}
+              jobId={item.id}
+              jobType="data-frame-analytics"
+              refresh={refresh}
+            />
+          ) : null,
+        width: '90px',
+      });
+    }
     // Remove actions if Ml not enabled in current space
     if (isMlEnabledInSpace === false) {
       columns.pop();

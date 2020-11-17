@@ -37,6 +37,7 @@ import { JobsListView } from '../../../../jobs/jobs_list/components/jobs_list_vi
 import { DataFrameAnalyticsList } from '../../../../data_frame_analytics/pages/analytics_management/components/analytics_list';
 import { AccessDeniedPage } from '../access_denied_page';
 import { SharePluginStart } from '../../../../../../../../../src/plugins/share/public';
+import { SpacesPluginStart } from '../../../../../../../spaces/public';
 import {
   AnomalyDetectionJobsListState,
   getDefaultAnomalyDetectionJobsListState,
@@ -48,7 +49,7 @@ interface Tab extends EuiTabbedContentTab {
   'data-test-subj': string;
 }
 
-function useTabs(isMlEnabledInSpace: boolean): Tab[] {
+function useTabs(isMlEnabledInSpace: boolean, spacesEnabled: boolean): Tab[] {
   const [jobsViewState, setJobsViewState] = useState<AnomalyDetectionJobsListState>(
     getDefaultAnomalyDetectionJobsListState()
   );
@@ -79,6 +80,7 @@ function useTabs(isMlEnabledInSpace: boolean): Tab[] {
               onJobsViewStateUpdate={updateState}
               isManagementTable={true}
               isMlEnabledInSpace={isMlEnabledInSpace}
+              spacesEnabled={spacesEnabled}
             />
           </Fragment>
         ),
@@ -95,6 +97,7 @@ function useTabs(isMlEnabledInSpace: boolean): Tab[] {
             <DataFrameAnalyticsList
               isManagementTable={true}
               isMlEnabledInSpace={isMlEnabledInSpace}
+              spacesEnabled={spacesEnabled}
             />
           </Fragment>
         ),
@@ -108,21 +111,26 @@ export const JobsListPage: FC<{
   coreStart: CoreStart;
   share: SharePluginStart;
   history: ManagementAppMountParams['history'];
-}> = ({ coreStart, share, history }) => {
+  spaces?: SpacesPluginStart;
+}> = ({ coreStart, share, history, spaces }) => {
+  const spacesEnabled = spaces !== undefined;
   const [initialized, setInitialized] = useState(false);
   const [accessDenied, setAccessDenied] = useState(false);
   const [showRepairFlyout, setShowRepairFlyout] = useState(false);
   const [isMlEnabledInSpace, setIsMlEnabledInSpace] = useState(false);
-  const tabs = useTabs(isMlEnabledInSpace);
+  const tabs = useTabs(isMlEnabledInSpace, spacesEnabled);
   const [currentTabId, setCurrentTabId] = useState(tabs[0].id);
   const I18nContext = coreStart.i18n.Context;
   const spacesContext = useMemo(() => createSpacesContext(coreStart.http), []);
 
   const check = async () => {
     try {
-      const checkPrivilege = await checkGetManagementMlJobsResolver();
-      setIsMlEnabledInSpace(checkPrivilege.mlFeatureEnabledInSpace);
-      spacesContext.allSpaces = await spacesContext.spacesManager.getSpaces();
+      const { mlFeatureEnabledInSpace } = await checkGetManagementMlJobsResolver();
+      setIsMlEnabledInSpace(mlFeatureEnabledInSpace);
+      spacesContext.spacesEnabled = spacesEnabled;
+      if (spacesEnabled) {
+        spacesContext.allSpaces = await spacesContext.spacesManager.getSpaces();
+      }
     } catch (e) {
       setAccessDenied(true);
     }
@@ -223,15 +231,17 @@ export const JobsListPage: FC<{
                 </EuiTitle>
                 <EuiSpacer size="l" />
                 <EuiPageContentBody>
-                  <>
-                    <EuiButtonEmpty onClick={() => setShowRepairFlyout(true)}>
-                      {i18n.translate('xpack.ml.management.jobsList.repairFlyoutButton', {
-                        defaultMessage: 'Repair saved objects',
-                      })}
-                    </EuiButtonEmpty>
-                    {showRepairFlyout && <JobSpacesRepairFlyout onClose={onCloseRepairFlyout} />}
-                  </>
-                  <EuiSpacer size="s" />
+                  {spacesEnabled && (
+                    <>
+                      <EuiButtonEmpty onClick={() => setShowRepairFlyout(true)}>
+                        {i18n.translate('xpack.ml.management.jobsList.repairFlyoutButton', {
+                          defaultMessage: 'Repair saved objects',
+                        })}
+                      </EuiButtonEmpty>
+                      {showRepairFlyout && <JobSpacesRepairFlyout onClose={onCloseRepairFlyout} />}
+                      <EuiSpacer size="s" />
+                    </>
+                  )}
                   {renderTabs()}
                 </EuiPageContentBody>
               </EuiPageContent>

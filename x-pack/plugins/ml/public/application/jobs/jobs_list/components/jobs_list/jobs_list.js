@@ -95,7 +95,7 @@ export class JobsList extends Component {
   }
 
   render() {
-    const { loading, isManagementTable } = this.props;
+    const { loading, isManagementTable, spacesEnabled } = this.props;
     const selectionControls = {
       selectable: (job) => job.deleting !== true,
       selectableMessage: (selectable, rowItem) =>
@@ -242,20 +242,22 @@ export class JobsList extends Component {
     ];
 
     if (isManagementTable === true) {
-      // insert before last column
-      columns.splice(columns.length - 1, 0, {
-        name: i18n.translate('xpack.ml.jobsList.spacesLabel', {
-          defaultMessage: 'Spaces',
-        }),
-        render: (item) => (
-          <JobSpacesList
-            spaceIds={item.spaceIds}
-            jobId={item.id}
-            jobType="anomaly-detector"
-            refresh={this.props.refreshJobs}
-          />
-        ),
-      });
+      if (spacesEnabled === true) {
+        // insert before last column
+        columns.splice(columns.length - 1, 0, {
+          name: i18n.translate('xpack.ml.jobsList.spacesLabel', {
+            defaultMessage: 'Spaces',
+          }),
+          render: (item) => (
+            <JobSpacesList
+              spaceIds={item.spaceIds}
+              jobId={item.id}
+              jobType="anomaly-detector"
+              refresh={this.props.refreshJobs}
+            />
+          ),
+        });
+      }
       // Remove actions if Ml not enabled in current space
       if (this.props.isMlEnabledInSpace === false) {
         columns.pop();
