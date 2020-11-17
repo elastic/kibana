@@ -395,9 +395,9 @@ export const reindex = (
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface UpdateAliasesResponse {}
 
-type AliasAction =
+export type AliasAction =
   | { remove_index: { index: string } }
-  | { remove: { index: string; alias: string } }
+  | { remove: { index: string; alias: string; must_exist: boolean } }
   | { add: { index: string; alias: string } };
 
 /**
@@ -409,14 +409,20 @@ export const updateAliases = (
   client: ElasticsearchClient,
   aliasActions: AliasAction[]
 ): TaskEither.TaskEither<ExpectedErrors, UpdateAliasesResponse> => () => {
+  console.log(JSON.stringify(aliasActions));
   return client.indices
     .updateAliases({
       body: {
         actions: aliasActions,
       },
     })
-    .then(() => {
+    .then((res) => {
+      console.log(res);
       return Either.right({});
+    })
+    .catch((err) => {
+      console.log(err.meta.body);
+      throw err;
     })
     .catch(catchRetryableEsClientErrors);
 };
@@ -737,8 +743,8 @@ export const bulkIndex = (
       console.log(res.body.errors, res.body?.items?.[0]);
       // TODO follow-up with es-distrib team: update operations can cause
       // version conflicts even when no seq_no is specified, can we be sure
-      // that a version conflict can _only_ be caused by another Kibana
-      // writing to the index?
+      // that a bulk index version conflict can _only_ be caused by another
+      // Kibana writing to the index?
       const errors = (res.body.items ?? []).filter(
         (item) => item.index.error.type !== 'version_conflict_engine_exception'
       );
@@ -759,8 +765,12 @@ export const bulkIndex = (
  *  3. Delete the legacy index
  *
  * @remarks
- * This method is idempotent. Although it will cause some duplicate work, it's
- * safe to call it several times, or from several Kibana instances in parallel.
+ * This method should be idempotent. Although it will cause some duplicate
+ * work, it should safe to call it several times, or from several Kibana
+ * instances in parallel.
+ * TODO ask es-distrib team: what happens if we reindex `.kibana` into
+ * `.kibana_1` and one of the processes deletes `.kibana` and adds a `.kibana`
+ * alias?
  *
  * @internalRemarks
  * - Unlike v1 migrations, we don't create an alias that points to the

@@ -20,16 +20,18 @@
 /* eslint-disable no-console */
 
 import { ElasticsearchClient } from 'src/core/server/elasticsearch';
-import { gt } from 'semver';
+import { gt, valid } from 'semver';
 import chalk from 'chalk';
 import * as Either from 'fp-ts/lib/Either';
 import * as TaskEither from 'fp-ts/lib/TaskEither';
 import * as Option from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
+import { flow } from 'fp-ts/lib/function';
 import * as Actions from './actions';
 import { IndexMapping } from '../mappings';
 import { Logger } from '../../logging';
 import { SavedObjectsMigrationVersion } from '../types';
+import { AliasAction } from './actions';
 import { SavedObjectsRawDoc, SavedObjectsSerializer } from '..';
 
 export interface BaseState {
@@ -37,10 +39,6 @@ export interface BaseState {
   indexPrefix: string;
   /** Kibana version number */
   kibanaVersion: string;
-  /** The source index is the index from which the migration reads */
-  source: string;
-  /** The target index is the index to which the migration writes */
-  target: string;
   /** The mappings to apply to the target index */
   targetMappings: IndexMapping;
   /** Script to apply to a legacy index before it can be used as a migration source */
@@ -48,13 +46,26 @@ export interface BaseState {
   migrationVersionPerType: SavedObjectsMigrationVersion;
   retryCount: number;
   retryDelay: number;
-  aliases: Record<string, string>;
   log: Array<{ level: 'error' | 'info'; message: string }>;
 }
 
-// Initial state
 export type InitState = BaseState & {
   controlState: 'INIT';
+};
+
+export type PostInitState = BaseState & {
+  /**
+   * The source index is the index from which the migration reads. If the
+   * Option is a none, we didn't do any migration from a source index, either:
+   *  - this is a blank ES cluster and we will perform the CREATE_NEW_TARGET
+   *    step
+   *  - another Kibana instance already did the source migration and finished
+   *    the MARK_VERSION_INDEX_READY step
+   */
+  source: Option.Option<string>;
+  /** The target index is the index to which the migration writes */
+  target: string;
+  versionIndexReadyActions: Option.Option<AliasAction[]>;
 };
 
 export type DoneState = BaseState & {
@@ -68,66 +79,84 @@ export type FatalState = BaseState & {
   error?: Error;
 };
 
-export type SetSourceWriteBlockState = BaseState & {
+export type SetSourceWriteBlockState = PostInitState & {
   /** Set a write block on the source index to prevent any further writes */
   controlState: 'SET_SOURCE_WRITE_BLOCK';
+  source: Option.Some<string>;
 };
 
-export type InitNewIndicesState = BaseState & {
-  /** Blank ES cluster, create new kibana indices */
-  controlState: 'INIT_NEW_INDICES';
+export type CreateNewTargetState = PostInitState & {
+  /** Blank ES cluster, create a new version-specific target index */
+  controlState: 'CREATE_NEW_TARGET';
+  source: Option.None;
 };
 
-export type CloneSourceState = BaseState & {
+export type CloneSourceToTargetState = PostInitState & {
   /** Create the target index by cloning the source index */
-  controlState: 'CLONE_SOURCE';
+  controlState: 'CLONE_SOURCE_TO_TARGET';
+  source: Option.Some<string>;
 };
 
-export type UpdateTargetMappingsState = BaseState & {
+export type UpdateTargetMappingsState = PostInitState & {
   /** Update the mappings of the target index */
   controlState: 'UPDATE_TARGET_MAPPINGS';
 };
 
-export type UpdateTargetMappingsWaitForTaskState = BaseState & {
+export type UpdateTargetMappingsWaitForTaskState = PostInitState & {
   /** Update the mappings of the target index */
   controlState: 'UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK';
   updateTargetMappingsTaskId: string;
 };
 
-export type OutdatedDocumentsSearch = BaseState & {
+export type OutdatedDocumentsSearch = PostInitState & {
   /** Start a scroll search for outdated documents in the target index */
   controlState: 'OUTDATED_DOCUMENTS_SEARCH';
   outdatedDocumentsQuery: Record<string, unknown>;
 };
 
-export type OutdatedDocumentsScroll = BaseState & {
+export type OutdatedDocumentsScroll = PostInitState & {
   /** Retrieve the next batch of results from the scroll search for outdated documents in the target index */
   controlState: 'OUTDATED_DOCUMENTS_SCROLL';
   transformDocumentsScrollId: string;
 };
 
-export type OutdatedDocumentsTransform = BaseState & {
+export type OutdatedDocumentsTransform = PostInitState & {
   /** Transform a batch of outdated documents to their latest version and write them to the target index */
   controlState: 'OUTDATED_DOCUMENTS_TRANSFORM';
   outdatedDocuments: SavedObjectsRawDoc[];
   transformDocumentsScrollId: string;
 };
 
-export type OutdatedDocumentsClearScroll = BaseState & {
+export type OutdatedDocumentsClearScroll = PostInitState & {
   /** When there are no more results, clear the scroll */
   controlState: 'OUTDATED_DOCUMENTS_CLEAR_SCROLL';
   transformDocumentsScrollId: string;
 };
 
+export type MarkVersionIndexReady = PostInitState & {
+  /**
+   * Marks the version-specific index as ready. Once this step is complete,
+   * future Kibana instances will not have to prepare a target index by e.g.
+   * cloning a source index or creating a new index.
+   *
+   * To account for newly installed or enabled plugins, Kibana will still
+   * perform the `UPDATE_TARGET_MAPPINGS*` and `OUTDATED_DOCUMENTS_*` steps
+   * every time it is restarted.
+   */
+  controlState: 'MARK_VERSION_INDEX_READY';
+  versionIndexReadyActions: Option.Some<AliasAction[]>;
+};
+
 /**
  * If there's a legacy index prepare it for migration.
  */
-export type LegacyBaseState = BaseState & {
+export type LegacyBaseState = PostInitState & {
   legacy: string;
+  source: Option.Some<string>;
 };
 
 export type CloneLegacyState = LegacyBaseState & {
-  /** Create a 'source' index for the migration by cloning the legacy index */
+  /** Prepare a new 'source' index for the migration by cloning the legacy index */
   controlState: 'CLONE_LEGACY';
 };
 
@@ -157,14 +186,15 @@ export type State =
   | InitState
   | DoneState
   | SetSourceWriteBlockState
-  | InitNewIndicesState
-  | CloneSourceState
+  | CreateNewTargetState
+  | CloneSourceToTargetState
   | UpdateTargetMappingsState
   | UpdateTargetMappingsWaitForTaskState
   | OutdatedDocumentsSearch
   | OutdatedDocumentsScroll
   | OutdatedDocumentsTransform
   | OutdatedDocumentsClearScroll
+  | MarkVersionIndexReady
   | CloneLegacyState
   | SetLegacyWriteBlockState
   | PreMigrateLegacyState
@@ -211,7 +241,7 @@ function mergeMappings(targetMappings: IndexMapping, indexMappings: IndexMapping
   };
 }
 
-type Await<T> = T extends PromiseLike<infer U> ? U : T;
+type Await<T> = T extends PromiseLike<infer U> ? U : never;
 
 type AllControlStates = State['controlState'];
 /**
@@ -220,6 +250,8 @@ type AllControlStates = State['controlState'];
  */
 type AllActionStates = Exclude<AllControlStates, 'FATAL' | 'DONE'>;
 
+type ActionMap = ReturnType<typeof nextActionMap>;
+
 /**
  * The response type of the provided control state's action.
  *
@@ -227,7 +259,7 @@ type AllActionStates = Exclude<AllControlStates, 'FATAL' | 'DONE'>;
  * `next` in the 'INIT' control state.
  */
 type ResponseType<ControlState extends AllActionStates> = Await<
-  ReturnType<ReturnType<typeof nextActionMap>[ControlState]>
+  ReturnType<ReturnType<ActionMap[ControlState]>>
 >;
 
 const delayOrResetRetryState = (state: State, resW: ResponseType<AllActionStates>): State => {
@@ -313,15 +345,20 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           // transform any outdated documents for in case a new plugin was
           // installed / enabled.
           controlState: 'UPDATE_TARGET_MAPPINGS',
+          // Source is a none because we didn't do any migration from a source
+          // index
+          source: Option.none,
+          target: `${stateP.indexPrefix}_${stateP.kibanaVersion}_001`,
           targetMappings: mergeMappings(
             stateP.targetMappings,
             indices[aliases[CURRENT_ALIAS]].mappings
           ),
+          versionIndexReadyActions: Option.none,
         };
       } else if (
         // `.kibana` is pointing to an index that belongs to a later
         // version of Kibana .e.g. a 7.11.0 node found `.kibana_7.12.0_001`
-        aliases[CURRENT_ALIAS] != null &&
+        valid(aliases[CURRENT_ALIAS]) &&
         gt(indexVersion(aliases[CURRENT_ALIAS]), stateP.kibanaVersion)
       ) {
         stateP = {
@@ -339,12 +376,18 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       ) {
         // The source index is the index the `.kibana` alias points to
         const source = aliases[CURRENT_ALIAS];
+        const target = `${stateP.indexPrefix}_${stateP.kibanaVersion}_001`;
         stateP = {
           ...stateP,
           controlState: 'SET_SOURCE_WRITE_BLOCK',
-          source,
-          target: `${stateP.indexPrefix}_${stateP.kibanaVersion}_001`,
+          source: Option.some(source) as Option.Some<string>,
+          target,
           targetMappings: mergeMappings(stateP.targetMappings, indices[source].mappings),
+          versionIndexReadyActions: Option.some([
+            { remove: { index: source, alias: CURRENT_ALIAS, must_exist: true } },
+            { add: { index: target, alias: CURRENT_ALIAS } },
+            { add: { index: target, alias: VERSION_ALIAS } },
+          ]),
         };
       } else if (indices[LEGACY_INDEX] != null) {
         // Migrate from a legacy index
@@ -364,21 +407,32 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           legacyVersion = 'pre' + stateP.kibanaVersion;
         }
 
+        const target = `${stateP.indexPrefix}_${stateP.kibanaVersion}_001`;
         stateP = {
           ...stateP,
           controlState: 'SET_LEGACY_WRITE_BLOCK',
-          source: `${stateP.indexPrefix}_${legacyVersion}_001`,
-          target: `${stateP.indexPrefix}_${stateP.kibanaVersion}_001`,
+          source: Option.some(`${stateP.indexPrefix}_${legacyVersion}_001`) as Option.Some<string>,
+          target,
           targetMappings: mergeMappings(stateP.targetMappings, indices[LEGACY_INDEX].mappings),
           legacy: `.kibana`,
+          versionIndexReadyActions: Option.some([
+            { add: { index: target, alias: CURRENT_ALIAS } },
+            { add: { index: target, alias: VERSION_ALIAS } },
+          ]),
         };
       } else {
         // This cluster doesn't have an existing Saved Object index, create a
         // new version specific index.
+        const target = `${stateP.indexPrefix}_${stateP.kibanaVersion}_001`;
         stateP = {
           ...stateP,
-          controlState: 'INIT_NEW_INDICES',
-          target: `${stateP.indexPrefix}_${stateP.kibanaVersion}_001`,
+          controlState: 'CREATE_NEW_TARGET',
+          source: Option.none as Option.None,
+          target,
+          versionIndexReadyActions: Option.some([
+            { add: { index: target, alias: CURRENT_ALIAS } },
+            { add: { index: target, alias: VERSION_ALIAS } },
+          ]),
         };
       }
     }
@@ -412,10 +466,10 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
     }
     return { ...stateP, controlState: 'DELETE_LEGACY' };
   } else if (stateP.controlState === 'DELETE_LEGACY') {
-    return { ...stateP, controlState: 'CLONE_SOURCE' };
+    return { ...stateP, controlState: 'CLONE_SOURCE_TO_TARGET' };
   } else if (stateP.controlState === 'SET_SOURCE_WRITE_BLOCK') {
-    return { ...stateP, controlState: 'CLONE_SOURCE' };
-  } else if (stateP.controlState === 'CLONE_SOURCE') {
+    return { ...stateP, controlState: 'CLONE_SOURCE_TO_TARGET' };
+  } else if (stateP.controlState === 'CLONE_SOURCE_TO_TARGET') {
     return { ...stateP, controlState: 'UPDATE_TARGET_MAPPINGS' };
   } else if (stateP.controlState === 'UPDATE_TARGET_MAPPINGS') {
     const res = resW as ResponseType<typeof stateP.controlState>;
@@ -497,8 +551,32 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       controlState: 'OUTDATED_DOCUMENTS_SCROLL',
     };
   } else if (stateP.controlState === 'OUTDATED_DOCUMENTS_CLEAR_SCROLL') {
-    return { ...stateP, controlState: 'DONE' };
-  } else if (stateP.controlState === 'INIT_NEW_INDICES') {
+    if (Option.isSome(stateP.versionIndexReadyActions)) {
+      return {
+        ...stateP,
+        controlState: 'MARK_VERSION_INDEX_READY',
+        versionIndexReadyActions: stateP.versionIndexReadyActions,
+      };
+    } else {
+      return {
+        ...stateP,
+        controlState: 'DONE',
+      };
+    }
+  } else if (stateP.controlState === 'CREATE_NEW_TARGET') {
+    if (Option.isSome(stateP.versionIndexReadyActions)) {
+      return {
+        ...stateP,
+        controlState: 'MARK_VERSION_INDEX_READY',
+        versionIndexReadyActions: stateP.versionIndexReadyActions,
+      };
+    } else {
+      return {
+        ...stateP,
+        controlState: 'DONE',
+      };
+    }
+  } else if (stateP.controlState === 'MARK_VERSION_INDEX_READY') {
     return { ...stateP, controlState: 'DONE' };
   } else if (stateP.controlState === 'DONE' || stateP.controlState === 'FATAL') {
     return stateP;
@@ -509,53 +587,46 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
 
 export const nextActionMap = (
   client: ElasticsearchClient,
-  transformRawDocs: (rawDocs: SavedObjectsRawDoc[]) => Promise<SavedObjectsRawDoc[]>,
-  state: State
+  transformRawDocs: (rawDocs: SavedObjectsRawDoc[]) => Promise<SavedObjectsRawDoc[]>
 ) => {
   return {
-    FATAL: null,
-    DONE: null,
-    INIT: Actions.fetchIndices(client, ['.kibana', '.kibana_7.11.0']),
-    SET_SOURCE_WRITE_BLOCK: Actions.setIndexWriteBlock(client, state.source),
-    INIT_NEW_INDICES: Actions.createIndex(client, state.target, state.targetMappings),
-    CLONE_SOURCE: Actions.cloneIndex(client, state.source, state.target),
-    UPDATE_TARGET_MAPPINGS: Actions.updateAndPickupMappings(
-      client,
-      state.target,
-      (state as UpdateTargetMappingsState).targetMappings
-    ),
-    UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK:
+    INIT: (state: InitState) =>
+      Actions.fetchIndices(client, [
+        state.indexPrefix,
+        state.indexPrefix + '_' + state.kibanaVersion,
+      ]),
+    SET_SOURCE_WRITE_BLOCK: (state: SetSourceWriteBlockState) =>
+      Actions.setIndexWriteBlock(client, state.source.value),
+    CREATE_NEW_TARGET: (state: CreateNewTargetState) =>
+      Actions.createIndex(client, state.target, state.targetMappings),
+    CLONE_SOURCE_TO_TARGET: (state: CloneSourceToTargetState) =>
+      Actions.cloneIndex(client, state.source.value, state.target),
+    UPDATE_TARGET_MAPPINGS: (state: UpdateTargetMappingsState) =>
+      Actions.updateAndPickupMappings(client, state.target, state.targetMappings),
+    UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK: (state: UpdateTargetMappingsWaitForTaskState) =>
       // Wait for the updateTargetMappingsTaskId task to complete
-      Actions.waitForTask(
-        client,
-        (state as UpdateTargetMappingsWaitForTaskState).updateTargetMappingsTaskId,
-        '60s'
+      Actions.waitForTask(client, state.updateTargetMappingsTaskId, '60s'),
+    OUTDATED_DOCUMENTS_SEARCH: (state: OutdatedDocumentsSearch) =>
+      Actions.search(client, state.target, state.outdatedDocumentsQuery),
+    OUTDATED_DOCUMENTS_SCROLL: (state: OutdatedDocumentsScroll) =>
+      Actions.scroll(client, state.transformDocumentsScrollId),
+    OUTDATED_DOCUMENTS_CLEAR_SCROLL: (state: OutdatedDocumentsClearScroll) =>
+      Actions.clearScroll(client, state.transformDocumentsScrollId),
+    OUTDATED_DOCUMENTS_TRANSFORM: (state: OutdatedDocumentsTransform) =>
+      pipe(
+        TaskEither.tryCatch(
+          () => transformRawDocs(state.outdatedDocuments),
+          (e) => {
+            throw e;
+          }
+        ),
+        TaskEither.chain((docs) => Actions.bulkIndex(client, state.target, docs))
       ),
-    OUTDATED_DOCUMENTS_SEARCH: Actions.search(
-      client,
-      state.target,
-      (state as OutdatedDocumentsSearch).outdatedDocumentsQuery
-    ),
-    TARGET_DOCUMENTS_SCROLL: Actions.scroll(
-      client,
-      (state as OutdatedDocumentsScroll).transformDocumentsScrollId
-    ),
-    TARGET_DOCUMENTS_CLEAR_SCROLL: Actions.clearScroll(
-      client,
-      (state as OutdatedDocumentsClearScroll).transformDocumentsScrollId
-    ),
-    TARGET_DOCUMENTS_TRANSFORM: pipe(
-      TaskEither.tryCatch(
-        () => transformRawDocs((state as OutdatedDocumentsTransform).outdatedDocuments),
-        (e) => {
-          throw e;
-        }
-      ),
-      TaskEither.chain((docs) => Actions.bulkIndex(client, state.target, docs))
-    ),
-    CLONE_LEGACY: pipe(
+    MARK_VERSION_INDEX_READY: (state: MarkVersionIndexReady) =>
+      Actions.updateAliases(client, state.versionIndexReadyActions.value),
+    CLONE_LEGACY: flow(
       // Clone legacy index into a new source index, will ignore index exists error
-      Actions.cloneIndex(client, (state as CloneLegacyState).legacy, state.source),
+      (state: CloneLegacyState) => Actions.cloneIndex(client, state.legacy, state.source.value),
       TaskEither.orElse((error) => {
         // Ignore if legacy index doesn't exist, this probably means another
         // Kibana instance already completed the legacy pre-migration and
@@ -567,8 +638,8 @@ export const nextActionMap = (
         }
       })
     ),
-    SET_LEGACY_WRITE_BLOCK: pipe(
-      Actions.setIndexWriteBlock(client, (state as SetLegacyWriteBlockState).legacy),
+    SET_LEGACY_WRITE_BLOCK: flow(
+      (state: SetLegacyWriteBlockState) => Actions.setIndexWriteBlock(client, state.legacy),
       TaskEither.orElse((error) => {
         // Ignore if legacy index doesn't exist, this probably means another
         // Kibana instance already completed the legacy pre-migration and
@@ -580,19 +651,15 @@ export const nextActionMap = (
         }
       })
     ),
-    PRE_MIGRATE_LEGACY:
+    PRE_MIGRATE_LEGACY: (state: PreMigrateLegacyState) =>
       // Start an update by query to pre-migrate the source index using the
       // supplied script.
-      Actions.updateByQuery(client, state.source, state.preMigrationScript),
-    PRE_MIGRATE_LEGACY_WAIT_FOR_TASK:
+      Actions.updateByQuery(client, state.source.value, state.preMigrationScript),
+    PRE_MIGRATE_LEGACY_WAIT_FOR_TASK: (state: PreMigrateLegacyWaitForTaskState) =>
       // Wait for the preMigrationUpdateTaskId task to complete
-      Actions.waitForTask(
-        client,
-        (state as PreMigrateLegacyWaitForTaskState).preMigrationUpdateTaskId,
-        '60s'
-      ),
-    DELETE_LEGACY: pipe(
-      Actions.deleteIndex(client, (state as DeleteLegacyState).legacy),
+      Actions.waitForTask(client, state.preMigrationUpdateTaskId, '60s'),
+    DELETE_LEGACY: flow(
+      (state: DeleteLegacyState) => Actions.deleteIndex(client, state.legacy),
       TaskEither.orElse((error) => {
         // Ignore if legacy index doesn't exist, this probably means another
         // Kibana instance already completed the legacy pre-migration and
@@ -612,7 +679,7 @@ export const next = (
   transformRawDocs: (rawDocs: SavedObjectsRawDoc[]) => Promise<SavedObjectsRawDoc[]>,
   state: State
 ) => {
-  const delay = <F extends () => any>(fn: F): (() => ReturnType<F>) => {
+  const delay = <F extends (...args: any) => any>(fn: F): (() => ReturnType<F>) => {
     return () => {
       return state.retryDelay > 0
         ? new Promise((resolve) => setTimeout(resolve, state.retryDelay)).then(fn)
@@ -620,13 +687,19 @@ export const next = (
     };
   };
 
-  const map = nextActionMap(client, transformRawDocs, state);
+  const map = nextActionMap(client, transformRawDocs);
 
-  const nextAction = map[state.controlState];
-  if (nextAction != null) {
-    return delay(nextAction);
+  if (state.controlState === 'DONE' || state.controlState === 'FATAL') {
+    // Return null if we're in one of the terminating states
+    return null;
   } else {
-    return nextAction;
+    // Otherwise return the delayed action
+    // TS infers (state: never) => ... here because state is inferred to be the
+    // intersection of all states instead of the union.
+    const nextAction = map[state.controlState] as (
+      state: State
+    ) => ReturnType<typeof map[AllActionStates]>;
+    return delay(nextAction(state));
   }
 };
 
@@ -676,10 +749,7 @@ export async function migrationStateMachine({
     indexPrefix,
     controlState: 'INIT',
     kibanaVersion,
-    aliases: {},
-    source: '',
     preMigrationScript,
-    target: '',
     targetMappings,
     migrationVersionPerType,
     retryCount: 0,
@@ -696,9 +766,9 @@ export async function migrationStateMachine({
     const actionResult = await nextAction();
 
     console.log(
-      chalk.magentaBright(state.controlState),
+      chalk.magentaBright(`${state.controlState}:${state.indexPrefix}`),
       chalk.cyanBright('RESPONSE\n'),
-      actionResult
+      JSON.stringify(actionResult, null, 2)
     );
 
     const newState = model(state, actionResult);
@@ -711,7 +781,10 @@ export async function migrationStateMachine({
       throw new Error("Control state didn't change after 10 steps aborting.");
     }
     state = newState;
-    console.log(chalk.magentaBright(state.controlState + '\n'), state);
+    console.log(
+      chalk.magentaBright(`${state.controlState}:${state.indexPrefix}` + '\n'),
+      JSON.stringify(state)
+    );
 
     nextAction = next(client, transformRawDocs, state);
   }

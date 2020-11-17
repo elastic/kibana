@@ -1,5 +1,14 @@
 ## TODO
  - [ ] Should we adopt the naming convention of event log `.kibana-event-log-8.0.0-000001`?
+ - [ ] Can we detect and throw if there's an auto-created `.kibana` index
+   with inferred mappings? If we detect this we cannot assume that `.kibana`
+   contains all the latest documents. Our algorithm might also fail because we
+   clone the `.kibana` index with it's faulty mappings which can prevent us
+   from updating the mappings to the correct ones. We can ask users to verify
+   their indices to identify where the most up to date documents are located
+   (e.g. in `.kibana`, `.kibana_N` or perhaps a combination of both). We can
+   prepare a `.kibana_7.11.0_001` index and ask users to manually reindex
+   documents into this index.
 
 ## Manual QA Test Plan
 ### 1. Legacy pre-migration
