@@ -5,11 +5,13 @@
  */
 
 import { IScopedClusterClient, CoreStart, SavedObjectsClientContract } from 'kibana/server';
-import { savedObjectClientsFactory } from './util';
-import { repairFactory } from './repair';
-import { jobSavedObjectServiceFactory, JobObject } from './service';
-import { mlLog } from '../lib/log';
-import { ML_SAVED_OBJECT_TYPE } from '../../common/types/saved_objects';
+import { savedObjectClientsFactory } from '../util';
+import { repairFactory } from '../repair';
+import { jobSavedObjectServiceFactory, JobObject } from '../service';
+import { mlLog } from '../../lib/log';
+import { ML_SAVED_OBJECT_TYPE } from '../../../common/types/saved_objects';
+import { createJobSpaceOverrides } from './space_overrides';
+import type { SecurityPluginSetup } from '../../../../security/server';
 
 /**
  * Creates initializeJobs function which is used to check whether
@@ -17,7 +19,11 @@ import { ML_SAVED_OBJECT_TYPE } from '../../common/types/saved_objects';
  *
  * @param core: CoreStart
  */
-export function jobSavedObjectsInitializationFactory(core: CoreStart, spacesEnabled: boolean) {
+export function jobSavedObjectsInitializationFactory(
+  core: CoreStart,
+  security: SecurityPluginSetup | undefined,
+  spacesEnabled: boolean
+) {
   const client = (core.elasticsearch.client as unknown) as IScopedClusterClient;
 
   /**
@@ -35,22 +41,26 @@ export function jobSavedObjectsInitializationFactory(core: CoreStart, spacesEnab
         return;
       }
 
-      const jobSavedObjectService = jobSavedObjectServiceFactory(
-        savedObjectsClient,
-        savedObjectsClient,
-        spacesEnabled,
-        () => Promise.resolve() // pretend isMlReady, to allow us to initialize the saved objects
-      );
-
       if ((await _needsInitializing(savedObjectsClient)) === false) {
         // ml job saved objects have already been initialized
         return;
       }
 
+      const jobSavedObjectService = jobSavedObjectServiceFactory(
+        savedObjectsClient,
+        savedObjectsClient,
+        spacesEnabled,
+        security?.authz,
+        () => Promise.resolve() // pretend isMlReady, to allow us to initialize the saved objects
+      );
+
       mlLog.info('Initializing job saved objects');
+      // create space overrides for specific jobs
+      const jobSpaceOverrides = await createJobSpaceOverrides(client);
+      // initialize jobs
       const { initSavedObjects } = repairFactory(client, jobSavedObjectService);
-      const { jobs } = await initSavedObjects();
-      mlLog.info(`${jobs.length} job saved objects initialized for * space`);
+      const { jobs } = await initSavedObjects(false, jobSpaceOverrides);
+      mlLog.info(`${jobs.length} job saved objects initialized`);
     } catch (error) {
       mlLog.error(`Error Initializing jobs ${JSON.stringify(error)}`);
     }

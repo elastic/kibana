@@ -17,10 +17,29 @@
  * under the License.
  */
 
-const DOT_PREFIX_RE = /(.).+?\./g;
+import { pipeline } from 'stream';
+import { promisify } from 'util';
 
-/**
- * Convert a dot.notated.string into a short
- * version (d.n.string)
- */
-export const shortenDottedString = (input: string) => input.replace(DOT_PREFIX_RE, '$1.');
+import vfs from 'vinyl-fs';
+
+import { BuildContext } from '../build_context';
+
+const asyncPipeline = promisify(pipeline);
+
+export async function writePublicAssets({ log, plugin, sourceDir, buildDir }: BuildContext) {
+  if (!plugin.manifest.ui) {
+    return;
+  }
+
+  log.info('copying assets from `public/assets` to build');
+
+  await asyncPipeline(
+    vfs.src(['public/assets/**/*'], {
+      cwd: sourceDir,
+      base: sourceDir,
+      buffer: true,
+      allowEmpty: true,
+    }),
+    vfs.dest(buildDir)
+  );
+}
