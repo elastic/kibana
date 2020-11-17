@@ -348,9 +348,7 @@
         "runtime_number": {
           "type": "long",
           "script": {
-            "script": {
-              "source": "emit(doc['bytes'].value)"
-            }
+            "source": "emit(doc['bytes'].value)"
           }
         }
       }
@@ -723,9 +721,7 @@
         "runtime_number": {
           "type": "long",
           "script": {
-            "script": {
-              "source": "emit(doc['bytes'].value)"
-            }
+            "source": "emit(doc['bytes'].value)"
           }
         }
       }
@@ -1098,9 +1094,7 @@
         "runtime_number": {
           "type": "long",
           "script": {
-            "script": {
-              "source": "emit(doc['bytes'].value)"
-            }
+            "source": "emit(doc['bytes'].value)"
           }
         }
       }
