@@ -15,7 +15,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedRelative } from '@kbn/i18n/react';
 import { useGetPackageInstallStatus } from '../../hooks';
-import { InstallStatus, PackagePolicy } from '../../../../types';
+import { InstallStatus } from '../../../../types';
 import { useLink } from '../../../../hooks';
 import {
   AGENT_SAVED_OBJECT_TYPE,
@@ -27,9 +27,10 @@ import {
   useGetEnrichedPackagePolicies,
 } from './use_get_enriched_package_policies';
 import { LinkAndRevision, LinkAndRevisionProps } from '../../../../components';
+import { Persona } from './persona';
 
 const IntegrationDetailsLink = memo<{
-  integrationPolicy: PackagePolicy;
+  integrationPolicy: PackagePolicyEnriched;
 }>(({ integrationPolicy }) => {
   const { getHref } = useLink();
   return (
@@ -96,7 +97,7 @@ export const PackagePoliciesPanel = ({ name, version }: PackagePoliciesPanelProp
   });
 
   const handleTableOnChange = useCallback(
-    ({ page }: CriteriaWithPagination<PackagePolicy>) => {
+    ({ page }: CriteriaWithPagination<PackagePolicyEnriched>) => {
       setPagination({
         currentPage: page.index + 1,
         pageSize: page.size,
@@ -164,6 +165,9 @@ export const PackagePoliciesPanel = ({ name, version }: PackagePoliciesPanelProp
           defaultMessage: 'Last Updated By',
         }),
         truncateText: true,
+        render(updatedBy) {
+          return <Persona size="s" name={updatedBy} />;
+        },
       },
       {
         field: 'updated_at',
@@ -171,7 +175,7 @@ export const PackagePoliciesPanel = ({ name, version }: PackagePoliciesPanelProp
           defaultMessage: 'Last Updated',
         }),
         truncateText: true,
-        render(updatedAt: PackagePolicy['updated_at']) {
+        render(updatedAt: PackagePolicyEnriched['updated_at']) {
           return (
             <span className="eui-textTruncate">
               <FormattedRelative value={updatedAt} />
