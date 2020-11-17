@@ -4,14 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { useCallback, useReducer, useState, useEffect } from 'react';
-import { isObject } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiTitle, EuiFlyoutHeader, EuiFlyout, EuiFlyoutBody, EuiPortal } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useAlertsContext } from '../../context/alerts_context';
 import { Alert, AlertAction, IErrorObject } from '../../../types';
-import { AlertForm, validateBaseProperties } from './alert_form';
-import { alertReducer } from './alert_reducer';
+import { AlertForm, isValidAlert, validateBaseProperties } from './alert_form';
+import { alertReducer, InitialAlert, InitialAlertReducer } from './alert_reducer';
 import { createAlert } from '../../lib/alert_api';
 import { HealthCheck } from '../../components/health_check';
 import { ConfirmAlertSave } from './confirm_alert_save';
@@ -36,7 +35,7 @@ export const AlertAdd = ({
   alertTypeId,
   initialValues,
 }: AlertAddProps) => {
-  const initialAlert = ({
+  const initialAlert: InitialAlert = {
     params: {},
     consumer,
     alertTypeId,
@@ -46,16 +45,19 @@ export const AlertAdd = ({
     actions: [],
     tags: [],
     ...(initialValues ? initialValues : {}),
-  } as unknown) as Alert;
+  };
 
-  const [{ alert }, dispatch] = useReducer(alertReducer, { alert: initialAlert });
+  const [{ alert }, dispatch] = useReducer(alertReducer as InitialAlertReducer, {
+    alert: initialAlert,
+  });
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [isConfirmAlertSaveModalOpen, setIsConfirmAlertSaveModalOpen] = useState<boolean>(false);
 
-  const setAlert = (value: any) => {
+  const setAlert = (value: InitialAlert) => {
     dispatch({ command: { type: 'setAlert' }, payload: { key: 'alert', value } });
   };
-  const setAlertProperty = (key: string, value: any) => {
+
+  const setAlertProperty = <Key extends keyof Alert>(key: Key, value: Alert[Key] | null) => {
     dispatch({ command: { type: 'setProperty' }, payload: { key, value } });
   };
 
@@ -72,7 +74,7 @@ export const AlertAdd = ({
   const canShowActions = hasShowActionsCapability(capabilities);
 
   useEffect(() => {
-    setAlertProperty('alertTypeId', alertTypeId);
+    setAlertProperty('alertTypeId', alertTypeId ?? null);
   }, [alertTypeId]);
 
   const closeFlyout = useCallback(() => {
@@ -100,7 +102,7 @@ export const AlertAdd = ({
     ...(alertType ? alertType.validate(alert.params).errors : []),
     ...validateBaseProperties(alert).errors,
   } as IErrorObject;
-  const hasErrors = parseErrors(errors);
+  const hasErrors = !isValidAlert(alert, errors);
 
   const actionsErrors: Array<{
     errors: IErrorObject;
@@ -120,16 +122,18 @@ export const AlertAdd = ({
 
   async function onSaveAlert(): Promise<Alert | undefined> {
     try {
-      const newAlert = await createAlert({ http, alert });
-      toastNotifications.addSuccess(
-        i18n.translate('xpack.triggersActionsUI.sections.alertAdd.saveSuccessNotificationText', {
-          defaultMessage: 'Created alert "{alertName}"',
-          values: {
-            alertName: newAlert.name,
-          },
-        })
-      );
-      return newAlert;
+      if (isValidAlert(alert, errors)) {
+        const newAlert = await createAlert({ http, alert });
+        toastNotifications.addSuccess(
+          i18n.translate('xpack.triggersActionsUI.sections.alertAdd.saveSuccessNotificationText', {
+            defaultMessage: 'Created alert "{alertName}"',
+            values: {
+              alertName: newAlert.name,
+            },
+          })
+        );
+        return newAlert;
+      }
     } catch (errorRes) {
       toastNotifications.addDanger(
         errorRes.body?.message ??
@@ -205,12 +209,6 @@ export const AlertAdd = ({
     </EuiPortal>
   );
 };
-
-const parseErrors: (errors: IErrorObject) => boolean = (errors) =>
-  !!Object.values(errors).find((errorList) => {
-    if (isObject(errorList)) return parseErrors(errorList as IErrorObject);
-    return errorList.length >= 1;
-  });
 
 // eslint-disable-next-line import/no-default-export
 export { AlertAdd as default };

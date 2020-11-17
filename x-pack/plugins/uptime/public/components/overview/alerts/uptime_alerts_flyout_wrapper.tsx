@@ -17,15 +17,14 @@ export const UptimeAlertsFlyoutWrapperComponent = ({
   alertFlyoutVisible,
   alertTypeId,
   setAlertFlyoutVisibility,
-}: Props) =>
-  alertFlyoutVisible && alertTypeId ? (
-    <AlertAdd
-      addFlyoutVisible={alertFlyoutVisible}
-      consumer="uptime"
-      setAddFlyoutVisibility={setAlertFlyoutVisibility}
-      alertTypeId={alertTypeId}
-      // if we don't have an alert type pre-specified, we need to
-      // let the user choose
-      canChangeTrigger={!alertTypeId}
-    />
-  ) : null;
+}: Props) => (
+  <AlertAdd
+    addFlyoutVisible={alertFlyoutVisible}
+    consumer="uptime"
+    setAddFlyoutVisibility={setAlertFlyoutVisibility}
+    alertTypeId={alertTypeId}
+    // if we don't have an alert type pre-specified, we need to
+    // let the user choose
+    canChangeTrigger={!alertTypeId}
+  />
+);
