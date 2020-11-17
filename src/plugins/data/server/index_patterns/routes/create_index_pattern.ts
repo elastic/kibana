@@ -92,18 +92,29 @@ export const registerCreateIndexPatternRoute = (router: IRouter) => {
       path: '/api/index_patterns/index_pattern',
       validate: {
         body: schema.object({
+          override: schema.maybe(schema.boolean({ defaultValue: false })),
           skip_field_refresh: schema.maybe(schema.boolean({ defaultValue: false })),
-          make_default: schema.maybe(schema.boolean({ defaultValue: false })),
+          make_default: schema.maybe(schema.boolean({ defaultValue: true })),
           index_pattern: indexPatternSpecSchema,
         }),
       },
     },
     router.handleLegacyErrors(async (ctx, req, res) => {
-      // if (!ctx.indexPatterns) throw new Error('Index pattern context is missing.');
-      // const ip = ctx.indexPatterns.indexPatterns;
+      if (!ctx.indexPatterns) throw new Error('Index pattern context is missing.');
+
+      const ip = ctx.indexPatterns.indexPatterns;
+      const body = req.body;
+      const indexPattern = await ip.createAndSave(
+        body.index_pattern,
+        body.override || false,
+        body.skip_field_refresh || false,
+        body.make_default || true
+      );
 
       return res.ok({
-        body: 'yuppppi!',
+        body: JSON.stringify({
+          index_pattern: indexPattern.toSpec(),
+        }),
       });
     })
   );
