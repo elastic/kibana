@@ -52,7 +52,7 @@ export const TextFieldWithMessageVariables: React.FunctionComponent<Props> = ({
       id={`${paramsProperty}Id`}
       isInvalid={errors && errors.length > 0 && inputTargetValue !== undefined}
       data-test-subj={`${paramsProperty}Input`}
-      value={inputTargetValue}
+      value={inputTargetValue || ''}
       defaultValue={defaultValue}
       onChange={(e: React.ChangeEvent<HTMLInputElement>) => onChangeWithMessageVariable(e)}
       onFocus={(e: React.FocusEvent<HTMLInputElement>) => {
