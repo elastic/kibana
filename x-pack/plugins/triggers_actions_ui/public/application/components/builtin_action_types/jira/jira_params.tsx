@@ -49,7 +49,7 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
   const [prioritiesSelectOptions, setPrioritiesSelectOptions] = useState<EuiSelectOption[]>([]);
 
   const isActionBeingConfiguredByAnAlert = messageVariables
-    ? isSome(extractActionVariable(messageVariables, AlertProvidedActionVariables.alertInstanceId))
+    ? isSome(extractActionVariable(messageVariables, AlertProvidedActionVariables.alertId))
     : false;
 
   useEffect(() => {
@@ -142,7 +142,10 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
       editAction('subAction', 'pushToService', index);
     }
     if (!savedObjectId && isActionBeingConfiguredByAnAlert) {
-      editSubActionProperty('savedObjectId', '{{alertInstanceId}}');
+      editSubActionProperty(
+        'savedObjectId',
+        `{{${AlertProvidedActionVariables.alertId}}}:{{${AlertProvidedActionVariables.alertInstanceId}}}`
+      );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [

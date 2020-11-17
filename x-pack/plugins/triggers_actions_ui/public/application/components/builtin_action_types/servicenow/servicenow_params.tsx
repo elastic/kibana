@@ -31,7 +31,7 @@ const ServiceNowParamsFields: React.FunctionComponent<ActionParamsProps<
     actionParams.subActionParams || {};
 
   const isActionBeingConfiguredByAnAlert = messageVariables
-    ? isSome(extractActionVariable(messageVariables, AlertProvidedActionVariables.alertInstanceId))
+    ? isSome(extractActionVariable(messageVariables, AlertProvidedActionVariables.alertId))
     : false;
 
   const selectOptions = [
@@ -74,7 +74,10 @@ const ServiceNowParamsFields: React.FunctionComponent<ActionParamsProps<
       editAction('subAction', 'pushToService', index);
     }
     if (!savedObjectId && isActionBeingConfiguredByAnAlert) {
-      editSubActionProperty('savedObjectId', '{{alertInstanceId}}');
+      editSubActionProperty(
+        'savedObjectId',
+        `{{${AlertProvidedActionVariables.alertId}}}:{{${AlertProvidedActionVariables.alertInstanceId}}}`
+      );
     }
     if (!urgency) {
       editSubActionProperty('urgency', '3');

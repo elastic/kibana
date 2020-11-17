@@ -10,6 +10,7 @@ import { ActionParamsProps } from '../../../../types';
 import { PagerDutyActionParams } from '.././types';
 import { TextFieldWithMessageVariables } from '../../text_field_with_message_variables';
 import { AlertProvidedActionVariables } from '../../../lib/action_variables';
+import { ResolvedActionGroup } from '../../../../../../alerts/common';
 
 const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDutyActionParams>> = ({
   actionParams,
@@ -99,7 +100,11 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
   const isDedupeKeyRequired = eventAction !== 'trigger';
 
   useEffect(() => {
-    editAction('dedupKey', `{{${AlertProvidedActionVariables.alertInstanceId}}}`, index);
+    editAction(
+      'dedupKey',
+      `{{${AlertProvidedActionVariables.alertId}}}:{{${AlertProvidedActionVariables.alertInstanceId}}}`,
+      index
+    );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -200,7 +205,7 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
               messageVariables={messageVariables}
               paramsProperty={'dedupKey'}
               inputTargetValue={dedupKey}
-              defaultValue={`{{${AlertProvidedActionVariables.alertInstanceId}}}`}
+              defaultValue={`{{${AlertProvidedActionVariables.alertId}}}:{{${AlertProvidedActionVariables.alertInstanceId}}}`}
             />
           </EuiFormRow>
         </EuiFlexItem>
