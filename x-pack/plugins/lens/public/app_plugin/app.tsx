@@ -481,7 +481,9 @@ export function App({
         // Temporarily required until the 'by value' paradigm is default.
         (dashboardFeatureFlag.allowByValueEmbeddables || Boolean(initialInput))
     ),
-    showExportToCSV: Boolean(lastKnownDoc?.state.activeData),
+    enableExportToCSV: Boolean(
+      lastKnownDoc?.state.activeData && Object.keys(lastKnownDoc?.state.activeData).length
+    ),
     isByValueMode: getIsByValueMode(),
     showCancel: Boolean(state.isLinkedToOriginatingApp),
     savingPermitted,
