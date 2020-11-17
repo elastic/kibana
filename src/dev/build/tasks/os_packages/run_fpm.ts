@@ -94,6 +94,8 @@ export async function runFpm(
     resolve(__dirname, 'package_scripts/pre_remove.sh'),
     '--after-remove',
     resolve(__dirname, 'package_scripts/post_remove.sh'),
+    '--rpm-posttrans',
+    resolve(__dirname, 'package_scripts/post_trans.sh'),
 
     // tell fpm about the config file so that it is called out in the package definition
     '--config-files',
