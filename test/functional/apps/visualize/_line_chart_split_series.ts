@@ -165,8 +165,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should be able to save and load', async function () {
       const vizName = await PageObjects.visChart.getExpectedValue(
-        'Visualization LineChart',
-        'Visualization LineChart - chart library'
+        'Visualization Line split series',
+        'Visualization Line split series - chart library'
       );
 
       await PageObjects.visualize.saveVisualizationExpectSuccessAndBreadcrumb(vizName);

@@ -35,8 +35,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   ]);
 
   describe('line charts - split chart', function () {
-    const vizName1 = 'Visualization LineChart';
-
     const initLineChart = async function () {
       log.debug('navigateToApp visualize');
       await PageObjects.visualize.navigateToNewAggBasedVisualization();
@@ -168,9 +166,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should be able to save and load', async function () {
-      await PageObjects.visualize.saveVisualizationExpectSuccessAndBreadcrumb(vizName1);
+      const vizName = await PageObjects.visChart.getExpectedValue(
+        'Visualization Line split chart',
+        'Visualization Line split chart - chart library'
+      );
+      await PageObjects.visualize.saveVisualizationExpectSuccessAndBreadcrumb(vizName);
 
-      await PageObjects.visualize.loadSavedVisualization(vizName1);
+      await PageObjects.visualize.loadSavedVisualization(vizName);
       await PageObjects.visChart.waitForVisualization();
     });
 
