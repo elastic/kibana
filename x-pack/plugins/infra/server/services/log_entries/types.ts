@@ -19,6 +19,3 @@ export interface LogEntriesServiceSetupDeps {
 export interface LogEntriesServiceStartDeps {
   data: DataPluginStart;
 }
-
-// export type LogEntriesServiceCoreSetup = CoreSetup<LogEntriesServiceStartDeps, {}>;
-// export type LogEntriesServiceCoreStart = CoreStart;
