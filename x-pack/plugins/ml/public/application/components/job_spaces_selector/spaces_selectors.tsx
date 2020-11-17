@@ -51,11 +51,13 @@ export const SpacesSelector: FC<Props> = ({
   const [canShareToAllSpaces, setCanShareToAllSpaces] = useState(false);
 
   useEffect(() => {
-    const getPermissions = spacesManager.getShareSavedObjectPermissions(ML_SAVED_OBJECT_TYPE);
-    Promise.all([getPermissions]).then(([{ shareToAllSpaces }]) => {
-      setCanShareToAllSpaces(shareToAllSpaces);
-      setCanEditSpaces(shareToAllSpaces || spaceIds.includes(ALL_SPACES_ID) === false);
-    });
+    if (spacesManager !== null) {
+      const getPermissions = spacesManager.getShareSavedObjectPermissions(ML_SAVED_OBJECT_TYPE);
+      Promise.all([getPermissions]).then(([{ shareToAllSpaces }]) => {
+        setCanShareToAllSpaces(shareToAllSpaces);
+        setCanEditSpaces(shareToAllSpaces || spaceIds.includes(ALL_SPACES_ID) === false);
+      });
+    }
   }, []);
 
   function toggleShareOption(isAllSpaces: boolean) {

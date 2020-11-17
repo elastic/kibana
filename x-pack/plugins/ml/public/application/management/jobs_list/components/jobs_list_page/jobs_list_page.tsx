@@ -121,14 +121,14 @@ export const JobsListPage: FC<{
   const tabs = useTabs(isMlEnabledInSpace, spacesEnabled);
   const [currentTabId, setCurrentTabId] = useState(tabs[0].id);
   const I18nContext = coreStart.i18n.Context;
-  const spacesContext = useMemo(() => createSpacesContext(coreStart.http), []);
+  const spacesContext = useMemo(() => createSpacesContext(coreStart.http, spacesEnabled), []);
 
   const check = async () => {
     try {
       const { mlFeatureEnabledInSpace } = await checkGetManagementMlJobsResolver();
       setIsMlEnabledInSpace(mlFeatureEnabledInSpace);
       spacesContext.spacesEnabled = spacesEnabled;
-      if (spacesEnabled) {
+      if (spacesEnabled && spacesContext.spacesManager !== null) {
         spacesContext.allSpaces = await spacesContext.spacesManager.getSpaces();
       }
     } catch (e) {

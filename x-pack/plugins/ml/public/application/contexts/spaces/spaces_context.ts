@@ -9,18 +9,18 @@ import { HttpSetup } from 'src/core/public';
 import { SpacesManager, Space } from '../../../../../spaces/public';
 
 export interface SpacesContextValue {
-  spacesManager: SpacesManager;
+  spacesManager: SpacesManager | null;
   allSpaces: Space[];
   spacesEnabled: boolean;
 }
 
 export const SpacesContext = createContext<Partial<SpacesContextValue>>({});
 
-export function createSpacesContext(http: HttpSetup) {
+export function createSpacesContext(http: HttpSetup, spacesEnabled: boolean) {
   return {
-    spacesManager: new SpacesManager(http),
+    spacesManager: spacesEnabled ? new SpacesManager(http) : null,
     allSpaces: [],
-    spacesEnabled: false,
+    spacesEnabled,
   } as SpacesContextValue;
 }
 
