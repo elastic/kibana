@@ -1102,3 +1102,14 @@ export interface HostPolicyResponse {
 export interface GetHostPolicyResponse {
   policy_response: HostPolicyResponse;
 }
+
+/**
+ * REST API response for retrieving agent summary
+ */
+export interface GetAgentSummaryResponse {
+  summary_response: {
+    package: string;
+    policy_id?: string;
+    versions_count: { [key: string]: number };
+  };
+}
