@@ -139,8 +139,8 @@ export default function ({ getPageObjects, getService }) {
         await PageObjects.maps.openNewMap();
 
         await PageObjects.maps.saveMap(MAP1_NAME);
-        const count = await PageObjects.maps.getMapCountWithName(MAP1_NAME);
-        expect(count).to.equal(1);
+
+        await PageObjects.maps.searchAndExpectItemsCount(MAP1_NAME, 1);
       });
 
       it('should allow saving map that crosses dateline', async () => {
@@ -148,8 +148,8 @@ export default function ({ getPageObjects, getService }) {
         await PageObjects.maps.setView('64', '179', '5');
 
         await PageObjects.maps.saveMap(MAP2_NAME);
-        const count = await PageObjects.maps.getMapCountWithName(MAP2_NAME);
-        expect(count).to.equal(1);
+
+        await PageObjects.maps.searchAndExpectItemsCount(MAP2_NAME, 1);
       });
     });
 
@@ -157,11 +157,9 @@ export default function ({ getPageObjects, getService }) {
       it('should delete selected saved objects', async () => {
         await PageObjects.maps.deleteSavedMaps(MAP_NAME_PREFIX);
 
-        const map1Count = await PageObjects.maps.getMapCountWithName(MAP1_NAME);
-        expect(map1Count).to.equal(0);
+        await PageObjects.maps.searchAndExpectItemsCount(MAP1_NAME, 0);
 
-        const map2Count = await PageObjects.maps.getMapCountWithName(MAP2_NAME);
-        expect(map2Count).to.equal(0);
+        await PageObjects.maps.searchAndExpectItemsCount(MAP2_NAME, 0);
       });
     });
   });

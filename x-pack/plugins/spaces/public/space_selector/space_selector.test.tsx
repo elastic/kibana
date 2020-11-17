@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { shallowWithIntl } from '@kbn/test/jest';
 import { Space } from '../../common/model/space';
 import { SpaceSelector } from './space_selector';
 import { spacesManagerMock } from '../spaces_manager/mocks';

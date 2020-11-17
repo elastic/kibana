@@ -60,7 +60,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // .echLegendItem__title is the only viable way of getting the xy chart's
       // legend item(s), so we're using a class selector here.
-      expect(await find.allByCssSelector('.echLegendItem')).to.have.length(3);
+      // 4th item is the other bucket
+      expect(await find.allByCssSelector('.echLegendItem')).to.have.length(4);
     });
 
     it('should create an xy visualization with filters aggregation', async () => {
@@ -292,11 +293,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await PageObjects.lens.hasChartSwitchWarning('treemap')).to.eql(false);
       await PageObjects.lens.switchToVisualization('treemap');
       expect(
-        await PageObjects.lens.getDimensionTriggerText('lnsPie_groupByDimensionPanel', 0)
-      ).to.eql('Top values of geo.dest');
-      expect(
-        await PageObjects.lens.getDimensionTriggerText('lnsPie_groupByDimensionPanel', 1)
-      ).to.eql('Top values of geo.src');
+        await PageObjects.lens.getDimensionTriggersTexts('lnsPie_groupByDimensionPanel')
+      ).to.eql(['Top values of geo.dest', 'Top values of geo.src']);
       expect(await PageObjects.lens.getDimensionTriggerText('lnsPie_sizeByDimensionPanel')).to.eql(
         'Average of bytes'
       );
