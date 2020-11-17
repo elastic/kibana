@@ -283,13 +283,7 @@ async function enrichHostMetadata(
     }
   }
 
-  let policyVersions: HostInfo['policy_versions'] = {
-    agent: {
-      applied: 0,
-      configured: 0,
-    },
-    endpoint: 0,
-  };
+  let policyVersions: HostInfo['policy_versions'];
   try {
     const [agent, endpointPolicy] = await Promise.all([
       metadataRequestContext.endpointAppContextService

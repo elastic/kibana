@@ -14,6 +14,7 @@ import {
   FleetStartContract,
   ExternalCallback,
   PackageService,
+  AgentPolicyService,
 } from '../../../fleet/server';
 import { createPackagePolicyServiceMock } from '../../../fleet/server/mocks';
 import { AppClientFactory } from '../client';
@@ -91,6 +92,19 @@ export const createMockPackageService = (): jest.Mocked<PackageService> => {
 };
 
 /**
+ * Create mock AgentPolicyService
+ */
+
+export const createMockAgentPolicyService = (): jest.Mocked<AgentPolicyService> => {
+  return {
+    get: jest.fn(),
+    list: jest.fn(),
+    getDefaultAgentPolicyId: jest.fn(),
+    getFullAgentPolicy: jest.fn(),
+  };
+};
+
+/**
  * Creates a mock AgentService
  */
 export const createMockAgentService = (): jest.Mocked<AgentService> => {
@@ -116,6 +130,7 @@ export const createMockFleetStartContract = (indexPattern: string): FleetStartCo
     },
     agentService: createMockAgentService(),
     packageService: createMockPackageService(),
+    agentPolicyService: createMockAgentPolicyService(),
     registerExternalCallback: jest.fn((...args: ExternalCallback) => {}),
     packagePolicyService: createPackagePolicyServiceMock(),
   };

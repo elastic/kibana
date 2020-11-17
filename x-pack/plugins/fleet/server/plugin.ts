@@ -58,6 +58,7 @@ import {
   ESIndexPatternSavedObjectService,
   ESIndexPatternService,
   AgentService,
+  AgentPolicyService,
   agentPolicyService,
   packagePolicyService,
   PackageService,
@@ -135,7 +136,7 @@ export interface FleetStartContract {
    * Services for Fleet's package policies
    */
   packagePolicyService: typeof packagePolicyService;
-  agentPolicyService: typeof agentPolicyService;
+  agentPolicyService: AgentPolicyService;
   /**
    * Register callbacks for inclusion in fleet API processing
    * @param args

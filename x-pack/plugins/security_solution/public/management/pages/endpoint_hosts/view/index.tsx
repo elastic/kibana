@@ -364,19 +364,20 @@ export const EndpointList = () => {
                   dataTestSubj="policyStatusCellLink"
                 />
               </EuiHealth>
-              {(policy.version < item.policy_versions.agent.applied ||
-                policy.version < item.policy_versions.agent.configured ||
-                policy.endpoint_policy_version < item.policy_versions.endpoint) && (
-                <EuiFlexItem grow={false}>
-                  <EuiText color="subdued" size="xs" className="eui-textNoWrap">
-                    <EuiIcon size="m" type="alert" color="warning" />
-                    <FormattedMessage
-                      id="xpack.securitySolution.endpoint.list.outOfDateLabel"
-                      defaultMessage="Out-of-date"
-                    />
-                  </EuiText>
-                </EuiFlexItem>
-              )}
+              {item.policy_versions &&
+                (policy.version < item.policy_versions.agent.applied ||
+                  policy.version < item.policy_versions.agent.configured ||
+                  policy.endpoint_policy_version < item.policy_versions.endpoint) && (
+                  <EuiFlexItem grow={false}>
+                    <EuiText color="subdued" size="xs" className="eui-textNoWrap">
+                      <EuiIcon size="m" type="alert" color="warning" />
+                      <FormattedMessage
+                        id="xpack.securitySolution.endpoint.list.outOfDateLabel"
+                        defaultMessage="Out-of-date"
+                      />
+                    </EuiText>
+                  </EuiFlexItem>
+                )}
             </>
           );
         },

@@ -5,9 +5,10 @@
  */
 
 import { SavedObjectsClientContract, KibanaRequest } from 'kibana/server';
-import { AgentStatus, Agent, EsAssetReference } from '../types';
+import { AgentStatus, Agent, EsAssetReference, AgentPolicy, ListWithKuery } from '../types';
 import * as settingsService from './settings';
 import { getAgent, listAgents } from './agents';
+import { FullAgentPolicy } from '../../common';
 export { ESIndexPatternSavedObjectService } from './es_index_pattern';
 
 export { getRegistryUrl } from './epm/registry/registry_url';
@@ -57,6 +58,26 @@ export interface AgentService {
    * List agents
    */
   listAgents: typeof listAgents;
+}
+
+export interface AgentPolicyService {
+  get(
+    soClient: SavedObjectsClientContract,
+    id: string,
+    withPackagePolicies?: boolean
+  ): Promise<AgentPolicy | null>;
+  list(
+    soClient: SavedObjectsClientContract,
+    options: ListWithKuery & {
+      withPackagePolicies?: boolean;
+    }
+  ): Promise<{ items: AgentPolicy[]; total: number; page: number; perPage: number }>;
+  getDefaultAgentPolicyId(soClient: SavedObjectsClientContract): Promise<string>;
+  getFullAgentPolicy(
+    soClient: SavedObjectsClientContract,
+    id: string,
+    options?: { standalone: boolean }
+  ): Promise<FullAgentPolicy | null>;
 }
 
 // Saved object services

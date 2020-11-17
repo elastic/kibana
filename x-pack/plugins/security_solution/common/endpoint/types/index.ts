@@ -523,7 +523,7 @@ export enum MetadataQueryStrategyVersions {
 export type HostInfo = Immutable<{
   metadata: HostMetadata;
   host_status: HostStatus;
-  policy_versions: {
+  policy_versions?: {
     agent: {
       configured: number; // current agentPolicy version
       applied: number; // policy that the agent is currently reporting
@@ -1077,7 +1077,8 @@ export interface HostPolicyResponse {
   Endpoint: {
     policy: {
       applied: {
-        version: string;
+        version: number;
+        endpoint_policy_version: number;
         id: string;
         name: string;
         status: HostPolicyResponseActionStatus;

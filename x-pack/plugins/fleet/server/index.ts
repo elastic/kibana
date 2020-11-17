@@ -6,7 +6,6 @@
 import { schema, TypeOf } from '@kbn/config-schema';
 import { PluginConfigDescriptor, PluginInitializerContext } from 'src/core/server';
 import { FleetPlugin } from './plugin';
-import { agentPolicyService } from './services';
 import {
   AGENT_POLICY_ROLLOUT_RATE_LIMIT_INTERVAL_MS,
   AGENT_POLICY_ROLLOUT_RATE_LIMIT_REQUEST_PER_INTERVAL,
@@ -14,9 +13,14 @@ import {
 } from '../common';
 
 export { default as apm } from 'elastic-apm-node';
-export { AgentService, ESIndexPatternService, getRegistryUrl, PackageService } from './services';
+export {
+  AgentService,
+  ESIndexPatternService,
+  getRegistryUrl,
+  PackageService,
+  AgentPolicyService,
+} from './services';
 export { FleetSetupContract, FleetSetupDeps, FleetStartContract, ExternalCallback } from './plugin';
-export type AgentPolicyService = typeof agentPolicyService;
 
 export const config: PluginConfigDescriptor = {
   exposeToBrowser: {
@@ -65,6 +69,7 @@ export const config: PluginConfigDescriptor = {
 export type FleetConfigType = TypeOf<typeof config.schema>;
 
 export { PackagePolicyServiceInterface } from './services/package_policy';
+export { AgentPolicyServiceInterface } from './services/agent_policy';
 
 export const plugin = (initializerContext: PluginInitializerContext) => {
   return new FleetPlugin(initializerContext);
