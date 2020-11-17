@@ -39,7 +39,7 @@ export function getBatchDone$(items: Array<BatchItem<any, any>>) {
         };
 
         item.signal?.addEventListener('abort', onDone);
-        item.future.promise.finally(onDone);
+        item.future.promise.then(onDone, onDone);
       });
     }),
     filter((allDone) => allDone)
