@@ -28,7 +28,7 @@ import { IUrlParams } from '../../../../context/UrlParamsContext/types';
 import { FETCH_STATUS } from '../../../../hooks/useFetcher';
 import { ITransactionChartData } from '../../../../selectors/chartSelectors';
 import { isValidCoordinateValue } from '../../../../utils/isValidCoordinateValue';
-import { TransactionBreakdown } from '../../TransactionBreakdown';
+import { TransactionBreakdownChart } from '../transaction_breakdown_chart';
 import { LineChart } from '../line_chart';
 import { TransactionErrorRateChart } from '../transaction_error_rate_chart/';
 import { getResponseTimeTickFormatter } from './helper';
@@ -117,7 +117,7 @@ export function TransactionCharts({
             <TransactionErrorRateChart />
           </EuiFlexItem>
           <EuiFlexItem>
-            <TransactionBreakdown />
+            <TransactionBreakdownChart />
           </EuiFlexItem>
         </EuiFlexGrid>
       </ChartsSyncContextProvider>
