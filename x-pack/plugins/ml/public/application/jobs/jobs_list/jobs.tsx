@@ -10,6 +10,7 @@ import { NavigationMenu } from '../../components/navigation_menu';
 import { JobsListView } from './components/jobs_list_view/index';
 import { usePageUrlState } from '../../util/url_state';
 import { ML_PAGES } from '../../../../common/constants/ml_url_generator';
+import { ListingPageUrlState } from '../../../../common/types/common';
 
 interface JobsPageProps {
   blockRefresh?: boolean;
@@ -18,15 +19,7 @@ interface JobsPageProps {
   lastRefresh?: number;
 }
 
-export interface AnomalyDetectionJobsListState {
-  pageSize: number;
-  pageIndex: number;
-  sortField: string;
-  sortDirection: string;
-  queryText?: string;
-}
-
-export const getDefaultAnomalyDetectionJobsListState = (): AnomalyDetectionJobsListState => ({
+export const getDefaultAnomalyDetectionJobsListState = (): ListingPageUrlState => ({
   pageIndex: 0,
   pageSize: 10,
   sortField: 'id',
