@@ -103,7 +103,7 @@ exports[`Storyshots components/Assets/AssetManager no assets 1`] = `
             className="euiSpacer euiSpacer--l"
           />
           <div
-            className="canvasAssetManager__emptyPanel"
+            className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow canvasAssetManager__emptyPanel"
           >
             <div
               className="euiEmptyPrompt"
@@ -296,7 +296,7 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
               className="euiFlexItem"
             >
               <div
-                className="euiPanel euiPanel--paddingSmall canvasAsset"
+                className="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow canvasAsset"
               >
                 <div
                   className="canvasAsset__thumb canvasCheckered"
@@ -463,7 +463,7 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
               className="euiFlexItem"
             >
               <div
-                className="euiPanel euiPanel--paddingSmall canvasAsset"
+                className="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow canvasAsset"
               >
                 <div
                   className="canvasAsset__thumb canvasCheckered"
