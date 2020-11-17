@@ -42,6 +42,17 @@ interface AddItemProps {
 export const AddMitreThreat = memo(({ field, idAria, isDisabled }: AddItemProps) => {
   const [showValidation, setShowValidation] = useState(false);
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
+  const getErrorMessages = useCallback(() => {
+    if (field.isChangingValue || !field.errors.length) {
+      return null;
+    }
+    return field.errors.reduce((acc: string[], error) => {
+      if (error.path === 'threat.tactic') {
+        acc.push(error.message);
+      }
+      return acc;
+    }, []);
+  }, [field]);
 
   const removeTactic = useCallback(
     (index: number) => {
@@ -170,7 +181,7 @@ export const AddMitreThreat = memo(({ field, idAria, isDisabled }: AddItemProps)
               labelAppend={field.labelAppend}
               describedByIds={idAria ? [`${idAria} ${i18n.TACTIC}`] : undefined}
               isInvalid={showValidation && isTacticValid(threat)}
-              error={errorMessage}
+              error={getErrorMessages()}
             >
               <>{getSelectTactic(threat, index, isDisabled)}</>
             </InitialMitreFormRow>
@@ -178,7 +189,7 @@ export const AddMitreThreat = memo(({ field, idAria, isDisabled }: AddItemProps)
             <EuiFormRow
               fullWidth
               isInvalid={showValidation && isTacticValid(threat)}
-              error={errorMessage}
+              error={getErrorMessages()}
               describedByIds={idAria ? [`${idAria} ${i18n.TACTIC}`] : undefined}
             >
               {getSelectTactic(threat, index, isDisabled)}

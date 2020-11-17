@@ -53,6 +53,17 @@ export const MitreTechniqueFields: React.FC<AddTechniqueProps> = ({
 }): JSX.Element => {
   const [showValidation, setShowValidation] = useState(false);
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
+  const getErrorMessages = useCallback(() => {
+    if (field.isChangingValue || !field.errors.length) {
+      return null;
+    }
+    return field.errors.reduce((acc: string[], error) => {
+      if (error.path === 'threat.technique') {
+        acc.push(error.message);
+      }
+      return acc;
+    }, []);
+  }, [field]);
 
   const values = field.value as IMitreEnterpriseAttack[];
 
@@ -166,7 +177,7 @@ export const MitreTechniqueFields: React.FC<AddTechniqueProps> = ({
             }
             fullWidth
             describedByIds={idAria ? [`${idAria} ${i18n.TECHNIQUE}`] : undefined}
-            error={errorMessage}
+            error={getErrorMessages()}
           >
             <EuiFlexGroup gutterSize="s" alignItems="center">
               <EuiFlexItem grow>

@@ -207,11 +207,12 @@ export const schema: FormSchema<AboutStepRule> = {
           return hasTechniqueError
             ? {
                 code: 'ERR_FIELD_MISSING',
-                path,
+                path: `${path}.tactic`,
                 message: I18n.CUSTOM_MITRE_ATTACK_TECHNIQUES_REQUIRED,
               }
             : undefined;
         },
+        exitOnFail: false,
       },
       {
         validator: (
@@ -229,11 +230,12 @@ export const schema: FormSchema<AboutStepRule> = {
           return hasSubtechniqueError
             ? {
                 code: 'ERR_FIELD_MISSING',
-                path,
+                path: `${path}.technique`,
                 message: I18n.CUSTOM_MITRE_ATTACK_SUBTECHNIQUES_REQUIRED,
               }
             : undefined;
         },
+        exitOnFail: false,
       },
     ],
   },
