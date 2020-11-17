@@ -9,6 +9,7 @@ import { isRight } from 'fp-ts/lib/Either';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { MonitorSummariesResultType } from '../../../../../plugins/uptime/common/runtime_types';
 import { API_URLS } from '../../../../../plugins/uptime/common/constants';
+import { expectSnapshot } from '../../../../apm_api_integration/common/match_snapshot';
 
 interface ExpectedMonitorStatesPage {
   response: any;
@@ -88,6 +89,16 @@ export default function ({ getService }: FtrProviderContext) {
         prevPagination: null,
         nextPagination: null,
       });
+    });
+
+    it('will fetch monitor state data for the given down filters', async () => {
+      const statusFilter = 'down';
+      const size = 2;
+      const { body } = await supertest.get(
+        `${API_URLS.MONITOR_LIST}?dateRangeStart=${from}&dateRangeEnd=${to}&statusFilter=${statusFilter}&pageSize=${size}`
+      );
+
+      expectSnapshot(body).toMatch();
     });
 
     it('can navigate forward and backward using pagination', async () => {
