@@ -35,7 +35,7 @@ export class GlobalSearchTestPlugin
   public setup(core: CoreSetup, { globalSearch }: GlobalSearchTestPluginSetupDeps) {
     globalSearch.registerResultProvider({
       id: 'gs_test_server',
-      find: ({ term }, options, context) => {
+      find: ({ term = '' }, options, context) => {
         if (term.includes('server')) {
           return of([
             createResult({
