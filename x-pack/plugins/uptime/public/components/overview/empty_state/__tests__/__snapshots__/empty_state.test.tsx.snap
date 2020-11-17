@@ -1823,7 +1823,9 @@ exports[`EmptyState component renders error message when an error occurs 1`] = `
                             <div
                               className="euiText euiText--medium"
                             >
-                              <p>
+                              <p
+                                key="There was an error fetching your data."
+                              >
                                 There was an error fetching your data.
                               </p>
                             </div>

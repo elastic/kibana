@@ -5,8 +5,7 @@
  */
 
 import { getPingHistogram } from '../get_ping_histogram';
-import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../common/constants';
-import { elasticsearchServiceMock } from '../../../../../../../src/core/server/mocks';
+import { getUptimeESMockClient } from './helper';
 
 describe('getPingHistogram', () => {
   const standardMockResponse: any = {
@@ -38,7 +37,7 @@ describe('getPingHistogram', () => {
 
   it.skip('returns a single bucket if array has 1', async () => {
     expect.assertions(2);
-    const mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
+    const { esClient: mockEsClient, uptimeEsClient } = getUptimeESMockClient();
 
     mockEsClient.search.mockResolvedValueOnce({
       body: {
@@ -62,8 +61,7 @@ describe('getPingHistogram', () => {
     } as any);
 
     const result = await getPingHistogram({
-      callES: mockEsClient,
-      dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
+      uptimeEsClient,
       from: 'now-15m',
       to: 'now',
     });
@@ -75,7 +73,7 @@ describe('getPingHistogram', () => {
   it('returns expected result for no status filter', async () => {
     expect.assertions(2);
 
-    const mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
+    const { esClient: mockEsClient, uptimeEsClient } = getUptimeESMockClient();
 
     standardMockResponse.aggregations.timeseries.interval = '1m';
 
@@ -84,8 +82,7 @@ describe('getPingHistogram', () => {
     } as any);
 
     const result = await getPingHistogram({
-      callES: mockEsClient,
-      dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
+      uptimeEsClient,
       from: 'now-15m',
       to: 'now',
       filters: '',
@@ -98,7 +95,7 @@ describe('getPingHistogram', () => {
   it('handles status + additional user queries', async () => {
     expect.assertions(2);
 
-    const mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
+    const { esClient: mockEsClient, uptimeEsClient } = getUptimeESMockClient();
 
     mockEsClient.search.mockResolvedValueOnce({
       body: {
@@ -149,8 +146,7 @@ describe('getPingHistogram', () => {
     };
 
     const result = await getPingHistogram({
-      callES: mockEsClient,
-      dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
+      uptimeEsClient,
       from: 'now-15m',
       to: 'now',
       filters: JSON.stringify(searchFilter),
@@ -163,7 +159,7 @@ describe('getPingHistogram', () => {
 
   it('handles simple_text_query without issues', async () => {
     expect.assertions(2);
-    const mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
+    const { esClient: mockEsClient, uptimeEsClient } = getUptimeESMockClient();
 
     mockEsClient.search.mockResolvedValueOnce({
       body: {
@@ -206,8 +202,7 @@ describe('getPingHistogram', () => {
 
     const filters = `{"bool":{"must":[{"simple_query_string":{"query":"http"}}]}}`;
     const result = await getPingHistogram({
-      callES: mockEsClient,
-      dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
+      uptimeEsClient,
       from: 'now-15m',
       to: 'now',
       filters,
