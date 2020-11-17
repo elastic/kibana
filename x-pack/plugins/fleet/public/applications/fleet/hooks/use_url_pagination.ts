@@ -48,7 +48,7 @@ export const useUrlPagination = (): UrlPagination => {
     setPagination((prevState) => {
       return {
         ...prevState,
-        ...urlParams, // FIXME: Must parse these
+        ...paginationFromUrlParams(urlParams),
       };
     });
   }, [setPagination, urlParams]);
@@ -60,7 +60,7 @@ export const useUrlPagination = (): UrlPagination => {
   };
 };
 
-const paginationFromUrlParams = (urlParams: UrlPaginationParams) => {
+const paginationFromUrlParams = (urlParams: UrlPaginationParams): Pagination => {
   const pagination: Pagination = {
     pageSize: 20,
     currentPage: 1,
@@ -73,11 +73,12 @@ const paginationFromUrlParams = (urlParams: UrlPaginationParams) => {
       ? urlParams.currentPage[urlParams.currentPage.length - 1]
       : urlParams.currentPage) ?? pagination.currentPage
   );
-  pagination.pageSize = Number(
-    (Array.isArray(urlParams.pageSize)
-      ? urlParams.pageSize[urlParams.pageSize.length - 1]
-      : urlParams.pageSize) ?? pagination.pageSize
-  );
+  pagination.pageSize =
+    Number(
+      (Array.isArray(urlParams.pageSize)
+        ? urlParams.pageSize[urlParams.pageSize.length - 1]
+        : urlParams.pageSize) ?? pagination.pageSize
+    ) ?? pagination.pageSize;
 
   // If Current Page is not a valid positive integer, set it to 1
   if (!Number.isFinite(pagination.currentPage) || pagination.currentPage < 1) {
