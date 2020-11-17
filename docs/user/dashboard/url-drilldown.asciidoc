@@ -51,7 +51,7 @@ Example:
 
 
 [float]
-[[variables]]
+[[url-template-variables]]
 ==== URL template variables
 
 The URL drilldown template has three sources for variables:

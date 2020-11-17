@@ -164,3 +164,20 @@ This content has moved. See
 
 This content has moved. See {ref}/index-mgmt.html[Index management].
 
+[role="exclude",id="trigger-picker"]
+== Picking a trigger for a URL drilldown
+
+This content has moved. Refer to <<url-drilldown>>.
+
+[role="exclude",id="templating"]
+== URL templating language	
+
+This content has moved. Refer to <<url_templating-language>>.
+
+[role="exclude",id="variables"]
+== URL template variables
+
+This content has moved. Refer to <<url-template-variables>>.
+
+
+
