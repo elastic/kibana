@@ -51,12 +51,12 @@ describe('AnnotationFlyout', () => {
 
     annotationUpdatesService.setValue(annotation);
 
-    render(
+    const { getByTestId } = render(
       <MlAnnotationUpdatesContextProvider>
         <ObservableComponent />
       </MlAnnotationUpdatesContextProvider>
     );
-    const updateBtn = screen.getByText('Update').closest('button');
+    const updateBtn = getByTestId('annotationFlyoutUpdateButton');
     expect(updateBtn).toBeDisabled();
   });
 
@@ -66,12 +66,12 @@ describe('AnnotationFlyout', () => {
 
     // useObservable wraps the observable in a new component
 
-    render(
+    const { getByTestId } = render(
       <MlAnnotationUpdatesContextProvider>
         <ObservableComponent />
       </MlAnnotationUpdatesContextProvider>
     );
-    const updateBtn = screen.getByText('Update').closest('button');
+    const updateBtn = getByTestId('annotationFlyoutUpdateButton');
     expect(updateBtn).toBeDisabled();
     await waitFor(() => {
       const errorText = screen.queryByText(/characters above maximum length/);
@@ -95,6 +95,5 @@ describe('AnnotationFlyout', () => {
 
     await fireEvent.click(updateBtn);
     expect(screen.queryByTestId('mlAnnotationFlyout')).not.toBeInTheDocument();
-    screen.debug();
   });
 });
