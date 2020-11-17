@@ -19,8 +19,8 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 
-// import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiFormRow, EuiRadio, EuiComboBox, EuiPanel, EuiSpacer } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { EuiFormRow, EuiRadio, EuiIconTip, EuiComboBox, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { SavedObjectDashboard } from '../../../../plugins/dashboard/public';
 import { SavedObjectsClientContract } from '../../../../core/public';
 
@@ -39,6 +39,7 @@ interface DashboardSaveModalProps {
   onClose: () => void;
   onSave: (props: OnSaveProps & { dashboardId: string | null }) => void;
   savedObjectsClient: SavedObjectsClientContract;
+  tagOptions?: React.ReactNode | ((state: SaveModalState) => React.ReactNode);
 }
 
 interface SmallDashboard {
@@ -52,7 +53,7 @@ export function SavedObjectSaveModalDashboard(props: DashboardSaveModalProps) {
   const [isLoadingDashboards, setIsLoadingDashboards] = useState(true);
   const [selectedDashboard, setSelectedDashboard] = useState<SmallDashboard | null>(null);
 
-  const { documentInfo, savedObjectsClient } = props;
+  const { documentInfo, savedObjectsClient, tagOptions } = props;
 
   const fetchDashboards = useCallback(
     async (query) => {
@@ -80,7 +81,22 @@ export function SavedObjectSaveModalDashboard(props: DashboardSaveModalProps) {
   const renderDashboardSelect = (state: SaveModalState) => (
     <>
       <EuiFormRow
-        label="Add to dashboard"
+        label={
+          <>
+            <span>
+              {i18n.translate('savedObjects.saveModalDashboard.addToDashboardLabel', {
+                defaultMessage: 'Add to dashboard',
+              })}
+            </span>
+            <EuiIconTip
+              type="iInCircle"
+              content={i18n.translate('savedObjects.saveModalDashboard.dashboardInfoTooltip', {
+                defaultMessage:
+                  'Items added to a dashboard will not appear in the library and must be edited from the dashboard.',
+              })}
+            />
+          </>
+        }
         hasChildLabel={false}
         style={!state.copyOnSave && documentInfo.id ? { pointerEvents: 'none', opacity: 0.2 } : {}}
       >
@@ -90,18 +106,30 @@ export function SavedObjectSaveModalDashboard(props: DashboardSaveModalProps) {
               checked={dashboardOption === 'existing'}
               id="existing"
               name="dashboard-option"
-              label="Existing"
+              label={i18n.translate(
+                'savedObjects.saveModalDashboard.existingDashboardOptionLabel',
+                {
+                  defaultMessage: 'Existing',
+                }
+              )}
               onChange={() => setDashboardOption('existing')}
             />
 
             <EuiComboBox
-              placeholder="Search dashboards..."
+              placeholder={i18n.translate(
+                'savedObjects.saveModalDashboard.searchDashboardPlaceholder',
+                {
+                  defaultMessage: 'Search dashboards...',
+                }
+              )}
               singleSelection={{ asPlainText: true }}
               options={dashboards || []}
               selectedOptions={!!selectedDashboard ? [selectedDashboard] : undefined}
               onChange={(e) => {
                 if (e.length) {
                   setSelectedDashboard({ value: e[0].value || '', label: e[0].label });
+                } else {
+                  setSelectedDashboard(null);
                 }
               }}
               onSearchChange={fetchDashboards}
@@ -116,7 +144,9 @@ export function SavedObjectSaveModalDashboard(props: DashboardSaveModalProps) {
               checked={dashboardOption === 'new'}
               id="new"
               name="dashboard-option"
-              label="New"
+              label={i18n.translate('savedObjects.saveModalDashboard.newDashboardOptionLabel', {
+                defaultMessage: 'New',
+              })}
               onChange={() => setDashboardOption('new')}
             />
 
@@ -126,7 +156,9 @@ export function SavedObjectSaveModalDashboard(props: DashboardSaveModalProps) {
               checked={dashboardOption === null}
               id="library"
               name="dashboard-option"
-              label="None (add to visualize library)"
+              label={i18n.translate('savedObjects.saveModalDashboard.libraryOptionLabel', {
+                defaultMessage: 'No dashboard, but add to library',
+              })}
               onChange={() => setDashboardOption(null)}
             />
           </div>
@@ -155,7 +187,17 @@ export function SavedObjectSaveModalDashboard(props: DashboardSaveModalProps) {
     props.onSave({ ...onSaveProps, dashboardId });
   };
 
-  const confirmButtonLabel = dashboardOption === null ? 'Save' : 'Save and go to Dashboard';
+  const saveLibraryLabel = i18n.translate('savedObjects.saveModalDashboard.saveToLibraryLabel', {
+    defaultMessage: 'Save and add to library',
+  });
+  const saveDashboardLabel = i18n.translate(
+    'savedObjects.saveModalDashboard.saveAndGoToDashboardLabel',
+    {
+      defaultMessage: 'Save and go to Dashboard',
+    }
+  );
+
+  const confirmButtonLabel = dashboardOption === null ? saveLibraryLabel : saveDashboardLabel;
 
   return (
     <SavedObjectSaveModal
@@ -166,7 +208,7 @@ export function SavedObjectSaveModalDashboard(props: DashboardSaveModalProps) {
       initialCopyOnSave={Boolean(documentInfo.id)}
       confirmButtonLabel={confirmButtonLabel}
       objectType={props.objectType}
-      // options={getReturnToOriginSwitch}
+      options={dashboardOption === null ? tagOptions : undefined} // Show tags when not adding to dashboard
       rightOptions={renderDashboardSelect}
       description={documentInfo.description}
       showDescription={true}

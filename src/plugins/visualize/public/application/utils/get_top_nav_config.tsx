@@ -369,7 +369,7 @@ export const getTopNavConfig = (
               };
 
               let selectedTags: string[] = [];
-              let options: React.ReactNode | undefined;
+              let tagOptions: React.ReactNode | undefined;
 
               if (
                 savedVis &&
@@ -377,7 +377,7 @@ export const getTopNavConfig = (
                 savedObjectsTagging.ui.hasTagDecoration(savedVis)
               ) {
                 selectedTags = savedVis.getTags();
-                options = (
+                tagOptions = (
                   <savedObjectsTagging.ui.components.SavedObjectSaveModalTagSelector
                     initialSelection={selectedTags}
                     onTagsSelected={(newSelection) => {
@@ -393,7 +393,7 @@ export const getTopNavConfig = (
                   <SavedObjectSaveModalOrigin
                     documentInfo={savedVis || { title: '' }}
                     onSave={onSave}
-                    options={options}
+                    options={tagOptions}
                     getAppNameFromId={stateTransfer.getAppNameFromId}
                     objectType={'visualization'}
                     onClose={() => {}}
@@ -403,7 +403,7 @@ export const getTopNavConfig = (
                   <SavedObjectSaveModalDashboard
                     documentInfo={savedVis || { title: '' }}
                     onSave={onSave}
-                    // options={options} TODO: add this
+                    tagOptions={tagOptions}
                     objectType={'visualization'}
                     onClose={() => {}}
                     savedObjectsClient={savedObjectsClient}
