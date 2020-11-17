@@ -9,7 +9,7 @@
     "kbn:watch": "node scripts/build --dev --watch"
   },
   "dependencies": {
-    "@elastic/charts": "23.2.1",
+    "@elastic/charts": "23.2.2",
     "@elastic/eui": "29.3.1",
     "@elastic/numeral": "^2.5.0",
     "@kbn/i18n": "1.0.0",

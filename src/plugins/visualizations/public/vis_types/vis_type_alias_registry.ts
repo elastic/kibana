@@ -21,6 +21,7 @@ import { TriggerContextMapping } from '../../../ui_actions/public';
 export interface VisualizationListItem {
   editUrl: string;
   editApp?: string;
+  error?: string;
   icon: string;
   id: string;
   stage: 'experimental' | 'beta' | 'production';

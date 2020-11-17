@@ -179,5 +179,25 @@ This content has moved. Refer to <<url_templating-language>>.
 
 This content has moved. Refer to <<url-template-variables>>.
 
+[role="exclude",id="field-filter"]
+== Filter by field
 
+This content has moved. See <<discover, **Discover**>>.
+
+
+[role="exclude",id="document-context"]
+== View a document in context
+
+This content has moved. See <<discover, **Discover**>>.
+
+
+[role="exclude",id="document-data"]
+== View document data
+
+This content has moved. See <<discover, **Discover**>>.
+
+[role="exclude",id="viewing-field-stats"]
+== View field data statistics
+
+This content has moved. See <<discover, **Discover**>>.
 

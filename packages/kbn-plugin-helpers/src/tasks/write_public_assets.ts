@@ -17,9 +17,29 @@
  * under the License.
  */
 
-export * from './clean';
-export * from './create_archive';
-export * from './optimize';
-export * from './write_public_assets';
-export * from './write_server_files';
-export * from './yarn_install';
+import { pipeline } from 'stream';
+import { promisify } from 'util';
+
+import vfs from 'vinyl-fs';
+
+import { BuildContext } from '../build_context';
+
+const asyncPipeline = promisify(pipeline);
+
+export async function writePublicAssets({ log, plugin, sourceDir, buildDir }: BuildContext) {
+  if (!plugin.manifest.ui) {
+    return;
+  }
+
+  log.info('copying assets from `public/assets` to build');
+
+  await asyncPipeline(
+    vfs.src(['public/assets/**/*'], {
+      cwd: sourceDir,
+      base: sourceDir,
+      buffer: true,
+      allowEmpty: true,
+    }),
+    vfs.dest(buildDir)
+  );
+}
