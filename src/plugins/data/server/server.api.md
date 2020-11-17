@@ -507,6 +507,8 @@ export interface IFieldType {
     // (undocumented)
     count?: number;
     // (undocumented)
+    customName?: string;
+    // (undocumented)
     displayName?: string;
     // (undocumented)
     esTypes?: string[];
@@ -557,6 +559,10 @@ export class IndexPattern implements IIndexPattern {
     addScriptedField(name: string, script: string, fieldType?: string): Promise<void>;
     // (undocumented)
     deleteFieldFormat: (fieldName: string) => void;
+    // Warning: (ae-forgotten-export) The symbol "FieldAttrs" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    fieldAttrs: FieldAttrs;
     // (undocumented)
     fieldFormatMap: Record<string, any>;
     // Warning: (ae-forgotten-export) The symbol "IIndexPatternFieldList" needs to be exported by the entry point index.d.ts
@@ -584,6 +590,7 @@ export class IndexPattern implements IIndexPattern {
         time_zone?: string | undefined;
     }>> | undefined;
     getAsSavedObjectBody(): {
+        fieldAttrs: string | undefined;
         title: string;
         timeFieldName: string | undefined;
         intervalName: string | undefined;
@@ -603,6 +610,12 @@ export class IndexPattern implements IIndexPattern {
         }[];
     };
     // (undocumented)
+    getFieldAttrs: () => {
+        [x: string]: {
+            customName: string;
+        };
+    };
+    // (undocumented)
     getFieldByName(name: string): IndexPatternField | undefined;
     getFormatterForField(field: IndexPatternField | IndexPatternField['spec'] | IFieldType): FieldFormat;
     getFormatterForFieldNoDefault(fieldname: string): FieldFormat | undefined;
@@ -611,6 +624,7 @@ export class IndexPattern implements IIndexPattern {
     // (undocumented)
     getNonScriptedFields(): IndexPatternField[];
     getOriginalSavedObjectBody: () => {
+        fieldAttrs?: string | undefined;
         title?: string | undefined;
         timeFieldName?: string | undefined;
         intervalName?: string | undefined;
@@ -669,6 +683,8 @@ export class IndexPattern implements IIndexPattern {
 //
 // @public (undocumented)
 export interface IndexPatternAttributes {
+    // (undocumented)
+    fieldAttrs?: string;
     // (undocumented)
     fieldFormatMap?: string;
     // (undocumented)
@@ -1195,8 +1211,8 @@ export function usageProvider(core: CoreSetup_2): SearchUsage;
 //
 // src/plugins/data/common/es_query/filters/meta_filter.ts:53:3 - (ae-forgotten-export) The symbol "FilterState" needs to be exported by the entry point index.d.ts
 // src/plugins/data/common/es_query/filters/meta_filter.ts:54:3 - (ae-forgotten-export) The symbol "FilterMeta" needs to be exported by the entry point index.d.ts
-// src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts:56:45 - (ae-forgotten-export) The symbol "IndexPatternFieldMap" needs to be exported by the entry point index.d.ts
-// src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts:62:5 - (ae-forgotten-export) The symbol "FormatFieldFn" needs to be exported by the entry point index.d.ts
+// src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts:58:45 - (ae-forgotten-export) The symbol "IndexPatternFieldMap" needs to be exported by the entry point index.d.ts
+// src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts:64:5 - (ae-forgotten-export) The symbol "FormatFieldFn" needs to be exported by the entry point index.d.ts
 // src/plugins/data/server/index.ts:40:23 - (ae-forgotten-export) The symbol "buildCustomFilter" needs to be exported by the entry point index.d.ts
 // src/plugins/data/server/index.ts:40:23 - (ae-forgotten-export) The symbol "buildFilter" needs to be exported by the entry point index.d.ts
 // src/plugins/data/server/index.ts:71:21 - (ae-forgotten-export) The symbol "getEsQueryConfig" needs to be exported by the entry point index.d.ts
