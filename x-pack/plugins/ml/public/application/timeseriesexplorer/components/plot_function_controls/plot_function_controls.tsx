@@ -3,13 +3,14 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { EuiFlexItem, EuiFormRow, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { mlJobService } from '../../../services/job_service';
 import { getFunctionDescription, isMetricDetector } from '../../get_function_description';
 import { useToastNotificationService } from '../../../services/toast_notification_service';
 import { ML_JOB_AGGREGATION } from '../../../../../common/constants/aggregation_types';
+import type { CombinedJob } from '../../../../../common/types/anomaly_detection_jobs';
 
 const plotByFunctionOptions = [
   {
@@ -46,23 +47,31 @@ export const PlotByFunctionControls = ({
 }) => {
   const toastNotificationService = useToastNotificationService();
 
-  useEffect(() => {
-    if (functionDescription !== undefined) {
-      return;
-    }
-    const getFunctionDescriptionToPlot = async () => {
+  const getFunctionDescriptionToPlot = useCallback(
+    async (
+      _selectedDetectorIndex: number,
+      _selectedEntities: Record<string, any>,
+      _selectedJobId: string,
+      _selectedJob: CombinedJob
+    ) => {
       const functionToPlot = await getFunctionDescription(
         {
-          selectedDetectorIndex,
-          selectedEntities,
-          selectedJobId,
-          selectedJob,
+          selectedDetectorIndex: _selectedDetectorIndex,
+          selectedEntities: _selectedEntities,
+          selectedJobId: _selectedJobId,
+          selectedJob: _selectedJob,
         },
         toastNotificationService
       );
       setFunctionDescription(functionToPlot);
-    };
+    },
+    [setFunctionDescription, toastNotificationService]
+  );
 
+  useEffect(() => {
+    if (functionDescription !== undefined) {
+      return;
+    }
     const selectedJob = mlJobService.getJob(selectedJobId);
     if (
       // set if only entity controls are picked
@@ -72,7 +81,12 @@ export const PlotByFunctionControls = ({
     ) {
       const detector = selectedJob.analysis_config.detectors[selectedDetectorIndex];
       if (detector?.function === ML_JOB_AGGREGATION.METRIC) {
-        getFunctionDescriptionToPlot();
+        getFunctionDescriptionToPlot(
+          selectedDetectorIndex,
+          selectedEntities,
+          selectedJobId,
+          selectedJob
+        );
       }
     }
   }, [
