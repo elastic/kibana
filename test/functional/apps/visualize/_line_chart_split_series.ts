@@ -35,8 +35,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   ]);
 
   describe('line charts - split series', function () {
-    const vizName1 = 'Visualization LineChart';
-
     const initLineChart = async function () {
       log.debug('navigateToApp visualize');
       await PageObjects.visualize.navigateToNewAggBasedVisualization();
@@ -50,8 +48,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.visEditor.selectAggregation('Terms');
       log.debug('Field = extension');
       await PageObjects.visEditor.selectField('extension.raw');
-      log.debug('switch from Rows to Columns');
-      await PageObjects.visEditor.clickSplitDirection('Columns');
       await PageObjects.visEditor.clickGo();
     };
 
@@ -168,9 +164,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should be able to save and load', async function () {
-      await PageObjects.visualize.saveVisualizationExpectSuccessAndBreadcrumb(vizName1);
+      const vizName = await PageObjects.visChart.getExpectedValue(
+        'Visualization LineChart',
+        'Visualization LineChart - chart library'
+      );
 
-      await PageObjects.visualize.loadSavedVisualization(vizName1);
+      await PageObjects.visualize.saveVisualizationExpectSuccessAndBreadcrumb(vizName);
+
+      await PageObjects.visualize.loadSavedVisualization(vizName);
       await PageObjects.visChart.waitForVisualization();
     });
 
