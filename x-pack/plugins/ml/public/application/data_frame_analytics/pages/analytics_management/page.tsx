@@ -59,16 +59,13 @@ export const Page: FC = () => {
                   />
                   <span>&nbsp;</span>
                   <EuiBetaBadge
-                    label={i18n.translate(
-                      'xpack.ml.dataframe.analyticsList.experimentalBadgeLabel',
-                      {
-                        defaultMessage: 'Experimental',
-                      }
-                    )}
+                    label={i18n.translate('xpack.ml.dataframe.analyticsList.betaBadgeLabel', {
+                      defaultMessage: 'Beta',
+                    })}
                     tooltipContent={i18n.translate(
-                      'xpack.ml.dataframe.analyticsList.experimentalBadgeTooltipContent',
+                      'xpack.ml.dataframe.analyticsList.betaBadgeTooltipContent',
                       {
-                        defaultMessage: `Data frame analytics are an experimental feature. We'd love to hear your feedback.`,
+                        defaultMessage: `Data frame analytics are a beta feature. We'd love to hear your feedback.`,
                       }
                     )}
                   />

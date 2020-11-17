@@ -15,6 +15,7 @@ import { VectorTileLayer } from '../../layers/vector_tile_layer/vector_tile_laye
 import { TileServiceSelect } from './tile_service_select';
 import { getEMSSettings } from '../../../kibana_services';
 import { LAYER_WIZARD_CATEGORY } from '../../../../common/constants';
+import { WorldMapLayerIcon } from '../../layers/icons/world_map_layer_icon';
 
 export const emsBaseMapLayerWizardConfig: LayerWizard = {
   categories: [LAYER_WIZARD_CATEGORY.REFERENCE],
@@ -25,7 +26,7 @@ export const emsBaseMapLayerWizardConfig: LayerWizard = {
   description: i18n.translate('xpack.maps.source.emsTileDescription', {
     defaultMessage: 'Tile map service from Elastic Maps Service',
   }),
-  icon: 'emsApp',
+  icon: WorldMapLayerIcon,
   renderWizard: ({ previewLayers }: RenderWizardArguments) => {
     const onSourceConfigChange = (sourceConfig: unknown) => {
       const layerDescriptor = VectorTileLayer.createDescriptor({
