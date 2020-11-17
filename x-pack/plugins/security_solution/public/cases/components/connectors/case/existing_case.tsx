@@ -6,6 +6,7 @@
 
 import React, { memo, useMemo, useCallback } from 'react';
 import { useGetCases } from '../../../containers/use_get_cases';
+import { useCreateCaseModal } from '../../use_create_case_modal';
 import { CasesDropdown } from './cases_dropdown';
 
 interface ExistingCaseProps {
@@ -14,17 +15,22 @@ interface ExistingCaseProps {
 }
 
 const ExistingCaseComponent: React.FC<ExistingCaseProps> = ({ onCaseChanged, selectedCase }) => {
-  const { data: cases, loading: isLoadingCases } = useGetCases();
+  const { data: cases, loading: isLoadingCases, refetchCases } = useGetCases();
+
+  const onCaseCreated = useCallback(() => refetchCases(), [refetchCases]);
+
+  const { Modal: CreateCaseModal, openModal } = useCreateCaseModal({ onCaseCreated });
 
   const onChange = useCallback(
     (id: string) => {
       if (id === 'add-case') {
+        openModal();
         return;
       }
 
       onCaseChanged(id);
     },
-    [onCaseChanged]
+    [onCaseChanged, openModal]
   );
 
   const isCasesLoading = useMemo(
@@ -33,12 +39,15 @@ const ExistingCaseComponent: React.FC<ExistingCaseProps> = ({ onCaseChanged, sel
   );
 
   return (
-    <CasesDropdown
-      isLoading={isCasesLoading}
-      cases={cases.cases}
-      selectedCase={selectedCase ?? undefined}
-      onCaseChanged={onChange}
-    />
+    <>
+      <CasesDropdown
+        isLoading={isCasesLoading}
+        cases={cases.cases}
+        selectedCase={selectedCase ?? undefined}
+        onCaseChanged={onChange}
+      />
+      <CreateCaseModal />
+    </>
   );
 };
 

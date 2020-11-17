@@ -33,19 +33,23 @@ const CasesDropdownComponent: React.FC<CaseDropdownProps> = ({
   selectedCase,
   onCaseChanged,
 }) => {
-  const options: Array<EuiSuperSelectOption<string>> = useMemo(
+  const caseOptions: Array<EuiSuperSelectOption<string>> = useMemo(
     () =>
-      cases.reduce(
-        (acc, theCase) => ({
+      cases.reduce<Array<EuiSuperSelectOption<string>>>(
+        (acc, theCase) => [
           ...acc,
-          value: theCase.id,
-          inputDisplay: <span>{theCase.title}</span>,
-        }),
-        [addNewCase]
+          {
+            value: theCase.id,
+            inputDisplay: <span>{theCase.title}</span>,
+            'data-test-subj': `case-connector-cases-dropdown-${theCase.id}`,
+          },
+        ],
+        []
       ),
     [cases]
   );
 
+  const options = useMemo(() => [...caseOptions, addNewCase], [caseOptions]);
   const onChange = useCallback((id: string) => onCaseChanged(id), [onCaseChanged]);
 
   return (

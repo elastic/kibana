@@ -5,7 +5,7 @@
  */
 import React, { useCallback } from 'react';
 import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 import { useHistory } from 'react-router-dom';
 
 import { Field, getUseField, useFormContext } from '../../../shared_imports';
@@ -16,13 +16,9 @@ import { FormContext } from './form_context';
 
 export const CommonUseField = getUseField({ component: Field });
 
-interface ContainerProps {
-  big?: boolean;
-}
-
-const Container = styled.div.attrs((props) => props)<ContainerProps>`
-  ${({ big, theme }) => css`
-    margin-top: ${big ? theme.eui.euiSizeXL : theme.eui.euiSize};
+const Container = styled.div`
+  ${({ theme }) => `
+    margin-top: ${theme.eui.euiSize};
   `}
 `;
 

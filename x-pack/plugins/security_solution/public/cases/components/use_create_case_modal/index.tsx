@@ -5,34 +5,40 @@
  */
 
 import React, { useState, useCallback, useMemo } from 'react';
+import { Case } from '../../containers/types';
 import { CreateCaseModal } from './create_case_modal';
 
+interface Props {
+  onCaseCreated: (theCase: Case) => void;
+}
 export interface UseAllCasesModalReturnedValues {
   Modal: React.FC;
-  showModal: boolean;
-  onCloseModal: () => void;
-  onOpenModal: () => void;
-  onCaseCreated: (id: string) => void;
+  isModalOpen: boolean;
+  closeModal: () => void;
+  openModal: () => void;
 }
 
-export const useCreateCaseModal = () => {
-  const [showModal, setShowModal] = useState<boolean>(false);
-  const onCloseModal = useCallback(() => setShowModal(false), []);
-  const onOpenModal = useCallback(() => setShowModal(true), []);
+export const useCreateCaseModal = ({ onCaseCreated }: Props) => {
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const closeModal = useCallback(() => setIsModalOpen(false), []);
+  const openModal = useCallback(() => setIsModalOpen(true), []);
 
   const Modal: React.FC = useCallback(
-    () => (showModal ? <CreateCaseModal onCloseCaseModal={onCloseModal} /> : null),
-    [onCloseModal, showModal]
+    () =>
+      isModalOpen ? (
+        <CreateCaseModal onCloseCaseModal={closeModal} onCaseCreated={onCaseCreated} />
+      ) : null,
+    [closeModal, isModalOpen, onCaseCreated]
   );
 
   const state = useMemo(
     () => ({
       Modal,
-      showModal,
-      onCloseModal,
-      onOpenModal,
+      isModalOpen,
+      closeModal,
+      openModal,
     }),
-    [showModal, onCloseModal, onOpenModal, Modal]
+    [isModalOpen, closeModal, openModal, Modal]
   );
 
   return state;

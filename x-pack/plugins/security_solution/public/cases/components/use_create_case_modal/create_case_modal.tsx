@@ -4,29 +4,78 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useCallback } from 'react';
+import styled from 'styled-components';
 import {
   EuiModal,
   EuiModalBody,
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiOverlayMask,
+  EuiButton,
 } from '@elastic/eui';
 
+import { useFormContext } from '../../../shared_imports';
 import * as i18n from '../../translations';
+import { FormContext } from '../create/form_context';
+import { CreateCaseForm } from '../create/form';
+import { Case } from '../../containers/types';
 
 export interface CreateCaseModalProps {
   onCloseCaseModal: () => void;
+  onCaseCreated: (theCase: Case) => void;
 }
 
-const CreateModalComponent: React.FC<CreateCaseModalProps> = ({ onCloseCaseModal }) => {
+const Container = styled.div`
+  ${({ theme }) => `
+    margin-top: ${theme.eui.euiSize};
+    text-align: right;
+  `}
+`;
+
+const SubmitButton = () => {
+  const { submit, isSubmitting } = useFormContext();
+
+  return (
+    <Container>
+      <EuiButton
+        data-test-subj="create-case-submit"
+        fill
+        iconType="plusInCircle"
+        isDisabled={isSubmitting}
+        isLoading={isSubmitting}
+        onClick={submit}
+      >
+        {i18n.CREATE_CASE}
+      </EuiButton>
+    </Container>
+  );
+};
+
+const CreateModalComponent: React.FC<CreateCaseModalProps> = ({
+  onCloseCaseModal,
+  onCaseCreated,
+}) => {
+  const onSuccess = useCallback(
+    (theCase) => {
+      onCaseCreated(theCase);
+      onCloseCaseModal();
+    },
+    [onCaseCreated, onCloseCaseModal]
+  );
+
   return (
     <EuiOverlayMask data-test-subj="all-cases-modal">
       <EuiModal onClose={onCloseCaseModal}>
         <EuiModalHeader>
           <EuiModalHeaderTitle>{i18n.CREATE_TITLE}</EuiModalHeaderTitle>
         </EuiModalHeader>
-        <EuiModalBody>{'test'}</EuiModalBody>
+        <EuiModalBody>
+          <FormContext onSuccess={onSuccess}>
+            <CreateCaseForm withSteps={false} />
+            <SubmitButton />
+          </FormContext>
+        </EuiModalBody>
       </EuiModal>
     </EuiOverlayMask>
   );

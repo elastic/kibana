@@ -7,8 +7,8 @@
 import React, { memo, useEffect, useState } from 'react';
 import { isEqual } from 'lodash/fp';
 
+import { Field, getUseField, useFormData } from '../../../shared_imports';
 import { useGetTags } from '../../containers/use_get_tags';
-import { Field, getUseField, FormDataProvider } from '../../../shared_imports';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -36,42 +36,45 @@ const TagsComponent: React.FC<Props> = ({ isLoading }) => {
     [tagOptions]
   );
 
+  const [{ tags: currentTags }] = useFormData<{ tags: string[] }>({
+    watch: ['tags'],
+  });
+
+  useEffect(() => {
+    if (currentTags) {
+      const current: string[] = options.map((opt) => opt.label);
+      const newOptions = currentTags.reduce((acc: string[], item: string) => {
+        if (!acc.includes(item)) {
+          return [...acc, item];
+        }
+        return acc;
+      }, current);
+
+      if (!isEqual(current, newOptions)) {
+        setOptions(
+          newOptions.map((label: string) => ({
+            label,
+          }))
+        );
+      }
+    }
+  }, [currentTags, options]);
+
   return (
-    <>
-      <CommonUseField
-        path="tags"
-        componentProps={{
-          idAria: 'caseTags',
-          'data-test-subj': 'caseTags',
-          euiFieldProps: {
-            fullWidth: true,
-            placeholder: '',
-            disabled: isLoading || isLoadingTags,
-            options,
-            noSuggestions: false,
-          },
-        }}
-      />
-      <FormDataProvider pathsToWatch="tags">
-        {({ tags: anotherTags }) => {
-          const current: string[] = options.map((opt) => opt.label);
-          const newOptions = anotherTags.reduce((acc: string[], item: string) => {
-            if (!acc.includes(item)) {
-              return [...acc, item];
-            }
-            return acc;
-          }, current);
-          if (!isEqual(current, newOptions)) {
-            setOptions(
-              newOptions.map((label: string) => ({
-                label,
-              }))
-            );
-          }
-          return null;
-        }}
-      </FormDataProvider>
-    </>
+    <CommonUseField
+      path="tags"
+      componentProps={{
+        idAria: 'caseTags',
+        'data-test-subj': 'caseTags',
+        euiFieldProps: {
+          fullWidth: true,
+          placeholder: '',
+          disabled: isLoading || isLoadingTags,
+          options,
+          noSuggestions: false,
+        },
+      }}
+    />
   );
 };
 

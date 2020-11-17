@@ -48,7 +48,7 @@ const CaseParamsFields: React.FunctionComponent<ActionParamsProps<CaseActionPara
   const {
     caseId = null,
     comment = {
-      comment: '',
+      comment: null,
       context: {
         type: isAlert || isDetectionAlert ? 'alert' : 'user',
         savedObjectId: isDetectionAlert ? '{{context.rule.id}}' : isAlert ? '{{alertId}}' : null,
@@ -88,10 +88,6 @@ const CaseParamsFields: React.FunctionComponent<ActionParamsProps<CaseActionPara
       editSubActionProperty('caseId', caseId);
     }
 
-    if (!actionParams.subActionParams?.comment) {
-      editSubActionProperty('comment', comment);
-    }
-
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [actionConnector, actionParams.subAction, index]);
 
@@ -107,7 +103,7 @@ const CaseParamsFields: React.FunctionComponent<ActionParamsProps<CaseActionPara
           editAction={onEditComment}
           messageVariables={messageVariables}
           paramsProperty={'comment'}
-          inputTargetValue={comment && comment.comment?.length > 0 ? comment.comment : ''}
+          inputTargetValue={comment?.comment ?? undefined}
           label={i18n.CASE_CONNECTOR_COMMENT_LABEL}
           errors={errors.comment as string[]}
         />

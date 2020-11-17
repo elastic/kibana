@@ -67,7 +67,7 @@ export const CASE_CONNECTOR_CASES_OPTION_EXISTING_CASE = i18n.translate(
 export const CASE_CONNECTOR_CASE_REQUIRED = i18n.translate(
   'xpack.securitySolution.case.components.connectors.case.caseRequired',
   {
-    defaultMessage: 'A case is required. Create or select a case.',
+    defaultMessage: 'You must select a case.',
   }
 );
 
