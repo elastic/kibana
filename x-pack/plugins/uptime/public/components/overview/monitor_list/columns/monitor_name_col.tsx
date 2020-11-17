@@ -68,6 +68,7 @@ export const MonitorNameColumn = ({ summary }: Props) => {
           }}
           size="xs"
           flush="left"
+          style={{ border: 'none' }}
         >
           <EuiText size="xs">{MONITOR_TYPES[summary.state.monitor.type]}</EuiText>
         </EuiButtonEmpty>

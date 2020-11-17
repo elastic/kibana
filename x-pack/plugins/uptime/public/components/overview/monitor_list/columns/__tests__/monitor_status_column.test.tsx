@@ -265,18 +265,18 @@ describe('MonitorListStatusColumn', () => {
   it(' will test getLocationStatus location', () => {
     let { statusMessage } = getLocationStatus(summaryPings, STATUS.UP);
 
-    expect(statusMessage).toBe('in 1/3 Locations');
+    expect(statusMessage).toBe('in 1/3 locations');
 
     statusMessage = getLocationStatus(summaryPings, STATUS.DOWN).statusMessage;
 
-    expect(statusMessage).toBe('in 2/3 Locations');
+    expect(statusMessage).toBe('in 2/3 locations');
 
     statusMessage = getLocationStatus(upChecks, STATUS.UP).statusMessage;
 
-    expect(statusMessage).toBe('in 3/3 Locations');
+    expect(statusMessage).toBe('in 3/3 locations');
 
     statusMessage = getLocationStatus(downChecks, STATUS.UP).statusMessage;
 
-    expect(statusMessage).toBe('in 0/3 Locations');
+    expect(statusMessage).toBe('in 0/3 locations');
   });
 });

@@ -33,7 +33,7 @@ const StatusColumnFlexG = styled(EuiFlexGroup)`
   }
 `;
 
-const getHealthMessage = (status: string): string | null => {
+export const getHealthMessage = (status: string): string | null => {
   switch (status) {
     case STATUS.UP:
       return labels.UP;
@@ -170,13 +170,13 @@ export const MonitorListStatusColumn = ({
           }
         >
           <EuiText size="xs" color="subdued" className="eui-textNoWrap" style={{ paddingRight: 5 }}>
-            {statusMessage}{' '}
+            {statusMessage},
           </EuiText>
         </EuiToolTip>
         <EuiToolTip
           content={
             <EuiText color="ghost" size="xs">
-              {timestamp.toLocaleString()},
+              {timestamp.toLocaleString()}
             </EuiText>
           }
         >

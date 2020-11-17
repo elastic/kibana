@@ -1140,7 +1140,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
                         <div
                           class="euiTextColor euiTextColor--subdued"
                         >
-                          in 0/1 Location 
+                          in 0/1 location,
                         </div>
                       </div>
                     </span>
@@ -1187,6 +1187,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
                   <div>
                     <button
                       class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall euiButtonEmpty--flushLeft"
+                      style="border:none"
                       title="Filter all monitors with type http"
                       type="button"
                     >
@@ -1378,7 +1379,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
                         <div
                           class="euiTextColor euiTextColor--subdued"
                         >
-                          in 0/1 Location 
+                          in 0/1 location,
                         </div>
                       </div>
                     </span>
@@ -1425,6 +1426,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
                   <div>
                     <button
                       class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall euiButtonEmpty--flushLeft"
+                      style="border:none"
                       title="Filter all monitors with type http"
                       type="button"
                     >

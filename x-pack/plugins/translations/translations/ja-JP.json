@@ -20722,7 +20722,6 @@
     "xpack.uptime.monitorList.downLineSeries.downLabel": "ダウン",
     "xpack.uptime.monitorList.drawer.missingLocation": "一部のHeartbeatインスタンスには位置情報が定義されていません。Heartbeat構成への{link}。",
     "xpack.uptime.monitorList.enabledAlerts.noAlert": "このモニターではアラートが有効ではありません。",
-    "xpack.uptime.monitorList.enabledAlerts.title": "有効なアラート：",
     "xpack.uptime.monitorList.enableDownAlert": "ステータスアラートを有効にする",
     "xpack.uptime.monitorList.expandDrawerButton.ariaLabel": "ID {id}のモニターの行を展開",
     "xpack.uptime.monitorList.geoName.helpLinkAnnotation": "場所を追加",

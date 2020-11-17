@@ -1,32 +1,30 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`MostRecentError component renders properly with mock data 1`] = `
-Array [
-  <div
-    class="euiSpacer euiSpacer--l"
-  />,
-  <div
-    class="euiText euiText--extraSmall"
+<dl
+  class="euiDescriptionList euiDescriptionList--row"
+>
+  <dt
+    class="euiDescriptionList__title"
   >
-    <h3>
-      Most recent error (5 days ago)
-    </h3>
-  </div>,
-  <div
-    class="euiSpacer euiSpacer--s"
-  />,
-  <button
-    class="euiLink euiLink--primary"
-    type="button"
+    Most recent error (5 days ago)
+  </dt>
+  <dd
+    class="euiDescriptionList__description"
   >
-    <a
-      data-test-subj="monitor-page-link-bad-ssl"
-      href="/monitor/YmFkLXNzbA==/?selectedPingStatus=down"
+    <button
+      class="euiLink euiLink--primary"
+      type="button"
     >
-      Get https://expired.badssl.com: x509: certificate has expired or is not yet valid
-    </a>
-  </button>,
-]
+      <a
+        data-test-subj="monitor-page-link-bad-ssl"
+        href="/monitor/YmFkLXNzbA==/?selectedPingStatus=down"
+      >
+        Get https://expired.badssl.com: x509: certificate has expired or is not yet valid
+      </a>
+    </button>
+  </dd>
+</dl>
 `;
 
 exports[`MostRecentError component validates props with shallow render 1`] = `

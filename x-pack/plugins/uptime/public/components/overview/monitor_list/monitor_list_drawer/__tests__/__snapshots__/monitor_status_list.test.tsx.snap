@@ -19,6 +19,12 @@ exports[`MonitorStatusList component renders checks 1`] = `
         status="down"
       />
     </EuiFlexItem>
+    <EuiFlexItem>
+      <MonitorStatusRow
+        locationNames={Set {}}
+        status="up"
+      />
+    </EuiFlexItem>
   </EuiFlexGroup>
   <EuiSpacer
     size="s"
@@ -59,6 +65,12 @@ exports[`MonitorStatusList component renders null in place of child status with 
           }
         }
         status="down"
+      />
+    </EuiFlexItem>
+    <EuiFlexItem>
+      <MonitorStatusRow
+        locationNames={Set {}}
+        status="up"
       />
     </EuiFlexItem>
   </EuiFlexGroup>

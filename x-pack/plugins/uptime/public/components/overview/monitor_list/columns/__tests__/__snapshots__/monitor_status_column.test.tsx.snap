@@ -56,8 +56,8 @@ exports[`MonitorListStatusColumn can handle a non-numeric timestamp value 1`] = 
           }
         }
       >
-        in 0/0 Location
-         
+        in 0/0 location
+        ,
       </EuiText>
     </EuiToolTip>
     <EuiToolTip
@@ -141,8 +141,8 @@ exports[`MonitorListStatusColumn provides expected tooltip and display times 1`]
           }
         }
       >
-        in 0/0 Location
-         
+        in 0/0 location
+        ,
       </EuiText>
     </EuiToolTip>
     <EuiToolTip
@@ -226,8 +226,8 @@ exports[`MonitorListStatusColumn will display location status 1`] = `
           }
         }
       >
-        in 1/3 Locations
-         
+        in 1/3 locations
+        ,
       </EuiText>
     </EuiToolTip>
     <EuiToolTip
@@ -302,7 +302,7 @@ exports[`MonitorListStatusColumn will render display location status 1`] = `
         <div
           class="euiTextColor euiTextColor--subdued"
         >
-          in 1/3 Locations 
+          in 1/3 locations,
         </div>
       </div>
     </span>

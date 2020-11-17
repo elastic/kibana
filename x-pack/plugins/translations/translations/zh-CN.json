@@ -20742,7 +20742,6 @@
     "xpack.uptime.monitorList.downLineSeries.downLabel": "关闭",
     "xpack.uptime.monitorList.drawer.missingLocation": "某些 Heartbeat 实例未定义位置。{link}到您的 Heartbeat 配置。",
     "xpack.uptime.monitorList.enabledAlerts.noAlert": "没有为此监测启用告警。",
-    "xpack.uptime.monitorList.enabledAlerts.title": "已启用的告警：",
     "xpack.uptime.monitorList.enableDownAlert": "启用状态告警",
     "xpack.uptime.monitorList.expandDrawerButton.ariaLabel": "展开 ID {id} 的监测行",
     "xpack.uptime.monitorList.geoName.helpLinkAnnotation": "添加位置",

@@ -7,6 +7,7 @@
 import React from 'react';
 import { EuiBadge, EuiSpacer } from '@elastic/eui';
 import { UNNAMED_LOCATION, STATUS } from '../../../../../common/constants';
+import { getHealthMessage } from '../columns/monitor_status_column';
 
 interface MonitorStatusRowProps {
   /**
@@ -29,16 +30,12 @@ export const MonitorStatusRow = ({ locationNames, status }: MonitorStatusRowProp
     checkListArray.push(UNNAMED_LOCATION);
   }
 
-  if (locationNames.size === 0) {
-    return null;
-  }
-
   const locations = checkListArray.join(', ');
   return (
     <span>
-      <EuiBadge color={color}>{status}</EuiBadge>
+      <EuiBadge color={color}>{getHealthMessage(status)}</EuiBadge>
       <EuiSpacer size="xs" />
-      {locations}
+      {locations || '--'}
       <EuiSpacer size="xs" />
     </span>
   );
