@@ -103,8 +103,8 @@ export class Vis<TVisParams = VisParams> {
     this.id = visState.id;
   }
 
-  private getType(visType: string): TVisParams {
-    const type = getTypes().get(visType);
+  private getType(visType: string) {
+    const type = getTypes().get<TVisParams>(visType);
     if (!type) {
       const errorMessage = i18n.translate('visualizations.visualizationTypeInvalidMessage', {
         defaultMessage: 'Invalid visualization type "{visType}"',
