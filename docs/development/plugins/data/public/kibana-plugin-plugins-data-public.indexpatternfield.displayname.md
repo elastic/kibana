@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-readonly displayName: string;
+get displayName(): string;
 ```
