@@ -47,7 +47,7 @@ export function ChangeIndexPattern({
   indexPatternRefs: IndexPatternRef[];
   onChangeIndexPattern: (newId: string) => void;
   indexPatternId?: string;
-  selectableProps?: EuiSelectableProps;
+  selectableProps?: EuiSelectableProps<{ value: string }>;
 }) {
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
 
@@ -86,7 +86,7 @@ export function ChangeIndexPattern({
             defaultMessage: 'Change index pattern',
           })}
         </EuiPopoverTitle>
-        <EuiSelectable
+        <EuiSelectable<{ value: string }>
           data-test-subj="indexPattern-switcher"
           {...selectableProps}
           searchable
@@ -104,7 +104,6 @@ export function ChangeIndexPattern({
             onChangeIndexPattern(choice.value);
             setPopoverIsOpen(false);
           }}
-          // @ts-expect-error Property 'value' is missing in type '...'.
           searchProps={{
             compressed: true,
             ...(selectableProps ? selectableProps.searchProps : undefined),
