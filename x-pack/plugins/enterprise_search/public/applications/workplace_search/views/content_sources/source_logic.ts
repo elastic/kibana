@@ -11,21 +11,23 @@ import { kea, MakeLogicType } from 'kea';
 import http from 'shared/http';
 import routes from 'workplace_search/routes';
 
-import { handleAPIError } from 'app_search/utils/handleAPIError';
-import { IFlashMessagesProps } from 'shared/types';
+import {
+  flashAPIErrors,
+  setSuccessMessage,
+  setQueuedSuccessMessage,
+  FlashMessagesLogic,
+} from '../../../shared/flash_messages';
+
 import { DEFAULT_META } from '../../../shared/constants';
 import { AppLogic } from '../../app_logic';
 import { NOT_FOUND_PATH } from '../../routes';
 import { ContentSourceFullData, CustomSource, Meta } from '../../types';
-
-import { SourcesLogic } from './sources_logic';
 
 export interface SourceActions {
   onInitializeSource(contentSource: ContentSourceFullData): ContentSourceFullData;
   onUpdateSourceName(name: string): string;
   setSourceConfigData(sourceConfigData: SourceConfigData): SourceConfigData;
   setSourceConnectData(sourceConnectData: SourceConnectData): SourceConnectData;
-  setFlashMessages(flashMessages: IFlashMessagesProps): { flashMessages: IFlashMessagesProps };
   setSearchResults(searchResultsResponse: SearchResultsResponse): SearchResultsResponse;
   initializeFederatedSummary(sourceId: string): { sourceId: string };
   onUpdateSummary(summary: object[]): object[];
@@ -69,6 +71,7 @@ export interface SourceActions {
   ): { serviceType: string; successCallback(oauthUrl: string) };
   getSourceReConnectData(serviceType: string): { serviceType: string };
   getPreContentSourceConfigData(preContentSourceId: string): { preContentSourceId: string };
+  setButtonNotLoading(): void;
 }
 
 interface SourceConfigData {
@@ -96,7 +99,6 @@ interface SourceConnectData {
 
 interface SourceValues {
   contentSource: ContentSourceFullData;
-  flashMessages: IFlashMessagesProps;
   dataLoading: boolean;
   sectionLoading: boolean;
   buttonLoading: boolean;
@@ -138,7 +140,6 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
     setSourceConfigData: (sourceConfigData: SourceConfigData) => sourceConfigData,
     setSourceConnectData: (sourceConnectData: SourceConnectData) => sourceConnectData,
     onUpdateSummary: (summary: object[]) => summary,
-    setFlashMessages: (flashMessages: IFlashMessagesProps) => ({ flashMessages }),
     setSearchResults: (searchResultsResponse: SearchResultsResponse) => searchResultsResponse,
     setContentFilterValue: (contentFilterValue: string) => contentFilterValue,
     setActivePage: (activePage: number) => activePage,
@@ -178,6 +179,7 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
       errorCallback?: () => void
     ) => ({ serviceType, successCallback, errorCallback }),
     resetSourceState: () => true,
+    setButtonNotLoading: () => false,
   },
   reducers: {
     contentSource: [
@@ -206,18 +208,6 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
         setSourceConnectData: (_, sourceConnectData) => sourceConnectData,
       },
     ],
-    flashMessages: [
-      {},
-      {
-        setFlashMessages: (_, { flashMessages }) => flashMessages,
-        onUpdateSourceName: (_, name) => ({ success: [`Successfully changed name to ${name}`] }),
-        resetSourceState: () => ({}),
-        removeContentSource: () => ({}),
-        saveSourceConfig: () => ({}),
-        getSourceConnectData: () => ({}),
-        createContentSource: () => ({}),
-      },
-    ],
     dataLoading: [
       true,
       {
@@ -230,7 +220,7 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
     buttonLoading: [
       false,
       {
-        setFlashMessages: () => false,
+        setButtonNotLoading: () => false,
         setSourceConnectData: () => false,
         setSourceConfigData: () => false,
         resetSourceState: () => false,
@@ -385,7 +375,7 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
           if (error.response.status === 404) {
             history.push(NOT_FOUND_PATH);
           } else {
-            handleAPIError((messages) => actions.setFlashMessages({ error: messages }));
+            flashAPIErrors(e);
           }
         });
     },
@@ -395,7 +385,7 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
       http(route)
         .then(({ data }) => actions.onUpdateSummary(data.summary))
         .catch(() => {
-          handleAPIError((messages) => actions.setFlashMessages({ error: messages }));
+          flashAPIErrors(e);
         });
     },
     searchContentSourceDocuments: async ({ sourceId }, breakpoint) => {
@@ -414,7 +404,7 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
       http
         .post(route, { query, page })
         .then(({ data }) => actions.setSearchResults(data))
-        .catch(handleAPIError((messages) => actions.setFlashMessages({ error: messages })));
+        .catch(flashAPIErrors(e));
     },
     updateContentSource: ({ sourceId, source }) => {
       const { isOrganization } = AppLogic.values;
@@ -425,9 +415,10 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
       http
         .patch(route, { content_source: source })
         .then(({ data }) => actions.onUpdateSourceName(data.name))
-        .catch(handleAPIError((messages) => actions.setFlashMessages({ error: messages })));
+        .catch(flashAPIErrors(e));
     },
     removeContentSource: ({ sourceId, successCallback }) => {
+      FlashMessagesLogic.actions.clearFlashMessages();
       const { isOrganization } = AppLogic.values;
       const route = isOrganization
         ? routes.fritoPieOrganizationContentSourcePath(sourceId)
@@ -436,10 +427,11 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
       return http
         .delete(route)
         .then(({ data: { name } }) => {
-          SourcesLogic.actions.setFlashMessages({ success: [`Successfully deleted ${name}`] });
+          setQueuedSuccessMessage(`Successfully deleted ${name}`);
           successCallback();
         })
-        .catch(handleAPIError((messages) => actions.setFlashMessages({ error: messages })));
+        .catch(flashAPIErrors(e))
+        .finally(actions.setButtonNotLoading);
     },
     getSourceConfigData: ({ serviceType }) => {
       const route = routes.fritoPieOrganizationSettingsContentSourceOauthConfigurationPath(
@@ -448,9 +440,10 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
 
       http(route)
         .then(({ data }) => actions.setSourceConfigData(data))
-        .catch(handleAPIError((messages) => actions.setFlashMessages({ error: messages })));
+        .catch(flashAPIErrors(e));
     },
     getSourceConnectData: ({ serviceType, successCallback }) => {
+      FlashMessagesLogic.actions.clearFlashMessages();
       const { isOrganization } = AppLogic.values;
       const { subdomainValue: subdomain, indexPermissionsValue: indexPermissions } = values;
 
@@ -467,7 +460,8 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
           actions.setSourceConnectData(data);
           successCallback(data.oauthUrl);
         })
-        .catch(handleAPIError((messages) => actions.setFlashMessages({ error: messages })));
+        .catch(flashAPIErrors(e))
+        .finally(actions.setButtonNotLoading);
     },
     getSourceReConnectData: ({ serviceType }) => {
       const { isOrganization } = AppLogic.values;
@@ -477,7 +471,7 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
 
       return http(route)
         .then(({ data }) => actions.setSourceConnectData(data))
-        .catch(handleAPIError((messages) => actions.setFlashMessages({ error: messages })));
+        .catch(flashAPIErrors(e));
     },
     getPreContentSourceConfigData: ({ preContentSourceId }) => {
       const { isOrganization } = AppLogic.values;
@@ -487,9 +481,10 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
 
       http(route)
         .then(({ data }) => actions.setPreContentSourceConfigData(data))
-        .catch(handleAPIError((messages) => actions.setFlashMessages({ error: messages })));
+        .catch(flashAPIErrors(e));
     },
     saveSourceConfig: ({ isUpdating, successCallback }) => {
+      FlashMessagesLogic.actions.clearFlashMessages();
       const {
         sourceConfigData: { serviceType },
         baseUrlValue,
@@ -516,19 +511,18 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
 
       return http({ url: route, method, data: params })
         .then(({ data }) => {
-          if (isUpdating)
-            actions.setFlashMessages({ success: ['Successfully updated configuration.'] });
+          if (isUpdating) setSuccessMessage('Successfully updated configuration.');
           actions.setSourceConfigData(data);
           if (successCallback) successCallback();
         })
-        .catch(
-          handleAPIError((messages) => {
-            actions.setFlashMessages({ error: messages });
-            if (!isUpdating) throw new Error(messages[0]);
-          })
-        );
+        .catch((e) => {
+          flashAPIErrors(e);
+          if (!isUpdating) throw new Error(e);
+        })
+        .finally(actions.setButtonNotLoading);
     },
     createContentSource: ({ serviceType, successCallback, errorCallback }) => {
+      FlashMessagesLogic.actions.clearFlashMessages();
       const { isOrganization } = AppLogic.values;
       const route = isOrganization
         ? routes.formCreateFritoPieOrganizationContentSourcesPath()
@@ -560,13 +554,18 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
           actions.setCustomSourceData(data);
           successCallback();
         })
-        .catch(
-          handleAPIError((messages) => {
-            actions.setFlashMessages({ error: messages });
-            if (errorCallback) errorCallback();
-            throw new Error('Auth Error');
-          })
-        );
+        .catch((e) => {
+          flashAPIErrors(e);
+          if (errorCallback) errorCallback();
+          throw new Error('Auth Error');
+        })
+        .finally(actions.setButtonNotLoading);
+    },
+    onUpdateSourceName: (name: string) => {
+      setSuccessMessage(`Successfully changed name to ${name}`);
+    },
+    resetSourceState: () => {
+      FlashMessagesLogic.actions.clearFlashMessages();
     },
   }),
 });
