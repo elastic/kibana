@@ -12190,8 +12190,6 @@
     "xpack.ml.dataframe.analyticsList.expandedRow.tabs.jobSettings.state": "状态",
     "xpack.ml.dataframe.analyticsList.expandedRow.tabs.jobSettings.stats": "统计",
     "xpack.ml.dataframe.analyticsList.expandedRow.tabs.jobSettingsLabel": "作业详情",
-    "xpack.ml.dataframe.analyticsList.experimentalBadgeLabel": "实验性",
-    "xpack.ml.dataframe.analyticsList.experimentalBadgeTooltipContent": "数据帧分析为实验功能。我们很乐意听取您的反馈意见。",
     "xpack.ml.dataframe.analyticsList.fetchSourceIndexPatternForCloneErrorMessage": "检查索引模式 {indexPattern} 是否存在时发生错误：{error}",
     "xpack.ml.dataframe.analyticsList.forceStopModalBody": "{analyticsId} 处于失败状态。您必须停止该作业并修复失败问题。",
     "xpack.ml.dataframe.analyticsList.forceStopModalCancelButton": "取消",
