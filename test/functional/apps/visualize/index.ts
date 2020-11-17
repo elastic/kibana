@@ -62,7 +62,7 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
 
       // Test replaced vislib chart types
       loadTestFile(require.resolve('./_area_chart'));
-      loadTestFile(require.resolve('./_line_chart'));
+      loadTestFile(require.resolve('./_line_chart_split_series'));
       loadTestFile(require.resolve('./_point_series_options'));
       loadTestFile(require.resolve('./_vertical_bar_chart'));
       loadTestFile(require.resolve('./_vertical_bar_chart_nontimeindex'));
@@ -99,7 +99,8 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
     describe('', function () {
       this.tags('ciGroup11');
 
-      loadTestFile(require.resolve('./_line_chart'));
+      loadTestFile(require.resolve('./_line_chart_split_series'));
+      loadTestFile(require.resolve('./_line_chart_split_chart'));
       loadTestFile(require.resolve('./_pie_chart'));
       loadTestFile(require.resolve('./_point_series_options'));
       loadTestFile(require.resolve('./_markdown_vis'));

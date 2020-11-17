@@ -34,7 +34,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'timePicker',
   ]);
 
-  describe('line charts', function () {
+  describe('line charts - split series', function () {
     const vizName1 = 'Visualization LineChart';
 
     const initLineChart = async function () {
@@ -45,7 +45,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.visualize.clickNewSearch();
       await PageObjects.timePicker.setDefaultAbsoluteRange();
       log.debug('Bucket = Split chart');
-      await PageObjects.visEditor.clickBucket('Split chart');
+      await PageObjects.visEditor.clickBucket('Split series');
       log.debug('Aggregation = Terms');
       await PageObjects.visEditor.selectAggregation('Terms');
       log.debug('Field = extension');
