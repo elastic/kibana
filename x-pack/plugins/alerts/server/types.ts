@@ -180,4 +180,16 @@ export interface AlertsConfigType {
   };
 }
 
+export interface AlertsConfigType {
+  invalidateApiKeysTask: {
+    interval: string;
+    removalDelay: string;
+  };
+}
+
+export interface InvalidatePendingApiKey {
+  apiKeyId: string;
+  createdAt: string;
+}
+
 export type AlertTypeRegistry = PublicMethodsOf<OrigAlertTypeRegistry>;
