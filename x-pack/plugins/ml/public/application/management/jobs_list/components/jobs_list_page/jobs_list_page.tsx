@@ -22,6 +22,7 @@ import {
   EuiTabbedContentTab,
 } from '@elastic/eui';
 
+import { PLUGIN_ID } from '../../../../../../common/constants/app';
 import { createSpacesContext, SpacesContext } from '../../../../contexts/spaces';
 import { ManagementAppMountParams } from '../../../../../../../../../src/plugins/management/public/';
 
@@ -129,7 +130,9 @@ export const JobsListPage: FC<{
       setIsMlEnabledInSpace(mlFeatureEnabledInSpace);
       spacesContext.spacesEnabled = spacesEnabled;
       if (spacesEnabled && spacesContext.spacesManager !== null) {
-        spacesContext.allSpaces = await spacesContext.spacesManager.getSpaces();
+        spacesContext.allSpaces = (await spacesContext.spacesManager.getSpaces()).filter(
+          (space) => space.disabledFeatures.includes(PLUGIN_ID) === false
+        );
       }
     } catch (e) {
       setAccessDenied(true);
