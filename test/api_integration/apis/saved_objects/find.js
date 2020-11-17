@@ -195,7 +195,7 @@ export default function ({ getService }) {
                     },
                     id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
                     migrationVersion: {
-                      visualization: '7.10.0',
+                      visualization: resp.body.saved_objects[0].migrationVersion,
                     },
                     namespaces: ['foo-ns'],
                     references: [
