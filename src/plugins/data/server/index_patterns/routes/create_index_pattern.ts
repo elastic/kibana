@@ -20,17 +20,91 @@
 import { schema } from '@kbn/config-schema';
 import { IRouter } from 'src/core/server';
 
+const serializedFieldFormatSchema = schema.object({
+  id: schema.maybe(schema.string()),
+  params: schema.maybe(schema.any()),
+});
+
 export const registerCreateIndexPatternRoute = (router: IRouter) => {
   router.post(
     {
       path: '/api/index_patterns/index_pattern',
       validate: {
         body: schema.object({
-          name: schema.string(),
+          skip_field_refresh: schema.maybe(schema.boolean({ defaultValue: false })),
+          make_default: schema.maybe(schema.boolean({ defaultValue: false })),
+          index_pattern: schema.object({
+            id: schema.maybe(schema.string()),
+            version: schema.maybe(schema.string()),
+            title: schema.maybe(schema.string()),
+            type: schema.maybe(schema.string()),
+            intervalName: schema.maybe(schema.string()),
+            timeFieldName: schema.maybe(schema.string()),
+            sourceFilters: schema.maybe(
+              schema.arrayOf(
+                schema.object({
+                  value: schema.string(),
+                })
+              )
+            ),
+            fields: schema.maybe(
+              schema.recordOf(
+                schema.string(),
+                schema.object({
+                  name: schema.string(),
+                  type: schema.string(),
+                  searchable: schema.boolean(),
+                  aggregatable: schema.boolean(),
+                  count: schema.maybe(schema.number()),
+                  script: schema.maybe(schema.string()),
+                  lang: schema.maybe(schema.string()),
+                  conflictDescriptions: schema.maybe(
+                    schema.recordOf(schema.string(), schema.arrayOf(schema.string()))
+                  ),
+                  format: schema.maybe(serializedFieldFormatSchema),
+                  esTypes: schema.maybe(schema.arrayOf(schema.string())),
+                  scripted: schema.maybe(schema.boolean()),
+                  readFromDocValues: schema.maybe(schema.boolean()),
+                  subType: schema.maybe(
+                    schema.object({
+                      multi: schema.maybe(
+                        schema.object({
+                          parent: schema.string(),
+                        })
+                      ),
+                      nested: schema.maybe(
+                        schema.object({
+                          path: schema.string(),
+                        })
+                      ),
+                    })
+                  ),
+                  indexed: schema.maybe(schema.boolean()),
+                  customName: schema.maybe(schema.string()),
+                  shortDotsEnable: schema.maybe(schema.boolean()),
+                })
+              )
+            ),
+            typeMeta: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+            fieldFormats: schema.maybe(
+              schema.recordOf(schema.string(), serializedFieldFormatSchema)
+            ),
+            fieldAttrs: schema.maybe(
+              schema.recordOf(
+                schema.string(),
+                schema.object({
+                  customName: schema.string(),
+                })
+              )
+            ),
+          }),
         }),
       },
     },
     router.handleLegacyErrors(async (ctx, req, res) => {
+      // if (!ctx.indexPatterns) throw new Error('Index pattern context is missing.');
+      // const ip = ctx.indexPatterns.indexPatterns;
+
       return res.ok({
         body: 'yuppppi!',
       });
