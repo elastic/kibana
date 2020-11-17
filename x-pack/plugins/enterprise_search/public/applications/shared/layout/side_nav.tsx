@@ -23,7 +23,7 @@ import './side_nav.scss';
  * Side navigation - product & icon + links wrapper
  */
 
-interface ISideNavProps {
+interface SideNavProps {
   // Expects product plugin constants (@see common/constants.ts)
   product: {
     NAME: string;
@@ -31,7 +31,7 @@ interface ISideNavProps {
   };
 }
 
-export const SideNav: React.FC<ISideNavProps> = ({ product, children }) => {
+export const SideNav: React.FC<SideNavProps> = ({ product, children }) => {
   return (
     <nav
       id="enterpriseSearchNav"
@@ -61,17 +61,19 @@ export const SideNav: React.FC<ISideNavProps> = ({ product, children }) => {
  * Side navigation link item
  */
 
-interface ISideNavLinkProps {
+interface SideNavLinkProps {
   to: string;
+  shouldShowActiveForSubroutes?: boolean;
   isExternal?: boolean;
   className?: string;
   isRoot?: boolean;
   subNav?: React.ReactNode;
 }
 
-export const SideNavLink: React.FC<ISideNavLinkProps> = ({
-  isExternal,
+export const SideNavLink: React.FC<SideNavLinkProps> = ({
   to,
+  shouldShowActiveForSubroutes = false,
+  isExternal,
   children,
   className,
   isRoot,
@@ -82,7 +84,10 @@ export const SideNavLink: React.FC<ISideNavLinkProps> = ({
 
   const { pathname } = useLocation();
   const currentPath = stripTrailingSlash(pathname);
-  const isActive = currentPath === to || (isRoot && currentPath === '');
+  const isActive =
+    currentPath === to ||
+    (shouldShowActiveForSubroutes && currentPath.startsWith(to)) ||
+    (isRoot && currentPath === '');
 
   const classes = classNames('enterpriseSearchNavLinks__item', className, {
     'enterpriseSearchNavLinks__item--isActive': !isExternal && isActive, // eslint-disable-line @typescript-eslint/naming-convention
@@ -114,11 +119,11 @@ export const SideNavLink: React.FC<ISideNavLinkProps> = ({
  * Side navigation non-link item
  */
 
-interface ISideNavItemProps {
+interface SideNavItemProps {
   className?: string;
 }
 
-export const SideNavItem: React.FC<ISideNavItemProps> = ({ children, className, ...rest }) => {
+export const SideNavItem: React.FC<SideNavItemProps> = ({ children, className, ...rest }) => {
   const classes = classNames('enterpriseSearchNavLinks__item', className);
   return (
     <li {...rest} className={classes}>
