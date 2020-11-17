@@ -41,7 +41,6 @@ import { DiscoverGridFlyout } from './discover_grid_flyout';
 import { DiscoverGridContext } from './discover_grid_context';
 import { getRenderCellValueFn } from './get_render_cell_value';
 import { DiscoverGridSettings } from './types';
-import { DiscoverGridSelection, DiscoverGridToolbarSelection } from './discover_grid_doc_selection';
 import { SortPairArr } from '../../angular/doc_table/lib/get_sort';
 import { leadControlColumns } from './discover_grid_columns';
 
@@ -68,7 +67,6 @@ interface Props {
   searchTitle?: string;
   showTimeCol: boolean;
   sort: SortPairArr[];
-  useDocSelector: boolean;
 }
 
 const gridStyle = {
@@ -101,10 +99,8 @@ export const DiscoverGrid = React.memo(
     onAddColumn,
     showTimeCol,
     onSetColumns,
-    useDocSelector,
   }: Props) => {
     const [showSelected, setShowSelected] = useState(false);
-    const [selected, setSelected] = useState<DiscoverGridSelection>(new Map());
     const [viewed, setViewed] = useState<number>(-1);
     const timeString = useMemo(
       () =>
@@ -166,7 +162,6 @@ export const DiscoverGrid = React.memo(
         allowReorder: true,
       },
       showStyleSelector: false,
-      additionalControls: useDocSelector ? <DiscoverGridToolbarSelection /> : undefined,
     };
 
     /**
@@ -198,7 +193,7 @@ export const DiscoverGrid = React.memo(
       sortingColumns,
       onTableSort,
     ]);
-    const lead = useMemo(() => leadControlColumns(rows, useDocSelector), [rows, useDocSelector]);
+    const lead = useMemo(() => leadControlColumns(rows), [rows]);
 
     if (!rowCount || !rows) {
       return (
@@ -218,8 +213,6 @@ export const DiscoverGrid = React.memo(
       <I18nProvider>
         <DiscoverGridContext.Provider
           value={{
-            selected,
-            setSelected,
             showSelected,
             setShowSelected,
             viewed,
@@ -295,9 +288,6 @@ export const DiscoverGrid = React.memo(
                   setViewed(-1);
                 }}
               />
-            )}
-            {showSelected && selected && selected.size && (
-              <DiscoverGridSelection selected={selected} onClose={() => setShowSelected(false)} />
             )}
           </>
         </DiscoverGridContext.Provider>

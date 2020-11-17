@@ -68,7 +68,6 @@ export class DiscoverEnhancedPlugin
   ) {
     const start = createStartServicesGetter(core.getStartServices);
     const isSharePluginInstalled = !!share;
-    discover.setEnhanced(true);
 
     if (isSharePluginInstalled) {
       const params = { start };

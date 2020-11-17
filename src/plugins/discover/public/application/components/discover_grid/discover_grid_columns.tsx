@@ -19,32 +19,14 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiScreenReaderOnly } from '@elastic/eui';
-import { DiscoverGridSelectButton } from './discover_grid_doc_selection';
 import { ViewButton } from './discover_grid_view_button';
 import { ElasticSearchHit } from '../../doc_views/doc_views_types';
 
-export function leadControlColumns(rows: ElasticSearchHit[] | undefined, useDocSelector: boolean) {
+export function leadControlColumns(rows: ElasticSearchHit[] | undefined) {
   if (!rows) {
     return [];
   }
   return [
-    useDocSelector
-      ? {
-          id: 'checkBox',
-          width: 31,
-          headerCellRender: () => (
-            <EuiScreenReaderOnly>
-              <span>
-                {i18n.translate('discover.selectColumnHeader', {
-                  defaultMessage: 'Select column',
-                })}
-              </span>
-            </EuiScreenReaderOnly>
-          ),
-          rowCellRender: (col: number) => <DiscoverGridSelectButton col={col} rows={rows} />,
-          cellActions: [],
-        }
-      : null,
     {
       id: 'openDetails',
       width: 31,
@@ -60,5 +42,5 @@ export function leadControlColumns(rows: ElasticSearchHit[] | undefined, useDocS
       rowCellRender: ViewButton,
       cellActions: [],
     },
-  ].filter((obj) => !!obj);
+  ];
 }

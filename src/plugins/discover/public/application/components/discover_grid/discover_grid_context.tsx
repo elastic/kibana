@@ -17,15 +17,12 @@
  * under the License.
  */
 import React from 'react';
-import { DiscoverGridSelection } from './discover_grid_doc_selection';
 import { DocViewFilterFn, ElasticSearchHit } from '../../doc_views/doc_views_types';
 import { IndexPattern } from '../../../kibana_services';
 
 export interface GridContext {
   viewed: number;
   setViewed: (id: number) => void;
-  selected: DiscoverGridSelection;
-  setSelected: (map: DiscoverGridSelection) => void;
   showSelected: boolean;
   setShowSelected: (value: boolean) => void;
   rows: ElasticSearchHit[];

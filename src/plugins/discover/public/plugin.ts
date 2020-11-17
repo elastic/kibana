@@ -89,7 +89,6 @@ export interface DiscoverSetup {
      */
     addDocView(docViewRaw: DocViewInput | DocViewInputFn): void;
   };
-  setEnhanced: (value: boolean) => void;
 }
 
 export interface DiscoverStart {
@@ -163,7 +162,6 @@ export class DiscoverPlugin
   private servicesInitialized: boolean = false;
   private innerAngularInitialized: boolean = false;
   private urlGenerator?: DiscoverStart['urlGenerator'];
-  private enhanced: boolean = true;
 
   /**
    * why are those functions public? they are needed for some mocha tests
@@ -304,7 +302,6 @@ export class DiscoverPlugin
     this.registerEmbeddable(core, plugins);
 
     return {
-      setEnhanced: (value: boolean) => (this.enhanced = value),
       docViews: {
         addDocView: this.docViewsRegistry.addDocView.bind(this.docViewsRegistry),
       },
@@ -342,8 +339,7 @@ export class DiscoverPlugin
         core,
         plugins,
         this.initializerContext,
-        this.getEmbeddableInjector,
-        this.enhanced
+        this.getEmbeddableInjector
       );
       setServices(services);
       this.servicesInitialized = true;

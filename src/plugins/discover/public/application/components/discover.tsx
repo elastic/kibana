@@ -70,7 +70,6 @@ export function Discover({
     return <div>Loading</div>;
   }
   const { TopNavMenu } = getServices().navigation.ui;
-  const enhanced = getServices().enhanced;
   const { savedSearch, filterManager, indexPatternList, config } = opts;
   const showTimeCol = !config.get('doc_table:hideTimeColumn', false) && indexPattern.timeFieldName;
   const bucketAggConfig = opts.chartAggConfigs?.aggs[1];
@@ -253,7 +252,6 @@ export function Discover({
                               const newGrid = { ...grid, columns: newColumns };
                               opts.setAppState({ grid: newGrid });
                             }}
-                            useDocSelector={enhanced}
                           />
                         </div>
                       )}
