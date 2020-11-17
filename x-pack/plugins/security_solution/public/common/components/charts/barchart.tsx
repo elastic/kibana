@@ -47,6 +47,9 @@ const checkIfAnyValidSeriesExist = (
   !checkIfAllValuesAreZero(data) &&
   data.some(checkIfAllTheDataInTheSeriesAreValid);
 
+const yAccessors = ['y'];
+const splitSeriesAccessors = ['g'];
+
 // Bar chart rotation: https://ela.st/chart-rotations
 export const BarChartBaseComponent = ({
   data,
@@ -73,9 +76,6 @@ export const BarChartBaseComponent = ({
     ...deepmerge(get('configs.settings', chartConfigs), { theme }),
   };
 
-  const yAccessors = useMemo(() => ['y'], []);
-  const splitSeriesAccessors = useMemo(() => ['g'], []);
-
   return chartConfigs.width && chartConfigs.height ? (
     <Chart>
       <Settings {...settings} showLegend={settings.showLegend && !forceHiddenLegend} />
@@ -98,16 +98,6 @@ export const BarChartBaseComponent = ({
           />
         ) : null;
       })}
-
-      {/* <HistogramBarSeries
-        id={'xxxx'}
-        xScaleType="time"
-        yScaleType="linear"
-        xAccessor="x"
-        yAccessors={yAccessors}
-        splitSeriesAccessors={splitSeriesAccessors}
-        data={data}
-      /> */}
 
       <Axis
         id={xAxisId}
