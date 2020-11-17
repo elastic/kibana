@@ -17,6 +17,7 @@ set_chmod() {
 
 set_chown() {
   chown <%= user %>:<%= group %> <%= logDir %>
+  chown <%= user %>:<%= group %> <%= pidDir %>
   chown -R <%= user %>:<%= group %> <%= dataDir %>
   chown -R root:<%= group %> ${KBN_PATH_CONF}
 }

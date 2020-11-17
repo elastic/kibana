@@ -137,7 +137,7 @@ describe('LayerPanel', () => {
           {
             groupLabel: 'A',
             groupId: 'a',
-            accessors: ['x'],
+            accessors: [{ columnId: 'x' }],
             filterOperations: () => true,
             supportsMoreColumns: false,
             dataTestSubj: 'lnsGroup',
@@ -177,7 +177,7 @@ describe('LayerPanel', () => {
           {
             groupLabel: 'A',
             groupId: 'a',
-            accessors: ['x'],
+            accessors: [{ columnId: 'x' }],
             filterOperations: () => true,
             supportsMoreColumns: false,
             dataTestSubj: 'lnsGroup',
@@ -209,7 +209,7 @@ describe('LayerPanel', () => {
           {
             groupLabel: 'A',
             groupId: 'a',
-            accessors: ['newid'],
+            accessors: [{ columnId: 'newid' }],
             filterOperations: () => true,
             supportsMoreColumns: true,
             dataTestSubj: 'lnsGroup',
@@ -257,7 +257,7 @@ describe('LayerPanel', () => {
           {
             groupLabel: 'A',
             groupId: 'a',
-            accessors: ['newid'],
+            accessors: [{ columnId: 'newid' }],
             filterOperations: () => true,
             supportsMoreColumns: false,
             dataTestSubj: 'lnsGroup',
@@ -302,7 +302,7 @@ describe('LayerPanel', () => {
           {
             groupLabel: 'A',
             groupId: 'a',
-            accessors: ['newid'],
+            accessors: [{ columnId: 'newid' }],
             filterOperations: () => true,
             supportsMoreColumns: false,
             dataTestSubj: 'lnsGroup',
@@ -377,7 +377,7 @@ describe('LayerPanel', () => {
           {
             groupLabel: 'A',
             groupId: 'a',
-            accessors: ['a'],
+            accessors: [{ columnId: 'a' }],
             filterOperations: () => true,
             supportsMoreColumns: true,
             dataTestSubj: 'lnsGroup',
@@ -416,7 +416,7 @@ describe('LayerPanel', () => {
           {
             groupLabel: 'A',
             groupId: 'a',
-            accessors: ['a'],
+            accessors: [{ columnId: 'a' }],
             filterOperations: () => true,
             supportsMoreColumns: false,
             dataTestSubj: 'lnsGroupA',
@@ -424,7 +424,7 @@ describe('LayerPanel', () => {
           {
             groupLabel: 'B',
             groupId: 'b',
-            accessors: ['b'],
+            accessors: [{ columnId: 'b' }],
             filterOperations: () => true,
             supportsMoreColumns: true,
             dataTestSubj: 'lnsGroupB',
@@ -480,7 +480,7 @@ describe('LayerPanel', () => {
           {
             groupLabel: 'A',
             groupId: 'a',
-            accessors: ['a', 'b'],
+            accessors: [{ columnId: 'a' }, { columnId: 'b' }],
             filterOperations: () => true,
             supportsMoreColumns: true,
             dataTestSubj: 'lnsGroup',
