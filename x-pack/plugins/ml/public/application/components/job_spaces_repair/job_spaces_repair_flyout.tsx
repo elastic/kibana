@@ -75,7 +75,7 @@ export const JobSpacesRepairFlyout: FC<Props> = ({ onClose }) => {
       const { successCount, errorCount } = getResponseCounts(resp);
       if (errorCount > 0) {
         const title = i18n.translate('xpack.ml.management.repairSavedObjectsFlyout.repair.error', {
-          defaultMessage: 'Some jobs could not be repaired',
+          defaultMessage: 'Some jobs cannot be repaired.',
         });
         displayErrorToast(resp as any, title);
         return;
