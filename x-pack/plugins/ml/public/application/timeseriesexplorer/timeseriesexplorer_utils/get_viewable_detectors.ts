@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { each } from 'lodash';
 import { CombinedJob } from '../../../../common/types/anomaly_detection_jobs';
 import { isTimeSeriesViewDetector } from '../../../../common/util/job_utils';
 
@@ -16,7 +15,7 @@ interface ViewableDetector {
 export function getViewableDetectors(selectedJob: CombinedJob): ViewableDetector[] {
   const jobDetectors = selectedJob.analysis_config.detectors;
   const viewableDetectors: ViewableDetector[] = [];
-  each(jobDetectors, (dtr, index) => {
+  jobDetectors.forEach((dtr, index) => {
     if (isTimeSeriesViewDetector(selectedJob, index)) {
       viewableDetectors.push({
         index,
@@ -25,5 +24,6 @@ export function getViewableDetectors(selectedJob: CombinedJob): ViewableDetector
       });
     }
   });
+
   return viewableDetectors;
 }
