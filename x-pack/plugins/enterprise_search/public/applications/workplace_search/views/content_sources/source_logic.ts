@@ -120,6 +120,7 @@ interface SourceValues {
   githubOrganizations: string[];
   selectedGithubOrganizationsMap: object;
   selectedGithubOrganizations: object;
+  selectedGithubOrganizations: string[];
 }
 
 interface SearchResultsResponse {
