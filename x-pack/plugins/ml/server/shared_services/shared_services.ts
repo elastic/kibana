@@ -5,11 +5,12 @@
  */
 
 import { IClusterClient, IScopedClusterClient, SavedObjectsClientContract } from 'kibana/server';
+import { SpacesPluginStart } from '../../../spaces/server';
 import { KibanaRequest } from '../../.././../../src/core/server';
 import { MlLicense } from '../../common/license';
 
-import { CloudSetup } from '../../../cloud/server';
-import { SpacesPluginStart } from '../../../spaces/server';
+import type { CloudSetup } from '../../../cloud/server';
+import type { SecurityPluginSetup } from '../../../security/server';
 import { licenseChecks } from './license_checks';
 import { MlSystemProvider, getMlSystemProvider } from './providers/system';
 import { JobServiceProvider, getJobServiceProvider } from './providers/job_service';
@@ -23,7 +24,7 @@ import { ResolveMlCapabilities, MlCapabilitiesKey } from '../../common/types/cap
 import { hasMlCapabilitiesProvider, HasMlCapabilities } from '../lib/capabilities';
 import { MLClusterClientUninitialized } from './errors';
 import { MlClient, getMlClient } from '../lib/ml_client';
-import { jobSavedObjectServiceFactory } from '../saved_objects';
+import { jobSavedObjectServiceFactory, JobSavedObjectService } from '../saved_objects';
 
 export type SharedServices = JobServiceProvider &
   AnomalyDetectorsProvider &
@@ -50,6 +51,7 @@ export interface SharedServicesChecks {
 interface OkParams {
   scopedClient: IScopedClusterClient;
   mlClient: MlClient;
+  jobSavedObjectService: JobSavedObjectService;
 }
 
 type OkCallback = (okParams: OkParams) => any;
@@ -58,6 +60,7 @@ export function createSharedServices(
   mlLicense: MlLicense,
   getSpaces: (() => Promise<SpacesPluginStart>) | undefined,
   cloud: CloudSetup,
+  authorization: SecurityPluginSetup['authz'] | undefined,
   resolveMlCapabilities: ResolveMlCapabilities,
   getClusterClient: () => IClusterClient | null,
   getInternalSavedObjectsClient: () => SavedObjectsClientContract | null,
@@ -77,11 +80,14 @@ export function createSharedServices(
       getClusterClient,
       savedObjectsClient,
       internalSavedObjectsClient,
+      authorization,
       getSpaces !== undefined,
       isMlReady
     );
 
-    const { hasMlCapabilities, scopedClient, mlClient } = getRequestItems(request);
+    const { hasMlCapabilities, scopedClient, mlClient, jobSavedObjectService } = getRequestItems(
+      request
+    );
     const asyncGuards: Array<Promise<void>> = [];
 
     const guards: Guards = {
@@ -99,7 +105,7 @@ export function createSharedServices(
       },
       async ok(callback: OkCallback) {
         await Promise.all(asyncGuards);
-        return callback({ scopedClient, mlClient });
+        return callback({ scopedClient, mlClient, jobSavedObjectService });
       },
     };
     return guards;
@@ -119,6 +125,7 @@ function getRequestItemsProvider(
   getClusterClient: () => IClusterClient | null,
   savedObjectsClient: SavedObjectsClientContract,
   internalSavedObjectsClient: SavedObjectsClientContract,
+  authorization: SecurityPluginSetup['authz'] | undefined,
   spaceEnabled: boolean,
   isMlReady: () => Promise<void>
 ) {
@@ -135,6 +142,7 @@ function getRequestItemsProvider(
       savedObjectsClient,
       internalSavedObjectsClient,
       spaceEnabled,
+      authorization,
       isMlReady
     );
 
@@ -155,6 +163,6 @@ function getRequestItemsProvider(
       };
       mlClient = getMlClient(scopedClient, jobSavedObjectService);
     }
-    return { hasMlCapabilities, scopedClient, mlClient };
+    return { hasMlCapabilities, scopedClient, mlClient, jobSavedObjectService };
   };
 }
