@@ -135,13 +135,13 @@ export const progressColumn = {
   'data-test-subj': 'mlAnalyticsTableColumnProgress',
 };
 
-export const DFAnalyticsJobIdLink = ({ item }: { item: DataFrameAnalyticsListRow }) => {
+export const DFAnalyticsJobIdLink = ({ jobId }: { jobId: string }) => {
   const href = useMlLink({
     page: ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE,
-    pageState: { jobId: item.id },
+    pageState: { jobId },
   });
 
-  return <EuiLink href={href}>{item.id}</EuiLink>;
+  return <EuiLink href={href}>{jobId}</EuiLink>;
 };
 
 export const useColumns = (
@@ -207,8 +207,9 @@ export const useColumns = (
       truncateText: true,
       'data-test-subj': 'mlAnalyticsTableColumnId',
       scope: 'row',
-      render: (item: DataFrameAnalyticsListRow) =>
-        isManagementTable ? <DFAnalyticsJobIdLink item={item} /> : item.id,
+      render: (jobId: string) => {
+        return isManagementTable ? <DFAnalyticsJobIdLink jobId={jobId} /> : jobId;
+      },
     },
     {
       field: DataFrameAnalyticsListColumn.description,
