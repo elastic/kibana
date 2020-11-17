@@ -98,7 +98,7 @@ export const JobSpacesRepairFlyout: FC<Props> = ({ onClose }) => {
             <h2>
               <FormattedMessage
                 id="xpack.ml.management.repairSavedObjectsFlyout.headerLabel"
-                defaultMessage="Repair job saved objects"
+                defaultMessage="Repair saved objects"
               />
             </h2>
           </EuiTitle>
@@ -108,7 +108,7 @@ export const JobSpacesRepairFlyout: FC<Props> = ({ onClose }) => {
             <EuiText size="s">
               <FormattedMessage
                 id="xpack.ml.management.repairSavedObjectsFlyout.description"
-                defaultMessage="Repair the ML job saved objects in case they become out of sync with the jobs in elasticsearch."
+                defaultMessage="Repair the saved objects if they are out of sync with the machine learning jobs in Elasticsearch."
               />
             </EuiText>
           </EuiCallOut>

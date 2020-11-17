@@ -49,7 +49,7 @@ const SavedObjectsCreated: FC<{ repairItems: RepairSavedObjectResponse }> = ({ r
           <EuiTextColor color={items.length ? 'default' : 'subdued'}>
             <FormattedMessage
               id="xpack.ml.management.repairSavedObjectsFlyout.savedObjectsCreated.title"
-              defaultMessage="Missing job saved objects ({count})"
+              defaultMessage="Missing saved objects ({count})"
               values={{ count: items.length }}
             />
           </EuiTextColor>
@@ -60,7 +60,7 @@ const SavedObjectsCreated: FC<{ repairItems: RepairSavedObjectResponse }> = ({ r
           <EuiTextColor color="subdued">
             <FormattedMessage
               id="xpack.ml.management.repairSavedObjectsFlyout.savedObjectsCreated.description"
-              defaultMessage="Jobs exist which do not have accompanying saved objects. These will be created in the current space"
+              defaultMessage="If there are jobs that do not have accompanying saved objects, they will be created in the current space."
             />
           </EuiTextColor>
         </p>
@@ -80,7 +80,7 @@ const SavedObjectsDeleted: FC<{ repairItems: RepairSavedObjectResponse }> = ({ r
           <EuiTextColor color={items.length ? 'default' : 'subdued'}>
             <FormattedMessage
               id="xpack.ml.management.repairSavedObjectsFlyout.savedObjectsDeleted.title"
-              defaultMessage="Unmatched job saved objects ({count})"
+              defaultMessage="Unmatched saved objects ({count})"
               values={{ count: items.length }}
             />
           </EuiTextColor>
@@ -91,7 +91,7 @@ const SavedObjectsDeleted: FC<{ repairItems: RepairSavedObjectResponse }> = ({ r
           <EuiTextColor color="subdued">
             <FormattedMessage
               id="xpack.ml.management.repairSavedObjectsFlyout.savedObjectsDeleted.description"
-              defaultMessage="Saved objects which do not have an accompanying job. These will be left over when deleting anomaly detection jobs."
+              defaultMessage="If there are saved objects that do not have an accompanying job, they will be deleted."
             />
           </EuiTextColor>
         </p>
@@ -111,7 +111,7 @@ const DatafeedsAdded: FC<{ repairItems: RepairSavedObjectResponse }> = ({ repair
           <EuiTextColor color={items.length ? 'default' : 'subdued'}>
             <FormattedMessage
               id="xpack.ml.management.repairSavedObjectsFlyout.datafeedsAdded.title"
-              defaultMessage="Job saved objects with missing datafeeds ({count})"
+              defaultMessage="Saved objects with missing datafeeds ({count})"
               values={{ count: items.length }}
             />
           </EuiTextColor>
@@ -122,7 +122,7 @@ const DatafeedsAdded: FC<{ repairItems: RepairSavedObjectResponse }> = ({ repair
           <EuiTextColor color="subdued">
             <FormattedMessage
               id="xpack.ml.management.repairSavedObjectsFlyout.datafeedsAdded.description"
-              defaultMessage="Anomaly detection job saved objects which are missing their datafeed id."
+              defaultMessage="If there are saved objects that are missing the datafeed ID for anomaly detection jobs, the ID will be added."
             />
           </EuiTextColor>
         </p>
@@ -142,7 +142,7 @@ const DatafeedsRemoved: FC<{ repairItems: RepairSavedObjectResponse }> = ({ repa
           <EuiTextColor color={items.length ? 'default' : 'subdued'}>
             <FormattedMessage
               id="xpack.ml.management.repairSavedObjectsFlyout.datafeedsRemoved.title"
-              defaultMessage="Job saved objects with unmatched datafeed ids ({count})"
+              defaultMessage="Saved objects with unmatched datafeed IDs ({count})"
               values={{ count: items.length }}
             />
           </EuiTextColor>
@@ -153,7 +153,7 @@ const DatafeedsRemoved: FC<{ repairItems: RepairSavedObjectResponse }> = ({ repa
           <EuiTextColor color="subdued">
             <FormattedMessage
               id="xpack.ml.management.repairSavedObjectsFlyout.datafeedsRemoved.description"
-              defaultMessage="Anomaly detection jobs which contain a datafeed ID, but the datafeed does not exist."
+              defaultMessage="If there are saved objects that use a datafeed that does not exist, they will be deleted."
             />
           </EuiTextColor>
         </p>
