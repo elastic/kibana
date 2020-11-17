@@ -8,7 +8,8 @@ import { keys, pickBy } from 'lodash';
 
 import { kea, MakeLogicType } from 'kea';
 
-import http from 'shared/http';
+import { HttpLogic } from '../../../shared/http';
+import { KibanaLogic } from '../../../shared/kibana';
 
 import {
   flashAPIErrors,
@@ -360,35 +361,35 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
     ],
   }),
   listeners: ({ actions, values }) => ({
-    initializeSource: ({ sourceId, history }) => {
+    initializeSource: async ({ sourceId }) => {
       const { isOrganization } = AppLogic.values;
       const route = isOrganization
         ? `/api/workplace_search/org/sources/${sourceId}`
         : `/api/workplace_search/account/sources/${sourceId}`;
 
-      http(route)
-        .then(({ data }) => {
-          actions.onInitializeSource(data);
-          if (data.isFederatedSource) {
-            actions.initializeFederatedSummary(sourceId);
-          }
-        })
-        .catch((error) => {
-          if (error.response.status === 404) {
-            history.push(NOT_FOUND_PATH);
-          } else {
-            flashAPIErrors(e);
-          }
-        });
-    },
-    initializeFederatedSummary: ({ sourceId }) => {
-      const route = `/api/workplace_search/org/sources/${sourceId}/federated_summary`;
-
-      http(route)
-        .then(({ data }) => actions.onUpdateSummary(data.summary))
-        .catch(() => {
+      try {
+        const response = await HttpLogic.values.http.get(route);
+        actions.onInitializeSource(response);
+        if (response.isFederatedSource) {
+          actions.initializeFederatedSummary(sourceId);
+        }
+      } catch (e) {
+        // TODO: Verify this works once components are there. Not sure if the catch gives a status code.
+        if (e.response.status === 404) {
+          KibanaLogic.values.navigateToUrl(NOT_FOUND_PATH);
+        } else {
           flashAPIErrors(e);
-        });
+        }
+      }
+    },
+    initializeFederatedSummary: async ({ sourceId }) => {
+      const route = `/api/workplace_search/org/sources/${sourceId}/federated_summary`;
+      try {
+        const response = await HttpLogic.values.http.get(route);
+        actions.onUpdateSummary(response.summary);
+      } catch (e) {
+        flashAPIErrors(e);
+      }
     },
     searchContentSourceDocuments: async ({ sourceId }, breakpoint) => {
       await breakpoint(300);
@@ -403,46 +404,57 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
         contentMeta: { page },
       } = values;
 
-      http
-        .post(route, { query, page })
-        .then(({ data }) => actions.setSearchResults(data))
-        .catch(flashAPIErrors(e));
+      try {
+        const response = await HttpLogic.values.http.post(route, {
+          body: JSON.stringify({ query, page }),
+        });
+        actions.setSearchResults(response);
+      } catch (e) {
+        flashAPIErrors(e);
+      }
     },
-    updateContentSource: ({ sourceId, source }) => {
+    updateContentSource: async ({ sourceId, source }) => {
       const { isOrganization } = AppLogic.values;
       const route = isOrganization
         ? `/api/workplace_search/org/sources/${sourceId}/settings`
         : `/api/workplace_search/account/sources/${sourceId}/settings`;
 
-      http
-        .patch(route, { content_source: source })
-        .then(({ data }) => actions.onUpdateSourceName(data.name))
-        .catch(flashAPIErrors(e));
+      try {
+        const response = await HttpLogic.values.http.patch(route, {
+          body: JSON.stringify({ content_source: source }),
+        });
+        actions.onUpdateSourceName(response.name);
+      } catch (e) {
+        flashAPIErrors(e);
+      }
     },
-    removeContentSource: ({ sourceId, successCallback }) => {
+    removeContentSource: async ({ sourceId, successCallback }) => {
       FlashMessagesLogic.actions.clearFlashMessages();
       const { isOrganization } = AppLogic.values;
       const route = isOrganization
         ? `/api/workplace_search/org/sources/${sourceId}`
         : `/api/workplace_search/account/sources/${sourceId}`;
 
-      return http
-        .delete(route)
-        .then(({ data: { name } }) => {
-          setQueuedSuccessMessage(`Successfully deleted ${name}`);
-          successCallback();
-        })
-        .catch(flashAPIErrors(e))
-        .finally(actions.setButtonNotLoading);
+      try {
+        const response = await HttpLogic.values.http.delete(route);
+        setQueuedSuccessMessage(`Successfully deleted ${response.name}`);
+        successCallback();
+      } catch (e) {
+        flashAPIErrors(e);
+        actions.setButtonNotLoading();
+      }
     },
-    getSourceConfigData: ({ serviceType }) => {
+    getSourceConfigData: async ({ serviceType }) => {
       const route = `/api/workplace_search/org/settings/connectors/${serviceType}`;
 
-      http(route)
-        .then(({ data }) => actions.setSourceConfigData(data))
-        .catch(flashAPIErrors(e));
+      try {
+        const response = await HttpLogic.values.http.get(route);
+        actions.setSourceConfigData(response);
+      } catch (e) {
+        flashAPIErrors(e);
+      }
     },
-    getSourceConnectData: ({ serviceType, successCallback }) => {
+    getSourceConnectData: async ({ serviceType, successCallback }) => {
       FlashMessagesLogic.actions.clearFlashMessages();
       const { isOrganization } = AppLogic.values;
       const { subdomainValue: subdomain, indexPermissionsValue: indexPermissions } = values;
@@ -455,35 +467,42 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
       if (subdomain) params.append('subdomain', subdomain);
       if (indexPermissions) params.append('index_permissions', indexPermissions.toString());
 
-      return http(`${route}?${params}`)
-        .then(({ data }) => {
-          actions.setSourceConnectData(data);
-          successCallback(data.oauthUrl);
-        })
-        .catch(flashAPIErrors(e))
-        .finally(actions.setButtonNotLoading);
+      try {
+        const response = await HttpLogic.values.http.get(`${route}?${params}`);
+        actions.setSourceConnectData(response);
+        successCallback(response.oauthUrl);
+      } catch (e) {
+        flashAPIErrors(e);
+        actions.setButtonNotLoading();
+      }
     },
-    getSourceReConnectData: ({ sourceId }) => {
+    getSourceReConnectData: async ({ sourceId }) => {
       const { isOrganization } = AppLogic.values;
       const route = isOrganization
         ? `/api/workplace_search/org/sources/${sourceId}/reauth_prepare`
         : `/api/workplace_search/account/sources/${sourceId}/reauth_prepare`;
 
-      return http(route)
-        .then(({ data }) => actions.setSourceConnectData(data))
-        .catch(flashAPIErrors(e));
+      try {
+        const response = await HttpLogic.values.http.get(route);
+        actions.setSourceConnectData(response);
+      } catch (e) {
+        flashAPIErrors(e);
+      }
     },
-    getPreContentSourceConfigData: ({ preContentSourceId }) => {
+    getPreContentSourceConfigData: async ({ preContentSourceId }) => {
       const { isOrganization } = AppLogic.values;
       const route = isOrganization
         ? `/api/workplace_search/org/pre_sources/${preContentSourceId}`
         : `/api/workplace_search/account/pre_sources/${preContentSourceId}`;
 
-      http(route)
-        .then(({ data }) => actions.setPreContentSourceConfigData(data))
-        .catch(flashAPIErrors(e));
+      try {
+        const response = await HttpLogic.values.http.get(route);
+        actions.setPreContentSourceConfigData(response);
+      } catch (e) {
+        flashAPIErrors(e);
+      }
     },
-    saveSourceConfig: ({ isUpdating, successCallback }) => {
+    saveSourceConfig: async ({ isUpdating, successCallback }) => {
       FlashMessagesLogic.actions.clearFlashMessages();
       const {
         sourceConfigData: { serviceType },
@@ -497,7 +516,7 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
         ? `/api/workplace_search/org/settings/connectors/${serviceType}`
         : '/api/workplace_search/org/settings/connectors';
 
-      const method = isUpdating ? 'put' : 'post';
+      const http = isUpdating ? HttpLogic.values.http.put : HttpLogic.values.http.post;
 
       const params = {
         base_url: baseUrlValue || undefined,
@@ -509,19 +528,20 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
         consumer_key: sourceConfigData.configuredFields?.consumerKey,
       };
 
-      return http({ url: route, method, data: params })
-        .then(({ data }) => {
-          if (isUpdating) setSuccessMessage('Successfully updated configuration.');
-          actions.setSourceConfigData(data);
-          if (successCallback) successCallback();
-        })
-        .catch((e) => {
-          flashAPIErrors(e);
-          if (!isUpdating) throw new Error(e);
-        })
-        .finally(actions.setButtonNotLoading);
+      try {
+        const response = await http(route, {
+          body: JSON.stringify({ params }),
+        });
+        if (isUpdating) setSuccessMessage('Successfully updated configuration.');
+        actions.setSourceConfigData(response);
+        if (successCallback) successCallback();
+      } catch (e) {
+        flashAPIErrors(e);
+        actions.setButtonNotLoading();
+        if (!isUpdating) throw new Error(e);
+      }
     },
-    createContentSource: ({ serviceType, successCallback, errorCallback }) => {
+    createContentSource: async ({ serviceType, successCallback, errorCallback }) => {
       FlashMessagesLogic.actions.clearFlashMessages();
       const { isOrganization } = AppLogic.values;
       const route = isOrganization ? ORG_CREATE_SOURCE_ROUTE : ACCOUNT_CREATE_SOURCE_ROUTE;
@@ -546,18 +566,18 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
       // Remove undefined values from params
       Object.keys(params).forEach((key) => params[key] === undefined && delete params[key]);
 
-      return http
-        .post(route, params)
-        .then(({ data }) => {
-          actions.setCustomSourceData(data);
-          successCallback();
-        })
-        .catch((e) => {
-          flashAPIErrors(e);
-          if (errorCallback) errorCallback();
-          throw new Error('Auth Error');
-        })
-        .finally(actions.setButtonNotLoading);
+      try {
+        const response = await HttpLogic.values.http.post(route, {
+          body: JSON.stringify({ params }),
+        });
+        actions.setCustomSourceData(response);
+        successCallback();
+      } catch (e) {
+        flashAPIErrors(e);
+        actions.setButtonNotLoading();
+        if (errorCallback) errorCallback();
+        throw new Error('Auth Error');
+      }
     },
     onUpdateSourceName: (name: string) => {
       setSuccessMessage(`Successfully changed name to ${name}`);
