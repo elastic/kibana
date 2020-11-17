@@ -13202,7 +13202,6 @@
     "xpack.ml.newJob.wizard.pickFieldsStep.stoppedPartitionsErrorCallout": "提取已停止分区的列表时发生错误。",
     "xpack.ml.newJob.wizard.pickFieldsStep.stoppedPartitionsExistCallout": "启用按分区分类和 stop_on_warn 设置。作业“{jobId}”中的某些分区不适合进行分类，已从进一步分类或异常检测分析中排除。",
     "xpack.ml.newJob.wizard.pickFieldsStep.stoppedPartitionsPreviewColumnName": "已停止的分区名称",
-    "xpack.ml.newJob.wizard.pickFieldsStep.summaryCountField.description": "可选，用于输入数据已预汇总时，例如 \\{docCountParam\\}。",
     "xpack.ml.newJob.wizard.pickFieldsStep.summaryCountField.title": "汇总计数字段",
     "xpack.ml.newJob.wizard.previewJsonButton": "预览 JSON",
     "xpack.ml.newJob.wizard.previousStepButton": "上一页",
