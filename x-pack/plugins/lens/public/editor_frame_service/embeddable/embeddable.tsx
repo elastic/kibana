@@ -129,6 +129,10 @@ export class Embeddable
     }
   }
 
+  public getInspectorAdapters() {
+    return this.savedVis?.state?.activeData;
+  }
+
   async initializeSavedVis(input: LensEmbeddableInput) {
     const attributes:
       | LensSavedObjectAttributes
