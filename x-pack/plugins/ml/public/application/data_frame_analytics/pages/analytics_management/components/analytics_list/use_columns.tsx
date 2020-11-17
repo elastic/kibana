@@ -199,7 +199,10 @@ export const useColumns = (
       'data-test-subj': 'mlAnalyticsTableRowDetailsToggle',
     },
     {
-      name: 'id',
+      field: DataFrameAnalyticsListColumn.id,
+      name: i18n.translate('xpack.ml.dataframe.analyticsList.id', {
+        defaultMessage: 'ID',
+      }),
       sortable: (item: DataFrameAnalyticsListRow) => item.id,
       truncateText: true,
       'data-test-subj': 'mlAnalyticsTableColumnId',
