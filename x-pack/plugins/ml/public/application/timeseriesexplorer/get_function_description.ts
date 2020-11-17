@@ -11,9 +11,11 @@ import { getControlsForDetector } from './get_controls_for_detector';
 import { getCriteriaFields } from './get_criteria_fields';
 import { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
 import { ML_JOB_AGGREGATION } from '../../../common/constants/aggregation_types';
+import { getViewableDetectors } from './timeseriesexplorer_utils/get_viewable_detectors';
 
 export function isMetricDetector(selectedJob: CombinedJob, selectedDetectorIndex: number) {
-  if (selectedJob?.analysis_config?.detectors?.hasOwnProperty(selectedDetectorIndex)) {
+  const detectors = getViewableDetectors(selectedJob);
+  if (Array.isArray(detectors) && detectors.length >= selectedDetectorIndex) {
     const detector = selectedJob.analysis_config.detectors[selectedDetectorIndex];
     if (detector?.function === ML_JOB_AGGREGATION.METRIC) {
       return true;

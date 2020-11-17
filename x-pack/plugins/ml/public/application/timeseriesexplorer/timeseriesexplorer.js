@@ -8,7 +8,7 @@
  * React component for rendering Single Metric Viewer.
  */
 
-import { each, find, get, has, isEqual } from 'lodash';
+import { find, get, has, isEqual } from 'lodash';
 import moment from 'moment-timezone';
 import { Subject, Subscription, forkJoin } from 'rxjs';
 import { map, debounceTime, switchMap, tap, withLatestFrom } from 'rxjs/operators';
@@ -40,7 +40,6 @@ import {
   isModelPlotEnabled,
   isModelPlotChartableForDetector,
   isSourceDataChartableForDetector,
-  isTimeSeriesViewDetector,
   mlFunctionToESAggregation,
 } from '../../../common/util/job_utils';
 
@@ -85,6 +84,7 @@ import { TimeSeriesChartWithTooltips } from './components/timeseries_chart/times
 import { PlotByFunctionControls } from './components/plot_function_controls';
 import { aggregationTypeTransform } from '../../../common/util/anomaly_utils';
 import { isMetricDetector } from './get_function_description';
+import { getViewableDetectors } from './timeseriesexplorer_utils/get_viewable_detectors';
 
 // Used to indicate the chart is being plotted across
 // all partition field values, where the cardinality of the field cannot be
@@ -92,20 +92,6 @@ import { isMetricDetector } from './get_function_description';
 const allValuesLabel = i18n.translate('xpack.ml.timeSeriesExplorer.allPartitionValuesLabel', {
   defaultMessage: 'all',
 });
-
-export function getViewableDetectors(selectedJob) {
-  const jobDetectors = selectedJob.analysis_config.detectors;
-  const viewableDetectors = [];
-  each(jobDetectors, (dtr, index) => {
-    if (isTimeSeriesViewDetector(selectedJob, index)) {
-      viewableDetectors.push({
-        index,
-        detector_description: dtr.detector_description,
-      });
-    }
-  });
-  return viewableDetectors;
-}
 
 function getTimeseriesexplorerDefaultState() {
   return {

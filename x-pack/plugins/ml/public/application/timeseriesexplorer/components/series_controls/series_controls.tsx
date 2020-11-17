@@ -19,8 +19,6 @@ import {
   EntityControlProps,
 } from '../entity_control/entity_control';
 import { getControlsForDetector } from '../../get_controls_for_detector';
-// @ts-ignore
-import { getViewableDetectors } from '../../timeseriesexplorer';
 import {
   ML_ENTITY_FIELDS_CONFIG,
   PartitionFieldConfig,
@@ -29,6 +27,7 @@ import {
 import { useStorage } from '../../../contexts/ml/use_storage';
 import { EntityFieldType } from '../../../../../common/types/anomalies';
 import { FieldDefinition } from '../../../services/results_service/result_service_rx';
+import { getViewableDetectors } from '../../timeseriesexplorer_utils/get_viewable_detectors';
 
 function getEntityControlOptions(fieldValues: FieldDefinition['values']): ComboBoxOption[] {
   if (!Array.isArray(fieldValues)) {
