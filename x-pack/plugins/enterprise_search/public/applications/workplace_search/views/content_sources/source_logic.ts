@@ -9,7 +9,6 @@ import { keys, pickBy } from 'lodash';
 import { kea, MakeLogicType } from 'kea';
 
 import http from 'shared/http';
-import routes from 'workplace_search/routes';
 
 import {
   flashAPIErrors,
@@ -69,7 +68,7 @@ export interface SourceActions {
     serviceType: string,
     successCallback: (oauthUrl: string) => string
   ): { serviceType: string; successCallback(oauthUrl: string): void };
-  getSourceReConnectData(serviceType: string): { serviceType: string };
+  getSourceReConnectData(sourceId: string): { sourceId: string };
   getPreContentSourceConfigData(preContentSourceId: string): { preContentSourceId: string };
   setButtonNotLoading(): void;
 }
@@ -133,6 +132,9 @@ interface PreContentSourceResponse {
   githubOrganizations: string[];
 }
 
+const ACCOUNT_CREATE_SOURCE_ROUTE = '/api/workplace_search/account/create_source';
+const ORG_CREATE_SOURCE_ROUTE = '/api/workplace_search/org/create_source';
+
 export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
   actions: {
     onInitializeSource: (contentSource: ContentSourceFullData) => contentSource,
@@ -167,7 +169,7 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
       serviceType,
       successCallback,
     }),
-    getSourceReConnectData: (serviceType: string) => ({ serviceType }),
+    getSourceReConnectData: (sourceId: string) => ({ sourceId }),
     getPreContentSourceConfigData: (preContentSourceId: string) => ({ preContentSourceId }),
     saveSourceConfig: (isUpdating: boolean, successCallback?: () => void) => ({
       isUpdating,
@@ -361,8 +363,8 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
     initializeSource: ({ sourceId, history }) => {
       const { isOrganization } = AppLogic.values;
       const route = isOrganization
-        ? routes.fritoPieOrganizationContentSourcePath(sourceId)
-        : routes.fritoPieAccountContentSourcePath(sourceId);
+        ? `/api/workplace_search/org/sources/${sourceId}`
+        : `/api/workplace_search/account/sources/${sourceId}`;
 
       http(route)
         .then(({ data }) => {
@@ -380,7 +382,7 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
         });
     },
     initializeFederatedSummary: ({ sourceId }) => {
-      const route = routes.fritoPieAccountContentSourceFederatedSummaryPath(sourceId);
+      const route = `/api/workplace_search/org/sources/${sourceId}/federated_summary`;
 
       http(route)
         .then(({ data }) => actions.onUpdateSummary(data.summary))
@@ -393,8 +395,8 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
 
       const { isOrganization } = AppLogic.values;
       const route = isOrganization
-        ? routes.fritoPieOrganizationContentSourceDocumentsPath(sourceId)
-        : routes.fritoPieAccountContentSourceDocumentsPath(sourceId);
+        ? `/api/workplace_search/org/sources/${sourceId}/documents`
+        : `/api/workplace_search/account/sources/${sourceId}/documents`;
 
       const {
         contentFilterValue: query,
@@ -409,8 +411,8 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
     updateContentSource: ({ sourceId, source }) => {
       const { isOrganization } = AppLogic.values;
       const route = isOrganization
-        ? routes.fritoPieOrganizationContentSourceSettingsPath(sourceId)
-        : routes.fritoPieAccountContentSourceSettingsPath(sourceId);
+        ? `/api/workplace_search/org/sources/${sourceId}/settings`
+        : `/api/workplace_search/account/sources/${sourceId}/settings`;
 
       http
         .patch(route, { content_source: source })
@@ -421,8 +423,8 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
       FlashMessagesLogic.actions.clearFlashMessages();
       const { isOrganization } = AppLogic.values;
       const route = isOrganization
-        ? routes.fritoPieOrganizationContentSourcePath(sourceId)
-        : routes.fritoPieAccountContentSourcePath(sourceId);
+        ? `/api/workplace_search/org/sources/${sourceId}`
+        : `/api/workplace_search/account/sources/${sourceId}`;
 
       return http
         .delete(route)
@@ -434,9 +436,7 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
         .finally(actions.setButtonNotLoading);
     },
     getSourceConfigData: ({ serviceType }) => {
-      const route = routes.fritoPieOrganizationSettingsContentSourceOauthConfigurationPath(
-        serviceType
-      );
+      const route = `/api/workplace_search/org/settings/connectors/${serviceType}`;
 
       http(route)
         .then(({ data }) => actions.setSourceConfigData(data))
@@ -448,8 +448,8 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
       const { subdomainValue: subdomain, indexPermissionsValue: indexPermissions } = values;
 
       const route = isOrganization
-        ? routes.prepareFritoPieOrganizationContentSourcesPath(serviceType)
-        : routes.prepareFritoPieAccountContentSourcesPath(serviceType);
+        ? `/api/workplace_search/org/sources/${serviceType}/prepare`
+        : `/api/workplace_search/account/sources/${serviceType}/prepare`;
 
       const params = new URLSearchParams();
       if (subdomain) params.append('subdomain', subdomain);
@@ -463,11 +463,11 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
         .catch(flashAPIErrors(e))
         .finally(actions.setButtonNotLoading);
     },
-    getSourceReConnectData: ({ serviceType }) => {
+    getSourceReConnectData: ({ sourceId }) => {
       const { isOrganization } = AppLogic.values;
       const route = isOrganization
-        ? routes.fritoPieOrganizationContentSourceReauthPreparePath(serviceType)
-        : routes.fritoPieAccountContentSourceReauthPreparePath(serviceType);
+        ? `/api/workplace_search/org/sources/${sourceId}/reauth_prepare`
+        : `/api/workplace_search/account/sources/${sourceId}/reauth_prepare`;
 
       return http(route)
         .then(({ data }) => actions.setSourceConnectData(data))
@@ -476,8 +476,8 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
     getPreContentSourceConfigData: ({ preContentSourceId }) => {
       const { isOrganization } = AppLogic.values;
       const route = isOrganization
-        ? routes.fritoPieOrganizationPreContentSourcePath(preContentSourceId)
-        : routes.fritoPieAccountPreContentSourcePath(preContentSourceId);
+        ? `/api/workplace_search/org/pre_sources/${preContentSourceId}`
+        : `/api/workplace_search/account/pre_sources/${preContentSourceId}`;
 
       http(route)
         .then(({ data }) => actions.setPreContentSourceConfigData(data))
@@ -494,8 +494,8 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
       } = values;
 
       const route = isUpdating
-        ? routes.fritoPieOrganizationSettingsContentSourceOauthConfigurationPath(serviceType)
-        : routes.fritoPieOrganizationSettingsContentSourceOauthConfigurationsPath();
+        ? `/api/workplace_search/org/settings/connectors/${serviceType}`
+        : '/api/workplace_search/org/settings/connectors';
 
       const method = isUpdating ? 'put' : 'post';
 
@@ -524,9 +524,7 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
     createContentSource: ({ serviceType, successCallback, errorCallback }) => {
       FlashMessagesLogic.actions.clearFlashMessages();
       const { isOrganization } = AppLogic.values;
-      const route = isOrganization
-        ? routes.formCreateFritoPieOrganizationContentSourcesPath()
-        : routes.formCreateFritoPieAccountContentSourcesPath();
+      const route = isOrganization ? ORG_CREATE_SOURCE_ROUTE : ACCOUNT_CREATE_SOURCE_ROUTE;
 
       const {
         selectedGithubOrganizations: githubOrganizations,
