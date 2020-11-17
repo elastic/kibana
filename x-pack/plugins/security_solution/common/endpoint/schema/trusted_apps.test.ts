@@ -5,6 +5,7 @@
  */
 
 import { GetTrustedAppsRequestSchema, PostTrustedAppCreateRequestSchema } from './trusted_apps';
+import { ConditionEntryField } from '../types';
 
 describe('When invoking Trusted Apps Schema', () => {
   describe('for GET List', () => {
@@ -76,7 +77,7 @@ describe('When invoking Trusted Apps Schema', () => {
       os: 'windows',
       entries: [
         {
-          field: 'process.executable.caseless',
+          field: ConditionEntryField.PATH,
           type: 'match',
           operator: 'included',
           value: 'c:/programs files/Anti-Virus',
@@ -201,10 +202,10 @@ describe('When invoking Trusted Apps Schema', () => {
 
         [
           {
-            field: 'process.hash.*',
+            field: ConditionEntryField.HASH,
             value: 'A4370C0CF81686C0B696FA6261c9d3e0d810ae704ab8301839dffd5d5112f476',
           },
-          { field: 'process.executable.caseless', value: '/tmp/dir1' },
+          { field: ConditionEntryField.PATH, value: '/tmp/dir1' },
         ].forEach((partialEntry) => {
           const bodyMsg3 = {
             ...getCreateTrustedAppItem(),
@@ -304,12 +305,12 @@ describe('When invoking Trusted Apps Schema', () => {
           entries: [
             {
               ...getTrustedAppItemEntryItem(),
-              field: 'process.hash.*',
+              field: ConditionEntryField.HASH,
               value: VALID_HASH_MD5,
             },
             {
               ...getTrustedAppItemEntryItem(),
-              field: 'process.hash.*',
+              field: ConditionEntryField.HASH,
               value: VALID_HASH_MD5,
             },
           ],
@@ -325,7 +326,7 @@ describe('When invoking Trusted Apps Schema', () => {
               entries: [
                 {
                   ...getTrustedAppItemEntryItem(),
-                  field: 'process.hash.*',
+                  field: ConditionEntryField.HASH,
                   value,
                 },
               ],
@@ -342,7 +343,7 @@ describe('When invoking Trusted Apps Schema', () => {
               entries: [
                 {
                   ...getTrustedAppItemEntryItem(),
-                  field: 'process.hash.*',
+                  field: ConditionEntryField.HASH,
                   value,
                 },
               ],
@@ -358,7 +359,7 @@ describe('When invoking Trusted Apps Schema', () => {
             entries: [
               {
                 ...getTrustedAppItemEntryItem(),
-                field: 'process.hash.*',
+                field: ConditionEntryField.HASH,
                 value: `G${VALID_HASH_MD5.substr(1)}`,
               },
             ],
@@ -373,7 +374,7 @@ describe('When invoking Trusted Apps Schema', () => {
             entries: [
               {
                 ...getTrustedAppItemEntryItem(),
-                field: 'process.hash.*',
+                field: ConditionEntryField.HASH,
                 value: `  ${VALID_HASH_MD5}  \r\n`,
               },
             ],

@@ -18,6 +18,7 @@ import {
   TRUSTED_APPS_LIST_API,
 } from '../../../../common/endpoint/constants';
 import {
+  ConditionEntryField,
   DeleteTrustedAppsRequestParams,
   GetTrustedAppsListRequest,
   PostTrustedAppCreateRequest,
@@ -189,19 +190,19 @@ describe('when invoking endpoint trusted apps route handlers', () => {
               description: '',
               entries: [
                 {
-                  field: 'process.hash.*',
+                  field: ConditionEntryField.HASH,
                   operator: 'included',
                   type: 'match',
                   value: 'a4370c0cf81686c0b696fa6261c9d3e0d810ae704ab8301839dffd5d5112f476',
                 },
                 {
-                  field: 'process.hash.*',
+                  field: ConditionEntryField.HASH,
                   operator: 'included',
                   type: 'match',
                   value: 'aedb279e378bed6c2db3c9dc9e12ba635e0b391c',
                 },
                 {
-                  field: 'process.hash.*',
+                  field: ConditionEntryField.HASH,
                   operator: 'included',
                   type: 'match',
                   value: '741462ab431a22233c787baab9b653c7',
@@ -240,7 +241,7 @@ describe('when invoking endpoint trusted apps route handlers', () => {
       os: 'windows',
       entries: [
         {
-          field: 'process.executable.caseless',
+          field: ConditionEntryField.PATH,
           type: 'match',
           operator: 'included',
           value: 'c:/programs files/Anti-Virus',
@@ -321,7 +322,7 @@ describe('when invoking endpoint trusted apps route handlers', () => {
             description: 'this one is ok',
             entries: [
               {
-                field: 'process.executable.caseless',
+                field: ConditionEntryField.PATH,
                 operator: 'included',
                 type: 'match',
                 value: 'c:/programs files/Anti-Virus',
@@ -358,7 +359,7 @@ describe('when invoking endpoint trusted apps route handlers', () => {
     it('should trim condition entry values', async () => {
       const newTrustedApp = createNewTrustedAppBody();
       newTrustedApp.entries.push({
-        field: 'process.executable.caseless',
+        field: ConditionEntryField.PATH,
         value: '\n    some value \r\n ',
         operator: 'included',
         type: 'match',
@@ -384,7 +385,7 @@ describe('when invoking endpoint trusted apps route handlers', () => {
     it('should convert hash values to lowercase', async () => {
       const newTrustedApp = createNewTrustedAppBody();
       newTrustedApp.entries.push({
-        field: 'process.hash.*',
+        field: ConditionEntryField.HASH,
         value: '741462AB431A22233C787BAAB9B653C7',
         operator: 'included',
         type: 'match',
@@ -411,7 +412,7 @@ describe('when invoking endpoint trusted apps route handlers', () => {
       const newTrustedApp = createNewTrustedAppBody();
       newTrustedApp.entries = [
         {
-          field: 'process.hash.*',
+          field: ConditionEntryField.HASH,
           value: '741462ab431a22233c787baab9b653c7',
           operator: 'included',
           type: 'match',
@@ -433,7 +434,7 @@ describe('when invoking endpoint trusted apps route handlers', () => {
       const newTrustedApp = createNewTrustedAppBody();
       newTrustedApp.entries = [
         {
-          field: 'process.hash.*',
+          field: ConditionEntryField.HASH,
           value: 'aedb279e378bed6c2db3c9dc9e12ba635e0b391c',
           operator: 'included',
           type: 'match',
@@ -455,7 +456,7 @@ describe('when invoking endpoint trusted apps route handlers', () => {
       const newTrustedApp = createNewTrustedAppBody();
       newTrustedApp.entries = [
         {
-          field: 'process.hash.*',
+          field: ConditionEntryField.HASH,
           value: 'a4370c0cf81686c0b696fa6261c9d3e0d810ae704ab8301839dffd5d5112f476',
           operator: 'included',
           type: 'match',

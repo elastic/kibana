@@ -18,6 +18,8 @@ import { EuiFormProps } from '@elastic/eui/src/components/form/form';
 import { TRUSTED_APPS_SUPPORTED_OS_TYPES } from '../../../../../../common/endpoint/constants';
 import { LogicalConditionBuilder } from './logical_condition';
 import {
+  ConditionEntry,
+  ConditionEntryField,
   MacosLinuxConditionEntry,
   NewTrustedApp,
   TrustedApp,
@@ -31,9 +33,9 @@ import {
   isWindowsTrustedAppCondition,
 } from '../../state/type_guards';
 
-const generateNewEntry = (): NewTrustedApp['entries'][0] => {
+const generateNewEntry = (): ConditionEntry<ConditionEntryField.HASH> => {
   return {
-    field: 'process.hash.*',
+    field: ConditionEntryField.HASH,
     operator: 'included',
     type: 'match',
     value: '',

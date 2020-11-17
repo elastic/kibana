@@ -4,14 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React from 'react';
+import * as reactTestingLibrary from '@testing-library/react';
+import { fireEvent, getByTestId } from '@testing-library/dom';
+
+import { ConditionEntryField } from '../../../../../../common/endpoint/types';
 import {
   AppContextTestRender,
   createAppRootMockRenderer,
 } from '../../../../../common/mock/endpoint';
-import * as reactTestingLibrary from '@testing-library/react';
-import React from 'react';
+
 import { CreateTrustedAppForm, CreateTrustedAppFormProps } from './create_trusted_app_form';
-import { fireEvent, getByTestId } from '@testing-library/dom';
 
 describe('When showing the Trusted App Create Form', () => {
   const dataTestSubjForForm = 'createForm';
@@ -234,7 +237,7 @@ describe('When showing the Trusted App Create Form', () => {
           description: '',
           entries: [
             {
-              field: 'process.hash.*',
+              field: ConditionEntryField.HASH,
               operator: 'included',
               type: 'match',
               value: '',
@@ -289,7 +292,7 @@ describe('When showing the Trusted App Create Form', () => {
           description: 'some description',
           entries: [
             {
-              field: 'process.hash.*',
+              field: ConditionEntryField.HASH,
               operator: 'included',
               type: 'match',
               value: 'someHASH',
