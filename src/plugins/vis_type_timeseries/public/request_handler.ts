@@ -19,7 +19,7 @@
 
 import { getTimezone, validateInterval } from './application';
 import { getUISettings, getDataStart, getCoreStart } from './services';
-import { MAX_BUCKETS_SETTING } from '../common/constants';
+import { MAX_BUCKETS_SETTING, ROUTES } from '../common/constants';
 
 export const metricsRequestHandler = async ({
   uiState,
@@ -38,36 +38,32 @@ export const metricsRequestHandler = async ({
   const dateFormat = config.get('dateFormat');
 
   if (visParams && visParams.id && !visParams.isModelInvalid) {
-    try {
-      const maxBuckets = config.get(MAX_BUCKETS_SETTING);
+    const maxBuckets = config.get(MAX_BUCKETS_SETTING);
 
-      validateInterval(parsedTimeRange, visParams, maxBuckets);
+    validateInterval(parsedTimeRange, visParams, maxBuckets);
 
-      const resp = await getCoreStart().http.post('/api/metrics/vis/data', {
-        body: JSON.stringify({
-          timerange: {
-            timezone,
-            ...parsedTimeRange,
-          },
-          query,
-          filters,
-          panels: [visParams],
-          state: uiStateObj,
-          savedObjectId: savedObjectId || 'unsaved',
-          sessionId: dataSearch.search.session.getSessionId(),
-        }),
-      });
+    const resp = await getCoreStart().http.post(ROUTES.VIS_DATA, {
+      body: JSON.stringify({
+        timerange: {
+          timezone,
+          ...parsedTimeRange,
+        },
+        query,
+        filters,
+        panels: [visParams],
+        state: uiStateObj,
+        savedObjectId: savedObjectId || 'unsaved',
+        sessionId: dataSearch.search.session.getSessionId(),
+      }),
+    });
 
-      return {
-        dateFormat,
-        scaledDataFormat,
-        timezone,
-        ...resp,
-      };
-    } catch (error) {
-      return Promise.reject(error);
-    }
+    return {
+      dateFormat,
+      scaledDataFormat,
+      timezone,
+      ...resp,
+    };
   }
 
-  return Promise.resolve({});
+  return {};
 };

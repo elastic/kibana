@@ -19,18 +19,18 @@
 
 import { buildExpression, buildExpressionFunction } from '../../expressions/public';
 import { Vis } from '../../visualizations/public';
+import { TimeseriesExpressionFunctionDefinition } from './metrics_fn';
 
-// const fun = ({ title, ...params }, schemas, uiState = {}) => {
-//   const paramsJson = prepareJson('params', params);
-//   const uiStateJson = prepareJson('uiState', uiState);
-
-//   const paramsArray = [paramsJson, uiStateJson].filter((param) => Boolean(param));
-//   return `tsvb ${paramsArray.join(' ')}`;
-// };
+const prepareJson = (data: unknown) =>
+  JSON.stringify(data).replace(/\\/g, `\\\\`).replace(/'/g, `\\'`);
 
 export const toExpressionAst = (vis: Vis<any>) => {
-  const timeseries = buildExpressionFunction<any>('tsvb', {
-    params: JSON.stringify(vis.params).replace(/\\/g, `\\\\`).replace(/'/g, `\\'`),
+  const params = prepareJson(vis.params);
+  const uiState = prepareJson(vis.uiState);
+
+  const timeseries = buildExpressionFunction<TimeseriesExpressionFunctionDefinition>('tsvb', {
+    params,
+    uiState,
   });
 
   const ast = buildExpression([timeseries]);

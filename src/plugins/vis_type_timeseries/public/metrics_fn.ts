@@ -22,7 +22,6 @@ import { i18n } from '@kbn/i18n';
 import { KibanaContext } from '../../data/public';
 import { ExpressionFunctionDefinition, Render } from '../../expressions/public';
 
-// @ts-ignore
 import { metricsRequestHandler } from './request_handler';
 
 type Input = KibanaContext | null;
@@ -43,12 +42,14 @@ export interface TimeseriesRenderValue {
   uiState: any;
 }
 
-export const createMetricsFn = (): ExpressionFunctionDefinition<
+export type TimeseriesExpressionFunctionDefinition = ExpressionFunctionDefinition<
   'tsvb',
   Input,
   Arguments,
   Output
-> => ({
+>;
+
+export const createMetricsFn = (): TimeseriesExpressionFunctionDefinition => ({
   name: 'tsvb',
   type: 'render',
   inputTypes: ['kibana_context', 'null'],

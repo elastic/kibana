@@ -19,8 +19,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-// @ts-ignore
-import { metricsRequestHandler } from './request_handler';
 import { EditorController } from './application';
 // @ts-ignore
 import { PANEL_TYPES } from '../common/panel_types';

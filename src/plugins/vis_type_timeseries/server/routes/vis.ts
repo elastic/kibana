@@ -21,6 +21,7 @@ import { IRouter, KibanaRequest } from 'kibana/server';
 import { schema } from '@kbn/config-schema';
 import { getVisData, GetVisDataOptions } from '../lib/get_vis_data';
 import { visPayloadSchema } from '../../common/vis_schema';
+import { ROUTES } from '../../common/constants';
 import { ValidationTelemetryServiceSetup } from '../index';
 import { Framework } from '../plugin';
 
@@ -33,7 +34,7 @@ export const visDataRoutes = (
 ) => {
   router.post(
     {
-      path: '/api/metrics/vis/data',
+      path: ROUTES.VIS_DATA,
       validate: {
         body: escapeHatch,
       },
