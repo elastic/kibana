@@ -5,8 +5,15 @@
  */
 
 import { IEsSearchResponse } from '../../../../../../../../src/plugins/data/common';
-import { CursorType, Inspect, Maybe, PageInfoPaginated, SortField } from '../../../common';
-import { RequestOptionsPaginated } from '../..';
+import {
+  CursorType,
+  Inspect,
+  Maybe,
+  PageInfoPaginated,
+  PaginationInputPaginated,
+  SortField,
+} from '../../../common';
+import { RequestBasicOptions } from '../..';
 
 export enum NetworkDnsFields {
   dnsName = 'dnsName',
@@ -16,10 +23,12 @@ export enum NetworkDnsFields {
   dnsBytesOut = 'dnsBytesOut',
 }
 
-export interface NetworkDnsRequestOptions extends RequestOptionsPaginated {
-  isPtrIncluded: boolean;
-  sort: SortField<NetworkDnsFields>;
+export interface NetworkDnsRequestOptions extends RequestBasicOptions {
+  isPtrIncluded?: boolean;
+  isHistogram?: boolean;
+  sort?: SortField<NetworkDnsFields>;
   stackByField?: Maybe<string>;
+  pagination?: PaginationInputPaginated;
 }
 
 export interface NetworkDnsStrategyResponse extends IEsSearchResponse {

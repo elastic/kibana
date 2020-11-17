@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { buildDnsHistogramQuery } from './query.dns_histogram.dsl';
+import { buildDnsQuery } from '../../network/dns/query.dns_network.dsl';
 import { getDnsParsedData } from './helpers';
 
 export const dnsMatrixHistogramConfig = {
-  buildDsl: buildDnsHistogramQuery,
-  aggName: 'aggregations.NetworkDns.buckets',
-  parseKey: 'dns.buckets',
+  buildDsl: buildDnsQuery,
+  aggName: 'aggregations.dns_name_query_count.buckets',
+  parseKey: 'dns_question_name.buckets',
   parser: getDnsParsedData,
 };

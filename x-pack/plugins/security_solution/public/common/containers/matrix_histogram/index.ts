@@ -6,14 +6,18 @@
 
 import deepEqual from 'fast-deep-equal';
 import { getOr, noop } from 'lodash/fp';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import { MatrixHistogramQueryProps } from '../../components/matrix_histogram/types';
+import {
+  MatrixHistogramDnsQueryProps,
+  MatrixHistogramQueryProps,
+} from '../../components/matrix_histogram/types';
 import { inputsModel } from '../../../common/store';
 import { createFilter } from '../../../common/containers/helpers';
 import { useKibana } from '../../../common/lib/kibana';
 import {
   MatrixHistogramQuery,
+  MatrixHistogramBasicRequestOptions,
   MatrixHistogramRequestOptions,
   MatrixHistogramStrategyResponse,
   MatrixHistogramData,
@@ -42,40 +46,51 @@ export interface UseMatrixHistogramArgs {
   }>;
 }
 
-export const useMatrixHistogram = ({
-  endDate,
-  errorMessage,
-  filterQuery,
-  histogramType,
-  indexNames,
-  stackByField,
-  startDate,
-  threshold,
-  skip = false,
-}: MatrixHistogramQueryProps): [
-  boolean,
-  UseMatrixHistogramArgs,
-  (to: string, from: string) => void
-] => {
+export const isMatrixHistogramDnsQueryProps = (
+  args: MatrixHistogramQueryProps
+): args is MatrixHistogramDnsQueryProps => 'sort' in args && 'isPtrIncluded' in args;
+
+export const useMatrixHistogram = (
+  args: MatrixHistogramQueryProps
+): [boolean, UseMatrixHistogramArgs, (to: string, from: string) => void] => {
+  const {
+    endDate,
+    errorMessage,
+    filterQuery,
+    histogramType,
+    indexNames,
+    stackByField,
+    startDate,
+    threshold,
+    skip = false,
+  } = args;
+  const isPtrIncluded = isMatrixHistogramDnsQueryProps(args) ? args.isPtrIncluded : false;
+  const sort = isMatrixHistogramDnsQueryProps(args) ? args.sort : null;
   const { data, notifications } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
   const [loading, setLoading] = useState(false);
-  const [matrixHistogramRequest, setMatrixHistogramRequest] = useState<
-    MatrixHistogramRequestOptions
-  >({
-    defaultIndex: indexNames,
-    factoryQueryType: MatrixHistogramQuery,
-    filterQuery: createFilter(filterQuery),
-    histogramType,
-    timerange: {
-      interval: '12h',
-      from: startDate,
-      to: endDate,
-    },
-    stackByField,
-    threshold,
-  });
+  const options: MatrixHistogramBasicRequestOptions = useMemo(
+    () => ({
+      defaultIndex: indexNames,
+      factoryQueryType: MatrixHistogramQuery,
+      filterQuery: createFilter(filterQuery),
+      histogramType,
+      timerange: {
+        interval: '12h',
+        from: startDate,
+        to: endDate,
+      },
+      stackByField,
+      threshold,
+    }),
+    [endDate, filterQuery, histogramType, indexNames, stackByField, startDate, threshold]
+  );
+  const requestOptions = useMemo(
+    () => (sort != null ? { ...options, sort, isPtrIncluded, isHistogram: true } : options),
+    [options, sort, isPtrIncluded]
+  );
+  const [matrixHistogramRequest, setMatrixHistogramRequest] = useState(requestOptions);
 
   const [matrixHistogramResponse, setMatrixHistogramResponse] = useState<UseMatrixHistogramArgs>({
     data: [],
@@ -156,23 +171,14 @@ export const useMatrixHistogram = ({
     setMatrixHistogramRequest((prevRequest) => {
       const myRequest = {
         ...prevRequest,
-        defaultIndex: indexNames,
-        filterQuery: createFilter(filterQuery),
-        histogramType,
-        timerange: {
-          interval: '12h',
-          from: startDate,
-          to: endDate,
-        },
-        stackByField,
-        threshold,
+        ...requestOptions,
       };
       if (!deepEqual(prevRequest, myRequest)) {
         return myRequest;
       }
       return prevRequest;
     });
-  }, [indexNames, endDate, filterQuery, startDate, stackByField, histogramType, threshold]);
+  }, [requestOptions]);
 
   useEffect(() => {
     if (!skip) {

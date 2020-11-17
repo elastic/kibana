@@ -5,11 +5,11 @@
  */
 
 import { dnsMatrixHistogramConfig } from '.';
-import { buildDnsHistogramQuery } from './query.dns_histogram.dsl';
+import { buildDnsQuery } from '../../network/dns/query.dns_network.dsl';
 import { getDnsParsedData } from './helpers';
 
-jest.mock('./query.dns_histogram.dsl', () => ({
-  buildDnsHistogramQuery: jest.fn(),
+jest.mock('../../network/dns/query.dns_network.dsl', () => ({
+  buildDnsQuery: jest.fn(),
 }));
 
 jest.mock('./helpers', () => ({
@@ -19,9 +19,9 @@ jest.mock('./helpers', () => ({
 describe('dnsMatrixHistogramConfig', () => {
   test('should export dnsMatrixHistogramConfig corrrectly', () => {
     expect(dnsMatrixHistogramConfig).toEqual({
-      aggName: 'aggregations.NetworkDns.buckets',
-      parseKey: 'dns.buckets',
-      buildDsl: buildDnsHistogramQuery,
+      aggName: 'aggregations.dns_name_query_count.buckets',
+      parseKey: 'dns_question_name.buckets',
+      buildDsl: buildDnsQuery,
       parser: getDnsParsedData,
     });
   });
