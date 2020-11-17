@@ -68,7 +68,7 @@ export class EncryptionConfig {
       docs += `${key}
     ${this.#encryptionMeta[key].description}
     ${this.#encryptionMeta[key].docs}
-`;
+\n`;
     });
     return docs;
   }
