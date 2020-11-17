@@ -323,7 +323,7 @@ const getSavedObjectTypes = (
         package_name: { type: 'keyword' },
         package_version: { type: 'keyword' },
         install_source: { type: 'keyword' },
-        path: { type: 'text' },
+        asset_path: { type: 'text' },
         media_type: { type: 'keyword' },
         data_utf8: { type: 'text', index: false },
         data_base64: { type: 'binary' },

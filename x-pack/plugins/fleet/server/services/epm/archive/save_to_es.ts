@@ -9,16 +9,16 @@ import { isBinaryFile } from 'isbinaryfile';
 import mime from 'mime-types';
 import { SavedObjectsClientContract, SavedObjectsBulkCreateObject } from 'src/core/server';
 import { ASSETS_SAVED_OBJECT_TYPE, InstallablePackage, InstallSource } from '../../../../common';
-import { cacheGet } from '../archive';
+import { getArchiveEntry } from './index';
 
 // could be anything, picked this from https://github.com/elastic/elastic-agent-client/issues/17
 const MAX_ES_ASSET_BYTES = 4 * 1024 * 1024;
 
-interface AssetsSOAttributes {
+interface PackageAssetsSOAttributes {
   package_name: string;
   package_version: string;
   install_source: string;
-  path: string;
+  asset_path: string;
   media_type: string;
   data_utf8: string;
   data_base64: string;
@@ -37,14 +37,14 @@ export const saveArchiveEntriesToES = async ({
 }) => {
   const bulkBody = await Promise.all(
     paths.map((path) => {
-      const buffer = cacheGet(path);
+      const buffer = getArchiveEntry(path);
       if (!buffer) throw new Error(`Could not find ArchiveEntry at ${path}`);
       const { name, version } = packageInfo;
       return archiveEntryToBulkCreateObject({ path, buffer, name, version, installSource });
     })
   );
 
-  const results = await savedObjectsClient.bulkCreate<AssetsSOAttributes>(bulkBody);
+  const results = await savedObjectsClient.bulkCreate<PackageAssetsSOAttributes>(bulkBody);
   return results;
 };
 
@@ -60,7 +60,7 @@ export async function archiveEntryToBulkCreateObject({
   name: string;
   version: string;
   installSource: InstallSource;
-}): Promise<SavedObjectsBulkCreateObject<AssetsSOAttributes>> {
+}): Promise<SavedObjectsBulkCreateObject<PackageAssetsSOAttributes>> {
   const fileExt = extname(path);
   const contentType = mime.lookup(fileExt);
   const mediaType = mime.contentType(contentType || fileExt);
@@ -87,7 +87,7 @@ export async function archiveEntryToBulkCreateObject({
       package_name: name,
       package_version: version,
       install_source: installSource,
-      path,
+      asset_path: path,
       media_type: mediaType || '',
       data_utf8: dataUtf8,
       data_base64: dataBase64,
