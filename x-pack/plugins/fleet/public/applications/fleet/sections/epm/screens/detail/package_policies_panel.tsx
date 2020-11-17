@@ -26,6 +26,7 @@ import {
   PackagePolicyEnriched,
   useGetEnrichedPackagePolicies,
 } from './use_get_enriched_package_policies';
+import { LinkAndRevision, LinkAndRevisionProps } from '../../../../components';
 
 const IntegrationDetailsLink = memo<{
   integrationPolicy: PackagePolicy;
@@ -44,21 +45,24 @@ const IntegrationDetailsLink = memo<{
   );
 });
 
-const AgentPolicyDetailLink = memo<{ agentPolicyId: string; children: ReactNode }>(
-  ({ agentPolicyId, children }) => {
-    const { getHref } = useLink();
-    return (
-      <EuiLink
-        className="eui-textTruncate"
-        href={getHref('policy_details', {
-          policyId: agentPolicyId,
-        })}
-      >
-        {children}
-      </EuiLink>
-    );
-  }
-);
+const AgentPolicyDetailLink = memo<{
+  agentPolicyId: string;
+  revision: LinkAndRevisionProps['revision'];
+  children: ReactNode;
+}>(({ agentPolicyId, revision, children }) => {
+  const { getHref } = useLink();
+  return (
+    <LinkAndRevision
+      className="eui-textTruncate"
+      revision={revision}
+      href={getHref('policy_details', {
+        policyId: agentPolicyId,
+      })}
+    >
+      {children}
+    </LinkAndRevision>
+  );
+});
 
 const PolicyAgentListLink = memo<{ agentPolicyId: string; children: ReactNode }>(
   ({ agentPolicyId, children }) => {
@@ -127,7 +131,10 @@ export const PackagePoliciesPanel = ({ name, version }: PackagePoliciesPanelProp
         truncateText: true,
         render(id, packagePolicy) {
           return (
-            <AgentPolicyDetailLink agentPolicyId={id}>
+            <AgentPolicyDetailLink
+              agentPolicyId={id}
+              revision={packagePolicy._agentPolicy?.revision}
+            >
               {packagePolicy._agentPolicy?.name ?? id}
             </AgentPolicyDetailLink>
           );
