@@ -10,7 +10,7 @@ import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 import { UrlStateContainer } from '../../utils/url_state';
 import { useTrackedPromise } from '../../utils/use_tracked_promise';
-import { LogEntry, fetchLogEntry } from './log_entries/api/fetch_log_entry';
+import { fetchLogEntry } from './log_entries/api/fetch_log_entry';
 import { useLogSourceContext } from './log_source';
 
 export enum FlyoutVisibility {

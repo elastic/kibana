@@ -24,8 +24,8 @@ interface LogStreamProps {
 
 interface LogStreamState {
   entries: LogEntry[];
-  topCursor: LogEntriesCursor | null;
-  bottomCursor: LogEntriesCursor | null;
+  topCursor: LogEntryCursor | null;
+  bottomCursor: LogEntryCursor | null;
   hasMoreBefore: boolean;
   hasMoreAfter: boolean;
 }
