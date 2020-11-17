@@ -164,6 +164,7 @@ export function initPushCaseUserActionApi({
             ],
           }),
         ]);
+
         return response.ok({
           body: CaseResponseRt.encode(
             flattenCaseSavedObject({
@@ -183,6 +184,16 @@ export function initPushCaseUserActionApi({
                   attributes: {
                     ...origComment.attributes,
                     ...updatedComment?.attributes,
+                    ...(origComment.attributes.type === 'user'
+                      ? {
+                          type: 'user',
+                          comment: origComment.attributes.comment,
+                        }
+                      : {
+                          type: 'alert',
+                          alertId: origComment.attributes.alertId,
+                          index: origComment.attributes.index,
+                        }),
                   },
                   version: updatedComment?.version ?? origComment.version,
                   references: origComment?.references ?? [],

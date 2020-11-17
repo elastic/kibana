@@ -9,18 +9,18 @@ import { validateConnector } from './validators';
 // Reserved for future implementation
 export const CaseConfigurationSchema = schema.object({});
 
-const CommentProps = {
+const ContextTypeUserSchema = schema.object({
+  type: schema.literal('user'),
   comment: schema.string(),
-  context: schema.object({
-    type: schema.conditional(
-      schema.siblingRef('savedObjectId'),
-      null,
-      schema.literal('user'),
-      schema.oneOf([schema.literal('alert')])
-    ),
-    savedObjectId: schema.nullable(schema.string()),
-  }),
-};
+});
+
+const ContextTypeAlertSchema = schema.object({
+  type: schema.literal('alert'),
+  alertId: schema.string(),
+  index: schema.string(),
+});
+
+export const CommentSchema = schema.oneOf([ContextTypeUserSchema, ContextTypeAlertSchema]);
 
 const JiraFieldsSchema = schema.object({
   issueType: schema.string(),
@@ -94,7 +94,7 @@ const CaseUpdateRequestProps = {
 
 const CaseAddCommentRequestProps = {
   caseId: schema.string(),
-  comment: schema.object(CommentProps),
+  comment: CommentSchema,
 };
 
 export const ExecutorSubActionCreateParamsSchema = schema.object(CaseBasicProps);

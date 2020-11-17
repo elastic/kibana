@@ -8,7 +8,7 @@ import { EuiButton, EuiLoadingSpinner } from '@elastic/eui';
 import React, { useCallback, forwardRef, useImperativeHandle } from 'react';
 import styled from 'styled-components';
 
-import { CommentRequest, CommentType } from '../../../../../case/common/api';
+import { CommentRequestUserType, CommentType } from '../../../../../case/common/api';
 import { usePostComment } from '../../containers/use_post_comment';
 import { Case } from '../../containers/types';
 import { MarkdownEditorForm } from '../../../common/components/markdown_editor/eui_form';
@@ -25,9 +25,9 @@ const MySpinner = styled(EuiLoadingSpinner)`
   left: 50%;
 `;
 
-const initialCommentValue: CommentRequest = {
+const initialCommentValue: CommentRequestUserType = {
   comment: '',
-  context: { type: CommentType.user, savedObjectId: null },
+  type: CommentType.user,
 };
 
 export interface AddCommentRefObject {
@@ -47,7 +47,7 @@ export const AddComment = React.memo(
     ({ caseId, disabled, showLoading = true, onCommentPosted, onCommentSaving }, ref) => {
       const { isLoading, postComment } = usePostComment(caseId);
 
-      const { form } = useForm<CommentRequest>({
+      const { form } = useForm<CommentRequestUserType>({
         defaultValue: initialCommentValue,
         options: { stripEmptyFields: false },
         schema,
@@ -82,10 +82,7 @@ export const AddComment = React.memo(
           if (onCommentSaving != null) {
             onCommentSaving();
           }
-          postComment(
-            { ...data, context: { type: CommentType.user, savedObjectId: null } },
-            onCommentPosted
-          );
+          postComment({ ...data }, onCommentPosted);
           reset();
         }
       }, [onCommentPosted, onCommentSaving, postComment, reset, submit]);

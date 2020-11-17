@@ -13,10 +13,10 @@ import { flattenCaseSavedObject, transformNewComment } from '../../routes/api/ut
 
 import {
   throwErrors,
-  excess,
   CaseResponseRt,
   CommentRequestRt,
   CaseResponse,
+  decodeComment,
 } from '../../../common/api';
 import { buildCommentUserActionItem } from '../../services/user_actions/helpers';
 
@@ -33,9 +33,12 @@ export const addComment = ({
   comment,
 }: CaseClientAddComment): Promise<CaseResponse> => {
   const query = pipe(
-    excess(CommentRequestRt).decode(comment),
+    // TODO: Excess CommentRequestRt when the excess() function supports union types
+    CommentRequestRt.decode(comment),
     fold(throwErrors(Boom.badRequest), identity)
   );
+
+  decodeComment(comment.type, comment);
 
   const myCase = await caseService.getCase({
     client: savedObjectsClient,
@@ -105,7 +108,7 @@ export const addComment = ({
           caseId: myCase.id,
           commentId: newComment.id,
           fields: ['comment'],
-          newValue: query.comment,
+          newValue: JSON.stringify(query),
         }),
       ],
     }),

@@ -117,7 +117,7 @@ describe('Utils', () => {
     it('transforms correctly', () => {
       const comment = {
         comment: 'A comment',
-        context: { type: CommentType.user as const, savedObjectId: null },
+        type: CommentType.user as const,
         createdDate: '2020-04-09T09:43:51.778Z',
         email: 'elastic@elastic.co',
         full_name: 'Elastic',
@@ -127,7 +127,7 @@ describe('Utils', () => {
       const res = transformNewComment(comment);
       expect(res).toEqual({
         comment: 'A comment',
-        context: { type: CommentType.user, savedObjectId: null },
+        type: CommentType.user,
         created_at: '2020-04-09T09:43:51.778Z',
         created_by: { email: 'elastic@elastic.co', full_name: 'Elastic', username: 'elastic' },
         pushed_at: null,
@@ -140,7 +140,7 @@ describe('Utils', () => {
     it('transform correctly without optional fields', () => {
       const comment = {
         comment: 'A comment',
-        context: { type: CommentType.user as const, savedObjectId: null },
+        type: CommentType.user as const,
         createdDate: '2020-04-09T09:43:51.778Z',
       };
 
@@ -148,7 +148,7 @@ describe('Utils', () => {
 
       expect(res).toEqual({
         comment: 'A comment',
-        context: { type: CommentType.user, savedObjectId: null },
+        type: CommentType.user,
         created_at: '2020-04-09T09:43:51.778Z',
         created_by: { email: undefined, full_name: undefined, username: undefined },
         pushed_at: null,
@@ -161,7 +161,7 @@ describe('Utils', () => {
     it('transform correctly with optional fields as null', () => {
       const comment = {
         comment: 'A comment',
-        context: { type: CommentType.user as const, savedObjectId: null },
+        type: CommentType.user as const,
         createdDate: '2020-04-09T09:43:51.778Z',
         email: null,
         full_name: null,
@@ -172,7 +172,7 @@ describe('Utils', () => {
 
       expect(res).toEqual({
         comment: 'A comment',
-        context: { type: CommentType.user, savedObjectId: null },
+        type: CommentType.user,
         created_at: '2020-04-09T09:43:51.778Z',
         created_by: { email: null, full_name: null, username: null },
         pushed_at: null,

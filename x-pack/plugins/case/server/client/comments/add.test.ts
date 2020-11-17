@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { omit } from 'lodash/fp';
 import { CommentType } from '../../../common/api';
 import {
   createMockSavedObjectsRepository,
@@ -33,7 +34,7 @@ describe('addComment', () => {
         caseId: 'mock-id-1',
         comment: {
           comment: 'Wow, good luck catching that bad meanie!',
-          context: { type: CommentType.user, savedObjectId: null },
+          type: CommentType.user,
         },
       });
 
@@ -41,7 +42,7 @@ describe('addComment', () => {
       expect(res.totalComment).toEqual(res.comments!.length);
       expect(res.comments![res.comments!.length - 1]).toEqual({
         comment: 'Wow, good luck catching that bad meanie!',
-        context: { type: CommentType.user, savedObjectId: null },
+        type: CommentType.user,
         created_at: '2020-10-23T21:54:48.952Z',
         created_by: {
           email: 'd00d@awesome.com',
@@ -67,16 +68,18 @@ describe('addComment', () => {
       const res = await caseClient.client.addComment({
         caseId: 'mock-id-1',
         comment: {
-          comment: 'Wow, good luck catching that bad meanie!',
-          context: { type: CommentType.alert, savedObjectId: 'id' },
+          type: CommentType.alert,
+          alertId: 'test-id',
+          index: 'test-index',
         },
       });
 
       expect(res.id).toEqual('mock-id-1');
       expect(res.totalComment).toEqual(res.comments!.length);
       expect(res.comments![res.comments!.length - 1]).toEqual({
-        comment: 'Wow, good luck catching that bad meanie!',
-        context: { type: CommentType.alert, savedObjectId: 'id' },
+        type: CommentType.alert,
+        alertId: 'test-id',
+        index: 'test-index',
         created_at: '2020-10-23T21:54:48.952Z',
         created_by: {
           email: 'd00d@awesome.com',
@@ -103,7 +106,7 @@ describe('addComment', () => {
         caseId: 'mock-id-1',
         comment: {
           comment: 'Wow, good luck catching that bad meanie!',
-          context: { type: CommentType.user, savedObjectId: null },
+          type: CommentType.user,
         },
       });
 
@@ -126,7 +129,7 @@ describe('addComment', () => {
         caseId: 'mock-id-1',
         comment: {
           comment: 'Wow, good luck catching that bad meanie!',
-          context: { type: CommentType.user, savedObjectId: null },
+          type: CommentType.user,
         },
       });
 
@@ -143,7 +146,7 @@ describe('addComment', () => {
               username: 'awesome',
             },
             action_field: ['comment'],
-            new_value: 'Wow, good luck catching that bad meanie!',
+            new_value: '{"comment":"Wow, good luck catching that bad meanie!","type":"user"}',
             old_value: null,
           },
           references: [
@@ -173,14 +176,14 @@ describe('addComment', () => {
         caseId: 'mock-id-1',
         comment: {
           comment: 'Wow, good luck catching that bad meanie!',
-          context: { type: CommentType.user, savedObjectId: null },
+          type: CommentType.user,
         },
       });
 
       expect(res.id).toEqual('mock-id-1');
       expect(res.comments![res.comments!.length - 1]).toEqual({
         comment: 'Wow, good luck catching that bad meanie!',
-        context: { type: CommentType.user, savedObjectId: null },
+        type: CommentType.user,
         created_at: '2020-10-23T21:54:48.952Z',
         created_by: {
           email: null,
@@ -198,7 +201,7 @@ describe('addComment', () => {
   });
 
   describe('unhappy path', () => {
-    test('it throws when missing comment', async () => {
+    test('it throws when missing type', async () => {
       expect.assertions(3);
 
       const savedObjectsClient = createMockSavedObjectsRepository({
@@ -219,73 +222,126 @@ describe('addComment', () => {
         });
     });
 
-    test('it throws when missing context', async () => {
+    test('it throws when missing attributes: type user', async () => {
       expect.assertions(3);
 
       const savedObjectsClient = createMockSavedObjectsRepository({
         caseSavedObject: mockCases,
         caseCommentSavedObject: mockCaseComments,
       });
+
       const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
-      caseClient.client
-        .addComment({
-          caseId: 'mock-id-1',
-          // @ts-expect-error
-          comment: { comment: 'a comment' },
-        })
-        .catch((e) => {
-          expect(e).not.toBeNull();
-          expect(e.isBoom).toBe(true);
-          expect(e.output.statusCode).toBe(400);
-        });
+      const allRequestAttributes = {
+        type: CommentType.user,
+        comment: 'a comment',
+      };
+
+      ['comment'].forEach((attribute) => {
+        const requestAttributes = omit(attribute, allRequestAttributes);
+        caseClient.client
+          .addComment({
+            caseId: 'mock-id-1',
+            // @ts-expect-error
+            comment: {
+              ...requestAttributes,
+            },
+          })
+          .catch((e) => {
+            expect(e).not.toBeNull();
+            expect(e.isBoom).toBe(true);
+            expect(e.output.statusCode).toBe(400);
+          });
+      });
     });
 
-    test('it throws when type is user and savedObjectId !== null', async () => {
-      expect.assertions(3);
+    test('it throws when excess attributes are provided: type user', async () => {
+      expect.assertions(6);
 
       const savedObjectsClient = createMockSavedObjectsRepository({
         caseSavedObject: mockCases,
         caseCommentSavedObject: mockCaseComments,
       });
+
       const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
-      caseClient.client
-        .addComment({
-          caseId: 'mock-id-1',
-          comment: {
-            comment: 'a comment',
-            // @ts-expect-error
-            context: { type: CommentType.user, savedObjectId: 'ada' },
-          },
-        })
-        .catch((e) => {
-          expect(e).not.toBeNull();
-          expect(e.isBoom).toBe(true);
-          expect(e.output.statusCode).toBe(400);
-        });
+
+      ['alertId', 'index'].forEach((attribute) => {
+        caseClient.client
+          .addComment({
+            caseId: 'mock-id-1',
+            comment: {
+              [attribute]: attribute,
+              comment: 'a comment',
+              type: CommentType.user,
+            },
+          })
+          .catch((e) => {
+            expect(e).not.toBeNull();
+            expect(e.isBoom).toBe(true);
+            expect(e.output.statusCode).toBe(400);
+          });
+      });
     });
 
-    test('it throws when type is alert and savedObjectId === null', async () => {
+    test('it throws when missing attributes: type alert', async () => {
+      expect.assertions(6);
+
+      const savedObjectsClient = createMockSavedObjectsRepository({
+        caseSavedObject: mockCases,
+        caseCommentSavedObject: mockCaseComments,
+      });
+
+      const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
+      const allRequestAttributes = {
+        type: CommentType.alert,
+        index: 'test-index',
+        alertId: 'test-id',
+      };
+
+      ['alertId', 'index'].forEach((attribute) => {
+        const requestAttributes = omit(attribute, allRequestAttributes);
+        caseClient.client
+          .addComment({
+            caseId: 'mock-id-1',
+            // @ts-expect-error
+            comment: {
+              ...requestAttributes,
+            },
+          })
+          .catch((e) => {
+            expect(e).not.toBeNull();
+            expect(e.isBoom).toBe(true);
+            expect(e.output.statusCode).toBe(400);
+          });
+      });
+    });
+
+    test('it throws when excess attributes are provided: type alert', async () => {
       expect.assertions(3);
 
       const savedObjectsClient = createMockSavedObjectsRepository({
         caseSavedObject: mockCases,
         caseCommentSavedObject: mockCaseComments,
       });
+
       const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
-      caseClient.client
-        .addComment({
-          caseId: 'mock-id-1',
-          comment: {
-            comment: 'a comment',
-            // @ts-expect-error
-            context: { type: CommentType.alert, savedObjectId: null },
-          },
-        })
-        .catch((e) => {
-          expect(e).not.toBeNull();
-          expect(e.isBoom).toBe(true);
-          expect(e.output.statusCode).toBe(400);
-        });
+
+      ['comment'].forEach((attribute) => {
+        caseClient.client
+          .addComment({
+            caseId: 'mock-id-1',
+            comment: {
+              [attribute]: attribute,
+              type: CommentType.alert,
+              index: 'test-index',
+              alertId: 'test-id',
+            },
+          })
+          .catch((e) => {
+            expect(e).not.toBeNull();
+            expect(e.isBoom).toBe(true);
+            expect(e.output.statusCode).toBe(400);
+          });
+      });
     });
 
     test('it throws when the case does not exists', async () => {
@@ -301,7 +357,7 @@ describe('addComment', () => {
           caseId: 'not-exists',
           comment: {
             comment: 'Wow, good luck catching that bad meanie!',
-            context: { type: CommentType.user, savedObjectId: null },
+            type: CommentType.user,
           },
         })
         .catch((e) => {
@@ -324,7 +380,7 @@ describe('addComment', () => {
           caseId: 'mock-id-1',
           comment: {
             comment: 'Throw an error',
-            context: { type: CommentType.user, savedObjectId: null },
+            type: CommentType.user,
           },
         })
         .catch((e) => {

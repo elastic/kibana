@@ -208,7 +208,7 @@ export const mockCaseComments: Array<SavedObject<CommentAttributes>> = [
     id: 'mock-comment-1',
     attributes: {
       comment: 'Wow, good luck catching that bad meanie!',
-      context: { type: CommentType.user, savedObjectId: null },
+      type: CommentType.user,
       created_at: '2019-11-25T21:55:00.177Z',
       created_by: {
         full_name: 'elastic',
@@ -239,7 +239,7 @@ export const mockCaseComments: Array<SavedObject<CommentAttributes>> = [
     id: 'mock-comment-2',
     attributes: {
       comment: 'Well I decided to update my comment. So what? Deal with it.',
-      context: { type: CommentType.user, savedObjectId: null },
+      type: CommentType.user,
       created_at: '2019-11-25T21:55:14.633Z',
       created_by: {
         full_name: 'elastic',
@@ -271,7 +271,39 @@ export const mockCaseComments: Array<SavedObject<CommentAttributes>> = [
     id: 'mock-comment-3',
     attributes: {
       comment: 'Wow, good luck catching that bad meanie!',
-      context: { type: CommentType.user, savedObjectId: null },
+      type: CommentType.user,
+      created_at: '2019-11-25T22:32:30.608Z',
+      created_by: {
+        full_name: 'elastic',
+        email: 'testemail@elastic.co',
+        username: 'elastic',
+      },
+      pushed_at: null,
+      pushed_by: null,
+      updated_at: '2019-11-25T22:32:30.608Z',
+      updated_by: {
+        full_name: 'elastic',
+        email: 'testemail@elastic.co',
+        username: 'elastic',
+      },
+    },
+    references: [
+      {
+        type: 'cases',
+        name: 'associated-cases',
+        id: 'mock-id-3',
+      },
+    ],
+    updated_at: '2019-11-25T22:32:30.608Z',
+    version: 'WzYsMV0=',
+  },
+  {
+    type: 'cases-comment',
+    id: 'mock-comment-4',
+    attributes: {
+      type: CommentType.alert,
+      index: 'test-index',
+      alertId: 'test-id',
       created_at: '2019-11-25T22:32:30.608Z',
       created_by: {
         full_name: 'elastic',

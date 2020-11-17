@@ -9,6 +9,8 @@ import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 import * as rt from 'io-ts';
 import { failure } from 'io-ts/lib/PathReporter';
+import Boom from '@hapi/boom';
+import { ContextTypeUserRt, ContextTypeAlertRt } from '.';
 
 type ErrorFactory = (message: string) => Error;
 
@@ -56,3 +58,17 @@ export function excess<C extends rt.InterfaceType<rt.Props>>(codec: C): C {
   );
   return r as any;
 }
+
+export const decodeComment = (type: string, attributes: unknown) => {
+  if (type === 'user') {
+    pipe(
+      excess(ContextTypeUserRt).decode(attributes),
+      fold(throwErrors(Boom.badRequest), identity)
+    );
+  } else if (type === 'alert') {
+    pipe(
+      excess(ContextTypeAlertRt).decode(attributes),
+      fold(throwErrors(Boom.badRequest), identity)
+    );
+  }
+};

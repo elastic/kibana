@@ -56,24 +56,22 @@ export const transformNewCase = ({
   updated_by: null,
 });
 
-interface NewCommentArgs extends CommentRequest {
+type NewCommentArgs = CommentRequest & {
   createdDate: string;
   email?: string | null;
   full_name?: string | null;
   username?: string | null;
-}
+};
 
 export const transformNewComment = ({
-  comment,
-  context,
   createdDate,
   email,
   // eslint-disable-next-line @typescript-eslint/naming-convention
   full_name,
   username,
+  ...comment
 }: NewCommentArgs): CommentAttributes => ({
-  comment,
-  context,
+  ...comment,
   created_at: createdDate,
   created_by: { email, full_name, username },
   pushed_at: null,

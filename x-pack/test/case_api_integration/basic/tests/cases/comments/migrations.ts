@@ -30,9 +30,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'true')
         .send();
 
-      expect(comment).key('context');
-      expect(comment.context.type).to.eql('user');
-      expect(comment.context.savedObjectId).to.eql(null);
+      expect(comment.type).to.eql('user');
     });
   });
 }
