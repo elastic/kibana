@@ -25,6 +25,7 @@ import { EditorController } from './application';
 // @ts-ignore
 import { PANEL_TYPES } from '../common/panel_types';
 import { VIS_EVENT_TO_TRIGGER, VisGroups } from '../../visualizations/public';
+import { toExpressionAst } from './to_ast';
 
 export const metricsVisDefinition = {
   name: 'metrics',
@@ -77,10 +78,9 @@ export const metricsVisDefinition = {
     showFilterBar: false,
     showIndexSelection: false,
   },
-  requestHandler: metricsRequestHandler,
+  toExpressionAst,
   getSupportedTriggers: () => {
     return [VIS_EVENT_TO_TRIGGER.applyFilter];
   },
   inspectorAdapters: {},
-  responseHandler: 'none',
 };

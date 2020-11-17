@@ -30,8 +30,8 @@ const TimeseriesVisualization = lazy(
 );
 
 const checkIfDataExists = (visData: any, model: any) => {
-  const data = visData.type === 'table' ? visData.series : visData[model.id].series;
-  return data.length > 0;
+  const data = visData.type === 'table' ? visData.series : visData[model.id]?.series;
+  return data?.length > 0;
 };
 
 export const getTimeseriesVisRenderer: (deps: {
