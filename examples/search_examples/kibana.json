@@ -1,11 +1,7 @@
 {
   "id": "searchExamples",
-<<<<<<< HEAD
-  "version": "7.10.1",
-=======
   "version": "0.0.1",
   "kibanaVersion": "kibana",
->>>>>>> a2d288d134c... fix(NA): search examples kibana version declaration (#83182)
   "server": true,
   "ui": true,
   "requiredPlugins": ["navigation", "data", "developerExamples"],
