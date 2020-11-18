@@ -18,7 +18,7 @@ import { ViewContentHeader } from '../../components/shared/view_content_header';
 export const ErrorState: React.FC = () => {
   return (
     <EuiPage restrictWidth>
-      <SetPageChrome isRoot />
+      <SetPageChrome />
       <SendTelemetry action="error" metric="cannot_connect" />
 
       <EuiPageBody>

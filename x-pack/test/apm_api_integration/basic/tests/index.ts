@@ -25,6 +25,10 @@ export default function apmApiIntegrationTests({ loadTestFile }: FtrProviderCont
       loadTestFile(require.resolve('./services/transaction_types'));
     });
 
+    describe('Service overview', function () {
+      loadTestFile(require.resolve('./service_overview/error_groups'));
+    });
+
     describe('Settings', function () {
       loadTestFile(require.resolve('./settings/custom_link'));
       loadTestFile(require.resolve('./settings/agent_configuration'));
@@ -55,6 +59,11 @@ export default function apmApiIntegrationTests({ loadTestFile }: FtrProviderCont
 
     describe('Metrics', function () {
       loadTestFile(require.resolve('./metrics_charts/metrics_charts'));
+    });
+
+    describe('Correlations', function () {
+      loadTestFile(require.resolve('./correlations/slow_durations'));
+      loadTestFile(require.resolve('./correlations/ranges'));
     });
   });
 }

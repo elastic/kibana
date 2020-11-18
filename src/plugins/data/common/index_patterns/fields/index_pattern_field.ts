@@ -18,18 +18,18 @@
  */
 
 import { KbnFieldType, getKbnFieldType } from '../../kbn_field_types';
+import { KBN_FIELD_TYPES } from '../../kbn_field_types/types';
 import { IFieldType } from './types';
 import { FieldSpec, IndexPattern } from '../..';
+import { shortenDottedString } from '../../utils';
 
 export class IndexPatternField implements IFieldType {
   readonly spec: FieldSpec;
   // not writable or serialized
-  readonly displayName: string;
   private readonly kbnFieldType: KbnFieldType;
 
-  constructor(spec: FieldSpec, displayName: string) {
+  constructor(spec: FieldSpec) {
     this.spec = { ...spec, type: spec.name === '_source' ? '_source' : spec.type };
-    this.displayName = displayName;
 
     this.kbnFieldType = getKbnFieldType(spec.type);
   }
@@ -68,6 +68,14 @@ export class IndexPatternField implements IFieldType {
     this.spec.lang = lang;
   }
 
+  public get customName() {
+    return this.spec.customName;
+  }
+
+  public set customName(label) {
+    this.spec.customName = label;
+  }
+
   /**
    * Description of field type conflicts across different indices in the same index pattern
    */
@@ -82,6 +90,14 @@ export class IndexPatternField implements IFieldType {
   // read only attrs
   public get name() {
     return this.spec.name;
+  }
+
+  public get displayName(): string {
+    return this.spec.customName
+      ? this.spec.customName
+      : this.spec.shortDotsEnable
+      ? shortenDottedString(this.spec.name)
+      : this.spec.name;
   }
 
   public get type() {
@@ -129,7 +145,8 @@ export class IndexPatternField implements IFieldType {
   }
 
   public get visualizable() {
-    return this.aggregatable;
+    const notVisualizableFieldTypes: string[] = [KBN_FIELD_TYPES.UNKNOWN, KBN_FIELD_TYPES.CONFLICT];
+    return this.aggregatable && !notVisualizableFieldTypes.includes(this.spec.type);
   }
 
   public toJSON() {
@@ -138,7 +155,6 @@ export class IndexPatternField implements IFieldType {
       script: this.script,
       lang: this.lang,
       conflictDescriptions: this.conflictDescriptions,
-
       name: this.name,
       type: this.type,
       esTypes: this.esTypes,
@@ -147,6 +163,7 @@ export class IndexPatternField implements IFieldType {
       aggregatable: this.aggregatable,
       readFromDocValues: this.readFromDocValues,
       subType: this.subType,
+      customName: this.customName,
     };
   }
 
@@ -169,6 +186,8 @@ export class IndexPatternField implements IFieldType {
       readFromDocValues: this.readFromDocValues,
       subType: this.subType,
       format: getFormatterForField ? getFormatterForField(this).toJSON() : undefined,
+      customName: this.customName,
+      shortDotsEnable: this.spec.shortDotsEnable,
     };
   }
 }

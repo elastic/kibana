@@ -28,6 +28,7 @@ interface Usage {
   locale: string;
 }
 
+// @ts-expect-error Intentionally not specifying `schema`
 export const myCollector = makeUsageCollector<Usage>({
   type: 'unmapped_collector',
   isReady: () => true,

@@ -32,6 +32,7 @@ import {
 import { useActions } from './use_actions';
 import { useMlLink } from '../../../../../contexts/kibana';
 import { ML_PAGES } from '../../../../../../../common/constants/ml_url_generator';
+import { JobSpacesList } from '../../../../../components/job_spaces_list';
 
 enum TASK_STATE_COLOR {
   analyzing = 'primary',
@@ -134,13 +135,13 @@ export const progressColumn = {
   'data-test-subj': 'mlAnalyticsTableColumnProgress',
 };
 
-export const DFAnalyticsJobIdLink = ({ item }: { item: DataFrameAnalyticsListRow }) => {
+export const DFAnalyticsJobIdLink = ({ jobId }: { jobId: string }) => {
   const href = useMlLink({
     page: ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE,
-    pageState: { jobId: item.id },
+    pageState: { jobId },
   });
 
-  return <EuiLink href={href}>{item.id}</EuiLink>;
+  return <EuiLink href={href}>{jobId}</EuiLink>;
 };
 
 export const useColumns = (
@@ -198,13 +199,17 @@ export const useColumns = (
       'data-test-subj': 'mlAnalyticsTableRowDetailsToggle',
     },
     {
-      name: 'ID',
+      field: DataFrameAnalyticsListColumn.id,
+      name: i18n.translate('xpack.ml.dataframe.analyticsList.id', {
+        defaultMessage: 'ID',
+      }),
       sortable: (item: DataFrameAnalyticsListRow) => item.id,
       truncateText: true,
       'data-test-subj': 'mlAnalyticsTableColumnId',
       scope: 'row',
-      render: (item: DataFrameAnalyticsListRow) =>
-        isManagementTable ? <DFAnalyticsJobIdLink item={item} /> : item.id,
+      render: (jobId: string) => {
+        return isManagementTable ? <DFAnalyticsJobIdLink jobId={jobId} /> : jobId;
+      },
     },
     {
       field: DataFrameAnalyticsListColumn.description,
@@ -278,7 +283,8 @@ export const useColumns = (
       name: i18n.translate('xpack.ml.jobsList.analyticsSpacesLabel', {
         defaultMessage: 'Spaces',
       }),
-      render: () => <EuiBadge color={'hollow'}>{'all'}</EuiBadge>,
+      render: (item: DataFrameAnalyticsListRow) =>
+        Array.isArray(item.spaces) ? <JobSpacesList spaces={item.spaces} /> : null,
       width: '75px',
     });
 

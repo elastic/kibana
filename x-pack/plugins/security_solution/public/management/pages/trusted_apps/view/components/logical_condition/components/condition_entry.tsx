@@ -16,6 +16,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TrustedApp } from '../../../../../../../../common/endpoint/types';
+import { CONDITION_FIELD_TITLE } from '../../../translations';
 
 const ConditionEntryCell = memo<{
   showLabel: boolean;
@@ -72,18 +73,12 @@ export const ConditionEntry = memo<ConditionEntryProps>(
     const fieldOptions = useMemo<Array<EuiSuperSelectOption<string>>>(() => {
       return [
         {
-          inputDisplay: i18n.translate(
-            'xpack.securitySolution.trustedapps.logicalConditionBuilder.entry.field.hash',
-            { defaultMessage: 'Hash' }
-          ),
+          inputDisplay: CONDITION_FIELD_TITLE['process.hash.*'],
           value: 'process.hash.*',
         },
         {
-          inputDisplay: i18n.translate(
-            'xpack.securitySolution.trustedapps.logicalConditionBuilder.entry.field.path',
-            { defaultMessage: 'Path' }
-          ),
-          value: 'process.path.text',
+          inputDisplay: CONDITION_FIELD_TITLE['process.executable.caseless'],
+          value: 'process.executable.caseless',
         },
       ];
     }, []);
@@ -130,6 +125,7 @@ export const ConditionEntry = memo<ConditionEntryProps>(
         alignItems="center"
         direction="row"
         data-test-subj={dataTestSubj}
+        responsive={false}
       >
         <EuiFlexItem grow={2}>
           <ConditionEntryCell
@@ -176,6 +172,7 @@ export const ConditionEntry = memo<ConditionEntryProps>(
             <EuiFieldText
               name="value"
               value={entry.value}
+              fullWidth
               required
               onChange={handleValueUpdate}
               onBlur={handleValueOnBlur}

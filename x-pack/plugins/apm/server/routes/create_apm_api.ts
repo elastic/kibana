@@ -21,6 +21,7 @@ import {
   serviceNodeMetadataRoute,
   serviceAnnotationsRoute,
   serviceAnnotationsCreateRoute,
+  serviceErrorGroupsRoute,
 } from './services';
 import {
   agentConfigurationRoute,
@@ -41,6 +42,10 @@ import { metricsChartsRoute } from './metrics';
 import { serviceNodesRoute } from './service_nodes';
 import { tracesRoute, tracesByIdRoute } from './traces';
 import { transactionByTraceIdRoute } from './transaction';
+import {
+  correlationsForRangesRoute,
+  correlationsForSlowTransactionsRoute,
+} from './correlations';
 import {
   transactionGroupsBreakdownRoute,
   transactionGroupsChartsRoute,
@@ -79,6 +84,7 @@ import {
   anomalyDetectionEnvironmentsRoute,
 } from './settings/anomaly_detection';
 import {
+  rumHasDataRoute,
   rumClientMetricsRoute,
   rumJSErrors,
   rumLongTaskMetrics,
@@ -110,6 +116,7 @@ const createApmApi = () => {
     .add(serviceNodeMetadataRoute)
     .add(serviceAnnotationsRoute)
     .add(serviceAnnotationsCreateRoute)
+    .add(serviceErrorGroupsRoute)
 
     // Agent configuration
     .add(getSingleAgentConfigurationRoute)
@@ -120,6 +127,10 @@ const createApmApi = () => {
     .add(listAgentConfigurationEnvironmentsRoute)
     .add(listAgentConfigurationServicesRoute)
     .add(createOrUpdateAgentConfigurationRoute)
+
+    // Correlations
+    .add(correlationsForSlowTransactionsRoute)
+    .add(correlationsForRangesRoute)
 
     // APM indices
     .add(apmIndexSettingsRoute)
@@ -186,7 +197,8 @@ const createApmApi = () => {
     .add(rumWebCoreVitals)
     .add(rumJSErrors)
     .add(rumUrlSearch)
-    .add(rumLongTaskMetrics);
+    .add(rumLongTaskMetrics)
+    .add(rumHasDataRoute);
 
   return api;
 };

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { EuiLoadingSpinner, EuiProgress } from '@elastic/eui';
+import { EuiLoadingSpinner, EuiProgress, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import classNames from 'classnames';
@@ -39,16 +39,26 @@ export class LoadingIndicator extends React.Component<LoadingIndicatorProps, { v
     visible: false,
   };
 
+  private timer: any;
+  private increment = 1;
+
   componentDidMount() {
     this.loadingCountSubscription = this.props.loadingCount$.subscribe((count) => {
-      this.setState({
-        visible: count > 0,
-      });
+      if (this.increment > 1) {
+        clearTimeout(this.timer);
+      }
+      this.increment += this.increment;
+      this.timer = setTimeout(() => {
+        this.setState({
+          visible: count > 0,
+        });
+      }, 250);
     });
   }
 
   componentWillUnmount() {
     if (this.loadingCountSubscription) {
+      clearTimeout(this.timer);
       this.loadingCountSubscription.unsubscribe();
       this.loadingCountSubscription = undefined;
     }
@@ -67,13 +77,27 @@ export class LoadingIndicator extends React.Component<LoadingIndicatorProps, { v
       defaultMessage: 'Loading content',
     });
 
-    return !this.props.showAsBar ? (
+    const logo = this.state.visible ? (
       <EuiLoadingSpinner
-        className={className}
+        size="l"
         data-test-subj={testSubj}
-        aria-hidden={ariaHidden}
+        aria-hidden={false}
         aria-label={ariaLabel}
       />
+    ) : (
+      <EuiIcon
+        type="logoElastic"
+        size="l"
+        data-test-subj={testSubj}
+        className="chrHeaderLogo__cluster"
+        aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.logoAriaLabel', {
+          defaultMessage: 'Elastic Logo',
+        })}
+      />
+    );
+
+    return !this.props.showAsBar ? (
+      logo
     ) : (
       <EuiProgress
         className={className}

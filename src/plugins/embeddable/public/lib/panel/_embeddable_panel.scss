@@ -54,17 +54,22 @@
   .embPanel__titleInner {
     overflow: hidden;
     display: flex;
+    align-items: center;
     padding-right: $euiSizeS;
+  }
+
+  .embPanel__titleTooltipAnchor {
+    max-width: 100%;
   }
 
   .embPanel__titleText {
     @include euiTextTruncate;
+    font-weight: $euiFontWeightBold;
   }
 
   .embPanel__placeholderTitleText {
-    @include euiTextTruncate;
-    font-weight: $euiFontWeightRegular;
     color: $euiColorMediumShade;
+    font-weight: $euiFontWeightRegular;
   }
 }
 

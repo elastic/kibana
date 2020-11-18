@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { SafeResolverEvent } from './../../../../common/endpoint/types/index';
+
 import {
   ResolverRelatedEvents,
   ResolverTree,
@@ -12,7 +14,12 @@ import {
 import { mockTreeWithNoProcessEvents } from '../../mocks/resolver_tree';
 import { DataAccessLayer } from '../../types';
 
-type EmptiableRequests = 'relatedEvents' | 'resolverTree' | 'entities';
+type EmptiableRequests =
+  | 'relatedEvents'
+  | 'resolverTree'
+  | 'entities'
+  | 'eventsWithEntityIDAndCategory'
+  | 'event';
 
 interface Metadata<T> {
   /**
@@ -56,6 +63,24 @@ export function emptifyMock<T>(
               nextEvent: null,
             })
           : dataAccessLayer.relatedEvents(...args);
+      },
+
+      async eventsWithEntityIDAndCategory(
+        ...args
+      ): Promise<{
+        events: SafeResolverEvent[];
+        nextEvent: string | null;
+      }> {
+        return dataShouldBeEmpty.includes('eventsWithEntityIDAndCategory')
+          ? {
+              events: [],
+              nextEvent: null,
+            }
+          : dataAccessLayer.eventsWithEntityIDAndCategory(...args);
+      },
+
+      async event(...args): Promise<SafeResolverEvent | null> {
+        return dataShouldBeEmpty.includes('event') ? null : dataAccessLayer.event(...args);
       },
 
       /**

@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-readonly getAction: <T extends ActionDefinition<{}>>(id: string) => Action<ActionContext<T>, "" | "ACTION_VISUALIZE_FIELD" | "ACTION_VISUALIZE_GEO_FIELD" | "ACTION_CUSTOMIZE_PANEL" | "ACTION_ADD_PANEL" | "openInspector" | "deletePanel" | "editPanel" | "togglePanel" | "replacePanel" | "clonePanel" | "addToFromLibrary" | "unlinkFromLibrary" | "ACTION_LIBRARY_NOTIFICATION" | "ACTION_GLOBAL_APPLY_FILTER" | "ACTION_SELECT_RANGE" | "ACTION_VALUE_CLICK">;
+readonly getAction: <T extends ActionDefinition<{}>>(id: string) => Action<ActionContext<T>, "" | "ACTION_VISUALIZE_FIELD" | "ACTION_VISUALIZE_GEO_FIELD" | "ACTION_VISUALIZE_LENS_FIELD" | "ACTION_GLOBAL_APPLY_FILTER" | "ACTION_SELECT_RANGE" | "ACTION_VALUE_CLICK" | "ACTION_CUSTOMIZE_PANEL" | "ACTION_ADD_PANEL" | "openInspector" | "deletePanel" | "editPanel" | "togglePanel" | "replacePanel" | "clonePanel" | "addToFromLibrary" | "unlinkFromLibrary" | "ACTION_LIBRARY_NOTIFICATION">;
 ```

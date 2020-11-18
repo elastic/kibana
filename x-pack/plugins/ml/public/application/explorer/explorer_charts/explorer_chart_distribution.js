@@ -17,7 +17,7 @@ import d3 from 'd3';
 import $ from 'jquery';
 import moment from 'moment';
 
-import { formatHumanReadableDateTime } from '../../util/date_utils';
+import { formatHumanReadableDateTime } from '../../../../common/util/date_utils';
 import { formatValue } from '../../formatters/format_value';
 import { getSeverityColor, getSeverityWithLow } from '../../../../common/util/anomaly_utils';
 import {

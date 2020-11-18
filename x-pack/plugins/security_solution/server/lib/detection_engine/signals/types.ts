@@ -14,13 +14,19 @@ import {
   AlertExecutorOptions,
   AlertServices,
 } from '../../../../../alerts/server';
-import { RuleAlertAction } from '../../../../common/detection_engine/types';
+import { BaseSearchResponse, SearchResponse, TermAggregationBucket } from '../../types';
+import {
+  EqlSearchResponse,
+  BaseHit,
+  RuleAlertAction,
+  SearchTypes,
+} from '../../../../common/detection_engine/types';
 import { RuleTypeParams, RefreshTypes } from '../types';
-import { SearchResponse, EqlSearchResponse, BaseHit } from '../../types';
 import { ListClient } from '../../../../../lists/server';
 import { Logger } from '../../../../../../../src/core/server';
 import { ExceptionListItemSchema } from '../../../../../lists/common/schemas';
 import { BuildRuleMessage } from './rule_messages';
+import { TelemetryEventsSender } from '../../telemetry/sender';
 
 // used for gap detection code
 // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -39,17 +45,6 @@ export interface SignalsStatusParams {
   query: object | undefined | null;
   status: Status;
 }
-
-export type SearchTypes =
-  | string
-  | string[]
-  | number
-  | number[]
-  | boolean
-  | boolean[]
-  | object
-  | object[]
-  | undefined;
 
 export interface SignalSource {
   [key: string]: SearchTypes;
@@ -162,6 +157,7 @@ export interface Signal {
   original_event?: SearchTypes;
   status: Status;
   threshold_count?: SearchTypes;
+  original_signal?: SearchTypes;
   depth: number;
 }
 
@@ -211,6 +207,7 @@ export interface SearchAfterAndBulkCreateParams {
   listClient: ListClient;
   exceptionsList: ExceptionListItemSchema[];
   logger: Logger;
+  eventsTelemetry: TelemetryEventsSender | undefined;
   id: string;
   inputIndexPattern: string[];
   signalsIndex: string;
@@ -237,4 +234,8 @@ export interface SearchAfterAndBulkCreateReturnType {
   lastLookBackDate: Date | null | undefined;
   createdSignalsCount: number;
   errors: string[];
+}
+
+export interface ThresholdAggregationBucket extends TermAggregationBucket {
+  top_threshold_hits: BaseSearchResponse<SignalSource>;
 }

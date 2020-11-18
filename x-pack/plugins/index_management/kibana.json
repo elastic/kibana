@@ -7,7 +7,8 @@
     "home",
     "licensing",
     "management",
-    "features"
+    "features",
+    "share"
   ],
   "optionalPlugins": [
     "security",
@@ -17,6 +18,7 @@
   "configPath": ["xpack", "index_management"],
   "requiredBundles": [
     "kibanaReact",
-    "esUiShared"
+    "esUiShared",
+    "runtimeFields"
   ]
 }

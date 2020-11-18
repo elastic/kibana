@@ -5,7 +5,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
-import { getOr, isEmpty, union } from 'lodash/fp';
+import { isEmpty } from 'lodash/fp';
 import React, { useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
@@ -104,6 +104,7 @@ interface Props {
   kqlMode: KqlMode;
   onChangeItemsPerPage: OnChangeItemsPerPage;
   query: Query;
+  onRuleChange?: () => void;
   start: string;
   sort: Sort;
   toggleColumn: (column: ColumnHeaderOptions) => void;
@@ -131,6 +132,7 @@ const EventsViewerComponent: React.FC<Props> = ({
   kqlMode,
   onChangeItemsPerPage,
   query,
+  onRuleChange,
   start,
   sort,
   toggleColumn,
@@ -175,8 +177,6 @@ const EventsViewerComponent: React.FC<Props> = ({
     filters,
     kqlQuery: query,
     kqlMode,
-    start,
-    end,
     isEventViewer: true,
   });
 
@@ -190,14 +190,10 @@ const EventsViewerComponent: React.FC<Props> = ({
     [isLoadingIndexPattern, combinedQueries, start, end]
   );
 
-  const fields = useMemo(
-    () =>
-      union(
-        columnsHeader.map((c) => c.id),
-        queryFields ?? []
-      ),
-    [columnsHeader, queryFields]
-  );
+  const fields = useMemo(() => [...columnsHeader.map((c) => c.id), ...(queryFields ?? [])], [
+    columnsHeader,
+    queryFields,
+  ]);
 
   const sortField = useMemo(
     () => ({
@@ -239,6 +235,19 @@ const EventsViewerComponent: React.FC<Props> = ({
     events,
   ]);
 
+  const HeaderSectionContent = useMemo(
+    () =>
+      headerFilterGroup && (
+        <HeaderFilterGroupWrapper
+          data-test-subj="header-filter-group-wrapper"
+          show={!resolverIsShowing(graphEventId)}
+        >
+          {headerFilterGroup}
+        </HeaderFilterGroupWrapper>
+      ),
+    [graphEventId, headerFilterGroup]
+  );
+
   useEffect(() => {
     setIsQueryLoading(loading);
   }, [loading]);
@@ -257,14 +266,7 @@ const EventsViewerComponent: React.FC<Props> = ({
               subtitle={utilityBar ? undefined : subtitle}
               title={inspect ? justTitle : titleWithExitFullScreen}
             >
-              {headerFilterGroup && (
-                <HeaderFilterGroupWrapper
-                  data-test-subj="header-filter-group-wrapper"
-                  show={!resolverIsShowing(graphEventId)}
-                >
-                  {headerFilterGroup}
-                </HeaderFilterGroupWrapper>
-              )}
+              {HeaderSectionContent}
             </HeaderSection>
             {utilityBar && !resolverIsShowing(graphEventId) && (
               <UtilityBar>{utilityBar?.(refetch, totalCountMinusDeleted)}</UtilityBar>
@@ -284,6 +286,7 @@ const EventsViewerComponent: React.FC<Props> = ({
                 docValueFields={docValueFields}
                 id={id}
                 isEventViewer={true}
+                onRuleChange={onRuleChange}
                 refetch={refetch}
                 sort={sort}
                 toggleColumn={toggleColumn}
@@ -293,7 +296,7 @@ const EventsViewerComponent: React.FC<Props> = ({
                 /** Hide the footer if Resolver is showing. */
                 !graphEventId && (
                   <Footer
-                    activePage={getOr(0, 'activePage', pageInfo)}
+                    activePage={pageInfo.activePage}
                     data-test-subj="events-viewer-footer"
                     updatedAt={updatedAt}
                     height={footerHeight}
@@ -305,8 +308,7 @@ const EventsViewerComponent: React.FC<Props> = ({
                     itemsPerPageOptions={itemsPerPageOptions}
                     onChangeItemsPerPage={onChangeItemsPerPage}
                     onChangePage={loadPage}
-                    serverSideEventCount={totalCountMinusDeleted}
-                    totalPages={getOr(0, 'totalPages', pageInfo)}
+                    totalCount={totalCountMinusDeleted}
                   />
                 )
               }

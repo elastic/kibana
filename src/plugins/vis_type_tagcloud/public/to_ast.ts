@@ -38,7 +38,7 @@ export const toExpressionAst = (vis: Vis<TagCloudVisParams>, params: BuildPipeli
   const esaggs = buildExpressionFunction<EsaggsExpressionFunctionDefinition>('esaggs', {
     index: vis.data.indexPattern!.id!,
     metricsAtAllLevels: vis.isHierarchical(),
-    partialRows: vis.type.requiresPartialRows || false,
+    partialRows: false,
     aggConfigs: JSON.stringify(vis.data.aggs!.aggs),
     includeFormatHints: false,
   });

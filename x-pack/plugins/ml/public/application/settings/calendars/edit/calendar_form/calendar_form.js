@@ -31,7 +31,7 @@ import { useCreateAndNavigateToMlLink } from '../../../../contexts/kibana/use_cr
 function EditHeader({ calendarId, description }) {
   return (
     <Fragment>
-      <EuiTitle>
+      <EuiTitle data-test-subj="mlCalendarTitle">
         <h1>
           <FormattedMessage
             id="xpack.ml.calendarsEdit.calendarForm.calendarTitle"
@@ -86,7 +86,7 @@ export const CalendarForm = ({
   const redirectToCalendarsManagementPage = useCreateAndNavigateToMlLink(ML_PAGES.CALENDARS_MANAGE);
 
   return (
-    <EuiForm>
+    <EuiForm data-test-subj={`mlCalendarForm${isEdit === true ? 'Edit' : 'New'}`}>
       {isEdit === true ? (
         <EditHeader calendarId={calendarId} description={description} />
       ) : (

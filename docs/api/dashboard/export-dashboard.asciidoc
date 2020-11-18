@@ -11,6 +11,8 @@ experimental[] Export dashboards and corresponding saved objects.
 
 `GET <kibana host>:<port>/api/kibana/dashboards/export`
 
+`GET <kibana host>:<port>/s/<space-id>/api/kibana/dashboards/export`
+
 [[dashboard-api-export-params]]
 ==== Query parameters
 

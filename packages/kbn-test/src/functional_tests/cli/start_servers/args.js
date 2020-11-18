@@ -75,7 +75,8 @@ export function displayHelp() {
 export function processOptions(userOptions, defaultConfigPath) {
   validateOptions(userOptions);
 
-  const config = userOptions.config || defaultConfigPath;
+  const useDefaultConfig = !userOptions.config;
+  const config = useDefaultConfig ? defaultConfigPath : userOptions.config;
 
   if (!config) {
     throw new Error(`functional_tests_server: config is required`);
@@ -100,6 +101,7 @@ export function processOptions(userOptions, defaultConfigPath) {
   return {
     ...userOptions,
     config: resolve(config),
+    useDefaultConfig,
     createLogger,
     extraKbnOpts: userOptions._,
   };

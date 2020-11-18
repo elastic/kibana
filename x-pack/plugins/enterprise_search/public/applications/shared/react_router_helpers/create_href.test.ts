@@ -4,16 +4,33 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { httpServiceMock } from 'src/core/public/mocks';
 import { mockHistory } from '../../__mocks__';
 
 import { createHref } from './';
 
 describe('createHref', () => {
+  const dependencies = {
+    history: mockHistory,
+    http: httpServiceMock.createSetupContract(),
+  };
+
   it('generates a path with the React Router basename included', () => {
-    expect(createHref('/test', mockHistory)).toEqual('/app/enterprise_search/test');
+    expect(createHref('/test', dependencies)).toEqual('/app/enterprise_search/test');
   });
 
-  it('does not include the basename if shouldNotCreateHref is passed', () => {
-    expect(createHref('/test', mockHistory, { shouldNotCreateHref: true })).toEqual('/test');
+  describe('shouldNotCreateHref', () => {
+    const options = { shouldNotCreateHref: true };
+
+    it('does not include the router basename,', () => {
+      expect(createHref('/test', dependencies, options)).toEqual('/test');
+    });
+
+    it('does include the Kibana basepath,', () => {
+      const http = httpServiceMock.createSetupContract({ basePath: '/xyz/s/custom-space' });
+      const basePathDeps = { ...dependencies, http };
+
+      expect(createHref('/test', basePathDeps, options)).toEqual('/xyz/s/custom-space/test');
+    });
   });
 });

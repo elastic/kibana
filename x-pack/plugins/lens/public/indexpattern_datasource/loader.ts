@@ -16,15 +16,17 @@ import {
   IndexPatternField,
   IndexPatternLayer,
 } from './types';
-import { updateLayerIndexPattern } from './state_helpers';
+import { updateLayerIndexPattern } from './operations';
 import { DateRange, ExistingFields } from '../../common/types';
 import { BASE_API_URL } from '../../common';
 import {
   IndexPatternsContract,
   indexPatterns as indexPatternsUtils,
 } from '../../../../../src/plugins/data/public';
+import { VisualizeFieldContext } from '../../../../../src/plugins/ui_actions/public';
 import { documentField } from './document_field';
 import { readFromStorage, writeToStorage } from '../settings_storage';
+import { getFieldByNameFactory } from './pure_helpers';
 
 type SetState = StateSetter<IndexPatternPrivateState>;
 type SavedObjectsClient = Pick<SavedObjectsClientContract, 'find'>;
@@ -102,8 +104,16 @@ export async function loadIndexPatterns({
         id: indexPattern.id!, // id exists for sure because we got index patterns by id
         title,
         timeFieldName,
-        fieldFormatMap,
+        fieldFormatMap:
+          fieldFormatMap &&
+          Object.fromEntries(
+            Object.entries(fieldFormatMap).map(([id, format]) => [
+              id,
+              'toJSON' in format ? format.toJSON() : format,
+            ])
+          ),
         fields: newFields,
+        getFieldByName: getFieldByNameFactory(newFields),
         hasRestrictions: !!typeMeta?.aggs,
       };
 
@@ -179,6 +189,7 @@ export async function loadInitialState({
   defaultIndexPatternId,
   storage,
   indexPatternsService,
+  initialContext,
 }: {
   persistedState?: IndexPatternPersistedState;
   references?: SavedObjectReference[];
@@ -186,6 +197,7 @@ export async function loadInitialState({
   defaultIndexPatternId?: string;
   storage: IStorageWrapper;
   indexPatternsService: IndexPatternsService;
+  initialContext?: VisualizeFieldContext;
 }): Promise<IndexPatternPrivateState> {
   const indexPatternRefs = await loadIndexPatternRefs(savedObjectsClient);
   const lastUsedIndexPatternId = getLastUsedIndexPatternId(storage, indexPatternRefs);
@@ -201,13 +213,13 @@ export async function loadInitialState({
       : [lastUsedIndexPatternId || defaultIndexPatternId || indexPatternRefs[0].id]
   );
 
-  const currentIndexPatternId = requiredPatterns[0];
+  const currentIndexPatternId = initialContext?.indexPatternId ?? requiredPatterns[0];
   setLastUsedIndexPatternId(storage, currentIndexPatternId);
 
   const indexPatterns = await loadIndexPatterns({
     indexPatternsService,
     cache: {},
-    patterns: requiredPatterns,
+    patterns: initialContext ? [initialContext.indexPatternId] : requiredPatterns,
   });
   if (state) {
     return {

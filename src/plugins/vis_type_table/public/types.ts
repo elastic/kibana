@@ -33,7 +33,6 @@ export interface Dimensions {
 }
 
 export interface TableVisParams {
-  type: 'table';
   perPage: number | '';
   showPartialRows: boolean;
   showMetricsAtAllLevels: boolean;
@@ -44,5 +43,9 @@ export interface TableVisParams {
   showTotal: boolean;
   totalFunc: AggTypes;
   percentageCol: string;
+}
+
+export interface TableVisConfig extends TableVisParams {
+  title: string;
   dimensions: Dimensions;
 }

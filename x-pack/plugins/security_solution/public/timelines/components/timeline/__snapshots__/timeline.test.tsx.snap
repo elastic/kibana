@@ -646,34 +646,7 @@ In other use cases the message field can be used to concatenate different values
               dataProviders={
                 Array [
                   Object {
-                    "and": Array [
-                      Object {
-                        "and": Array [],
-                        "enabled": true,
-                        "excluded": false,
-                        "id": "id-Provider 2",
-                        "kqlQuery": "",
-                        "name": "Provider 2",
-                        "queryMatch": Object {
-                          "field": "name",
-                          "operator": ":",
-                          "value": "Provider 2",
-                        },
-                      },
-                      Object {
-                        "and": Array [],
-                        "enabled": true,
-                        "excluded": false,
-                        "id": "id-Provider 3",
-                        "kqlQuery": "",
-                        "name": "Provider 3",
-                        "queryMatch": Object {
-                          "field": "name",
-                          "operator": ":",
-                          "value": "Provider 3",
-                        },
-                      },
-                    ],
+                    "and": Array [],
                     "enabled": true,
                     "excluded": false,
                     "id": "id-Provider 1",
@@ -921,11 +894,6 @@ In other use cases the message field can be used to concatenate different values
               loadingSourcerer={false}
               onChangeItemsPerPage={[MockFunction]}
               onClose={[MockFunction]}
-              onDataProviderEdited={[MockFunction]}
-              onDataProviderRemoved={[MockFunction]}
-              onToggleDataProviderEnabled={[MockFunction]}
-              onToggleDataProviderExcluded={[MockFunction]}
-              onToggleDataProviderType={[MockFunction]}
               show={true}
               showCallOutUnauthorizedMsg={false}
               sort={
@@ -937,6 +905,7 @@ In other use cases the message field can be used to concatenate different values
               start="2018-03-23T18:49:23.132Z"
               status="active"
               timelineType="default"
+              timerangeKind="absolute"
               toggleColumn={[MockFunction]}
               usersViewing={
                 Array [

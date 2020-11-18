@@ -5,10 +5,8 @@
  */
 
 import { Demo } from './test_samples/demo';
-import { cleanup, fireEvent, render } from '@testing-library/react/pure';
+import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
-
-afterEach(cleanup);
 
 test('configure valid URL template', () => {
   const screen = render(<Demo />);

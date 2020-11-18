@@ -104,6 +104,7 @@ export const metricsItems = schema.object({
       })
     )
   ),
+  numberOfSignificantValueDigits: numberOptional,
   percentiles: schema.maybe(
     schema.arrayOf(
       schema.object({
@@ -111,7 +112,7 @@ export const metricsItems = schema.object({
         field: stringOptionalNullable,
         mode: schema.oneOf([schema.literal('line'), schema.literal('band')]),
         shade: schema.oneOf([numberOptional, stringOptionalNullable]),
-        value: schema.oneOf([numberOptional, stringOptionalNullable]),
+        value: schema.maybe(schema.oneOf([numberOptional, stringOptionalNullable])),
         percentile: stringOptionalNullable,
       })
     )
@@ -119,7 +120,7 @@ export const metricsItems = schema.object({
   type: stringRequired,
   value: stringOptionalNullable,
   values: schema.maybe(schema.nullable(schema.arrayOf(schema.nullable(schema.string())))),
-  size: stringOptionalNullable,
+  size: stringOrNumberOptionalNullable,
   agg_with: stringOptionalNullable,
   order: stringOptionalNullable,
   order_by: stringOptionalNullable,
@@ -164,6 +165,7 @@ export const seriesItems = schema.object({
   hide_in_legend: numberIntegerOptional,
   hidden: schema.maybe(schema.boolean()),
   id: stringRequired,
+  ignore_global_filter: numberOptional,
   label: stringOptionalNullable,
   line_width: numberOptionalOrEmptyString,
   metrics: schema.arrayOf(metricsItems),
@@ -271,4 +273,5 @@ export const visPayloadSchema = schema.object({
     min: stringRequired,
     max: stringRequired,
   }),
+  sessionId: schema.maybe(schema.string()),
 });

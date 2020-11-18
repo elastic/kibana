@@ -29,7 +29,7 @@ export async function buildAllRefs(log: ToolingLog) {
 async function buildRefs(log: ToolingLog, projectPath: string) {
   try {
     log.debug(`Building TypeScript projects refs for ${projectPath}...`);
-    await execa(require.resolve('typescript/bin/tsc'), ['-b', projectPath]);
+    await execa(require.resolve('typescript/bin/tsc'), ['-b', projectPath, '--pretty']);
   } catch (e) {
     log.error(e);
     process.exit(1);
@@ -38,17 +38,11 @@ async function buildRefs(log: ToolingLog, projectPath: string) {
 
 export async function runBuildRefs() {
   run(
-    async ({ log, flags }) => {
-      await buildRefs(log, flags.project as string);
+    async ({ log }) => {
+      await buildAllRefs(log);
     },
     {
       description: 'Build TypeScript projects',
-      flags: {
-        string: ['project'],
-        help: `
---project          Required, path to the tsconfig.refs.file
-        `,
-      },
     }
   );
 }

@@ -216,7 +216,11 @@ export class LegacyService implements CoreService {
         getOpsMetrics$: startDeps.core.metrics.getOpsMetrics$,
       },
       uiSettings: { asScopedToClient: startDeps.core.uiSettings.asScopedToClient },
-      auditTrail: startDeps.core.auditTrail,
+      coreUsageData: {
+        getCoreUsageData: () => {
+          throw new Error('core.start.coreUsageData.getCoreUsageData is unsupported in legacy');
+        },
+      },
     };
 
     const router = setupDeps.core.http.createRouter('', this.legacyId);
@@ -247,6 +251,7 @@ export class LegacyService implements CoreService {
         csp: setupDeps.core.http.csp,
         getServerInfo: setupDeps.core.http.getServerInfo,
       },
+      i18n: setupDeps.core.i18n,
       logging: {
         configure: (config$) => setupDeps.core.logging.configure([], config$),
       },
@@ -279,7 +284,6 @@ export class LegacyService implements CoreService {
       uiSettings: {
         register: setupDeps.core.uiSettings.register,
       },
-      auditTrail: setupDeps.core.auditTrail,
       getStartServices: () => Promise.resolve([coreStart, startDeps.plugins, {}]),
     };
 

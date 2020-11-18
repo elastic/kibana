@@ -17,11 +17,8 @@ import { useKibana } from '../../../common/lib/kibana';
 import { inputsModel } from '../../../common/store/inputs';
 import { createFilter } from '../../../common/containers/helpers';
 import { ESQuery } from '../../../../common/typed_json';
-import {
-  AbortError,
-  isCompleteResponse,
-  isErrorResponse,
-} from '../../../../../../../src/plugins/data/common';
+import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/plugins/data/common';
+import { AbortError } from '../../../../../../../src/plugins/kibana_utils/common';
 import { getInspectResponse } from '../../../helpers';
 import { InspectResponse } from '../../../types';
 import * as i18n from './translations';
@@ -55,16 +52,23 @@ export const useNetworkOverview = ({
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
   const [loading, setLoading] = useState(false);
-  const [overviewNetworkRequest, setNetworkRequest] = useState<NetworkOverviewRequestOptions>({
-    defaultIndex: indexNames,
-    factoryQueryType: NetworkQueries.overview,
-    filterQuery: createFilter(filterQuery),
-    timerange: {
-      interval: '12h',
-      from: startDate,
-      to: endDate,
-    },
-  });
+  const [
+    overviewNetworkRequest,
+    setNetworkRequest,
+  ] = useState<NetworkOverviewRequestOptions | null>(
+    !skip
+      ? {
+          defaultIndex: indexNames,
+          factoryQueryType: NetworkQueries.overview,
+          filterQuery: createFilter(filterQuery),
+          timerange: {
+            interval: '12h',
+            from: startDate,
+            to: endDate,
+          },
+        }
+      : null
+  );
 
   const [overviewNetworkResponse, setNetworkOverviewResponse] = useState<NetworkOverviewArgs>({
     overviewNetwork: {},
@@ -78,7 +82,11 @@ export const useNetworkOverview = ({
   });
 
   const overviewNetworkSearch = useCallback(
-    (request: NetworkOverviewRequestOptions) => {
+    (request: NetworkOverviewRequestOptions | null) => {
+      if (request == null) {
+        return;
+      }
+
       let didCancel = false;
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
@@ -135,8 +143,9 @@ export const useNetworkOverview = ({
   useEffect(() => {
     setNetworkRequest((prevRequest) => {
       const myRequest = {
-        ...prevRequest,
+        ...(prevRequest ?? {}),
         defaultIndex: indexNames,
+        factoryQueryType: NetworkQueries.overview,
         filterQuery: createFilter(filterQuery),
         timerange: {
           interval: '12h',

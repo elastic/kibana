@@ -10,6 +10,7 @@ You can configure `xpack.reporting` settings in your `kibana.yml` to:
 * <<reporting-kibana-server-settings,Control how the {report-features} communicate with the {kib} server>>
 * <<reporting-job-queue-settings,Manage background jobs>>
 * <<reporting-capture-settings,Capture screenshots>>
+* <<reporting-csv-settings,Increase the byte limit for CSV exports>>
 
 [float]
 [[general-reporting-settings]]
@@ -65,7 +66,7 @@ proxy host requires that the {kib} server has network access to the proxy.
 
 [NOTE]
 ============
-Reporting authenticates requests on the Kibana page only when the hostname matches the
+Reporting authenticates requests on the {kib} page only when the hostname matches the
 <<xpack-kibanaServer-hostname, `xpack.reporting.kibanaServer.hostname`>> setting. Therefore Reporting would fail if the
 set value redirects to another server. For that reason, `"0"` is an invalid setting
 because, in the Reporting browser, it becomes an automatic redirect to `"0.0.0.0"`.
@@ -214,6 +215,23 @@ a| `xpack.reporting.capture.browser`
   | The maximum {ref}/common-options.html#byte-units[byte size] of a CSV file before being truncated. This setting exists to
   prevent large exports from causing performance and storage issues. Can be specified as number of bytes.
   Defaults to `10mb`.
+|===
+
+[NOTE]
+============
+Setting `xpack.reporting.csv.maxSizeBytes` much larger than the default 10 MB limit has the potential to negatively affect the
+performance of {kib} and your {es} cluster. There is no enforced maximum for this setting, but a reasonable maximum value depends
+on multiple factors:
+
+* The `http.max_content_length` setting in {es}.
+* Network proxies, which are often configured by default to block large requests with a 413 error.
+* The amount of memory available to the {kib} server, which limits the size of CSV data that must be held temporarily.
+
+For information about {kib} memory limits, see <<production, using {kib} in a production environment>>.
+============
+
+[cols="2*<"]
+|===
 
 | `xpack.reporting.csv.scroll.size`
   | Number of documents retrieved from {es} for each scroll iteration during a CSV
@@ -247,6 +265,11 @@ a| `xpack.reporting.capture.browser`
   the report content. The index is automatically created if it does not already
   exist. Configure this to a unique value, beginning with `.reporting-`, for every
   {kib} instance that has a unique <<kibana-index, `kibana.index`>> setting. Defaults to `.reporting`.
+
+| `xpack.reporting.capture.networkPolicy`
+  | Capturing a screenshot from a {kib} page involves sending out requests for all the linked web assets. For example, a Markdown
+  visualization can show an image from a remote server. You can configure what type of requests to allow or filter by setting a
+  <<reporting-network-policy, network policy>> for Reporting.
 
 | `xpack.reporting.roles.allow`
   | Specifies the roles in addition to superusers that can use reporting.

@@ -69,18 +69,21 @@ Table of Contents
     - [`secrets`](#secrets-6)
     - [`params`](#params-6)
       - [`subActionParams (pushToService)`](#subactionparams-pushtoservice)
+      - [`subActionParams (getFields)`](#subactionparams-getfields-1)
   - [Jira](#jira)
     - [`config`](#config-7)
     - [`secrets`](#secrets-7)
     - [`params`](#params-7)
       - [`subActionParams (pushToService)`](#subactionparams-pushtoservice-1)
       - [`subActionParams (issueTypes)`](#subactionparams-issuetypes)
+      - [`subActionParams (getFields)`](#subactionparams-getfields-2)
       - [`subActionParams (pushToService)`](#subactionparams-pushtoservice-2)
   - [IBM Resilient](#ibm-resilient)
     - [`config`](#config-8)
     - [`secrets`](#secrets-8)
     - [`params`](#params-8)
       - [`subActionParams (pushToService)`](#subactionparams-pushtoservice-3)
+      - [`subActionParams (getFields)`](#subactionparams-getfields-3)
 - [Command Line Utility](#command-line-utility)
 - [Developing New Action Types](#developing-new-action-types)
   - [licensing](#licensing)
@@ -274,12 +277,12 @@ Running the action by scheduling a task means that we will no longer have a user
 
 The following table describes the properties of the `options` object.
 
-| Property | Description                                                                                            | Type   |
-| -------- | ------------------------------------------------------------------------------------------------------ | ------ |
-| id       | The id of the action you want to execute.                                                              | string |
-| params   | The `params` value to give the action type executor.                                                   | object |
-| spaceId  | The space id the action is within.                                                                     | string |
-| apiKey   | The Elasticsearch API key to use for context. (Note: only required and used when security is enabled). | string |
+| Property | Description                                                                                            | Type             |
+| -------- | ------------------------------------------------------------------------------------------------------ | ---------------- |
+| id       | The id of the action you want to execute.                                                              | string           |
+| params   | The `params` value to give the action type executor.                                                   | object           |
+| spaceId  | The space id the action is within.                                                                     | string           |
+| apiKey   | The Elasticsearch API key to use for context. (Note: only required and used when security is enabled). | string           |
 | source   | The source of the execution, either an HTTP request or a reference to a Saved Object.                  | object, optional |
 
 ## Example
@@ -308,11 +311,11 @@ This api runs the action and asynchronously returns the result of running the ac
 
 The following table describes the properties of the `options` object.
 
-| Property | Description                                                                          | Type   |
-| -------- | ------------------------------------------------------------------------------------ | ------ |
-| id       | The id of the action you want to execute.                                            | string |
-| params   | The `params` value to give the action type executor.                                 | object |
-| source   | The source of the execution, either an HTTP request or a reference to a Saved Object.| object, optional |
+| Property | Description                                                                           | Type             |
+| -------- | ------------------------------------------------------------------------------------- | ---------------- |
+| id       | The id of the action you want to execute.                                             | string           |
+| params   | The `params` value to give the action type executor.                                  | object           |
+| source   | The source of the execution, either an HTTP request or a reference to a Saved Object. | object, optional |
 
 ## Example
 
@@ -330,7 +333,7 @@ const result = await actionsClient.execute({
   },
   source: asSavedObjectExecutionSource({
     id: '573891ae-8c48-49cb-a197-0cd5ec34a88b',
-    type: 'alert'
+    type: 'alert',
   }),
 });
 ```
@@ -563,7 +566,7 @@ The ServiceNow action uses the [V2 Table API](https://developer.servicenow.com/a
 
 | Property        | Description                                                                          | Type   |
 | --------------- | ------------------------------------------------------------------------------------ | ------ |
-| subAction       | The sub action to perform. It can be `pushToService`, `handshake`, and `getIncident` | string |
+| subAction       | The sub action to perform. It can be `getFields`, `pushToService`, `handshake`, and `getIncident` | string |
 | subActionParams | The parameters of the sub action                                                     | object |
 
 #### `subActionParams (pushToService)`
@@ -579,6 +582,10 @@ The ServiceNow action uses the [V2 Table API](https://developer.servicenow.com/a
 | severity      | The name of the severity in ServiceNow.                                                                                   | string _(optional)_   |
 | urgency       | The name of the urgency in ServiceNow.                                                                                    | string _(optional)_   |
 | impact        | The name of the impact in ServiceNow.                                                                                     | string _(optional)_   |
+
+#### `subActionParams (getFields)`
+
+No parameters for `getFields` sub-action. Provide an empty object `{}`.
 
 ---
 
@@ -606,7 +613,7 @@ The Jira action uses the [V2 API](https://developer.atlassian.com/cloud/jira/pla
 
 | Property        | Description                                                                                                             | Type   |
 | --------------- | ----------------------------------------------------------------------------------------------------------------------- | ------ |
-| subAction       | The sub action to perform. It can be `pushToService`, `handshake`, `getIncident`, `issueTypes`, and `fieldsByIssueType` | string |
+| subAction       | The sub action to perform. It can be `getFields`, `pushToService`, `handshake`, `getIncident`, `issueTypes`, and `fieldsByIssueType` | string |
 | subActionParams | The parameters of the sub action                                                                                        | object |
 
 #### `subActionParams (pushToService)`
@@ -620,11 +627,16 @@ The Jira action uses the [V2 API](https://developer.atlassian.com/cloud/jira/pla
 | issueType     | The id of the issue type in Jira.                                                                                | string _(optional)_   |
 | priority      | The name of the priority in Jira. Example: `Medium`.                                                             | string _(optional)_   |
 | labels        | An array of labels.                                                                                              | string[] _(optional)_ |
+| parent        | The parent issue id or key. Only for `Sub-task` issue types.                                                     | string _(optional)_   |
 | comments      | The comments of the case. A comment is of the form `{ commentId: string, version: string, comment: string }`     | object[] _(optional)_ |
 
 #### `subActionParams (issueTypes)`
 
 No parameters for `issueTypes` sub-action. Provide an empty object `{}`.
+
+#### `subActionParams (getFields)`
+
+No parameters for `getFields` sub-action. Provide an empty object `{}`.
 
 #### `subActionParams (pushToService)`
 
@@ -654,7 +666,7 @@ ID: `.resilient`
 
 | Property        | Description                                                                          | Type   |
 | --------------- | ------------------------------------------------------------------------------------ | ------ |
-| subAction       | The sub action to perform. It can be `pushToService`, `handshake`, and `getIncident` | string |
+| subAction       | The sub action to perform. It can be `getFields`, `pushToService`, `handshake`, and `getIncident` | string |
 | subActionParams | The parameters of the sub action                                                     | object |
 
 #### `subActionParams (pushToService)`
@@ -668,6 +680,10 @@ ID: `.resilient`
 | externalId    | The id of the incident in IBM Resilient. If presented the incident will be update. Otherwise a new incident will be created. | string _(optional)_   |
 | incidentTypes | An array with the ids of IBM Resilient incident types.                                                                       | number[] _(optional)_ |
 | severityCode  | IBM Resilient id of the severity code.                                                                                       | number _(optional)_   |
+
+#### `subActionParams (getFields)`
+
+No parameters for `getFields` sub-action. Provide an empty object `{}`.
 
 # Command Line Utility
 

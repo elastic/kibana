@@ -138,6 +138,7 @@ describe('rules_notification_alert_type', () => {
 
     alert = signalRulesAlertType({
       logger,
+      eventsTelemetry: undefined,
       version,
       ml: mlMock,
       lists: listMock.createSetup(),
@@ -344,6 +345,7 @@ describe('rules_notification_alert_type', () => {
         payload = getPayload(ruleAlert, alertServices) as jest.Mocked<RuleExecutorOptions>;
         alert = signalRulesAlertType({
           logger,
+          eventsTelemetry: undefined,
           version,
           ml: undefined,
           lists: undefined,
@@ -502,7 +504,7 @@ describe('rules_notification_alert_type', () => {
         await alert.executor(payload);
         expect(logger.error).toHaveBeenCalled();
         expect(logger.error.mock.calls[0][0]).toContain(
-          'An error occurred during rule execution: message: "Threat Match rule is missing threatQuery and/or threatIndex and/or threatMapping: threatQuery: "undefined" threatIndex: "undefined" threatMapping: "undefined"" name: "Detect Root/Admin Users" id: "04128c15-0d1b-4716-a4c5-46997ac7f3bd" rule id: "rule-1" signals index: ".siem-signals"'
+          'An error occurred during rule execution: message: "Indicator match is missing threatQuery and/or threatIndex and/or threatMapping: threatQuery: "undefined" threatIndex: "undefined" threatMapping: "undefined"" name: "Detect Root/Admin Users" id: "04128c15-0d1b-4716-a4c5-46997ac7f3bd" rule id: "rule-1" signals index: ".siem-signals"'
         );
       });
     });

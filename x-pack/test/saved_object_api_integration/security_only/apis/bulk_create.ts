@@ -28,6 +28,7 @@ const createTestCases = (overwrite: boolean) => {
     { ...CASES.SINGLE_NAMESPACE_DEFAULT_SPACE, ...fail409(!overwrite) },
     { ...CASES.SINGLE_NAMESPACE_SPACE_1, expectedNamespaces },
     { ...CASES.SINGLE_NAMESPACE_SPACE_2, expectedNamespaces },
+    { ...CASES.MULTI_NAMESPACE_ALL_SPACES, ...fail409(!overwrite) },
     { ...CASES.MULTI_NAMESPACE_DEFAULT_AND_SPACE_1, ...fail409(!overwrite) },
     { ...CASES.MULTI_NAMESPACE_ONLY_SPACE_1, ...fail409(), ...unresolvableConflict() },
     { ...CASES.MULTI_NAMESPACE_ONLY_SPACE_2, ...fail409(), ...unresolvableConflict() },
@@ -35,6 +36,8 @@ const createTestCases = (overwrite: boolean) => {
     { ...CASES.NEW_SINGLE_NAMESPACE_OBJ, expectedNamespaces },
     { ...CASES.NEW_MULTI_NAMESPACE_OBJ, expectedNamespaces },
     CASES.NEW_NAMESPACE_AGNOSTIC_OBJ,
+    CASES.NEW_EACH_SPACE_OBJ,
+    CASES.NEW_ALL_SPACES_OBJ,
   ];
   const hiddenType = [{ ...CASES.HIDDEN, ...fail400() }];
   const allTypes = normalTypes.concat(hiddenType);
@@ -46,11 +49,11 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const es = getService('legacyEs');
 
-  const { addTests, createTestDefinitions, expectForbidden } = bulkCreateTestSuiteFactory(
-    es,
-    esArchiver,
-    supertest
-  );
+  const {
+    addTests,
+    createTestDefinitions,
+    expectSavedObjectForbidden,
+  } = bulkCreateTestSuiteFactory(es, esArchiver, supertest);
   const createTests = (overwrite: boolean, user: TestUser) => {
     const { normalTypes, hiddenType, allTypes } = createTestCases(overwrite);
     // use singleRequest to reduce execution time and/or test combined cases
@@ -62,7 +65,7 @@ export default function ({ getService }: FtrProviderContext) {
         createTestDefinitions(allTypes, true, overwrite, {
           user,
           singleRequest: true,
-          responseBodyOverride: expectForbidden(['hiddentype']),
+          responseBodyOverride: expectSavedObjectForbidden(['hiddentype']),
         }),
       ].flat(),
       superuser: createTestDefinitions(allTypes, false, overwrite, { user, singleRequest: true }),

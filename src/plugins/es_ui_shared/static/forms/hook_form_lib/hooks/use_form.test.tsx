@@ -196,7 +196,9 @@ describe('useForm() hook', () => {
       });
 
       expect(isValid).toBe(false);
-      expect(data).toEqual({}); // Don't build the object (and call the serializers()) when invalid
+      // If the form is not valid, we don't build the final object to avoid
+      // calling the serializer(s) with invalid values.
+      expect(data).toEqual({});
     });
   });
 
@@ -209,7 +211,13 @@ describe('useForm() hook', () => {
 
     test('should allow subscribing to the form data changes and provide a handler to build the form data', async () => {
       const TestComp = ({ onData }: { onData: OnUpdateHandler }) => {
-        const { form } = useForm();
+        const { form } = useForm({
+          serializer: (value) => ({
+            user: {
+              name: value.user.name.toUpperCase(),
+            },
+          }),
+        });
         const { subscribe } = form;
 
         useEffect(() => {
@@ -251,8 +259,9 @@ describe('useForm() hook', () => {
         OnUpdateHandler
       >;
 
-      expect(data.raw).toEqual({ 'user.name': 'John' });
-      expect(data.format()).toEqual({ user: { name: 'John' } });
+      expect(data.internal).toEqual({ user: { name: 'John' } });
+      // Transform name to uppercase as decalred in our serializer func
+      expect(data.format()).toEqual({ user: { name: 'JOHN' } });
       // As we have touched all fields, the validity went from "undefined" to "true"
       expect(isValid).toBe(true);
     });
@@ -300,10 +309,12 @@ describe('useForm() hook', () => {
         OnUpdateHandler
       >;
 
-      expect(data.raw).toEqual({
+      expect(data.internal).toEqual({
         title: defaultValue.title,
         subTitle: 'hasBeenOverridden',
-        'user.name': defaultValue.user.name,
+        user: {
+          name: defaultValue.user.name,
+        },
       });
     });
   });

@@ -121,24 +121,29 @@ export const InfrastructurePage = ({ match }: RouteComponentProps) => {
                             ]}
                           />
                         </EuiFlexItem>
-                        <EuiFlexItem grow={false}>
-                          <Route path={'/inventory'} component={AnomalyDetectionFlyout} />
-                        </EuiFlexItem>
-                        <EuiFlexItem grow={false}>
-                          <Route path={'/explorer'} component={MetricsAlertDropdown} />
-                          <Route path={'/inventory'} component={InventoryAlertDropdown} />
-                        </EuiFlexItem>
-                        <EuiFlexItem grow={false}>
-                          <EuiButtonEmpty
-                            href={kibana.services?.application?.getUrlForApp(
-                              '/home#/tutorial_directory/metrics'
-                            )}
-                            size="s"
-                            color="primary"
-                            iconType="plusInCircle"
-                          >
-                            {ADD_DATA_LABEL}
-                          </EuiButtonEmpty>
+                        <EuiFlexItem
+                          grow={false}
+                          style={{ flexDirection: 'row', alignItems: 'center' }}
+                        >
+                          <EuiFlexItem grow={false}>
+                            <Route path={'/inventory'} component={AnomalyDetectionFlyout} />
+                          </EuiFlexItem>
+                          <EuiFlexItem grow={false}>
+                            <Route path={'/explorer'} component={MetricsAlertDropdown} />
+                            <Route path={'/inventory'} component={InventoryAlertDropdown} />
+                          </EuiFlexItem>
+                          <EuiFlexItem grow={false}>
+                            <EuiButtonEmpty
+                              href={kibana.services?.application?.getUrlForApp(
+                                '/home#/tutorial_directory/metrics'
+                              )}
+                              size="s"
+                              color="primary"
+                              iconType="plusInCircle"
+                            >
+                              {ADD_DATA_LABEL}
+                            </EuiButtonEmpty>
+                          </EuiFlexItem>
                         </EuiFlexItem>
                       </EuiFlexGroup>
                     </AppNavigation>

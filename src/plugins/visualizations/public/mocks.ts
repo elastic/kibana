@@ -28,6 +28,7 @@ import { usageCollectionPluginMock } from '../../../plugins/usage_collection/pub
 import { uiActionsPluginMock } from '../../../plugins/ui_actions/public/mocks';
 import { inspectorPluginMock } from '../../../plugins/inspector/public/mocks';
 import { dashboardPluginMock } from '../../../plugins/dashboard/public/mocks';
+import { savedObjectsPluginMock } from '../../../plugins/saved_objects/public/mocks';
 
 const createSetupContract = (): VisualizationsSetup => ({
   createBaseVisualization: jest.fn(),
@@ -40,6 +41,8 @@ const createStartContract = (): VisualizationsStart => ({
   get: jest.fn(),
   all: jest.fn(),
   getAliases: jest.fn(),
+  getByGroup: jest.fn(),
+  unRegisterAlias: jest.fn(),
   savedVisualizationsLoader: {
     get: jest.fn(),
   } as any,
@@ -72,6 +75,8 @@ const createInstance = async () => {
       embeddable: embeddablePluginMock.createStartContract(),
       dashboard: dashboardPluginMock.createStartContract(),
       getAttributeService: jest.fn(),
+      savedObjectsClient: coreMock.createStart().savedObjects.client,
+      savedObjects: savedObjectsPluginMock.createStartContract(),
     });
 
   return {

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, useEffect, useState, Dispatch, SetStateAction } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import styled, { css } from 'styled-components';
 
 import { EuiCallOut } from '@elastic/eui';
@@ -25,9 +25,15 @@ import { ClosureType } from '../../containers/configure/types';
 import { ActionConnectorTableItem } from '../../../../../triggers_actions_ui/public/types';
 import { connectorsConfiguration } from '../../../common/lib/connectors/config';
 
+import { SectionWrapper } from '../wrappers';
 import { Connectors } from './connectors';
 import { ClosureOptions } from './closure_options';
-import { SectionWrapper } from '../wrappers';
+import {
+  getConnectorById,
+  getNoneConnector,
+  normalizeActionConnector,
+  normalizeCaseConnector,
+} from './utils';
 import * as i18n from './translations';
 
 const FormWrapper = styled.div`
@@ -55,8 +61,7 @@ interface ConfigureCasesComponentProps {
 }
 
 const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userCanCrud }) => {
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  const { http, triggers_actions_ui, notifications, application, docLinks } = useKibana().services;
+  const { http, triggersActionsUi, notifications, application, docLinks } = useKibana().services;
 
   const [connectorIsValid, setConnectorIsValid] = useState(true);
   const [addFlyoutVisible, setAddFlyoutVisibility] = useState<boolean>(false);
@@ -66,12 +71,10 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
   );
 
   const {
-    connectorId,
+    connector,
     closureType,
-    currentConfiguration,
     loading: loadingCaseConfigure,
     persistLoading,
-    version,
     persistCaseConfigure,
     setConnector,
     setClosureType,
@@ -84,27 +87,19 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const reloadConnectors = useCallback(async () => refetchConnectors(), []);
   const isLoadingAny = isLoadingConnectors || persistLoading || loadingCaseConfigure;
-  const updateConnectorDisabled = isLoadingAny || !connectorIsValid || connectorId === 'none';
+  const updateConnectorDisabled = isLoadingAny || !connectorIsValid || connector.id === 'none';
 
   const onClickUpdateConnector = useCallback(() => {
     setEditFlyoutVisibility(true);
   }, []);
 
-  const handleSetAddFlyoutVisibility = useCallback(
-    (isVisible: boolean) => {
-      setAddFlyoutVisibility(isVisible);
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [currentConfiguration, connectorId, closureType]
-  );
+  const onCloseAddFlyout = useCallback(() => setAddFlyoutVisibility(false), [
+    setAddFlyoutVisibility,
+  ]);
 
-  const handleSetEditFlyoutVisibility = useCallback(
-    (isVisible: boolean) => {
-      setEditFlyoutVisibility(isVisible);
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [currentConfiguration, connectorId, closureType]
-  );
+  const onCloseEditFlyout = useCallback(() => setEditFlyoutVisibility(false), [
+    setEditFlyoutVisibility,
+  ]);
 
   const onChangeConnector = useCallback(
     (id: string) => {
@@ -113,54 +108,52 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
         return;
       }
 
-      setConnector(id);
+      const actionConnector = getConnectorById(id, connectors);
+      const caseConnector =
+        actionConnector != null ? normalizeActionConnector(actionConnector) : getNoneConnector();
+
+      setConnector(caseConnector);
       persistCaseConfigure({
-        connectorId: id,
-        connectorName: connectors.find((c) => c.id === id)?.name ?? '',
+        connector: caseConnector,
         closureType,
       });
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [connectorId, closureType, version]
+    [connectors, closureType, persistCaseConfigure, setConnector]
   );
 
   const onChangeClosureType = useCallback(
     (type: ClosureType) => {
       setClosureType(type);
       persistCaseConfigure({
-        connectorId,
-        connectorName: connectors.find((c) => c.id === connectorId)?.name ?? '',
+        connector,
         closureType: type,
       });
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [connectorId, closureType, version]
+    [connector, persistCaseConfigure, setClosureType]
   );
 
   useEffect(() => {
     if (
       !isLoadingConnectors &&
-      connectorId !== 'none' &&
-      !connectors.some((c) => c.id === connectorId)
+      connector.id !== 'none' &&
+      !connectors.some((c) => c.id === connector.id)
     ) {
       setConnectorIsValid(false);
     } else if (
       !isLoadingConnectors &&
-      (connectorId === 'none' || connectors.some((c) => c.id === connectorId))
+      (connector.id === 'none' || connectors.some((c) => c.id === connector.id))
     ) {
       setConnectorIsValid(true);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [connectors, connectorId]);
+  }, [connectors, connector, isLoadingConnectors]);
 
   useEffect(() => {
-    if (!isLoadingConnectors && connectorId !== 'none') {
+    if (!isLoadingConnectors && connector.id !== 'none') {
       setEditedConnectorItem(
-        connectors.find((c) => c.id === connectorId) as ActionConnectorTableItem
+        normalizeCaseConnector(connectors, connector) as ActionConnectorTableItem
       );
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [connectors, connectorId]);
+  }, [connectors, connector, isLoadingConnectors]);
 
   return (
     <FormWrapper>
@@ -191,13 +184,13 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
           onChangeConnector={onChangeConnector}
           updateConnectorDisabled={updateConnectorDisabled || !userCanCrud}
           handleShowEditFlyout={onClickUpdateConnector}
-          selectedConnector={connectorId}
+          selectedConnector={connector.id}
         />
       </SectionWrapper>
       <ActionsConnectorsContextProvider
         value={{
           http,
-          actionTypeRegistry: triggers_actions_ui.actionTypeRegistry,
+          actionTypeRegistry: triggersActionsUi.actionTypeRegistry,
           toastNotifications: notifications.toasts,
           capabilities: application.capabilities,
           reloadConnectors,
@@ -205,19 +198,14 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
           consumer: 'case',
         }}
       >
-        <ConnectorAddFlyout
-          addFlyoutVisible={addFlyoutVisible}
-          setAddFlyoutVisibility={handleSetAddFlyoutVisibility as Dispatch<SetStateAction<boolean>>}
-          actionTypes={actionTypes}
-        />
-        {editedConnectorItem && (
+        {addFlyoutVisible && (
+          <ConnectorAddFlyout onClose={onCloseAddFlyout} actionTypes={actionTypes} />
+        )}
+        {editedConnectorItem && editFlyoutVisible && (
           <ConnectorEditFlyout
             key={editedConnectorItem.id}
             initialConnector={editedConnectorItem}
-            editFlyoutVisible={editFlyoutVisible}
-            setEditFlyoutVisibility={
-              handleSetEditFlyoutVisibility as Dispatch<SetStateAction<boolean>>
-            }
+            onClose={onCloseEditFlyout}
           />
         )}
       </ActionsConnectorsContextProvider>

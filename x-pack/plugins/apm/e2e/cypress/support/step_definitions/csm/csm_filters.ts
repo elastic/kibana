@@ -56,7 +56,9 @@ Then(/^it filters the client metrics "([^"]*)"$/, (filterName) => {
   cy.get('.euiStat__title-isLoading').should('not.be.visible');
 
   const data =
-    filterName === 'os' ? ['5 ms', '0.06 s', '8 '] : ['4 ms', '0.05 s', '28 '];
+    filterName === 'os'
+      ? ['82 ms', '5 ms', '77 ms', '8']
+      : ['75 ms', '4 ms', '71 ms', '28'];
 
   verifyClientMetrics(data, true);
 

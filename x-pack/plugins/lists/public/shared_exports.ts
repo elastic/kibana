@@ -30,7 +30,7 @@ export {
 } from './exceptions/api';
 export {
   ExceptionList,
-  ExceptionIdentifiers,
+  ExceptionListIdentifiers,
   Pagination,
   UseExceptionListSuccess,
 } from './exceptions/types';

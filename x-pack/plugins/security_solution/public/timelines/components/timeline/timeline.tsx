@@ -19,14 +19,7 @@ import { defaultHeaders } from './body/column_headers/default_headers';
 import { Sort } from './body/sort';
 import { StatefulBody } from './body/stateful_body';
 import { DataProvider } from './data_providers/data_provider';
-import {
-  OnChangeItemsPerPage,
-  OnDataProviderRemoved,
-  OnDataProviderEdited,
-  OnToggleDataProviderEnabled,
-  OnToggleDataProviderExcluded,
-  OnToggleDataProviderType,
-} from './events';
+import { OnChangeItemsPerPage } from './events';
 import { TimelineKqlFetch } from './fetch_kql_timeline';
 import { Footer, footerHeight } from './footer';
 import { TimelineHeader } from './header';
@@ -113,17 +106,13 @@ export interface Props {
   loadingSourcerer: boolean;
   onChangeItemsPerPage: OnChangeItemsPerPage;
   onClose: () => void;
-  onDataProviderEdited: OnDataProviderEdited;
-  onDataProviderRemoved: OnDataProviderRemoved;
-  onToggleDataProviderEnabled: OnToggleDataProviderEnabled;
-  onToggleDataProviderExcluded: OnToggleDataProviderExcluded;
-  onToggleDataProviderType: OnToggleDataProviderType;
   show: boolean;
   showCallOutUnauthorizedMsg: boolean;
   sort: Sort;
   start: string;
   status: TimelineStatusLiteral;
   timelineType: TimelineType;
+  timerangeKind: 'absolute' | 'relative';
   toggleColumn: (column: ColumnHeaderOptions) => void;
   usersViewing: string[];
 }
@@ -149,17 +138,13 @@ export const TimelineComponent: React.FC<Props> = ({
   kqlQueryExpression,
   onChangeItemsPerPage,
   onClose,
-  onDataProviderEdited,
-  onDataProviderRemoved,
-  onToggleDataProviderEnabled,
-  onToggleDataProviderExcluded,
-  onToggleDataProviderType,
   show,
   showCallOutUnauthorizedMsg,
   start,
   status,
   sort,
   timelineType,
+  timerangeKind,
   toggleColumn,
   usersViewing,
 }) => {
@@ -181,20 +166,8 @@ export const TimelineComponent: React.FC<Props> = ({
         filters,
         kqlQuery,
         kqlMode,
-        start,
-        end,
       }),
-    [
-      browserFields,
-      dataProviders,
-      esQueryConfig,
-      start,
-      end,
-      filters,
-      indexPattern,
-      kqlMode,
-      kqlQuery,
-    ]
+    [browserFields, dataProviders, esQueryConfig, filters, indexPattern, kqlMode, kqlQuery]
   );
 
   const canQueryTimeline = useMemo(
@@ -241,6 +214,7 @@ export const TimelineComponent: React.FC<Props> = ({
     startDate: start,
     skip: !canQueryTimeline,
     sort: timelineQuerySortField,
+    timerangeKind,
   });
 
   useEffect(() => {
@@ -270,11 +244,6 @@ export const TimelineComponent: React.FC<Props> = ({
             dataProviders={dataProviders}
             filterManager={filterManager}
             graphEventId={graphEventId}
-            onDataProviderEdited={onDataProviderEdited}
-            onDataProviderRemoved={onDataProviderRemoved}
-            onToggleDataProviderEnabled={onToggleDataProviderEnabled}
-            onToggleDataProviderExcluded={onToggleDataProviderExcluded}
-            onToggleDataProviderType={onToggleDataProviderType}
             show={show}
             showCallOutUnauthorizedMsg={showCallOutUnauthorizedMsg}
             timelineId={id}
@@ -323,8 +292,7 @@ export const TimelineComponent: React.FC<Props> = ({
                   itemsPerPageOptions={itemsPerPageOptions}
                   onChangeItemsPerPage={onChangeItemsPerPage}
                   onChangePage={loadPage}
-                  serverSideEventCount={totalCount}
-                  totalPages={pageInfo.totalPages}
+                  totalCount={totalCount}
                 />
               </StyledEuiFlyoutFooter>
             )

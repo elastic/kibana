@@ -50,10 +50,10 @@ export const AnomalyDetectionFlyout = () => {
 
   return (
     <>
-      <EuiButtonEmpty iconSide={'right'} onClick={openFlyout}>
+      <EuiButtonEmpty iconSide={'left'} iconType={'inspect'} onClick={openFlyout}>
         <FormattedMessage
           id="xpack.infra.ml.anomalyDetectionButton"
-          defaultMessage="Anomaly Detection"
+          defaultMessage="Anomaly detection"
         />
       </EuiButtonEmpty>
       {showFlyout && (

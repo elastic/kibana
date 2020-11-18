@@ -5,24 +5,25 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { isEmpty } from 'lodash';
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
-import { isEmpty } from 'lodash';
-import { ProcessorEvent } from '../../../common/processor_event';
-import { EventOutcome } from '../../../common/event_outcome';
+import { APMConfig } from '../..';
+import { ESSearchResponse } from '../../../../../typings/elasticsearch';
+import { AlertingPlugin } from '../../../../alerts/server';
 import { AlertType, ALERT_TYPES_CONFIG } from '../../../common/alert_types';
-import { ESSearchResponse } from '../../../typings/elasticsearch';
 import {
+  EVENT_OUTCOME,
   PROCESSOR_EVENT,
+  SERVICE_ENVIRONMENT,
   SERVICE_NAME,
   TRANSACTION_TYPE,
-  EVENT_OUTCOME,
-  SERVICE_ENVIRONMENT,
 } from '../../../common/elasticsearch_fieldnames';
-import { AlertingPlugin } from '../../../../alerts/server';
-import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
-import { APMConfig } from '../..';
+import { EventOutcome } from '../../../common/event_outcome';
+import { ProcessorEvent } from '../../../common/processor_event';
+import { asDecimalOrInteger } from '../../../common/utils/formatters';
 import { getEnvironmentUiFilterES } from '../helpers/convert_ui_filters/get_environment_ui_filter_es';
+import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
 import { apmActionVariables } from './action_variables';
 
 interface RegisterAlertParams {
@@ -60,6 +61,7 @@ export function registerTransactionErrorRateAlertType({
         apmActionVariables.environment,
         apmActionVariables.threshold,
         apmActionVariables.triggerValue,
+        apmActionVariables.interval,
       ],
     },
     producer: 'apm',
@@ -69,6 +71,7 @@ export function registerTransactionErrorRateAlertType({
         config,
         savedObjectsClient: services.savedObjectsClient,
       });
+      const maxServiceEnvironments = config['xpack.apm.maxServiceEnvironments'];
 
       const searchParams = {
         index: indices['apm_oss.transactionIndices'],
@@ -118,6 +121,7 @@ export function registerTransactionErrorRateAlertType({
                     environments: {
                       terms: {
                         field: SERVICE_ENVIRONMENT,
+                        size: maxServiceEnvironments,
                       },
                     },
                   },
@@ -170,7 +174,8 @@ export function registerTransactionErrorRateAlertType({
             transactionType,
             environment,
             threshold: alertParams.threshold,
-            triggerValue: transactionErrorRate,
+            triggerValue: asDecimalOrInteger(transactionErrorRate),
+            interval: `${alertParams.windowSize}${alertParams.windowUnit}`,
           });
         }
 

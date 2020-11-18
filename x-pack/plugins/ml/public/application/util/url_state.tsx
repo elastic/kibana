@@ -13,6 +13,7 @@ import { useHistory, useLocation } from 'react-router-dom';
 import { Dictionary } from '../../../common/types/common';
 
 import { getNestedProperty } from './object_utils';
+import { MlPages } from '../../../common/constants/ml_url_generator';
 
 type Accessor = '_a' | '_g';
 export type SetUrlState = (
@@ -140,13 +141,45 @@ export const useUrlState = (accessor: Accessor) => {
     if (typeof fullUrlState === 'object') {
       return fullUrlState[accessor];
     }
-    return undefined;
   }, [searchString]);
 
   const setUrlState = useCallback(
-    (attribute: string | Dictionary<any>, value?: any) =>
-      setUrlStateContext(accessor, attribute, value),
+    (attribute: string | Dictionary<any>, value?: any) => {
+      setUrlStateContext(accessor, attribute, value);
+    },
     [accessor, setUrlStateContext]
   );
   return [urlState, setUrlState];
+};
+
+/**
+ * Hook for managing the URL state of the page.
+ */
+export const usePageUrlState = <PageUrlState extends {}>(
+  pageKey: MlPages,
+  defaultState: PageUrlState
+): [PageUrlState, (update: Partial<PageUrlState>) => void] => {
+  const [appState, setAppState] = useUrlState('_a');
+  const pageState = appState?.[pageKey];
+
+  const resultPageState: PageUrlState = useMemo(() => {
+    return {
+      ...defaultState,
+      ...(pageState ?? {}),
+    };
+  }, [pageState]);
+
+  const onStateUpdate = useCallback(
+    (update: Partial<PageUrlState>, replace?: boolean) => {
+      setAppState(pageKey, {
+        ...(replace ? {} : resultPageState),
+        ...update,
+      });
+    },
+    [pageKey, resultPageState, setAppState]
+  );
+
+  return useMemo(() => {
+    return [resultPageState, onStateUpdate];
+  }, [resultPageState, onStateUpdate]);
 };

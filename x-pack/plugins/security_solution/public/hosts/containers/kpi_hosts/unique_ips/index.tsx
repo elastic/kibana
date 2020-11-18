@@ -19,7 +19,7 @@ import {
 import { ESTermQuery } from '../../../../../common/typed_json';
 
 import * as i18n from './translations';
-import { AbortError } from '../../../../../../../../src/plugins/data/common';
+import { AbortError } from '../../../../../../../../src/plugins/kibana_utils/common';
 import { getInspectResponse } from '../../../../helpers';
 import { InspectResponse } from '../../../../types';
 
@@ -52,19 +52,23 @@ export const useHostsKpiUniqueIps = ({
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
   const [loading, setLoading] = useState(false);
-  const [hostsKpiUniqueIpsRequest, setHostsKpiUniqueIpsRequest] = useState<
-    HostsKpiUniqueIpsRequestOptions
-  >({
-    defaultIndex: indexNames,
-    factoryQueryType: HostsKpiQueries.kpiUniqueIps,
-    filterQuery: createFilter(filterQuery),
-    id: ID,
-    timerange: {
-      interval: '12h',
-      from: startDate,
-      to: endDate,
-    },
-  });
+  const [
+    hostsKpiUniqueIpsRequest,
+    setHostsKpiUniqueIpsRequest,
+  ] = useState<HostsKpiUniqueIpsRequestOptions | null>(
+    !skip
+      ? {
+          defaultIndex: indexNames,
+          factoryQueryType: HostsKpiQueries.kpiUniqueIps,
+          filterQuery: createFilter(filterQuery),
+          timerange: {
+            interval: '12h',
+            from: startDate,
+            to: endDate,
+          },
+        }
+      : null
+  );
 
   const [hostsKpiUniqueIpsResponse, setHostsKpiUniqueIpsResponse] = useState<HostsKpiUniqueIpsArgs>(
     {
@@ -83,7 +87,11 @@ export const useHostsKpiUniqueIps = ({
   );
 
   const hostsKpiUniqueIpsSearch = useCallback(
-    (request: HostsKpiUniqueIpsRequestOptions) => {
+    (request: HostsKpiUniqueIpsRequestOptions | null) => {
+      if (request == null) {
+        return;
+      }
+
       let didCancel = false;
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
@@ -143,8 +151,9 @@ export const useHostsKpiUniqueIps = ({
   useEffect(() => {
     setHostsKpiUniqueIpsRequest((prevRequest) => {
       const myRequest = {
-        ...prevRequest,
+        ...(prevRequest ?? {}),
         defaultIndex: indexNames,
+        factoryQueryType: HostsKpiQueries.kpiUniqueIps,
         filterQuery: createFilter(filterQuery),
         timerange: {
           interval: '12h',

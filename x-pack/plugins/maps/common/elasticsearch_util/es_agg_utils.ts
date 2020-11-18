@@ -8,7 +8,10 @@ import _ from 'lodash';
 import { IndexPattern, IFieldType } from '../../../../../src/plugins/data/common';
 import { TOP_TERM_PERCENTAGE_SUFFIX } from '../constants';
 
-export function getField(indexPattern: IndexPattern, fieldName: string) {
+export type BucketProperties = Record<string | number, unknown>;
+export type PropertiesMap = Map<string, BucketProperties>;
+
+export function getField(indexPattern: IndexPattern, fieldName: string): IFieldType {
   const field = indexPattern.fields.getByName(fieldName);
   if (!field) {
     throw new Error(
@@ -33,8 +36,11 @@ export function addFieldToDSL(dsl: object, field: IFieldType) {
       };
 }
 
-export function extractPropertiesFromBucket(bucket: any, ignoreKeys: string[] = []) {
-  const properties: Record<string | number, unknown> = {};
+export function extractPropertiesFromBucket(
+  bucket: any,
+  ignoreKeys: string[] = []
+): BucketProperties {
+  const properties: BucketProperties = {};
   for (const key in bucket) {
     if (ignoreKeys.includes(key) || !bucket.hasOwnProperty(key)) {
       continue;

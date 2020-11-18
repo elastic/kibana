@@ -8,6 +8,8 @@ const path = require('path');
 const fs = require('fs');
 const del = require('del');
 const { run } = require('@kbn/dev-utils');
+// This is included in the main Kibana package.json
+// eslint-disable-next-line import/no-extraneous-dependencies
 const storybook = require('@storybook/react/standalone');
 const execa = require('execa');
 const { DLL_OUTPUT } = require('./../storybook/constants');

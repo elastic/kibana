@@ -32,6 +32,7 @@ export type FieldGroups = Record<
     isAffectedByGlobalFilter: boolean;
     isAffectedByTimeFilter: boolean;
     hideDetails?: boolean;
+    defaultNoFieldsMessage?: string;
   }
 >;
 
@@ -52,6 +53,7 @@ export function FieldList({
   hasSyncedExistingFields,
   filter,
   currentIndexPatternId,
+  existFieldsInIndex,
 }: {
   exists: (field: IndexPatternField) => boolean;
   fieldGroups: FieldGroups;
@@ -63,6 +65,7 @@ export function FieldList({
     typeFilter: string[];
   };
   currentIndexPatternId: string;
+  existFieldsInIndex: boolean;
 }) {
   const [pageSize, setPageSize] = useState(PAGINATION_SIZE);
   const [scrollContainer, setScrollContainer] = useState<Element | undefined>(undefined);
@@ -73,8 +76,6 @@ export function FieldList({
         .map(([key, { isInitiallyOpen }]) => [key, isInitiallyOpen])
     )
   );
-
-  const isAffectedByFieldFilter = !!(filter.typeFilter.length || filter.nameFilter.length);
 
   useEffect(() => {
     // Reset the scroll if we have made material changes to the field list
@@ -178,9 +179,10 @@ export function FieldList({
                 renderCallout={
                   <NoFieldsCallout
                     isAffectedByGlobalFilter={fieldGroup.isAffectedByGlobalFilter}
-                    isAffectedByFieldFilter={isAffectedByFieldFilter}
                     isAffectedByTimerange={fieldGroup.isAffectedByTimeFilter}
-                    existFieldsInIndex={!!fieldGroup.fieldCount}
+                    isAffectedByFieldFilter={fieldGroup.fieldCount !== fieldGroup.fields.length}
+                    existFieldsInIndex={!!existFieldsInIndex}
+                    defaultNoFieldsMessage={fieldGroup.defaultNoFieldsMessage}
                   />
                 }
               />

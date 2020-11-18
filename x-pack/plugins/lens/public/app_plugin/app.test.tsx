@@ -11,7 +11,8 @@ import { act } from 'react-dom/test-utils';
 import { App } from './app';
 import { LensAppProps, LensAppServices } from './types';
 import { EditorFrameInstance } from '../types';
-import { Document, DOC_TYPE } from '../persistence';
+import { Document } from '../persistence';
+import { DOC_TYPE } from '../../common';
 import { mount } from 'enzyme';
 import { I18nProvider } from '@kbn/i18n/react';
 import {
@@ -36,14 +37,14 @@ import {
   LensByReferenceInput,
 } from '../editor_frame_service/embeddable/embeddable';
 import { SavedObjectReference } from '../../../../../src/core/types';
-import { mockAttributeService } from '../../../../../src/plugins/dashboard/public/mocks';
+import { mockAttributeService } from '../../../../../src/plugins/embeddable/public/mocks';
 import { LensAttributeService } from '../lens_attribute_service';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 
 jest.mock('../editor_frame_service/editor_frame/expression_helpers');
 jest.mock('src/core/public');
 jest.mock('../../../../../src/plugins/saved_objects/public', () => {
-  // eslint-disable-next-line no-shadow
+  // eslint-disable-next-line @typescript-eslint/no-shadow
   const { SavedObjectSaveModal, SavedObjectSaveModalOrigin } = jest.requireActual(
     '../../../../../src/plugins/saved_objects/public'
   );
@@ -145,8 +146,9 @@ describe('Lens App', () => {
     >(
       DOC_TYPE,
       {
-        customSaveMethod: jest.fn(),
-        customUnwrapMethod: jest.fn(),
+        saveMethod: jest.fn(),
+        unwrapMethod: jest.fn(),
+        checkForDuplicateTitle: jest.fn(),
       },
       core
     );
@@ -280,6 +282,7 @@ describe('Lens App', () => {
             },
             "doc": undefined,
             "filters": Array [],
+            "initialContext": undefined,
             "onChange": [Function],
             "onError": [Function],
             "query": Object {
@@ -500,7 +503,7 @@ describe('Lens App', () => {
       async function testSave(inst: ReactWrapper, saveProps: SaveProps) {
         await getButton(inst).run(inst.getDOMNode());
         inst.update();
-        const handler = inst.find('[data-test-subj="lnsApp_saveModalOrigin"]').prop('onSave') as (
+        const handler = inst.find('SavedObjectSaveModalOrigin').prop('onSave') as (
           p: unknown
         ) => void;
         handler(saveProps);
@@ -693,6 +696,9 @@ describe('Lens App', () => {
           undefined
         );
         expect(props.redirectTo).toHaveBeenCalledWith('aaa');
+        expect(services.notifications.toasts.addSuccess).toHaveBeenCalledWith(
+          "Saved 'hello there'"
+        );
       });
 
       it('adds to the recently accessed list on save', async () => {
@@ -716,17 +722,19 @@ describe('Lens App', () => {
         });
         expect(services.attributeService.wrapAttributes).toHaveBeenCalledWith(
           expect.objectContaining({
-            savedObjectId: undefined,
             title: 'hello there',
           }),
           true,
           undefined
         );
-        expect(props.redirectTo).toHaveBeenCalledWith('aaa');
+        expect(props.redirectTo).toHaveBeenCalledWith(defaultSavedObjectId);
         await act(async () => {
-          component.setProps({ initialInput: { savedObjectId: 'aaa' } });
+          component.setProps({ initialInput: { savedObjectId: defaultSavedObjectId } });
         });
         expect(services.attributeService.wrapAttributes).toHaveBeenCalledTimes(1);
+        expect(services.notifications.toasts.addSuccess).toHaveBeenCalledWith(
+          "Saved 'hello there'"
+        );
       });
 
       it('saves existing docs', async () => {
@@ -748,6 +756,9 @@ describe('Lens App', () => {
           component.setProps({ initialInput: { savedObjectId: defaultSavedObjectId } });
         });
         expect(services.attributeService.unwrapAttributes).toHaveBeenCalledTimes(1);
+        expect(services.notifications.toasts.addSuccess).toHaveBeenCalledWith(
+          "Saved 'hello there'"
+        );
       });
 
       it('handles save failure by showing a warning, but still allows another save', async () => {
@@ -769,7 +780,6 @@ describe('Lens App', () => {
         await act(async () => {
           testSave(component, { newCopyOnSave: false, newTitle: 'hello there' });
         });
-        expect(services.notifications.toasts.addDanger).toHaveBeenCalled();
         expect(props.redirectTo).not.toHaveBeenCalled();
         expect(getButton(component).disableButton).toEqual(false);
       });
@@ -845,6 +855,7 @@ describe('Lens App', () => {
         );
         component.update();
         await act(async () => {
+          component.setProps({ initialInput: { savedObjectId: '123' } });
           getButton(component).run(component.getDOMNode());
         });
         component.update();
@@ -859,7 +870,7 @@ describe('Lens App', () => {
           });
         });
         expect(checkForDuplicateTitle).toHaveBeenCalledWith(
-          expect.objectContaining({ savedObjectId: '123' }),
+          expect.objectContaining({ id: '123' }),
           false,
           onTitleDuplicate,
           expect.anything()

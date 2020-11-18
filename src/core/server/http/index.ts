@@ -83,6 +83,7 @@ export { OnPreAuthHandler, OnPreAuthToolkit } from './lifecycle/on_pre_auth';
 export {
   OnPreResponseHandler,
   OnPreResponseToolkit,
+  OnPreResponseRender,
   OnPreResponseExtensions,
   OnPreResponseInfo,
 } from './lifecycle/on_pre_response';

@@ -9,11 +9,12 @@ import {
   getResponseTimeTooltipFormatter,
   getMaxY,
 } from './helper';
+
+import { TimeSeries } from '../../../../../typings/timeseries';
 import {
   getDurationFormatter,
   toMicroseconds,
-} from '../../../../utils/formatters';
-import { TimeSeries } from '../../../../../typings/timeseries';
+} from '../../../../../common/utils/formatters';
 
 describe('transaction chart helper', () => {
   describe('getResponseTimeTickFormatter', () => {

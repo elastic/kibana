@@ -171,11 +171,17 @@ describe('metric_visualization', () => {
                 "accessor": Array [
                   "a",
                 ],
+                "description": Array [
+                  "",
+                ],
+                "metricTitle": Array [
+                  "shazm",
+                ],
                 "mode": Array [
                   "full",
                 ],
                 "title": Array [
-                  "shazm",
+                  "",
                 ],
               },
               "function": "lens_metric_chart",
@@ -185,6 +191,30 @@ describe('metric_visualization', () => {
           "type": "expression",
         }
       `);
+    });
+  });
+
+  describe('#getErrorMessages', () => {
+    it('returns undefined if no error is raised', () => {
+      const datasource: DatasourcePublicAPI = {
+        ...createMockDatasource('l1').publicAPIMock,
+        getOperationForColumnId(_: string) {
+          return {
+            id: 'a',
+            dataType: 'number',
+            isBucketed: false,
+            label: 'shazm',
+          };
+        },
+      };
+      const frame = {
+        ...mockFrame(),
+        datasourceLayers: { l1: datasource },
+      };
+
+      const error = metricVisualization.getErrorMessages(exampleState(), frame);
+
+      expect(error).not.toBeDefined();
     });
   });
 });

@@ -69,7 +69,8 @@ export class MonitoringViewBaseEuiTableController extends MonitoringViewBaseCont
       });
     };
 
-    this.updateData();
+    // For pages where we do not fetch immediately, we want to fetch after pagination is applied
+    args.fetchDataImmediately === false && this.updateData();
   }
 
   setPagination(page) {

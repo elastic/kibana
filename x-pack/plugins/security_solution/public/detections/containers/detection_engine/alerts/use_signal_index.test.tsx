@@ -26,6 +26,7 @@ describe('useSignalIndex', () => {
         loading: true,
         signalIndexExists: null,
         signalIndexName: null,
+        signalIndexMappingOutdated: null,
       });
     });
   });
@@ -42,6 +43,7 @@ describe('useSignalIndex', () => {
         loading: false,
         signalIndexExists: true,
         signalIndexName: 'mock-signal-index',
+        signalIndexMappingOutdated: false,
       });
     });
   });
@@ -62,6 +64,7 @@ describe('useSignalIndex', () => {
         loading: false,
         signalIndexExists: true,
         signalIndexName: 'mock-signal-index',
+        signalIndexMappingOutdated: false,
       });
     });
   });
@@ -101,6 +104,7 @@ describe('useSignalIndex', () => {
         loading: false,
         signalIndexExists: false,
         signalIndexName: null,
+        signalIndexMappingOutdated: null,
       });
     });
   });
@@ -121,6 +125,7 @@ describe('useSignalIndex', () => {
         loading: false,
         signalIndexExists: false,
         signalIndexName: null,
+        signalIndexMappingOutdated: null,
       });
     });
   });

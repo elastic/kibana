@@ -13,8 +13,9 @@ import { alertStateSchema, AlertingFrameworkHealth } from '../../../../alerts/co
 import { BASE_ALERT_API_PATH } from '../constants';
 import {
   Alert,
+  AlertAggregations,
   AlertType,
-  AlertWithoutId,
+  AlertUpdates,
   AlertTaskState,
   AlertInstanceSummary,
 } from '../../types';
@@ -64,24 +65,15 @@ export async function loadAlertInstanceSummary({
   return await http.get(`${BASE_ALERT_API_PATH}/alert/${alertId}/_instance_summary`);
 }
 
-export async function loadAlerts({
-  http,
-  page,
-  searchText,
+export const mapFiltersToKql = ({
   typesFilter,
   actionTypesFilter,
+  alertStatusesFilter,
 }: {
-  http: HttpSetup;
-  page: { index: number; size: number };
-  searchText?: string;
   typesFilter?: string[];
   actionTypesFilter?: string[];
-}): Promise<{
-  page: number;
-  perPage: number;
-  total: number;
-  data: Alert[];
-}> {
+  alertStatusesFilter?: string[];
+}): string[] => {
   const filters = [];
   if (typesFilter && typesFilter.length) {
     filters.push(`alert.attributes.alertTypeId:(${typesFilter.join(' or ')})`);
@@ -97,6 +89,33 @@ export async function loadAlerts({
       ].join('')
     );
   }
+  if (alertStatusesFilter && alertStatusesFilter.length) {
+    filters.push(`alert.attributes.executionStatus.status:(${alertStatusesFilter.join(' or ')})`);
+  }
+  return filters;
+};
+
+export async function loadAlerts({
+  http,
+  page,
+  searchText,
+  typesFilter,
+  actionTypesFilter,
+  alertStatusesFilter,
+}: {
+  http: HttpSetup;
+  page: { index: number; size: number };
+  searchText?: string;
+  typesFilter?: string[];
+  actionTypesFilter?: string[];
+  alertStatusesFilter?: string[];
+}): Promise<{
+  page: number;
+  perPage: number;
+  total: number;
+  data: Alert[];
+}> {
+  const filters = mapFiltersToKql({ typesFilter, actionTypesFilter, alertStatusesFilter });
   return await http.get(`${BASE_ALERT_API_PATH}/_find`, {
     query: {
       page: page.index + 1,
@@ -107,6 +126,30 @@ export async function loadAlerts({
       default_search_operator: 'AND',
       sort_field: 'name.keyword',
       sort_order: 'asc',
+    },
+  });
+}
+
+export async function loadAlertAggregations({
+  http,
+  searchText,
+  typesFilter,
+  actionTypesFilter,
+  alertStatusesFilter,
+}: {
+  http: HttpSetup;
+  searchText?: string;
+  typesFilter?: string[];
+  actionTypesFilter?: string[];
+  alertStatusesFilter?: string[];
+}): Promise<AlertAggregations> {
+  const filters = mapFiltersToKql({ typesFilter, actionTypesFilter, alertStatusesFilter });
+  return await http.get(`${BASE_ALERT_API_PATH}/_aggregate`, {
+    query: {
+      search_fields: searchText ? JSON.stringify(['name', 'tags']) : undefined,
+      search: searchText,
+      filter: filters.length ? filters.join(' and ') : undefined,
+      default_search_operator: 'AND',
     },
   });
 }
@@ -136,7 +179,10 @@ export async function createAlert({
   alert,
 }: {
   http: HttpSetup;
-  alert: Omit<AlertWithoutId, 'createdBy' | 'updatedBy' | 'muteAll' | 'mutedInstanceIds'>;
+  alert: Omit<
+    AlertUpdates,
+    'createdBy' | 'updatedBy' | 'muteAll' | 'mutedInstanceIds' | 'executionStatus'
+  >;
 }): Promise<Alert> {
   return await http.post(`${BASE_ALERT_API_PATH}/alert`, {
     body: JSON.stringify(alert),
@@ -149,7 +195,7 @@ export async function updateAlert({
   id,
 }: {
   http: HttpSetup;
-  alert: Pick<AlertWithoutId, 'throttle' | 'name' | 'tags' | 'schedule' | 'params' | 'actions'>;
+  alert: Pick<AlertUpdates, 'throttle' | 'name' | 'tags' | 'schedule' | 'params' | 'actions'>;
   id: string;
 }): Promise<Alert> {
   return await http.put(`${BASE_ALERT_API_PATH}/alert/${id}`, {

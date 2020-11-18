@@ -19,7 +19,8 @@
 
 import './field_button.scss';
 import classNames from 'classnames';
-import React, { ReactNode, HTMLAttributes } from 'react';
+import React, { ReactNode, HTMLAttributes, ButtonHTMLAttributes } from 'react';
+import { CommonProps } from '@elastic/eui';
 
 export interface FieldButtonProps extends HTMLAttributes<HTMLDivElement> {
   /**
@@ -56,7 +57,14 @@ export interface FieldButtonProps extends HTMLAttributes<HTMLDivElement> {
    * The component will render a `<button>` when provided an `onClick`
    */
   onClick?: () => void;
+  /**
+   * Applies to the inner `<button>`  or `<div>`
+   */
   dataTestSubj?: string;
+  /**
+   * Pass more button props to the `<button>` element
+   */
+  buttonProps?: ButtonHTMLAttributes<HTMLButtonElement> & CommonProps;
 }
 
 const sizeToClassNameMap = {
@@ -79,6 +87,8 @@ export function FieldButton({
   isDraggable = false,
   onClick,
   dataTestSubj,
+  buttonProps,
+  ...rest
 }: FieldButtonProps) {
   const classes = classNames(
     'kbnFieldButton',
@@ -88,8 +98,18 @@ export function FieldButton({
     className
   );
 
+  const contentClasses = classNames('kbn-resetFocusState', 'kbnFieldButton__button');
+
+  const innerContent = (
+    <>
+      {fieldIcon && <span className="kbnFieldButton__fieldIcon">{fieldIcon}</span>}
+      {fieldName && <span className="kbnFieldButton__name">{fieldName}</span>}
+      {fieldInfoIcon && <div className="kbnFieldButton__infoIcon">{fieldInfoIcon}</div>}
+    </>
+  );
+
   return (
-    <div className={classes}>
+    <div className={classes} {...rest}>
       {onClick ? (
         <button
           onClick={(e) => {
@@ -99,17 +119,14 @@ export function FieldButton({
             onClick();
           }}
           data-test-subj={dataTestSubj}
-          className={'kbn-resetFocusState kbnFieldButton__button'}
+          className={contentClasses}
+          {...buttonProps}
         >
-          {fieldIcon && <span className="kbnFieldButton__fieldIcon">{fieldIcon}</span>}
-          {fieldName && <span className="kbnFieldButton__name">{fieldName}</span>}
-          {fieldInfoIcon && <div className="kbnFieldButton__infoIcon">{fieldInfoIcon}</div>}
+          {innerContent}
         </button>
       ) : (
-        <div className={'kbn-resetFocusState kbnFieldButton__button'} data-test-subj={dataTestSubj}>
-          {fieldIcon && <span className="kbnFieldButton__fieldIcon">{fieldIcon}</span>}
-          {fieldName && <span className="kbnFieldButton__name">{fieldName}</span>}
-          {fieldInfoIcon && <div className="kbnFieldButton__infoIcon">{fieldInfoIcon}</div>}
+        <div className={contentClasses} data-test-subj={dataTestSubj}>
+          {innerContent}
         </div>
       )}
 

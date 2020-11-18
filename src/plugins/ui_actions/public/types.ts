@@ -57,10 +57,12 @@ export interface TriggerContextMapping {
 const DEFAULT_ACTION = '';
 export const ACTION_VISUALIZE_FIELD = 'ACTION_VISUALIZE_FIELD';
 export const ACTION_VISUALIZE_GEO_FIELD = 'ACTION_VISUALIZE_GEO_FIELD';
+export const ACTION_VISUALIZE_LENS_FIELD = 'ACTION_VISUALIZE_LENS_FIELD';
 export type ActionType = keyof ActionContextMapping;
 
 export interface ActionContextMapping {
   [DEFAULT_ACTION]: BaseContext;
   [ACTION_VISUALIZE_FIELD]: VisualizeFieldContext;
   [ACTION_VISUALIZE_GEO_FIELD]: VisualizeFieldContext;
+  [ACTION_VISUALIZE_LENS_FIELD]: VisualizeFieldContext;
 }

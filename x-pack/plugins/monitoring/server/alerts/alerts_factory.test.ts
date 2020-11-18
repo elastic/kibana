@@ -60,9 +60,4 @@ describe('AlertsFactory', () => {
     expect(alert).not.toBeNull();
     expect(alert?.type).toBe(ALERT_CPU_USAGE);
   });
-
-  it('should get all', () => {
-    const alerts = AlertsFactory.getAll();
-    expect(alerts.length).toBe(8);
-  });
 });

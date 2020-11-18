@@ -38,4 +38,5 @@ export {
   ClusterDetails,
   ClusterDetailsGetter,
   LicenseGetter,
+  UsageStatsPayload,
 } from './types';

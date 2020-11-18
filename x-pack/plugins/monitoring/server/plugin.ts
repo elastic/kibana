@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { combineLatest } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
@@ -20,7 +20,6 @@ import {
   CoreStart,
   CustomHttpResponseOptions,
   ResponseError,
-  IClusterClient,
 } from 'kibana/server';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
 import {
@@ -40,7 +39,7 @@ import { initInfraSource } from './lib/logs/init_infra_source';
 import { mbSafeQuery } from './lib/mb_safe_query';
 import { instantiateClient } from './es_client/instantiate_client';
 import { registerCollectors } from './kibana_monitoring/collectors';
-import { registerMonitoringCollection } from './telemetry_collection';
+import { registerMonitoringTelemetryCollection } from './telemetry_collection';
 import { LicenseService } from './license_service';
 import { AlertsFactory } from './alerts';
 import {
@@ -75,7 +74,6 @@ export class Plugin {
   private monitoringCore = {} as MonitoringCore;
   private legacyShimDependencies = {} as LegacyShimDependencies;
   private bulkUploader: IBulkUploader = {} as IBulkUploader;
-  private telemetryElasticsearchClient: IClusterClient | undefined;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.initializerContext = initializerContext;
@@ -119,7 +117,6 @@ export class Plugin {
       config,
       log: this.log,
     });
-    await this.licenseService.refresh();
 
     const serverInfo = core.http.getServerInfo();
     let kibanaUrl = `${serverInfo.protocol}://${serverInfo.hostname}:${serverInfo.port}`;
@@ -141,19 +138,7 @@ export class Plugin {
         kibanaUrl,
         isCloud
       );
-      plugins.alerts.registerType(alert.getAlertType());
-    }
-
-    // Initialize telemetry
-    if (plugins.telemetryCollectionManager) {
-      registerMonitoringCollection(
-        plugins.telemetryCollectionManager,
-        this.cluster,
-        () => this.telemetryElasticsearchClient,
-        {
-          maxBucketSize: config.ui.max_bucket_size,
-        }
-      );
+      plugins.alerts?.registerType(alert.getAlertType());
     }
 
     // Register collector objects for stats to show up in the APIs
@@ -171,7 +156,12 @@ export class Plugin {
         },
       });
 
-      registerCollectors(plugins.usageCollection, config, cluster.callAsInternalUser);
+      registerCollectors(plugins.usageCollection, config, cluster);
+      registerMonitoringTelemetryCollection(
+        plugins.usageCollection,
+        cluster,
+        config.ui.max_bucket_size
+      );
     }
 
     // Always create the bulk uploader
@@ -231,7 +221,8 @@ export class Plugin {
         legacyConfig,
         core.getStartServices as () => Promise<[CoreStart, PluginsStart, {}]>,
         this.licenseService,
-        this.cluster
+        this.cluster,
+        plugins
       );
 
       this.registerPluginInUI(plugins);
@@ -250,13 +241,7 @@ export class Plugin {
     };
   }
 
-  start({ elasticsearch }: CoreStart) {
-    // TODO: For the telemetry plugin to work, we need to provide the new ES client.
-    // The new client should be inititalized with a similar config to `this.cluster` but, since we're not using
-    // the new client in Monitoring Telemetry collection yet, setting the local client allos progress for now.
-    // We will update the client in a follow up PR.
-    this.telemetryElasticsearchClient = elasticsearch.client;
-  }
+  start() {}
 
   stop() {
     if (this.cluster) {
@@ -274,8 +259,6 @@ export class Plugin {
         defaultMessage: 'Stack Monitoring',
       }),
       category: DEFAULT_APP_CATEGORIES.management,
-      icon: 'monitoringApp',
-      navLinkId: 'monitoring',
       app: ['monitoring', 'kibana'],
       catalogue: ['monitoring'],
       privileges: null,
@@ -310,7 +293,8 @@ export class Plugin {
     legacyConfig: any,
     getCoreServices: () => Promise<[CoreStart, PluginsStart, {}]>,
     licenseService: MonitoringLicenseService,
-    cluster: ILegacyCustomClusterClient
+    cluster: ILegacyCustomClusterClient,
+    setupPlugins: PluginsSetup
   ): MonitoringCore {
     const router = this.legacyShimDependencies.router;
     const legacyConfigWrapper = () => ({
@@ -369,7 +353,7 @@ export class Plugin {
               config: legacyConfigWrapper,
               newPlatform: {
                 setup: {
-                  plugins,
+                  plugins: setupPlugins,
                 },
               },
               plugins: {

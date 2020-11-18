@@ -29,12 +29,12 @@ import {
 } from './action';
 
 import {
-  getCurrentListResourceState,
+  getListResourceState,
   getDeletionDialogEntry,
   getDeletionSubmissionResourceState,
   getLastLoadedListResourceState,
-  getListCurrentPageIndex,
-  getListCurrentPageSize,
+  getCurrentLocationPageIndex,
+  getCurrentLocationPageSize,
   getTrustedAppCreateData,
   isCreatePending,
   needsRefreshOfListData,
@@ -56,15 +56,15 @@ const refreshListIfNeeded = async (
       createTrustedAppsListResourceStateChangedAction({
         type: 'LoadingResourceState',
         // need to think on how to avoid the casting
-        previousState: getCurrentListResourceState(store.getState()) as Immutable<
+        previousState: getListResourceState(store.getState()) as Immutable<
           StaleResourceState<TrustedAppsListData>
         >,
       })
     );
 
     try {
-      const pageIndex = getListCurrentPageIndex(store.getState());
-      const pageSize = getListCurrentPageSize(store.getState());
+      const pageIndex = getCurrentLocationPageIndex(store.getState());
+      const pageSize = getCurrentLocationPageSize(store.getState());
       const response = await trustedAppsService.getTrustedAppsList({
         page: pageIndex + 1,
         per_page: pageSize,
@@ -75,8 +75,9 @@ const refreshListIfNeeded = async (
           type: 'LoadedResourceState',
           data: {
             items: response.data,
+            pageIndex,
+            pageSize,
             totalItemsCount: response.total,
-            paginationInfo: { index: pageIndex, size: pageSize },
             timestamp: Date.now(),
           },
         })

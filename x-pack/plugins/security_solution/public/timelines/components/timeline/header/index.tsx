@@ -11,13 +11,6 @@ import deepEqual from 'fast-deep-equal';
 
 import { DataProviders } from '../data_providers';
 import { DataProvider } from '../data_providers/data_provider';
-import {
-  OnDataProviderEdited,
-  OnDataProviderRemoved,
-  OnToggleDataProviderEnabled,
-  OnToggleDataProviderExcluded,
-  OnToggleDataProviderType,
-} from '../events';
 import { StatefulSearchOrFilter } from '../search_or_filter';
 import { BrowserFields } from '../../../../common/containers/source';
 
@@ -33,11 +26,6 @@ interface Props {
   filterManager: FilterManager;
   graphEventId?: string;
   indexPattern: IIndexPattern;
-  onDataProviderEdited: OnDataProviderEdited;
-  onDataProviderRemoved: OnDataProviderRemoved;
-  onToggleDataProviderEnabled: OnToggleDataProviderEnabled;
-  onToggleDataProviderExcluded: OnToggleDataProviderExcluded;
-  onToggleDataProviderType: OnToggleDataProviderType;
   show: boolean;
   showCallOutUnauthorizedMsg: boolean;
   status: TimelineStatusLiteralWithNull;
@@ -50,11 +38,6 @@ const TimelineHeaderComponent: React.FC<Props> = ({
   dataProviders,
   filterManager,
   graphEventId,
-  onDataProviderEdited,
-  onDataProviderRemoved,
-  onToggleDataProviderEnabled,
-  onToggleDataProviderExcluded,
-  onToggleDataProviderType,
   show,
   showCallOutUnauthorizedMsg,
   status,
@@ -85,11 +68,6 @@ const TimelineHeaderComponent: React.FC<Props> = ({
           browserFields={browserFields}
           timelineId={timelineId}
           dataProviders={dataProviders}
-          onDataProviderEdited={onDataProviderEdited}
-          onDataProviderRemoved={onDataProviderRemoved}
-          onToggleDataProviderEnabled={onToggleDataProviderEnabled}
-          onToggleDataProviderExcluded={onToggleDataProviderExcluded}
-          onToggleDataProviderType={onToggleDataProviderType}
         />
 
         <StatefulSearchOrFilter
@@ -111,11 +89,6 @@ export const TimelineHeader = React.memo(
     deepEqual(prevProps.dataProviders, nextProps.dataProviders) &&
     prevProps.filterManager === nextProps.filterManager &&
     prevProps.graphEventId === nextProps.graphEventId &&
-    prevProps.onDataProviderEdited === nextProps.onDataProviderEdited &&
-    prevProps.onDataProviderRemoved === nextProps.onDataProviderRemoved &&
-    prevProps.onToggleDataProviderEnabled === nextProps.onToggleDataProviderEnabled &&
-    prevProps.onToggleDataProviderExcluded === nextProps.onToggleDataProviderExcluded &&
-    prevProps.onToggleDataProviderType === nextProps.onToggleDataProviderType &&
     prevProps.show === nextProps.show &&
     prevProps.showCallOutUnauthorizedMsg === nextProps.showCallOutUnauthorizedMsg &&
     prevProps.status === nextProps.status &&

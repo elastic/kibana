@@ -16,11 +16,12 @@ import {
   AABB,
   VisibleEntites,
   TreeFetcherParameters,
+  IsometricTaxiLayout,
 } from '../../types';
 import { isGraphableProcess, isTerminatedProcess } from '../../models/process_event';
 import * as indexedProcessTreeModel from '../../models/indexed_process_tree';
 import * as eventModel from '../../../../common/endpoint/models/event';
-
+import * as nodeEventsInCategoryModel from './node_events_in_category_model';
 import {
   ResolverTree,
   ResolverNodeStats,
@@ -102,9 +103,8 @@ export const terminatedProcesses = createSelector(resolverTreeResponse, function
  * A function that given an entity id returns a boolean indicating if the id is in the set of terminated processes.
  */
 export const isProcessTerminated = createSelector(terminatedProcesses, function (
-  /* eslint-disable no-shadow */
+  // eslint-disable-next-line @typescript-eslint/no-shadow
   terminatedProcesses
-  /* eslint-enable no-shadow */
 ) {
   return (entityID: string) => {
     return terminatedProcesses.has(entityID);
@@ -136,9 +136,8 @@ export const graphableProcesses = createSelector(resolverTreeResponse, function 
  * The 'indexed process tree' contains the tree data, indexed in helpful ways. Used for O(1) access to stuff during graph layout.
  */
 export const tree = createSelector(graphableProcesses, function indexedTree(
-  /* eslint-disable no-shadow */
+  // eslint-disable-next-line @typescript-eslint/no-shadow
   graphableProcesses
-  /* eslint-enable no-shadow */
 ) {
   return indexedProcessTreeModel.factory(graphableProcesses);
 });
@@ -247,9 +246,8 @@ export const relatedEventsByCategory: (
 ) => (node: string, eventCategory: string) => SafeResolverEvent[] = createSelector(
   relatedEventsByEntityId,
   function (
-    /* eslint-disable no-shadow */
+    // eslint-disable-next-line @typescript-eslint/no-shadow
     relatedEventsByEntityId
-    /* eslint-enable no-shadow */
   ) {
     // A map of nodeID -> event category -> SafeResolverEvent[]
     const nodeMap: Map<string, Map<string, SafeResolverEvent[]>> = new Map();
@@ -346,14 +344,13 @@ export function treeParametersToFetch(state: DataState): TreeFetcherParameters |
   }
 }
 
-export const layout = createSelector(
+export const layout: (state: DataState) => IsometricTaxiLayout = createSelector(
   tree,
   originID,
   function processNodePositionsAndEdgeLineSegments(
-    /* eslint-disable no-shadow */
     indexedProcessTree,
+    // eslint-disable-next-line @typescript-eslint/no-shadow
     originID
-    /* eslint-enable no-shadow */
   ) {
     // use the isometric taxi layout as a base
     const taxiLayout = isometricTaxiLayoutModel.isometricTaxiLayoutFactory(indexedProcessTree);
@@ -372,7 +369,7 @@ export const layout = createSelector(
     }
 
     // Find the position of the origin, we'll center the map on it intrinsically
-    const originPosition = isometricTaxiLayoutModel.nodePosition(taxiLayout, originNode);
+    const originPosition = isometricTaxiLayoutModel.processPosition(taxiLayout, originNode);
     // adjust the position of everything so that the origin node is at `(0, 0)`
 
     if (originPosition === undefined) {
@@ -649,7 +646,7 @@ export const relatedEventCountOfTypeForNode: (
 export const panelViewAndParameters = createSelector(
   (state: DataState) => state.locationSearch,
   resolverComponentInstanceID,
-  /* eslint-disable-next-line no-shadow */
+  // eslint-disable-next-line @typescript-eslint/no-shadow
   (locationSearch, resolverComponentInstanceID) => {
     return panelViewAndParametersFromLocationSearchAndResolverComponentInstanceID({
       locationSearch,
@@ -665,3 +662,74 @@ export const panelViewAndParameters = createSelector(
 export const nodeEventsInCategory = (state: DataState) => {
   return state.nodeEventsInCategory?.events ?? [];
 };
+
+export const lastRelatedEventResponseContainsCursor = createSelector(
+  (state: DataState) => state.nodeEventsInCategory,
+  panelViewAndParameters,
+  // eslint-disable-next-line @typescript-eslint/no-shadow
+  function (nodeEventsInCategory, panelViewAndParameters) {
+    if (
+      nodeEventsInCategory !== undefined &&
+      nodeEventsInCategoryModel.isRelevantToPanelViewAndParameters(
+        nodeEventsInCategory,
+        panelViewAndParameters
+      )
+    ) {
+      return nodeEventsInCategory.cursor !== null;
+    } else {
+      return false;
+    }
+  }
+);
+
+export const hadErrorLoadingNodeEventsInCategory = createSelector(
+  (state: DataState) => state.nodeEventsInCategory,
+  panelViewAndParameters,
+  // eslint-disable-next-line @typescript-eslint/no-shadow
+  function (nodeEventsInCategory, panelViewAndParameters) {
+    if (
+      nodeEventsInCategory !== undefined &&
+      nodeEventsInCategoryModel.isRelevantToPanelViewAndParameters(
+        nodeEventsInCategory,
+        panelViewAndParameters
+      )
+    ) {
+      return nodeEventsInCategory && nodeEventsInCategory.error === true;
+    } else {
+      return false;
+    }
+  }
+);
+
+export const isLoadingNodeEventsInCategory = createSelector(
+  (state: DataState) => state.nodeEventsInCategory,
+  panelViewAndParameters,
+  // eslint-disable-next-line @typescript-eslint/no-shadow
+  function (nodeEventsInCategory, panelViewAndParameters) {
+    const { panelView } = panelViewAndParameters;
+    return panelView === 'nodeEventsInCategory' && nodeEventsInCategory === undefined;
+  }
+);
+
+export const isLoadingMoreNodeEventsInCategory = createSelector(
+  (state: DataState) => state.nodeEventsInCategory,
+  panelViewAndParameters,
+  // eslint-disable-next-line @typescript-eslint/no-shadow
+  function (nodeEventsInCategory, panelViewAndParameters) {
+    if (
+      nodeEventsInCategory !== undefined &&
+      nodeEventsInCategoryModel.isRelevantToPanelViewAndParameters(
+        nodeEventsInCategory,
+        panelViewAndParameters
+      )
+    ) {
+      return (
+        nodeEventsInCategory &&
+        nodeEventsInCategory.lastCursorRequested !== null &&
+        nodeEventsInCategory.cursor === nodeEventsInCategory.lastCursorRequested
+      );
+    } else {
+      return false;
+    }
+  }
+);

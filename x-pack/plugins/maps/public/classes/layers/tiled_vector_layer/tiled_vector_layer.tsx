@@ -5,9 +5,14 @@
  */
 
 import React from 'react';
+import {
+  Map as MbMap,
+  GeoJSONSource as MbGeoJSONSource,
+  VectorSource as MbVectorSource,
+} from 'mapbox-gl';
 import { EuiIcon } from '@elastic/eui';
 import { Feature } from 'geojson';
-import { VectorStyle } from '../../styles/vector/vector_style';
+import { IVectorStyle, VectorStyle } from '../../styles/vector/vector_style';
 import { SOURCE_DATA_REQUEST_ID, LAYER_TYPE } from '../../../../common/constants';
 import { VectorLayer, VectorLayerArguments } from '../vector_layer/vector_layer';
 import { ITiledSingleLayerVectorSource } from '../../sources/vector_source';
@@ -59,7 +64,7 @@ export class TiledVectorLayer extends VectorLayer {
     const searchFilters: VectorSourceRequestMeta = this._getSearchFilters(
       dataFilters,
       this.getSource(),
-      this._style
+      this._style as IVectorStyle
     );
     const prevDataRequest = this.getSourceDataRequest();
 
@@ -88,13 +93,12 @@ export class TiledVectorLayer extends VectorLayer {
   }
 
   async syncData(syncContext: DataRequestContext) {
-    await this._syncSourceStyleMeta(syncContext, this._source, this._style);
-    await this._syncSourceFormatters(syncContext, this._source, this._style);
+    await this._syncSourceStyleMeta(syncContext, this._source, this._style as IVectorStyle);
+    await this._syncSourceFormatters(syncContext, this._source, this._style as IVectorStyle);
     await this._syncMVTUrlTemplate(syncContext);
   }
 
-  _syncSourceBindingWithMb(mbMap: unknown) {
-    // @ts-expect-error
+  _syncSourceBindingWithMb(mbMap: MbMap) {
     const mbSource = mbMap.getSource(this._getMbSourceId());
     if (mbSource) {
       return;
@@ -113,7 +117,6 @@ export class TiledVectorLayer extends VectorLayer {
     }
 
     const mbSourceId = this._getMbSourceId();
-    // @ts-expect-error
     mbMap.addSource(mbSourceId, {
       type: 'vector',
       tiles: [sourceMeta.urlTemplate],
@@ -126,7 +129,7 @@ export class TiledVectorLayer extends VectorLayer {
     return this._getMbSourceId() === mbSourceId;
   }
 
-  _syncStylePropertiesWithMb(mbMap: unknown) {
+  _syncStylePropertiesWithMb(mbMap: MbMap) {
     // @ts-ignore
     const mbSource = mbMap.getSource(this._getMbSourceId());
     if (!mbSource) {
@@ -146,12 +149,16 @@ export class TiledVectorLayer extends VectorLayer {
     this._setMbLinePolygonProperties(mbMap, sourceMeta.layerName);
   }
 
-  _requiresPrevSourceCleanup(mbMap: unknown): boolean {
-    // @ts-expect-error
-    const mbTileSource = mbMap.getSource(this._getMbSourceId());
-    if (!mbTileSource) {
+  _requiresPrevSourceCleanup(mbMap: MbMap): boolean {
+    const mbSource = mbMap.getSource(this._getMbSourceId()) as MbVectorSource | MbGeoJSONSource;
+    if (!mbSource) {
       return false;
     }
+    if (!('tiles' in mbSource)) {
+      // Expected source is not compatible, so remove.
+      return true;
+    }
+    const mbTileSource = mbSource as MbVectorSource;
 
     const dataRequest = this.getSourceDataRequest();
     if (!dataRequest) {
@@ -163,13 +170,8 @@ export class TiledVectorLayer extends VectorLayer {
       return false;
     }
 
-    if (!mbTileSource.tiles) {
-      // Expected source is not compatible, so remove.
-      return true;
-    }
-
     const isSourceDifferent =
-      mbTileSource.tiles[0] !== tiledSourceMeta.urlTemplate ||
+      mbTileSource.tiles?.[0] !== tiledSourceMeta.urlTemplate ||
       mbTileSource.minzoom !== tiledSourceMeta.minSourceZoom ||
       mbTileSource.maxzoom !== tiledSourceMeta.maxSourceZoom;
 
@@ -179,8 +181,10 @@ export class TiledVectorLayer extends VectorLayer {
 
     const layerIds = this.getMbLayerIds();
     for (let i = 0; i < layerIds.length; i++) {
-      // @ts-expect-error
       const mbLayer = mbMap.getLayer(layerIds[i]);
+      // The mapbox type in the spec is specified with `source-layer`
+      // but the programmable JS-object uses camelcase `sourceLayer`
+      // @ts-expect-error
       if (mbLayer && mbLayer.sourceLayer !== tiledSourceMeta.layerName) {
         // If the source-pointer of one of the layers is stale, they will all be stale.
         // In this case, all the mb-layers need to be removed and re-added.
@@ -191,7 +195,7 @@ export class TiledVectorLayer extends VectorLayer {
     return false;
   }
 
-  syncLayerWithMB(mbMap: unknown) {
+  syncLayerWithMB(mbMap: MbMap) {
     this._removeStaleMbSourcesAndLayers(mbMap);
     this._syncSourceBindingWithMb(mbMap);
     this._syncStylePropertiesWithMb(mbMap);

@@ -19,16 +19,12 @@
 
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import {
-  ExecutionContext,
-  ExpressionFunctionDefinition,
-  KibanaContext,
-  Render,
-} from '../../expressions/public';
+import { ExecutionContextSearch } from '../../data/public';
+import { ExecutionContext, ExpressionFunctionDefinition, Render } from '../../expressions/public';
 import { VegaVisualizationDependencies } from './plugin';
 import { createVegaRequestHandler } from './vega_request_handler';
 import { VegaInspectorAdapters } from './vega_inspector/index';
-import { TimeRange, Query } from '../../data/public';
+import { KibanaContext, TimeRange, Query } from '../../data/public';
 import { VegaParser } from './data_model/vega_parser';
 
 type Input = KibanaContext | null;
@@ -40,21 +36,23 @@ interface Arguments {
 
 export type VisParams = Required<Arguments>;
 
-interface RenderValue {
+export interface RenderValue {
   visData: VegaParser;
   visType: 'vega';
   visConfig: VisParams;
 }
 
-export const createVegaFn = (
-  dependencies: VegaVisualizationDependencies
-): ExpressionFunctionDefinition<
+export type VegaExpressionFunctionDefinition = ExpressionFunctionDefinition<
   'vega',
   Input,
   Arguments,
   Output,
-  ExecutionContext<unknown, VegaInspectorAdapters>
-> => ({
+  ExecutionContext<VegaInspectorAdapters, ExecutionContextSearch>
+>;
+
+export const createVegaFn = (
+  dependencies: VegaVisualizationDependencies
+): VegaExpressionFunctionDefinition => ({
   name: 'vega',
   type: 'render',
   inputTypes: ['kibana_context', 'null'],
@@ -80,7 +78,7 @@ export const createVegaFn = (
 
     return {
       type: 'render',
-      as: 'visualization',
+      as: 'vega_vis',
       value: {
         visData: response,
         visType: 'vega',

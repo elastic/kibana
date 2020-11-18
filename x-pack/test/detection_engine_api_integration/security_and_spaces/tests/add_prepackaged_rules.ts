@@ -109,6 +109,30 @@ export default ({ getService }: FtrProviderContext): void => {
 
         expect(body.rules_installed).to.eql(0);
       });
+
+      it('should be possible to call the API twice and the second time the number of timelines installed should be zero', async () => {
+        await supertest
+          .put(DETECTION_ENGINE_PREPACKAGED_URL)
+          .set('kbn-xsrf', 'true')
+          .send()
+          .expect(200);
+
+        await waitFor(async () => {
+          const { body } = await supertest
+            .get(`${DETECTION_ENGINE_PREPACKAGED_URL}/_status`)
+            .set('kbn-xsrf', 'true')
+            .expect(200);
+          return body.timelines_not_installed === 0;
+        });
+
+        const { body } = await supertest
+          .put(DETECTION_ENGINE_PREPACKAGED_URL)
+          .set('kbn-xsrf', 'true')
+          .send()
+          .expect(200);
+
+        expect(body.timelines_installed).to.eql(0);
+      });
     });
   });
 };

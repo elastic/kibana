@@ -18,7 +18,7 @@
  */
 
 import { ScopedHistory } from 'kibana/public';
-import { History } from 'history';
+import { History, parsePath } from 'history';
 
 interface LocationObject {
   pathname?: string;
@@ -32,7 +32,7 @@ const isModifiedEvent = (event: any) =>
 const isLeftClickEvent = (event: any) => event.button === 0;
 
 export const toLocationObject = (to: string | LocationObject) =>
-  typeof to === 'string' ? { pathname: to } : to;
+  typeof to === 'string' ? parsePath(to) : to;
 
 export const reactRouterNavigate = (
   history: ScopedHistory | History,

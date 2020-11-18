@@ -25,6 +25,8 @@ import {
   EmbeddableFactoryDefinition,
   IContainer,
   EmbeddableFactory,
+  EmbeddableStart,
+  AttributeService,
 } from '../../../../src/plugins/embeddable/public';
 import {
   BookEmbeddable,
@@ -33,12 +35,18 @@ import {
   BookEmbeddableOutput,
 } from './book_embeddable';
 import { CreateEditBookComponent } from './create_edit_book_component';
-import { OverlayStart } from '../../../../src/core/public';
-import { DashboardStart, AttributeService } from '../../../../src/plugins/dashboard/public';
+import {
+  OverlayStart,
+  SavedObjectsClientContract,
+  SimpleSavedObject,
+} from '../../../../src/core/public';
+import { checkForDuplicateTitle, OnSaveProps } from '../../../../src/plugins/saved_objects/public';
 
 interface StartServices {
-  getAttributeService: DashboardStart['getAttributeService'];
+  getAttributeService: EmbeddableStart['getAttributeService'];
   openModal: OverlayStart['openModal'];
+  savedObjectsClient: SavedObjectsClientContract;
+  overlays: OverlayStart;
 }
 
 export type BookEmbeddableFactory = EmbeddableFactory<
@@ -117,11 +125,51 @@ export class BookEmbeddableFactoryDefinition
     });
   }
 
+  private async unwrapMethod(savedObjectId: string): Promise<BookSavedObjectAttributes> {
+    const { savedObjectsClient } = await this.getStartServices();
+    const savedObject: SimpleSavedObject<BookSavedObjectAttributes> = await savedObjectsClient.get<
+      BookSavedObjectAttributes
+    >(this.type, savedObjectId);
+    return { ...savedObject.attributes };
+  }
+
+  private async saveMethod(attributes: BookSavedObjectAttributes, savedObjectId?: string) {
+    const { savedObjectsClient } = await this.getStartServices();
+    if (savedObjectId) {
+      return savedObjectsClient.update(this.type, savedObjectId, attributes);
+    }
+    return savedObjectsClient.create(this.type, attributes);
+  }
+
+  private async checkForDuplicateTitleMethod(props: OnSaveProps): Promise<true> {
+    const start = await this.getStartServices();
+    const { savedObjectsClient, overlays } = start;
+    return checkForDuplicateTitle(
+      {
+        title: props.newTitle,
+        copyOnSave: false,
+        lastSavedTitle: '',
+        getEsType: () => this.type,
+        getDisplayName: this.getDisplayName || (() => this.type),
+      },
+      props.isTitleDuplicateConfirmed,
+      props.onTitleDuplicate,
+      {
+        savedObjectsClient,
+        overlays,
+      }
+    );
+  }
+
   private async getAttributeService() {
     if (!this.attributeService) {
-      this.attributeService = await (await this.getStartServices()).getAttributeService<
+      this.attributeService = (await this.getStartServices()).getAttributeService<
         BookSavedObjectAttributes
-      >(this.type);
+      >(this.type, {
+        saveMethod: this.saveMethod.bind(this),
+        unwrapMethod: this.unwrapMethod.bind(this),
+        checkForDuplicateTitle: this.checkForDuplicateTitleMethod.bind(this),
+      });
     }
     return this.attributeService!;
   }

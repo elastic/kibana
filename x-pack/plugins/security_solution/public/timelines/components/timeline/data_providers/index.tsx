@@ -14,13 +14,6 @@ import {
   droppableTimelineProvidersPrefix,
   IS_DRAGGING_CLASS_NAME,
 } from '../../../../common/components/drag_and_drop/helpers';
-import {
-  OnDataProviderEdited,
-  OnDataProviderRemoved,
-  OnToggleDataProviderEnabled,
-  OnToggleDataProviderExcluded,
-  OnToggleDataProviderType,
-} from '../events';
 
 import { DataProvider } from './data_provider';
 import { Empty } from './empty';
@@ -31,11 +24,6 @@ interface Props {
   browserFields: BrowserFields;
   timelineId: string;
   dataProviders: DataProvider[];
-  onDataProviderEdited: OnDataProviderEdited;
-  onDataProviderRemoved: OnDataProviderRemoved;
-  onToggleDataProviderEnabled: OnToggleDataProviderEnabled;
-  onToggleDataProviderExcluded: OnToggleDataProviderExcluded;
-  onToggleDataProviderType: OnToggleDataProviderType;
 }
 
 const DropTargetDataProvidersContainer = styled.div`
@@ -91,48 +79,32 @@ const getDroppableId = (id: string): string => `${droppableTimelineProvidersPref
  * the user to drop anything with a facet count into
  * the data pro section.
  */
-export const DataProviders = React.memo<Props>(
-  ({
-    browserFields,
-    dataProviders,
+export const DataProviders = React.memo<Props>(({ browserFields, dataProviders, timelineId }) => {
+  const { getManageTimelineById } = useManageTimeline();
+  const isLoading = useMemo(() => getManageTimelineById(timelineId).isLoading, [
+    getManageTimelineById,
     timelineId,
-    onDataProviderEdited,
-    onDataProviderRemoved,
-    onToggleDataProviderEnabled,
-    onToggleDataProviderExcluded,
-    onToggleDataProviderType,
-  }) => {
-    const { getManageTimelineById } = useManageTimeline();
-    const isLoading = useMemo(() => getManageTimelineById(timelineId).isLoading, [
-      getManageTimelineById,
-      timelineId,
-    ]);
-    return (
-      <DropTargetDataProvidersContainer className="drop-target-data-providers-container">
-        <DropTargetDataProviders
-          className="drop-target-data-providers"
-          data-test-subj="dataProviders"
-        >
-          {dataProviders != null && dataProviders.length ? (
-            <Providers
-              browserFields={browserFields}
-              timelineId={timelineId}
-              dataProviders={dataProviders}
-              onDataProviderEdited={onDataProviderEdited}
-              onDataProviderRemoved={onDataProviderRemoved}
-              onToggleDataProviderEnabled={onToggleDataProviderEnabled}
-              onToggleDataProviderExcluded={onToggleDataProviderExcluded}
-              onToggleDataProviderType={onToggleDataProviderType}
-            />
-          ) : (
-            <DroppableWrapper isDropDisabled={isLoading} droppableId={getDroppableId(timelineId)}>
-              <Empty browserFields={browserFields} timelineId={timelineId} />
-            </DroppableWrapper>
-          )}
-        </DropTargetDataProviders>
-      </DropTargetDataProvidersContainer>
-    );
-  }
-);
+  ]);
+  return (
+    <DropTargetDataProvidersContainer className="drop-target-data-providers-container">
+      <DropTargetDataProviders
+        className="drop-target-data-providers"
+        data-test-subj="dataProviders"
+      >
+        {dataProviders != null && dataProviders.length ? (
+          <Providers
+            browserFields={browserFields}
+            timelineId={timelineId}
+            dataProviders={dataProviders}
+          />
+        ) : (
+          <DroppableWrapper isDropDisabled={isLoading} droppableId={getDroppableId(timelineId)}>
+            <Empty browserFields={browserFields} timelineId={timelineId} />
+          </DroppableWrapper>
+        )}
+      </DropTargetDataProviders>
+    </DropTargetDataProvidersContainer>
+  );
+});
 
 DataProviders.displayName = 'DataProviders';

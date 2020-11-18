@@ -20,6 +20,7 @@
 import { loggingSystemMock } from '../../../core/server/mocks';
 import { UsageCollectionSetup } from './plugin';
 import { CollectorSet } from './collector';
+export { Collector, createCollectorFetchContextMock } from './usage_collection.mock';
 
 const createSetupContract = () => {
   return {

@@ -10,8 +10,11 @@ import React, { useMemo } from 'react';
 import styled from 'styled-components';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { TransactionGroup } from '../../../../../server/lib/transaction_groups/fetcher';
+import {
+  asDecimal,
+  asMillisecondDuration,
+} from '../../../../../common/utils/formatters';
 import { fontFamilyCode, truncate } from '../../../../style/variables';
-import { asDecimal, asMillisecondDuration } from '../../../../utils/formatters';
 import { ImpactBar } from '../../../shared/ImpactBar';
 import { ITableColumn, ManagedTable } from '../../../shared/ManagedTable';
 import { LoadingStatePrompt } from '../../../shared/LoadingStatePrompt';

@@ -26,9 +26,8 @@ export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<
   const config = reporting.getConfig();
   const encryptionKey = config.get('encryptionKey');
 
-  const logger = parentLogger.clone([PDF_JOB_TYPE, 'execute']);
-
   return async function runTask(jobId, job, cancellationToken) {
+    const logger = parentLogger.clone([PDF_JOB_TYPE, 'execute-job', jobId]);
     const apmTrans = apm.startTransaction('reporting execute_job pdf', 'reporting');
     const apmGetAssets = apmTrans?.startSpan('get_assets', 'setup');
     let apmGeneratePdf: { end: () => void } | null | undefined;
@@ -40,7 +39,9 @@ export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<
       mergeMap(() => decryptJobHeaders(encryptionKey, job.headers, logger)),
       map((decryptedHeaders) => omitBlockedHeaders(decryptedHeaders)),
       map((filteredHeaders) => getConditionalHeaders(config, filteredHeaders)),
-      mergeMap((conditionalHeaders) => getCustomLogo(reporting, conditionalHeaders, job.spaceId)),
+      mergeMap((conditionalHeaders) =>
+        getCustomLogo(reporting, conditionalHeaders, job.spaceId, logger)
+      ),
       mergeMap(({ logo, conditionalHeaders }) => {
         const urls = getFullUrls(config, job);
 

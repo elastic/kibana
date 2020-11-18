@@ -5,11 +5,7 @@
  */
 
 import { mergeProjection } from '../../projections/util/merge_projection';
-import {
-  Setup,
-  SetupTimeRange,
-  SetupUIFilters,
-} from '../helpers/setup_request';
+import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { getRumPageLoadTransactionsProjection } from '../../projections/rum_page_load_transactions';
 import {
   TRANSACTION_DURATION,
@@ -21,7 +17,7 @@ export async function getUrlSearch({
   urlQuery,
   percentile,
 }: {
-  setup: Setup & SetupTimeRange & SetupUIFilters;
+  setup: Setup & SetupTimeRange;
   urlQuery?: string;
   percentile: number;
 }) {

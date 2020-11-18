@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mountWithIntl, renderWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl, renderWithIntl, shallowWithIntl } from '@kbn/test/jest';
 import React from 'react';
 import { PingListExpandedRowComponent } from '../expanded_row';
 import { Ping } from '../../../../../common/runtime_types';
@@ -17,6 +17,7 @@ describe('PingListExpandedRow', () => {
       docId: 'fdeio12',
       timestamp: '19290310',
       monitor: {
+        check_group: 'check_group_id',
         duration: {
           us: 12345,
         },
@@ -86,5 +87,26 @@ describe('PingListExpandedRow', () => {
     const docLinkComponent = component.find(DocLinkForBody);
 
     expect(docLinkComponent).toHaveLength(1);
+  });
+
+  it('renders a synthetics expanded row for synth monitor', () => {
+    ping.monitor.type = 'browser';
+    expect(shallowWithIntl(<PingListExpandedRowComponent ping={ping} />)).toMatchInlineSnapshot(`
+      <EuiFlexGroup
+        direction="column"
+      >
+        <EuiFlexItem>
+          <EuiCallOut
+            iconType="beaker"
+            title="Experimental feature"
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <BrowserExpandedRow
+            checkGroup="check_group_id"
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    `);
   });
 });

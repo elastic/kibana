@@ -13,25 +13,20 @@
 /x-pack/build
 node_modules
 target
+snapshots.js
 
 !/.eslintrc.js
 
 # plugin overrides
 /src/core/lib/kbn_internal_native_observable
 /src/legacy/plugin_discovery/plugin_pack/__tests__/fixtures/plugins/broken
-/src/legacy/ui/public/flot-charts
 /src/plugins/data/common/es_query/kuery/ast/_generated_/**
 /src/plugins/vis_type_timelion/public/_generated_/**
-/src/plugins/vis_type_timelion/public/flot/jquery.flot.*
-/src/plugins/timelion/public/flot/jquery.flot.*
 /x-pack/legacy/plugins/**/__tests__/fixtures/**
-/x-pack/plugins/apm/e2e/**/snapshots.js
 /x-pack/plugins/apm/e2e/tmp/*
 /x-pack/plugins/canvas/canvas_plugin
-/x-pack/plugins/canvas/canvas_plugin_src/lib/flot-charts
 /x-pack/plugins/canvas/shareable_runtime/build
 /x-pack/plugins/canvas/storybook/build
-/x-pack/plugins/monitoring/public/lib/jquery_flot
 /x-pack/plugins/reporting/server/export_types/printable_pdf/server/lib/pdf/assets/**
 /x-pack/legacy/plugins/infra/common/graphql/types.ts
 /x-pack/legacy/plugins/infra/public/graphql/types.ts
@@ -48,4 +43,4 @@ target
 /packages/kbn-ui-framework/dist
 /packages/kbn-ui-framework/doc_site/build
 /packages/kbn-ui-framework/generator-kui/*/templates/
-
+/packages/kbn-ui-shared-deps/flot_charts

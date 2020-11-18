@@ -5,11 +5,7 @@
  */
 import { getRumPageLoadTransactionsProjection } from '../../projections/rum_page_load_transactions';
 import { mergeProjection } from '../../projections/util/merge_projection';
-import {
-  Setup,
-  SetupTimeRange,
-  SetupUIFilters,
-} from '../helpers/setup_request';
+import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { BreakdownItem } from '../../../typings/ui_filters';
 
 export async function getPageViewTrends({
@@ -17,13 +13,14 @@ export async function getPageViewTrends({
   breakdowns,
   urlQuery,
 }: {
-  setup: Setup & SetupTimeRange & SetupUIFilters;
+  setup: Setup & SetupTimeRange;
   breakdowns?: string;
   urlQuery?: string;
 }) {
   const projection = getRumPageLoadTransactionsProjection({
     setup,
     urlQuery,
+    checkFetchStartFieldExists: false,
   });
   let breakdownItem: BreakdownItem | null = null;
   if (breakdowns) {

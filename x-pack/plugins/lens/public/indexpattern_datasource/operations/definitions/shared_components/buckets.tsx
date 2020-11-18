@@ -96,7 +96,13 @@ export const DraggableBucketContainer = ({
   children: React.ReactNode;
 } & BucketContainerProps) => {
   return (
-    <EuiDraggable spacing="m" index={idx} draggableId={id} disableInteractiveElementBlocking>
+    <EuiDraggable
+      style={{ marginBottom: 4 }}
+      spacing="none"
+      index={idx}
+      draggableId={id}
+      disableInteractiveElementBlocking
+    >
       {(provided) => <BucketContainer {...bucketContainerProps}>{children}</BucketContainer>}
     </EuiDraggable>
   );
@@ -134,7 +140,7 @@ export const DragDropBuckets = ({
   };
   return (
     <EuiDragDropContext onDragEnd={handleDragEnd} onDragStart={onDragStart}>
-      <EuiDroppable droppableId={droppableId} spacing="s">
+      <EuiDroppable droppableId={droppableId} spacing="none">
         {children}
       </EuiDroppable>
     </EuiDragDropContext>

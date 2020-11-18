@@ -88,7 +88,7 @@ export function MachineLearningAnomalyExplorerProvider({ getService }: FtrProvid
       );
       await testSubjects.clickWhenNotDisabled('mlAddAndEditDashboardButton');
       const embeddable = await testSubjects.find('mlAnomalySwimlaneEmbeddableWrapper');
-      const swimlane = await embeddable.findByClassName('ml-swimlanes');
+      const swimlane = await embeddable.findByClassName('mlSwimLaneContainer');
       expect(await swimlane.isDisplayed()).to.eql(
         true,
         'Anomaly swimlane should be displayed in dashboard'

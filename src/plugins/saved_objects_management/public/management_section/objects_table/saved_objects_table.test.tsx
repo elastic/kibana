@@ -30,7 +30,7 @@ import {
 import React from 'react';
 import { Query } from '@elastic/eui';
 import { ShallowWrapper } from 'enzyme';
-import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers';
+import { shallowWithI18nProvider } from '@kbn/test/jest';
 import {
   httpServiceMock,
   overlayServiceMock,
@@ -342,12 +342,11 @@ describe('SavedObjectsTable', () => {
 
       await component.instance().onExportAll();
 
-      expect(fetchExportByTypeAndSearchMock).toHaveBeenCalledWith(
+      expect(fetchExportByTypeAndSearchMock).toHaveBeenCalledWith({
         http,
-        allowedTypes,
-        undefined,
-        true
-      );
+        types: allowedTypes,
+        includeReferencesDeep: true,
+      });
       expect(saveAsMock).toHaveBeenCalledWith(blob, 'export.ndjson');
       expect(notifications.toasts.addSuccess).toHaveBeenCalledWith({
         title: 'Your file is downloading in the background',
@@ -372,12 +371,12 @@ describe('SavedObjectsTable', () => {
 
       await component.instance().onExportAll();
 
-      expect(fetchExportByTypeAndSearchMock).toHaveBeenCalledWith(
+      expect(fetchExportByTypeAndSearchMock).toHaveBeenCalledWith({
         http,
-        allowedTypes,
-        'test*',
-        true
-      );
+        types: allowedTypes,
+        search: 'test*',
+        includeReferencesDeep: true,
+      });
       expect(saveAsMock).toHaveBeenCalledWith(blob, 'export.ndjson');
       expect(notifications.toasts.addSuccess).toHaveBeenCalledWith({
         title: 'Your file is downloading in the background',
@@ -544,11 +543,13 @@ describe('SavedObjectsTable', () => {
       expect(mockSavedObjectsClient.bulkGet).toHaveBeenCalledWith(mockSelectedSavedObjects);
       expect(mockSavedObjectsClient.delete).toHaveBeenCalledWith(
         mockSavedObjects[0].type,
-        mockSavedObjects[0].id
+        mockSavedObjects[0].id,
+        { force: true }
       );
       expect(mockSavedObjectsClient.delete).toHaveBeenCalledWith(
         mockSavedObjects[1].type,
-        mockSavedObjects[1].id
+        mockSavedObjects[1].id,
+        { force: true }
       );
       expect(component.state('selectedSavedObjects').length).toBe(0);
     });

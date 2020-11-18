@@ -133,7 +133,6 @@ describe('when invoking endpoint trusted apps route handlers', () => {
       const emptyResponse: FoundExceptionListItemSchema = {
         data: [
           {
-            _tags: ['os:windows'],
             _version: undefined,
             comments: [],
             created_at: '2020-09-21T19:43:48.240Z',
@@ -165,6 +164,7 @@ describe('when invoking endpoint trusted apps route handlers', () => {
             meta: undefined,
             name: 'test',
             namespace_type: 'agnostic',
+            os_types: ['windows'],
             tags: [],
             tie_breaker_id: '1',
             type: 'simple',
@@ -240,7 +240,7 @@ describe('when invoking endpoint trusted apps route handlers', () => {
       os: 'windows',
       entries: [
         {
-          field: 'process.path.text',
+          field: 'process.executable.caseless',
           type: 'match',
           operator: 'included',
           value: 'c:/programs files/Anti-Virus',
@@ -267,6 +267,7 @@ describe('when invoking endpoint trusted apps route handlers', () => {
         return ({
           ...getExceptionListItemSchemaMock(),
           ...newExceptionItem,
+          os_types: newExceptionItem.osTypes,
         } as unknown) as ExceptionListItemSchema;
       });
     });
@@ -288,12 +289,11 @@ describe('when invoking endpoint trusted apps route handlers', () => {
       const request = createPostRequest();
       await routeHandler(context, request, response);
       expect(exceptionsListClient.createExceptionListItem.mock.calls[0][0]).toEqual({
-        _tags: ['os:windows'],
         comments: [],
         description: 'this one is ok',
         entries: [
           {
-            field: 'process.path.text',
+            field: 'process.executable.caseless',
             operator: 'included',
             type: 'match',
             value: 'c:/programs files/Anti-Virus',
@@ -304,6 +304,7 @@ describe('when invoking endpoint trusted apps route handlers', () => {
         meta: undefined,
         name: 'Some Anti-Virus App',
         namespaceType: 'agnostic',
+        osTypes: ['windows'],
         tags: [],
         type: 'simple',
       });
@@ -320,7 +321,7 @@ describe('when invoking endpoint trusted apps route handlers', () => {
             description: 'this one is ok',
             entries: [
               {
-                field: 'process.path.text',
+                field: 'process.executable.caseless',
                 operator: 'included',
                 type: 'match',
                 value: 'c:/programs files/Anti-Virus',
@@ -357,7 +358,7 @@ describe('when invoking endpoint trusted apps route handlers', () => {
     it('should trim condition entry values', async () => {
       const newTrustedApp = createNewTrustedAppBody();
       newTrustedApp.entries.push({
-        field: 'process.path.text',
+        field: 'process.executable.caseless',
         value: '\n    some value \r\n ',
         operator: 'included',
         type: 'match',
@@ -366,13 +367,13 @@ describe('when invoking endpoint trusted apps route handlers', () => {
       await routeHandler(context, request, response);
       expect(exceptionsListClient.createExceptionListItem.mock.calls[0][0].entries).toEqual([
         {
-          field: 'process.path.text',
+          field: 'process.executable.caseless',
           operator: 'included',
           type: 'match',
           value: 'c:/programs files/Anti-Virus',
         },
         {
-          field: 'process.path.text',
+          field: 'process.executable.caseless',
           value: 'some value',
           operator: 'included',
           type: 'match',
@@ -392,7 +393,7 @@ describe('when invoking endpoint trusted apps route handlers', () => {
       await routeHandler(context, request, response);
       expect(exceptionsListClient.createExceptionListItem.mock.calls[0][0].entries).toEqual([
         {
-          field: 'process.path.text',
+          field: 'process.executable.caseless',
           operator: 'included',
           type: 'match',
           value: 'c:/programs files/Anti-Virus',

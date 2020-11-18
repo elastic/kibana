@@ -21,6 +21,5 @@ core: {
         uiSettings: {
             client: IUiSettingsClient;
         };
-        auditor: Auditor;
     };
 ```

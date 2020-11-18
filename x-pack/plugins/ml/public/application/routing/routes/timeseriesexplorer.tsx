@@ -5,7 +5,7 @@
  */
 
 import { isEqual } from 'lodash';
-import React, { FC, useCallback, useEffect, useState } from 'react';
+import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
 import moment from 'moment';
 
@@ -38,7 +38,9 @@ import { useResolver } from '../use_resolver';
 import { basicResolvers } from '../resolvers';
 import { getBreadcrumbWithUrlForApp } from '../breadcrumbs';
 import { useTimefilter } from '../../contexts/kibana';
-
+import { useToastNotificationService } from '../../services/toast_notification_service';
+import { AnnotationUpdatesService } from '../../services/annotations_service';
+import { MlAnnotationUpdatesContext } from '../../contexts/ml/ml_annotation_updates_context';
 export const timeSeriesExplorerRouteFactory = (
   navigateToPath: NavigateToPath,
   basePath: string
@@ -63,13 +65,16 @@ const PageWrapper: FC<PageProps> = ({ deps }) => {
     jobs: mlJobService.loadJobsWrapper,
     jobsWithTimeRange: () => ml.jobs.jobsWithTimerange(getDateFormatTz()),
   });
+  const annotationUpdatesService = useMemo(() => new AnnotationUpdatesService(), []);
 
   return (
     <PageLoader context={context}>
-      <TimeSeriesExplorerUrlStateManager
-        config={deps.config}
-        jobsWithTimeRange={results.jobsWithTimeRange.jobs}
-      />
+      <MlAnnotationUpdatesContext.Provider value={annotationUpdatesService}>
+        <TimeSeriesExplorerUrlStateManager
+          config={deps.config}
+          jobsWithTimeRange={results.jobsWithTimeRange.jobs}
+        />
+      </MlAnnotationUpdatesContext.Provider>
     </PageLoader>
   );
 };
@@ -88,6 +93,7 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
   config,
   jobsWithTimeRange,
 }) => {
+  const toastNotificationService = useToastNotificationService();
   const [appState, setAppState] = useUrlState('_a');
   const [globalState, setGlobalState] = useUrlState('_g');
   const [lastRefresh, setLastRefresh] = useState(0);
@@ -98,7 +104,7 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
 
   const refresh = useRefresh();
   useEffect(() => {
-    if (refresh !== undefined) {
+    if (refresh !== undefined && refresh.lastRefresh !== lastRefresh) {
       setLastRefresh(refresh?.lastRefresh);
 
       if (refresh.timeRange !== undefined) {
@@ -109,7 +115,7 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
         });
       }
     }
-  }, [refresh?.lastRefresh]);
+  }, [refresh?.lastRefresh, lastRefresh, setGlobalState]);
 
   // We cannot simply infer bounds from the globalState's `time` attribute
   // with `moment` since it can contain custom strings such as `now-15m`.
@@ -147,18 +153,6 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
   const previousSelectedJobIds = usePrevious(selectedJobIds);
   const isJobChange = !isEqual(previousSelectedJobIds, selectedJobIds);
 
-  // Use a side effect to clear appState when changing jobs.
-  useEffect(() => {
-    if (selectedJobIds !== undefined && previousSelectedJobIds !== undefined) {
-      setLastRefresh(Date.now());
-      appStateHandler(APP_STATE_ACTION.CLEAR);
-    }
-    const validatedJobId = validateJobSelection(jobsWithTimeRange, selectedJobIds, setGlobalState);
-    if (typeof validatedJobId === 'string') {
-      setSelectedJobId(validatedJobId);
-    }
-  }, [JSON.stringify(selectedJobIds)]);
-
   // Next we get globalState and appState information to pass it on as props later.
   // If a job change is going on, we fall back to defaults (as if appState was already cleared),
   // otherwise the page could break.
@@ -167,6 +161,11 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
     : +appState?.mlTimeSeriesExplorer?.detectorIndex || 0;
   const selectedEntities = isJobChange ? undefined : appState?.mlTimeSeriesExplorer?.entities;
   const selectedForecastId = isJobChange ? undefined : appState?.mlTimeSeriesExplorer?.forecastId;
+
+  const selectedFunctionDescription = isJobChange
+    ? undefined
+    : appState?.mlTimeSeriesExplorer?.functionDescription;
+
   const zoom: AppStateZoom | undefined = isJobChange
     ? undefined
     : appState?.mlTimeSeriesExplorer?.zoom;
@@ -190,14 +189,19 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
           delete mlTimeSeriesExplorer.entities;
           delete mlTimeSeriesExplorer.forecastId;
           delete mlTimeSeriesExplorer.zoom;
+          delete mlTimeSeriesExplorer.functionDescription;
           break;
 
         case APP_STATE_ACTION.SET_DETECTOR_INDEX:
           mlTimeSeriesExplorer.detectorIndex = payload;
+          delete mlTimeSeriesExplorer.functionDescription;
+
           break;
 
         case APP_STATE_ACTION.SET_ENTITIES:
           mlTimeSeriesExplorer.entities = payload;
+          delete mlTimeSeriesExplorer.functionDescription;
+
           break;
 
         case APP_STATE_ACTION.SET_FORECAST_ID:
@@ -212,12 +216,28 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
         case APP_STATE_ACTION.UNSET_ZOOM:
           delete mlTimeSeriesExplorer.zoom;
           break;
+
+        case APP_STATE_ACTION.SET_FUNCTION_DESCRIPTION:
+          mlTimeSeriesExplorer.functionDescription = payload;
+          break;
       }
 
       setAppState('mlTimeSeriesExplorer', mlTimeSeriesExplorer);
     },
-    [JSON.stringify([appState, globalState])]
+    [JSON.stringify(appState?.mlTimeSeriesExplorer), setAppState]
   );
+
+  // Use a side effect to clear appState when changing jobs.
+  useEffect(() => {
+    if (selectedJobIds !== undefined && previousSelectedJobIds !== undefined) {
+      setLastRefresh(Date.now());
+      appStateHandler(APP_STATE_ACTION.CLEAR);
+    }
+    const validatedJobId = validateJobSelection(jobsWithTimeRange, selectedJobIds, setGlobalState);
+    if (typeof validatedJobId === 'string') {
+      setSelectedJobId(validatedJobId);
+    }
+  }, [JSON.stringify(selectedJobIds)]);
 
   const boundsMinMs = bounds?.min?.valueOf();
   const boundsMaxMs = bounds?.max?.valueOf();
@@ -293,6 +313,7 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
   return (
     <TimeSeriesExplorer
       {...{
+        toastNotificationService,
         appStateHandler,
         autoZoomDuration,
         bounds,
@@ -308,6 +329,7 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
         timefilter,
         zoom: zoomProp,
         invalidTimeRangeError,
+        functionDescription: selectedFunctionDescription,
       }}
     />
   );

@@ -17,11 +17,11 @@ function sampleArgs() {
     type: 'lens_multitable',
     tables: {
       l1: {
-        type: 'kibana_datatable',
+        type: 'datatable',
         columns: [
-          { id: 'a', name: 'a' },
-          { id: 'b', name: 'b' },
-          { id: 'c', name: 'c' },
+          { id: 'a', name: 'a', meta: { type: 'string' } },
+          { id: 'b', name: 'b', meta: { type: 'string' } },
+          { id: 'c', name: 'c', meta: { type: 'number' } },
         ],
         rows: [{ a: 10110, b: 2, c: 3 }],
       },
@@ -32,10 +32,21 @@ function sampleArgs() {
     accessor: 'a',
     layerId: 'l1',
     title: 'My fanci metric chart',
+    description: 'Fancy chart description',
+    metricTitle: 'My fanci metric chart',
     mode: 'full',
   };
 
-  return { data, args };
+  const noAttributesArgs: MetricConfig = {
+    accessor: 'a',
+    layerId: 'l1',
+    title: '',
+    description: '',
+    metricTitle: 'My fanci metric chart',
+    mode: 'full',
+  };
+
+  return { data, args, noAttributesArgs };
 }
 
 describe('metric_expression', () => {
@@ -53,7 +64,7 @@ describe('metric_expression', () => {
   });
 
   describe('MetricChart component', () => {
-    test('it renders the title and value', () => {
+    test('it renders the all attributes when passed (title, description, metricTitle, value)', () => {
       const { data, args } = sampleArgs();
 
       expect(
@@ -61,6 +72,7 @@ describe('metric_expression', () => {
       ).toMatchInlineSnapshot(`
         <VisualizationContainer
           className="lnsMetricExpression__container"
+          reportDescription="Fancy chart description"
           reportTitle="My fanci metric chart"
         >
           <AutoScale>
@@ -90,21 +102,22 @@ describe('metric_expression', () => {
       `);
     });
 
-    test('it does not render title in reduced mode', () => {
-      const { data, args } = sampleArgs();
+    test('it renders only chart content when title and description are empty strings', () => {
+      const { data, noAttributesArgs } = sampleArgs();
 
       expect(
         shallow(
           <MetricChart
             data={data}
-            args={{ ...args, mode: 'reduced' }}
+            args={noAttributesArgs}
             formatFactory={(x) => x as IFieldFormat}
           />
         )
       ).toMatchInlineSnapshot(`
         <VisualizationContainer
           className="lnsMetricExpression__container"
-          reportTitle="My fanci metric chart"
+          reportDescription=""
+          reportTitle=""
         >
           <AutoScale>
             <div
@@ -117,6 +130,134 @@ describe('metric_expression', () => {
               }
             >
               10110
+            </div>
+            <div
+              data-test-subj="lns_metric_title"
+              style={
+                Object {
+                  "fontSize": "24pt",
+                }
+              }
+            >
+              My fanci metric chart
+            </div>
+          </AutoScale>
+        </VisualizationContainer>
+      `);
+    });
+
+    test('it does not render metricTitle in reduced mode', () => {
+      const { data, noAttributesArgs } = sampleArgs();
+
+      expect(
+        shallow(
+          <MetricChart
+            data={data}
+            args={{ ...noAttributesArgs, mode: 'reduced' }}
+            formatFactory={(x) => x as IFieldFormat}
+          />
+        )
+      ).toMatchInlineSnapshot(`
+        <VisualizationContainer
+          className="lnsMetricExpression__container"
+          reportDescription=""
+          reportTitle=""
+        >
+          <AutoScale>
+            <div
+              data-test-subj="lns_metric_value"
+              style={
+                Object {
+                  "fontSize": "60pt",
+                  "fontWeight": 600,
+                }
+              }
+            >
+              10110
+            </div>
+          </AutoScale>
+        </VisualizationContainer>
+      `);
+    });
+
+    test('it renders an EmptyPlaceholder when no tables is passed as data', () => {
+      const { data, noAttributesArgs } = sampleArgs();
+
+      expect(
+        shallow(
+          <MetricChart
+            data={{ ...data, tables: {} }}
+            args={noAttributesArgs}
+            formatFactory={(x) => x as IFieldFormat}
+          />
+        )
+      ).toMatchInlineSnapshot(`
+              <EmptyPlaceholder
+                icon={[Function]}
+              />
+          `);
+    });
+
+    test('it renders an EmptyPlaceholder when null value is passed as data', () => {
+      const { data, noAttributesArgs } = sampleArgs();
+
+      data.tables.l1.rows[0].a = null;
+
+      expect(
+        shallow(
+          <MetricChart
+            data={data}
+            args={noAttributesArgs}
+            formatFactory={(x) => x as IFieldFormat}
+          />
+        )
+      ).toMatchInlineSnapshot(`
+        <EmptyPlaceholder
+          icon={[Function]}
+        />
+      `);
+    });
+
+    test('it renders 0 value', () => {
+      const { data, noAttributesArgs } = sampleArgs();
+
+      data.tables.l1.rows[0].a = 0;
+
+      expect(
+        shallow(
+          <MetricChart
+            data={data}
+            args={noAttributesArgs}
+            formatFactory={(x) => x as IFieldFormat}
+          />
+        )
+      ).toMatchInlineSnapshot(`
+        <VisualizationContainer
+          className="lnsMetricExpression__container"
+          reportDescription=""
+          reportTitle=""
+        >
+          <AutoScale>
+            <div
+              data-test-subj="lns_metric_value"
+              style={
+                Object {
+                  "fontSize": "60pt",
+                  "fontWeight": 600,
+                }
+              }
+            >
+              0
+            </div>
+            <div
+              data-test-subj="lns_metric_title"
+              style={
+                Object {
+                  "fontSize": "24pt",
+                }
+              }
+            >
+              My fanci metric chart
             </div>
           </AutoScale>
         </VisualizationContainer>

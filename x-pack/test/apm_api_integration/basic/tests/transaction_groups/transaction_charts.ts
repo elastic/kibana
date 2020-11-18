@@ -5,7 +5,7 @@
  */
 import expect from '@kbn/expect';
 import archives_metadata from '../../../common/archives_metadata';
-import { PromiseReturnType } from '../../../../../plugins/apm/typings/common';
+import { PromiseReturnType } from '../../../../../plugins/observability/typings/common';
 import { expectSnapshot } from '../../../common/match_snapshot';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
@@ -19,7 +19,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   // url parameters
   const start = encodeURIComponent(metadata.start);
   const end = encodeURIComponent(metadata.end);
-  const uiFilters = encodeURIComponent(JSON.stringify({}));
+  const uiFilters = encodeURIComponent(JSON.stringify({ environment: 'testing' }));
 
   describe('Transaction charts', () => {
     describe('when data is not loaded ', () => {

@@ -68,6 +68,7 @@ describe('PUT /api/spaces/space', () => {
       getImportExportObjectLimit: () => 1000,
       log,
       spacesService,
+      authorization: null, // not needed for this route
     });
 
     const [routeDefinition, routeHandler] = router.put.mock.calls[0];

@@ -5,7 +5,7 @@
  */
 
 import './datapanel.scss';
-import { uniq, keyBy, groupBy } from 'lodash';
+import { uniq, groupBy } from 'lodash';
 import React, { useState, memo, useCallback, useMemo } from 'react';
 import {
   EuiFlexGroup,
@@ -266,9 +266,8 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   const fieldInfoUnavailable = existenceFetchFailed || currentIndexPattern.hasRestrictions;
 
   const unfilteredFieldGroups: FieldGroups = useMemo(() => {
-    const fieldByName = keyBy(allFields, 'name');
     const containsData = (field: IndexPatternField) => {
-      const overallField = fieldByName[field.name];
+      const overallField = currentIndexPattern.getFieldByName(field.name);
 
       return (
         overallField && fieldExists(existingFields, currentIndexPattern.title, overallField.name)
@@ -335,6 +334,9 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
         isAffectedByGlobalFilter: !!filters.length,
         isAffectedByTimeFilter: true,
         hideDetails: fieldInfoUnavailable,
+        defaultNoFieldsMessage: i18n.translate('xpack.lens.indexPatterns.noAvailableDataLabel', {
+          defaultMessage: `There are no available fields that contain data.`,
+        }),
       },
       EmptyFields: {
         fields: groupedFields.emptyFields,
@@ -347,6 +349,9 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
         title: i18n.translate('xpack.lens.indexPattern.emptyFieldsLabel', {
           defaultMessage: 'Empty fields',
         }),
+        defaultNoFieldsMessage: i18n.translate('xpack.lens.indexPatterns.noEmptyDataLabel', {
+          defaultMessage: `There are no empty fields.`,
+        }),
       },
       MetaFields: {
         fields: groupedFields.metaFields,
@@ -358,6 +363,9 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
         hideDetails: false,
         title: i18n.translate('xpack.lens.indexPattern.metaFieldsLabel', {
           defaultMessage: 'Meta fields',
+        }),
+        defaultNoFieldsMessage: i18n.translate('xpack.lens.indexPatterns.noMetaDataLabel', {
+          defaultMessage: `There are no meta fields.`,
         }),
       },
     };
@@ -557,6 +565,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
             }}
             currentIndexPatternId={currentIndexPatternId}
             existenceFetchFailed={existenceFetchFailed}
+            existFieldsInIndex={!!allFields.length}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

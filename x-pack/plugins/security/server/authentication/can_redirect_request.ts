@@ -17,10 +17,14 @@ const KIBANA_VERSION_HEADER = 'kbn-version';
  */
 export function canRedirectRequest(request: KibanaRequest) {
   const headers = request.headers;
+  const route = request.route;
   const hasVersionHeader = headers.hasOwnProperty(KIBANA_VERSION_HEADER);
   const hasXsrfHeader = headers.hasOwnProperty(KIBANA_XSRF_HEADER);
 
-  const isApiRoute = request.route.options.tags.includes(ROUTE_TAG_API);
+  const isApiRoute =
+    route.options.tags.includes(ROUTE_TAG_API) ||
+    (route.path.startsWith('/api/') && route.path !== '/api/security/logout') ||
+    route.path.startsWith('/internal/');
   const isAjaxRequest = hasVersionHeader || hasXsrfHeader;
 
   return !isApiRoute && !isAjaxRequest;

@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import type { MockedKeys } from '@kbn/utility-types/jest';
 import { CoreSetup, CoreStart } from '../../../../core/server';
 import { coreMock } from '../../../../core/server/mocks';
 
@@ -44,7 +44,10 @@ describe('Search service', () => {
     it('exposes proper contract', async () => {
       const setup = plugin.setup(mockCoreSetup, ({
         packageInfo: { version: '8' },
-        registerFunction: jest.fn(),
+        expressions: {
+          registerFunction: jest.fn(),
+          registerType: jest.fn(),
+        },
       } as unknown) as SearchServiceSetupDependencies);
       expect(setup).toHaveProperty('aggs');
       expect(setup).toHaveProperty('registerSearchStrategy');

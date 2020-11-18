@@ -17,8 +17,6 @@ export const METRICS_FEATURE = {
   }),
   order: 800,
   category: DEFAULT_APP_CATEGORIES.observability,
-  icon: 'metricsApp',
-  navLinkId: 'metrics',
   app: ['infra', 'metrics', 'kibana'],
   catalogue: ['infraops', 'metrics'],
   management: {
@@ -51,7 +49,7 @@ export const METRICS_FEATURE = {
         read: ['infrastructure-ui-source', 'index-pattern'],
       },
       alerting: {
-        all: [METRIC_THRESHOLD_ALERT_TYPE_ID, METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID],
+        read: [METRIC_THRESHOLD_ALERT_TYPE_ID, METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID],
       },
       management: {
         insightsAndAlerting: ['triggersActions'],
@@ -68,10 +66,11 @@ export const LOGS_FEATURE = {
   }),
   order: 700,
   category: DEFAULT_APP_CATEGORIES.observability,
-  icon: 'logsApp',
-  navLinkId: 'logs',
   app: ['infra', 'logs', 'kibana'],
   catalogue: ['infralogging', 'logs'],
+  management: {
+    insightsAndAlerting: ['triggersActions'],
+  },
   alerting: [LOG_DOCUMENT_COUNT_ALERT_TYPE_ID],
   privileges: {
     all: {
@@ -85,6 +84,9 @@ export const LOGS_FEATURE = {
       alerting: {
         all: [LOG_DOCUMENT_COUNT_ALERT_TYPE_ID],
       },
+      management: {
+        insightsAndAlerting: ['triggersActions'],
+      },
       ui: ['show', 'configureSource', 'save'],
     },
     read: {
@@ -92,7 +94,10 @@ export const LOGS_FEATURE = {
       catalogue: ['infralogging', 'logs'],
       api: ['infra'],
       alerting: {
-        all: [LOG_DOCUMENT_COUNT_ALERT_TYPE_ID],
+        read: [LOG_DOCUMENT_COUNT_ALERT_TYPE_ID],
+      },
+      management: {
+        insightsAndAlerting: ['triggersActions'],
       },
       savedObject: {
         all: [],

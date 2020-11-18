@@ -8,7 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { ActionTypeModel, ValidationResult } from '../../../../types';
 import { ServerLogActionParams } from '../types';
 
-export function getActionType(): ActionTypeModel<unknown, ServerLogActionParams> {
+export function getActionType(): ActionTypeModel<unknown, unknown, ServerLogActionParams> {
   return {
     id: '.server-log',
     iconClass: 'logsApp',

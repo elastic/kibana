@@ -4,12 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 import { ServerLogLevelOptions } from '.././types';
 import ServerLogParamsFields from './server_log_params';
 import { DocLinksStart } from 'kibana/public';
+import { coreMock } from 'src/core/public/mocks';
 
 describe('ServerLogParamsFields renders', () => {
+  const mocks = coreMock.createSetup();
+
   test('all params fields is rendered', () => {
     const actionParams = {
       level: ServerLogLevelOptions.TRACE,
@@ -23,6 +26,8 @@ describe('ServerLogParamsFields renders', () => {
         index={0}
         defaultMessage={'test default message'}
         docLinks={{ ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart}
+        toastNotifications={mocks.notifications.toasts}
+        http={mocks.http}
       />
     );
     expect(wrapper.find('[data-test-subj="loggingLevelSelect"]').length > 0).toBeTruthy();
@@ -44,6 +49,8 @@ describe('ServerLogParamsFields renders', () => {
         editAction={() => {}}
         index={0}
         docLinks={{ ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart}
+        toastNotifications={mocks.notifications.toasts}
+        http={mocks.http}
       />
     );
     expect(wrapper.find('[data-test-subj="loggingLevelSelect"]').length > 0).toBeTruthy();

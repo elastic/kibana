@@ -11,20 +11,38 @@ import {
   WindowsConditionEntry,
 } from '../../../../../common/endpoint/types';
 
-export const OS_TITLES: Readonly<{ [K in TrustedApp['os']]: string }> = {
-  windows: i18n.translate('xpack.securitySolution.trustedapps.os.windows', {
-    defaultMessage: 'Windows',
-  }),
-  macos: i18n.translate('xpack.securitySolution.trustedapps.os.macos', {
-    defaultMessage: 'Mac OS',
-  }),
-  linux: i18n.translate('xpack.securitySolution.trustedapps.os.linux', {
-    defaultMessage: 'Linux',
+export { OS_TITLES } from '../../../common/translations';
+
+export const ABOUT_TRUSTED_APPS = i18n.translate('xpack.securitySolution.trustedapps.aboutInfo', {
+  defaultMessage:
+    'Add a trusted application to improve performance or alleviate conflicts with other applications running on your hosts. Trusted applications will be applied to hosts running Endpoint Security.',
+});
+
+type Entry = MacosLinuxConditionEntry | WindowsConditionEntry;
+
+export const CONDITION_FIELD_TITLE: { [K in Entry['field']]: string } = {
+  'process.hash.*': i18n.translate(
+    'xpack.securitySolution.trustedapps.logicalConditionBuilder.entry.field.hash',
+    { defaultMessage: 'Hash' }
+  ),
+  'process.executable.caseless': i18n.translate(
+    'xpack.securitySolution.trustedapps.logicalConditionBuilder.entry.field.path',
+    { defaultMessage: 'Path' }
+  ),
+  'process.code_signature': i18n.translate(
+    'xpack.securitySolution.trustedapps.logicalConditionBuilder.entry.field.signature',
+    { defaultMessage: 'Signature' }
+  ),
+};
+
+export const OPERATOR_TITLE: { [K in Entry['operator']]: string } = {
+  included: i18n.translate('xpack.securitySolution.trustedapps.card.operator.includes', {
+    defaultMessage: 'is',
   }),
 };
 
 export const PROPERTY_TITLES: Readonly<
-  { [K in keyof Omit<TrustedApp, 'id' | 'description' | 'entries'>]: string }
+  { [K in keyof Omit<TrustedApp, 'id' | 'entries'>]: string }
 > = {
   name: i18n.translate('xpack.securitySolution.trustedapps.trustedapp.name', {
     defaultMessage: 'Name',
@@ -37,6 +55,9 @@ export const PROPERTY_TITLES: Readonly<
   }),
   created_by: i18n.translate('xpack.securitySolution.trustedapps.trustedapp.createdBy', {
     defaultMessage: 'Created By',
+  }),
+  description: i18n.translate('xpack.securitySolution.trustedapps.trustedapp.description', {
+    defaultMessage: 'Description',
   }),
 };
 
@@ -74,3 +95,28 @@ export const LIST_ACTIONS = {
     ),
   },
 };
+
+export const CARD_DELETE_BUTTON_LABEL = i18n.translate(
+  'xpack.securitySolution.trustedapps.card.removeButtonLabel',
+  {
+    defaultMessage: 'Remove',
+  }
+);
+
+export const GRID_VIEW_TOGGLE_LABEL = i18n.translate(
+  'xpack.securitySolution.trustedapps.view.toggle.grid',
+  {
+    defaultMessage: 'Grid view',
+  }
+);
+
+export const LIST_VIEW_TOGGLE_LABEL = i18n.translate(
+  'xpack.securitySolution.trustedapps.view.toggle.list',
+  {
+    defaultMessage: 'List view',
+  }
+);
+
+export const NO_RESULTS_MESSAGE = i18n.translate('xpack.securitySolution.trustedapps.noResults', {
+  defaultMessage: 'No items found',
+});

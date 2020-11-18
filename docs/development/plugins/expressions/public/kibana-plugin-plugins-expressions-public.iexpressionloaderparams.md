@@ -17,10 +17,12 @@ export interface IExpressionLoaderParams
 |  [context](./kibana-plugin-plugins-expressions-public.iexpressionloaderparams.context.md) | <code>ExpressionValue</code> |  |
 |  [customFunctions](./kibana-plugin-plugins-expressions-public.iexpressionloaderparams.customfunctions.md) | <code>[]</code> |  |
 |  [customRenderers](./kibana-plugin-plugins-expressions-public.iexpressionloaderparams.customrenderers.md) | <code>[]</code> |  |
+|  [debug](./kibana-plugin-plugins-expressions-public.iexpressionloaderparams.debug.md) | <code>boolean</code> |  |
 |  [disableCaching](./kibana-plugin-plugins-expressions-public.iexpressionloaderparams.disablecaching.md) | <code>boolean</code> |  |
 |  [inspectorAdapters](./kibana-plugin-plugins-expressions-public.iexpressionloaderparams.inspectoradapters.md) | <code>Adapters</code> |  |
 |  [onRenderError](./kibana-plugin-plugins-expressions-public.iexpressionloaderparams.onrendererror.md) | <code>RenderErrorHandlerFnType</code> |  |
-|  [searchContext](./kibana-plugin-plugins-expressions-public.iexpressionloaderparams.searchcontext.md) | <code>ExecutionContextSearch</code> |  |
+|  [searchContext](./kibana-plugin-plugins-expressions-public.iexpressionloaderparams.searchcontext.md) | <code>SerializableState</code> |  |
+|  [searchSessionId](./kibana-plugin-plugins-expressions-public.iexpressionloaderparams.searchsessionid.md) | <code>string</code> |  |
 |  [uiState](./kibana-plugin-plugins-expressions-public.iexpressionloaderparams.uistate.md) | <code>unknown</code> |  |
 |  [variables](./kibana-plugin-plugins-expressions-public.iexpressionloaderparams.variables.md) | <code>Record&lt;string, any&gt;</code> |  |
 

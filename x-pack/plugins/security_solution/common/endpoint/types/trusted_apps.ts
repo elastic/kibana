@@ -5,11 +5,13 @@
  */
 
 import { TypeOf } from '@kbn/config-schema';
+import { ApplicationStart } from 'kibana/public';
 import {
   DeleteTrustedAppsRequestSchema,
   GetTrustedAppsRequestSchema,
   PostTrustedAppCreateRequestSchema,
 } from '../schema/trusted_apps';
+import { Linux, MacOS, Windows } from './os';
 
 /** API request params for deleting Trusted App entry */
 export type DeleteTrustedAppsRequestParams = TypeOf<typeof DeleteTrustedAppsRequestSchema.params>;
@@ -32,7 +34,7 @@ export interface PostTrustedAppCreateResponse {
 }
 
 export interface MacosLinuxConditionEntry {
-  field: 'process.hash.*' | 'process.path.text';
+  field: 'process.hash.*' | 'process.executable.caseless';
   type: 'match';
   operator: 'included';
   value: string;
@@ -50,11 +52,11 @@ export type NewTrustedApp = {
   description?: string;
 } & (
   | {
-      os: 'linux' | 'macos';
+      os: Linux | MacOS;
       entries: MacosLinuxConditionEntry[];
     }
   | {
-      os: 'windows';
+      os: Windows;
       entries: WindowsConditionEntry[];
     }
 );
@@ -65,3 +67,15 @@ export type TrustedApp = NewTrustedApp & {
   created_at: string;
   created_by: string;
 };
+
+/**
+ * Supported React-Router state for the Trusted Apps List page
+ */
+export interface TrustedAppsListPageRouteState {
+  /** Where the user should be redirected to when the `Back` button is clicked */
+  onBackButtonNavigateTo: Parameters<ApplicationStart['navigateToApp']>;
+  /** The URL for the `Back` button */
+  backButtonUrl?: string;
+  /** The label for the button */
+  backButtonLabel?: string;
+}

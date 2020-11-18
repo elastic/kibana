@@ -4,12 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  EuiHorizontalRule,
-  EuiSelect,
-  EuiSpacer,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
@@ -66,22 +61,17 @@ function ServiceNameFilter({ loading, serviceNames }: Props) {
 
   return (
     <>
-      <EuiTitle size="xxxs" textTransform="uppercase">
-        <h4>
-          {i18n.translate('xpack.apm.localFilters.titles.serviceName', {
-            defaultMessage: 'Service name',
-          })}
-        </h4>
-      </EuiTitle>
-      <EuiSpacer size="s" />
-      <EuiHorizontalRule margin="none" />
-      <EuiSpacer size="s" />
       <EuiSelect
+        prepend={i18n.translate(
+          'xpack.apm.ux.localFilters.titles.webApplication',
+          {
+            defaultMessage: 'Web application',
+          }
+        )}
         isLoading={loading}
         data-cy="serviceNameFilter"
         options={options}
         value={selectedServiceName}
-        compressed={true}
         onChange={(event) => {
           updateServiceName(event.target.value);
         }}

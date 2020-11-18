@@ -4,10 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { MapExtent, VectorSourceRequestMeta } from '../../../../common/descriptor_types';
-
-jest.mock('../../../kibana_services');
-
-import { getIndexPatternService, getSearchService, getHttp } from '../../../kibana_services';
+import { getHttp, getIndexPatternService, getSearchService } from '../../../kibana_services';
 import { ESGeoGridSource } from './es_geo_grid_source';
 import {
   ES_GEO_FIELD_TYPE,
@@ -16,6 +13,9 @@ import {
   SOURCE_TYPES,
 } from '../../../../common/constants';
 import { SearchSource } from 'src/plugins/data/public';
+import { LICENSED_FEATURES } from '../../../licensed_features';
+
+jest.mock('../../../kibana_services');
 
 export class MockSearchSource {
   setField = jest.fn();
@@ -27,6 +27,8 @@ export class MockSearchSource {
 
 describe('ESGeoGridSource', () => {
   const geoFieldName = 'bar';
+
+  let esGeoFieldType = ES_GEO_FIELD_TYPE.GEO_POINT;
   const mockIndexPatternService = {
     get() {
       return {
@@ -34,7 +36,7 @@ describe('ESGeoGridSource', () => {
           getByName() {
             return {
               name: geoFieldName,
-              type: ES_GEO_FIELD_TYPE.GEO_POINT,
+              type: esGeoFieldType,
             };
           },
         },
@@ -127,6 +129,11 @@ describe('ESGeoGridSource', () => {
     });
   });
 
+  afterEach(() => {
+    esGeoFieldType = ES_GEO_FIELD_TYPE.GEO_POINT;
+    jest.resetAllMocks();
+  });
+
   const extent: MapExtent = {
     minLon: -160,
     minLat: -80,
@@ -144,6 +151,7 @@ describe('ESGeoGridSource', () => {
     },
     extent,
     applyGlobalQuery: true,
+    applyGlobalTime: true,
     fieldNames: [],
     buffer: extent,
     sourceQuery: {
@@ -160,7 +168,8 @@ describe('ESGeoGridSource', () => {
       const { data, meta } = await geogridSource.getGeoJsonWithMeta(
         'foobarLayer',
         vectorSourceRequestMeta,
-        () => {}
+        () => {},
+        () => true
       );
 
       expect(meta && meta.areResultsTrimmed).toEqual(false);
@@ -268,6 +277,19 @@ describe('ESGeoGridSource', () => {
       expect(urlTemplateWithMeta.urlTemplate).toBe(
         "rootdir/api/maps/mvt/getGridTile;?x={x}&y={y}&z={z}&geometryFieldName=bar&index=undefined&requestBody=(foobar:ES_DSL_PLACEHOLDER,params:('0':('0':index,'1':(fields:())),'1':('0':size,'1':0),'2':('0':filter,'1':!((geo_bounding_box:(bar:(bottom_right:!(180,-82.67628),top_left:!(-180,82.67628)))))),'3':('0':query),'4':('0':index,'1':(fields:())),'5':('0':query,'1':(language:KQL,query:'',queryLastTriggeredAt:'2019-04-25T20:53:22.331Z')),'6':('0':aggs,'1':(gridSplit:(aggs:(gridCentroid:(geo_centroid:(field:bar))),geotile_grid:(bounds:!n,field:bar,precision:!n,shard_size:65535,size:65535))))))&requestType=heatmap&geoFieldType=geo_point"
       );
+    });
+  });
+
+  describe('Gold+ usage', () => {
+    it('Should have none for points', async () => {
+      expect(await geogridSource.getLicensedFeatures()).toEqual([]);
+    });
+
+    it('Should have shape-aggs for geo_shape', async () => {
+      esGeoFieldType = ES_GEO_FIELD_TYPE.GEO_SHAPE;
+      expect(await geogridSource.getLicensedFeatures()).toEqual([
+        LICENSED_FEATURES.GEO_SHAPE_AGGS_GEO_TILE,
+      ]);
     });
   });
 });

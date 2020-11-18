@@ -144,10 +144,10 @@ export default ({ getService }: FtrProviderContext) => {
         .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
         .send({ jobIds: [jobId] })
         .set(COMMON_REQUEST_HEADERS)
-        .expect(404);
+        .expect(403);
 
-      expect(body.error).to.be('Not Found');
-      expect(body.message).to.be('Not Found');
+      expect(body.error).to.be('Forbidden');
+      expect(body.message).to.be('Forbidden');
     });
 
     it('should fetch stopped partitions for multiple job ids', async () => {

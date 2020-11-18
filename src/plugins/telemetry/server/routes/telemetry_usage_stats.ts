@@ -32,8 +32,6 @@ const validate: TypeOptions<string | number>['validate'] = (value) => {
   }
 };
 
-const dateSchema = schema.oneOf([schema.string({ validate }), schema.number({ validate })]);
-
 export function registerTelemetryUsageStatsRoutes(
   router: IRouter,
   telemetryCollectionManager: TelemetryCollectionManagerPluginSetup,
@@ -45,25 +43,20 @@ export function registerTelemetryUsageStatsRoutes(
       validate: {
         body: schema.object({
           unencrypted: schema.boolean({ defaultValue: false }),
-          timeRange: schema.object({
-            min: dateSchema,
-            max: dateSchema,
-          }),
+          timestamp: schema.oneOf([schema.string({ validate }), schema.number({ validate })]),
         }),
       },
     },
     async (context, req, res) => {
-      const start = moment(req.body.timeRange.min).toISOString();
-      const end = moment(req.body.timeRange.max).toISOString();
-      const unencrypted = req.body.unencrypted;
+      const { unencrypted, timestamp } = req.body;
 
       try {
         const statsConfig: StatsGetterConfig = {
-          unencrypted,
-          start,
-          end,
+          timestamp: moment(timestamp).valueOf(),
           request: req,
+          unencrypted,
         };
+
         const stats = await telemetryCollectionManager.getStats(statsConfig);
         return res.ok({ body: stats });
       } catch (err) {

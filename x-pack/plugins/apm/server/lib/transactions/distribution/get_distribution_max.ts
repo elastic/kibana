@@ -9,11 +9,7 @@ import {
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
 } from '../../../../common/elasticsearch_fieldnames';
-import {
-  Setup,
-  SetupTimeRange,
-  SetupUIFilters,
-} from '../../helpers/setup_request';
+import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import {
   getProcessorEventForAggregatedTransactions,
   getTransactionDurationFieldForAggregatedTransactions,
@@ -29,10 +25,10 @@ export async function getDistributionMax({
   serviceName: string;
   transactionName: string;
   transactionType: string;
-  setup: Setup & SetupTimeRange & SetupUIFilters;
+  setup: Setup & SetupTimeRange;
   searchAggregatedTransactions: boolean;
 }) {
-  const { start, end, uiFiltersES, apmEventClient } = setup;
+  const { start, end, esFilter, apmEventClient } = setup;
 
   const params = {
     apm: {
@@ -59,7 +55,7 @@ export async function getDistributionMax({
                 },
               },
             },
-            ...uiFiltersES,
+            ...esFilter,
           ],
         },
       },

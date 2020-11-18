@@ -8,9 +8,9 @@ import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { RumOverview } from '../RumDashboard';
-import { RumHeader } from './RumHeader';
-import { UserPercentile } from './UserPercentile';
 import { CsmSharedContextProvider } from './CsmSharedContext';
+import { MainFilters } from './Panels/MainFilters';
+import { DatePicker } from '../../shared/DatePicker';
 
 export const UX_LABEL = i18n.translate('xpack.apm.ux.title', {
   defaultMessage: 'User Experience',
@@ -18,22 +18,28 @@ export const UX_LABEL = i18n.translate('xpack.apm.ux.title', {
 
 export function RumHome() {
   return (
-    <div>
-      <CsmSharedContextProvider>
-        <RumHeader>
-          <EuiFlexGroup alignItems="center">
-            <EuiFlexItem grow={true}>
-              <EuiTitle size="l">
-                <h1>{UX_LABEL}</h1>
-              </EuiTitle>
-            </EuiFlexItem>
+    <CsmSharedContextProvider>
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiTitle>
+            <h1 className="eui-textNoWrap">{UX_LABEL}</h1>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup
+            wrap
+            style={{ flexWrap: 'wrap-reverse' }}
+            justifyContent="flexEnd"
+            gutterSize="s"
+          >
+            <MainFilters />
             <EuiFlexItem grow={false}>
-              <UserPercentile />
+              <DatePicker />
             </EuiFlexItem>
           </EuiFlexGroup>
-        </RumHeader>
-        <RumOverview />
-      </CsmSharedContextProvider>
-    </div>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <RumOverview />
+    </CsmSharedContextProvider>
   );
 }

@@ -22,14 +22,16 @@ import { UI_SETTINGS } from '../../../../src/plugins/data/public';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
 import { MonitoringStartPluginDependencies, MonitoringConfig } from './types';
 import { TriggersAndActionsUIPublicPluginSetup } from '../../triggers_actions_ui/public';
-import { createCpuUsageAlertType } from './alerts/cpu_usage_alert';
-import { createLegacyAlertTypes } from './alerts/legacy_alert';
-import { createDiskUsageAlertType } from './alerts/disk_usage_alert';
+import {
+  ALERT_THREAD_POOL_SEARCH_REJECTIONS,
+  ALERT_THREAD_POOL_WRITE_REJECTIONS,
+  ALERT_DETAILS,
+} from '../common/constants';
 
 interface MonitoringSetupPluginDependencies {
   home?: HomePublicPluginSetup;
   cloud?: { isCloudEnabled: boolean };
-  triggers_actions_ui: TriggersAndActionsUIPublicPluginSetup;
+  triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
   usageCollection: UsageCollectionSetup;
 }
 
@@ -38,7 +40,7 @@ export class MonitoringPlugin
     Plugin<boolean, void, MonitoringSetupPluginDependencies, MonitoringStartPluginDependencies> {
   constructor(private initializerContext: PluginInitializerContext<MonitoringConfig>) {}
 
-  public setup(
+  public async setup(
     core: CoreSetup<MonitoringStartPluginDependencies>,
     plugins: MonitoringSetupPluginDependencies
   ) {
@@ -71,12 +73,7 @@ export class MonitoringPlugin
       });
     }
 
-    plugins.triggers_actions_ui.alertTypeRegistry.register(createCpuUsageAlertType());
-    plugins.triggers_actions_ui.alertTypeRegistry.register(createDiskUsageAlertType());
-    const legacyAlertTypes = createLegacyAlertTypes();
-    for (const legacyAlertType of legacyAlertTypes) {
-      plugins.triggers_actions_ui.alertTypeRegistry.register(legacyAlertType);
-    }
+    await this.registerAlertsAsync(plugins);
 
     const app: App = {
       id,
@@ -96,11 +93,10 @@ export class MonitoringPlugin
           isCloud: Boolean(plugins.cloud?.isCloudEnabled),
           pluginInitializerContext: this.initializerContext,
           externalConfig: this.getExternalConfig(),
-          triggersActionsUi: plugins.triggers_actions_ui,
+          triggersActionsUi: plugins.triggersActionsUi,
           usageCollection: plugins.usageCollection,
         };
 
-        pluginsStart.kibanaLegacy.loadFontAwesome();
         this.setInitialTimefilter(deps);
 
         const monitoringApp = new AngularApp(deps);
@@ -148,4 +144,41 @@ export class MonitoringPlugin
       ['showCgroupMetricsLogstash', monitoring.ui.container.logstash.enabled],
     ];
   }
+
+  private registerAlertsAsync = async (plugins: MonitoringSetupPluginDependencies) => {
+    const { createCpuUsageAlertType } = await import('./alerts/cpu_usage_alert');
+    const { createMissingMonitoringDataAlertType } = await import(
+      './alerts/missing_monitoring_data_alert'
+    );
+    const { createLegacyAlertTypes } = await import('./alerts/legacy_alert');
+    const { createDiskUsageAlertType } = await import('./alerts/disk_usage_alert');
+    const { createThreadPoolRejectionsAlertType } = await import(
+      './alerts/thread_pool_rejections_alert'
+    );
+    const { createMemoryUsageAlertType } = await import('./alerts/memory_usage_alert');
+
+    const {
+      triggersActionsUi: { alertTypeRegistry },
+    } = plugins;
+    alertTypeRegistry.register(createCpuUsageAlertType());
+    alertTypeRegistry.register(createDiskUsageAlertType());
+    alertTypeRegistry.register(createMemoryUsageAlertType());
+    alertTypeRegistry.register(createMissingMonitoringDataAlertType());
+    alertTypeRegistry.register(
+      createThreadPoolRejectionsAlertType(
+        ALERT_THREAD_POOL_SEARCH_REJECTIONS,
+        ALERT_DETAILS[ALERT_THREAD_POOL_SEARCH_REJECTIONS]
+      )
+    );
+    alertTypeRegistry.register(
+      createThreadPoolRejectionsAlertType(
+        ALERT_THREAD_POOL_WRITE_REJECTIONS,
+        ALERT_DETAILS[ALERT_THREAD_POOL_WRITE_REJECTIONS]
+      )
+    );
+    const legacyAlertTypes = createLegacyAlertTypes();
+    for (const legacyAlertType of legacyAlertTypes) {
+      alertTypeRegistry.register(legacyAlertType);
+    }
+  };
 }

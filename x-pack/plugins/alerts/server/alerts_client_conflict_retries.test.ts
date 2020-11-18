@@ -8,7 +8,7 @@ import { cloneDeep } from 'lodash';
 
 import { AlertsClient, ConstructorOptions } from './alerts_client';
 import { savedObjectsClientMock, loggingSystemMock } from '../../../../src/core/server/mocks';
-import { taskManagerMock } from '../../task_manager/server/task_manager.mock';
+import { taskManagerMock } from '../../task_manager/server/mocks';
 import { alertTypeRegistryMock } from './alert_type_registry.mock';
 import { alertsAuthorizationMock } from './authorization/alerts_authorization.mock';
 import { encryptedSavedObjectsMock } from '../../encrypted_saved_objects/server/mocks';
@@ -25,7 +25,7 @@ const MockAlertId = 'alert-id';
 
 const ConflictAfterRetries = RetryForConflictsAttempts + 1;
 
-const taskManager = taskManagerMock.start();
+const taskManager = taskManagerMock.createStart();
 const alertTypeRegistry = alertTypeRegistryMock.create();
 const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
 
@@ -45,7 +45,6 @@ const alertsClientParams: jest.Mocked<ConstructorOptions> = {
   namespace: 'default',
   getUserName: jest.fn(),
   createAPIKey: jest.fn(),
-  invalidateAPIKey: jest.fn(),
   logger,
   encryptedSavedObjectsClient: encryptedSavedObjects,
   getActionsClient: jest.fn(),
@@ -115,7 +114,7 @@ async function update(success: boolean) {
     );
     return expectConflict(success, err, 'create');
   }
-  expectSuccess(success, 2, 'create');
+  expectSuccess(success, 3, 'create');
 
   // only checking the debug messages in this test
   expect(logger.debug).nthCalledWith(1, `alertsClient.update('alert-id') conflict, retrying ...`);
@@ -306,14 +305,6 @@ beforeEach(() => {
   jest.resetAllMocks();
 
   alertsClientParams.createAPIKey.mockResolvedValue({ apiKeysEnabled: false });
-  alertsClientParams.invalidateAPIKey.mockResolvedValue({
-    apiKeysEnabled: true,
-    result: {
-      invalidated_api_keys: [],
-      previously_invalidated_api_keys: [],
-      error_count: 0,
-    },
-  });
   alertsClientParams.getUserName.mockResolvedValue('elastic');
 
   taskManager.runNow.mockResolvedValue({ id: '' });

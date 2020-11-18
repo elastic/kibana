@@ -51,11 +51,13 @@ const checkIfAnyValidSeriesExist = (
 export const BarChartBaseComponent = ({
   data,
   forceHiddenLegend = false,
+  yAxisTitle,
   ...chartConfigs
 }: {
   data: ChartSeriesData[];
   width: string | null | undefined;
   height: string | null | undefined;
+  yAxisTitle?: string | undefined;
   configs?: ChartSeriesConfigs | undefined;
   forceHiddenLegend?: boolean;
 }) => {
@@ -115,6 +117,7 @@ export const BarChartBaseComponent = ({
           },
         }}
         tickFormat={yTickFormatter}
+        title={yAxisTitle}
       />
     </Chart>
   ) : null;
@@ -158,6 +161,7 @@ export const BarChartComponent: React.FC<BarChartComponentProps> = ({
     [barChart, stackByField, timelineId]
   );
 
+  const yAxisTitle = get('yAxisTitle', configs);
   const customHeight = get('customHeight', configs);
   const customWidth = get('customWidth', configs);
   const chartHeight = getChartHeight(customHeight, height);
@@ -170,6 +174,7 @@ export const BarChartComponent: React.FC<BarChartComponentProps> = ({
           <BarChartBase
             configs={configs}
             data={barChart}
+            yAxisTitle={yAxisTitle}
             forceHiddenLegend={stackByField != null}
             height={chartHeight}
             width={chartHeight}

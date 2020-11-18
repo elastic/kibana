@@ -17,7 +17,7 @@ describe('RuleActionsField', () => {
   it('should not render ActionForm if no actions are supported', () => {
     (useKibana as jest.Mock).mockReturnValue({
       services: {
-        triggers_actions_ui: {
+        triggersActionsUi: {
           actionTypeRegistry: {},
         },
         application: {

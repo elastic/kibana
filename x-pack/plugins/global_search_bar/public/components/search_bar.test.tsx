@@ -5,16 +5,15 @@
  */
 
 import React from 'react';
-import { wait } from '@testing-library/react';
-import { of } from 'rxjs';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
-import {
-  GlobalSearchBatchedResults,
-  GlobalSearchPluginStart,
-  GlobalSearchResult,
-} from '../../../global_search/public';
+import { waitFor, act } from '@testing-library/react';
+import { ReactWrapper } from 'enzyme';
+import { of, BehaviorSubject } from 'rxjs';
+import { filter, map } from 'rxjs/operators';
+import { mountWithIntl } from '@kbn/test/jest';
+import { applicationServiceMock } from '../../../../../src/core/public/mocks';
+import { GlobalSearchBatchedResults, GlobalSearchResult } from '../../../global_search/public';
 import { globalSearchPluginMock } from '../../../global_search/public/mocks';
-import { SearchBar } from '../components/search_bar';
+import { SearchBar } from './search_bar';
 
 type Result = { id: string; type: string } | string;
 
@@ -37,26 +36,46 @@ const createBatch = (...results: Result[]): GlobalSearchBatchedResults => ({
   results: results.map(createResult),
 });
 
-jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
-  htmlIdGenerator: () => () => 'mockId',
-}));
-
 const getSelectableProps: any = (component: any) => component.find('EuiSelectable').props();
 const getSearchProps: any = (component: any) => component.find('EuiFieldSearch').props();
 
 describe('SearchBar', () => {
-  let searchService: GlobalSearchPluginStart;
-  let findSpy: jest.SpyInstance;
+  let searchService: ReturnType<typeof globalSearchPluginMock.createStartContract>;
+  let applications: ReturnType<typeof applicationServiceMock.createStartContract>;
+  const basePathUrl = '/plugins/globalSearchBar/assets/';
+  const darkMode = false;
+
+  let component: ReactWrapper<any>;
 
   beforeEach(() => {
+    applications = applicationServiceMock.createStartContract();
     searchService = globalSearchPluginMock.createStartContract();
-    findSpy = jest.spyOn(searchService, 'find');
     jest.useFakeTimers();
   });
 
+  const triggerFocus = () => {
+    component.find('input[data-test-subj="header-search"]').simulate('focus');
+  };
+
+  const update = () => {
+    act(() => {
+      jest.runAllTimers();
+    });
+    component.update();
+  };
+
+  const simulateTypeChar = async (text: string) => {
+    await waitFor(() =>
+      getSearchProps(component).onKeyUpCapture({ currentTarget: { value: text } })
+    );
+  };
+
+  const getDisplayedOptionsTitle = () => {
+    return getSelectableProps(component).options.map((option: any) => option.title);
+  };
+
   it('correctly filters and sorts results', async () => {
-    const navigate = jest.fn();
-    findSpy
+    searchService.find
       .mockReturnValueOnce(
         of(
           createBatch('Discover', 'Canvas'),
@@ -65,27 +84,43 @@ describe('SearchBar', () => {
       )
       .mockReturnValueOnce(of(createBatch('Discover', { id: 'My Dashboard', type: 'test' })));
 
-    const component = mountWithIntl(
-      <SearchBar globalSearch={searchService.find} navigateToUrl={navigate} />
+    component = mountWithIntl(
+      <SearchBar
+        globalSearch={searchService.find}
+        navigateToUrl={applications.navigateToUrl}
+        basePathUrl={basePathUrl}
+        darkMode={darkMode}
+        trackUiMetric={jest.fn()}
+      />
     );
 
-    expect(findSpy).toHaveBeenCalledTimes(0);
-    component.find('input[data-test-subj="header-search"]').simulate('focus');
-    jest.runAllTimers();
-    component.update();
-    expect(findSpy).toHaveBeenCalledTimes(1);
-    expect(findSpy).toHaveBeenCalledWith('', {});
-    expect(getSelectableProps(component).options).toMatchSnapshot();
-    await wait(() => getSearchProps(component).onKeyUpCapture({ currentTarget: { value: 'd' } }));
-    jest.runAllTimers();
-    component.update();
-    expect(getSelectableProps(component).options).toMatchSnapshot();
-    expect(findSpy).toHaveBeenCalledTimes(2);
-    expect(findSpy).toHaveBeenCalledWith('d', {});
+    expect(searchService.find).toHaveBeenCalledTimes(0);
+
+    triggerFocus();
+    update();
+
+    expect(searchService.find).toHaveBeenCalledTimes(1);
+    expect(searchService.find).toHaveBeenCalledWith('', {});
+    expect(getDisplayedOptionsTitle()).toMatchSnapshot();
+
+    await simulateTypeChar('d');
+    update();
+
+    expect(getDisplayedOptionsTitle()).toMatchSnapshot();
+    expect(searchService.find).toHaveBeenCalledTimes(2);
+    expect(searchService.find).toHaveBeenCalledWith('d', {});
   });
 
   it('supports keyboard shortcuts', () => {
-    mountWithIntl(<SearchBar globalSearch={searchService.find} navigateToUrl={jest.fn()} />);
+    mountWithIntl(
+      <SearchBar
+        globalSearch={searchService.find}
+        navigateToUrl={applications.navigateToUrl}
+        basePathUrl={basePathUrl}
+        darkMode={darkMode}
+        trackUiMetric={jest.fn()}
+      />
+    );
 
     const searchEvent = new KeyboardEvent('keydown', {
       key: '/',
@@ -95,5 +130,44 @@ describe('SearchBar', () => {
     window.dispatchEvent(searchEvent);
 
     expect(document.activeElement).toMatchSnapshot();
+  });
+
+  it('only display results from the last search', async () => {
+    const firstSearchTrigger = new BehaviorSubject<boolean>(false);
+    const firstSearch = firstSearchTrigger.pipe(
+      filter((event) => event),
+      map(() => {
+        return createBatch('Discover', 'Canvas');
+      })
+    );
+    const secondSearch = of(createBatch('Visualize', 'Map'));
+
+    searchService.find.mockReturnValueOnce(firstSearch).mockReturnValueOnce(secondSearch);
+
+    component = mountWithIntl(
+      <SearchBar
+        globalSearch={searchService.find}
+        navigateToUrl={applications.navigateToUrl}
+        basePathUrl={basePathUrl}
+        darkMode={darkMode}
+        trackUiMetric={jest.fn()}
+      />
+    );
+
+    triggerFocus();
+    update();
+
+    expect(searchService.find).toHaveBeenCalledTimes(1);
+
+    await simulateTypeChar('d');
+    update();
+
+    expect(getDisplayedOptionsTitle()).toMatchSnapshot();
+
+    firstSearchTrigger.next(true);
+
+    update();
+
+    expect(getDisplayedOptionsTitle()).toMatchSnapshot();
   });
 });

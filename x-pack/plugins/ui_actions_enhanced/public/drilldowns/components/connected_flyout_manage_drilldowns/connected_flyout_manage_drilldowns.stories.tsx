@@ -7,10 +7,10 @@
 import * as React from 'react';
 import { EuiFlyout } from '@elastic/eui';
 import { storiesOf } from '@storybook/react';
+import { StubBrowserStorage } from '@kbn/test/jest';
 import { createFlyoutManageDrilldowns } from './connected_flyout_manage_drilldowns';
 import { mockActionFactories } from '../../../components/action_wizard/test_data';
 import { Storage } from '../../../../../../../src/plugins/kibana_utils/public';
-import { StubBrowserStorage } from '../../../../../../../src/test_utils/public/stub_browser_storage';
 import { mockDynamicActionManager } from './test_data';
 
 const FlyoutManageDrilldowns = createFlyoutManageDrilldowns({
@@ -34,7 +34,7 @@ storiesOf('components/FlyoutManageDrilldowns', module)
     <EuiFlyout onClose={() => {}}>
       <FlyoutManageDrilldowns
         dynamicActionManager={mockDynamicActionManager}
-        supportedTriggers={['VALUE_CLICK_TRIGGER', 'SELECT_RANGE_TRIGGER', 'FILTER_TRIGGER']}
+        triggers={['VALUE_CLICK_TRIGGER', 'SELECT_RANGE_TRIGGER', 'FILTER_TRIGGER']}
       />
     </EuiFlyout>
   ))
@@ -42,7 +42,7 @@ storiesOf('components/FlyoutManageDrilldowns', module)
     <EuiFlyout onClose={() => {}}>
       <FlyoutManageDrilldowns
         dynamicActionManager={mockDynamicActionManager}
-        supportedTriggers={['FILTER_TRIGGER']}
+        triggers={['FILTER_TRIGGER']}
       />
     </EuiFlyout>
   ));

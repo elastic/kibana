@@ -19,6 +19,7 @@
 
 import { resolve } from 'path';
 import { format as formatUrl } from 'url';
+import Fs from 'fs';
 
 import opn from 'opn';
 import { REPO_ROOT } from '@kbn/utils';
@@ -109,6 +110,7 @@ export class ClusterManager {
         type: 'server',
         log: this.log,
         argv: serverArgv,
+        apmServiceName: 'kibana',
       })),
     ];
 
@@ -232,6 +234,14 @@ export class ClusterManager {
         ].map((path) => resolve(path))
       )
     );
+
+    for (const watchPath of watchPaths) {
+      if (!Fs.existsSync(fromRoot(watchPath))) {
+        throw new Error(
+          `A watch directory [${watchPath}] does not exist, which will cause chokidar to fail. Either make sure the directory exists or remove it as a watch source in the ClusterManger`
+        );
+      }
+    }
 
     const ignorePaths = [
       /[\\\/](\..*|node_modules|bower_components|target|public|__[a-z0-9_]+__|coverage)([\\\/]|$)/,

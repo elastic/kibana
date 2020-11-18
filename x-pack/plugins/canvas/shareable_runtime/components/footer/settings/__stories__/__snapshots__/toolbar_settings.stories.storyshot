@@ -55,12 +55,12 @@ exports[`Storyshots shareables/Footer/Settings/ToolbarSettings component: off 1`
               <span
                 className="euiSwitch__track"
               >
-                <div
+                <span
                   className="euiSwitch__icon"
                   data-euiicon-type="cross"
                   size="m"
                 />
-                <div
+                <span
                   className="euiSwitch__icon euiSwitch__icon--checked"
                   data-euiicon-type="check"
                   size="m"
@@ -143,12 +143,12 @@ exports[`Storyshots shareables/Footer/Settings/ToolbarSettings component: on 1`]
               <span
                 className="euiSwitch__track"
               >
-                <div
+                <span
                   className="euiSwitch__icon"
                   data-euiicon-type="cross"
                   size="m"
                 />
-                <div
+                <span
                   className="euiSwitch__icon euiSwitch__icon--checked"
                   data-euiicon-type="check"
                   size="m"
@@ -231,12 +231,12 @@ exports[`Storyshots shareables/Footer/Settings/ToolbarSettings contextual 1`] = 
               <span
                 className="euiSwitch__track"
               >
-                <div
+                <span
                   className="euiSwitch__icon"
                   data-euiicon-type="cross"
                   size="m"
                 />
-                <div
+                <span
                   className="euiSwitch__icon euiSwitch__icon--checked"
                   data-euiicon-type="check"
                   size="m"

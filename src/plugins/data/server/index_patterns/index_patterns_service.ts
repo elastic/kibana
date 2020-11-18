@@ -17,7 +17,14 @@
  * under the License.
  */
 
-import { CoreSetup, CoreStart, Plugin, KibanaRequest, Logger } from 'kibana/server';
+import {
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  Logger,
+  SavedObjectsClientContract,
+  ElasticsearchClient,
+} from 'kibana/server';
 import { registerRoutes } from './routes';
 import { indexPatternSavedObjectType } from '../saved_objects';
 import { capabilitiesProvider } from './capabilities_provider';
@@ -29,7 +36,8 @@ import { SavedObjectsClientServerToCommon } from './saved_objects_client_wrapper
 
 export interface IndexPatternsServiceStart {
   indexPatternsServiceFactory: (
-    kibanaRequest: KibanaRequest
+    savedObjectsClient: SavedObjectsClientContract,
+    elasticsearchClient: ElasticsearchClient
   ) => Promise<IndexPatternsCommonService>;
 }
 
@@ -47,18 +55,20 @@ export class IndexPatternsService implements Plugin<void, IndexPatternsServiceSt
   }
 
   public start(core: CoreStart, { fieldFormats, logger }: IndexPatternsServiceStartDeps) {
-    const { uiSettings, savedObjects } = core;
+    const { uiSettings } = core;
 
     return {
-      indexPatternsServiceFactory: async (kibanaRequest: KibanaRequest) => {
-        const savedObjectsClient = savedObjects.getScopedClient(kibanaRequest);
+      indexPatternsServiceFactory: async (
+        savedObjectsClient: SavedObjectsClientContract,
+        elasticsearchClient: ElasticsearchClient
+      ) => {
         const uiSettingsClient = uiSettings.asScopedToClient(savedObjectsClient);
         const formats = await fieldFormats.fieldFormatServiceFactory(uiSettingsClient);
 
         return new IndexPatternsCommonService({
           uiSettings: new UiSettingsServerToCommon(uiSettingsClient),
           savedObjectsClient: new SavedObjectsClientServerToCommon(savedObjectsClient),
-          apiClient: new IndexPatternsApiServer(),
+          apiClient: new IndexPatternsApiServer(elasticsearchClient),
           fieldFormats: formats,
           onError: (error) => {
             logger.error(error);

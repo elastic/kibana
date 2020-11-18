@@ -5,8 +5,12 @@
     "exclude": [
       "src/plugins/kibana_react/",
       "src/plugins/testbed/",
-      "src/plugins/kibana_utils/",
-      "src/plugins/kibana_usage_collection/server/collectors/ui_metric/telemetry_ui_metric_collector.ts"
+      "src/plugins/kibana_utils/"
     ]
+  },
+  {
+    "output": "src/plugins/telemetry/schema/legacy_plugins.json",
+    "root": "src/legacy/server/",
+    "exclude": []
   }
 ]

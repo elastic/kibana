@@ -83,7 +83,6 @@ export const ForLastExpression = ({
       }}
       ownFocus
       display={display === 'fullWidth' ? 'block' : 'inlineBlock'}
-      withTitle
       anchorPosition={popupPosition ?? 'downLeft'}
     >
       <div>

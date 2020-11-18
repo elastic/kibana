@@ -6,19 +6,9 @@
 import { act } from 'react-dom/test-utils';
 import React from 'react';
 
-import { notificationServiceMock, scopedHistoryMock } from 'src/core/public/mocks';
-
-import { LocationDescriptorObject } from 'history';
-import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
-import { registerTestBed, TestBed } from '../../../../../../../test_utils';
-import { ProcessorsEditorContextProvider, Props, PipelineProcessorsEditor } from '../';
-
-import {
-  breadcrumbService,
-  uiMetricService,
-  documentationService,
-  apiService,
-} from '../../../services';
+import { registerTestBed, TestBed } from '@kbn/test/jest';
+import { Props } from '../';
+import { ProcessorsEditorWithDeps } from './processors_editor';
 
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
@@ -67,28 +57,8 @@ jest.mock('react-virtualized', () => {
   };
 });
 
-const history = scopedHistoryMock.create();
-history.createHref.mockImplementation((location: LocationDescriptorObject) => {
-  return `${location.pathname}?${location.search}`;
-});
-
-const appServices = {
-  breadcrumbs: breadcrumbService,
-  metric: uiMetricService,
-  documentation: documentationService,
-  api: apiService,
-  notifications: notificationServiceMock.createSetupContract(),
-  history,
-};
-
 const testBedSetup = registerTestBed<TestSubject>(
-  (props: Props) => (
-    <KibanaContextProvider services={appServices}>
-      <ProcessorsEditorContextProvider {...props}>
-        <PipelineProcessorsEditor onLoadJson={jest.fn()} />
-      </ProcessorsEditorContextProvider>
-    </KibanaContextProvider>
-  ),
+  (props: Props) => <ProcessorsEditorWithDeps {...props} />,
   {
     doMountAsync: false,
   }
@@ -135,7 +105,7 @@ const createActions = (testBed: TestBed<TestSubject>) => {
 
     moveProcessor(processorSelector: string, dropZoneSelector: string) {
       act(() => {
-        find(`${processorSelector}.moveItemButton`).simulate('change');
+        find(`${processorSelector}.moveItemButton`).simulate('click');
       });
       component.update();
       act(() => {
@@ -167,11 +137,11 @@ const createActions = (testBed: TestBed<TestSubject>) => {
 
     startAndCancelMove(processorSelector: string) {
       act(() => {
-        find(`${processorSelector}.moveItemButton`).simulate('change');
+        find(`${processorSelector}.moveItemButton`).simulate('click');
       });
       component.update();
       act(() => {
-        find(`${processorSelector}.cancelMoveItemButton`).simulate('change');
+        find(`${processorSelector}.cancelMoveItemButton`).simulate('click');
       });
       component.update();
     },

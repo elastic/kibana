@@ -453,6 +453,14 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
+    public async waitForIndexPatternTimeFieldOptionsLoaded() {
+      await retry.waitFor('combobox options loaded', async () => {
+        const options = await comboBox.getOptions('metricsIndexPatternFieldsSelect');
+        log.debug(`-- optionsCount=${options.length}`);
+        return options.length > 0;
+      });
+    }
+
     public async selectIndexPatternTimeField(timeField: string) {
       await retry.try(async () => {
         await comboBox.clearInputField('metricsIndexPatternFieldsSelect');

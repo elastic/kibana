@@ -35,7 +35,6 @@ export const updateExceptionListRoute = (router: IRouter): void => {
       const siemResponse = buildSiemResponse(response);
       try {
         const {
-          _tags,
           _version,
           tags,
           name,
@@ -44,6 +43,7 @@ export const updateExceptionListRoute = (router: IRouter): void => {
           list_id: listId,
           meta,
           namespace_type: namespaceType,
+          os_types: osTypes,
           type,
           version,
         } = request.body;
@@ -55,7 +55,6 @@ export const updateExceptionListRoute = (router: IRouter): void => {
           });
         } else {
           const list = await exceptionLists.updateExceptionList({
-            _tags,
             _version,
             description,
             id,
@@ -63,6 +62,7 @@ export const updateExceptionListRoute = (router: IRouter): void => {
             meta,
             name,
             namespaceType,
+            osTypes,
             tags,
             type,
             version,

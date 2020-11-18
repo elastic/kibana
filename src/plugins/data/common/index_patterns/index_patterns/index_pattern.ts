@@ -18,16 +18,10 @@
  */
 
 import _, { each, reject } from 'lodash';
-import { SavedObjectsClientCommon } from '../..';
+import { FieldAttrs } from '../..';
 import { DuplicateField } from '../../../../kibana_utils/common';
 
-import {
-  ES_FIELD_TYPES,
-  KBN_FIELD_TYPES,
-  IIndexPattern,
-  FieldFormatNotFoundError,
-  IFieldType,
-} from '../../../common';
+import { ES_FIELD_TYPES, KBN_FIELD_TYPES, IIndexPattern, IFieldType } from '../../../common';
 import { IndexPatternField, IIndexPatternFieldList, fieldList } from '../fields';
 import { formatHitProvider } from './format_hit';
 import { flattenHitWrapper } from './flatten_hit';
@@ -37,13 +31,13 @@ import { SerializedFieldFormat } from '../../../../expressions/common';
 
 interface IndexPatternDeps {
   spec?: IndexPatternSpec;
-  savedObjectsClient: SavedObjectsClientCommon;
   fieldFormats: FieldFormatsStartCommon;
-  shortDotsEnable: boolean;
-  metaFields: string[];
+  shortDotsEnable?: boolean;
+  metaFields?: string[];
 }
 
 interface SavedObjectBody {
+  fieldAttrs?: string;
   title?: string;
   timeFieldName?: string;
   intervalName?: string;
@@ -78,6 +72,8 @@ export class IndexPattern implements IIndexPattern {
   private originalSavedObjectBody: SavedObjectBody = {};
   private shortDotsEnable: boolean = false;
   private fieldFormats: FieldFormatsStartCommon;
+  // make private once manual field refresh is removed
+  public fieldAttrs: FieldAttrs;
 
   constructor({
     spec = {},
@@ -102,22 +98,26 @@ export class IndexPattern implements IIndexPattern {
 
     // set values
     this.id = spec.id;
-    const fieldFormatMap = this.fieldSpecsToFieldFormatMap(spec.fields);
+    this.fieldFormatMap = spec.fieldFormats || {};
 
     this.version = spec.version;
 
     this.title = spec.title || '';
     this.timeFieldName = spec.timeFieldName;
     this.sourceFilters = spec.sourceFilters;
-
     this.fields.replaceAll(Object.values(spec.fields || {}));
     this.type = spec.type;
     this.typeMeta = spec.typeMeta;
-
-    this.fieldFormatMap = _.mapValues(fieldFormatMap, (mapping) => {
-      return this.deserializeFieldFormatMap(mapping);
-    });
+    this.fieldAttrs = spec.fieldAttrs || {};
   }
+
+  setFieldFormat = (fieldName: string, format: SerializedFieldFormat) => {
+    this.fieldFormatMap[fieldName] = format;
+  };
+
+  deleteFieldFormat = (fieldName: string) => {
+    delete this.fieldFormatMap[fieldName];
+  };
 
   /**
    * Get last saved saved object fields
@@ -131,33 +131,19 @@ export class IndexPattern implements IIndexPattern {
     this.originalSavedObjectBody = this.getAsSavedObjectBody();
   };
 
-  /**
-   * Converts field format spec to field format instance
-   * @param mapping
-   */
-  private deserializeFieldFormatMap(mapping: SerializedFieldFormat<Record<string, any>>) {
-    try {
-      return this.fieldFormats.getInstance(mapping.id as string, mapping.params);
-    } catch (err) {
-      if (err instanceof FieldFormatNotFoundError) {
-        return undefined;
-      } else {
-        throw err;
-      }
-    }
-  }
+  getFieldAttrs = () => {
+    const newFieldAttrs = { ...this.fieldAttrs };
 
-  /**
-   * Extracts FieldFormatMap from FieldSpec map
-   * @param fldList FieldSpec map
-   */
-  private fieldSpecsToFieldFormatMap = (fldList: IndexPatternSpec['fields'] = {}) =>
-    Object.values(fldList).reduce<Record<string, SerializedFieldFormat>>((col, fieldSpec) => {
-      if (fieldSpec.format) {
-        col[fieldSpec.name] = { ...fieldSpec.format };
+    this.fields.forEach((field) => {
+      if (field.customName) {
+        newFieldAttrs[field.name] = { customName: field.customName };
+      } else {
+        delete newFieldAttrs[field.name];
       }
-      return col;
-    }, {});
+    });
+
+    return newFieldAttrs;
+  };
 
   getComputedFields() {
     const scriptFields: any = {};
@@ -211,6 +197,8 @@ export class IndexPattern implements IIndexPattern {
       fields: this.fields.toSpec({ getFormatterForField: this.getFormatterForField.bind(this) }),
       typeMeta: this.typeMeta,
       type: this.type,
+      fieldFormats: this.fieldFormatMap,
+      fieldAttrs: this.fieldAttrs,
     };
   }
 
@@ -299,19 +287,13 @@ export class IndexPattern implements IIndexPattern {
    * Returns index pattern as saved object body for saving
    */
   getAsSavedObjectBody() {
-    const serializeFieldFormatMap = (
-      flat: any,
-      format: FieldFormat | undefined,
-      field: string | undefined
-    ) => {
-      if (format && field) {
-        flat[field] = format;
-      }
-    };
-    const serialized = _.transform(this.fieldFormatMap, serializeFieldFormatMap);
-    const fieldFormatMap = _.isEmpty(serialized) ? undefined : JSON.stringify(serialized);
+    const fieldFormatMap = _.isEmpty(this.fieldFormatMap)
+      ? undefined
+      : JSON.stringify(this.fieldFormatMap);
+    const fieldAttrs = this.getFieldAttrs();
 
     return {
+      fieldAttrs: fieldAttrs ? JSON.stringify(fieldAttrs) : undefined,
       title: this.title,
       timeFieldName: this.timeFieldName,
       intervalName: this.intervalName,
@@ -330,12 +312,25 @@ export class IndexPattern implements IIndexPattern {
   getFormatterForField(
     field: IndexPatternField | IndexPatternField['spec'] | IFieldType
   ): FieldFormat {
-    return (
-      this.fieldFormatMap[field.name] ||
-      this.fieldFormats.getDefaultInstance(
-        field.type as KBN_FIELD_TYPES,
-        field.esTypes as ES_FIELD_TYPES[]
-      )
+    const fieldFormat = this.getFormatterForFieldNoDefault(field.name);
+    if (fieldFormat) {
+      return fieldFormat;
+    }
+
+    return this.fieldFormats.getDefaultInstance(
+      field.type as KBN_FIELD_TYPES,
+      field.esTypes as ES_FIELD_TYPES[]
     );
+  }
+
+  /**
+   * Get formatter for a given field name. Return undefined if none exists
+   * @param field
+   */
+  getFormatterForFieldNoDefault(fieldname: string) {
+    const formatSpec = this.fieldFormatMap[fieldname];
+    if (formatSpec?.id) {
+      return this.fieldFormats.getInstance(formatSpec.id, formatSpec.params);
+    }
   }
 }

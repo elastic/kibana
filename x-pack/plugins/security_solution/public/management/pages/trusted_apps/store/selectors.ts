@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createSelector } from 'reselect';
 import { ServerApiError } from '../../../../common/types';
 import { Immutable, NewTrustedApp, TrustedApp } from '../../../../../common/endpoint/types';
+import { MANAGEMENT_PAGE_SIZE_OPTIONS } from '../../../common/constants';
 
 import {
   AsyncResourceState,
@@ -17,97 +17,88 @@ import {
   isLoadingResourceState,
   isOutdatedResourceState,
   LoadedResourceState,
-  PaginationInfo,
+  Pagination,
   TrustedAppCreateFailure,
   TrustedAppsListData,
+  TrustedAppsListPageLocation,
   TrustedAppsListPageState,
 } from '../state';
-import { TrustedAppsUrlParams } from '../types';
 import {
   isTrustedAppCreateFailureState,
   isTrustedAppCreatePendingState,
   isTrustedAppCreateSuccessState,
 } from '../state/type_guards';
 
-const pageInfosEqual = (pageInfo1: PaginationInfo, pageInfo2: PaginationInfo): boolean =>
-  pageInfo1.index === pageInfo2.index && pageInfo1.size === pageInfo2.size;
-
 export const needsRefreshOfListData = (state: Immutable<TrustedAppsListPageState>): boolean => {
-  const currentPageInfo = state.listView.currentPaginationInfo;
-  const currentPage = state.listView.currentListResourceState;
   const freshDataTimestamp = state.listView.freshDataTimestamp;
+  const currentPage = state.listView.listResourceState;
+  const location = state.location;
 
   return (
     state.active &&
     isOutdatedResourceState(currentPage, (data) => {
       return (
-        pageInfosEqual(currentPageInfo, data.paginationInfo) && data.timestamp >= freshDataTimestamp
+        data.pageIndex === location.page_index &&
+        data.pageSize === location.page_size &&
+        data.timestamp >= freshDataTimestamp
       );
     })
   );
 };
 
-export const getCurrentListResourceState = (
+export const getListResourceState = (
   state: Immutable<TrustedAppsListPageState>
 ): Immutable<AsyncResourceState<TrustedAppsListData>> | undefined => {
-  return state.listView.currentListResourceState;
+  return state.listView.listResourceState;
 };
 
 export const getLastLoadedListResourceState = (
   state: Immutable<TrustedAppsListPageState>
 ): Immutable<LoadedResourceState<TrustedAppsListData>> | undefined => {
-  return getLastLoadedResourceState(state.listView.currentListResourceState);
+  return getLastLoadedResourceState(state.listView.listResourceState);
 };
 
 export const getListItems = (
   state: Immutable<TrustedAppsListPageState>
 ): Immutable<TrustedApp[]> => {
-  return getLastLoadedResourceState(state.listView.currentListResourceState)?.data.items || [];
+  return getLastLoadedResourceState(state.listView.listResourceState)?.data.items || [];
 };
 
-export const getListCurrentPageIndex = (state: Immutable<TrustedAppsListPageState>): number => {
-  return state.listView.currentPaginationInfo.index;
+export const getCurrentLocationPageIndex = (state: Immutable<TrustedAppsListPageState>): number => {
+  return state.location.page_index;
 };
 
-export const getListCurrentPageSize = (state: Immutable<TrustedAppsListPageState>): number => {
-  return state.listView.currentPaginationInfo.size;
+export const getCurrentLocationPageSize = (state: Immutable<TrustedAppsListPageState>): number => {
+  return state.location.page_size;
 };
 
 export const getListTotalItemsCount = (state: Immutable<TrustedAppsListPageState>): number => {
-  return (
-    getLastLoadedResourceState(state.listView.currentListResourceState)?.data.totalItemsCount || 0
-  );
+  return getLastLoadedResourceState(state.listView.listResourceState)?.data.totalItemsCount || 0;
 };
 
-export const getListCurrentShowValue: (
-  state: Immutable<TrustedAppsListPageState>
-) => TrustedAppsListPageState['listView']['show'] = (state) => {
-  return state.listView.show;
+export const getListPagination = (state: Immutable<TrustedAppsListPageState>): Pagination => {
+  const lastLoadedResourceState = getLastLoadedResourceState(state.listView.listResourceState);
+
+  return {
+    pageIndex: state.location.page_index,
+    pageSize: state.location.page_size,
+    totalItemCount: lastLoadedResourceState?.data.totalItemsCount || 0,
+    pageSizeOptions: [...MANAGEMENT_PAGE_SIZE_OPTIONS],
+  };
 };
 
-export const getListUrlSearchParams: (
+export const getCurrentLocation = (
   state: Immutable<TrustedAppsListPageState>
-) => TrustedAppsUrlParams = createSelector(
-  getListCurrentPageIndex,
-  getListCurrentPageSize,
-  getListCurrentShowValue,
-  (pageIndex, pageSize, showValue) => {
-    return {
-      page_index: pageIndex,
-      page_size: pageSize,
-      show: showValue,
-    };
-  }
-);
+): TrustedAppsListPageLocation => state.location;
 
 export const getListErrorMessage = (
   state: Immutable<TrustedAppsListPageState>
 ): string | undefined => {
-  return getCurrentResourceError(state.listView.currentListResourceState)?.message;
+  return getCurrentResourceError(state.listView.listResourceState)?.message;
 };
 
 export const isListLoading = (state: Immutable<TrustedAppsListPageState>): boolean => {
-  return isLoadingResourceState(state.listView.currentListResourceState);
+  return isLoadingResourceState(state.listView.listResourceState);
 };
 
 export const isDeletionDialogOpen = (state: Immutable<TrustedAppsListPageState>): boolean => {

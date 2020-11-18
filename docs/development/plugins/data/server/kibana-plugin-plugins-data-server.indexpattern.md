@@ -20,16 +20,20 @@ export declare class IndexPattern implements IIndexPattern
 
 |  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
+|  [deleteFieldFormat](./kibana-plugin-plugins-data-server.indexpattern.deletefieldformat.md) |  | <code>(fieldName: string) =&gt; void</code> |  |
+|  [fieldAttrs](./kibana-plugin-plugins-data-server.indexpattern.fieldattrs.md) |  | <code>FieldAttrs</code> |  |
 |  [fieldFormatMap](./kibana-plugin-plugins-data-server.indexpattern.fieldformatmap.md) |  | <code>Record&lt;string, any&gt;</code> |  |
 |  [fields](./kibana-plugin-plugins-data-server.indexpattern.fields.md) |  | <code>IIndexPatternFieldList &amp; {</code><br/><code>        toSpec: () =&gt; IndexPatternFieldMap;</code><br/><code>    }</code> |  |
 |  [flattenHit](./kibana-plugin-plugins-data-server.indexpattern.flattenhit.md) |  | <code>(hit: Record&lt;string, any&gt;, deep?: boolean) =&gt; Record&lt;string, any&gt;</code> |  |
 |  [formatField](./kibana-plugin-plugins-data-server.indexpattern.formatfield.md) |  | <code>FormatFieldFn</code> |  |
 |  [formatHit](./kibana-plugin-plugins-data-server.indexpattern.formathit.md) |  | <code>{</code><br/><code>        (hit: Record&lt;string, any&gt;, type?: string): any;</code><br/><code>        formatField: FormatFieldFn;</code><br/><code>    }</code> |  |
-|  [getOriginalSavedObjectBody](./kibana-plugin-plugins-data-server.indexpattern.getoriginalsavedobjectbody.md) |  | <code>() =&gt; {</code><br/><code>        title?: string &#124; undefined;</code><br/><code>        timeFieldName?: string &#124; undefined;</code><br/><code>        intervalName?: string &#124; undefined;</code><br/><code>        fields?: string &#124; undefined;</code><br/><code>        sourceFilters?: string &#124; undefined;</code><br/><code>        fieldFormatMap?: string &#124; undefined;</code><br/><code>        typeMeta?: string &#124; undefined;</code><br/><code>        type?: string &#124; undefined;</code><br/><code>    }</code> | Get last saved saved object fields |
+|  [getFieldAttrs](./kibana-plugin-plugins-data-server.indexpattern.getfieldattrs.md) |  | <code>() =&gt; {</code><br/><code>        [x: string]: {</code><br/><code>            customName: string;</code><br/><code>        };</code><br/><code>    }</code> |  |
+|  [getOriginalSavedObjectBody](./kibana-plugin-plugins-data-server.indexpattern.getoriginalsavedobjectbody.md) |  | <code>() =&gt; {</code><br/><code>        fieldAttrs?: string &#124; undefined;</code><br/><code>        title?: string &#124; undefined;</code><br/><code>        timeFieldName?: string &#124; undefined;</code><br/><code>        intervalName?: string &#124; undefined;</code><br/><code>        fields?: string &#124; undefined;</code><br/><code>        sourceFilters?: string &#124; undefined;</code><br/><code>        fieldFormatMap?: string &#124; undefined;</code><br/><code>        typeMeta?: string &#124; undefined;</code><br/><code>        type?: string &#124; undefined;</code><br/><code>    }</code> | Get last saved saved object fields |
 |  [id](./kibana-plugin-plugins-data-server.indexpattern.id.md) |  | <code>string</code> |  |
 |  [intervalName](./kibana-plugin-plugins-data-server.indexpattern.intervalname.md) |  | <code>string &#124; undefined</code> |  |
 |  [metaFields](./kibana-plugin-plugins-data-server.indexpattern.metafields.md) |  | <code>string[]</code> |  |
 |  [resetOriginalSavedObjectBody](./kibana-plugin-plugins-data-server.indexpattern.resetoriginalsavedobjectbody.md) |  | <code>() =&gt; void</code> | Reset last saved saved object fields. used after saving |
+|  [setFieldFormat](./kibana-plugin-plugins-data-server.indexpattern.setfieldformat.md) |  | <code>(fieldName: string, format: SerializedFieldFormat) =&gt; void</code> |  |
 |  [sourceFilters](./kibana-plugin-plugins-data-server.indexpattern.sourcefilters.md) |  | <code>SourceFilter[]</code> |  |
 |  [timeFieldName](./kibana-plugin-plugins-data-server.indexpattern.timefieldname.md) |  | <code>string &#124; undefined</code> |  |
 |  [title](./kibana-plugin-plugins-data-server.indexpattern.title.md) |  | <code>string</code> |  |
@@ -47,6 +51,7 @@ export declare class IndexPattern implements IIndexPattern
 |  [getComputedFields()](./kibana-plugin-plugins-data-server.indexpattern.getcomputedfields.md) |  |  |
 |  [getFieldByName(name)](./kibana-plugin-plugins-data-server.indexpattern.getfieldbyname.md) |  |  |
 |  [getFormatterForField(field)](./kibana-plugin-plugins-data-server.indexpattern.getformatterforfield.md) |  | Provide a field, get its formatter |
+|  [getFormatterForFieldNoDefault(fieldname)](./kibana-plugin-plugins-data-server.indexpattern.getformatterforfieldnodefault.md) |  | Get formatter for a given field name. Return undefined if none exists |
 |  [getNonScriptedFields()](./kibana-plugin-plugins-data-server.indexpattern.getnonscriptedfields.md) |  |  |
 |  [getScriptedFields()](./kibana-plugin-plugins-data-server.indexpattern.getscriptedfields.md) |  |  |
 |  [getSourceFiltering()](./kibana-plugin-plugins-data-server.indexpattern.getsourcefiltering.md) |  | Get the source filtering configuration for that index. |

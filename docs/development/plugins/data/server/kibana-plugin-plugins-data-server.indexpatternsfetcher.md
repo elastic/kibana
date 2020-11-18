@@ -14,7 +14,7 @@ export declare class IndexPatternsFetcher
 
 |  Constructor | Modifiers | Description |
 |  --- | --- | --- |
-|  [(constructor)(callDataCluster)](./kibana-plugin-plugins-data-server.indexpatternsfetcher._constructor_.md) |  | Constructs a new instance of the <code>IndexPatternsFetcher</code> class |
+|  [(constructor)(elasticsearchClient, allowNoIndices)](./kibana-plugin-plugins-data-server.indexpatternsfetcher._constructor_.md) |  | Constructs a new instance of the <code>IndexPatternsFetcher</code> class |
 
 ## Methods
 

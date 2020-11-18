@@ -7,6 +7,7 @@ exports[`Port renders correctly against snapshot 1`] = `
   eventId="abcd"
   fieldName="destination.ip"
   fieldType="ip"
+  truncate={true}
   value="10.1.2.3"
 />
 `;

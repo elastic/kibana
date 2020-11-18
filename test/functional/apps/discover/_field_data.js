@@ -32,15 +32,12 @@ export default function ({ getService, getPageObjects }) {
     before(async function () {
       await esArchiver.loadIfNeeded('logstash_functional');
       await esArchiver.load('discover');
-      // delete .kibana index and update configDoc
       await kibanaServer.uiSettings.replace({
         defaultIndex: 'logstash-*',
       });
-
+      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await PageObjects.common.navigateToApp('discover');
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
     });
-
     describe('field data', function () {
       it('search php should show the correct hit count', async function () {
         const expectedHitCount = '445';

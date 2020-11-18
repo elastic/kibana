@@ -56,18 +56,23 @@ import { ruleStatusServiceFactory } from './rule_status_service';
 import { buildRuleMessageFactory } from './rule_messages';
 import { ruleStatusSavedObjectsClientFactory } from './rule_status_saved_objects_client';
 import { getNotificationResultsLink } from '../notifications/utils';
+import { TelemetryEventsSender } from '../../telemetry/sender';
 import { buildEqlSearchRequest } from '../../../../common/detection_engine/get_query_filter';
 import { bulkInsertSignals } from './single_bulk_create';
 import { buildSignalFromEvent, buildSignalGroupFromSequence } from './build_bulk_body';
 import { createThreatSignals } from './threat_mapping/create_threat_signals';
+import { getIndexVersion } from '../routes/index/get_index_version';
+import { MIN_EQL_RULE_INDEX_VERSION } from '../routes/index/get_signals_template';
 
 export const signalRulesAlertType = ({
   logger,
+  eventsTelemetry,
   version,
   ml,
   lists,
 }: {
   logger: Logger;
+  eventsTelemetry: TelemetryEventsSender | undefined;
   version: string;
   ml: SetupPlugins['ml'];
   lists: SetupPlugins['lists'] | undefined;
@@ -95,6 +100,7 @@ export const signalRulesAlertType = ({
         from,
         ruleId,
         index,
+        eventCategoryOverride,
         filters,
         language,
         maxSignals,
@@ -109,9 +115,14 @@ export const signalRulesAlertType = ({
         threatQuery,
         threatIndex,
         threatMapping,
+        threatLanguage,
+        timestampOverride,
         type,
         exceptionsList,
+        concurrentSearches,
+        itemsPerSearch,
       } = params;
+
       const searchAfterSize = Math.min(maxSignals, DEFAULT_SEARCH_AFTER_PAGE_SIZE);
       let hasError: boolean = false;
       let result = createSearchAfterReturnType();
@@ -202,7 +213,7 @@ export const signalRulesAlertType = ({
           // currently unused by the jobsSummary function.
           const fakeRequest = {} as KibanaRequest;
           const summaryJobs = await ml
-            .jobServiceProvider(fakeRequest)
+            .jobServiceProvider(fakeRequest, services.savedObjectsClient)
             .jobsSummary([machineLearningJobId]);
           const jobSummary = summaryJobs.find((job) => job.id === machineLearningJobId);
 
@@ -223,6 +234,7 @@ export const signalRulesAlertType = ({
             // Using fake KibanaRequest as it is needed to satisfy the ML Services API, but can be empty as it is
             // currently unused by the mlAnomalySearch function.
             request: ({} as unknown) as KibanaRequest,
+            savedObjectsClient: services.savedObjectsClient,
             jobId: machineLearningJobId,
             anomalyThreshold,
             from,
@@ -296,6 +308,7 @@ export const signalRulesAlertType = ({
             logger,
             filter: esFilter,
             threshold,
+            timestampOverride,
             buildRuleMessage,
           });
 
@@ -315,6 +328,7 @@ export const signalRulesAlertType = ({
             id: alertId,
             inputIndexPattern: inputIndex,
             signalsIndex: outputIndex,
+            timestampOverride,
             startedAt,
             name,
             createdBy,
@@ -329,7 +343,10 @@ export const signalRulesAlertType = ({
           });
           result = mergeReturns([
             result,
-            createSearchAfterReturnTypeFromResponse({ searchResult: thresholdResults }),
+            createSearchAfterReturnTypeFromResponse({
+              searchResult: thresholdResults,
+              timestampOverride,
+            }),
             createSearchAfterReturnType({
               success,
               errors: [...errors, ...searchErrors],
@@ -346,7 +363,7 @@ export const signalRulesAlertType = ({
           ) {
             throw new Error(
               [
-                'Threat Match rule is missing threatQuery and/or threatIndex and/or threatMapping:',
+                'Indicator match is missing threatQuery and/or threatIndex and/or threatMapping:',
                 `threatQuery: "${threatQuery}"`,
                 `threatIndex: "${threatIndex}"`,
                 `threatMapping: "${threatMapping}"`,
@@ -369,6 +386,7 @@ export const signalRulesAlertType = ({
             previousStartedAt,
             listClient,
             logger,
+            eventsTelemetry,
             alertId,
             outputIndex,
             params,
@@ -385,8 +403,11 @@ export const signalRulesAlertType = ({
             throttle,
             threatFilters: threatFilters ?? [],
             threatQuery,
+            threatLanguage,
             buildRuleMessage,
             threatIndex,
+            concurrentSearches: concurrentSearches ?? 1,
+            itemsPerSearch: itemsPerSearch ?? 9000,
           });
         } else if (type === 'query' || type === 'saved_query') {
           const inputIndex = await getInputIndex(services, version, index);
@@ -409,6 +430,7 @@ export const signalRulesAlertType = ({
             ruleParams: params,
             services,
             logger,
+            eventsTelemetry,
             id: alertId,
             inputIndexPattern: inputIndex,
             signalsIndex: outputIndex,
@@ -429,18 +451,37 @@ export const signalRulesAlertType = ({
           });
         } else if (isEqlRule(type)) {
           if (query === undefined) {
-            throw new Error('eql query rule must have a query defined');
+            throw new Error('EQL query rule must have a query defined');
+          }
+          try {
+            const signalIndexVersion = await getIndexVersion(services.callCluster, outputIndex);
+            if (
+              signalIndexVersion === undefined ||
+              signalIndexVersion < MIN_EQL_RULE_INDEX_VERSION
+            ) {
+              throw new Error(
+                `EQL based rules require an update to version ${MIN_EQL_RULE_INDEX_VERSION} of the detection alerts index mapping`
+              );
+            }
+          } catch (err) {
+            if (err.statusCode === 403) {
+              throw new Error(
+                `EQL based rules require the user that created it to have the view_index_metadata, read, and write permissions for index: ${outputIndex}`
+              );
+            } else {
+              throw err;
+            }
           }
           const inputIndex = await getInputIndex(services, version, index);
           const request = buildEqlSearchRequest(
             query,
             inputIndex,
-            params.from,
-            params.to,
+            from,
+            to,
             searchAfterSize,
-            params.timestampOverride,
+            timestampOverride,
             exceptionItems ?? [],
-            params.eventCategoryOverride
+            eventCategoryOverride
           );
           const response: EqlSignalSearchResponse = await services.callCluster(
             'transport.request',
@@ -455,7 +496,7 @@ export const signalRulesAlertType = ({
             );
           } else if (response.hits.events !== undefined) {
             newSignals = response.hits.events.map((event) =>
-              wrapSignal(buildSignalFromEvent(event, savedObject), outputIndex)
+              wrapSignal(buildSignalFromEvent(event, savedObject, true), outputIndex)
             );
           } else {
             throw new Error(

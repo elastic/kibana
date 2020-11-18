@@ -18,11 +18,8 @@ import {
   NetworkDetailsRequestOptions,
   NetworkDetailsStrategyResponse,
 } from '../../../../common/search_strategy';
-import {
-  AbortError,
-  isCompleteResponse,
-  isErrorResponse,
-} from '../../../../../../../src/plugins/data/common';
+import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/plugins/data/common';
+import { AbortError } from '../../../../../../../src/plugins/kibana_utils/common';
 import * as i18n from './translations';
 import { getInspectResponse } from '../../../helpers';
 import { InspectResponse } from '../../../types';
@@ -59,13 +56,20 @@ export const useNetworkDetails = ({
   const abortCtrl = useRef(new AbortController());
   const [loading, setLoading] = useState(false);
 
-  const [networkDetailsRequest, setNetworkDetailsRequest] = useState<NetworkDetailsRequestOptions>({
-    defaultIndex: indexNames,
-    docValueFields: docValueFields ?? [],
-    factoryQueryType: NetworkQueries.details,
-    filterQuery: createFilter(filterQuery),
-    ip,
-  });
+  const [
+    networkDetailsRequest,
+    setNetworkDetailsRequest,
+  ] = useState<NetworkDetailsRequestOptions | null>(
+    !skip
+      ? {
+          defaultIndex: indexNames,
+          docValueFields: docValueFields ?? [],
+          factoryQueryType: NetworkQueries.details,
+          filterQuery: createFilter(filterQuery),
+          ip,
+        }
+      : null
+  );
 
   const [networkDetailsResponse, setNetworkDetailsResponse] = useState<NetworkDetailsArgs>({
     networkDetails: {},
@@ -79,7 +83,11 @@ export const useNetworkDetails = ({
   });
 
   const networkDetailsSearch = useCallback(
-    (request: NetworkDetailsRequestOptions) => {
+    (request: NetworkDetailsRequestOptions | null) => {
+      if (request == null) {
+        return;
+      }
+
       let didCancel = false;
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
@@ -136,18 +144,19 @@ export const useNetworkDetails = ({
   useEffect(() => {
     setNetworkDetailsRequest((prevRequest) => {
       const myRequest = {
-        ...prevRequest,
+        ...(prevRequest ?? {}),
         defaultIndex: indexNames,
-        ip,
         docValueFields: docValueFields ?? [],
+        factoryQueryType: NetworkQueries.details,
         filterQuery: createFilter(filterQuery),
+        ip,
       };
       if (!skip && !deepEqual(prevRequest, myRequest)) {
         return myRequest;
       }
       return prevRequest;
     });
-  }, [indexNames, filterQuery, skip, ip, docValueFields]);
+  }, [indexNames, filterQuery, skip, ip, docValueFields, id]);
 
   useEffect(() => {
     networkDetailsSearch(networkDetailsRequest);

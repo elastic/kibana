@@ -36,6 +36,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { isEmpty } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { UiStatsMetricType } from '@kbn/analytics';
 import { toMountPoint } from '../../../../../kibana_react/public';
 import { DocLinksStart, ToastsStart } from '../../../../../../core/public';
 
@@ -56,6 +57,7 @@ interface FormProps {
   enableSaving: boolean;
   dockLinks: DocLinksStart['links'];
   toasts: ToastsStart;
+  trackUiMetric?: (metricType: UiStatsMetricType, eventName: string | string[]) => void;
 }
 
 interface FormState {
@@ -149,7 +151,7 @@ export class Form extends PureComponent<FormProps> {
       if (!setting) {
         return;
       }
-      const { defVal, type, requiresPageReload } = setting;
+      const { defVal, type, requiresPageReload, metric } = setting;
       let valueToSave = value;
       let equalsToDefault = false;
       switch (type) {
@@ -163,6 +165,11 @@ export class Form extends PureComponent<FormProps> {
           const isArray = Array.isArray(JSON.parse((defVal as string) || '{}'));
           valueToSave = valueToSave.trim();
           valueToSave = valueToSave || (isArray ? '[]' : '{}');
+        case 'boolean':
+          if (metric && this.props.trackUiMetric) {
+            const metricName = valueToSave ? `${metric.name}_on` : `${metric.name}_off`;
+            this.props.trackUiMetric(metric.type, metricName);
+          }
         default:
           equalsToDefault = valueToSave === defVal;
       }
@@ -388,6 +395,13 @@ export class Form extends PureComponent<FormProps> {
     const { unsavedChanges } = this.state;
     const { visibleSettings, categories, categoryCounts, clearQuery } = this.props;
     const currentCategories: Category[] = [];
+    const hasUnsavedChanges = !isEmpty(unsavedChanges);
+
+    if (hasUnsavedChanges) {
+      document.body.classList.add('kbnBody--mgtAdvancedSettingsHasBottomBar');
+    } else {
+      document.body.classList.remove('kbnBody--mgtAdvancedSettingsHasBottomBar');
+    }
 
     categories.forEach((category) => {
       if (visibleSettings[category] && visibleSettings[category].length) {
@@ -408,7 +422,7 @@ export class Form extends PureComponent<FormProps> {
               })
             : this.maybeRenderNoSettings(clearQuery)}
         </div>
-        {!isEmpty(unsavedChanges) && this.renderBottomBar()}
+        {hasUnsavedChanges && this.renderBottomBar()}
       </Fragment>
     );
   }

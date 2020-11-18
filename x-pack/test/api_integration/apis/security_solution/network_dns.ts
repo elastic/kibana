@@ -5,20 +5,19 @@
  */
 
 import expect from '@kbn/expect';
-// @ts-expect-error
-import { networkDnsQuery } from '../../../../plugins/security_solution/public/network/containers/network_dns/index.gql_query';
 import {
+  NetworkQueries,
+  NetworkDnsEdges,
   Direction,
-  // @ts-expect-error
-  GetNetworkDnsQuery,
-  // @ts-expect-error
   NetworkDnsFields,
-} from '../../../../plugins/security_solution/public/graphql/types';
+} from '../../../../plugins/security_solution/common/search_strategy';
+
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const client = getService('securitySolutionGraphQLClient');
+  const supertest = getService('supertest');
+
   describe('Network DNS', () => {
     describe('With packetbeat', () => {
       before(() => esArchiver.load('packetbeat/dns'));
@@ -27,79 +26,75 @@ export default function ({ getService }: FtrProviderContext) {
       const FROM = '2000-01-01T00:00:00.000Z';
       const TO = '3000-01-01T00:00:00.000Z';
 
-      it('Make sure that we get Dns data and sorting by uniqueDomains ascending', () => {
-        return client
-          .query<GetNetworkDnsQuery.Query>({
-            query: networkDnsQuery,
-            variables: {
-              defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
-              docValueFields: [],
-              inspect: false,
-              isPtrIncluded: false,
-              pagination: {
-                activePage: 0,
-                cursorStart: 0,
-                fakePossibleCount: 30,
-                querySize: 10,
-              },
-              sort: { field: NetworkDnsFields.uniqueDomains, direction: Direction.asc },
-              sourceId: 'default',
-              stackByField: 'dns.question.registered_domain',
-              timerange: {
-                interval: '12h',
-                to: TO,
-                from: FROM,
-              },
+      it('Make sure that we get Dns data and sorting by uniqueDomains ascending', async () => {
+        const { body: networkDns } = await supertest
+          .post('/internal/search/securitySolutionSearchStrategy/')
+          .set('kbn-xsrf', 'true')
+          .send({
+            defaultIndex: [
+              'apm-*-transaction*',
+              'auditbeat-*',
+              'endgame-*',
+              'filebeat-*',
+              'logs-*',
+              'packetbeat-*',
+              'winlogbeat-*',
+            ],
+            docValueFields: [],
+            factoryQueryType: NetworkQueries.dns,
+            filterQuery:
+              '{"bool":{"must":[],"filter":[{"match_all":{}}],"should":[],"must_not":[]}}',
+            isPtrIncluded: false,
+            pagination: { activePage: 0, cursorStart: 0, fakePossibleCount: 30, querySize: 10 },
+            sort: { field: NetworkDnsFields.uniqueDomains, direction: Direction.asc },
+            timerange: {
+              interval: '12h',
+              to: TO,
+              from: FROM,
             },
           })
-          .then((resp) => {
-            const networkDns = resp.data.source.NetworkDns;
-            expect(networkDns.edges.length).to.be(10);
-            expect(networkDns.totalCount).to.be(44);
-            // @ts-expect-error
-            expect(networkDns.edges.map((i) => i.node.dnsName).join(',')).to.be(
-              'aaplimg.com,adgrx.com,akadns.net,akamaiedge.net,amazonaws.com,cbsistatic.com,cdn-apple.com,connman.net,crowbird.com,d1oxlq5h9kq8q5.cloudfront.net'
-            );
-            expect(networkDns.pageInfo.fakeTotalCount).to.equal(30);
-          });
+          .expect(200);
+
+        expect(networkDns.edges.length).to.be(10);
+        expect(networkDns.totalCount).to.be(44);
+        expect(networkDns.edges.map((i: NetworkDnsEdges) => i.node.dnsName).join(',')).to.be(
+          'aaplimg.com,adgrx.com,akadns.net,akamaiedge.net,amazonaws.com,cbsistatic.com,cdn-apple.com,connman.net,d1oxlq5h9kq8q5.cloudfront.net,d3epxf4t8a32oh.cloudfront.net'
+        );
+        expect(networkDns.pageInfo.fakeTotalCount).to.equal(30);
       });
 
-      it('Make sure that we get Dns data and sorting by uniqueDomains descending', () => {
-        return client
-          .query<GetNetworkDnsQuery.Query>({
-            query: networkDnsQuery,
-            variables: {
-              defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
-              docValueFields: [],
-              isDnsHistogram: false,
-              inspect: false,
-              isPtrIncluded: false,
-              pagination: {
-                activePage: 0,
-                cursorStart: 0,
-                fakePossibleCount: 30,
-                querySize: 10,
-              },
-              sourceId: 'default',
-              sort: { field: NetworkDnsFields.uniqueDomains, direction: Direction.desc },
-              stackByField: 'dns.question.registered_domain',
-              timerange: {
-                interval: '12h',
-                to: TO,
-                from: FROM,
-              },
+      it('Make sure that we get Dns data and sorting by uniqueDomains descending', async () => {
+        const { body: networkDns } = await supertest
+          .post('/internal/search/securitySolutionSearchStrategy/')
+          .set('kbn-xsrf', 'true')
+          .send({
+            ip: '151.205.0.17',
+            defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+            factoryQueryType: NetworkQueries.dns,
+            docValueFields: [],
+            inspect: false,
+            pagination: {
+              activePage: 0,
+              cursorStart: 0,
+              fakePossibleCount: 30,
+              querySize: 10,
+            },
+            sort: { field: NetworkDnsFields.uniqueDomains, direction: Direction.desc },
+            stackByField: 'dns.question.registered_domain',
+            timerange: {
+              interval: '12h',
+              to: TO,
+              from: FROM,
             },
           })
-          .then((resp) => {
-            const networkDns = resp.data.source.NetworkDns;
-            expect(networkDns.edges.length).to.be(10);
-            expect(networkDns.totalCount).to.be(44);
-            // @ts-expect-error
-            expect(networkDns.edges.map((i) => i.node.dnsName).join(',')).to.be(
-              'nflxvideo.net,apple.com,netflix.com,samsungcloudsolution.com,samsungqbe.com,samsungelectronics.com,internetat.tv,samsungcloudsolution.net,samsungosp.com,cbsnews.com'
-            );
-            expect(networkDns.pageInfo.fakeTotalCount).to.equal(30);
-          });
+          .expect(200);
+
+        expect(networkDns.edges.length).to.be(10);
+        expect(networkDns.totalCount).to.be(44);
+        expect(networkDns.edges.map((i: NetworkDnsEdges) => i.node.dnsName).join(',')).to.be(
+          'nflxvideo.net,apple.com,netflix.com,samsungcloudsolution.com,samsungqbe.com,samsungelectronics.com,internetat.tv,samsungcloudsolution.net,samsungosp.com,cbsnews.com'
+        );
+        expect(networkDns.pageInfo.fakeTotalCount).to.equal(30);
       });
     });
   });

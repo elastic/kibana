@@ -17,12 +17,12 @@ import {
 import { CreateExceptionListSchema } from './create_exception_list_schema';
 
 export const getCreateExceptionListSchemaMock = (): CreateExceptionListSchema => ({
-  _tags: [],
   description: DESCRIPTION,
   list_id: undefined,
   meta: META,
   name: NAME,
   namespace_type: NAMESPACE_TYPE,
+  os_types: [],
   tags: [],
   type: ENDPOINT_TYPE,
   version: VERSION,

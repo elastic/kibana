@@ -50,7 +50,7 @@ export function dataAccessLayerFactory(
       after?: string
     ): Promise<ResolverPaginatedEvents> {
       return context.services.http.post('/api/endpoint/resolver/events', {
-        query: { afterEvent: after },
+        query: { afterEvent: after, limit: 25 },
         body: JSON.stringify({
           filter: `process.entity_id:"${entityID}" and event.category:"${category}"`,
         }),

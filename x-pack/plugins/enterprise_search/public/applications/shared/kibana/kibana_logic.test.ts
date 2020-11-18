@@ -6,7 +6,10 @@
 
 import { resetContext } from 'kea';
 
-import { mockKibanaValues } from '../../__mocks__';
+import { mockKibanaValues, mockHttpValues } from '../../__mocks__';
+jest.mock('../http', () => ({
+  HttpLogic: { values: { http: mockHttpValues.http } },
+}));
 
 import { KibanaLogic, mountKibanaLogic } from './kibana_logic';
 

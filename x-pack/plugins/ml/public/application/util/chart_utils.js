@@ -15,6 +15,7 @@ import { ML_PAGES } from '../../../common/constants/ml_url_generator';
 export const LINE_CHART_ANOMALY_RADIUS = 7;
 export const MULTI_BUCKET_SYMBOL_SIZE = 100; // In square pixels for use with d3 symbol.size
 export const SCHEDULED_EVENT_SYMBOL_HEIGHT = 5;
+export const ANNOTATION_SYMBOL_HEIGHT = 10;
 
 const MAX_LABEL_WIDTH = 100;
 
@@ -239,7 +240,7 @@ export async function getExploreSeriesLink(mlUrlGenerator, series) {
       jobIds: [series.jobId],
       refreshInterval: {
         display: 'Off',
-        pause: false,
+        pause: true,
         value: 0,
       },
       timeRange: {
@@ -260,7 +261,7 @@ export async function getExploreSeriesLink(mlUrlGenerator, series) {
         },
       },
     },
-    excludeBasePath: true,
+    excludeBasePath: false,
   });
   return url;
 }

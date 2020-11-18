@@ -19,6 +19,7 @@ import { PanelViewAndParameters } from '../../types';
 /**
  * Show the panel that matches the `panelViewAndParameters` (derived from the browser's location.search)
  */
+
 export const PanelRouter = memo(function () {
   const params: PanelViewAndParameters = useSelector(selectors.panelViewAndParameters);
   if (params.panelView === 'nodeDetail') {

@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 import React from 'react';
 import { ReactWrapper } from 'enzyme';
 import { EuiCallOut } from '@elastic/eui';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import { NotEnabled } from './not_enabled';
 import { PermissionDenied } from './permission_denied';

@@ -44,9 +44,9 @@ import { LegacyServiceSetupDeps, LegacyServiceStartDeps } from './types';
 import { LegacyService } from './legacy_service';
 import { coreMock } from '../mocks';
 import { statusServiceMock } from '../status/status_service.mock';
-import { auditTrailServiceMock } from '../audit_trail/audit_trail_service.mock';
 import { loggingServiceMock } from '../logging/logging_service.mock';
 import { metricsServiceMock } from '../metrics/metrics_service.mock';
+import { i18nServiceMock } from '../i18n/i18n_service.mock';
 
 const MockKbnServer: jest.Mock<KbnServer> = KbnServer as any;
 
@@ -76,6 +76,7 @@ beforeEach(() => {
       capabilities: capabilitiesServiceMock.createSetupContract(),
       context: contextServiceMock.createSetupContract(),
       elasticsearch: { legacy: {} } as any,
+      i18n: i18nServiceMock.createSetupContract(),
       uiSettings: uiSettingsServiceMock.createSetupContract(),
       http: {
         ...httpServiceMock.createInternalSetupContract(),
@@ -92,7 +93,6 @@ beforeEach(() => {
       rendering: renderingServiceMock,
       environment: environmentSetup,
       status: statusServiceMock.createInternalSetupContract(),
-      auditTrail: auditTrailServiceMock.createSetupContract(),
       logging: loggingServiceMock.createInternalSetupContract(),
       metrics: metricsServiceMock.createInternalSetupContract(),
     },

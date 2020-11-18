@@ -35,6 +35,7 @@ export interface MatrixHistogramRequestOptions extends RequestBasicOptions {
   timerange: TimerangeInput;
   histogramType: MatrixHistogramType;
   stackByField: string;
+  threshold?: { field: string | undefined; value: number } | undefined;
   inspect?: Maybe<Inspect>;
 }
 
@@ -59,7 +60,7 @@ export interface MatrixHistogramSchema<T> {
   buildDsl: (options: MatrixHistogramRequestOptions) => {};
   aggName: string;
   parseKey: string;
-  parser?: <T>(data: MatrixHistogramParseData<T>, keyBucket: string) => MatrixHistogramData[];
+  parser?: <U>(data: MatrixHistogramParseData<U>, keyBucket: string) => MatrixHistogramData[];
 }
 
 export type MatrixHistogramParseData<T> = T extends MatrixHistogramType.alerts

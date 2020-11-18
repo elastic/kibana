@@ -30,6 +30,7 @@ exports[`FieldEditor should render create new scripted field correctly 1`] = `
             "getByName": [Function],
           },
           "getFormatterForField": [Function],
+          "getFormatterForFieldNoDefault": [Function],
         }
       }
       isVisible={false}
@@ -47,6 +48,22 @@ exports[`FieldEditor should render create new scripted field correctly 1`] = `
         isInvalid={true}
         onChange={[Function]}
         placeholder="New scripted field"
+        value=""
+      />
+    </eui-form-row>
+    <eui-form-row
+      helpText={
+        <FormattedMessage
+          defaultMessage="Set a custom name to use when this field is displayed in Discover and Visualize. Queries and filters don't currently support a custom name and will use the original field name."
+          id="indexPatternManagement.customNameHelpText"
+          values={Object {}}
+        />
+      }
+      label="Custom name"
+    >
+      <eui-field-text
+        data-test-subj="editorFieldCustomName"
+        onChange={[Function]}
         value=""
       />
     </eui-form-row>
@@ -155,7 +172,7 @@ exports[`FieldEditor should render create new scripted field correctly 1`] = `
       isInvalid={true}
       label="Script"
     >
-      <Component
+      <eui-code-editor
         data-test-subj="editorFieldScript"
         height="300px"
         mode="groovy"
@@ -265,6 +282,7 @@ exports[`FieldEditor should render edit scripted field correctly 1`] = `
             "getByName": [Function],
           },
           "getFormatterForField": [Function],
+          "getFormatterForFieldNoDefault": [Function],
         }
       }
       isVisible={false}
@@ -273,6 +291,23 @@ exports[`FieldEditor should render edit scripted field correctly 1`] = `
       onClose={[Function]}
       script="doc.test.value"
     />
+    <eui-form-row
+      helpText={
+        <FormattedMessage
+          defaultMessage="Set a custom name to use when this field is displayed in Discover and Visualize. Queries and filters don't currently support a custom name and will use the original field name."
+          id="indexPatternManagement.customNameHelpText"
+          values={Object {}}
+        />
+      }
+      label="Custom name"
+    >
+      <eui-field-text
+        data-test-subj="editorFieldCustomName"
+        onChange={[Function]}
+        placeholder="test"
+        value=""
+      />
+    </eui-form-row>
     <eui-form-row
       helpText={null}
       label="Language"
@@ -372,7 +407,7 @@ exports[`FieldEditor should render edit scripted field correctly 1`] = `
       isInvalid={false}
       label="Script"
     >
-      <Component
+      <eui-code-editor
         data-test-subj="editorFieldScript"
         height="300px"
         mode="groovy"
@@ -499,6 +534,7 @@ exports[`FieldEditor should show conflict field warning 1`] = `
             "getByName": [Function],
           },
           "getFormatterForField": [Function],
+          "getFormatterForFieldNoDefault": [Function],
         }
       }
       isVisible={false}
@@ -545,6 +581,23 @@ exports[`FieldEditor should show conflict field warning 1`] = `
         onChange={[Function]}
         placeholder="New scripted field"
         value="foobar"
+      />
+    </eui-form-row>
+    <eui-form-row
+      helpText={
+        <FormattedMessage
+          defaultMessage="Set a custom name to use when this field is displayed in Discover and Visualize. Queries and filters don't currently support a custom name and will use the original field name."
+          id="indexPatternManagement.customNameHelpText"
+          values={Object {}}
+        />
+      }
+      label="Custom name"
+    >
+      <eui-field-text
+        data-test-subj="editorFieldCustomName"
+        onChange={[Function]}
+        placeholder="foobar"
+        value=""
       />
     </eui-form-row>
     <eui-form-row
@@ -652,7 +705,7 @@ exports[`FieldEditor should show conflict field warning 1`] = `
       isInvalid={true}
       label="Script"
     >
-      <Component
+      <eui-code-editor
         data-test-subj="editorFieldScript"
         height="300px"
         mode="groovy"
@@ -762,6 +815,7 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
             "getByName": [Function],
           },
           "getFormatterForField": [Function],
+          "getFormatterForFieldNoDefault": [Function],
         }
       }
       isVisible={false}
@@ -770,6 +824,23 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
       onClose={[Function]}
       script="doc.test.value"
     />
+    <eui-form-row
+      helpText={
+        <FormattedMessage
+          defaultMessage="Set a custom name to use when this field is displayed in Discover and Visualize. Queries and filters don't currently support a custom name and will use the original field name."
+          id="indexPatternManagement.customNameHelpText"
+          values={Object {}}
+        />
+      }
+      label="Custom name"
+    >
+      <eui-field-text
+        data-test-subj="editorFieldCustomName"
+        onChange={[Function]}
+        placeholder="test"
+        value=""
+      />
+    </eui-form-row>
     <eui-form-row
       helpText={
         <span>
@@ -950,7 +1021,7 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
       isInvalid={false}
       label="Script"
     >
-      <Component
+      <eui-code-editor
         data-test-subj="editorFieldScript"
         height="300px"
         mode="groovy"
@@ -1077,6 +1148,7 @@ exports[`FieldEditor should show multiple type field warning with a table contai
             "getByName": [Function],
           },
           "getFormatterForField": [Function],
+          "getFormatterForFieldNoDefault": [Function],
         }
       }
       isVisible={false}
@@ -1123,6 +1195,23 @@ exports[`FieldEditor should show multiple type field warning with a table contai
         onChange={[Function]}
         placeholder="New scripted field"
         value="foobar"
+      />
+    </eui-form-row>
+    <eui-form-row
+      helpText={
+        <FormattedMessage
+          defaultMessage="Set a custom name to use when this field is displayed in Discover and Visualize. Queries and filters don't currently support a custom name and will use the original field name."
+          id="indexPatternManagement.customNameHelpText"
+          values={Object {}}
+        />
+      }
+      label="Custom name"
+    >
+      <eui-field-text
+        data-test-subj="editorFieldCustomName"
+        onChange={[Function]}
+        placeholder="foobar"
+        value=""
       />
     </eui-form-row>
     <eui-form-row
@@ -1286,7 +1375,7 @@ exports[`FieldEditor should show multiple type field warning with a table contai
       isInvalid={true}
       label="Script"
     >
-      <Component
+      <eui-code-editor
         data-test-subj="editorFieldScript"
         height="300px"
         mode="groovy"

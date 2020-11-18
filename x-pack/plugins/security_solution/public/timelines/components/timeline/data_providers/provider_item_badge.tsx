@@ -117,21 +117,38 @@ export const ProviderItemBadge = React.memo<ProviderItemBadgeProps>(
       [unRegisterProvider]
     );
 
-    const button = (
-      <ProviderBadge
-        deleteProvider={!isLoading ? deleteProvider : noop}
-        field={field}
-        kqlQuery={kqlQuery}
-        isEnabled={isEnabled}
-        isExcluded={isExcluded}
-        providerId={providerId}
-        togglePopover={togglePopover}
-        toggleType={onToggleTypeProvider}
-        val={val}
-        operator={operator}
-        type={type}
-        timelineType={timelineType}
-      />
+    const button = useMemo(
+      () => (
+        <ProviderBadge
+          deleteProvider={!isLoading ? deleteProvider : noop}
+          field={field}
+          kqlQuery={kqlQuery}
+          isEnabled={isEnabled}
+          isExcluded={isExcluded}
+          providerId={providerId}
+          togglePopover={togglePopover}
+          toggleType={onToggleTypeProvider}
+          val={val}
+          operator={operator}
+          type={type}
+          timelineType={timelineType}
+        />
+      ),
+      [
+        deleteProvider,
+        field,
+        isEnabled,
+        isExcluded,
+        isLoading,
+        kqlQuery,
+        onToggleTypeProvider,
+        operator,
+        providerId,
+        timelineType,
+        togglePopover,
+        type,
+        val,
+      ]
     );
 
     return (

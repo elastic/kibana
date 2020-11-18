@@ -33,11 +33,11 @@ export function initXAxis(chart: Chart, table: Table) {
   chart.xAxisLabel = title;
 
   if ('interval' in params) {
-    const { interval } = params;
     if ('date' in params) {
       const { intervalESUnit, intervalESValue } = params;
+
       chart.ordered = {
-        interval: moment.duration(interval),
+        interval: moment.duration(intervalESValue, intervalESUnit as any),
         intervalESUnit,
         intervalESValue,
       };

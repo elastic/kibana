@@ -16,25 +16,23 @@ import {
   AlertMessageTimeToken,
   AlertMessageLinkToken,
   AlertInstanceState,
-} from './types';
+  CommonAlertFilter,
+  CommonAlertNodeUuidFilter,
+  CommonAlertParams,
+} from '../../common/types/alerts';
 import { AlertInstance, AlertServices } from '../../../alerts/server';
-import { INDEX_PATTERN_ELASTICSEARCH, ALERT_CPU_USAGE } from '../../common/constants';
+import {
+  INDEX_PATTERN_ELASTICSEARCH,
+  ALERT_CPU_USAGE,
+  ALERT_DETAILS,
+} from '../../common/constants';
 import { fetchCpuUsageNodeStats } from '../lib/alerts/fetch_cpu_usage_node_stats';
 import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
-import { AlertMessageTokenType, AlertSeverity, AlertParamType } from '../../common/enums';
+import { AlertMessageTokenType, AlertSeverity } from '../../common/enums';
 import { RawAlertInstance } from '../../../alerts/common';
 import { parseDuration } from '../../../alerts/common/parse_duration';
-import {
-  CommonAlertFilter,
-  CommonAlertCpuUsageFilter,
-  CommonAlertParams,
-  CommonAlertParamDetail,
-} from '../../common/types';
-import { AlertingDefaults, createLink } from './alerts_common';
+import { AlertingDefaults, createLink } from './alert_helpers';
 import { appendMetricbeatIndex } from '../lib/alerts/append_mb_index';
-
-const DEFAULT_THRESHOLD = 85;
-const DEFAULT_DURATION = '5m';
 
 interface CpuUsageParams {
   threshold: number;
@@ -42,29 +40,13 @@ interface CpuUsageParams {
 }
 
 export class CpuUsageAlert extends BaseAlert {
-  public static paramDetails = {
-    threshold: {
-      label: i18n.translate('xpack.monitoring.alerts.cpuUsage.paramDetails.threshold.label', {
-        defaultMessage: `Notify when CPU is over`,
-      }),
-      type: AlertParamType.Percentage,
-    } as CommonAlertParamDetail,
-    duration: {
-      label: i18n.translate('xpack.monitoring.alerts.cpuUsage.paramDetails.duration.label', {
-        defaultMessage: `Look at the average over`,
-      }),
-      type: AlertParamType.Duration,
-    } as CommonAlertParamDetail,
-  };
-
   public type = ALERT_CPU_USAGE;
-  public label = i18n.translate('xpack.monitoring.alerts.cpuUsage.label', {
-    defaultMessage: 'CPU Usage',
-  });
+  public label = ALERT_DETAILS[ALERT_CPU_USAGE].label;
+  public description = ALERT_DETAILS[ALERT_CPU_USAGE].description;
 
   protected defaultParams: CpuUsageParams = {
-    threshold: DEFAULT_THRESHOLD,
-    duration: DEFAULT_DURATION,
+    threshold: 85,
+    duration: '5m',
   };
 
   protected actionVariables = [
@@ -106,18 +88,15 @@ export class CpuUsageAlert extends BaseAlert {
       this.config.ui.max_bucket_size
     );
     return stats.map((stat) => {
-      let cpuUsage = 0;
       if (this.config.ui.container.elasticsearch.enabled) {
-        cpuUsage =
+        stat.cpuUsage =
           (stat.containerUsage / (stat.containerPeriods * stat.containerQuota * 1000)) * 100;
-      } else {
-        cpuUsage = stat.cpuUsage;
       }
 
       return {
         instanceKey: `${stat.clusterUuid}:${stat.nodeId}`,
         clusterUuid: stat.clusterUuid,
-        shouldFire: cpuUsage > params.threshold,
+        shouldFire: stat.cpuUsage > params.threshold,
         severity: AlertSeverity.Danger,
         meta: stat,
         ccs: stat.ccs,
@@ -129,7 +108,7 @@ export class CpuUsageAlert extends BaseAlert {
     const alertInstanceState = (alertInstance.state as unknown) as AlertInstanceState;
     if (filters && filters.length) {
       for (const _filter of filters) {
-        const filter = _filter as CommonAlertCpuUsageFilter;
+        const filter = _filter as CommonAlertNodeUuidFilter;
         if (filter && filter.nodeUuid) {
           let nodeExistsInStates = false;
           for (const state of alertInstanceState.alertStates) {
@@ -193,13 +172,13 @@ export class CpuUsageAlert extends BaseAlert {
           i18n.translate('xpack.monitoring.alerts.cpuUsage.ui.nextSteps.hotThreads', {
             defaultMessage: '#start_linkCheck hot threads#end_link',
           }),
-          `{elasticWebsiteUrl}/guide/en/elasticsearch/reference/{docLinkVersion}/cluster-nodes-hot-threads.html`
+          `{elasticWebsiteUrl}guide/en/elasticsearch/reference/{docLinkVersion}/cluster-nodes-hot-threads.html`
         ),
         createLink(
           i18n.translate('xpack.monitoring.alerts.cpuUsage.ui.nextSteps.runningTasks', {
             defaultMessage: '#start_linkCheck long running tasks#end_link',
           }),
-          `{elasticWebsiteUrl}/guide/en/elasticsearch/reference/{docLinkVersion}/tasks.html`
+          `{elasticWebsiteUrl}guide/en/elasticsearch/reference/{docLinkVersion}/tasks.html`
         ),
       ],
       tokens: [

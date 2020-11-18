@@ -31,7 +31,12 @@ export {
 } from './application';
 export { DashboardConstants, createDashboardEditUrl } from './dashboard_constants';
 
-export { DashboardStart, DashboardUrlGenerator, DashboardFeatureFlagConfig } from './plugin';
+export {
+  DashboardSetup,
+  DashboardStart,
+  DashboardUrlGenerator,
+  DashboardFeatureFlagConfig,
+} from './plugin';
 export {
   DASHBOARD_APP_URL_GENERATOR,
   createDashboardUrlGenerator,
@@ -40,7 +45,6 @@ export {
 export { addEmbeddableToDashboardUrl } from './url_utils/url_helper';
 export { SavedObjectDashboard } from './saved_dashboards';
 export { SavedDashboardPanel } from './types';
-export { AttributeService, ATTRIBUTE_SERVICE_KEY } from './attribute_service';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new DashboardPlugin(initializerContext);

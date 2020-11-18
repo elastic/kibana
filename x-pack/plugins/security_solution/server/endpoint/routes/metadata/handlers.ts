@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { RequestHandlerContext, Logger, RequestHandler } from 'kibana/server';
 import { TypeOf } from '@kbn/config-schema';
 import {
@@ -15,7 +15,7 @@ import {
   MetadataQueryStrategyVersions,
 } from '../../../../common/endpoint/types';
 import { getESQueryHostMetadataByID, kibanaRequestToMetadataListESQuery } from './query_builders';
-import { Agent, AgentStatus } from '../../../../../ingest_manager/common/types/models';
+import { Agent, AgentStatus } from '../../../../../fleet/common/types/models';
 import { EndpointAppContext, HostListQueryResult } from '../../types';
 import { GetMetadataListRequestSchema, GetMetadataRequestSchema } from './index';
 import { findAllUnenrolledAgentIds } from './support/unenroll';
@@ -255,11 +255,11 @@ async function enrichHostMetadata(
   const log = metadataRequestContext.logger;
   try {
     /**
-     * Get agent status by elastic agent id if available or use the host id.
+     * Get agent status by elastic agent id if available or use the endpoint-agent id.
      */
 
     if (!elasticAgentId) {
-      elasticAgentId = hostMetadata.host.id;
+      elasticAgentId = hostMetadata.agent.id;
       log.warn(`Missing elastic agent id, using host id instead ${elasticAgentId}`);
     }
 

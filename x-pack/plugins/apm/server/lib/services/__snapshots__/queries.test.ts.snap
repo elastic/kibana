@@ -144,7 +144,7 @@ Array [
             },
             Object {
               "term": Object {
-                "my.custom.ui.filter": "foo-bar",
+                "service.environment": "test",
               },
             },
           ],
@@ -194,7 +194,7 @@ Array [
             },
             Object {
               "term": Object {
-                "my.custom.ui.filter": "foo-bar",
+                "service.environment": "test",
               },
             },
           ],
@@ -257,7 +257,7 @@ Array [
             },
             Object {
               "term": Object {
-                "my.custom.ui.filter": "foo-bar",
+                "service.environment": "test",
               },
             },
           ],
@@ -334,7 +334,7 @@ Array [
             },
             Object {
               "term": Object {
-                "my.custom.ui.filter": "foo-bar",
+                "service.environment": "test",
               },
             },
             Object {
@@ -366,6 +366,7 @@ Array [
             "environments": Object {
               "terms": Object {
                 "field": "service.environment",
+                "size": 100,
               },
             },
           },
@@ -389,7 +390,7 @@ Array [
             },
             Object {
               "term": Object {
-                "my.custom.ui.filter": "foo-bar",
+                "service.environment": "test",
               },
             },
           ],

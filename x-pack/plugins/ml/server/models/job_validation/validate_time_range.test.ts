@@ -144,6 +144,7 @@ describe('ML - validateTimeRange', () => {
 
   it('invalid time field', () => {
     const mockSearchResponseInvalid = cloneDeep(mockSearchResponse);
+    // @ts-expect-error creating intentionally invalid data
     mockSearchResponseInvalid.fieldCaps = undefined;
     const duration = { start: 0, end: 1 };
     return validateTimeRange(

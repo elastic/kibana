@@ -4,14 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 // eslint-disable-next-line import/no-extraneous-dependencies
-require('@babel/register')({
-  extensions: ['.js'],
-  plugins: [],
-  presets: [
-    '@babel/typescript',
-    ['@babel/preset-env', { targets: { node: 'current' } }],
-  ],
-});
+require('@kbn/optimizer').registerNodeAutoTranspilation();
 
 // eslint-disable-next-line import/no-extraneous-dependencies
 const { run } = require('jest');

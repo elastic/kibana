@@ -73,7 +73,7 @@ async function copySourceAndBabelify() {
           '**/*.{test,test.mocks,mock,mocks}.*',
           '**/*.d.ts',
           '**/node_modules/**',
-          '**/public/**',
+          '**/public/**/*.{js,ts,tsx,json}',
           '**/{__tests__,__mocks__,__snapshots__}/**',
           'plugins/canvas/shareable_runtime/test/**',
         ],

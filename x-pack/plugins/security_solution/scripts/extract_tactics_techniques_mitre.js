@@ -13,9 +13,10 @@ const fetch = require('node-fetch');
 const { camelCase } = require('lodash');
 const { resolve } = require('path');
 
-const OUTPUT_DIRECTORY = resolve('public', 'pages', 'detection_engine', 'mitre');
-const MITRE_ENTREPRISE_ATTACK_URL =
-  'https://raw.githubusercontent.com/mitre/cti/master/enterprise-attack/enterprise-attack.json';
+const OUTPUT_DIRECTORY = resolve('public', 'detections', 'mitre');
+// Revert to https://raw.githubusercontent.com/mitre/cti/master/enterprise-attack/enterprise-attack.json once we support sub-techniques
+const MITRE_ENTERPRISE_ATTACK_URL =
+  'https://raw.githubusercontent.com/mitre/cti/ATT%26CK-v6.3/enterprise-attack/enterprise-attack.json';
 
 const getTacticsOptions = (tactics) =>
   tactics.map((t) =>
@@ -63,7 +64,7 @@ const getIdReference = (references) =>
   );
 
 async function main() {
-  fetch(MITRE_ENTREPRISE_ATTACK_URL)
+  fetch(MITRE_ENTERPRISE_ATTACK_URL)
     .then((res) => res.json())
     .then((json) => {
       const mitreData = json.objects;

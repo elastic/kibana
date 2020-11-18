@@ -18,42 +18,30 @@
  */
 
 /* eslint-disable dot-notation */
-import { mockTelemetryService } from '../mocks';
-
-const mockSubtract = jest.fn().mockImplementation(() => {
-  return {
-    toISOString: jest.fn(),
-  };
-});
-
-const mockClone = jest.fn().mockImplementation(() => {
-  return {
-    clone: mockClone,
-    subtract: mockSubtract,
-    toISOString: jest.fn(),
-  };
-});
+const mockMomentValueOf = jest.fn();
 
 jest.mock('moment', () => {
   return jest.fn().mockImplementation(() => {
     return {
-      clone: mockClone,
-      subtract: mockSubtract,
-      toISOString: jest.fn(),
+      valueOf: mockMomentValueOf,
     };
   });
 });
 
+import { mockTelemetryService } from '../mocks';
+
 describe('TelemetryService', () => {
   describe('fetchTelemetry', () => {
     it('calls expected URL with 20 minutes - now', async () => {
+      const timestamp = Date.now();
+      mockMomentValueOf.mockReturnValueOnce(timestamp);
       const telemetryService = mockTelemetryService();
+
       await telemetryService.fetchTelemetry();
       expect(telemetryService['http'].post).toBeCalledWith('/api/telemetry/v2/clusters/_stats', {
-        body: JSON.stringify({ unencrypted: false, timeRange: {} }),
+        body: JSON.stringify({ unencrypted: false, timestamp }),
       });
-      expect(mockClone).toBeCalled();
-      expect(mockSubtract).toBeCalledWith(20, 'minutes');
+      expect(mockMomentValueOf).toBeCalled();
     });
   });
 
@@ -234,6 +222,62 @@ describe('TelemetryService', () => {
       expect(telemetryService.config.userCanChangeSettings).toBe(true);
       expect(telemetryService.userCanChangeSettings).toBe(true);
       expect(telemetryService.getUserShouldSeeOptInNotice()).toBe(true);
+    });
+  });
+
+  describe('reportOptInStatus', () => {
+    let originalFetch: typeof window['fetch'];
+    let mockFetch: jest.Mock<typeof window['fetch']>;
+
+    beforeAll(() => {
+      originalFetch = window.fetch;
+    });
+
+    // @ts-ignore
+    beforeEach(() => (window.fetch = mockFetch = jest.fn()));
+    // @ts-ignore
+    afterAll(() => (window.fetch = originalFetch));
+
+    it('reports opt-in status to telemetry url', async () => {
+      const telemetryService = mockTelemetryService({
+        config: { userCanChangeSettings: undefined },
+      });
+      const mockPayload = ['mock_hashed_opt_in_status_payload'];
+      const mockUrl = 'mock_telemetry_optin_status_url';
+
+      const mockGetOptInStatusUrl = jest.fn().mockReturnValue(mockUrl);
+      telemetryService.getOptInStatusUrl = mockGetOptInStatusUrl;
+      const result = await telemetryService['reportOptInStatus'](mockPayload);
+      expect(result).toBeUndefined();
+      expect(mockGetOptInStatusUrl).toBeCalledTimes(1);
+      expect(mockFetch).toBeCalledTimes(1);
+
+      expect(mockFetch).toBeCalledWith(mockUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Elastic-Stack-Version': 'mockKibanaVersion',
+        },
+        body: JSON.stringify(mockPayload),
+      });
+    });
+
+    it('swallows errors if fetch fails', async () => {
+      const telemetryService = mockTelemetryService({
+        config: { userCanChangeSettings: undefined },
+      });
+      const mockPayload = ['mock_hashed_opt_in_status_payload'];
+      const mockUrl = 'mock_telemetry_optin_status_url';
+
+      const mockGetOptInStatusUrl = jest.fn().mockReturnValue(mockUrl);
+      mockFetch.mockImplementation(() => {
+        throw Error('Error sending usage');
+      });
+
+      telemetryService.getOptInStatusUrl = mockGetOptInStatusUrl;
+      const result = await telemetryService['reportOptInStatus'](mockPayload);
+      expect(result).toBeUndefined();
+      expect(mockFetch).toHaveBeenCalledTimes(1);
     });
   });
 });

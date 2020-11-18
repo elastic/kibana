@@ -44,11 +44,14 @@ export const PanelContentError = memo(function ({
     <>
       <Breadcrumbs breadcrumbs={crumbs} />
       <EuiSpacer size="l" />
-      <EuiText textAlign="center">{translatedErrorMessage}</EuiText>
+      <EuiText textAlign="center" data-test-subj="resolver:panel:error">
+        {translatedErrorMessage}
+      </EuiText>
       <EuiSpacer size="l" />
+
       <EuiButtonEmpty {...nodesLinkNavProps}>
         {i18n.translate('xpack.securitySolution.endpoint.resolver.panel.error.goBack', {
-          defaultMessage: 'Click here to return to the list of all processes.',
+          defaultMessage: 'View all processes',
         })}
       </EuiButtonEmpty>
     </>

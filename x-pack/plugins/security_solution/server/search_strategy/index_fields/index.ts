@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { from } from 'rxjs';
 import isEmpty from 'lodash/isEmpty';
 import { IndexPatternsFetcher, ISearchStrategy } from '../../../../../../src/plugins/data/server';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
@@ -12,68 +13,73 @@ import {
   IndexFieldsStrategyResponse,
   IndexField,
   IndexFieldsStrategyRequest,
+  BeatFields,
 } from '../../../common/search_strategy/index_fields';
-
-import { fieldsBeat } from '../../utils/beat_schema/fields';
 
 export const securitySolutionIndexFieldsProvider = (): ISearchStrategy<
   IndexFieldsStrategyRequest,
   IndexFieldsStrategyResponse
 > => {
+  // require the fields once we actually need them, rather than ahead of time, and pass
+  // them to createFieldItem to reduce the amount of work done as much as possible
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const beatFields: BeatFields = require('../../utils/beat_schema/fields').fieldsBeat;
+
   return {
-    search: async (context, request) => {
-      const { elasticsearch } = context.core;
-      const indexPatternsFetcher = new IndexPatternsFetcher(
-        elasticsearch.legacy.client.callAsCurrentUser
-      );
-      const dedupeIndices = dedupeIndexName(request.indices);
+    search: (request, options, { esClient }) =>
+      from(
+        new Promise<IndexFieldsStrategyResponse>(async (resolve) => {
+          const indexPatternsFetcher = new IndexPatternsFetcher(esClient.asCurrentUser);
+          const dedupeIndices = dedupeIndexName(request.indices);
 
-      const responsesIndexFields = await Promise.all(
-        dedupeIndices
-          .map((index) =>
-            indexPatternsFetcher.getFieldsForWildcard({
-              pattern: index,
-            })
-          )
-          .map((p) => p.catch((e) => false))
-      );
-      let indexFields: IndexField[] = [];
+          const responsesIndexFields = await Promise.all(
+            dedupeIndices
+              .map((index) =>
+                indexPatternsFetcher.getFieldsForWildcard({
+                  pattern: index,
+                })
+              )
+              .map((p) => p.catch((e) => false))
+          );
+          let indexFields: IndexField[] = [];
 
-      if (!request.onlyCheckIfIndicesExist) {
-        indexFields = await formatIndexFields(
-          responsesIndexFields.filter((rif) => rif !== false) as FieldDescriptor[][],
-          dedupeIndices
-        );
-      }
+          if (!request.onlyCheckIfIndicesExist) {
+            indexFields = await formatIndexFields(
+              beatFields,
+              responsesIndexFields.filter((rif) => rif !== false) as FieldDescriptor[][],
+              dedupeIndices
+            );
+          }
 
-      return Promise.resolve({
-        indexFields,
-        indicesExist: dedupeIndices.filter((index, i) => responsesIndexFields[i] !== false),
-        rawResponse: {
-          timed_out: false,
-          took: -1,
-          _shards: {
-            total: -1,
-            successful: -1,
-            failed: -1,
-            skipped: -1,
-          },
-          hits: {
-            total: -1,
-            max_score: -1,
-            hits: [
-              {
-                _index: '',
-                _type: '',
-                _id: '',
-                _score: -1,
-                _source: null,
+          return resolve({
+            indexFields,
+            indicesExist: dedupeIndices.filter((index, i) => responsesIndexFields[i] !== false),
+            rawResponse: {
+              timed_out: false,
+              took: -1,
+              _shards: {
+                total: -1,
+                successful: -1,
+                failed: -1,
+                skipped: -1,
               },
-            ],
-          },
-        },
-      });
-    },
+              hits: {
+                total: -1,
+                max_score: -1,
+                hits: [
+                  {
+                    _index: '',
+                    _type: '',
+                    _id: '',
+                    _score: -1,
+                    _source: null,
+                  },
+                ],
+              },
+            },
+          });
+        })
+      ),
   };
 };
 
@@ -116,6 +122,7 @@ const missingFields: FieldDescriptor[] = [
  * @param indexesAliasIdx The index within the alias
  */
 export const createFieldItem = (
+  beatFields: BeatFields,
   indexesAlias: string[],
   index: FieldDescriptor,
   indexesAliasIdx: number
@@ -126,7 +133,7 @@ export const createFieldItem = (
     splitIndexName[splitIndexName.length - 1] === 'text'
       ? splitIndexName.slice(0, splitIndexName.length - 1).join('.')
       : index.name;
-  const beatIndex = fieldsBeat[indexName] ?? {};
+  const beatIndex = beatFields[indexName] ?? {};
   if (isEmpty(beatIndex.category)) {
     beatIndex.category = splitIndexName[0];
   }
@@ -151,6 +158,7 @@ export const createFieldItem = (
  * @param indexesAlias The index aliases such as filebeat-*
  */
 export const formatFirstFields = async (
+  beatFields: BeatFields,
   responsesIndexFields: FieldDescriptor[][],
   indexesAlias: string[]
 ): Promise<IndexField[]> => {
@@ -160,11 +168,11 @@ export const formatFirstFields = async (
         responsesIndexFields.reduce(
           (accumulator: IndexField[], indexFields: FieldDescriptor[], indexesAliasIdx: number) => {
             missingFields.forEach((index) => {
-              const item = createFieldItem(indexesAlias, index, indexesAliasIdx);
+              const item = createFieldItem(beatFields, indexesAlias, index, indexesAliasIdx);
               accumulator.push(item);
             });
             indexFields.forEach((index) => {
-              const item = createFieldItem(indexesAlias, index, indexesAliasIdx);
+              const item = createFieldItem(beatFields, indexesAlias, index, indexesAliasIdx);
               accumulator.push(item);
             });
             return accumulator;
@@ -224,10 +232,11 @@ export const formatSecondFields = async (fields: IndexField[]): Promise<IndexFie
  * @param indexesAlias The index alias
  */
 export const formatIndexFields = async (
+  beatFields: BeatFields,
   responsesIndexFields: FieldDescriptor[][],
   indexesAlias: string[]
 ): Promise<IndexField[]> => {
-  const fields = await formatFirstFields(responsesIndexFields, indexesAlias);
+  const fields = await formatFirstFields(beatFields, responsesIndexFields, indexesAlias);
   const secondFields = await formatSecondFields(fields);
   return secondFields;
 };

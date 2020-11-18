@@ -36,6 +36,7 @@ const createTestCases = (overwrite: boolean, spaceId: string) => {
       ...fail409(!overwrite && spaceId === SPACE_2_ID),
       expectedNamespaces,
     },
+    { ...CASES.MULTI_NAMESPACE_ALL_SPACES, ...fail409(!overwrite) },
     {
       ...CASES.MULTI_NAMESPACE_DEFAULT_AND_SPACE_1,
       ...fail409(!overwrite || (spaceId !== DEFAULT_SPACE_ID && spaceId !== SPACE_1_ID)),
@@ -47,6 +48,8 @@ const createTestCases = (overwrite: boolean, spaceId: string) => {
     { ...CASES.NEW_SINGLE_NAMESPACE_OBJ, expectedNamespaces },
     { ...CASES.NEW_MULTI_NAMESPACE_OBJ, expectedNamespaces },
     CASES.NEW_NAMESPACE_AGNOSTIC_OBJ,
+    CASES.NEW_EACH_SPACE_OBJ,
+    CASES.NEW_ALL_SPACES_OBJ,
   ];
 };
 

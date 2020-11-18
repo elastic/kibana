@@ -4,14 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiLink } from '@elastic/eui';
 import React from 'react';
-import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl, shallowWithIntl } from '@kbn/test/jest';
 import { SectionPanel } from './section_panel';
 
 test('it renders without blowing up', () => {
   const wrapper = shallowWithIntl(
-    <SectionPanel collapsible iconType="logoElasticsearch" title="Elasticsearch" description="desc">
+    <SectionPanel iconType="logoElasticsearch" title="Elasticsearch" description="desc">
       <p>child</p>
     </SectionPanel>
   );
@@ -19,9 +18,9 @@ test('it renders without blowing up', () => {
   expect(wrapper).toMatchSnapshot();
 });
 
-test('it renders children by default', () => {
+test('it renders children', () => {
   const wrapper = mountWithIntl(
-    <SectionPanel collapsible iconType="logoElasticsearch" title="Elasticsearch" description="desc">
+    <SectionPanel iconType="logoElasticsearch" title="Elasticsearch" description="desc">
       <p className="child">child 1</p>
       <p className="child">child 2</p>
     </SectionPanel>
@@ -29,20 +28,4 @@ test('it renders children by default', () => {
 
   expect(wrapper.find(SectionPanel)).toHaveLength(1);
   expect(wrapper.find('.child')).toHaveLength(2);
-});
-
-test('it hides children when the "hide" link is clicked', () => {
-  const wrapper = mountWithIntl(
-    <SectionPanel collapsible iconType="logoElasticsearch" title="Elasticsearch" description="desc">
-      <p className="child">child 1</p>
-      <p className="child">child 2</p>
-    </SectionPanel>
-  );
-
-  expect(wrapper.find(SectionPanel)).toHaveLength(1);
-  expect(wrapper.find('.child')).toHaveLength(2);
-
-  wrapper.find(EuiLink).simulate('click');
-
-  expect(wrapper.find('.child')).toHaveLength(0);
 });

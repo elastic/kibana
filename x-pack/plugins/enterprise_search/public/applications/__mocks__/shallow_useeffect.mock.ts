@@ -9,6 +9,10 @@ jest.mock('react', () => ({
   useEffect: jest.fn((fn) => fn()), // Calls on mount/every update - use mount for more complex behavior
 }));
 
+// Helper for calling the returned useEffect unmount handler
+import { useEffect } from 'react';
+export const unmountHandler = () => (useEffect as jest.Mock).mock.calls[0][0]()();
+
 /**
  * Example usage within a component test using shallow():
  *
@@ -18,4 +22,15 @@ jest.mock('react', () => ({
  * import { shallow } from 'enzyme';
  *
  * // ... etc.
+ */
+/**
+ * Example unmount() usage:
+ *
+ * import { unmountHandler } from '../../../__mocks__/shallow_useeffect.mock';
+ *
+ * it('unmounts', () => {
+ *   shallow(SomeComponent);
+ *   unmountHandler();
+ *   // expect something to have been done on unmount (NOTE: the component is not actually unmounted)
+ * });
  */

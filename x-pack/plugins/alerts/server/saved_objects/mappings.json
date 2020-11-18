@@ -83,6 +83,26 @@
             "type": "keyword"
           }
         }
+      },
+      "executionStatus": {
+        "properties": {
+          "status": {
+            "type": "keyword"
+          },
+          "lastExecutionDate": {
+            "type": "date"
+          },
+          "error": {
+            "properties": {
+              "reason": {
+                "type": "keyword"
+              },
+              "message": {
+                "type": "keyword"
+              }
+            }
+          }
+        }
       }
     }
   }

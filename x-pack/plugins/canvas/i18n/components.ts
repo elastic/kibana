@@ -235,6 +235,11 @@ export const ComponentStrings = {
       i18n.translate('xpack.canvas.datasourceDatasourceComponent.changeButtonLabel', {
         defaultMessage: 'Change element data source',
       }),
+    getExpressionArgDescription: () =>
+      i18n.translate('xpack.canvas.datasourceDatasourceComponent.expressionArgDescription', {
+        defaultMessage:
+          'The datasource has an argument controlled by an expression. Use the expression editor to modify the datasource.',
+      }),
     getPreviewButtonLabel: () =>
       i18n.translate('xpack.canvas.datasourceDatasourceComponent.previewButtonLabel', {
         defaultMessage: 'Preview data',
@@ -865,6 +870,10 @@ export const ComponentStrings = {
       i18n.translate('xpack.canvas.textStylePicker.alignRightOption', {
         defaultMessage: 'Align right',
       }),
+    getAlignmentOptionsControlLegend: () =>
+      i18n.translate('xpack.canvas.textStylePicker.alignmentOptionsControl', {
+        defaultMessage: 'Alignment options',
+      }),
     getFontColorLabel: () =>
       i18n.translate('xpack.canvas.textStylePicker.fontColorLabel', {
         defaultMessage: 'Font Color',
@@ -880,6 +889,10 @@ export const ComponentStrings = {
     getStyleUnderlineOption: () =>
       i18n.translate('xpack.canvas.textStylePicker.styleUnderlineOption', {
         defaultMessage: 'Underline',
+      }),
+    getStyleOptionsControlLegend: () =>
+      i18n.translate('xpack.canvas.textStylePicker.styleOptionsControl', {
+        defaultMessage: 'Style options',
       }),
   },
   TimePicker: {
@@ -1056,6 +1069,10 @@ export const ComponentStrings = {
       }),
   },
   VarConfigVarValueField: {
+    getBooleanOptionsLegend: () =>
+      i18n.translate('xpack.canvas.varConfigVarValueField.booleanOptionsLegend', {
+        defaultMessage: 'Boolean value',
+      }),
     getFalseOption: () =>
       i18n.translate('xpack.canvas.varConfigVarValueField.falseOption', {
         defaultMessage: 'False',

@@ -5,3 +5,4 @@
  */
 
 export { SetupGuide } from './setup_guide';
+export { SetupGuideCta } from './setup_guide_cta';

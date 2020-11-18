@@ -3,8 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { chunk } from 'lodash';
 import { Logger } from 'kibana/server';
+import { chunk } from 'lodash';
+import { PromiseReturnType } from '../../../../observability/typings/common';
 import {
   AGENT_NAME,
   SERVICE_ENVIRONMENT,
@@ -12,17 +13,16 @@ import {
 } from '../../../common/elasticsearch_fieldnames';
 import { getServicesProjection } from '../../projections/services';
 import { mergeProjection } from '../../projections/util/merge_projection';
-import { PromiseReturnType } from '../../../typings/common';
-import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { getEnvironmentUiFilterES } from '../helpers/convert_ui_filters/get_environment_ui_filter_es';
-import { transformServiceMapResponses } from './transform_service_map_responses';
-import { getServiceMapFromTraceIds } from './get_service_map_from_trace_ids';
-import { getTraceSampleIds } from './get_trace_sample_ids';
+import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import {
+  DEFAULT_ANOMALIES,
   getServiceAnomalies,
   ServiceAnomaliesResponse,
-  DEFAULT_ANOMALIES,
 } from './get_service_anomalies';
+import { getServiceMapFromTraceIds } from './get_service_map_from_trace_ids';
+import { getTraceSampleIds } from './get_trace_sample_ids';
+import { transformServiceMapResponses } from './transform_service_map_responses';
 
 export interface IEnvOptions {
   setup: Setup & SetupTimeRange;
@@ -82,7 +82,7 @@ async function getServicesData(options: IEnvOptions) {
   const { setup, searchAggregatedTransactions } = options;
 
   const projection = getServicesProjection({
-    setup: { ...setup, uiFiltersES: [] },
+    setup: { ...setup, esFilter: [] },
     searchAggregatedTransactions,
   });
 

@@ -57,6 +57,15 @@ export const findRulesRoute = (router: IRouter) => {
           filter: query.filter,
           fields: query.fields,
         });
+
+        // if any rules attempted to execute but failed before the rule executor is called,
+        // an execution status will be written directly onto the rule via the kibana alerting framework,
+        // which we are filtering on and will write a failure status
+        // for any rules found to be in a failing state into our rule status saved objects
+        const failingRules = rules.data.filter(
+          (rule) => rule.executionStatus != null && rule.executionStatus.status === 'error'
+        );
+
         const ruleStatuses = await Promise.all(
           rules.data.map(async (rule) => {
             const results = await ruleStatusClient.find({
@@ -66,6 +75,13 @@ export const findRulesRoute = (router: IRouter) => {
               search: rule.id,
               searchFields: ['alertId'],
             });
+            const failingRule = failingRules.find((badRule) => badRule.id === rule.id);
+            if (failingRule != null) {
+              if (results.saved_objects.length > 0) {
+                results.saved_objects[0].attributes.status = 'failed';
+                results.saved_objects[0].attributes.lastFailureAt = failingRule.executionStatus.lastExecutionDate.toISOString();
+              }
+            }
             return results;
           })
         );

@@ -35,7 +35,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'common',
   ]);
 
-  describe('visual builder', function describeIndexTests() {
+  // Failing: See https://github.com/elastic/kibana/issues/75127
+  describe.skip('visual builder', function describeIndexTests() {
     this.tags('includeFirefox');
     beforeEach(async () => {
       await security.testUser.setRoles([
@@ -135,11 +136,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visualBuilder.clickPanelOptions('metric');
         const fromTime = 'Oct 22, 2018 @ 00:00:00.000';
         const toTime = 'Oct 28, 2018 @ 23:59:59.999';
+        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
         // Sometimes popovers take some time to appear in Firefox (#71979)
         await retry.tryForTime(20000, async () => {
-          await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
           await PageObjects.visualBuilder.setIndexPatternValue('kibana_sample_data_flights');
-          await PageObjects.common.sleep(3000);
+          await PageObjects.visualBuilder.waitForIndexPatternTimeFieldOptionsLoaded();
           await PageObjects.visualBuilder.selectIndexPatternTimeField('timestamp');
         });
         const newValue = await PageObjects.visualBuilder.getMetricValue();

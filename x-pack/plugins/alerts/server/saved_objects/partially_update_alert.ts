@@ -15,7 +15,9 @@ import {
 
 import { AlertAttributesExcludedFromAAD, AlertAttributesExcludedFromAADType } from './index';
 
-export type PartiallyUpdateableAlertAttributes = Pick<RawAlert, AlertAttributesExcludedFromAADType>;
+export type PartiallyUpdateableAlertAttributes = Partial<
+  Pick<RawAlert, AlertAttributesExcludedFromAADType>
+>;
 
 export interface PartiallyUpdateAlertSavedObjectOptions {
   version?: string;

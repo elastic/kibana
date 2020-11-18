@@ -87,7 +87,7 @@ Object {
           },
           Object {
             "term": Object {
-              "my.custom.ui.filter": "foo-bar",
+              "service.environment": "test",
             },
           },
         ],
@@ -175,7 +175,7 @@ Object {
           },
           Object {
             "term": Object {
-              "my.custom.ui.filter": "foo-bar",
+              "service.environment": "test",
             },
           },
           Object {
@@ -206,7 +206,7 @@ Object {
             "lang": "painless",
             "source": "
     /*
-      When no limit is specified in the container, docker allows the app as much memory / swap memory as it wants. 
+      When no limit is specified in the container, docker allows the app as much memory / swap memory as it wants.
       This number represents the max possible value for the limit field.
     */
     double CGROUP_LIMIT_MAX_VALUE = 9223372036854771712L;
@@ -231,7 +231,7 @@ Object {
             "lang": "painless",
             "source": "
     /*
-      When no limit is specified in the container, docker allows the app as much memory / swap memory as it wants. 
+      When no limit is specified in the container, docker allows the app as much memory / swap memory as it wants.
       This number represents the max possible value for the limit field.
     */
     double CGROUP_LIMIT_MAX_VALUE = 9223372036854771712L;
@@ -258,7 +258,7 @@ Object {
                 "lang": "painless",
                 "source": "
     /*
-      When no limit is specified in the container, docker allows the app as much memory / swap memory as it wants. 
+      When no limit is specified in the container, docker allows the app as much memory / swap memory as it wants.
       This number represents the max possible value for the limit field.
     */
     double CGROUP_LIMIT_MAX_VALUE = 9223372036854771712L;
@@ -283,7 +283,7 @@ Object {
                 "lang": "painless",
                 "source": "
     /*
-      When no limit is specified in the container, docker allows the app as much memory / swap memory as it wants. 
+      When no limit is specified in the container, docker allows the app as much memory / swap memory as it wants.
       This number represents the max possible value for the limit field.
     */
     double CGROUP_LIMIT_MAX_VALUE = 9223372036854771712L;
@@ -338,7 +338,7 @@ Object {
           },
           Object {
             "term": Object {
-              "my.custom.ui.filter": "foo-bar",
+              "service.environment": "test",
             },
           },
           Object {
@@ -431,7 +431,7 @@ Object {
           },
           Object {
             "term": Object {
-              "my.custom.ui.filter": "foo-bar",
+              "service.environment": "test",
             },
           },
           Object {
@@ -514,7 +514,7 @@ Object {
           },
           Object {
             "term": Object {
-              "my.custom.ui.filter": "foo-bar",
+              "service.environment": "test",
             },
           },
           Object {
@@ -623,7 +623,7 @@ Object {
           },
           Object {
             "term": Object {
-              "my.custom.ui.filter": "foo-bar",
+              "service.environment": "test",
             },
           },
         ],
@@ -717,7 +717,7 @@ Object {
           },
           Object {
             "term": Object {
-              "my.custom.ui.filter": "foo-bar",
+              "service.environment": "test",
             },
           },
           Object {
@@ -748,7 +748,7 @@ Object {
             "lang": "painless",
             "source": "
     /*
-      When no limit is specified in the container, docker allows the app as much memory / swap memory as it wants. 
+      When no limit is specified in the container, docker allows the app as much memory / swap memory as it wants.
       This number represents the max possible value for the limit field.
     */
     double CGROUP_LIMIT_MAX_VALUE = 9223372036854771712L;
@@ -773,7 +773,7 @@ Object {
             "lang": "painless",
             "source": "
     /*
-      When no limit is specified in the container, docker allows the app as much memory / swap memory as it wants. 
+      When no limit is specified in the container, docker allows the app as much memory / swap memory as it wants.
       This number represents the max possible value for the limit field.
     */
     double CGROUP_LIMIT_MAX_VALUE = 9223372036854771712L;
@@ -800,7 +800,7 @@ Object {
                 "lang": "painless",
                 "source": "
     /*
-      When no limit is specified in the container, docker allows the app as much memory / swap memory as it wants. 
+      When no limit is specified in the container, docker allows the app as much memory / swap memory as it wants.
       This number represents the max possible value for the limit field.
     */
     double CGROUP_LIMIT_MAX_VALUE = 9223372036854771712L;
@@ -825,7 +825,7 @@ Object {
                 "lang": "painless",
                 "source": "
     /*
-      When no limit is specified in the container, docker allows the app as much memory / swap memory as it wants. 
+      When no limit is specified in the container, docker allows the app as much memory / swap memory as it wants.
       This number represents the max possible value for the limit field.
     */
     double CGROUP_LIMIT_MAX_VALUE = 9223372036854771712L;
@@ -886,7 +886,7 @@ Object {
           },
           Object {
             "term": Object {
-              "my.custom.ui.filter": "foo-bar",
+              "service.environment": "test",
             },
           },
           Object {
@@ -985,7 +985,7 @@ Object {
           },
           Object {
             "term": Object {
-              "my.custom.ui.filter": "foo-bar",
+              "service.environment": "test",
             },
           },
           Object {
@@ -1074,7 +1074,7 @@ Object {
           },
           Object {
             "term": Object {
-              "my.custom.ui.filter": "foo-bar",
+              "service.environment": "test",
             },
           },
           Object {
@@ -1172,7 +1172,7 @@ Object {
           },
           Object {
             "term": Object {
-              "my.custom.ui.filter": "foo-bar",
+              "service.environment": "test",
             },
           },
         ],
@@ -1255,7 +1255,7 @@ Object {
           },
           Object {
             "term": Object {
-              "my.custom.ui.filter": "foo-bar",
+              "service.environment": "test",
             },
           },
           Object {
@@ -1286,7 +1286,7 @@ Object {
             "lang": "painless",
             "source": "
     /*
-      When no limit is specified in the container, docker allows the app as much memory / swap memory as it wants. 
+      When no limit is specified in the container, docker allows the app as much memory / swap memory as it wants.
       This number represents the max possible value for the limit field.
     */
     double CGROUP_LIMIT_MAX_VALUE = 9223372036854771712L;
@@ -1311,7 +1311,7 @@ Object {
             "lang": "painless",
             "source": "
     /*
-      When no limit is specified in the container, docker allows the app as much memory / swap memory as it wants. 
+      When no limit is specified in the container, docker allows the app as much memory / swap memory as it wants.
       This number represents the max possible value for the limit field.
     */
     double CGROUP_LIMIT_MAX_VALUE = 9223372036854771712L;
@@ -1338,7 +1338,7 @@ Object {
                 "lang": "painless",
                 "source": "
     /*
-      When no limit is specified in the container, docker allows the app as much memory / swap memory as it wants. 
+      When no limit is specified in the container, docker allows the app as much memory / swap memory as it wants.
       This number represents the max possible value for the limit field.
     */
     double CGROUP_LIMIT_MAX_VALUE = 9223372036854771712L;
@@ -1363,7 +1363,7 @@ Object {
                 "lang": "painless",
                 "source": "
     /*
-      When no limit is specified in the container, docker allows the app as much memory / swap memory as it wants. 
+      When no limit is specified in the container, docker allows the app as much memory / swap memory as it wants.
       This number represents the max possible value for the limit field.
     */
     double CGROUP_LIMIT_MAX_VALUE = 9223372036854771712L;
@@ -1413,7 +1413,7 @@ Object {
           },
           Object {
             "term": Object {
-              "my.custom.ui.filter": "foo-bar",
+              "service.environment": "test",
             },
           },
           Object {
@@ -1501,7 +1501,7 @@ Object {
           },
           Object {
             "term": Object {
-              "my.custom.ui.filter": "foo-bar",
+              "service.environment": "test",
             },
           },
           Object {
@@ -1579,7 +1579,7 @@ Object {
           },
           Object {
             "term": Object {
-              "my.custom.ui.filter": "foo-bar",
+              "service.environment": "test",
             },
           },
           Object {

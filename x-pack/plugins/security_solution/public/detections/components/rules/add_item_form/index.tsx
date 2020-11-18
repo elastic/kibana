@@ -147,10 +147,7 @@ export const AddItem = ({
             ...(index === values.length - 1
               ? { inputRef: handleLastInputRef.bind(null, index) }
               : {}),
-            ...((inputsRef.current[index] != null && inputsRef.current[index].value !== item) ||
-            inputsRef.current[index] == null
-              ? { value: item }
-              : {}),
+            value: item,
             isInvalid: validate == null ? false : showValidation && validate(item),
           };
           return (

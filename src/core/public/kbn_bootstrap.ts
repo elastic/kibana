@@ -28,7 +28,7 @@ export async function __kbnBootstrap__() {
   );
 
   let i18nError: Error | undefined;
-  const apmSystem = new ApmSystem(injectedMetadata.vars.apmConfig);
+  const apmSystem = new ApmSystem(injectedMetadata.vars.apmConfig, injectedMetadata.basePath);
 
   await Promise.all([
     // eslint-disable-next-line no-console

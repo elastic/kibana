@@ -15,6 +15,7 @@ import { get, each, find, sortBy, map, reduce } from 'lodash';
 
 import { buildConfig } from './explorer_chart_config_builder';
 import { chartLimits, getChartType } from '../../util/chart_utils';
+import { getTimefilter } from '../../util/dependency_cache';
 
 import { getEntityFieldList } from '../../../../common/util/anomaly_utils';
 import {
@@ -45,13 +46,11 @@ const ML_TIME_FIELD_NAME = 'timestamp';
 const USE_OVERALL_CHART_LIMITS = false;
 const MAX_CHARTS_PER_ROW = 4;
 
-// callback(getDefaultChartsData());
-
 export const anomalyDataChange = function (
   chartsContainerWidth,
   anomalyRecords,
-  earliestMs,
-  latestMs,
+  selectedEarliestMs,
+  selectedLatestMs,
   severity = 0
 ) {
   const data = getDefaultChartsData();
@@ -83,8 +82,8 @@ export const anomalyDataChange = function (
   const chartWidth = Math.floor(chartsContainerWidth / chartsPerRow);
   const { chartRange, tooManyBuckets } = calculateChartRange(
     seriesConfigs,
-    earliestMs,
-    latestMs,
+    selectedEarliestMs,
+    selectedLatestMs,
     chartWidth,
     recordsToPlot,
     data.timeFieldName
@@ -124,7 +123,8 @@ export const anomalyDataChange = function (
           config.timeField,
           range.min,
           range.max,
-          bucketSpanSeconds * 1000
+          bucketSpanSeconds * 1000,
+          config.datafeedConfig
         )
         .toPromise();
     } else {
@@ -408,8 +408,8 @@ export const anomalyDataChange = function (
         chartData: processedData[i],
         plotEarliest: chartRange.min,
         plotLatest: chartRange.max,
-        selectedEarliest: earliestMs,
-        selectedLatest: latestMs,
+        selectedEarliest: selectedEarliestMs,
+        selectedLatest: selectedLatestMs,
         chartLimits: USE_OVERALL_CHART_LIMITS ? overallChartLimits : chartLimits(processedData[i]),
       }));
       explorerService.setCharts({ ...data });
@@ -561,8 +561,8 @@ function processRecordsForDisplay(anomalyRecords) {
 
 function calculateChartRange(
   seriesConfigs,
-  earliestMs,
-  latestMs,
+  selectedEarliestMs,
+  selectedLatestMs,
   chartWidth,
   recordsToPlot,
   timeFieldName
@@ -570,10 +570,15 @@ function calculateChartRange(
   let tooManyBuckets = false;
   // Calculate the time range for the charts.
   // Fit in as many points in the available container width plotted at the job bucket span.
-  const midpointMs = Math.ceil((earliestMs + latestMs) / 2);
+  // Look for the chart with the shortest bucket span as this determines
+  // the length of the time range that can be plotted.
+  const midpointMs = Math.ceil((selectedEarliestMs + selectedLatestMs) / 2);
+  const minBucketSpanMs = Math.min.apply(null, map(seriesConfigs, 'bucketSpanSeconds')) * 1000;
   const maxBucketSpanMs = Math.max.apply(null, map(seriesConfigs, 'bucketSpanSeconds')) * 1000;
 
-  const pointsToPlotFullSelection = Math.ceil((latestMs - earliestMs) / maxBucketSpanMs);
+  const pointsToPlotFullSelection = Math.ceil(
+    (selectedLatestMs - selectedEarliestMs) / minBucketSpanMs
+  );
 
   // Optimally space points 5px apart.
   const optimumPointSpacing = 5;
@@ -583,15 +588,18 @@ function calculateChartRange(
   // at optimal point spacing.
   const plotPoints = Math.max(optimumNumPoints, pointsToPlotFullSelection);
   const halfPoints = Math.ceil(plotPoints / 2);
+  const timefilter = getTimefilter();
+  const bounds = timefilter.getActiveBounds();
+  const boundsMin = bounds.min.valueOf();
+
   let chartRange = {
-    min: midpointMs - halfPoints * maxBucketSpanMs,
-    max: midpointMs + halfPoints * maxBucketSpanMs,
+    min: Math.max(midpointMs - halfPoints * minBucketSpanMs, boundsMin),
+    max: Math.min(midpointMs + halfPoints * minBucketSpanMs, bounds.max.valueOf()),
   };
 
   if (plotPoints > CHART_MAX_POINTS) {
-    tooManyBuckets = true;
     // For each series being plotted, display the record with the highest score if possible.
-    const maxTimeSpan = maxBucketSpanMs * CHART_MAX_POINTS;
+    const maxTimeSpan = minBucketSpanMs * CHART_MAX_POINTS;
     let minMs = recordsToPlot[0][timeFieldName];
     let maxMs = recordsToPlot[0][timeFieldName];
 
@@ -614,12 +622,31 @@ function calculateChartRange(
     });
 
     if (maxMs - minMs < maxTimeSpan) {
-      // Expand out to cover as much as the requested time span as possible.
-      minMs = Math.max(earliestMs, minMs - maxTimeSpan);
-      maxMs = Math.min(latestMs, maxMs + maxTimeSpan);
+      // Expand out before and after the span with the highest scoring anomalies,
+      // covering as much as the requested time span as possible.
+      // Work out if the high scoring region is nearer the start or end of the selected time span.
+      const diff = maxTimeSpan - (maxMs - minMs);
+      if (minMs - 0.5 * diff <= selectedEarliestMs) {
+        minMs = Math.max(selectedEarliestMs, minMs - 0.5 * diff);
+        maxMs = minMs + maxTimeSpan;
+      } else {
+        maxMs = Math.min(selectedLatestMs, maxMs + 0.5 * diff);
+        minMs = maxMs - maxTimeSpan;
+      }
     }
 
     chartRange = { min: minMs, max: maxMs };
+  }
+
+  // Elasticsearch aggregation returns points at start of bucket,
+  // so align the min to the length of the longest bucket.
+  chartRange.min = Math.floor(chartRange.min / maxBucketSpanMs) * maxBucketSpanMs;
+  if (chartRange.min < boundsMin) {
+    chartRange.min = chartRange.min + maxBucketSpanMs;
+  }
+
+  if (chartRange.min > selectedEarliestMs || chartRange.max < selectedLatestMs) {
+    tooManyBuckets = true;
   }
 
   return {

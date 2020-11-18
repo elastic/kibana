@@ -138,4 +138,33 @@ describe('getDescriptor', () => {
       },
     });
   });
+
+  it('serializes RecordWithKnownProps', () => {
+    const usageInterface = usageInterfaces.get('RecordWithKnownProps')!;
+    const descriptor = getDescriptor(usageInterface, tsProgram);
+    expect(descriptor).toEqual({
+      prop1: { kind: ts.SyntaxKind.NumberKeyword, type: 'NumberKeyword' },
+      prop2: { kind: ts.SyntaxKind.NumberKeyword, type: 'NumberKeyword' },
+    });
+  });
+
+  it('serializes RecordWithKnownAllProps', () => {
+    const usageInterface = usageInterfaces.get('RecordWithKnownAllProps')!;
+    const descriptor = getDescriptor(usageInterface, tsProgram);
+    expect(descriptor).toEqual({
+      prop1: { kind: ts.SyntaxKind.NumberKeyword, type: 'NumberKeyword' },
+      prop2: { kind: ts.SyntaxKind.NumberKeyword, type: 'NumberKeyword' },
+      prop3: { kind: ts.SyntaxKind.NumberKeyword, type: 'NumberKeyword' },
+      prop4: { kind: ts.SyntaxKind.NumberKeyword, type: 'NumberKeyword' },
+    });
+  });
+
+  it('serializes IndexedAccessType', () => {
+    const usageInterface = usageInterfaces.get('IndexedAccessType')!;
+    const descriptor = getDescriptor(usageInterface, tsProgram);
+    expect(descriptor).toEqual({
+      prop1: { kind: ts.SyntaxKind.StringKeyword, type: 'StringKeyword' },
+      prop2: { kind: ts.SyntaxKind.StringKeyword, type: 'StringKeyword' },
+    });
+  });
 });

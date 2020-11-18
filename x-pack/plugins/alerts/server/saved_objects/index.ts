@@ -16,15 +16,19 @@ export const AlertAttributesExcludedFromAAD = [
   'muteAll',
   'mutedInstanceIds',
   'updatedBy',
+  'executionStatus',
 ];
 
 // useful for Pick<RawAlert, AlertAttributesExcludedFromAADType> which is a
 // type which is a subset of RawAlert with just attributes excluded from AAD
+
+// useful for Pick<RawAlert, AlertAttributesExcludedFromAADType>
 export type AlertAttributesExcludedFromAADType =
   | 'scheduledTaskId'
   | 'muteAll'
   | 'mutedInstanceIds'
-  | 'updatedBy';
+  | 'updatedBy'
+  | 'executionStatus';
 
 export function setupSavedObjects(
   savedObjects: SavedObjectsServiceSetup,
@@ -38,15 +42,32 @@ export function setupSavedObjects(
     mappings: mappings.alert,
   });
 
+  savedObjects.registerType({
+    name: 'api_key_pending_invalidation',
+    hidden: true,
+    namespaceType: 'agnostic',
+    mappings: {
+      properties: {
+        apiKeyId: {
+          type: 'keyword',
+        },
+        createdAt: {
+          type: 'date',
+        },
+      },
+    },
+  });
+
   // Encrypted attributes
   encryptedSavedObjects.registerType({
     type: 'alert',
     attributesToEncrypt: new Set(['apiKey']),
-    attributesToExcludeFromAAD: new Set([
-      'scheduledTaskId',
-      'muteAll',
-      'mutedInstanceIds',
-      'updatedBy',
-    ]),
+    attributesToExcludeFromAAD: new Set(AlertAttributesExcludedFromAAD),
+  });
+
+  // Encrypted attributes
+  encryptedSavedObjects.registerType({
+    type: 'api_key_pending_invalidation',
+    attributesToEncrypt: new Set(['apiKeyId']),
   });
 }

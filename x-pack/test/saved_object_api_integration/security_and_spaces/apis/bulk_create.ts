@@ -43,6 +43,7 @@ const createTestCases = (overwrite: boolean, spaceId: string) => {
       ...fail409(!overwrite && spaceId === SPACE_2_ID),
       expectedNamespaces,
     },
+    { ...CASES.MULTI_NAMESPACE_ALL_SPACES, ...fail409(!overwrite) },
     {
       ...CASES.MULTI_NAMESPACE_DEFAULT_AND_SPACE_1,
       ...fail409(!overwrite || (spaceId !== DEFAULT_SPACE_ID && spaceId !== SPACE_1_ID)),
@@ -63,9 +64,10 @@ const createTestCases = (overwrite: boolean, spaceId: string) => {
     { ...CASES.NEW_MULTI_NAMESPACE_OBJ, expectedNamespaces },
     CASES.NEW_NAMESPACE_AGNOSTIC_OBJ,
   ];
+  const crossNamespace = [CASES.NEW_EACH_SPACE_OBJ, CASES.NEW_ALL_SPACES_OBJ];
   const hiddenType = [{ ...CASES.HIDDEN, ...fail400() }];
   const allTypes = normalTypes.concat(hiddenType);
-  return { normalTypes, hiddenType, allTypes };
+  return { normalTypes, crossNamespace, hiddenType, allTypes };
 };
 
 export default function ({ getService }: FtrProviderContext) {
@@ -73,28 +75,43 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const es = getService('legacyEs');
 
-  const { addTests, createTestDefinitions, expectForbidden } = bulkCreateTestSuiteFactory(
-    es,
-    esArchiver,
-    supertest
-  );
+  const {
+    addTests,
+    createTestDefinitions,
+    expectSavedObjectForbidden,
+  } = bulkCreateTestSuiteFactory(es, esArchiver, supertest);
   const createTests = (overwrite: boolean, spaceId: string, user: TestUser) => {
-    const { normalTypes, hiddenType, allTypes } = createTestCases(overwrite, spaceId);
+    const { normalTypes, crossNamespace, hiddenType, allTypes } = createTestCases(
+      overwrite,
+      spaceId
+    );
     // use singleRequest to reduce execution time and/or test combined cases
+    const authorizedCommon = [
+      createTestDefinitions(normalTypes, false, overwrite, {
+        spaceId,
+        user,
+        singleRequest: true,
+      }),
+      createTestDefinitions(hiddenType, true, overwrite, { spaceId, user }),
+      createTestDefinitions(allTypes, true, overwrite, {
+        spaceId,
+        user,
+        singleRequest: true,
+        responseBodyOverride: expectSavedObjectForbidden(['hiddentype']),
+      }),
+    ].flat();
     return {
       unauthorized: createTestDefinitions(allTypes, true, overwrite, { spaceId, user }),
-      authorized: [
-        createTestDefinitions(normalTypes, false, overwrite, {
+      authorizedAtSpace: [
+        authorizedCommon,
+        createTestDefinitions(crossNamespace, true, overwrite, { spaceId, user }),
+      ].flat(),
+      authorizedEverywhere: [
+        authorizedCommon,
+        createTestDefinitions(crossNamespace, false, overwrite, {
           spaceId,
           user,
           singleRequest: true,
-        }),
-        createTestDefinitions(hiddenType, true, overwrite, { spaceId, user }),
-        createTestDefinitions(allTypes, true, overwrite, {
-          spaceId,
-          user,
-          singleRequest: true,
-          responseBodyOverride: expectForbidden(['hiddentype']),
         }),
       ].flat(),
       superuser: createTestDefinitions(allTypes, false, overwrite, {
@@ -124,10 +141,15 @@ export default function ({ getService }: FtrProviderContext) {
           const { unauthorized } = createTests(overwrite!, spaceId, user);
           _addTests(user, unauthorized);
         });
-        [users.dualAll, users.allGlobally, users.allAtSpace].forEach((user) => {
-          const { authorized } = createTests(overwrite!, spaceId, user);
-          _addTests(user, authorized);
+
+        const { authorizedAtSpace } = createTests(overwrite!, spaceId, users.allAtSpace);
+        _addTests(users.allAtSpace, authorizedAtSpace);
+
+        [users.dualAll, users.allGlobally].forEach((user) => {
+          const { authorizedEverywhere } = createTests(overwrite!, spaceId, user);
+          _addTests(user, authorizedEverywhere);
         });
+
         const { superuser } = createTests(overwrite!, spaceId, users.superuser);
         _addTests(users.superuser, superuser);
       }

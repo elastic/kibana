@@ -18,29 +18,31 @@ import {
   EuiListGroupItem,
 } from '@elastic/eui';
 
-import { CommonAlertStatus, CommonAlertState } from '../../common/types';
-import { AlertMessage } from '../../server/alerts/types';
+import { CommonAlertStatus, CommonAlertState, AlertMessage } from '../../common/types/alerts';
 import { Legacy } from '../legacy_shims';
 import { replaceTokens } from './lib/replace_tokens';
 import { AlertsContextProvider } from '../../../triggers_actions_ui/public';
 import { AlertEdit } from '../../../triggers_actions_ui/public';
 import { isInSetupMode, hideBottomBar, showBottomBar } from '../lib/setup_mode';
 import { BASE_ALERT_API_PATH } from '../../../alerts/common';
+import { SetupModeContext } from '../components/setup_mode/setup_mode_context';
 
 interface Props {
   alert: CommonAlertStatus;
   alertState?: CommonAlertState;
+  nextStepsFilter: (nextStep: AlertMessage) => boolean;
 }
 export const AlertPanel: React.FC<Props> = (props: Props) => {
   const {
     alert: { alert },
     alertState,
+    nextStepsFilter = () => true,
   } = props;
   const [showFlyout, setShowFlyout] = React.useState(false);
   const [isEnabled, setIsEnabled] = React.useState(alert.rawAlert.enabled);
   const [isMuted, setIsMuted] = React.useState(alert.rawAlert.muteAll);
   const [isSaving, setIsSaving] = React.useState(false);
-  const inSetupMode = isInSetupMode();
+  const inSetupMode = isInSetupMode(React.useContext(SetupModeContext));
 
   if (!alert.rawAlert) {
     return null;
@@ -198,9 +200,11 @@ export const AlertPanel: React.FC<Props> = (props: Props) => {
   const nextStepsUi =
     alertState.state.ui.message.nextSteps && alertState.state.ui.message.nextSteps.length ? (
       <EuiListGroup>
-        {alertState.state.ui.message.nextSteps.map((step: AlertMessage, index: number) => (
-          <EuiListGroupItem size="s" key={index} label={replaceTokens(step)} />
-        ))}
+        {alertState.state.ui.message.nextSteps
+          .filter(nextStepsFilter)
+          .map((step: AlertMessage, index: number) => (
+            <EuiListGroupItem size="s" key={index} label={replaceTokens(step)} />
+          ))}
       </EuiListGroup>
     ) : null;
 

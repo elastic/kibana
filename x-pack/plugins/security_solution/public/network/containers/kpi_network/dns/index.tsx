@@ -20,10 +20,10 @@ import { ESTermQuery } from '../../../../../common/typed_json';
 
 import * as i18n from './translations';
 import {
-  AbortError,
   isCompleteResponse,
   isErrorResponse,
 } from '../../../../../../../../src/plugins/data/common';
+import { AbortError } from '../../../../../../../../src/plugins/kibana_utils/common';
 import { getInspectResponse } from '../../../../helpers';
 import { InspectResponse } from '../../../../types';
 
@@ -56,17 +56,23 @@ export const useNetworkKpiDns = ({
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
   const [loading, setLoading] = useState(false);
-  const [networkKpiDnsRequest, setNetworkKpiDnsRequest] = useState<NetworkKpiDnsRequestOptions>({
-    defaultIndex: indexNames,
-    factoryQueryType: NetworkKpiQueries.dns,
-    filterQuery: createFilter(filterQuery),
-    id: ID,
-    timerange: {
-      interval: '12h',
-      from: startDate,
-      to: endDate,
-    },
-  });
+  const [
+    networkKpiDnsRequest,
+    setNetworkKpiDnsRequest,
+  ] = useState<NetworkKpiDnsRequestOptions | null>(
+    !skip
+      ? {
+          defaultIndex: indexNames,
+          factoryQueryType: NetworkKpiQueries.dns,
+          filterQuery: createFilter(filterQuery),
+          timerange: {
+            interval: '12h',
+            from: startDate,
+            to: endDate,
+          },
+        }
+      : null
+  );
 
   const [networkKpiDnsResponse, setNetworkKpiDnsResponse] = useState<NetworkKpiDnsArgs>({
     dnsQueries: 0,
@@ -80,7 +86,11 @@ export const useNetworkKpiDns = ({
   });
 
   const networkKpiDnsSearch = useCallback(
-    (request: NetworkKpiDnsRequestOptions) => {
+    (request: NetworkKpiDnsRequestOptions | null) => {
+      if (request == null) {
+        return;
+      }
+
       let didCancel = false;
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
@@ -137,8 +147,9 @@ export const useNetworkKpiDns = ({
   useEffect(() => {
     setNetworkKpiDnsRequest((prevRequest) => {
       const myRequest = {
-        ...prevRequest,
+        ...(prevRequest ?? {}),
         defaultIndex: indexNames,
+        factoryQueryType: NetworkKpiQueries.dns,
         filterQuery: createFilter(filterQuery),
         timerange: {
           interval: '12h',

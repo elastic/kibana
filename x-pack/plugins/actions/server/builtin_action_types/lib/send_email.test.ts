@@ -64,7 +64,7 @@ describe('send_email module', () => {
   });
 
   test('handles unauthenticated email using not secure host/port', async () => {
-    const sendEmailOptions = getSendEmailOptions(
+    const sendEmailOptions = getSendEmailOptionsNoAuth(
       {
         transport: {
           host: 'example.com',
@@ -76,12 +76,7 @@ describe('send_email module', () => {
         proxyRejectUnauthorizedCertificates: false,
       }
     );
-    // @ts-expect-error
-    delete sendEmailOptions.transport.service;
-    // @ts-expect-error
-    delete sendEmailOptions.transport.user;
-    // @ts-expect-error
-    delete sendEmailOptions.transport.password;
+
     const result = await sendEmail(mockLogger, sendEmailOptions);
     expect(result).toBe(sendMailMockResult);
     expect(createTransportMock.mock.calls[0]).toMatchInlineSnapshot(`
@@ -248,5 +243,31 @@ function getSendEmailOptions(
       password: 'changeme',
     },
     proxySettings,
+    hasAuth: true,
+  };
+}
+
+function getSendEmailOptionsNoAuth(
+  { content = {}, routing = {}, transport = {} } = {},
+  proxySettings?: ProxySettings
+) {
+  return {
+    content: {
+      ...content,
+      message: 'a message',
+      subject: 'a subject',
+    },
+    routing: {
+      ...routing,
+      from: 'fred@example.com',
+      to: ['jim@example.com'],
+      cc: ['bob@example.com', 'robert@example.com'],
+      bcc: [],
+    },
+    transport: {
+      ...transport,
+    },
+    proxySettings,
+    hasAuth: false,
   };
 }

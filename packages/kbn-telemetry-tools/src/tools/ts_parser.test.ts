@@ -33,7 +33,7 @@ export function loadFixtureProgram(fixtureName: string) {
     'src',
     'fixtures',
     'telemetry_collectors',
-    `${fixtureName}.ts`
+    `${fixtureName}`
   );
   const tsConfig = ts.findConfigFile('./', ts.sys.fileExists, 'tsconfig.json');
   if (!tsConfig) {
@@ -52,49 +52,56 @@ describe('parseUsageCollection', () => {
   it.todo('throws when a function is returned from fetch');
   it.todo('throws when an object is not returned from fetch');
 
+  it('throws when `makeUsageCollector` argument is a function call', () => {
+    const { program, sourceFile } = loadFixtureProgram(
+      'externally_defined_usage_collector/index.ts'
+    );
+    expect(() => [...parseUsageCollection(sourceFile, program)]).toThrowErrorMatchingSnapshot();
+  });
+
   it('throws when mapping fields is not defined', () => {
-    const { program, sourceFile } = loadFixtureProgram('unmapped_collector');
+    const { program, sourceFile } = loadFixtureProgram('unmapped_collector.ts');
     expect(() => [...parseUsageCollection(sourceFile, program)]).toThrowErrorMatchingSnapshot();
   });
 
   it('parses root level defined collector', () => {
-    const { program, sourceFile } = loadFixtureProgram('working_collector');
+    const { program, sourceFile } = loadFixtureProgram('working_collector.ts');
     const result = [...parseUsageCollection(sourceFile, program)];
     expect(result).toEqual([parsedWorkingCollector]);
   });
 
   it('parses collector with schema defined as union of spreads', () => {
-    const { program, sourceFile } = loadFixtureProgram('schema_defined_with_spreads_collector');
+    const { program, sourceFile } = loadFixtureProgram('schema_defined_with_spreads_collector.ts');
     const result = [...parseUsageCollection(sourceFile, program)];
     expect(result).toEqual([parsedSchemaDefinedWithSpreadsCollector]);
   });
 
   it('parses nested collectors', () => {
-    const { program, sourceFile } = loadFixtureProgram('nested_collector');
+    const { program, sourceFile } = loadFixtureProgram('nested_collector.ts');
     const result = [...parseUsageCollection(sourceFile, program)];
     expect(result).toEqual([parsedNestedCollector]);
   });
 
   it('parses imported schema property', () => {
-    const { program, sourceFile } = loadFixtureProgram('imported_schema');
+    const { program, sourceFile } = loadFixtureProgram('imported_schema.ts');
     const result = [...parseUsageCollection(sourceFile, program)];
     expect(result).toEqual(parsedImportedSchemaCollector);
   });
 
   it('parses externally defined collectors', () => {
-    const { program, sourceFile } = loadFixtureProgram('externally_defined_collector');
+    const { program, sourceFile } = loadFixtureProgram('externally_defined_collector.ts');
     const result = [...parseUsageCollection(sourceFile, program)];
     expect(result).toEqual(parsedExternallyDefinedCollector);
   });
 
   it('parses imported Usage interface', () => {
-    const { program, sourceFile } = loadFixtureProgram('imported_usage_interface');
+    const { program, sourceFile } = loadFixtureProgram('imported_usage_interface.ts');
     const result = [...parseUsageCollection(sourceFile, program)];
     expect(result).toEqual(parsedImportedUsageInterface);
   });
 
   it('skips files that do not define a collector', () => {
-    const { program, sourceFile } = loadFixtureProgram('file_with_no_collector');
+    const { program, sourceFile } = loadFixtureProgram('file_with_no_collector.ts');
     const result = [...parseUsageCollection(sourceFile, program)];
     expect(result).toEqual([]);
   });

@@ -23,11 +23,8 @@ import {
   NetworkHttpStrategyResponse,
   SortField,
 } from '../../../../common/search_strategy';
-import {
-  AbortError,
-  isCompleteResponse,
-  isErrorResponse,
-} from '../../../../../../../src/plugins/data/common';
+import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/plugins/data/common';
+import { AbortError } from '../../../../../../../src/plugins/kibana_utils/common';
 import * as i18n from './translations';
 import { InspectResponse } from '../../../types';
 import { getInspectResponse } from '../../../helpers';
@@ -76,23 +73,31 @@ export const useNetworkHttp = ({
   const abortCtrl = useRef(new AbortController());
   const [loading, setLoading] = useState(false);
 
-  const [networkHttpRequest, setHostRequest] = useState<NetworkHttpRequestOptions>({
-    defaultIndex: indexNames,
-    factoryQueryType: NetworkQueries.http,
-    filterQuery: createFilter(filterQuery),
-    ip,
-    pagination: generateTablePaginationOptions(activePage, limit),
-    sort: sort as SortField,
-    timerange: {
-      interval: '12h',
-      from: startDate ? startDate : '',
-      to: endDate ? endDate : new Date(Date.now()).toISOString(),
-    },
-  });
+  const [networkHttpRequest, setHostRequest] = useState<NetworkHttpRequestOptions | null>(
+    !skip
+      ? {
+          defaultIndex: indexNames,
+          factoryQueryType: NetworkQueries.http,
+          filterQuery: createFilter(filterQuery),
+          ip,
+          pagination: generateTablePaginationOptions(activePage, limit),
+          sort: sort as SortField,
+          timerange: {
+            interval: '12h',
+            from: startDate ? startDate : '',
+            to: endDate ? endDate : new Date(Date.now()).toISOString(),
+          },
+        }
+      : null
+  );
 
   const wrappedLoadMore = useCallback(
     (newActivePage: number) => {
       setHostRequest((prevRequest) => {
+        if (!prevRequest) {
+          return prevRequest;
+        }
+
         return {
           ...prevRequest,
           pagination: generateTablePaginationOptions(newActivePage, limit),
@@ -121,7 +126,11 @@ export const useNetworkHttp = ({
   });
 
   const networkHttpSearch = useCallback(
-    (request: NetworkHttpRequestOptions) => {
+    (request: NetworkHttpRequestOptions | null) => {
+      if (request == null) {
+        return;
+      }
+
       let didCancel = false;
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
@@ -180,9 +189,11 @@ export const useNetworkHttp = ({
   useEffect(() => {
     setHostRequest((prevRequest) => {
       const myRequest = {
-        ...prevRequest,
+        ...(prevRequest ?? {}),
         defaultIndex: indexNames,
+        factoryQueryType: NetworkQueries.http,
         filterQuery: createFilter(filterQuery),
+        ip,
         pagination: generateTablePaginationOptions(activePage, limit),
         sort: sort as SortField,
         timerange: {
@@ -196,7 +207,7 @@ export const useNetworkHttp = ({
       }
       return prevRequest;
     });
-  }, [activePage, indexNames, endDate, filterQuery, limit, startDate, sort, skip]);
+  }, [activePage, indexNames, endDate, filterQuery, ip, limit, startDate, sort, skip]);
 
   useEffect(() => {
     networkHttpSearch(networkHttpRequest);

@@ -8,16 +8,19 @@
     "winlogbeat-*",
     "logs-endpoint.events.*"
   ],
-  "language": "kuery",
+  "language": "eql",
   "license": "Elastic License",
   "name": "MsBuild Making Network Connections",
-  "query": "event.category:network and event.type:connection and process.name:MSBuild.exe and not destination.ip:(127.0.0.1 or \"::1\")",
+  "query": "sequence by process.entity_id\n  [process where process.name : \"MSBuild.exe\" and event.type == \"start\"]\n  [network where process.name : \"MSBuild.exe\" and\n     not cidrmatch(destination.ip, \"127.0.0.1\", \"::1\")]\n",
   "risk_score": 47,
   "rule_id": "0e79980b-4250-4a50-a509-69294c14e84b",
   "severity": "medium",
   "tags": [
     "Elastic",
-    "Windows"
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Execution"
   ],
   "threat": [
     {
@@ -30,12 +33,12 @@
       "technique": [
         {
           "id": "T1127",
-          "name": "Trusted Developer Utilities",
+          "name": "Trusted Developer Utilities Proxy Execution",
           "reference": "https://attack.mitre.org/techniques/T1127/"
         }
       ]
     }
   ],
-  "type": "query",
-  "version": 4
+  "type": "eql",
+  "version": 5
 }

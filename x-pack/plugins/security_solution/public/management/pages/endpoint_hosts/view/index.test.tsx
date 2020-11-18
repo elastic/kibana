@@ -397,13 +397,13 @@ describe('when on the list page', () => {
 
   describe('when there is a selected host in the url', () => {
     let hostDetails: HostInfo;
-    let agentId: string;
+    let elasticAgentId: string;
     let renderAndWaitForData: () => Promise<ReturnType<AppContextTestRender['render']>>;
     const mockEndpointListApi = (mockedPolicyResponse?: HostPolicyResponse) => {
       const {
         // eslint-disable-next-line @typescript-eslint/naming-convention
         host_status,
-        metadata: { host, ...details },
+        metadata: { agent, ...details },
         // eslint-disable-next-line @typescript-eslint/naming-convention
         query_strategy_version,
       } = mockEndpointDetailsApiResult();
@@ -412,15 +412,15 @@ describe('when on the list page', () => {
         host_status,
         metadata: {
           ...details,
-          host: {
-            ...host,
+          agent: {
+            ...agent,
             id: '1',
           },
         },
         query_strategy_version,
       };
 
-      agentId = hostDetails.metadata.elastic.agent.id;
+      elasticAgentId = hostDetails.metadata.elastic.agent.id;
 
       const policy = docGenerator.generatePolicyPackagePolicy();
       policy.id = hostDetails.metadata.Endpoint.policy.applied.id;
@@ -618,7 +618,7 @@ describe('when on the list page', () => {
       expect(linkToReassign).not.toBeNull();
       expect(linkToReassign.textContent).toEqual('Reassign Policy');
       expect(linkToReassign.getAttribute('href')).toEqual(
-        `/app/ingestManager#/fleet/agents/${agentId}/activity?openReassignFlyout=true`
+        `/app/ingestManager#/fleet/agents/${elasticAgentId}/activity?openReassignFlyout=true`
       );
     });
 
@@ -702,10 +702,10 @@ describe('when on the list page', () => {
       });
 
       it('should not show any numbered badges if all actions are successful', () => {
-        const policyResponse = docGenerator.generatePolicyResponse(
-          new Date().getTime(),
-          HostPolicyResponseActionStatus.success
-        );
+        const policyResponse = docGenerator.generatePolicyResponse({
+          ts: new Date().getTime(),
+          allStatus: HostPolicyResponseActionStatus.success,
+        });
         reactTestingLibrary.act(() => {
           store.dispatch({
             type: 'serverReturnedEndpointPolicyResponse',

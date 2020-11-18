@@ -21,10 +21,10 @@ import { ESTermQuery } from '../../../../../common/typed_json';
 
 import * as i18n from './translations';
 import {
-  AbortError,
   isCompleteResponse,
   isErrorResponse,
 } from '../../../../../../../../src/plugins/data/common';
+import { AbortError } from '../../../../../../../../src/plugins/kibana_utils/common';
 import { getInspectResponse } from '../../../../helpers';
 import { InspectResponse } from '../../../../types';
 
@@ -60,19 +60,23 @@ export const useNetworkKpiUniquePrivateIps = ({
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
   const [loading, setLoading] = useState(false);
-  const [networkKpiUniquePrivateIpsRequest, setNetworkKpiUniquePrivateIpsRequest] = useState<
-    NetworkKpiUniquePrivateIpsRequestOptions
-  >({
-    defaultIndex: indexNames,
-    factoryQueryType: NetworkKpiQueries.uniquePrivateIps,
-    filterQuery: createFilter(filterQuery),
-    id: ID,
-    timerange: {
-      interval: '12h',
-      from: startDate,
-      to: endDate,
-    },
-  });
+  const [
+    networkKpiUniquePrivateIpsRequest,
+    setNetworkKpiUniquePrivateIpsRequest,
+  ] = useState<NetworkKpiUniquePrivateIpsRequestOptions | null>(
+    !skip
+      ? {
+          defaultIndex: indexNames,
+          factoryQueryType: NetworkKpiQueries.uniquePrivateIps,
+          filterQuery: createFilter(filterQuery),
+          timerange: {
+            interval: '12h',
+            from: startDate,
+            to: endDate,
+          },
+        }
+      : null
+  );
 
   const [networkKpiUniquePrivateIpsResponse, setNetworkKpiUniquePrivateIpsResponse] = useState<
     NetworkKpiUniquePrivateIpsArgs
@@ -91,7 +95,11 @@ export const useNetworkKpiUniquePrivateIps = ({
   });
 
   const networkKpiUniquePrivateIpsSearch = useCallback(
-    (request: NetworkKpiUniquePrivateIpsRequestOptions) => {
+    (request: NetworkKpiUniquePrivateIpsRequestOptions | null) => {
+      if (request == null) {
+        return;
+      }
+
       let didCancel = false;
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
@@ -155,8 +163,9 @@ export const useNetworkKpiUniquePrivateIps = ({
   useEffect(() => {
     setNetworkKpiUniquePrivateIpsRequest((prevRequest) => {
       const myRequest = {
-        ...prevRequest,
+        ...(prevRequest ?? {}),
         defaultIndex: indexNames,
+        factoryQueryType: NetworkKpiQueries.uniquePrivateIps,
         filterQuery: createFilter(filterQuery),
         timerange: {
           interval: '12h',

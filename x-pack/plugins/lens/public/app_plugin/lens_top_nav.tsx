@@ -30,33 +30,6 @@ export function getLensTopNavConfig(options: {
         defaultMessage: 'Save',
       });
 
-  if (showSaveAndReturn) {
-    topNavMenu.push({
-      label: i18n.translate('xpack.lens.app.saveAndReturn', {
-        defaultMessage: 'Save and return',
-      }),
-      emphasize: true,
-      iconType: 'check',
-      run: actions.saveAndReturn,
-      testId: 'lnsApp_saveAndReturnButton',
-      disableButton: !savingPermitted,
-      description: i18n.translate('xpack.lens.app.saveAndReturnButtonAriaLabel', {
-        defaultMessage: 'Save the current lens visualization and return to the last app',
-      }),
-    });
-  }
-
-  topNavMenu.push({
-    label: saveButtonLabel,
-    emphasize: !showSaveAndReturn,
-    run: actions.showSaveModal,
-    testId: 'lnsApp_saveButton',
-    description: i18n.translate('xpack.lens.app.saveButtonAriaLabel', {
-      defaultMessage: 'Save the current lens visualization',
-    }),
-    disableButton: !savingPermitted,
-  });
-
   if (showCancel) {
     topNavMenu.push({
       label: i18n.translate('xpack.lens.app.cancel', {
@@ -69,5 +42,34 @@ export function getLensTopNavConfig(options: {
       }),
     });
   }
+
+  topNavMenu.push({
+    label: saveButtonLabel,
+    iconType: !showSaveAndReturn ? 'save' : undefined,
+    emphasize: !showSaveAndReturn,
+    run: actions.showSaveModal,
+    testId: 'lnsApp_saveButton',
+    description: i18n.translate('xpack.lens.app.saveButtonAriaLabel', {
+      defaultMessage: 'Save the current lens visualization',
+    }),
+    disableButton: !savingPermitted,
+  });
+
+  if (showSaveAndReturn) {
+    topNavMenu.push({
+      label: i18n.translate('xpack.lens.app.saveAndReturn', {
+        defaultMessage: 'Save and return',
+      }),
+      emphasize: true,
+      iconType: 'checkInCircleFilled',
+      run: actions.saveAndReturn,
+      testId: 'lnsApp_saveAndReturnButton',
+      disableButton: !savingPermitted,
+      description: i18n.translate('xpack.lens.app.saveAndReturnButtonAriaLabel', {
+        defaultMessage: 'Save the current lens visualization and return to the last app',
+      }),
+    });
+  }
+
   return topNavMenu;
 }

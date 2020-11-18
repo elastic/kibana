@@ -48,6 +48,15 @@ import {
   severity_mapping,
   event_category_override,
 } from '../common/schemas';
+import {
+  threat_index,
+  concurrent_searches,
+  items_per_search,
+  threat_query,
+  threat_filters,
+  threat_mapping,
+  threat_language,
+} from '../types/threat_mapping';
 import { listArrayOrUndefined } from '../types/lists';
 
 /**
@@ -97,6 +106,13 @@ export const patchRulesSchema = t.exact(
     note,
     version,
     exceptions_list: listArrayOrUndefined,
+    threat_index,
+    threat_query,
+    threat_filters,
+    threat_mapping,
+    threat_language,
+    concurrent_searches,
+    items_per_search,
   })
 );
 

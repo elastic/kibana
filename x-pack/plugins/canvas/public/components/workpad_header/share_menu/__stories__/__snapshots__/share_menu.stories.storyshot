@@ -4,7 +4,6 @@ exports[`Storyshots components/WorkpadHeader/ShareMenu default 1`] = `
 <div>
   <div
     className="euiPopover euiPopover--anchorDownLeft"
-    container={null}
     onKeyDown={[Function]}
     onMouseDown={[Function]}
     onMouseUp={[Function]}

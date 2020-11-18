@@ -38,6 +38,7 @@ import {
   Adapters,
   SavedObjectEmbeddableInput,
   ReferenceOrValueEmbeddable,
+  AttributeService,
 } from '../../../../plugins/embeddable/public';
 import {
   IExpressionLoaderParams,
@@ -51,7 +52,6 @@ import { VIS_EVENT_TO_TRIGGER } from './events';
 import { VisualizeEmbeddableFactoryDeps } from './visualize_embeddable_factory';
 import { TriggerId } from '../../../ui_actions/public';
 import { SavedObjectAttributes } from '../../../../core/types';
-import { AttributeService } from '../../../dashboard/public';
 import { SavedVisualizationsLoader } from '../saved_visualizations';
 import { VisSavedObject } from '../types';
 
@@ -167,7 +167,7 @@ export class VisualizeEmbeddable
         typeof inspectorAdapters === 'function' ? inspectorAdapters() : inspectorAdapters;
     }
   }
-  public getVisualizationDescription() {
+  public getDescription() {
     return this.vis.description;
   }
 
@@ -374,6 +374,7 @@ export class VisualizeEmbeddable
         query: this.input.query,
         filters: this.input.filters,
       },
+      searchSessionId: this.input.searchSessionId,
       uiState: this.vis.uiState,
       inspectorAdapters: this.inspectorAdapters,
     };

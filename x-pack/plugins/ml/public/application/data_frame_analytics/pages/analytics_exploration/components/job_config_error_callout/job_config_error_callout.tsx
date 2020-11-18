@@ -10,7 +10,6 @@ import { EuiCallOut, EuiLink, EuiPanel, EuiSpacer } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { ExplorationTitle } from '../exploration_title';
 import { useMlKibana } from '../../../../../contexts/kibana';
 
 const jobConfigErrorTitle = i18n.translate('xpack.ml.dataframe.analytics.jobConfig.errorTitle', {
@@ -63,7 +62,6 @@ export const JobConfigErrorCallout: FC<Props> = ({
 
   return (
     <EuiPanel grow={false}>
-      <ExplorationTitle title={title} />
       <EuiSpacer />
       <EuiCallOut
         title={jobConfigErrorMessage ? jobConfigErrorTitle : jobCapsErrorTitle}

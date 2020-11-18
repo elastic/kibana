@@ -209,7 +209,7 @@ const hostStatGroups: StatGroup[] = [
     name: (
       <FormattedMessage
         id="xpack.securitySolution.overview.hostStatGroupElasticEndpointSecurity"
-        defaultMessage="Elastic Endpoint Security"
+        defaultMessage="Endpoint Security"
       />
     ),
     statIds: [

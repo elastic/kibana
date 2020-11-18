@@ -24,37 +24,34 @@ const initialState = initialTrustedAppsPageState();
 
 describe('reducer', () => {
   describe('UserChangedUrl', () => {
-    it('makes page state active and extracts pagination parameters', () => {
+    it('makes page state active and extracts all parameters', () => {
       const result = trustedAppsPageReducer(
         initialState,
-        createUserChangedUrlAction('/trusted_apps', '?page_index=5&page_size=50')
+        createUserChangedUrlAction(
+          '/trusted_apps',
+          '?page_index=5&page_size=50&show=create&view_type=list'
+        )
       );
 
       expect(result).toStrictEqual({
         ...initialState,
-        listView: { ...initialState.listView, currentPaginationInfo: { index: 5, size: 50 } },
+        location: { page_index: 5, page_size: 50, show: 'create', view_type: 'list' },
         active: true,
       });
     });
 
-    it('extracts default pagination parameters when none provided', () => {
+    it('extracts default pagination parameters when invalid provided', () => {
       const result = trustedAppsPageReducer(
-        {
-          ...initialState,
-          listView: { ...initialState.listView, currentPaginationInfo: { index: 5, size: 50 } },
-        },
-        createUserChangedUrlAction('/trusted_apps', '?page_index=b&page_size=60')
+        { ...initialState, location: { page_index: 5, page_size: 50, view_type: 'grid' } },
+        createUserChangedUrlAction('/trusted_apps', '?page_index=b&page_size=60&show=a&view_type=c')
       );
 
       expect(result).toStrictEqual({ ...initialState, active: true });
     });
 
-    it('extracts default pagination parameters when invalid provided', () => {
+    it('extracts default pagination parameters when none provided', () => {
       const result = trustedAppsPageReducer(
-        {
-          ...initialState,
-          listView: { ...initialState.listView, currentPaginationInfo: { index: 5, size: 50 } },
-        },
+        { ...initialState, location: { page_index: 5, page_size: 50, view_type: 'grid' } },
         createUserChangedUrlAction('/trusted_apps')
       );
 
@@ -74,8 +71,7 @@ describe('reducer', () => {
   describe('TrustedAppsListResourceStateChanged', () => {
     it('sets the current list resource state', () => {
       const listResourceState = createListLoadedResourceState(
-        { index: 3, size: 50 },
-        200,
+        { pageIndex: 3, pageSize: 50 },
         initialNow
       );
       const result = trustedAppsPageReducer(
@@ -85,7 +81,7 @@ describe('reducer', () => {
 
       expect(result).toStrictEqual({
         ...initialState,
-        listView: { ...initialState.listView, currentListResourceState: listResourceState },
+        listView: { ...initialState.listView, listResourceState },
       });
     });
   });

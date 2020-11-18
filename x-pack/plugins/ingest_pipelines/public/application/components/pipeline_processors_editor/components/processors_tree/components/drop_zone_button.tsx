@@ -7,11 +7,15 @@
 import { i18n } from '@kbn/i18n';
 import React, { FunctionComponent } from 'react';
 import classNames from 'classnames';
-import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import { EuiButtonIcon } from '@elastic/eui';
 
 export interface Props {
   isVisible: boolean;
   isDisabled: boolean;
+  /**
+   * Useful for buttons at the very top or bottom of lists to avoid any overflow.
+   */
+  compressed?: boolean;
   onClick: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
   'data-test-subj'?: string;
 }
@@ -29,7 +33,7 @@ const cannotMoveHereLabel = i18n.translate(
 );
 
 export const DropZoneButton: FunctionComponent<Props> = (props) => {
-  const { onClick, isDisabled, isVisible } = props;
+  const { onClick, isDisabled, isVisible, compressed } = props;
   const isUnavailable = isVisible && isDisabled;
   const containerClasses = classNames({
     // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -40,30 +44,21 @@ export const DropZoneButton: FunctionComponent<Props> = (props) => {
   const buttonClasses = classNames({
     // eslint-disable-next-line @typescript-eslint/naming-convention
     'pipelineProcessorsEditor__tree__dropZoneButton--visible': isVisible,
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    'pipelineProcessorsEditor__tree__dropZoneButton--compressed': compressed,
   });
 
-  const content = (
+  return (
     <div className={`pipelineProcessorsEditor__tree__dropZoneContainer ${containerClasses}`}>
       <EuiButtonIcon
         data-test-subj={props['data-test-subj']}
         className={`pipelineProcessorsEditor__tree__dropZoneButton ${buttonClasses}`}
-        aria-label={moveHereLabel}
+        aria-label={isUnavailable ? cannotMoveHereLabel : moveHereLabel}
         // We artificially disable the button so that hover and pointer events are
         // still enabled
         onClick={isDisabled ? () => {} : onClick}
         iconType="empty"
       />
     </div>
-  );
-
-  return isUnavailable ? (
-    <EuiToolTip
-      className="pipelineProcessorsEditor__tree__dropZoneContainer__toolTip"
-      content={cannotMoveHereLabel}
-    >
-      {content}
-    </EuiToolTip>
-  ) : (
-    content
   );
 };

@@ -16,7 +16,6 @@ import {
   EuiButton,
   EuiFlyoutBody,
   EuiPortal,
-  EuiBetaBadge,
   EuiCallOut,
   EuiSpacer,
 } from '@elastic/eui';
@@ -27,7 +26,7 @@ import { AlertForm, validateBaseProperties } from './alert_form';
 import { alertReducer } from './alert_reducer';
 import { updateAlert } from '../../lib/alert_api';
 import { HealthCheck } from '../../components/health_check';
-import { PLUGIN } from '../../constants/plugin';
+import { HealthContextProvider } from '../../context/health_context';
 
 interface AlertEditProps {
   initialAlert: Alert;
@@ -38,6 +37,9 @@ export const AlertEdit = ({ initialAlert, onClose }: AlertEditProps) => {
   const [{ alert }, dispatch] = useReducer(alertReducer, { alert: initialAlert });
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [hasActionsDisabled, setHasActionsDisabled] = useState<boolean>(false);
+  const [hasActionsWithBrokenConnector, setHasActionsWithBrokenConnector] = useState<boolean>(
+    false
+  );
   const setAlert = (key: string, value: any) => {
     dispatch({ command: { type: 'setAlert' }, payload: { key, value } });
   };
@@ -107,7 +109,6 @@ export const AlertEdit = ({ initialAlert, onClose }: AlertEditProps) => {
         aria-labelledby="flyoutAlertEditTitle"
         size="m"
         maxWidth={620}
-        ownFocus
       >
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="s" data-test-subj="editAlertFlyoutTitle">
@@ -116,90 +117,85 @@ export const AlertEdit = ({ initialAlert, onClose }: AlertEditProps) => {
                 defaultMessage="Edit alert"
                 id="xpack.triggersActionsUI.sections.alertEdit.flyoutTitle"
               />
-              &emsp;
-              <EuiBetaBadge
-                label="Beta"
-                tooltipContent={i18n.translate(
-                  'xpack.triggersActionsUI.sections.alertEdit.betaBadgeTooltipContent',
-                  {
-                    defaultMessage:
-                      '{pluginName} is in beta and is subject to change. The design and code is less mature than official GA features and is being provided as-is with no warranties. Beta features are not subject to the support SLA of official GA features.',
-                    values: {
-                      pluginName: PLUGIN.getI18nName(i18n),
-                    },
-                  }
-                )}
-              />
             </h3>
           </EuiTitle>
         </EuiFlyoutHeader>
-        <HealthCheck docLinks={docLinks} http={http} inFlyout={true}>
-          <EuiFlyoutBody>
-            {hasActionsDisabled && (
-              <Fragment>
-                <EuiCallOut
-                  size="s"
-                  color="danger"
-                  iconType="alert"
-                  data-test-subj="hasActionsDisabled"
-                  title={i18n.translate(
-                    'xpack.triggersActionsUI.sections.alertEdit.disabledActionsWarningTitle',
-                    { defaultMessage: 'This alert has actions that are disabled' }
-                  )}
-                />
-                <EuiSpacer />
-              </Fragment>
-            )}
-            <AlertForm
-              alert={alert}
-              dispatch={dispatch}
-              errors={errors}
-              canChangeTrigger={false}
-              setHasActionsDisabled={setHasActionsDisabled}
-              operation="i18n.translate('xpack.triggersActionsUI.sections.alertEdit.operationName', {
-                defaultMessage: 'edit',
-              })"
-            />
-          </EuiFlyoutBody>
-          <EuiFlyoutFooter>
-            <EuiFlexGroup justifyContent="spaceBetween">
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty data-test-subj="cancelSaveEditedAlertButton" onClick={closeFlyout}>
-                  {i18n.translate('xpack.triggersActionsUI.sections.alertEdit.cancelButtonLabel', {
-                    defaultMessage: 'Cancel',
-                  })}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  fill
-                  color="secondary"
-                  data-test-subj="saveEditedAlertButton"
-                  type="submit"
-                  iconType="check"
-                  isDisabled={hasErrors || hasActionErrors}
-                  isLoading={isSaving}
-                  onClick={async () => {
-                    setIsSaving(true);
-                    const savedAlert = await onSaveAlert();
-                    setIsSaving(false);
-                    if (savedAlert) {
-                      closeFlyout();
-                      if (reloadAlerts) {
-                        reloadAlerts();
-                      }
-                    }
-                  }}
-                >
-                  <FormattedMessage
-                    id="xpack.triggersActionsUI.sections.alertEdit.saveButtonLabel"
-                    defaultMessage="Save"
+        <HealthContextProvider>
+          <HealthCheck docLinks={docLinks} http={http} inFlyout={true} waitForCheck={true}>
+            <EuiFlyoutBody>
+              {hasActionsDisabled && (
+                <Fragment>
+                  <EuiCallOut
+                    size="s"
+                    color="danger"
+                    iconType="alert"
+                    data-test-subj="hasActionsDisabled"
+                    title={i18n.translate(
+                      'xpack.triggersActionsUI.sections.alertEdit.disabledActionsWarningTitle',
+                      { defaultMessage: 'This alert has actions that are disabled' }
+                    )}
                   />
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlyoutFooter>
-        </HealthCheck>
+                  <EuiSpacer />
+                </Fragment>
+              )}
+              <AlertForm
+                alert={alert}
+                dispatch={dispatch}
+                errors={errors}
+                canChangeTrigger={false}
+                setHasActionsDisabled={setHasActionsDisabled}
+                setHasActionsWithBrokenConnector={setHasActionsWithBrokenConnector}
+                operation="i18n.translate('xpack.triggersActionsUI.sections.alertEdit.operationName', {
+                  defaultMessage: 'edit',
+                })"
+              />
+            </EuiFlyoutBody>
+            <EuiFlyoutFooter>
+              <EuiFlexGroup justifyContent="spaceBetween">
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    data-test-subj="cancelSaveEditedAlertButton"
+                    onClick={closeFlyout}
+                  >
+                    {i18n.translate(
+                      'xpack.triggersActionsUI.sections.alertEdit.cancelButtonLabel',
+                      {
+                        defaultMessage: 'Cancel',
+                      }
+                    )}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    fill
+                    color="secondary"
+                    data-test-subj="saveEditedAlertButton"
+                    type="submit"
+                    iconType="check"
+                    isDisabled={hasErrors || hasActionErrors || hasActionsWithBrokenConnector}
+                    isLoading={isSaving}
+                    onClick={async () => {
+                      setIsSaving(true);
+                      const savedAlert = await onSaveAlert();
+                      setIsSaving(false);
+                      if (savedAlert) {
+                        closeFlyout();
+                        if (reloadAlerts) {
+                          reloadAlerts();
+                        }
+                      }
+                    }}
+                  >
+                    <FormattedMessage
+                      id="xpack.triggersActionsUI.sections.alertEdit.saveButtonLabel"
+                      defaultMessage="Save"
+                    />
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlyoutFooter>
+          </HealthCheck>
+        </HealthContextProvider>
       </EuiFlyout>
     </EuiPortal>
   );

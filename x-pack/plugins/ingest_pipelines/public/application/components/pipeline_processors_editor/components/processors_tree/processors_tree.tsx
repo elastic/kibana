@@ -98,9 +98,16 @@ export const ProcessorsTree: FunctionComponent<Props> = memo((props) => {
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup responsive={false} alignItems="flexStart" gutterSize="none">
-          <EuiFlexItem data-test-subj={selectorToDataTestSubject(baseSelector)} grow={false}>
-            {!processors.length && (
+        <EuiFlexGroup
+          data-test-subj={selectorToDataTestSubject(baseSelector)}
+          responsive={false}
+          alignItems="flexStart"
+          gutterSize="none"
+          direction="column"
+        >
+          {!processors.length && (
+            // We want to make this dropzone the max length of its container
+            <EuiFlexItem style={{ width: '100%' }}>
               <DropZoneButton
                 data-test-subj="dropButtonEmptyTree"
                 isVisible={Boolean(movingProcessor)}
@@ -116,7 +123,9 @@ export const ProcessorsTree: FunctionComponent<Props> = memo((props) => {
                   });
                 }}
               />
-            )}
+            </EuiFlexItem>
+          )}
+          <EuiFlexItem grow={false}>
             <AddProcessorButton
               onClick={() => {
                 onAction({ type: 'addProcessor', payload: { target: baseSelector } });

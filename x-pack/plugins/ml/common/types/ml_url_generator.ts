@@ -55,7 +55,7 @@ export type MlGenericUrlState = MLPageState<
 >;
 
 export interface AnomalyDetectionQueryState {
-  jobId?: JobId;
+  jobId?: JobId | string[];
   groupIds?: string[];
   globalState?: MlCommonGlobalState;
 }
@@ -132,6 +132,7 @@ export interface TimeSeriesExplorerAppState {
     forecastId?: string;
     detectorIndex?: number;
     entities?: Record<string, string>;
+    functionDescription?: string;
   };
   query?: any;
 }
@@ -145,6 +146,7 @@ export interface TimeSeriesExplorerPageState
   entities?: Record<string, string>;
   forecastId?: string;
   globalState?: MlCommonGlobalState;
+  functionDescription?: string;
 }
 
 export type TimeSeriesExplorerUrlState = MLPageState<
@@ -159,7 +161,7 @@ export interface DataFrameAnalyticsQueryState {
 }
 
 export type DataFrameAnalyticsUrlState = MLPageState<
-  typeof ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE,
+  typeof ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE | typeof ML_PAGES.DATA_FRAME_ANALYTICS_MAP,
   DataFrameAnalyticsQueryState | undefined
 >;
 

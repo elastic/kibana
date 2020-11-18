@@ -5,6 +5,7 @@
  */
 
 export * from './default_actions_array';
+export * from './default_array';
 export * from './default_boolean_false';
 export * from './default_boolean_true';
 export * from './default_empty_string';
@@ -27,10 +28,12 @@ export * from './default_version_number';
 export * from './iso_date_string';
 export * from './lists';
 export * from './lists_default_array';
+export * from './non_empty_array';
 export * from './non_empty_string';
 export * from './only_false_allowed';
 export * from './positive_integer';
 export * from './positive_integer_greater_than_zero';
 export * from './references_default_array';
 export * from './risk_score';
+export * from './threat_mapping';
 export * from './uuid';

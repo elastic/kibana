@@ -28,7 +28,11 @@ import {
   getMLJobIds,
   getServiceAnomalies,
 } from '../../service_map/get_service_anomalies';
-import { AggregationResultOf } from '../../../../typings/elasticsearch/aggregations';
+import {
+  calculateTransactionErrorPercentage,
+  getOutcomeAggregation,
+  getTransactionErrorRateTimeSeries,
+} from '../../helpers/transaction_error_rate';
 
 function getDateHistogramOpts(start: number, end: number) {
   return {
@@ -261,20 +265,7 @@ export const getTransactionErrorRates = async ({
 }: AggregationParams) => {
   const { apmEventClient, start, end } = setup;
 
-  const outcomes = {
-    terms: {
-      field: EVENT_OUTCOME,
-    },
-    aggs: {
-      count: {
-        value_count: {
-          field: getTransactionDurationFieldForAggregatedTransactions(
-            searchAggregatedTransactions
-          ),
-        },
-      },
-    },
-  };
+  const outcomes = getOutcomeAggregation({ searchAggregatedTransactions });
 
   const response = await apmEventClient.search(
     mergeProjection(projection, {
@@ -326,21 +317,6 @@ export const getTransactionErrorRates = async ({
     return [];
   }
 
-  function calculateTransactionErrorPercentage(
-    outcomeResponse: AggregationResultOf<typeof outcomes, {}>
-  ) {
-    const successfulTransactions =
-      outcomeResponse.buckets.find(
-        (bucket) => bucket.key === EventOutcome.success
-      )?.count.value ?? 0;
-    const failedTransactions =
-      outcomeResponse.buckets.find(
-        (bucket) => bucket.key === EventOutcome.failure
-      )?.count.value ?? 0;
-
-    return failedTransactions / (successfulTransactions + failedTransactions);
-  }
-
   return aggregations.services.buckets.map((serviceBucket) => {
     const transactionErrorRate = calculateTransactionErrorPercentage(
       serviceBucket.outcomes
@@ -349,12 +325,9 @@ export const getTransactionErrorRates = async ({
       serviceName: serviceBucket.key as string,
       transactionErrorRate: {
         value: transactionErrorRate,
-        timeseries: serviceBucket.timeseries.buckets.map((dateBucket) => {
-          return {
-            x: dateBucket.key,
-            y: calculateTransactionErrorPercentage(dateBucket.outcomes),
-          };
-        }),
+        timeseries: getTransactionErrorRateTimeSeries(
+          serviceBucket.timeseries.buckets
+        ),
       },
     };
   });
@@ -364,7 +337,8 @@ export const getEnvironments = async ({
   setup,
   projection,
 }: AggregationParams) => {
-  const { apmEventClient } = setup;
+  const { apmEventClient, config } = setup;
+  const maxServiceEnvironments = config['xpack.apm.maxServiceEnvironments'];
   const response = await apmEventClient.search(
     mergeProjection(projection, {
       body: {
@@ -379,6 +353,7 @@ export const getEnvironments = async ({
               environments: {
                 terms: {
                   field: SERVICE_ENVIRONMENT,
+                  size: maxServiceEnvironments,
                 },
               },
             },

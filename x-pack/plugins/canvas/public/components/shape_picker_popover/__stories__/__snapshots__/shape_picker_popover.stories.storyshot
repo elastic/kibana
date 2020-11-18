@@ -3,7 +3,6 @@
 exports[`Storyshots components/Shapes/ShapePickerPopover default 1`] = `
 <div
   className="euiPopover euiPopover--anchorDownCenter"
-  container={null}
   onKeyDown={[Function]}
   onMouseDown={[Function]}
   onMouseUp={[Function]}
@@ -14,7 +13,7 @@ exports[`Storyshots components/Shapes/ShapePickerPopover default 1`] = `
     className="euiPopover__anchor"
   >
     <div
-      className="euiPanel euiPanel--paddingSmall"
+      className="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusMedium euiPanel--plain"
     >
       <button
         className="euiLink euiLink--primary"
@@ -38,7 +37,6 @@ exports[`Storyshots components/Shapes/ShapePickerPopover default 1`] = `
 exports[`Storyshots components/Shapes/ShapePickerPopover interactive 1`] = `
 <div
   className="euiPopover euiPopover--anchorDownCenter"
-  container={null}
   onKeyDown={[Function]}
   onMouseDown={[Function]}
   onMouseUp={[Function]}
@@ -49,7 +47,7 @@ exports[`Storyshots components/Shapes/ShapePickerPopover interactive 1`] = `
     className="euiPopover__anchor"
   >
     <div
-      className="euiPanel euiPanel--paddingSmall"
+      className="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusMedium euiPanel--plain"
     >
       <button
         className="euiLink euiLink--primary"
@@ -80,7 +78,6 @@ exports[`Storyshots components/Shapes/ShapePickerPopover interactive 1`] = `
 exports[`Storyshots components/Shapes/ShapePickerPopover shape selected 1`] = `
 <div
   className="euiPopover euiPopover--anchorDownCenter"
-  container={null}
   onKeyDown={[Function]}
   onMouseDown={[Function]}
   onMouseUp={[Function]}
@@ -91,7 +88,7 @@ exports[`Storyshots components/Shapes/ShapePickerPopover shape selected 1`] = `
     className="euiPopover__anchor"
   >
     <div
-      className="euiPanel euiPanel--paddingSmall"
+      className="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusMedium euiPanel--plain"
     >
       <button
         className="euiLink euiLink--primary"

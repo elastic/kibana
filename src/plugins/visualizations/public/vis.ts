@@ -84,7 +84,7 @@ const getSearchSource = async (inputSearchSource: ISearchSource, savedSearchId?:
 type PartialVisState = Assign<SerializedVis, { data: Partial<SerializedVisData> }>;
 
 export class Vis<TVisParams = VisParams> {
-  public readonly type: VisType;
+  public readonly type: VisType<TVisParams>;
   public readonly id?: string;
   public title: string = '';
   public description: string = '';
@@ -104,7 +104,7 @@ export class Vis<TVisParams = VisParams> {
   }
 
   private getType(visType: string) {
-    const type = getTypes().get(visType);
+    const type = getTypes().get<TVisParams>(visType);
     if (!type) {
       const errorMessage = i18n.translate('visualizations.visualizationTypeInvalidMessage', {
         defaultMessage: 'Invalid visualization type "{visType}"',
@@ -118,7 +118,7 @@ export class Vis<TVisParams = VisParams> {
   }
 
   private getParams(params: VisParams) {
-    return defaults({}, cloneDeep(params || {}), cloneDeep(this.type.visConfig.defaults || {}));
+    return defaults({}, cloneDeep(params ?? {}), cloneDeep(this.type.visConfig?.defaults ?? {}));
   }
 
   async setState(state: PartialVisState) {
@@ -137,7 +137,6 @@ export class Vis<TVisParams = VisParams> {
     if (state.params || typeChanged) {
       this.params = this.getParams(state.params);
     }
-
     if (state.data && state.data.searchSource) {
       this.data.searchSource = await getSearch().searchSource.create(state.data.searchSource!);
       this.data.indexPattern = this.data.searchSource.getField('index');
@@ -200,10 +199,6 @@ export class Vis<TVisParams = VisParams> {
         savedSearchId: this.data.savedSearchId,
       },
     };
-  }
-
-  toExpressionAst() {
-    return this.type.toExpressionAst(this.params);
   }
 
   // deprecated

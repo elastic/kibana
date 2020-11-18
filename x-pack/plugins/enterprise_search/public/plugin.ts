@@ -17,22 +17,23 @@ import {
   HomePublicPluginSetup,
 } from '../../../../src/plugins/home/public';
 import { LicensingPluginStart } from '../../licensing/public';
+
 import {
   APP_SEARCH_PLUGIN,
   ENTERPRISE_SEARCH_PLUGIN,
   WORKPLACE_SEARCH_PLUGIN,
 } from '../common/constants';
-import { IInitialAppData } from '../common/types';
+import { InitialAppData } from '../common/types';
 
 export interface ClientConfigType {
   host?: string;
 }
-export interface ClientData extends IInitialAppData {
+export interface ClientData extends InitialAppData {
   publicUrl?: string;
   errorConnecting?: boolean;
 }
 
-export interface PluginsSetup {
+interface PluginsSetup {
   home?: HomePublicPluginSetup;
 }
 export interface PluginsStart {
@@ -118,7 +119,8 @@ export class EnterpriseSearchPlugin implements Plugin {
         title: ENTERPRISE_SEARCH_PLUGIN.NAME,
         subtitle: ENTERPRISE_SEARCH_PLUGIN.SUBTITLE,
         icon: 'logoEnterpriseSearch',
-        descriptions: ENTERPRISE_SEARCH_PLUGIN.DESCRIPTIONS,
+        description: ENTERPRISE_SEARCH_PLUGIN.DESCRIPTION,
+        appDescriptions: ENTERPRISE_SEARCH_PLUGIN.APP_DESCRIPTIONS,
         path: ENTERPRISE_SEARCH_PLUGIN.URL,
       });
 

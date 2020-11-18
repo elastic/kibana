@@ -6,10 +6,17 @@ behavior of Kibana. For example, you can change the format used to display dates
 specify the default index pattern, and set the precision for displayed decimal
 values.
 
-. Open the menu, then go to *Stack Management > {kib} > Advanced Settings*.
+. Open the main menu, then click *Stack Management > Advanced Settings*.
 . Scroll or search for the setting you want to modify.
 . Enter a new value for the setting.
 . Click *Save changes*.
+
+[float]
+=== Required permissions
+
+The `Advanced Settings` {kib} privilege is required to access *Advanced Settings*.
+
+To add the privilege, open the menu, then click *Stack Management > Roles*.
 
 
 [float]
@@ -453,9 +460,6 @@ Maps values to specified colors in visualizations.
 The opacity of the chart items that are dimmed when highlighting another element
 of the chart. The lower this number, the more the highlighted element stands out.
 This must be a number between 0 and 1.
-
-[[visualization-loadingdelay]]`visualization:loadingDelay`::
-The time to wait before dimming visualizations during a query.
 
 [[visualization-regionmap-showwarnings]]`visualization:regionmap:showWarnings`::
 Shows a warning in a region map when terms cannot be joined to a shape.

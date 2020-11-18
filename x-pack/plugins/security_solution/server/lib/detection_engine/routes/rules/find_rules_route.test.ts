@@ -14,11 +14,12 @@ import {
 import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { findRulesRoute } from './find_rules_route';
 
+jest.mock('../../signals/rule_status_service');
 describe('find_rules', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
 
-  beforeEach(() => {
+  beforeEach(async () => {
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
 

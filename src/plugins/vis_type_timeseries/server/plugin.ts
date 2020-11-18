@@ -28,7 +28,7 @@ import {
   FakeRequest,
 } from 'src/core/server';
 import { Observable } from 'rxjs';
-import { Server } from 'hapi';
+import { Server } from '@hapi/hapi';
 import { VisTypeTimeseriesConfig } from './config';
 import { getVisData, GetVisData, GetVisDataOptions } from './lib/get_vis_data';
 import { ValidationTelemetryService } from './validation_telemetry';

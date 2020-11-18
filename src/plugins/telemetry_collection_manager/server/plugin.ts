@@ -25,6 +25,7 @@ import {
   Plugin,
   Logger,
   IClusterClient,
+  SavedObjectsServiceStart,
 } from '../../../core/server';
 
 import {
@@ -67,6 +68,7 @@ export class TelemetryCollectionManagerPlugin
       setCollection: this.setCollection.bind(this),
       getOptInStats: this.getOptInStats.bind(this),
       getStats: this.getStats.bind(this),
+      areAllCollectorsReady: this.areAllCollectorsReady.bind(this),
     };
   }
 
@@ -75,6 +77,7 @@ export class TelemetryCollectionManagerPlugin
       setCollection: this.setCollection.bind(this),
       getOptInStats: this.getOptInStats.bind(this),
       getStats: this.getStats.bind(this),
+      areAllCollectorsReady: this.areAllCollectorsReady.bind(this),
     };
   }
 
@@ -88,6 +91,7 @@ export class TelemetryCollectionManagerPlugin
       priority,
       esCluster,
       esClientGetter,
+      soServiceGetter,
       statsGetter,
       clusterDetailsGetter,
       licenseGetter,
@@ -110,6 +114,9 @@ export class TelemetryCollectionManagerPlugin
       if (!esClientGetter) {
         throw Error('esClientGetter method not set.');
       }
+      if (!soServiceGetter) {
+        throw Error('soServiceGetter method not set.');
+      }
       if (!clusterDetailsGetter) {
         throw Error('Cluster UUIds method is not set.');
       }
@@ -124,6 +131,7 @@ export class TelemetryCollectionManagerPlugin
         esCluster,
         title,
         esClientGetter,
+        soServiceGetter,
       });
       this.usageGetterMethodPriority = priority;
     }
@@ -133,9 +141,10 @@ export class TelemetryCollectionManagerPlugin
     config: StatsGetterConfig,
     collection: Collection,
     collectionEsClient: IClusterClient,
+    collectionSoService: SavedObjectsServiceStart,
     usageCollection: UsageCollectionSetup
   ): StatsCollectionConfig {
-    const { start, end, request } = config;
+    const { timestamp, request } = config;
 
     const callCluster = config.unencrypted
       ? collection.esCluster.asScoped(request).callAsCurrentUser
@@ -144,7 +153,14 @@ export class TelemetryCollectionManagerPlugin
     const esClient = config.unencrypted
       ? collectionEsClient.asScoped(config.request).asCurrentUser
       : collectionEsClient.asInternalUser;
-    return { callCluster, start, end, usageCollection, esClient };
+    // Scope the saved objects client appropriately and pass to the stats collection config
+    const soClient = config.unencrypted
+      ? collectionSoService.getScopedClient(config.request)
+      : collectionSoService.createInternalRepository();
+    // Provide the kibanaRequest so opted-in plugins can scope their custom clients only if the request is not encrypted
+    const kibanaRequest = config.unencrypted ? request : void 0;
+
+    return { callCluster, timestamp, usageCollection, esClient, soClient, kibanaRequest };
   }
 
   private async getOptInStats(optInStatus: boolean, config: StatsGetterConfig) {
@@ -154,11 +170,13 @@ export class TelemetryCollectionManagerPlugin
     for (const collection of this.collections) {
       // first fetch the client and make sure it's not undefined.
       const collectionEsClient = collection.esClientGetter();
-      if (collectionEsClient !== undefined) {
+      const collectionSoService = collection.soServiceGetter();
+      if (collectionEsClient !== undefined && collectionSoService !== undefined) {
         const statsCollectionConfig = this.getStatsCollectionConfig(
           config,
           collection,
           collectionEsClient,
+          collectionSoService,
           this.usageCollection
         );
 
@@ -185,6 +203,10 @@ export class TelemetryCollectionManagerPlugin
     return [];
   }
 
+  private areAllCollectorsReady = async () => {
+    return await this.usageCollection?.areAllCollectorsReady();
+  };
+
   private getOptInStatsForCollection = async (
     collection: Collection,
     optInStatus: boolean,
@@ -209,11 +231,13 @@ export class TelemetryCollectionManagerPlugin
     }
     for (const collection of this.collections) {
       const collectionEsClient = collection.esClientGetter();
-      if (collectionEsClient !== undefined) {
+      const collectionSavedObjectsService = collection.soServiceGetter();
+      if (collectionEsClient !== undefined && collectionSavedObjectsService !== undefined) {
         const statsCollectionConfig = this.getStatsCollectionConfig(
           config,
           collection,
           collectionEsClient,
+          collectionSavedObjectsService,
           this.usageCollection
         );
         try {
@@ -265,9 +289,9 @@ export class TelemetryCollectionManagerPlugin
     return stats.map((stat) => {
       const license = licenses[stat.cluster_uuid];
       return {
+        collectionSource: collection.title,
         ...(license ? { license } : {}),
         ...stat,
-        collectionSource: collection.title,
       };
     });
   }

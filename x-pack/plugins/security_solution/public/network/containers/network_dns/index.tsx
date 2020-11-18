@@ -22,11 +22,8 @@ import {
   NetworkDnsStrategyResponse,
   MatrixOverOrdinalHistogramData,
 } from '../../../../common/search_strategy/security_solution/network';
-import {
-  AbortError,
-  isCompleteResponse,
-  isErrorResponse,
-} from '../../../../../../../src/plugins/data/common';
+import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/plugins/data/common';
+import { AbortError } from '../../../../../../../src/plugins/kibana_utils/common';
 import * as i18n from './translations';
 import { getInspectResponse } from '../../../helpers';
 import { InspectResponse } from '../../../types';
@@ -61,7 +58,6 @@ interface UseNetworkDns {
 export const useNetworkDns = ({
   endDate,
   filterQuery,
-  id = ID,
   indexNames,
   skip,
   startDate,
@@ -74,26 +70,36 @@ export const useNetworkDns = ({
   const abortCtrl = useRef(new AbortController());
   const [loading, setLoading] = useState(false);
 
-  const [networkDnsRequest, setNetworkDnsRequest] = useState<NetworkDnsRequestOptions>({
-    defaultIndex: indexNames,
-    factoryQueryType: NetworkQueries.dns,
-    filterQuery: createFilter(filterQuery),
-    isPtrIncluded,
-    pagination: generateTablePaginationOptions(activePage, limit),
-    sort,
-    timerange: {
-      interval: '12h',
-      from: startDate ? startDate : '',
-      to: endDate ? endDate : new Date(Date.now()).toISOString(),
-    },
-  });
+  const [networkDnsRequest, setNetworkDnsRequest] = useState<NetworkDnsRequestOptions | null>(
+    !skip
+      ? {
+          defaultIndex: indexNames,
+          factoryQueryType: NetworkQueries.dns,
+          filterQuery: createFilter(filterQuery),
+          isPtrIncluded,
+          pagination: generateTablePaginationOptions(activePage, limit, true),
+          sort,
+          timerange: {
+            interval: '12h',
+            from: startDate ? startDate : '',
+            to: endDate ? endDate : new Date(Date.now()).toISOString(),
+          },
+        }
+      : null
+  );
 
   const wrappedLoadMore = useCallback(
     (newActivePage: number) => {
-      setNetworkDnsRequest((prevRequest) => ({
-        ...prevRequest,
-        pagination: generateTablePaginationOptions(newActivePage, limit),
-      }));
+      setNetworkDnsRequest((prevRequest) => {
+        if (!prevRequest) {
+          return prevRequest;
+        }
+
+        return {
+          ...prevRequest,
+          pagination: generateTablePaginationOptions(newActivePage, limit),
+        };
+      });
     },
     [limit]
   );
@@ -118,7 +124,11 @@ export const useNetworkDns = ({
   });
 
   const networkDnsSearch = useCallback(
-    (request: NetworkDnsRequestOptions) => {
+    (request: NetworkDnsRequestOptions | null) => {
+      if (request == null) {
+        return;
+      }
+
       let didCancel = false;
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
@@ -178,11 +188,12 @@ export const useNetworkDns = ({
   useEffect(() => {
     setNetworkDnsRequest((prevRequest) => {
       const myRequest = {
-        ...prevRequest,
+        ...(prevRequest ?? {}),
         defaultIndex: indexNames,
         isPtrIncluded,
+        factoryQueryType: NetworkQueries.dns,
         filterQuery: createFilter(filterQuery),
-        pagination: generateTablePaginationOptions(activePage, limit),
+        pagination: generateTablePaginationOptions(activePage, limit, true),
         sort,
         timerange: {
           interval: '12h',

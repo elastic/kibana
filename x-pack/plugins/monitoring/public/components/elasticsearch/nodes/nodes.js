@@ -27,7 +27,7 @@ import {
   EuiHealth,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import _ from 'lodash';
+import { get } from 'lodash';
 import { ELASTICSEARCH_SYSTEM_ID } from '../../../../common/constants';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ListingCallOut } from '../../setup_mode/listing_callout';
@@ -58,7 +58,7 @@ const getNodeTooltip = (node) => {
   return null;
 };
 
-const getSortHandler = (type) => (item) => _.get(item, [type, 'summary', 'lastVal']);
+const getSortHandler = (type) => (item) => get(item, [type, 'summary', 'lastVal']);
 const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid, alerts) => {
   const cols = [];
 
@@ -87,7 +87,7 @@ const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid, aler
 
       let setupModeStatus = null;
       if (isSetupModeFeatureEnabled(SetupModeFeature.MetricbeatMigration)) {
-        const list = _.get(setupMode, 'data.byUuid', {});
+        const list = get(setupMode, 'data.byUuid', {});
         const status = list[node.resolver] || {};
         const instance = {
           uuid: node.resolver,
@@ -137,7 +137,15 @@ const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid, aler
         <AlertsStatus
           showBadge={true}
           alerts={alerts}
-          stateFilter={(state) => state.nodeId === node.resolver}
+          stateFilter={(state) =>
+            state.nodeId === node.resolver || state.stackProductUuid === node.resolver
+          }
+          nextStepsFilter={(nextStep) => {
+            if (nextStep.text.includes('Elasticsearch nodes')) {
+              return false;
+            }
+            return true;
+          }}
         />
       );
     },
@@ -388,7 +396,7 @@ export function ElasticsearchNodes({ clusterStatus, showCgroupMetricsElasticsear
             setupMode.data.totalUniqueInstanceCount
           ) {
             const finishMigrationAction =
-              _.get(setupMode.meta, 'liveClusterUuid') === clusterUuid
+              get(setupMode.meta, 'liveClusterUuid') === clusterUuid
                 ? setupMode.shortcutToFinishMigration
                 : setupMode.openFlyout;
 

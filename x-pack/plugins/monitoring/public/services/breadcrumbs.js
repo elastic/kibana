@@ -8,8 +8,8 @@ import { Legacy } from '../legacy_shims';
 import { i18n } from '@kbn/i18n';
 
 // Helper for making objects to use in a link element
-const createCrumb = (url, label, testSubj) => {
-  const crumb = { url, label };
+const createCrumb = (url, label, testSubj, ignoreGlobalState = false) => {
+  const crumb = { url, label, ignoreGlobalState };
   if (testSubj) {
     crumb.testSubj = testSubj;
   }
@@ -177,7 +177,7 @@ export function breadcrumbsProvider() {
       defaultMessage: 'Clusters',
     });
 
-    let breadcrumbs = [createCrumb('#/home', homeCrumb, 'breadcrumbClusters')];
+    let breadcrumbs = [createCrumb('#/home', homeCrumb, 'breadcrumbClusters', true)];
 
     if (!mainInstance.inOverview && clusterName) {
       breadcrumbs.push(createCrumb('#/overview', clusterName));
@@ -204,6 +204,7 @@ export function breadcrumbsProvider() {
         text: b.label,
         href: b.url,
         'data-test-subj': b.testSubj,
+        ignoreGlobalState: b.ignoreGlobalState,
       }))
     );
 

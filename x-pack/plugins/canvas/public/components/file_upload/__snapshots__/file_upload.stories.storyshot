@@ -21,7 +21,7 @@ exports[`Storyshots components/FileUpload default 1`] = `
       className="euiFilePicker__prompt"
       id="generated-id"
     >
-      <div
+      <span
         aria-hidden="true"
         className="euiFilePicker__icon"
         data-euiicon-type="importAction"

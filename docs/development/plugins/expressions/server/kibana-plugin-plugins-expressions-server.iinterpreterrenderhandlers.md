@@ -18,5 +18,6 @@ export interface IInterpreterRenderHandlers
 |  [event](./kibana-plugin-plugins-expressions-server.iinterpreterrenderhandlers.event.md) | <code>(event: any) =&gt; void</code> |  |
 |  [onDestroy](./kibana-plugin-plugins-expressions-server.iinterpreterrenderhandlers.ondestroy.md) | <code>(fn: () =&gt; void) =&gt; void</code> |  |
 |  [reload](./kibana-plugin-plugins-expressions-server.iinterpreterrenderhandlers.reload.md) | <code>() =&gt; void</code> |  |
+|  [uiState](./kibana-plugin-plugins-expressions-server.iinterpreterrenderhandlers.uistate.md) | <code>PersistedState</code> |  |
 |  [update](./kibana-plugin-plugins-expressions-server.iinterpreterrenderhandlers.update.md) | <code>(params: any) =&gt; void</code> |  |
 

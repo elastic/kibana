@@ -157,7 +157,7 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
       getFormData,
     } = form;
 
-    const [{ addMeta }] = useFormData({
+    const [{ addMeta }] = useFormData<{ addMeta: boolean }>({
       form,
       watch: 'addMeta',
     });

@@ -39,20 +39,19 @@ import { registerConfigDataRoute } from './routes/enterprise_search/config_data'
 
 import { appSearchTelemetryType } from './saved_objects/app_search/telemetry';
 import { registerTelemetryUsageCollector as registerASTelemetryUsageCollector } from './collectors/app_search/telemetry';
-import { registerEnginesRoute } from './routes/app_search/engines';
-import { registerCredentialsRoutes } from './routes/app_search/credentials';
+import { registerAppSearchRoutes } from './routes/app_search';
 
 import { workplaceSearchTelemetryType } from './saved_objects/workplace_search/telemetry';
 import { registerTelemetryUsageCollector as registerWSTelemetryUsageCollector } from './collectors/workplace_search/telemetry';
-import { registerWSOverviewRoute } from './routes/workplace_search/overview';
+import { registerWorkplaceSearchRoutes } from './routes/workplace_search';
 
-export interface PluginsSetup {
+interface PluginsSetup {
   usageCollection?: UsageCollectionSetup;
   security?: SecurityPluginSetup;
   features: FeaturesPluginSetup;
 }
 
-export interface IRouteDependencies {
+export interface RouteDependencies {
   router: IRouter;
   config: ConfigType;
   log: Logger;
@@ -84,7 +83,6 @@ export class EnterpriseSearchPlugin implements Plugin {
       name: ENTERPRISE_SEARCH_PLUGIN.NAME,
       order: 0,
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
-      icon: 'logoEnterpriseSearch',
       app: [
         'kibana',
         ENTERPRISE_SEARCH_PLUGIN.ID,
@@ -126,9 +124,8 @@ export class EnterpriseSearchPlugin implements Plugin {
     const dependencies = { router, config, log, enterpriseSearchRequestHandler };
 
     registerConfigDataRoute(dependencies);
-    registerEnginesRoute(dependencies);
-    registerCredentialsRoutes(dependencies);
-    registerWSOverviewRoute(dependencies);
+    registerAppSearchRoutes(dependencies);
+    registerWorkplaceSearchRoutes(dependencies);
 
     /**
      * Bootstrap the routes, saved objects, and collector for telemetry

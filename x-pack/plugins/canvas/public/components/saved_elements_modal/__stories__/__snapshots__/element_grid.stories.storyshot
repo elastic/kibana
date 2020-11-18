@@ -15,7 +15,7 @@ exports[`Storyshots components/SavedElementsModal/ElementGrid default 1`] = `
       className="euiFlexItem canvasElementCard__wrapper"
     >
       <div
-        className="euiCard euiCard--paddingMedium euiCard--leftAligned euiCard--isClickable canvasElementCard"
+        className="euiCard euiCard--shadow euiCard--borderRadiusMedium euiCard--paddingMedium euiCard--leftAligned euiCard--isClickable canvasElementCard"
         onClick={[Function]}
       >
         <div
@@ -79,7 +79,7 @@ exports[`Storyshots components/SavedElementsModal/ElementGrid default 1`] = `
               onFocus={[Function]}
               type="button"
             >
-              <div
+              <span
                 aria-hidden="true"
                 className="euiButtonIcon__icon"
                 data-euiicon-type="pencil"
@@ -106,7 +106,7 @@ exports[`Storyshots components/SavedElementsModal/ElementGrid default 1`] = `
               onFocus={[Function]}
               type="button"
             >
-              <div
+              <span
                 aria-hidden="true"
                 className="euiButtonIcon__icon"
                 data-euiicon-type="trash"
@@ -121,7 +121,7 @@ exports[`Storyshots components/SavedElementsModal/ElementGrid default 1`] = `
       className="euiFlexItem canvasElementCard__wrapper"
     >
       <div
-        className="euiCard euiCard--paddingMedium euiCard--leftAligned euiCard--isClickable canvasElementCard"
+        className="euiCard euiCard--shadow euiCard--borderRadiusMedium euiCard--paddingMedium euiCard--leftAligned euiCard--isClickable canvasElementCard"
         onClick={[Function]}
       >
         <div
@@ -185,7 +185,7 @@ exports[`Storyshots components/SavedElementsModal/ElementGrid default 1`] = `
               onFocus={[Function]}
               type="button"
             >
-              <div
+              <span
                 aria-hidden="true"
                 className="euiButtonIcon__icon"
                 data-euiicon-type="pencil"
@@ -212,7 +212,7 @@ exports[`Storyshots components/SavedElementsModal/ElementGrid default 1`] = `
               onFocus={[Function]}
               type="button"
             >
-              <div
+              <span
                 aria-hidden="true"
                 className="euiButtonIcon__icon"
                 data-euiicon-type="trash"
@@ -227,7 +227,7 @@ exports[`Storyshots components/SavedElementsModal/ElementGrid default 1`] = `
       className="euiFlexItem canvasElementCard__wrapper"
     >
       <div
-        className="euiCard euiCard--paddingMedium euiCard--leftAligned euiCard--isClickable canvasElementCard"
+        className="euiCard euiCard--shadow euiCard--borderRadiusMedium euiCard--paddingMedium euiCard--leftAligned euiCard--isClickable canvasElementCard"
         onClick={[Function]}
       >
         <div
@@ -291,7 +291,7 @@ exports[`Storyshots components/SavedElementsModal/ElementGrid default 1`] = `
               onFocus={[Function]}
               type="button"
             >
-              <div
+              <span
                 aria-hidden="true"
                 className="euiButtonIcon__icon"
                 data-euiicon-type="pencil"
@@ -318,7 +318,7 @@ exports[`Storyshots components/SavedElementsModal/ElementGrid default 1`] = `
               onFocus={[Function]}
               type="button"
             >
-              <div
+              <span
                 aria-hidden="true"
                 className="euiButtonIcon__icon"
                 data-euiicon-type="trash"

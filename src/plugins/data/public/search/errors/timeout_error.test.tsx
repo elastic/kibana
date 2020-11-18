@@ -23,7 +23,7 @@ import { coreMock } from '../../../../../core/public/mocks';
 const startMock = coreMock.createStart();
 
 import { mount } from 'enzyme';
-import { AbortError } from 'src/plugins/data/common';
+import { AbortError } from '../../../../kibana_utils/public';
 
 describe('SearchTimeoutError', () => {
   beforeEach(() => {
@@ -37,9 +37,9 @@ describe('SearchTimeoutError', () => {
 
     expect(component.find('EuiButton').length).toBe(1);
     component.find('EuiButton').simulate('click');
-    expect(startMock.application.navigateToApp).toHaveBeenCalledWith('management', {
-      path: '/kibana/indexPatterns',
-    });
+    expect(startMock.application.navigateToUrl).toHaveBeenCalledWith(
+      'https://www.elastic.co/subscriptions'
+    );
   });
 
   it('Should create contact admin message', () => {

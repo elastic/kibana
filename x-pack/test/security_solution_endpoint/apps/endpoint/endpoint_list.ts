@@ -64,8 +64,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     ],
   ];
 
-  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/72102
-  describe.skip('endpoint list', function () {
+  describe('endpoint list', function () {
     this.tags('ciGroup7');
     const sleep = (ms = 100) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -85,8 +84,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('finds data after load and polling', async () => {
-        await esArchiver.load('endpoint/metadata/api_feature', { useCreate: true });
-        await pageObjects.endpoint.waitForTableToHaveData('endpointListTable', 100000);
+        await esArchiver.load('endpoint/metadata/destination_index', { useCreate: true });
+        await pageObjects.endpoint.waitForTableToHaveData('endpointListTable', 1100);
         const tableData = await pageObjects.endpointPageUtils.tableData('endpointListTable');
         expect(tableData).to.eql(expectedData);
       });
@@ -94,8 +93,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     describe('when there is data,', () => {
       before(async () => {
-        await esArchiver.load('endpoint/metadata/api_feature', { useCreate: true });
-        await sleep(100000);
+        await esArchiver.load('endpoint/metadata/destination_index', { useCreate: true });
         await pageObjects.endpoint.navigateToEndpointList();
       });
       after(async () => {
@@ -105,7 +103,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       it('finds page title', async () => {
         const title = await testSubjects.getVisibleText('header-page-title');
-        expect(title).to.equal('Endpoints BETA');
+        expect(title).to.equal('Endpoints');
       });
 
       it('displays table data', async () => {
@@ -164,7 +162,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       describe.skip("has a url with an endpoint host's id", () => {
         before(async () => {
           await pageObjects.endpoint.navigateToEndpointList(
-            'selected_host=fc0ff548-feba-41b6-8367-65e8790d0eaf'
+            'selected_endpoint=3838df35-a095-4af4-8fce-0b6d78793f2e'
           );
         });
 
@@ -212,7 +210,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     describe('displays the correct table data for the kql queries', () => {
       before(async () => {
-        await esArchiver.load('endpoint/metadata/api_feature', { useCreate: true });
+        await esArchiver.load('endpoint/metadata/destination_index', { useCreate: true });
         await pageObjects.endpoint.navigateToEndpointList();
       });
       after(async () => {
@@ -220,8 +218,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await deleteAllDocsFromMetadataCurrentIndex(getService);
       });
       it('for the kql query: na, table shows an empty list', async () => {
-        await testSubjects.setValue('adminSearchBar', 'na');
-        await (await testSubjects.find('querySubmitButton')).click();
+        const adminSearchBar = await testSubjects.find('adminSearchBar');
+        await adminSearchBar.clearValueWithKeyboard();
+        await adminSearchBar.type('na');
+        const querySubmitButton = await testSubjects.find('querySubmitButton');
+        await querySubmitButton.click();
         const expectedDataFromQuery = [
           [
             'Hostname',
@@ -241,18 +242,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const tableData = await pageObjects.endpointPageUtils.tableData('endpointListTable');
         expect(tableData).to.eql(expectedDataFromQuery);
       });
-
       it('for the kql query: HostDetails.Endpoint.policy.applied.id : "C2A9093E-E289-4C0A-AA44-8C32A414FA7A", table shows 2 items', async () => {
-        await testSubjects.setValue('adminSearchBar', ' ');
-        await (await testSubjects.find('querySubmitButton')).click();
-
-        const endpointListTableTotal = await testSubjects.getVisibleText('endpointListTableTotal');
-
-        await testSubjects.setValue(
-          'adminSearchBar',
+        const adminSearchBar = await testSubjects.find('adminSearchBar');
+        await adminSearchBar.clearValueWithKeyboard();
+        await adminSearchBar.type(
           'HostDetails.Endpoint.policy.applied.id : "C2A9093E-E289-4C0A-AA44-8C32A414FA7A" '
         );
-        await (await testSubjects.find('querySubmitButton')).click();
+        const querySubmitButton = await testSubjects.find('querySubmitButton');
+        await querySubmitButton.click();
         const expectedDataFromQuery = [
           [
             'Hostname',
@@ -288,11 +285,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             '',
           ],
         ];
-
-        await pageObjects.endpoint.waitForVisibleTextToChange(
-          'endpointListTableTotal',
-          endpointListTableTotal
-        );
+        await pageObjects.endpoint.waitForTableToHaveData('endpointListTable');
         const tableData = await pageObjects.endpointPageUtils.tableData('endpointListTable');
         expect(tableData).to.eql(expectedDataFromQuery);
       });

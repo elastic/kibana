@@ -285,7 +285,7 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
     resetForm();
     const config = extractCloningConfig(cloneJob);
     if (isAdvancedConfig(config)) {
-      setJobConfig(config);
+      setFormState(getFormStateFromJobConfig(config));
       switchToAdvancedEditor();
     } else {
       setFormState(getFormStateFromJobConfig(config));

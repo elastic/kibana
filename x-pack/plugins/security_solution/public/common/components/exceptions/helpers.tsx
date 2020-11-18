@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { EuiText, EuiCommentProps, EuiAvatar } from '@elastic/eui';
-import { capitalize, union } from 'lodash';
+import { capitalize } from 'lodash';
 import moment from 'moment';
 import uuid from 'uuid';
 
@@ -33,8 +33,8 @@ import {
   createExceptionListItemSchema,
   exceptionListItemSchema,
   UpdateExceptionListItemSchema,
-  ExceptionListType,
   EntryNested,
+  OsTypeArray,
 } from '../../../shared_imports';
 import { IIndexPattern } from '../../../../../../../src/plugins/data/common';
 import { validate } from '../../../../common/validate';
@@ -99,19 +99,11 @@ export const getEntryValue = (item: BuilderEntry): string | string[] | undefined
 };
 
 /**
- * Retrieves the values of tags marked as os
- *
- * @param tags an ExceptionItem's tags
- */
-export const getOperatingSystems = (tags: string[]): string[] => {
-  return tags.filter((tag) => tag.startsWith('os:')).map((os) => os.substring(3).trim());
-};
-
-/**
  * Formats os value array to a displayable string
  */
 export const formatOperatingSystems = (osTypes: string[]): string => {
   return osTypes
+    .filter((os) => ['linux', 'macos', 'windows'].includes(os))
     .map((os) => {
       if (os === 'macos') {
         return 'macOS';
@@ -119,21 +111,6 @@ export const formatOperatingSystems = (osTypes: string[]): string => {
       return capitalize(os);
     })
     .join(', ');
-};
-
-/**
- * Returns all tags that match a given regex
- */
-export const getTagsInclude = ({
-  tags,
-  regex,
-}: {
-  tags: string[];
-  regex: RegExp;
-}): [boolean, string | null] => {
-  const matches: string[] | null = tags.join(';').match(regex);
-  const match = matches != null ? matches[1] : null;
-  return [matches != null, match];
 };
 
 /**
@@ -158,18 +135,15 @@ export const getFormattedComments = (comments: CommentsArray): EuiCommentProps[]
   }));
 
 export const getNewExceptionItem = ({
-  listType,
   listId,
   namespaceType,
   ruleName,
 }: {
-  listType: ExceptionListType;
   listId: string;
   namespaceType: NamespaceType;
   ruleName: string;
 }): CreateExceptionListItemBuilderSchema => {
   return {
-    _tags: [listType],
     comments: [],
     description: `${ruleName} - exception list item`,
     entries: [
@@ -326,14 +300,12 @@ export const enrichExistingExceptionItemWithComments = (
  */
 export const enrichExceptionItemsWithOS = (
   exceptionItems: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>,
-  osTypes: string[]
+  osTypes: OsTypeArray
 ): Array<ExceptionListItemSchema | CreateExceptionListItemSchema> => {
-  const osTags = osTypes.map((os) => `os:${os}`);
   return exceptionItems.map((item: ExceptionListItemSchema | CreateExceptionListItemSchema) => {
-    const newTags = item._tags ? union(item._tags, osTags) : [...osTags];
     return {
       ...item,
-      _tags: newTags,
+      os_types: osTypes,
     };
   });
 };
@@ -419,7 +391,6 @@ export const getCodeSignatureValue = (
  * Returns the default values from the alert data to autofill new endpoint exceptions
  */
 export const getPrepopulatedItem = ({
-  listType,
   listId,
   ruleName,
   codeSignature,
@@ -428,7 +399,6 @@ export const getPrepopulatedItem = ({
   eventCode,
   listNamespace = 'agnostic',
 }: {
-  listType: ExceptionListType;
   listId: string;
   listNamespace?: NamespaceType;
   ruleName: string;
@@ -438,7 +408,7 @@ export const getPrepopulatedItem = ({
   eventCode: string;
 }): ExceptionsBuilderExceptionItem => {
   return {
-    ...getNewExceptionItem({ listType, listId, namespaceType: listNamespace, ruleName }),
+    ...getNewExceptionItem({ listId, namespaceType: listNamespace, ruleName }),
     entries: [
       {
         field: 'file.Ext.code_signature',
@@ -459,7 +429,7 @@ export const getPrepopulatedItem = ({
         ],
       },
       {
-        field: 'file.path.text',
+        field: 'file.path.caseless',
         operator: 'included',
         type: 'match',
         value: filePath ?? '',
@@ -514,7 +484,6 @@ export const entryHasNonEcsType = (
  * Returns the default values from the alert data to autofill new endpoint exceptions
  */
 export const defaultEndpointExceptionItems = (
-  listType: ExceptionListType,
   listId: string,
   ruleName: string,
   alertEcsData: Ecs
@@ -523,7 +492,6 @@ export const defaultEndpointExceptionItems = (
 
   return getCodeSignatureValue(alertEcsData).map((codeSignature) =>
     getPrepopulatedItem({
-      listType,
       listId,
       ruleName,
       filePath: file && file.path ? file.path[0] : '',

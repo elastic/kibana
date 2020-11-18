@@ -25,7 +25,7 @@ import {
 } from '@elastic/eui';
 
 import { ApplicationStart } from 'kibana/public';
-import { getPolicyPath } from '../../application/services/navigation';
+import { getPolicyEditPath } from '../../application/services/navigation';
 import { Index, IndexLifecyclePolicy } from '../../../common/types';
 
 const getHeaders = (): Array<[keyof IndexLifecyclePolicy, string]> => {
@@ -143,7 +143,7 @@ export class IndexLifecycleSummary extends Component<Props, State> {
     );
     return (
       <Fragment key="phaseDefinition">
-        <EuiDescriptionListTitle>
+        <EuiDescriptionListTitle key="phaseDefinition_title">
           <strong>
             <FormattedMessage
               defaultMessage="Phase definition"
@@ -158,7 +158,6 @@ export class IndexLifecycleSummary extends Component<Props, State> {
             button={button}
             isOpen={this.state.showPhaseExecutionPopover}
             closePopover={this.closePhaseExecutionPopover}
-            withTitle
           >
             <EuiPopoverTitle>
               <FormattedMessage
@@ -193,7 +192,7 @@ export class IndexLifecycleSummary extends Component<Props, State> {
         content = (
           <EuiLink
             href={this.props.getUrlForApp('management', {
-              path: `data/index_lifecycle_management/${getPolicyPath(value)}`,
+              path: `data/index_lifecycle_management/${getPolicyEditPath(value)}`,
             })}
           >
             {value}
@@ -204,14 +203,14 @@ export class IndexLifecycleSummary extends Component<Props, State> {
       }
       content = content || '-';
       const cell = (
-        <>
+        <Fragment key={String(arrayIndex)}>
           <EuiDescriptionListTitle key={fieldName}>
             <strong>{label}</strong>
           </EuiDescriptionListTitle>
           <EuiDescriptionListDescription key={fieldName + '_desc'}>
             {content}
           </EuiDescriptionListDescription>
-        </>
+        </Fragment>
       );
       if (arrayIndex % 2 === 0) {
         rows.left.push(cell);

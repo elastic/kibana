@@ -80,7 +80,7 @@ By default, if you are running {kib} locally, go to `http://localhost:5601/`.
 If the Elastic {security-features} are enabled, log in.
 --
 
-. Open *Stack Monitoring*. 
+. Open the main menu, then click *Stack Monitoring*. 
 +
 --
 If data collection is disabled, you are prompted to turn on data collection.

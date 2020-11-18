@@ -6,7 +6,7 @@
 
 import { Action } from 'history';
 import { ApiResponse } from '@elastic/elasticsearch/lib/Transport';
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { ConfigPath } from '@kbn/config';
 import { EnvironmentMode } from '@kbn/config';
 import { EuiBreadcrumb } from '@elastic/eui';
@@ -38,6 +38,7 @@ import { TransportRequestParams } from '@elastic/elasticsearch/lib/Transport';
 import { TransportRequestPromise } from '@elastic/elasticsearch/lib/Transport';
 import { Type } from '@kbn/config-schema';
 import { TypeOf } from '@kbn/config-schema';
+import { UiStatsMetricType } from '@kbn/analytics';
 import { UnregisterCallback } from 'history';
 import { UserProvidedValues as UserProvidedValues_2 } from 'src/core/server/types';
 
@@ -343,6 +344,8 @@ export interface ChromeStart {
     getBadge$(): Observable<ChromeBadge | undefined>;
     getBrand$(): Observable<ChromeBrand>;
     getBreadcrumbs$(): Observable<ChromeBreadcrumb[]>;
+    // Warning: (ae-forgotten-export) The symbol "ChromeBreadcrumbsAppendExtension" needs to be exported by the entry point index.d.ts
+    getBreadcrumbsAppendExtension$(): Observable<ChromeBreadcrumbsAppendExtension | undefined>;
     getCustomNavLink$(): Observable<Partial<ChromeNavLink> | undefined>;
     getHelpExtension$(): Observable<ChromeHelpExtension | undefined>;
     getIsNavDrawerLocked$(): Observable<boolean>;
@@ -355,6 +358,7 @@ export interface ChromeStart {
     setBadge(badge?: ChromeBadge): void;
     setBrand(brand: ChromeBrand): void;
     setBreadcrumbs(newBreadcrumbs: ChromeBreadcrumb[]): void;
+    setBreadcrumbsAppendExtension(breadcrumbsAppendExtension?: ChromeBreadcrumbsAppendExtension): void;
     setCustomNavLink(newCustomNavLink?: Partial<ChromeNavLink>): void;
     setHelpExtension(helpExtension?: ChromeHelpExtension): void;
     setHelpSupportUrl(url: string): void;
@@ -457,6 +461,7 @@ export interface DocLinksStart {
     // (undocumented)
     readonly links: {
         readonly dashboard: {
+            readonly guide: string;
             readonly drilldowns: string;
             readonly drilldownsTriggerPicker: string;
             readonly urlDrilldownTemplateSyntax: string;
@@ -539,6 +544,7 @@ export interface DocLinksStart {
             readonly gettingStarted: string;
         };
         readonly query: {
+            readonly eql: string;
             readonly luceneQuerySyntax: string;
             readonly queryDsl: string;
             readonly kueryQuerySyntax: string;
@@ -619,8 +625,7 @@ export interface HttpFetchOptionsWithPath extends HttpFetchOptions {
 
 // @public (undocumented)
 export interface HttpFetchQuery {
-    // (undocumented)
-    [key: string]: string | number | boolean | undefined | Array<string | number | boolean | undefined>;
+    [key: string]: string | number | boolean | string[] | number[] | boolean[] | undefined | null;
 }
 
 // @public
@@ -857,6 +862,60 @@ export interface OverlayBannersStart {
     replace(id: string | undefined, mount: MountPoint, priority?: number): string;
 }
 
+// @public (undocumented)
+export interface OverlayFlyoutOpenOptions {
+    // (undocumented)
+    'data-test-subj'?: string;
+    // (undocumented)
+    className?: string;
+    // (undocumented)
+    closeButtonAriaLabel?: string;
+    // (undocumented)
+    ownFocus?: boolean;
+}
+
+// @public
+export interface OverlayFlyoutStart {
+    open(mount: MountPoint, options?: OverlayFlyoutOpenOptions): OverlayRef;
+}
+
+// @public (undocumented)
+export interface OverlayModalConfirmOptions {
+    // (undocumented)
+    'data-test-subj'?: string;
+    // (undocumented)
+    buttonColor?: EuiConfirmModalProps['buttonColor'];
+    // (undocumented)
+    cancelButtonText?: string;
+    // (undocumented)
+    className?: string;
+    // (undocumented)
+    closeButtonAriaLabel?: string;
+    // (undocumented)
+    confirmButtonText?: string;
+    // (undocumented)
+    defaultFocusedButton?: EuiConfirmModalProps['defaultFocusedButton'];
+    maxWidth?: boolean | number | string;
+    // (undocumented)
+    title?: string;
+}
+
+// @public (undocumented)
+export interface OverlayModalOpenOptions {
+    // (undocumented)
+    'data-test-subj'?: string;
+    // (undocumented)
+    className?: string;
+    // (undocumented)
+    closeButtonAriaLabel?: string;
+}
+
+// @public
+export interface OverlayModalStart {
+    open(mount: MountPoint, options?: OverlayModalOpenOptions): OverlayRef;
+    openConfirm(message: MountPoint | string, options?: OverlayModalConfirmOptions): Promise<boolean>;
+}
+
 // @public
 export interface OverlayRef {
     close(): Promise<void>;
@@ -869,12 +928,8 @@ export interface OverlayStart {
     banners: OverlayBannersStart;
     // (undocumented)
     openConfirm: OverlayModalStart['openConfirm'];
-    // Warning: (ae-forgotten-export) The symbol "OverlayFlyoutStart" needs to be exported by the entry point index.d.ts
-    //
     // (undocumented)
     openFlyout: OverlayFlyoutStart['open'];
-    // Warning: (ae-forgotten-export) The symbol "OverlayModalStart" needs to be exported by the entry point index.d.ts
-    //
     // (undocumented)
     openModal: OverlayModalStart['open'];
 }
@@ -1029,8 +1084,9 @@ export class SavedObjectsClient {
     }>) => Promise<SavedObjectsBatchResponse<unknown>>;
     bulkUpdate<T = unknown>(objects?: SavedObjectsBulkUpdateObject[]): Promise<SavedObjectsBatchResponse<unknown>>;
     create: <T = unknown>(type: string, attributes: T, options?: SavedObjectsCreateOptions) => Promise<SimpleSavedObject<T>>;
+    // Warning: (ae-forgotten-export) The symbol "SavedObjectsDeleteOptions" needs to be exported by the entry point index.d.ts
     // Warning: (ae-forgotten-export) The symbol "SavedObjectsClientContract" needs to be exported by the entry point index.d.ts
-    delete: (type: string, id: string) => ReturnType<SavedObjectsClientContract_2['delete']>;
+    delete: (type: string, id: string, options?: SavedObjectsDeleteOptions | undefined) => ReturnType<SavedObjectsClientContract_2['delete']>;
     // Warning: (ae-forgotten-export) The symbol "SavedObjectsFindOptions" needs to be exported by the entry point index.d.ts
     find: <T = unknown>(options: SavedObjectsFindOptions_2) => Promise<SavedObjectsFindResponsePublic<T>>;
     get: <T = unknown>(type: string, id: string) => Promise<SimpleSavedObject<T>>;
@@ -1051,18 +1107,14 @@ export interface SavedObjectsCreateOptions {
 
 // @public (undocumented)
 export interface SavedObjectsFindOptions {
-    // (undocumented)
     defaultSearchOperator?: 'AND' | 'OR';
     fields?: string[];
     // Warning: (ae-forgotten-export) The symbol "KueryNode" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
     filter?: string | KueryNode;
-    // (undocumented)
-    hasReference?: {
-        type: string;
-        id: string;
-    };
+    hasReference?: SavedObjectsFindOptionsReference | SavedObjectsFindOptionsReference[];
+    hasReferenceOperator?: 'AND' | 'OR';
     // (undocumented)
     namespaces?: string[];
     // (undocumented)
@@ -1080,6 +1132,14 @@ export interface SavedObjectsFindOptions {
     // (undocumented)
     type: string | string[];
     typeToNamespacesMap?: Map<string, string[] | undefined>;
+}
+
+// @public (undocumented)
+export interface SavedObjectsFindOptionsReference {
+    // (undocumented)
+    id: string;
+    // (undocumented)
+    type: string;
 }
 
 // @public
@@ -1352,6 +1412,11 @@ export interface UiSettingsParams<T = unknown> {
     // Warning: (ae-forgotten-export) The symbol "DeprecationSettings" needs to be exported by the entry point index.d.ts
     deprecation?: DeprecationSettings;
     description?: string;
+    // @deprecated
+    metric?: {
+        type: UiStatsMetricType;
+        name: string;
+    };
     name?: string;
     optionLabels?: Record<string, string>;
     options?: string[];

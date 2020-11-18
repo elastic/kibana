@@ -26,17 +26,11 @@ export function ErrorPageProvider({ getPageObjects }: FtrProviderContext) {
   class ErrorPage {
     public async expectForbidden() {
       const messageText = await common.getBodyText();
-      expect(messageText).to.eql(
-        JSON.stringify({
-          statusCode: 403,
-          error: 'Forbidden',
-          message: 'Forbidden',
-        })
-      );
+      expect(messageText).to.contain('You do not have permission to access the requested page');
     }
 
     public async expectNotFound() {
-      const messageText = await common.getBodyText();
+      const messageText = await common.getJsonBodyText();
       expect(messageText).to.eql(
         JSON.stringify({
           statusCode: 404,

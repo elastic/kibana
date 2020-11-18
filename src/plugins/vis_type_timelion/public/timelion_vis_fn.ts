@@ -19,34 +19,40 @@
 
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { ExpressionFunctionDefinition, Render } from 'src/plugins/expressions/public';
 import {
-  ExpressionFunctionDefinition,
-  KibanaContext,
-  Render,
-} from 'src/plugins/expressions/public';
-import { getTimelionRequestHandler } from './helpers/timelion_request_handler';
+  getTimelionRequestHandler,
+  TimelionSuccessResponse,
+} from './helpers/timelion_request_handler';
 import { TIMELION_VIS_NAME } from './timelion_vis_type';
 import { TimelionVisDependencies } from './plugin';
-import { Filter, Query, TimeRange } from '../../data/common';
+import { KibanaContext, Filter, Query, TimeRange } from '../../data/public';
 
 type Input = KibanaContext | null;
-type Output = Promise<Render<RenderValue>>;
+type Output = Promise<Render<TimelionRenderValue>>;
 interface Arguments {
   expression: string;
   interval: string;
 }
 
-interface RenderValue {
-  visData: Input;
+export interface TimelionRenderValue {
+  visData: TimelionSuccessResponse;
   visType: 'timelion';
-  visParams: VisParams;
+  visParams: TimelionVisParams;
 }
 
-export type VisParams = Arguments;
+export type TimelionVisParams = Arguments;
+
+export type TimelionExpressionFunctionDefinition = ExpressionFunctionDefinition<
+  'timelion_vis',
+  Input,
+  Arguments,
+  Output
+>;
 
 export const getTimelionVisualizationConfig = (
   dependencies: TimelionVisDependencies
-): ExpressionFunctionDefinition<'timelion_vis', Input, Arguments, Output> => ({
+): TimelionExpressionFunctionDefinition => ({
   name: 'timelion_vis',
   type: 'render',
   inputTypes: ['kibana_context', 'null'],
@@ -82,7 +88,7 @@ export const getTimelionVisualizationConfig = (
 
     return {
       type: 'render',
-      as: 'visualization',
+      as: 'timelion_vis',
       value: {
         visParams,
         visType: TIMELION_VIS_NAME,

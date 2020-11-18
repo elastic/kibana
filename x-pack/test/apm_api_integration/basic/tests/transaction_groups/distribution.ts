@@ -20,7 +20,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const url = `/api/apm/services/opbeans-java/transaction_groups/distribution?${qs.stringify({
     start: metadata.start,
     end: metadata.end,
-    uiFilters: {},
+    uiFilters: encodeURIComponent('{}'),
     transactionName: 'APIRestController#stats',
     transactionType: 'request',
   })}`;
@@ -37,8 +37,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
     });
 
-    // SKIP FAILING TEST to unblock CI: https://github.com/elastic/kibana/issues/78942
-    describe.skip('when data is loaded', () => {
+    describe('when data is loaded', () => {
       let response: any;
       before(async () => {
         await esArchiver.load(archiveName);
@@ -61,7 +60,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       it('returns the correct number of buckets', () => {
-        expectSnapshot(response.body.buckets.length).toMatchInline(`19`);
+        expectSnapshot(response.body.buckets.length).toMatchInline(`45`);
       });
 
       it('returns the correct bucket size', () => {
@@ -73,18 +72,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           (bucket: any) => !isEmpty(bucket.samples)
         );
 
-        expectSnapshot(bucketWithSamples.count).toMatchInline(`2`);
+        expectSnapshot(bucketWithSamples.count).toMatchInline(`1`);
 
         expectSnapshot(bucketWithSamples.samples.sort((sample: any) => sample.traceId))
           .toMatchInline(`
           Array [
             Object {
-              "traceId": "a1333547d1257c636154290cddd38c3a",
-              "transactionId": "3e656b390989133d",
-            },
-            Object {
-              "traceId": "c799c34f4ee2b0f9998745ea7354d599",
-              "transactionId": "69b6251b239abb46",
+              "traceId": "3dd90c5c2035f5bcb2728a34cb48d796",
+              "transactionId": "69f3ff7d35056f63",
             },
           ]
         `);

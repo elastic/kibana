@@ -18,6 +18,7 @@
  */
 
 import { CoreStart, CoreSetup, Plugin, PluginInitializerContext } from 'src/core/public';
+import { PublicMethodsOf } from '@kbn/utility-types';
 import { UiActionsService } from './service';
 import {
   selectRangeTrigger,

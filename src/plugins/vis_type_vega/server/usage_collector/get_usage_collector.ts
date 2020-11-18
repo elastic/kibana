@@ -17,22 +17,15 @@
  * under the License.
  */
 import { parse } from 'hjson';
-import { first } from 'rxjs/operators';
 import { SearchResponse } from 'elasticsearch';
 import { LegacyAPICaller, SavedObject } from 'src/core/server';
 
-import {
-  ConfigObservable,
-  VegaSavedObjectAttributes,
-  VisTypeVegaPluginSetupDependencies,
-} from '../types';
+import { VegaSavedObjectAttributes, VisTypeVegaPluginSetupDependencies } from '../types';
 
 type UsageCollectorDependencies = Pick<VisTypeVegaPluginSetupDependencies, 'home'>;
 
 type ESResponse = SearchResponse<{ visualization: { visState: string } }>;
 type VegaType = 'vega' | 'vega-lite';
-
-const VEGA_USAGE_TYPE = 'vis_type_vega';
 
 function isVegaType(attributes: any): attributes is VegaSavedObjectAttributes {
   return attributes && attributes.type === 'vega' && attributes.params?.spec;
@@ -64,11 +57,25 @@ const getDefaultVegaVisualizations = (home: UsageCollectorDependencies['home']) 
   return titles;
 };
 
-const getStats = async (
+export interface VegaUsage {
+  vega_lib_specs_total: number;
+  vega_lite_lib_specs_total: number;
+  vega_use_map_total: number;
+}
+
+export const getStats = async (
   callCluster: LegacyAPICaller,
   index: string,
   { home }: UsageCollectorDependencies
-) => {
+): Promise<VegaUsage | undefined> => {
+  let shouldPublishTelemetry = false;
+
+  const vegaUsage = {
+    vega_lib_specs_total: 0,
+    vega_lite_lib_specs_total: 0,
+    vega_use_map_total: 0,
+  };
+
   const searchParams = {
     size: 10000,
     index,
@@ -82,9 +89,9 @@ const getStats = async (
       },
     },
   };
+
   const esResponse: ESResponse = await callCluster('search', searchParams);
   const size = esResponse?.hits?.hits?.length ?? 0;
-  let shouldPublishTelemetry = false;
 
   if (!size) {
     return;
@@ -93,55 +100,32 @@ const getStats = async (
   // we want to exclude the Vega Sample Data visualizations from the stats
   // in order to have more accurate results
   const excludedFromStatsVisualizations = getDefaultVegaVisualizations(home);
+  for (const hit of esResponse.hits.hits) {
+    const visualization = hit._source?.visualization;
+    const visState = JSON.parse(visualization?.visState ?? '{}');
 
-  const finalTelemetry = esResponse.hits.hits.reduce(
-    (telemetry, hit) => {
-      const visualization = hit._source?.visualization;
-      const visState = JSON.parse(visualization?.visState ?? '{}');
+    if (isVegaType(visState) && !excludedFromStatsVisualizations.includes(visState.title)) {
+      try {
+        const spec = parse(visState.params.spec, { legacyRoot: false });
 
-      if (isVegaType(visState) && !excludedFromStatsVisualizations.includes(visState.title))
-        try {
-          const spec = parse(visState.params.spec, { legacyRoot: false });
+        if (spec) {
+          shouldPublishTelemetry = true;
 
-          if (spec) {
-            shouldPublishTelemetry = true;
-            if (checkVegaSchemaType(spec.$schema, 'vega')) {
-              telemetry.vega_lib_specs_total++;
-            }
-            if (checkVegaSchemaType(spec.$schema, 'vega-lite')) {
-              telemetry.vega_lite_lib_specs_total++;
-            }
-            if (spec.config?.kibana?.type === 'map') {
-              telemetry.vega_use_map_total++;
-            }
+          if (checkVegaSchemaType(spec.$schema, 'vega')) {
+            vegaUsage.vega_lib_specs_total++;
           }
-        } catch (e) {
-          // Let it go, the data is invalid and we'll don't need to handle it
+          if (checkVegaSchemaType(spec.$schema, 'vega-lite')) {
+            vegaUsage.vega_lite_lib_specs_total++;
+          }
+          if (spec.config?.kibana?.type === 'map') {
+            vegaUsage.vega_use_map_total++;
+          }
         }
-
-      return telemetry;
-    },
-    {
-      vega_lib_specs_total: 0,
-      vega_lite_lib_specs_total: 0,
-      vega_use_map_total: 0,
+      } catch (e) {
+        // Let it go, the data is invalid and we'll don't need to handle it
+      }
     }
-  );
+  }
 
-  return shouldPublishTelemetry ? finalTelemetry : undefined;
+  return shouldPublishTelemetry ? vegaUsage : undefined;
 };
-
-export function getUsageCollector(
-  config: ConfigObservable,
-  dependencies: UsageCollectorDependencies
-) {
-  return {
-    type: VEGA_USAGE_TYPE,
-    isReady: () => true,
-    fetch: async (callCluster: LegacyAPICaller) => {
-      const { index } = (await config.pipe(first()).toPromise()).kibana;
-
-      return await getStats(callCluster, index, dependencies);
-    },
-  };
-}

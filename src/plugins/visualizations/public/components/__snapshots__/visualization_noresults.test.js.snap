@@ -16,7 +16,7 @@ exports[`VisualizationNoResults should render according to snapshot 1`] = `
       <div
         class="euiTextColor euiTextColor--subdued"
       >
-        <div
+        <span
           color="subdued"
           data-euiicon-type="visualizeApp"
         />

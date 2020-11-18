@@ -20,8 +20,8 @@ import { EuiHighlight } from '@elastic/eui';
 import { OperationType } from '../indexpattern';
 import { LensFieldIcon } from '../lens_field_icon';
 import { DataType } from '../../types';
-import { OperationSupportMatrix } from './dimension_panel';
-import { IndexPattern, IndexPatternField, IndexPatternPrivateState } from '../types';
+import { OperationSupportMatrix } from './operation_support';
+import { IndexPattern, IndexPatternPrivateState } from '../types';
 import { trackUiEvent } from '../../lens_ui_telemetry';
 import { fieldExists } from '../pure_helpers';
 
@@ -33,7 +33,6 @@ export interface FieldChoice {
 
 export interface FieldSelectProps extends EuiComboBoxProps<{}> {
   currentIndexPattern: IndexPattern;
-  fieldMap: Record<string, IndexPatternField>;
   incompatibleSelectedOperationType: OperationType | null;
   selectedColumnOperationType?: OperationType;
   selectedColumnSourceField?: string;
@@ -41,11 +40,11 @@ export interface FieldSelectProps extends EuiComboBoxProps<{}> {
   onChoose: (choice: FieldChoice) => void;
   onDeleteColumn: () => void;
   existingFields: IndexPatternPrivateState['existingFields'];
+  fieldIsInvalid: boolean;
 }
 
 export function FieldSelect({
   currentIndexPattern,
-  fieldMap,
   incompatibleSelectedOperationType,
   selectedColumnOperationType,
   selectedColumnSourceField,
@@ -53,6 +52,7 @@ export function FieldSelect({
   onChoose,
   onDeleteColumn,
   existingFields,
+  fieldIsInvalid,
   ...rest
 }: FieldSelectProps) {
   const { operationByField } = operationSupportMatrix;
@@ -61,31 +61,32 @@ export function FieldSelect({
 
     function isCompatibleWithCurrentOperation(fieldName: string) {
       if (incompatibleSelectedOperationType) {
-        return operationByField[fieldName]!.includes(incompatibleSelectedOperationType);
+        return operationByField[fieldName]!.has(incompatibleSelectedOperationType);
       }
       return (
         !selectedColumnOperationType ||
-        operationByField[fieldName]!.includes(selectedColumnOperationType)
+        operationByField[fieldName]!.has(selectedColumnOperationType)
       );
     }
 
     const [specialFields, normalFields] = _.partition(
       fields,
-      (field) => fieldMap[field].type === 'document'
+      (field) => currentIndexPattern.getFieldByName(field)?.type === 'document'
     );
 
     const containsData = (field: string) =>
-      fieldMap[field].type === 'document' ||
+      currentIndexPattern.getFieldByName(field)?.type === 'document' ||
       fieldExists(existingFields, currentIndexPattern.title, field);
 
     function fieldNamesToOptions(items: string[]) {
       return items
+        .filter((field) => currentIndexPattern.getFieldByName(field)?.displayName)
         .map((field) => ({
-          label: fieldMap[field].displayName,
+          label: currentIndexPattern.getFieldByName(field)?.displayName,
           value: {
             type: 'field',
             field,
-            dataType: fieldMap[field].type,
+            dataType: currentIndexPattern.getFieldByName(field)?.type,
             operationType:
               selectedColumnOperationType && isCompatibleWithCurrentOperation(field)
                 ? selectedColumnOperationType
@@ -116,7 +117,10 @@ export function FieldSelect({
         }));
     }
 
-    const [metaFields, nonMetaFields] = _.partition(normalFields, (field) => fieldMap[field].meta);
+    const [metaFields, nonMetaFields] = _.partition(
+      normalFields,
+      (field) => currentIndexPattern.getFieldByName(field)?.meta
+    );
     const [availableFields, emptyFields] = _.partition(nonMetaFields, containsData);
 
     const constructFieldsOptions = (fieldsArr: string[], label: string) =>
@@ -156,7 +160,6 @@ export function FieldSelect({
     incompatibleSelectedOperationType,
     selectedColumnOperationType,
     currentIndexPattern,
-    fieldMap,
     operationByField,
     existingFields,
   ]);
@@ -171,12 +174,14 @@ export function FieldSelect({
         defaultMessage: 'Field',
       })}
       options={(memoizedFieldOptions as unknown) as EuiComboBoxOptionOption[]}
-      isInvalid={Boolean(incompatibleSelectedOperationType)}
+      isInvalid={Boolean(incompatibleSelectedOperationType || fieldIsInvalid)}
       selectedOptions={
         ((selectedColumnOperationType && selectedColumnSourceField
           ? [
               {
-                label: fieldMap[selectedColumnSourceField].displayName,
+                label: fieldIsInvalid
+                  ? selectedColumnSourceField
+                  : currentIndexPattern.getFieldByName(selectedColumnSourceField)?.displayName,
                 value: { type: 'field', field: selectedColumnSourceField },
               },
             ]

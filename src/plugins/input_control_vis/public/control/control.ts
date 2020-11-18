@@ -83,7 +83,7 @@ export abstract class Control<FilterManager extends BaseFilterManager> {
   format = (value: any) => {
     const indexPattern = this.filterManager.getIndexPattern();
     const field = this.filterManager.getField();
-    if (field) {
+    if (field && indexPattern) {
       return indexPattern.getFormatterForField(field).convert(value);
     }
 

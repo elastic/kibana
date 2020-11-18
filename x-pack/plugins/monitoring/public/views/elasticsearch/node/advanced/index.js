@@ -20,7 +20,11 @@ import { MonitoringViewBaseController } from '../../../base_controller';
 import {
   CODE_PATH_ELASTICSEARCH,
   ALERT_CPU_USAGE,
+  ALERT_THREAD_POOL_SEARCH_REJECTIONS,
+  ALERT_THREAD_POOL_WRITE_REJECTIONS,
+  ALERT_MISSING_MONITORING_DATA,
   ALERT_DISK_USAGE,
+  ALERT_MEMORY_USAGE,
 } from '../../../../../common/constants';
 
 function getPageData($injector) {
@@ -71,7 +75,14 @@ uiRoutes.when('/elasticsearch/nodes/:node/advanced', {
         alerts: {
           shouldFetch: true,
           options: {
-            alertTypeIds: [ALERT_CPU_USAGE, ALERT_DISK_USAGE],
+            alertTypeIds: [
+              ALERT_CPU_USAGE,
+              ALERT_DISK_USAGE,
+              ALERT_THREAD_POOL_SEARCH_REJECTIONS,
+              ALERT_THREAD_POOL_WRITE_REJECTIONS,
+              ALERT_MEMORY_USAGE,
+              ALERT_MISSING_MONITORING_DATA,
+            ],
             filters: [
               {
                 nodeUuid: nodeName,
@@ -110,6 +121,7 @@ uiRoutes.when('/elasticsearch/nodes/:node/advanced', {
             <AdvancedNode
               nodeSummary={data.nodeSummary}
               alerts={this.alerts}
+              nodeId={data.nodeSummary.resolver}
               metrics={data.metrics}
               onBrush={this.onBrush}
               zoomInfo={this.zoomInfo}

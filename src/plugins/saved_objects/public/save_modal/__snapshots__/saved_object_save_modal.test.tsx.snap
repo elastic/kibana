@@ -25,6 +25,7 @@ exports[`SavedObjectSaveModal should render matching snapshot 1`] = `
       </EuiModalHeader>
       <EuiModalBody>
         <EuiForm>
+          <EuiSpacer />
           <EuiFormRow
             describedByIds={Array []}
             display="row"

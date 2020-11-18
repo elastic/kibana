@@ -4,11 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  Setup,
-  SetupTimeRange,
-  SetupUIFilters,
-} from '../../server/lib/helpers/setup_request';
+import { Setup, SetupTimeRange } from '../../server/lib/helpers/setup_request';
 import {
   SERVICE_NAME,
   ERROR_GROUP_ID,
@@ -20,10 +16,10 @@ export function getErrorGroupsProjection({
   setup,
   serviceName,
 }: {
-  setup: Setup & SetupTimeRange & SetupUIFilters;
+  setup: Setup & SetupTimeRange;
   serviceName: string;
 }) {
-  const { start, end, uiFiltersES } = setup;
+  const { start, end, esFilter } = setup;
 
   return {
     apm: {
@@ -35,7 +31,7 @@ export function getErrorGroupsProjection({
           filter: [
             { term: { [SERVICE_NAME]: serviceName } },
             { range: rangeFilter(start, end) },
-            ...uiFiltersES,
+            ...esFilter,
           ],
         },
       },

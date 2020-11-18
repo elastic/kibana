@@ -76,7 +76,6 @@ export const TagList = React.memo(
         ),
       [tagOptions]
     );
-
     return (
       <EuiText>
         <EuiFlexGroup alignItems="center" gutterSize="xs" justifyContent="spaceBetween">
@@ -97,7 +96,7 @@ export const TagList = React.memo(
           )}
         </EuiFlexGroup>
         <EuiHorizontalRule margin="xs" />
-        <MyFlexGroup gutterSize="xs" data-test-subj="case-tags">
+        <MyFlexGroup gutterSize="none" data-test-subj="case-tags">
           {tags.length === 0 && !isEditTags && <p data-test-subj="no-tags">{i18n.NO_TAGS}</p>}
           {!isEditTags && <Tags tags={tags} color="hollow" />}
           {isEditTags && (

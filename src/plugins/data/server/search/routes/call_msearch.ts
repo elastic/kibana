@@ -23,9 +23,10 @@ import { ApiResponse } from '@elastic/elasticsearch';
 import { SearchResponse } from 'elasticsearch';
 import { IUiSettingsClient, IScopedClusterClient, SharedGlobalConfig } from 'src/core/server';
 
-import { MsearchRequestBody, MsearchResponse } from '../../../common/search/search_source';
+import type { MsearchRequestBody, MsearchResponse } from '../../../common/search/search_source';
+import { toSnakeCase, shimAbortSignal } from '../../../common/search/es_search';
 import { shimHitsTotal } from './shim_hits_total';
-import { getShardTimeout, getDefaultSearchParams, toSnakeCase } from '..';
+import { getShardTimeout, getDefaultSearchParams } from '..';
 
 /** @internal */
 export function convertRequestBody(
@@ -74,18 +75,17 @@ export function getCallMsearch(dependencies: CallMsearchDependencies) {
 
     const body = convertRequestBody(params.body, timeout);
 
-    // Temporary workaround until https://github.com/elastic/elasticsearch-js/issues/1297
-    const promise = esClient.asCurrentUser.msearch(
-      {
-        body,
-      },
-      {
-        querystring: toSnakeCase(defaultParams),
-      }
+    const promise = shimAbortSignal(
+      esClient.asCurrentUser.msearch(
+        {
+          body,
+        },
+        {
+          querystring: toSnakeCase(defaultParams),
+        }
+      ),
+      params.signal
     );
-    if (params.signal) {
-      params.signal.addEventListener('abort', () => promise.abort());
-    }
     const response = (await promise) as ApiResponse<{ responses: Array<SearchResponse<any>> }>;
 
     return {

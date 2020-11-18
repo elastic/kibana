@@ -31,7 +31,7 @@ export const eventHasNotes = (noteIds: string[]): boolean => !isEmpty(noteIds);
 
 export const getPinTooltip = ({
   isPinned,
-  // eslint-disable-next-line no-shadow
+  // eslint-disable-next-line @typescript-eslint/no-shadow
   eventHasNotes,
   timelineType,
 }: {
@@ -102,6 +102,9 @@ export const getEventIdToDataMapping = (
       ...fvm,
     };
   }, {});
+
+export const isEventBuildingBlockType = (event: Ecs): boolean =>
+  !isEmpty(event.signal?.rule?.building_block_type);
 
 /** Return eventType raw or signal */
 export const getEventType = (event: Ecs): Omit<TimelineEventsType, 'all'> => {

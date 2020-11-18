@@ -7,11 +7,10 @@
 import { i18n } from '@kbn/i18n';
 
 import { FormSchema, fieldValidators } from '../../shared_imports';
-import { MappingsTemplates } from '../../types';
 
 const { isJsonField } = fieldValidators;
 
-export const templatesFormSchema: FormSchema<MappingsTemplates> = {
+export const templatesFormSchema: FormSchema<{ dynamicTemplates: any[] }> = {
   dynamicTemplates: {
     label: i18n.translate('xpack.idxMgmt.mappingsEditor.templates.dynamicTemplatesEditorLabel', {
       defaultMessage: 'Dynamic templates data',

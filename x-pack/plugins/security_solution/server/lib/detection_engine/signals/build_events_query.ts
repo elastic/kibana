@@ -4,7 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TimestampOverrideOrUndefined } from '../../../../common/detection_engine/schemas/common/schemas';
+import {
+  SortOrderOrUndefined,
+  TimestampOverrideOrUndefined,
+} from '../../../../common/detection_engine/schemas/common/schemas';
 
 interface BuildEventsSearchQuery {
   aggregations?: unknown;
@@ -13,6 +16,7 @@ interface BuildEventsSearchQuery {
   to: string;
   filter: unknown;
   size: number;
+  sortOrder?: SortOrderOrUndefined;
   searchAfterSortId: string | number | undefined;
   timestampOverride: TimestampOverrideOrUndefined;
 }
@@ -25,9 +29,29 @@ export const buildEventsSearchQuery = ({
   filter,
   size,
   searchAfterSortId,
+  sortOrder,
   timestampOverride,
 }: BuildEventsSearchQuery) => {
   const timestamp = timestampOverride ?? '@timestamp';
+  const docFields =
+    timestampOverride != null
+      ? [
+          {
+            field: '@timestamp',
+            format: 'strict_date_optional_time',
+          },
+          {
+            field: timestampOverride,
+            format: 'strict_date_optional_time',
+          },
+        ]
+      : [
+          {
+            field: '@timestamp',
+            format: 'strict_date_optional_time',
+          },
+        ];
+
   const filterWithTime = [
     filter,
     {
@@ -40,6 +64,7 @@ export const buildEventsSearchQuery = ({
                   range: {
                     [timestamp]: {
                       gte: from,
+                      format: 'strict_date_optional_time',
                     },
                   },
                 },
@@ -54,6 +79,7 @@ export const buildEventsSearchQuery = ({
                   range: {
                     [timestamp]: {
                       lte: to,
+                      format: 'strict_date_optional_time',
                     },
                   },
                 },
@@ -65,12 +91,14 @@ export const buildEventsSearchQuery = ({
       },
     },
   ];
+
   const searchQuery = {
     allowNoIndices: true,
     index,
     size,
     ignoreUnavailable: true,
     body: {
+      docvalue_fields: docFields,
       query: {
         bool: {
           filter: [
@@ -85,7 +113,7 @@ export const buildEventsSearchQuery = ({
       sort: [
         {
           [timestamp]: {
-            order: 'asc',
+            order: sortOrder ?? 'asc',
           },
         },
       ],

@@ -21,6 +21,7 @@ import { CreateTimeline, UpdateTimelineLoading } from './types';
 import { Ecs } from '../../../../common/ecs';
 import { TimelineId, TimelineType, TimelineStatus } from '../../../../common/types/timeline';
 import { ISearchStart } from '../../../../../../../src/plugins/data/public';
+import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
 
 jest.mock('apollo-client');
 
@@ -29,7 +30,7 @@ describe('alert actions', () => {
   const unix = moment(anchor).valueOf();
   let createTimeline: CreateTimeline;
   let updateTimelineIsLoading: UpdateTimelineLoading;
-  let searchStrategyClient: ISearchStart;
+  let searchStrategyClient: jest.Mocked<ISearchStart>;
   let clock: sinon.SinonFakeTimers;
 
   beforeEach(() => {
@@ -42,11 +43,15 @@ describe('alert actions', () => {
 
     createTimeline = jest.fn() as jest.Mocked<CreateTimeline>;
     updateTimelineIsLoading = jest.fn() as jest.Mocked<UpdateTimelineLoading>;
+
     searchStrategyClient = {
       aggs: {} as ISearchStart['aggs'],
       showError: jest.fn(),
-      search: jest.fn().mockResolvedValue({ data: mockTimelineDetails }),
+      search: jest
+        .fn()
+        .mockImplementation(() => ({ toPromise: () => ({ data: mockTimelineDetails }) })),
       searchSource: {} as ISearchStart['searchSource'],
+      session: dataPluginMock.createStartContract().search.session,
     };
 
     jest.spyOn(apolloClient, 'query').mockImplementation((obj) => {
@@ -379,6 +384,78 @@ describe('alert actions', () => {
           signal: {
             rule: {
               ...mockEcsDataWithAlert.signal?.rule!,
+              timeline_id: [''],
+            },
+          },
+        };
+
+        await sendAlertToTimelineAction({
+          createTimeline,
+          ecsData: ecsDataMock,
+          nonEcsData: [],
+          updateTimelineIsLoading,
+          searchStrategyClient,
+        });
+
+        expect(updateTimelineIsLoading).not.toHaveBeenCalled();
+        expect(createTimeline).toHaveBeenCalledTimes(1);
+        expect(createTimeline).toHaveBeenCalledWith(defaultTimelineProps);
+      });
+    });
+
+    describe('Eql', () => {
+      test(' with signal.group.id', async () => {
+        const ecsDataMock: Ecs = {
+          ...mockEcsDataWithAlert,
+          signal: {
+            rule: {
+              ...mockEcsDataWithAlert.signal?.rule!,
+              type: ['eql'],
+              timeline_id: [''],
+            },
+            group: {
+              id: ['my-group-id'],
+            },
+          },
+        };
+
+        await sendAlertToTimelineAction({
+          createTimeline,
+          ecsData: ecsDataMock,
+          nonEcsData: [],
+          updateTimelineIsLoading,
+          searchStrategyClient,
+        });
+
+        expect(updateTimelineIsLoading).not.toHaveBeenCalled();
+        expect(createTimeline).toHaveBeenCalledTimes(1);
+        expect(createTimeline).toHaveBeenCalledWith({
+          ...defaultTimelineProps,
+          timeline: {
+            ...defaultTimelineProps.timeline,
+            dataProviders: [
+              {
+                and: [],
+                enabled: true,
+                excluded: false,
+                id:
+                  'send-alert-to-timeline-action-default-draggable-event-details-value-formatted-field-value-timeline-1-alert-id-my-group-id',
+                kqlQuery: '',
+                name: '1',
+                queryMatch: { field: 'signal.group.id', operator: ':', value: 'my-group-id' },
+              },
+            ],
+          },
+        });
+      });
+
+      test(' with NO  signal.group.id', async () => {
+        const ecsDataMock: Ecs = {
+          ...mockEcsDataWithAlert,
+          signal: {
+            rule: {
+              ...mockEcsDataWithAlert.signal?.rule!,
+              type: ['eql'],
               timeline_id: [''],
             },
           },

@@ -7,7 +7,7 @@
 <b>Signature:</b>
 
 ```typescript
-protected handleSearchError(e: any, request: IKibanaSearchRequest, timeoutSignal: AbortSignal, appAbortSignal?: AbortSignal): Error;
+protected handleSearchError(e: any, request: IKibanaSearchRequest, timeoutSignal: AbortSignal, options?: ISearchOptions): Error;
 ```
 
 ## Parameters
@@ -17,7 +17,7 @@ protected handleSearchError(e: any, request: IKibanaSearchRequest, timeoutSignal
 |  e | <code>any</code> |  |
 |  request | <code>IKibanaSearchRequest</code> |  |
 |  timeoutSignal | <code>AbortSignal</code> |  |
-|  appAbortSignal | <code>AbortSignal</code> |  |
+|  options | <code>ISearchOptions</code> |  |
 
 <b>Returns:</b>
 

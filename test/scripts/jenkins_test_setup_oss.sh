@@ -3,11 +3,7 @@
 source test/scripts/jenkins_test_setup.sh
 
 if [[ -z "$CODE_COVERAGE" ]]; then
-
-  destDir="build/kibana-build-oss"
-  if [[ ! "$TASK_QUEUE_PROCESS_ID" ]]; then
-    destDir="${destDir}-${CI_PARALLEL_PROCESS_NUMBER}"
-  fi
+  destDir="$WORKSPACE/kibana-build-oss-${TASK_QUEUE_PROCESS_ID:-$CI_PARALLEL_PROCESS_NUMBER}"
 
   if [[ ! -d $destDir ]]; then
     mkdir -p $destDir

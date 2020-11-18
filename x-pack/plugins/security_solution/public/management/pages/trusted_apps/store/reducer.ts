@@ -11,7 +11,8 @@ import { ImmutableReducer } from '../../../../common/store';
 import { AppLocation, Immutable } from '../../../../../common/endpoint/types';
 import { UserChangedUrl } from '../../../../common/store/routing/action';
 import { AppAction } from '../../../../common/store/actions';
-import { extractFirstParamValue, extractListPaginationParams } from '../../../common/routing';
+import { extractTrustedAppsListPageLocation } from '../../../common/routing';
+
 import {
   MANAGEMENT_ROUTING_TRUSTED_APPS_PATH,
   MANAGEMENT_DEFAULT_PAGE,
@@ -29,6 +30,7 @@ import {
   ServerReturnedCreateTrustedAppSuccess,
   UserClickedSaveNewTrustedAppButton,
 } from './action';
+
 import { TrustedAppsListPageState } from '../state';
 
 type StateReducer = ImmutableReducer<TrustedAppsListPageState, AppAction>;
@@ -64,7 +66,7 @@ const trustedAppsListResourceStateChanged: CaseReducer<TrustedAppsListResourceSt
     ...state,
     listView: {
       ...state.listView,
-      currentListResourceState: action.payload.newState,
+      listResourceState: action.payload.newState,
     },
   };
 };
@@ -110,22 +112,13 @@ const trustedAppDeletionDialogClosed: CaseReducer<TrustedAppDeletionDialogClosed
 const userChangedUrl: CaseReducer<UserChangedUrl> = (state, action) => {
   if (isTrustedAppsPageLocation(action.payload)) {
     const parsedUrlsParams = parse(action.payload.search.slice(1));
-    const paginationParams = extractListPaginationParams(parsedUrlsParams);
-    const show =
-      extractFirstParamValue(parsedUrlsParams, 'show') === 'create' ? 'create' : undefined;
+    const location = extractTrustedAppsListPageLocation(parsedUrlsParams);
 
     return {
       ...state,
-      listView: {
-        ...state.listView,
-        currentPaginationInfo: {
-          index: paginationParams.page_index,
-          size: paginationParams.page_size,
-        },
-        show,
-      },
-      createView: show ? state.createView : undefined,
+      createView: location.show ? state.createView : undefined,
       active: true,
+      location,
     };
   } else {
     return initialTrustedAppsPageState();
@@ -150,16 +143,17 @@ const initialDeletionDialogState = (): TrustedAppsListPageState['deletionDialog'
 
 export const initialTrustedAppsPageState = (): TrustedAppsListPageState => ({
   listView: {
-    currentListResourceState: { type: 'UninitialisedResourceState' },
-    currentPaginationInfo: {
-      index: MANAGEMENT_DEFAULT_PAGE,
-      size: MANAGEMENT_DEFAULT_PAGE_SIZE,
-    },
+    listResourceState: { type: 'UninitialisedResourceState' },
     freshDataTimestamp: Date.now(),
-    show: undefined,
   },
   deletionDialog: initialDeletionDialogState(),
   createView: undefined,
+  location: {
+    page_index: MANAGEMENT_DEFAULT_PAGE,
+    page_size: MANAGEMENT_DEFAULT_PAGE_SIZE,
+    show: undefined,
+    view_type: 'grid',
+  },
   active: false,
 });
 

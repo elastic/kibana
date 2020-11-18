@@ -17,17 +17,21 @@
  * under the License.
  */
 
+import type { ApmBase } from '@elastic/apm-rum';
+import { modifyUrl } from '@kbn/std';
+import type { InternalApplicationStart } from './application';
+
+/** "GET protocol://hostname:port/pathname" */
+const HTTP_REQUEST_TRANSACTION_NAME_REGEX = /^(GET|POST|PUT|HEAD|PATCH|DELETE|OPTIONS|CONNECT|TRACE)\s(.*)$/;
+
 /**
  * This is the entry point used to boot the frontend when serving a application
  * that lives in the Kibana Platform.
- *
- * Any changes to this file should be kept in sync with
- * src/legacy/ui/ui_bundles/app_entry_template.js
  */
-import type { InternalApplicationStart } from './application';
 
 interface ApmConfig {
   // AgentConfigOptions is not exported from @elastic/apm-rum
+  active?: boolean;
   globalLabels?: Record<string, string>;
 }
 
@@ -39,10 +43,10 @@ export class ApmSystem {
   private readonly enabled: boolean;
   /**
    * `apmConfig` would be populated with relevant APM RUM agent
-   * configuration if server is started with `ELASTIC_APM_ACTIVE=true`
+   * configuration if server is started with elastic.apm.* config.
    */
-  constructor(private readonly apmConfig?: ApmConfig) {
-    this.enabled = process.env.IS_KIBANA_DISTRIBUTABLE !== 'true' && apmConfig != null;
+  constructor(private readonly apmConfig?: ApmConfig, private readonly basePath = '') {
+    this.enabled = apmConfig != null && !!apmConfig.active;
   }
 
   async setup() {
@@ -52,6 +56,8 @@ export class ApmSystem {
     if (globalLabels) {
       apm.addLabels(globalLabels);
     }
+
+    this.addHttpRequestNormalization(apm);
 
     init(apmConfig);
   }
@@ -70,6 +76,54 @@ export class ApmSystem {
           canReuse: true,
         });
       }
+    });
+  }
+
+  /**
+   * Adds an observer to the APM configuration for normalizing transactions of the 'http-request' type to remove the
+   * hostname, protocol, port, and base path. Allows for coorelating data cross different deployments.
+   */
+  private addHttpRequestNormalization(apm: ApmBase) {
+    apm.observe('transaction:end', (t) => {
+      if (t.type !== 'http-request') {
+        return;
+      }
+
+      /** Split URLs of the from "GET protocol://hostname:port/pathname" into method & hostname */
+      const matches = t.name.match(HTTP_REQUEST_TRANSACTION_NAME_REGEX);
+      if (!matches) {
+        return;
+      }
+
+      const [, method, originalUrl] = matches;
+      // Normalize the URL
+      const normalizedUrl = modifyUrl(originalUrl, (parts) => {
+        const isAbsolute = parts.hostname && parts.protocol && parts.port;
+        // If the request was to a different host, port, or protocol then don't change anything
+        if (
+          isAbsolute &&
+          (parts.hostname !== window.location.hostname ||
+            parts.protocol !== window.location.protocol ||
+            parts.port !== window.location.port)
+        ) {
+          return;
+        }
+
+        // Strip the protocol, hostnname, port, and protocol slashes to normalize
+        parts.protocol = null;
+        parts.hostname = null;
+        parts.port = null;
+        parts.slashes = false;
+
+        // Replace the basePath if present in the pathname
+        if (parts.pathname === this.basePath) {
+          parts.pathname = '/';
+        } else if (parts.pathname?.startsWith(`${this.basePath}/`)) {
+          parts.pathname = parts.pathname?.slice(this.basePath.length);
+        }
+      });
+
+      t.name = `${method} ${normalizedUrl}`;
     });
   }
 }

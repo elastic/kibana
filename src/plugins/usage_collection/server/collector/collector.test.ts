@@ -122,6 +122,7 @@ describe('collector', () => {
         type: 'my_test_collector',
         isReady: () => false,
         fetch: () => fetchOutput,
+        schema: { testPass: { type: 'long' } },
       });
       expect(collector.formatForBulkUpload(fetchOutput)).toStrictEqual({
         type: 'kibana_stats',

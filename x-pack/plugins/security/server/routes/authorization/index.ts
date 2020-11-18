@@ -6,9 +6,11 @@
 
 import { definePrivilegesRoutes } from './privileges';
 import { defineRolesRoutes } from './roles';
+import { resetSessionPageRoutes } from './reset_session_page';
 import { RouteDefinitionParams } from '..';
 
 export function defineAuthorizationRoutes(params: RouteDefinitionParams) {
   defineRolesRoutes(params);
   definePrivilegesRoutes(params);
+  resetSessionPageRoutes(params);
 }

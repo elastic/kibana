@@ -14,6 +14,43 @@ import {
 
 const DEFAULT_PAGE_SIZE = 25;
 
+/**
+ * This branch of filtering is used for monitors of type `browser`. This monitor
+ * type represents an unbounded set of steps, with each `check_group` representing
+ * a distinct journey. The document containing the `summary` field is indexed last, and
+ * contains the data necessary for querying a journey.
+ *
+ * Because of this, when querying for "pings", it is important that we treat `browser` summary
+ * checks as the "ping" we want. Without this filtering, we will receive >= N pings for a journey
+ * of N steps, because an individual step may also contain multiple documents.
+ */
+const REMOVE_NON_SUMMARY_BROWSER_CHECKS = {
+  must_not: [
+    {
+      bool: {
+        filter: [
+          {
+            term: {
+              'monitor.type': 'browser',
+            },
+          },
+          {
+            bool: {
+              must_not: [
+                {
+                  exists: {
+                    field: 'summary',
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+};
+
 export const getPings: UMElasticsearchQueryFn<GetPingsParams, PingsResponse> = async ({
   callES,
   dynamicSettings,
@@ -39,7 +76,12 @@ export const getPings: UMElasticsearchQueryFn<GetPingsParams, PingsResponse> = a
   if (location) {
     postFilterClause = { post_filter: { term: { 'observer.geo.name': location } } };
   }
-  const queryContext = { bool: { filter } };
+  const queryContext = {
+    bool: {
+      filter,
+      ...REMOVE_NON_SUMMARY_BROWSER_CHECKS,
+    },
+  };
   const params: any = {
     index: dynamicSettings.heartbeatIndices,
     body: {
@@ -66,9 +108,11 @@ export const getPings: UMElasticsearchQueryFn<GetPingsParams, PingsResponse> = a
   }
 
   const {
-    hits: { hits, total },
-    aggregations: aggs,
-  } = await callES('search', params);
+    body: {
+      hits: { hits, total },
+      aggregations: aggs,
+    },
+  } = await callES.search(params);
 
   const locations = aggs?.locations ?? { buckets: [{ key: 'N/A', doc_count: 0 }] };
 

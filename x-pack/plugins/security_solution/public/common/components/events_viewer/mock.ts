@@ -8,7 +8,7 @@ export const mockEventViewerResponse = {
   totalCount: 12,
   pageInfo: {
     activePage: 0,
-    totalPages: 10,
+    fakeTotalCount: 100,
   },
   events: [],
 };

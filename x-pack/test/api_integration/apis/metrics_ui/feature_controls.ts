@@ -23,11 +23,11 @@ export default function ({ getService }: FtrProviderContext) {
   const spaces = getService('spaces');
   const clientFactory = getService('infraOpsGraphQLClientFactory');
 
-  const expectGraphQL404 = (result: any) => {
+  const expectGraphQL403 = (result: any) => {
     expect(result.response).to.be(undefined);
     expect(result.error).not.to.be(undefined);
     expect(result.error).to.have.property('networkError');
-    expect(result.error.networkError).to.have.property('statusCode', 404);
+    expect(result.error.networkError).to.have.property('statusCode', 403);
   };
 
   const expectGraphQLResponse = (result: any) => {
@@ -81,7 +81,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         const graphQLResult = await executeGraphQLQuery(username, password);
-        expectGraphQL404(graphQLResult);
+        expectGraphQL403(graphQLResult);
       } finally {
         await security.role.delete(roleName);
         await security.user.delete(username);
@@ -156,7 +156,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         const graphQLResult = await executeGraphQLQuery(username, password);
-        expectGraphQL404(graphQLResult);
+        expectGraphQL403(graphQLResult);
       } finally {
         await security.role.delete(roleName);
         await security.user.delete(username);
@@ -245,7 +245,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it(`user_1 can't access APIs in space_3`, async () => {
         const graphQLResult = await executeGraphQLQuery(username, password, space3Id);
-        expectGraphQL404(graphQLResult);
+        expectGraphQL403(graphQLResult);
       });
     });
   });

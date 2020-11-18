@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { badRequest, notFound } from 'boom';
+import { badRequest, notFound } from '@hapi/boom';
 import { getClustersStats } from './get_clusters_stats';
 import { i18n } from '@kbn/i18n';
 

@@ -6,7 +6,6 @@
 
 import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { useDebounce } from 'react-use';
 import {
   EuiButtonEmpty,
   EuiFormRow,
@@ -15,11 +14,13 @@ import {
   EuiFlexGroup,
   EuiButtonIcon,
   EuiToolTip,
+  EuiIconTip,
 } from '@elastic/eui';
 import { IFieldFormat } from 'src/plugins/data/public';
 import { RangeColumnParams, UpdateParamsFnType, MODES_TYPES } from './ranges';
 import { AdvancedRangeEditor } from './advanced_editor';
 import { TYPING_DEBOUNCE_TIME, MODES, MIN_HISTOGRAM_BARS } from './constants';
+import { useDebounceWithOptions } from '../helpers';
 
 const BaseRangeEditor = ({
   maxBars,
@@ -36,17 +37,24 @@ const BaseRangeEditor = ({
 }) => {
   const [maxBarsValue, setMaxBarsValue] = useState(String(maxBars));
 
-  useDebounce(
+  useDebounceWithOptions(
     () => {
       onMaxBarsChange(Number(maxBarsValue));
     },
+    { skipFirstRender: true },
     TYPING_DEBOUNCE_TIME,
     [maxBarsValue]
   );
 
   const granularityLabel = i18n.translate('xpack.lens.indexPattern.ranges.granularity', {
-    defaultMessage: 'Granularity',
+    defaultMessage: 'Intervals granularity',
   });
+  const granularityLabelDescription = i18n.translate(
+    'xpack.lens.indexPattern.ranges.granularityDescription',
+    {
+      defaultMessage: 'Divides the field into evenly spaced intervals.',
+    }
+  );
   const decreaseButtonLabel = i18n.translate('xpack.lens.indexPattern.ranges.decreaseButtonLabel', {
     defaultMessage: 'Decrease granularity',
   });
@@ -57,7 +65,17 @@ const BaseRangeEditor = ({
   return (
     <>
       <EuiFormRow
-        label={granularityLabel}
+        label={
+          <>
+            {granularityLabel}{' '}
+            <EuiIconTip
+              position="right"
+              content={granularityLabelDescription}
+              type="questionInCircle"
+              color="subdued"
+            />
+          </>
+        }
         data-test-subj="indexPattern-ranges-section-label"
         labelType="legend"
         fullWidth
@@ -91,7 +109,7 @@ const BaseRangeEditor = ({
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiToolTip content={decreaseButtonLabel} delay="long">
+            <EuiToolTip content={increaseButtonLabel} delay="long">
               <EuiButtonIcon
                 iconType="plusInCircle"
                 color="text"
@@ -108,7 +126,7 @@ const BaseRangeEditor = ({
 
       <EuiButtonEmpty size="xs" iconType="controlsHorizontal" onClick={() => onToggleEditor()}>
         {i18n.translate('xpack.lens.indexPattern.ranges.customIntervalsToggle', {
-          defaultMessage: 'Create custom intervals',
+          defaultMessage: 'Create custom ranges',
         })}
       </EuiButtonEmpty>
     </>
@@ -134,13 +152,14 @@ export const RangeEditor = ({
 }) => {
   const [isAdvancedEditor, toggleAdvancedEditor] = useState(params.type === MODES.Range);
 
-  // if the maxBars in the params is set to auto refresh it with the default value
-  // only on bootstrap
+  // if the maxBars in the params is set to auto refresh it with the default value only on bootstrap
   useEffect(() => {
-    if (params.maxBars !== maxBars) {
-      setParam('maxBars', maxBars);
+    if (!isAdvancedEditor) {
+      if (params.maxBars !== maxBars) {
+        setParam('maxBars', maxBars);
+      }
     }
-  }, [maxBars, params.maxBars, setParam]);
+  }, [maxBars, params.maxBars, setParam, isAdvancedEditor]);
 
   if (isAdvancedEditor) {
     return (

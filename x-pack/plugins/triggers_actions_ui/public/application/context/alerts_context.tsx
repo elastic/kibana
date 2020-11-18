@@ -13,15 +13,19 @@ import {
   ApplicationStart,
 } from 'kibana/public';
 import { ChartsPluginSetup } from 'src/plugins/charts/public';
-import { DataPublicPluginSetup } from 'src/plugins/data/public';
-import { TypeRegistry } from '../type_registry';
-import { AlertTypeModel, ActionTypeModel } from '../../types';
+import {
+  DataPublicPluginSetup,
+  DataPublicPluginStartUi,
+  IndexPatternsContract,
+} from 'src/plugins/data/public';
+import { KibanaFeature } from '../../../../features/common';
+import { AlertTypeRegistryContract, ActionTypeRegistryContract } from '../../types';
 
 export interface AlertsContextValue<MetaData = Record<string, any>> {
   reloadAlerts?: () => Promise<void>;
   http: HttpSetup;
-  alertTypeRegistry: TypeRegistry<AlertTypeModel>;
-  actionTypeRegistry: TypeRegistry<ActionTypeModel>;
+  alertTypeRegistry: AlertTypeRegistryContract;
+  actionTypeRegistry: ActionTypeRegistryContract;
   toastNotifications: ToastsStart;
   uiSettings?: IUiSettingsClient;
   charts?: ChartsPluginSetup;
@@ -29,6 +33,9 @@ export interface AlertsContextValue<MetaData = Record<string, any>> {
   capabilities: ApplicationStart['capabilities'];
   dataFieldsFormats?: DataPublicPluginSetup['fieldFormats'];
   metadata?: MetaData;
+  dataUi?: DataPublicPluginStartUi;
+  dataIndexPatterns?: IndexPatternsContract;
+  kibanaFeatures?: KibanaFeature[];
 }
 
 const AlertsContext = createContext<AlertsContextValue>(null as any);

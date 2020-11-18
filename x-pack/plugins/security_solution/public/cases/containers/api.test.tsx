@@ -51,6 +51,7 @@ import {
 
 import { DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from './use_get_cases';
 import * as i18n from './translations';
+import { ConnectorTypes, CommentType } from '../../../../case/common/api';
 
 const abortCtrl = new AbortController();
 const mockKibanaServices = KibanaServices.get as jest.Mock;
@@ -374,6 +375,12 @@ describe('Case Configuration API', () => {
       description: 'description',
       tags: ['tag'],
       title: 'title',
+      connector: {
+        id: 'none',
+        name: 'none',
+        type: ConnectorTypes.none,
+        fields: null,
+      },
     };
 
     test('check url, method, signal', async () => {
@@ -397,6 +404,7 @@ describe('Case Configuration API', () => {
     });
     const data = {
       comment: 'comment',
+      type: CommentType.user,
     };
 
     test('check url, method, signal', async () => {

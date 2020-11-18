@@ -17,10 +17,10 @@ import {
   RectCoordinate,
   TimeSeries,
 } from '../../typings/timeseries';
-import { asDecimal, asDuration, tpmUnit } from '../utils/formatters';
 import { IUrlParams } from '../context/UrlParamsContext/types';
 import { getEmptySeries } from '../components/shared/charts/CustomPlot/getEmptySeries';
 import { httpStatusCodeToColor } from '../utils/httpStatusCodeToColor';
+import { asDecimal, asDuration, tpmUnit } from '../../common/utils/formatters';
 
 export interface ITpmBucket {
   title: string;
@@ -31,40 +31,37 @@ export interface ITpmBucket {
 }
 
 export interface ITransactionChartData {
-  tpmSeries: ITpmBucket[];
-  responseTimeSeries: TimeSeries[];
+  tpmSeries?: ITpmBucket[];
+  responseTimeSeries?: TimeSeries[];
   mlJobId: string | undefined;
 }
 
-const INITIAL_DATA = {
-  apmTimeseries: {
-    responseTimes: {
-      avg: [],
-      p95: [],
-      p99: [],
-    },
-    tpmBuckets: [],
-    overallAvgDuration: null,
-  },
+const INITIAL_DATA: Partial<TimeSeriesAPIResponse> = {
+  apmTimeseries: undefined,
   anomalyTimeseries: undefined,
 };
 
 export function getTransactionCharts(
   { transactionType }: IUrlParams,
-  { apmTimeseries, anomalyTimeseries }: TimeSeriesAPIResponse = INITIAL_DATA
+  charts = INITIAL_DATA
 ): ITransactionChartData {
-  const tpmSeries = getTpmSeries(apmTimeseries, transactionType);
+  const { apmTimeseries, anomalyTimeseries } = charts;
 
-  const responseTimeSeries = getResponseTimeSeries({
-    apmTimeseries,
-    anomalyTimeseries,
-  });
-
-  return {
-    tpmSeries,
-    responseTimeSeries,
+  const transactionCharts: ITransactionChartData = {
+    tpmSeries: undefined,
+    responseTimeSeries: undefined,
     mlJobId: anomalyTimeseries?.jobId,
   };
+
+  if (apmTimeseries) {
+    transactionCharts.tpmSeries = getTpmSeries(apmTimeseries, transactionType);
+
+    transactionCharts.responseTimeSeries = getResponseTimeSeries({
+      apmTimeseries,
+      anomalyTimeseries,
+    });
+  }
+  return transactionCharts;
 }
 
 export function getResponseTimeSeries({

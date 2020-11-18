@@ -9,6 +9,7 @@ import { isEmpty } from 'lodash';
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { APMConfig } from '../..';
+import { ESSearchResponse } from '../../../../../typings/elasticsearch';
 import { AlertingPlugin } from '../../../../alerts/server';
 import { AlertType, ALERT_TYPES_CONFIG } from '../../../common/alert_types';
 import {
@@ -17,7 +18,6 @@ import {
   SERVICE_NAME,
 } from '../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../common/processor_event';
-import { ESSearchResponse } from '../../../typings/elasticsearch';
 import { getEnvironmentUiFilterES } from '../helpers/convert_ui_filters/get_environment_ui_filter_es';
 import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
 import { apmActionVariables } from './action_variables';
@@ -55,6 +55,7 @@ export function registerErrorCountAlertType({
         apmActionVariables.environment,
         apmActionVariables.threshold,
         apmActionVariables.triggerValue,
+        apmActionVariables.interval,
       ],
     },
     producer: 'apm',
@@ -65,6 +66,7 @@ export function registerErrorCountAlertType({
         config,
         savedObjectsClient: services.savedObjectsClient,
       });
+      const maxServiceEnvironments = config['xpack.apm.maxServiceEnvironments'];
 
       const searchParams = {
         index: indices['apm_oss.errorIndices'],
@@ -99,6 +101,7 @@ export function registerErrorCountAlertType({
                 environments: {
                   terms: {
                     field: SERVICE_ENVIRONMENT,
+                    size: maxServiceEnvironments,
                   },
                 },
               },
@@ -138,6 +141,7 @@ export function registerErrorCountAlertType({
             environment,
             threshold: alertParams.threshold,
             triggerValue: errorCount,
+            interval: `${alertParams.windowSize}${alertParams.windowUnit}`,
           });
         }
         response.aggregations?.services.buckets.forEach((serviceBucket) => {

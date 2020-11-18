@@ -23,6 +23,8 @@ import {
   isOneOfOperator,
   EXCEPTION_OPERATORS,
   EXCEPTION_OPERATORS_SANS_LISTS,
+  isNotOperator,
+  doesNotExistOperator,
 } from '../../autocomplete/operators';
 import { OperatorOption } from '../../autocomplete/types';
 import {
@@ -371,7 +373,7 @@ export const getOperatorOptions = (
     return isBoolean ? [isOperator, existsOperator] : [isOperator, isOneOfOperator, existsOperator];
   } else {
     return isBoolean
-      ? [isOperator, existsOperator]
+      ? [isOperator, isNotOperator, existsOperator, doesNotExistOperator]
       : includeValueListOperators
       ? EXCEPTION_OPERATORS
       : EXCEPTION_OPERATORS_SANS_LISTS;

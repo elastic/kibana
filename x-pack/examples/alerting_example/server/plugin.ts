@@ -12,7 +12,7 @@ import { PluginSetupContract as FeaturesPluginSetup } from '../../../plugins/fea
 
 import { alertType as alwaysFiringAlert } from './alert_types/always_firing';
 import { alertType as peopleInSpaceAlert } from './alert_types/astros';
-import { INDEX_THRESHOLD_ID } from '../../../plugins/alerting_builtins/server';
+import { INDEX_THRESHOLD_ID } from '../../../plugins/stack_alerts/server';
 import { ALERTING_EXAMPLE_APP_ID } from '../common/constants';
 
 // this plugin's dependendencies

@@ -23,6 +23,9 @@ import { ExpressionAstExpression } from '../ast';
 import { ExecutionContract } from '../execution/execution_contract';
 import { AnyExpressionTypeDefinition } from '../expression_types';
 import { AnyExpressionFunctionDefinition } from '../expression_functions';
+import { SavedObjectReference } from '../../../../core/types';
+import { PersistableStateService, SerializableState } from '../../../kibana_utils/common';
+import { Adapters } from '../../../inspector/common/adapters';
 
 /**
  * The public contract that `ExpressionsService` provides to other plugins
@@ -42,6 +45,23 @@ export type ExpressionsServiceSetup = Pick<
   | 'run'
   | 'fork'
 >;
+
+export interface ExpressionExecutionParams {
+  searchContext?: SerializableState;
+
+  variables?: Record<string, any>;
+
+  /**
+   * Whether to execute expression in *debug mode*. In *debug mode* inputs and
+   * outputs as well as all resolved arguments and time it took to execute each
+   * function are saved and are available for introspection.
+   */
+  debug?: boolean;
+
+  searchSessionId?: string;
+
+  inspectorAdapters?: Adapters;
+}
 
 /**
  * The public contract that `ExpressionsService` provides to other plugins
@@ -96,10 +116,10 @@ export interface ExpressionsServiceStart {
    * expressions.run('...', null, { elasticsearchClient });
    * ```
    */
-  run: <Input, Output, ExtraContext extends Record<string, unknown> = Record<string, unknown>>(
+  run: <Input, Output>(
     ast: string | ExpressionAstExpression,
     input: Input,
-    context?: ExtraContext
+    params?: ExpressionExecutionParams
   ) => Promise<Output>;
 
   /**
@@ -107,16 +127,12 @@ export interface ExpressionsServiceStart {
    * instance that tracks the progress of the execution and can be used to
    * interact with the execution.
    */
-  execute: <
-    Input = unknown,
-    Output = unknown,
-    ExtraContext extends Record<string, unknown> = Record<string, unknown>
-  >(
+  execute: <Input = unknown, Output = unknown>(
     ast: string | ExpressionAstExpression,
     // This any is for legacy reasons.
     input: Input,
-    context?: ExtraContext
-  ) => ExecutionContract<ExtraContext, Input, Output>;
+    params?: ExpressionExecutionParams
+  ) => ExecutionContract<Input, Output>;
 
   /**
    * Create a new instance of `ExpressionsService`. The new instance inherits
@@ -154,7 +170,7 @@ export interface ExpressionServiceParams {
  *
  *    so that JSDoc appears in developers IDE when they use those `plugins.expressions.registerFunction(`.
  */
-export class ExpressionsService {
+export class ExpressionsService implements PersistableStateService<ExpressionAstExpression> {
   public readonly executor: Executor;
   public readonly renderers: ExpressionRendererRegistry;
 
@@ -210,8 +226,8 @@ export class ExpressionsService {
     definition: AnyExpressionRenderDefinition | (() => AnyExpressionRenderDefinition)
   ): void => this.renderers.register(definition);
 
-  public readonly run: ExpressionsServiceStart['run'] = (ast, input, context) =>
-    this.executor.run(ast, input, context);
+  public readonly run: ExpressionsServiceStart['run'] = (ast, input, params) =>
+    this.executor.run(ast, input, params);
 
   public readonly getFunction: ExpressionsServiceStart['getFunction'] = (name) =>
     this.executor.getFunction(name);
@@ -242,8 +258,8 @@ export class ExpressionsService {
    */
   public readonly getTypes = (): ReturnType<Executor['getTypes']> => this.executor.getTypes();
 
-  public readonly execute: ExpressionsServiceStart['execute'] = ((ast, input, context) => {
-    const execution = this.executor.createExecution(ast, context);
+  public readonly execute: ExpressionsServiceStart['execute'] = ((ast, input, params) => {
+    const execution = this.executor.createExecution(ast, params);
     execution.start(input);
     return execution.contract;
   }) as ExpressionsServiceStart['execute'];
@@ -254,6 +270,46 @@ export class ExpressionsService {
     const fork = new ExpressionsService({ executor, renderers });
 
     return fork;
+  };
+
+  /**
+   * Extracts telemetry from expression AST
+   * @param state expression AST to extract references from
+   */
+  public readonly telemetry = (
+    state: ExpressionAstExpression,
+    telemetryData: Record<string, any> = {}
+  ) => {
+    return this.executor.telemetry(state, telemetryData);
+  };
+
+  /**
+   * Extracts saved object references from expression AST
+   * @param state expression AST to extract references from
+   * @returns new expression AST with references removed and array of references
+   */
+  public readonly extract = (state: ExpressionAstExpression) => {
+    return this.executor.extract(state);
+  };
+
+  /**
+   * Injects saved object references into expression AST
+   * @param state expression AST to update
+   * @param references array of saved object references
+   * @returns new expression AST with references injected
+   */
+  public readonly inject = (state: ExpressionAstExpression, references: SavedObjectReference[]) => {
+    return this.executor.inject(state, references);
+  };
+
+  /**
+   * Runs the migration (if it exists) for specified version. This will run a single migration step (ie from 7.10.0 to 7.10.1)
+   * @param state expression AST to update
+   * @param version defines which migration version to run
+   * @returns new migrated expression AST
+   */
+  public readonly migrate = (state: SerializableState, version: string) => {
+    return this.executor.migrate(state, version);
   };
 
   /**

@@ -30,6 +30,7 @@ export const MetricsAPIRequestRT = rt.intersection([
   }),
   rt.partial({
     groupBy: rt.array(groupByRT),
+    modules: rt.array(rt.string),
     afterKey: rt.union([rt.null, afterKeyObjectRT]),
     limit: rt.union([rt.number, rt.null, rt.undefined]),
     filters: rt.array(rt.object),

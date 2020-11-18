@@ -347,7 +347,7 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
       <EuiForm {...formProps} component="div">
         <EuiFormRow
           label={i18n.translate('xpack.securitySolution.trustedapps.create.name', {
-            defaultMessage: 'Name your trusted app application',
+            defaultMessage: 'Name your trusted application',
           })}
           fullWidth={fullWidth}
           data-test-subj={getTestId('nameRow')}
@@ -361,6 +361,7 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
             onBlur={handleDomBlurEvents}
             fullWidth
             required
+            maxLength={256}
             data-test-subj={getTestId('nameTextField')}
           />
         </EuiFormRow>
@@ -410,6 +411,7 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
             value={formValues.description}
             onChange={handleDomChangeEvents}
             fullWidth
+            maxLength={256}
             data-test-subj={getTestId('descriptionField')}
           />
         </EuiFormRow>

@@ -30,7 +30,7 @@ export interface AlertingExampleComponentParams {
   application: CoreStart['application'];
   http: CoreStart['http'];
   basename: string;
-  triggers_actions_ui: TriggersAndActionsUIPublicPluginStart;
+  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   data: DataPublicPluginStart;
   charts: ChartsPluginStart;
   uiSettings: IUiSettingsClient;

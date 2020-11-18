@@ -7,21 +7,28 @@ import React from 'react';
 import { EuiToolTip, EuiHealth } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { CommonAlertStatus } from '../../common/types';
+import { CommonAlertStatus, AlertMessage, AlertState } from '../../common/types/alerts';
 import { AlertSeverity } from '../../common/enums';
-import { AlertState } from '../../server/alerts/types';
 import { AlertsBadge } from './badge';
 import { isInSetupMode } from '../lib/setup_mode';
+import { SetupModeContext } from '../components/setup_mode/setup_mode_context';
 
 interface Props {
   alerts: { [alertTypeId: string]: CommonAlertStatus };
   showBadge: boolean;
   showOnlyCount: boolean;
   stateFilter: (state: AlertState) => boolean;
+  nextStepsFilter: (nextStep: AlertMessage) => boolean;
 }
 export const AlertsStatus: React.FC<Props> = (props: Props) => {
-  const { alerts, showBadge = false, showOnlyCount = false, stateFilter = () => true } = props;
-  const inSetupMode = isInSetupMode();
+  const {
+    alerts,
+    showBadge = false,
+    showOnlyCount = false,
+    stateFilter = () => true,
+    nextStepsFilter = () => true,
+  } = props;
+  const inSetupMode = isInSetupMode(React.useContext(SetupModeContext));
 
   if (!alerts) {
     return null;
@@ -71,7 +78,9 @@ export const AlertsStatus: React.FC<Props> = (props: Props) => {
   }
 
   if (showBadge || inSetupMode) {
-    return <AlertsBadge alerts={alerts} stateFilter={stateFilter} />;
+    return (
+      <AlertsBadge alerts={alerts} stateFilter={stateFilter} nextStepsFilter={nextStepsFilter} />
+    );
   }
 
   const severity = atLeastOneDanger ? AlertSeverity.Danger : AlertSeverity.Warning;

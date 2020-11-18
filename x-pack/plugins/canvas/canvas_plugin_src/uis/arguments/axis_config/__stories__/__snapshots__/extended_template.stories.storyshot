@@ -59,7 +59,7 @@ exports[`Storyshots arguments/AxisConfig extended 1`] = `
             <span
               className="euiFormControlLayoutCustomIcon"
             >
-              <div
+              <span
                 aria-hidden="true"
                 className="euiFormControlLayoutCustomIcon__icon"
                 data-euiicon-type="arrowDown"
@@ -135,7 +135,7 @@ exports[`Storyshots arguments/AxisConfig/components extended 1`] = `
             <span
               className="euiFormControlLayoutCustomIcon"
             >
-              <div
+              <span
                 aria-hidden="true"
                 className="euiFormControlLayoutCustomIcon__icon"
                 data-euiicon-type="arrowDown"

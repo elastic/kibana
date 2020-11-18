@@ -4,24 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { fold } from 'fp-ts/lib/Either';
-import { identity } from 'fp-ts/lib/function';
-import { pipe } from 'fp-ts/lib/pipeable';
 import * as rt from 'io-ts';
-import { npStart } from '../../../legacy_singletons';
+import type { HttpHandler } from 'src/core/public';
 
 import { jobCustomSettingsRT } from '../../../../common/log_analysis';
-import { createPlainError, throwErrors } from '../../../../common/runtime_types';
+import { decodeOrThrow } from '../../../../common/runtime_types';
 
-export const callGetMlModuleAPI = async (moduleId: string) => {
-  const response = await npStart.http.fetch(`/api/ml/modules/get_module/${moduleId}`, {
+export const callGetMlModuleAPI = async (moduleId: string, fetch: HttpHandler) => {
+  const response = await fetch(`/api/ml/modules/get_module/${moduleId}`, {
     method: 'GET',
   });
 
-  return pipe(
-    getMlModuleResponsePayloadRT.decode(response),
-    fold(throwErrors(createPlainError), identity)
-  );
+  return decodeOrThrow(getMlModuleResponsePayloadRT)(response);
 };
 
 const jobDefinitionRT = rt.type({

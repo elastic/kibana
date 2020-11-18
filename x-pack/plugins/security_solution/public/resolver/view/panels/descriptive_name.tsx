@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FormattedMessage } from 'react-intl';
-
 import React from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
   isLegacyEventSafeVersion,

@@ -850,7 +850,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
 }
 
 <div
-  class="euiPanel euiPanel--paddingMedium"
+  class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow"
 >
   <div
     class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive c0"
@@ -1121,7 +1121,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
                         <div
                           class="euiFlexItem euiFlexItem--flexGrowZero"
                         >
-                          <div
+                          <span
                             color=""
                             data-euiicon-type="dot"
                           />
@@ -1201,7 +1201,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
                   type="button"
                 >
                    
-                  <div
+                  <span
                     color="subbdued"
                     data-euiicon-type="popout"
                   />
@@ -1304,7 +1304,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
                   data-test-subj="xpack.uptime.monitorList.foo.expandMonitorDetail"
                   type="button"
                 >
-                  <div
+                  <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
                     data-euiicon-type="arrowDown"
@@ -1344,7 +1344,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
                         <div
                           class="euiFlexItem euiFlexItem--flexGrowZero"
                         >
-                          <div
+                          <span
                             color=""
                             data-euiicon-type="dot"
                           />
@@ -1424,7 +1424,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
                   type="button"
                 >
                    
-                  <div
+                  <span
                     color="subbdued"
                     data-euiicon-type="popout"
                   />
@@ -1527,7 +1527,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
                   data-test-subj="xpack.uptime.monitorList.bar.expandMonitorDetail"
                   type="button"
                 >
-                  <div
+                  <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
                     data-euiicon-type="arrowDown"
@@ -1563,7 +1563,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
             <span
               class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
             >
-              <div
+              <span
                 class="euiButtonContent__icon"
                 data-euiicon-type="arrowDown"
               />
@@ -1593,7 +1593,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
             disabled=""
             type="button"
           >
-            <div
+            <span
               aria-hidden="true"
               class="euiButtonIcon__icon"
               data-euiicon-type="arrowLeft"
@@ -1610,7 +1610,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
             disabled=""
             type="button"
           >
-            <div
+            <span
               aria-hidden="true"
               class="euiButtonIcon__icon"
               data-euiicon-type="arrowRight"

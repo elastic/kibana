@@ -84,6 +84,7 @@ export function BeatsOverview({
   latestVersions,
   stats,
   metrics,
+  alerts,
   ...props
 }) {
   const seriesToShow = [
@@ -113,7 +114,7 @@ export function BeatsOverview({
           </h1>
         </EuiScreenReaderOnly>
         <EuiPanel>
-          <Stats stats={stats} />
+          <Stats stats={stats} alerts={alerts} />
         </EuiPanel>
         <EuiSpacer size="m" />
         <EuiPanel>{renderLatestActive(latestActive, latestTypes, latestVersions)}</EuiPanel>

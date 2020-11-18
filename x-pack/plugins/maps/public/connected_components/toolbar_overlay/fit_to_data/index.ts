@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AnyAction, Dispatch } from 'redux';
+import { AnyAction } from 'redux';
+import { ThunkDispatch } from 'redux-thunk';
 import { connect } from 'react-redux';
 import { MapStoreState } from '../../../reducers/store';
 import { fitToDataBounds } from '../../../actions';
@@ -17,10 +18,10 @@ function mapStateToProps(state: MapStoreState) {
   };
 }
 
-function mapDispatchToProps(dispatch: Dispatch<AnyAction>) {
+function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) {
   return {
     fitToBounds: () => {
-      dispatch<any>(fitToDataBounds());
+      dispatch(fitToDataBounds());
     },
   };
 }

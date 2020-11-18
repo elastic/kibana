@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IScopedClusterClient } from 'kibana/server';
 import { GLOBAL_CALENDAR } from '../../../common/constants/calendars';
+import type { MlClient } from '../../lib/ml_client';
 
 export interface CalendarEvent {
   calendar_id?: string;
@@ -16,13 +16,13 @@ export interface CalendarEvent {
 }
 
 export class EventManager {
-  private _asInternalUser: IScopedClusterClient['asInternalUser'];
-  constructor({ asInternalUser }: IScopedClusterClient) {
-    this._asInternalUser = asInternalUser;
+  private _mlClient: MlClient;
+  constructor(mlClient: MlClient) {
+    this._mlClient = mlClient;
   }
 
   async getCalendarEvents(calendarId: string) {
-    const { body } = await this._asInternalUser.ml.getCalendarEvents({ calendar_id: calendarId });
+    const { body } = await this._mlClient.getCalendarEvents({ calendar_id: calendarId });
 
     return body.events;
   }
@@ -30,7 +30,7 @@ export class EventManager {
   // jobId is optional
   async getAllEvents(jobId?: string) {
     const calendarId = GLOBAL_CALENDAR;
-    const { body } = await this._asInternalUser.ml.getCalendarEvents({
+    const { body } = await this._mlClient.getCalendarEvents({
       calendar_id: calendarId,
       job_id: jobId,
     });
@@ -41,14 +41,14 @@ export class EventManager {
   async addEvents(calendarId: string, events: CalendarEvent[]) {
     const body = { events };
 
-    return await this._asInternalUser.ml.postCalendarEvents({
+    return await this._mlClient.postCalendarEvents({
       calendar_id: calendarId,
       body,
     });
   }
 
   async deleteEvent(calendarId: string, eventId: string) {
-    return this._asInternalUser.ml.deleteCalendarEvent({
+    return this._mlClient.deleteCalendarEvent({
       calendar_id: calendarId,
       event_id: eventId,
     });

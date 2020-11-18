@@ -1,0 +1,11 @@
+parameters:
+  - schema:
+      type: string
+    name: agentId
+    in: path
+    required: true
+get:
+  summary: Fleet - Agent - Events
+  tags: []
+  responses: {}
+  operationId: get-fleet-agents-agentId-events

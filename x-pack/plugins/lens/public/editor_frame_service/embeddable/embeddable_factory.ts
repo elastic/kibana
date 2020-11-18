@@ -7,7 +7,7 @@
 import { Capabilities, HttpSetup } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { RecursiveReadonly } from '@kbn/utility-types';
-import { toExpression, Ast } from '@kbn/interpreter/target/common';
+import { Ast } from '@kbn/interpreter/target/common';
 import {
   IndexPatternsContract,
   TimefilterContract,
@@ -17,11 +17,11 @@ import {
   EmbeddableFactoryDefinition,
   IContainer,
 } from '../../../../../../src/plugins/embeddable/public';
-import { Embeddable, LensByReferenceInput, LensEmbeddableInput } from './embeddable';
-import { DOC_TYPE } from '../../persistence';
+import { LensByReferenceInput, LensEmbeddableInput } from './embeddable';
 import { UiActionsStart } from '../../../../../../src/plugins/ui_actions/public';
 import { Document } from '../../persistence/saved_object_store';
 import { LensAttributeService } from '../../lens_attribute_service';
+import { DOC_TYPE } from '../../../common';
 
 export interface LensEmbeddableStartServices {
   timefilter: TimefilterContract;
@@ -83,6 +83,8 @@ export class EmbeddableFactory implements EmbeddableFactoryDefinition {
       indexPatternService,
     } = await this.getStartServices();
 
+    const { Embeddable } = await import('../../async_services');
+
     return new Embeddable(
       {
         attributeService,
@@ -93,7 +95,6 @@ export class EmbeddableFactory implements EmbeddableFactoryDefinition {
         basePath: coreHttp.basePath,
         getTrigger: uiActions?.getTrigger,
         documentToExpression,
-        toExpressionString: toExpression,
       },
       input,
       parent

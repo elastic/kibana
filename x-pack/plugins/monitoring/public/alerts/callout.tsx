@@ -7,10 +7,10 @@
 import React, { Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
-import { CommonAlertStatus } from '../../common/types';
+import { CommonAlertStatus } from '../../common/types/alerts';
 import { AlertSeverity } from '../../common/enums';
 import { replaceTokens } from './lib/replace_tokens';
-import { AlertMessage, AlertState } from '../../server/alerts/types';
+import { AlertMessage, AlertState } from '../../common/types/alerts';
 
 const TYPES = [
   {
@@ -32,9 +32,10 @@ const TYPES = [
 interface Props {
   alerts: { [alertTypeId: string]: CommonAlertStatus };
   stateFilter: (state: AlertState) => boolean;
+  nextStepsFilter: (nextStep: AlertMessage) => boolean;
 }
 export const AlertsCallout: React.FC<Props> = (props: Props) => {
-  const { alerts, stateFilter = () => true } = props;
+  const { alerts, stateFilter = () => true, nextStepsFilter = () => true } = props;
 
   const callouts = TYPES.map((type) => {
     const list = [];
@@ -56,11 +57,11 @@ export const AlertsCallout: React.FC<Props> = (props: Props) => {
                 const nextStepsUi =
                   state.ui.message.nextSteps && state.ui.message.nextSteps.length ? (
                     <ul>
-                      {state.ui.message.nextSteps.map(
-                        (step: AlertMessage, nextStepIndex: number) => (
+                      {state.ui.message.nextSteps
+                        .filter(nextStepsFilter)
+                        .map((step: AlertMessage, nextStepIndex: number) => (
                           <li key={nextStepIndex}>{replaceTokens(step)}</li>
-                        )
-                      )}
+                        ))}
                     </ul>
                   ) : null;
 

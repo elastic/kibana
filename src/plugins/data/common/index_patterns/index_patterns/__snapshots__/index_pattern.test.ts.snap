@@ -2,11 +2,14 @@
 
 exports[`IndexPattern toSpec should match snapshot 1`] = `
 Object {
+  "fieldAttrs": Object {},
+  "fieldFormats": Object {},
   "fields": Object {
     "@tags": Object {
       "aggregatable": true,
       "conflictDescriptions": undefined,
       "count": 0,
+      "customName": undefined,
       "esTypes": Array [
         "keyword",
       ],
@@ -22,6 +25,7 @@ Object {
       "script": undefined,
       "scripted": false,
       "searchable": true,
+      "shortDotsEnable": false,
       "subType": undefined,
       "type": "string",
     },
@@ -29,6 +33,7 @@ Object {
       "aggregatable": true,
       "conflictDescriptions": undefined,
       "count": 30,
+      "customName": undefined,
       "esTypes": Array [
         "date",
       ],
@@ -44,6 +49,7 @@ Object {
       "script": undefined,
       "scripted": false,
       "searchable": true,
+      "shortDotsEnable": false,
       "subType": undefined,
       "type": "date",
     },
@@ -51,6 +57,7 @@ Object {
       "aggregatable": true,
       "conflictDescriptions": undefined,
       "count": 0,
+      "customName": undefined,
       "esTypes": Array [
         "_id",
       ],
@@ -66,6 +73,7 @@ Object {
       "script": undefined,
       "scripted": false,
       "searchable": true,
+      "shortDotsEnable": false,
       "subType": undefined,
       "type": "string",
     },
@@ -73,6 +81,7 @@ Object {
       "aggregatable": true,
       "conflictDescriptions": undefined,
       "count": 0,
+      "customName": undefined,
       "esTypes": Array [
         "_source",
       ],
@@ -88,6 +97,7 @@ Object {
       "script": undefined,
       "scripted": false,
       "searchable": true,
+      "shortDotsEnable": false,
       "subType": undefined,
       "type": "_source",
     },
@@ -95,6 +105,7 @@ Object {
       "aggregatable": true,
       "conflictDescriptions": undefined,
       "count": 0,
+      "customName": undefined,
       "esTypes": Array [
         "_type",
       ],
@@ -110,6 +121,7 @@ Object {
       "script": undefined,
       "scripted": false,
       "searchable": true,
+      "shortDotsEnable": false,
       "subType": undefined,
       "type": "string",
     },
@@ -117,6 +129,7 @@ Object {
       "aggregatable": true,
       "conflictDescriptions": undefined,
       "count": 0,
+      "customName": undefined,
       "esTypes": Array [
         "geo_shape",
       ],
@@ -132,6 +145,7 @@ Object {
       "script": undefined,
       "scripted": false,
       "searchable": true,
+      "shortDotsEnable": false,
       "subType": undefined,
       "type": "geo_shape",
     },
@@ -139,6 +153,7 @@ Object {
       "aggregatable": true,
       "conflictDescriptions": undefined,
       "count": 10,
+      "customName": undefined,
       "esTypes": Array [
         "long",
       ],
@@ -154,6 +169,7 @@ Object {
       "script": undefined,
       "scripted": false,
       "searchable": true,
+      "shortDotsEnable": false,
       "subType": undefined,
       "type": "number",
     },
@@ -161,6 +177,7 @@ Object {
       "aggregatable": true,
       "conflictDescriptions": undefined,
       "count": 0,
+      "customName": undefined,
       "esTypes": Array [
         "conflict",
       ],
@@ -176,6 +193,7 @@ Object {
       "script": undefined,
       "scripted": false,
       "searchable": true,
+      "shortDotsEnable": false,
       "subType": undefined,
       "type": "conflict",
     },
@@ -183,6 +201,7 @@ Object {
       "aggregatable": true,
       "conflictDescriptions": undefined,
       "count": 0,
+      "customName": undefined,
       "esTypes": Array [
         "text",
       ],
@@ -198,6 +217,7 @@ Object {
       "script": undefined,
       "scripted": false,
       "searchable": true,
+      "shortDotsEnable": false,
       "subType": undefined,
       "type": "string",
     },
@@ -205,6 +225,7 @@ Object {
       "aggregatable": true,
       "conflictDescriptions": undefined,
       "count": 0,
+      "customName": undefined,
       "esTypes": Array [
         "keyword",
       ],
@@ -220,6 +241,7 @@ Object {
       "script": undefined,
       "scripted": false,
       "searchable": true,
+      "shortDotsEnable": false,
       "subType": Object {
         "multi": Object {
           "parent": "extension",
@@ -231,6 +253,7 @@ Object {
       "aggregatable": true,
       "conflictDescriptions": undefined,
       "count": 0,
+      "customName": undefined,
       "esTypes": Array [
         "geo_point",
       ],
@@ -246,6 +269,7 @@ Object {
       "script": undefined,
       "scripted": false,
       "searchable": true,
+      "shortDotsEnable": false,
       "subType": undefined,
       "type": "geo_point",
     },
@@ -253,6 +277,7 @@ Object {
       "aggregatable": true,
       "conflictDescriptions": undefined,
       "count": 0,
+      "customName": undefined,
       "esTypes": Array [
         "keyword",
       ],
@@ -268,6 +293,7 @@ Object {
       "script": undefined,
       "scripted": false,
       "searchable": true,
+      "shortDotsEnable": false,
       "subType": undefined,
       "type": "string",
     },
@@ -275,6 +301,7 @@ Object {
       "aggregatable": false,
       "conflictDescriptions": undefined,
       "count": 0,
+      "customName": undefined,
       "esTypes": Array [
         "murmur3",
       ],
@@ -290,6 +317,7 @@ Object {
       "script": undefined,
       "scripted": false,
       "searchable": true,
+      "shortDotsEnable": false,
       "subType": undefined,
       "type": "murmur3",
     },
@@ -297,6 +325,7 @@ Object {
       "aggregatable": true,
       "conflictDescriptions": undefined,
       "count": 0,
+      "customName": undefined,
       "esTypes": Array [
         "ip",
       ],
@@ -312,6 +341,7 @@ Object {
       "script": undefined,
       "scripted": false,
       "searchable": true,
+      "shortDotsEnable": false,
       "subType": undefined,
       "type": "ip",
     },
@@ -319,6 +349,7 @@ Object {
       "aggregatable": true,
       "conflictDescriptions": undefined,
       "count": 0,
+      "customName": undefined,
       "esTypes": Array [
         "text",
       ],
@@ -334,6 +365,7 @@ Object {
       "script": undefined,
       "scripted": false,
       "searchable": true,
+      "shortDotsEnable": false,
       "subType": undefined,
       "type": "string",
     },
@@ -341,6 +373,7 @@ Object {
       "aggregatable": true,
       "conflictDescriptions": undefined,
       "count": 0,
+      "customName": undefined,
       "esTypes": Array [
         "keyword",
       ],
@@ -356,6 +389,7 @@ Object {
       "script": undefined,
       "scripted": false,
       "searchable": true,
+      "shortDotsEnable": false,
       "subType": Object {
         "multi": Object {
           "parent": "machine.os",
@@ -367,6 +401,7 @@ Object {
       "aggregatable": true,
       "conflictDescriptions": undefined,
       "count": 0,
+      "customName": undefined,
       "esTypes": Array [
         "text",
       ],
@@ -382,6 +417,7 @@ Object {
       "script": undefined,
       "scripted": false,
       "searchable": false,
+      "shortDotsEnable": false,
       "subType": undefined,
       "type": "string",
     },
@@ -389,6 +425,7 @@ Object {
       "aggregatable": false,
       "conflictDescriptions": undefined,
       "count": 0,
+      "customName": undefined,
       "esTypes": Array [
         "text",
       ],
@@ -404,6 +441,7 @@ Object {
       "script": undefined,
       "scripted": false,
       "searchable": false,
+      "shortDotsEnable": false,
       "subType": undefined,
       "type": "string",
     },
@@ -411,6 +449,7 @@ Object {
       "aggregatable": true,
       "conflictDescriptions": undefined,
       "count": 0,
+      "customName": undefined,
       "esTypes": Array [
         "integer",
       ],
@@ -426,6 +465,7 @@ Object {
       "script": undefined,
       "scripted": false,
       "searchable": true,
+      "shortDotsEnable": false,
       "subType": undefined,
       "type": "number",
     },
@@ -433,6 +473,7 @@ Object {
       "aggregatable": true,
       "conflictDescriptions": undefined,
       "count": 0,
+      "customName": undefined,
       "esTypes": Array [
         "geo_point",
       ],
@@ -448,6 +489,7 @@ Object {
       "script": undefined,
       "scripted": false,
       "searchable": true,
+      "shortDotsEnable": false,
       "subType": undefined,
       "type": "geo_point",
     },
@@ -455,6 +497,7 @@ Object {
       "aggregatable": true,
       "conflictDescriptions": undefined,
       "count": 0,
+      "customName": undefined,
       "esTypes": Array [
         "attachment",
       ],
@@ -470,6 +513,7 @@ Object {
       "script": undefined,
       "scripted": false,
       "searchable": true,
+      "shortDotsEnable": false,
       "subType": undefined,
       "type": "attachment",
     },
@@ -477,6 +521,7 @@ Object {
       "aggregatable": true,
       "conflictDescriptions": undefined,
       "count": 0,
+      "customName": undefined,
       "esTypes": Array [
         "date",
       ],
@@ -492,6 +537,7 @@ Object {
       "script": "1234",
       "scripted": true,
       "searchable": true,
+      "shortDotsEnable": false,
       "subType": undefined,
       "type": "date",
     },
@@ -499,6 +545,7 @@ Object {
       "aggregatable": true,
       "conflictDescriptions": undefined,
       "count": 0,
+      "customName": undefined,
       "esTypes": Array [
         "murmur3",
       ],
@@ -514,6 +561,7 @@ Object {
       "script": "1234",
       "scripted": true,
       "searchable": true,
+      "shortDotsEnable": false,
       "subType": undefined,
       "type": "murmur3",
     },
@@ -521,6 +569,7 @@ Object {
       "aggregatable": true,
       "conflictDescriptions": undefined,
       "count": 0,
+      "customName": undefined,
       "esTypes": Array [
         "long",
       ],
@@ -536,6 +585,7 @@ Object {
       "script": "1234",
       "scripted": true,
       "searchable": true,
+      "shortDotsEnable": false,
       "subType": undefined,
       "type": "number",
     },
@@ -543,6 +593,7 @@ Object {
       "aggregatable": true,
       "conflictDescriptions": undefined,
       "count": 0,
+      "customName": undefined,
       "esTypes": Array [
         "text",
       ],
@@ -558,6 +609,7 @@ Object {
       "script": "'i am a string'",
       "scripted": true,
       "searchable": true,
+      "shortDotsEnable": false,
       "subType": undefined,
       "type": "string",
     },
@@ -565,6 +617,7 @@ Object {
       "aggregatable": true,
       "conflictDescriptions": undefined,
       "count": 20,
+      "customName": undefined,
       "esTypes": Array [
         "boolean",
       ],
@@ -580,6 +633,7 @@ Object {
       "script": undefined,
       "scripted": false,
       "searchable": true,
+      "shortDotsEnable": false,
       "subType": undefined,
       "type": "boolean",
     },
@@ -587,6 +641,7 @@ Object {
       "aggregatable": true,
       "conflictDescriptions": undefined,
       "count": 30,
+      "customName": undefined,
       "esTypes": Array [
         "date",
       ],
@@ -602,6 +657,7 @@ Object {
       "script": undefined,
       "scripted": false,
       "searchable": true,
+      "shortDotsEnable": false,
       "subType": undefined,
       "type": "date",
     },
@@ -609,6 +665,7 @@ Object {
       "aggregatable": true,
       "conflictDescriptions": undefined,
       "count": 0,
+      "customName": undefined,
       "esTypes": Array [
         "date",
       ],
@@ -624,6 +681,7 @@ Object {
       "script": undefined,
       "scripted": false,
       "searchable": true,
+      "shortDotsEnable": false,
       "subType": undefined,
       "type": "date",
     },

@@ -4,20 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ConnectionElement } from '../../../common/service_map';
 import { groupResourceNodes } from './group_resource_nodes';
-import preGroupedData from './mock_responses/group_resource_nodes_pregrouped.json';
 import expectedGroupedData from './mock_responses/group_resource_nodes_grouped.json';
+import preGroupedData from './mock_responses/group_resource_nodes_pregrouped.json';
 
 describe('groupResourceNodes', () => {
   it('should group external nodes', () => {
-    const responseWithGroups = groupResourceNodes(preGroupedData);
+    const responseWithGroups = groupResourceNodes(
+      preGroupedData as { elements: ConnectionElement[] }
+    );
     expect(responseWithGroups.elements).toHaveLength(
       expectedGroupedData.elements.length
     );
     for (const element of responseWithGroups.elements) {
       const expectedElement = expectedGroupedData.elements.find(
         ({ data: { id } }: { data: { id: string } }) => id === element.data.id
-      );
+      )!;
       expect(element).toMatchObject(expectedElement);
     }
   });

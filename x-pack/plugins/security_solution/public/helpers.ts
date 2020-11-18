@@ -110,5 +110,6 @@ export const getInspectResponse = <T extends FactoryQueryTypes>(
   prevResponse: InspectResponse
 ): InspectResponse => ({
   dsl: response?.inspect?.dsl ?? prevResponse?.dsl ?? [],
-  response: response != null ? [JSON.stringify(response, null, 2)] : prevResponse?.response,
+  response:
+    response != null ? [JSON.stringify(response.rawResponse, null, 2)] : prevResponse?.response,
 });

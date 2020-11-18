@@ -39,7 +39,7 @@ import { Toast } from 'src/core/public';
 import { IDataPluginServices, IIndexPattern, Query } from '../..';
 import { QuerySuggestion, QuerySuggestionTypes } from '../../autocomplete';
 
-import { withKibana, KibanaReactContextValue, toMountPoint } from '../../../../kibana_react/public';
+import { KibanaReactContextValue, toMountPoint } from '../../../../kibana_react/public';
 import { fetchIndexPatterns } from './fetch_index_patterns';
 import { QueryLanguageSwitcher } from './language_switcher';
 import { PersistedLog, getQueryLog, matchPairs, toUser, fromUser } from '../../query';
@@ -93,7 +93,9 @@ const KEY_CODES = {
   END: 35,
 };
 
-export class QueryStringInputUI extends Component<Props, State> {
+// Needed for React.lazy
+// eslint-disable-next-line import/no-default-export
+export default class QueryStringInputUI extends Component<Props, State> {
   public state: State = {
     isSuggestionsVisible: false,
     index: null,
@@ -109,6 +111,7 @@ export class QueryStringInputUI extends Component<Props, State> {
 
   private persistedLog: PersistedLog | undefined;
   private abortController?: AbortController;
+  private fetchIndexPatternsAbortController?: AbortController;
   private services = this.props.kibana.services;
   private componentIsUnmounting = false;
   private queryBarInputDivRefInstance: RefObject<HTMLDivElement> = createRef();
@@ -117,7 +120,7 @@ export class QueryStringInputUI extends Component<Props, State> {
     return toUser(this.props.query.query);
   };
 
-  private fetchIndexPatterns = async () => {
+  private fetchIndexPatterns = debounce(async () => {
     const stringPatterns = this.props.indexPatterns.filter(
       (indexPattern) => typeof indexPattern === 'string'
     ) as string[];
@@ -125,16 +128,26 @@ export class QueryStringInputUI extends Component<Props, State> {
       (indexPattern) => typeof indexPattern !== 'string'
     ) as IIndexPattern[];
 
+    // abort the previous fetch to avoid overriding with outdated data
+    // issue https://github.com/elastic/kibana/issues/80831
+    if (this.fetchIndexPatternsAbortController) this.fetchIndexPatternsAbortController.abort();
+    this.fetchIndexPatternsAbortController = new AbortController();
+    const currentAbortController = this.fetchIndexPatternsAbortController;
+
     const objectPatternsFromStrings = (await fetchIndexPatterns(
       this.services.savedObjects!.client,
       stringPatterns,
       this.services.uiSettings!
     )) as IIndexPattern[];
 
-    this.setState({
-      indexPatterns: [...objectPatterns, ...objectPatternsFromStrings],
-    });
-  };
+    if (!currentAbortController.signal.aborted) {
+      this.setState({
+        indexPatterns: [...objectPatterns, ...objectPatternsFromStrings],
+      });
+
+      this.updateSuggestions();
+    }
+  }, 200);
 
   private getSuggestions = async () => {
     if (!this.inputRef) {
@@ -504,7 +517,7 @@ export class QueryStringInputUI extends Component<Props, State> {
     }
 
     this.initPersistedLog();
-    this.fetchIndexPatterns().then(this.updateSuggestions);
+    this.fetchIndexPatterns();
     this.handleListUpdate();
 
     window.addEventListener('resize', this.handleAutoHeight);
@@ -523,7 +536,7 @@ export class QueryStringInputUI extends Component<Props, State> {
     this.initPersistedLog();
 
     if (!isEqual(prevProps.indexPatterns, this.props.indexPatterns)) {
-      this.fetchIndexPatterns().then(this.updateSuggestions);
+      this.fetchIndexPatterns();
     } else if (!isEqual(prevProps.query, this.props.query)) {
       this.updateSuggestions();
     }
@@ -546,7 +559,7 @@ export class QueryStringInputUI extends Component<Props, State> {
 
   public componentWillUnmount() {
     if (this.abortController) this.abortController.abort();
-    this.updateSuggestions.cancel();
+    if (this.updateSuggestions.cancel) this.updateSuggestions.cancel();
     this.componentIsUnmounting = true;
     window.removeEventListener('resize', this.handleAutoHeight);
     window.removeEventListener('scroll', this.handleListUpdate, { capture: true });
@@ -690,5 +703,3 @@ export class QueryStringInputUI extends Component<Props, State> {
     );
   }
 }
-
-export const QueryStringInput: React.FC<QueryStringInputProps> = withKibana(QueryStringInputUI);

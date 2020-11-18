@@ -28,14 +28,16 @@ import {
   AlertData,
   AlertInstanceState,
   AlertEnableAction,
-} from './types';
+  CommonAlertFilter,
+  CommonAlertParams,
+  CommonBaseAlert,
+} from '../../common/types/alerts';
 import { fetchAvailableCcs } from '../lib/alerts/fetch_available_ccs';
 import { fetchClusters } from '../lib/alerts/fetch_clusters';
 import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
 import { INDEX_PATTERN_ELASTICSEARCH } from '../../common/constants';
 import { MonitoringConfig } from '../config';
 import { AlertSeverity } from '../../common/enums';
-import { CommonAlertFilter, CommonAlertParams, CommonBaseAlert } from '../../common/types';
 import { MonitoringLicenseService } from '../types';
 import { mbSafeQuery } from '../lib/mb_safe_query';
 import { appendMetricbeatIndex } from '../lib/alerts/append_mb_index';
@@ -43,6 +45,7 @@ import { appendMetricbeatIndex } from '../lib/alerts/append_mb_index';
 export class BaseAlert {
   public type!: string;
   public label!: string;
+  public description!: string;
   public defaultThrottle: string = '1d';
   public defaultInterval: string = '1m';
   public rawAlert: Alert | undefined;
@@ -198,6 +201,15 @@ export class BaseAlert {
         const alertInstance: RawAlertInstance = states.alertInstances[instanceId];
         if (alertInstance && this.filterAlertInstance(alertInstance, filters)) {
           accum[instanceId] = alertInstance;
+          if (alertInstance.state) {
+            accum[instanceId].state = {
+              alertStates: (alertInstance.state as AlertInstanceState).alertStates.filter(
+                (alertState: AlertState) => {
+                  return this.filterAlertState(alertState, filters);
+                }
+              ),
+            };
+          }
         }
         return accum;
       },
@@ -206,6 +218,10 @@ export class BaseAlert {
   }
 
   protected filterAlertInstance(alertInstance: RawAlertInstance, filters: CommonAlertFilter[]) {
+    return true;
+  }
+
+  protected filterAlertState(alertState: AlertState, filters: CommonAlertFilter[]) {
     return true;
   }
 
@@ -226,13 +242,7 @@ export class BaseAlert {
       return await mbSafeQuery(async () => _callCluster(endpoint, clientParams, options));
     };
     const availableCcs = this.config.ui.ccs.enabled ? await fetchAvailableCcs(callCluster) : [];
-    // Support CCS use cases by querying to find available remote clusters
-    // and then adding those to the index pattern we are searching against
-    let esIndexPattern = appendMetricbeatIndex(this.config, INDEX_PATTERN_ELASTICSEARCH);
-    if (availableCcs) {
-      esIndexPattern = getCcsIndexPattern(esIndexPattern, availableCcs);
-    }
-    const clusters = await fetchClusters(callCluster, esIndexPattern);
+    const clusters = await this.fetchClusters(callCluster, availableCcs, params);
     const uiSettings = (await this.getUiSettingsService()).asScopedToClient(
       services.savedObjectsClient
     );
@@ -241,19 +251,39 @@ export class BaseAlert {
     return await this.processData(data, clusters, services, logger, state);
   }
 
+  protected async fetchClusters(
+    callCluster: any,
+    availableCcs: string[] | undefined = undefined,
+    params: CommonAlertParams
+  ) {
+    let ccs;
+    if (!availableCcs) {
+      ccs = this.config.ui.ccs.enabled ? await fetchAvailableCcs(callCluster) : undefined;
+    } else {
+      ccs = availableCcs;
+    }
+    // Support CCS use cases by querying to find available remote clusters
+    // and then adding those to the index pattern we are searching against
+    let esIndexPattern = appendMetricbeatIndex(this.config, INDEX_PATTERN_ELASTICSEARCH);
+    if (ccs) {
+      esIndexPattern = getCcsIndexPattern(esIndexPattern, ccs);
+    }
+    return await fetchClusters(callCluster, esIndexPattern);
+  }
+
   protected async fetchData(
-    params: CommonAlertParams,
+    params: CommonAlertParams | unknown,
     callCluster: any,
     clusters: AlertCluster[],
     uiSettings: IUiSettingsClient,
     availableCcs: string[]
-  ): Promise<AlertData[]> {
+  ): Promise<Array<AlertData & unknown>> {
     // Child should implement
     throw new Error('Child classes must implement `fetchData`');
   }
 
   protected async processData(
-    data: AlertData[],
+    data: Array<AlertData & unknown>,
     clusters: AlertCluster[],
     services: AlertServices,
     logger: Logger,
@@ -338,16 +368,27 @@ export class BaseAlert {
     };
   }
 
-  protected getUiMessage(alertState: AlertState, item: AlertData): AlertMessage {
+  protected getUiMessage(
+    alertState: AlertState | unknown,
+    item: AlertData | unknown
+  ): AlertMessage {
     throw new Error('Child classes must implement `getUiMessage`');
   }
 
   protected executeActions(
     instance: AlertInstance,
-    instanceState: AlertInstanceState,
-    item: AlertData,
-    cluster: AlertCluster
+    instanceState: AlertInstanceState | unknown,
+    item: AlertData | unknown,
+    cluster?: AlertCluster | unknown
   ) {
     throw new Error('Child classes must implement `executeActions`');
+  }
+
+  protected createGlobalStateLink(link: string, clusterUuid: string, ccs?: string) {
+    const globalState = [`cluster_uuid:${clusterUuid}`];
+    if (ccs) {
+      globalState.push(`ccs:${ccs}`);
+    }
+    return `${this.kibanaUrl}/app/monitoring#/${link}?_g=(${globalState.toString()})`;
   }
 }

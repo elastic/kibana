@@ -17,6 +17,7 @@ jest.mock('../../../../../app/app_dependencies');
 
 describe('Transform: Transform List Actions <StopAction />', () => {
   test('Minimal initialization', () => {
+    // @ts-expect-error mock data is too loosely typed
     const item: TransformListRow = transformListRow;
     const props: StopActionNameProps = {
       forceDisable: false,

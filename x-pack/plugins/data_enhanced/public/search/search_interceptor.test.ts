@@ -3,12 +3,14 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import type { MockedKeys } from '@kbn/utility-types/jest';
 import { coreMock } from '../../../../../src/core/public/mocks';
 import { EnhancedSearchInterceptor } from './search_interceptor';
 import { CoreSetup, CoreStart } from 'kibana/public';
-import { AbortError, UI_SETTINGS } from '../../../../../src/plugins/data/common';
+import { UI_SETTINGS } from '../../../../../src/plugins/data/common';
+import { AbortError } from '../../../../../src/plugins/kibana_utils/public';
 import { SearchTimeoutError } from 'src/plugins/data/public';
+import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
 
 const timeTravel = (msToRun = 0) => {
   jest.advanceTimersByTime(msToRun);
@@ -43,6 +45,7 @@ describe('EnhancedSearchInterceptor', () => {
   beforeEach(() => {
     mockCoreSetup = coreMock.createSetup();
     mockCoreStart = coreMock.createStart();
+    const dataPluginMockStart = dataPluginMock.createStartContract();
 
     mockCoreSetup.uiSettings.get.mockImplementation((name: string) => {
       switch (name) {
@@ -77,6 +80,7 @@ describe('EnhancedSearchInterceptor', () => {
       http: mockCoreSetup.http,
       uiSettings: mockCoreSetup.uiSettings,
       usageCollector: mockUsageCollector,
+      session: dataPluginMockStart.search.session,
     });
   });
 

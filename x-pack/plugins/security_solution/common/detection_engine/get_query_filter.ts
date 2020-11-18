@@ -16,6 +16,7 @@ import {
   ExceptionListItemSchema,
   CreateExceptionListItemSchema,
 } from '../../../lists/common/schemas';
+import { ESBoolQuery } from '../typed_json';
 import { buildExceptionListQueries } from './build_exceptions_query';
 import {
   Query as QueryString,
@@ -31,7 +32,7 @@ export const getQueryFilter = (
   index: Index,
   lists: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>,
   excludeExceptions: boolean = true
-) => {
+): ESBoolQuery => {
   const indexPattern: IIndexPattern = {
     fields: [],
     title: index.join(),
@@ -110,6 +111,26 @@ export const buildEqlSearchRequest = (
     exceptionFilter = buildExceptionFilter(exceptionQueries, indexPattern, config, true, 1024);
   }
   const indexString = index.join();
+  const requestFilter: unknown[] = [
+    {
+      range: {
+        [timestamp]: {
+          gte: from,
+          lte: to,
+          format: 'strict_date_optional_time',
+        },
+      },
+    },
+  ];
+  if (exceptionFilter !== undefined) {
+    requestFilter.push({
+      bool: {
+        must_not: {
+          bool: exceptionFilter?.query.bool,
+        },
+      },
+    });
+  }
   const baseRequest = {
     method: 'POST',
     path: `/${indexString}/_eql/search?allow_no_indices=true`,
@@ -117,20 +138,9 @@ export const buildEqlSearchRequest = (
       size,
       query,
       filter: {
-        range: {
-          [timestamp]: {
-            gte: from,
-            lte: to,
-          },
+        bool: {
+          filter: requestFilter,
         },
-        bool:
-          exceptionFilter !== undefined
-            ? {
-                must_not: {
-                  bool: exceptionFilter?.query.bool,
-                },
-              }
-            : undefined,
       },
     },
   };

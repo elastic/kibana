@@ -4,13 +4,14 @@
   ],
   "description": "An adversary may attempt to disrupt an organization's business operations by performing a denial of service (DoS) attack against its Okta infrastructure.",
   "index": [
-    "filebeat-*"
+    "filebeat-*",
+    "logs-okta*"
   ],
   "language": "kuery",
   "license": "Elastic License",
   "name": "Possible Okta DoS Attack",
   "note": "The Okta Filebeat module must be enabled to use this rule.",
-  "query": "event.module:okta and event.dataset:okta.system and event.action:(application.integration.rate_limit_exceeded or system.org.rate_limit.warning or system.org.rate_limit.violation or core.concurrency.org.limit.violation)",
+  "query": "event.dataset:okta.system and event.action:(application.integration.rate_limit_exceeded or system.org.rate_limit.warning or system.org.rate_limit.violation or core.concurrency.org.limit.violation)",
   "references": [
     "https://developer.okta.com/docs/reference/api/system-log/",
     "https://developer.okta.com/docs/reference/api/event-types/"
@@ -20,10 +21,11 @@
   "severity": "medium",
   "tags": [
     "Elastic",
+    "Identity",
     "Okta",
+    "Continuous Monitoring",
     "SecOps",
-    "Monitoring",
-    "Continuous Monitoring"
+    "Monitoring"
   ],
   "threat": [
     {
@@ -48,5 +50,5 @@
     }
   ],
   "type": "query",
-  "version": 1
+  "version": 2
 }

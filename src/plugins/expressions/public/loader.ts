@@ -146,9 +146,11 @@ export class ExpressionLoader {
     }
     this.setParams(params);
     this.execution = getExpressionsService().execute(expression, params.context, {
-      search: params.searchContext,
+      searchContext: params.searchContext,
       variables: params.variables || {},
       inspectorAdapters: params.inspectorAdapters,
+      searchSessionId: params.searchSessionId,
+      debug: params.debug,
     });
 
     const prevDataHandler = this.execution;
@@ -181,6 +183,10 @@ export class ExpressionLoader {
     if (params.variables && this.params) {
       this.params.variables = params.variables;
     }
+    if (params.searchSessionId && this.params) {
+      this.params.searchSessionId = params.searchSessionId;
+    }
+    this.params.debug = Boolean(params.debug);
 
     this.params.inspectorAdapters = (params.inspectorAdapters ||
       this.execution?.inspect()) as Adapters;

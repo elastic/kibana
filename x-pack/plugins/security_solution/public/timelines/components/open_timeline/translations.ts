@@ -270,6 +270,16 @@ export const SUCCESSFULLY_EXPORTED_TIMELINES = (totalTimelines: number) =>
       'Successfully exported {totalTimelines, plural, =0 {all timelines} =1 {{totalTimelines} timeline} other {{totalTimelines} timelines}}',
   });
 
+export const SUCCESSFULLY_EXPORTED_TIMELINE_TEMPLATES = (totalTimelineTemplates: number) =>
+  i18n.translate(
+    'xpack.securitySolution.open.timeline.successfullyExportedTimelineTemplatesTitle',
+    {
+      values: { totalTimelineTemplates },
+      defaultMessage:
+        'Successfully exported {totalTimelineTemplates, plural, =0 {all timelines} =1 {{totalTimelineTemplates} timeline template} other {{totalTimelineTemplates} timeline templates}}',
+    }
+  );
+
 export const FILTER_TIMELINES = (timelineType: string) =>
   i18n.translate('xpack.securitySolution.open.timeline.filterByTimelineTypesTitle', {
     values: { timelineType },

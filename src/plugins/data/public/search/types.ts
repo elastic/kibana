@@ -21,7 +21,7 @@ import { PackageInfo } from 'kibana/server';
 import { ISearchInterceptor } from './search_interceptor';
 import { SearchUsageCollector } from './collectors';
 import { AggsSetup, AggsSetupDependencies, AggsStartDependencies, AggsStart } from './aggs';
-import { ISearchGeneric, ISearchStartSearchSource } from '../../common/search';
+import { ISearchGeneric, ISessionService, ISearchStartSearchSource } from '../../common/search';
 import { IndexPatternsContract } from '../../common/index_patterns/index_patterns';
 import { UsageCollectionSetup } from '../../../usage_collection/public';
 
@@ -38,6 +38,11 @@ export interface SearchEnhancements {
 export interface ISearchSetup {
   aggs: AggsSetup;
   usageCollector?: SearchUsageCollector;
+  /**
+   * session management
+   * {@link ISessionService}
+   */
+  session: ISessionService;
   /**
    * @internal
    */
@@ -67,6 +72,11 @@ export interface ISearchStart {
    * {@link ISearchStartSearchSource}
    */
   searchSource: ISearchStartSearchSource;
+  /**
+   * session management
+   * {@link ISessionService}
+   */
+  session: ISessionService;
 }
 
 export { SEARCH_EVENT_TYPE } from './collectors';

@@ -176,19 +176,6 @@ describe('create_exception_list_item_schema', () => {
     expect(message.schema).toEqual(outputPayload);
   });
 
-  test('it should pass validation when supplied an undefined for "_tags" but return an array and generate a correct body not counting the auto generated uuid', () => {
-    const inputPayload = getCreateExceptionListItemSchemaMock();
-    const outputPayload = getCreateExceptionListItemSchemaMock();
-    delete inputPayload._tags;
-    outputPayload._tags = [];
-    const decoded = createExceptionListItemSchema.decode(inputPayload);
-    const checked = exactCheck(inputPayload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    delete (message.schema as CreateExceptionListItemSchema).item_id;
-    expect(getPaths(left(message.errors))).toEqual([]);
-    expect(message.schema).toEqual(outputPayload);
-  });
-
   test('it should pass validation when supplied an undefined for "item_id" and auto generate a uuid', () => {
     const inputPayload = getCreateExceptionListItemSchemaMock();
     delete inputPayload.item_id;

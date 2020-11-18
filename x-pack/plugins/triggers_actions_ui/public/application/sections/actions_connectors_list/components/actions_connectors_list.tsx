@@ -20,13 +20,19 @@ import {
   EuiEmptyPrompt,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { omit } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useAppDependencies } from '../../../app_context';
 import { loadAllActions, loadActionTypes, deleteActions } from '../../../lib/action_connector_api';
 import ConnectorAddFlyout from '../../action_connector_form/connector_add_flyout';
-import ConnectorEditFlyout from '../../action_connector_form/connector_edit_flyout';
-
-import { hasDeleteActionsCapability, hasSaveActionsCapability } from '../../../lib/capabilities';
+import ConnectorEditFlyout, {
+  EditConectorTabs,
+} from '../../action_connector_form/connector_edit_flyout';
+import {
+  hasDeleteActionsCapability,
+  hasSaveActionsCapability,
+  hasExecuteActionsCapability,
+} from '../../../lib/capabilities';
 import { DeleteModalConfirmation } from '../../../components/delete_modal_confirmation';
 import { ActionsConnectorsContextProvider } from '../../../context/actions_connectors_context';
 import { checkActionTypeEnabled } from '../../../lib/check_action_type_enabled';
@@ -43,22 +49,19 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
     docLinks,
   } = useAppDependencies();
   const canDelete = hasDeleteActionsCapability(capabilities);
+  const canExecute = hasExecuteActionsCapability(capabilities);
   const canSave = hasSaveActionsCapability(capabilities);
 
   const [actionTypesIndex, setActionTypesIndex] = useState<ActionTypeIndex | undefined>(undefined);
   const [actions, setActions] = useState<ActionConnector[]>([]);
-  const [data, setData] = useState<ActionConnectorTableItem[]>([]);
   const [selectedItems, setSelectedItems] = useState<ActionConnectorTableItem[]>([]);
   const [isLoadingActionTypes, setIsLoadingActionTypes] = useState<boolean>(false);
   const [isLoadingActions, setIsLoadingActions] = useState<boolean>(false);
-  const [editFlyoutVisible, setEditFlyoutVisibility] = useState<boolean>(false);
   const [addFlyoutVisible, setAddFlyoutVisibility] = useState<boolean>(false);
-  const [actionTypesList, setActionTypesList] = useState<Array<{ value: string; name: string }>>(
-    []
-  );
-  const [editedConnectorItem, setEditedConnectorItem] = useState<
-    ActionConnectorTableItem | undefined
-  >(undefined);
+  const [editConnectorProps, setEditConnectorProps] = useState<{
+    initialConnector?: ActionConnector;
+    tab?: EditConectorTabs;
+  }>({});
   const [connectorsToDelete, setConnectorsToDelete] = useState<string[]>([]);
 
   useEffect(() => {
@@ -90,30 +93,25 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  useEffect(() => {
-    // Avoid flickering before action types load
-    if (typeof actionTypesIndex === 'undefined') {
-      return;
-    }
-    // Update the data for the table
-    const updatedData = actions.map((action) => {
-      return {
-        ...action,
-        actionType: actionTypesIndex[action.actionTypeId]
-          ? actionTypesIndex[action.actionTypeId].name
-          : action.actionTypeId,
-      };
-    });
-    setData(updatedData);
-    // Update the action types list for the filter
-    const actionTypes = Object.values(actionTypesIndex)
-      .map((actionType) => ({
-        value: actionType.id,
-        name: `${actionType.name} (${getActionsCountByActionType(actions, actionType.id)})`,
-      }))
-      .sort((a, b) => a.name.localeCompare(b.name));
-    setActionTypesList(actionTypes);
-  }, [actions, actionTypesIndex]);
+  const actionConnectorTableItems: ActionConnectorTableItem[] = actionTypesIndex
+    ? actions.map((action) => {
+        return {
+          ...action,
+          actionType: actionTypesIndex[action.actionTypeId]
+            ? actionTypesIndex[action.actionTypeId].name
+            : action.actionTypeId,
+        };
+      })
+    : [];
+
+  const actionTypesList: Array<{ value: string; name: string }> = actionTypesIndex
+    ? Object.values(actionTypesIndex)
+        .map((actionType) => ({
+          value: actionType.id,
+          name: `${actionType.name} (${getActionsCountByActionType(actions, actionType.id)})`,
+        }))
+        .sort((a, b) => a.name.localeCompare(b.name))
+    : [];
 
   async function loadActions() {
     setIsLoadingActions(true);
@@ -134,9 +132,8 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
     }
   }
 
-  async function editItem(connectorTableItem: ActionConnectorTableItem) {
-    setEditedConnectorItem(connectorTableItem);
-    setEditFlyoutVisibility(true);
+  async function editItem(actionConnector: ActionConnector, tab: EditConectorTabs) {
+    setEditConnectorProps({ initialConnector: actionConnector, tab });
   }
 
   const actionsTableColumns = [
@@ -159,7 +156,7 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
         const link = (
           <EuiLink
             data-test-subj={`edit${item.id}`}
-            onClick={() => editItem(item)}
+            onClick={() => editItem(item, EditConectorTabs.Configuration)}
             key={item.id}
             disabled={actionTypesIndex ? !actionTypesIndex[item.actionTypeId].enabled : true}
           >
@@ -203,6 +200,11 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
               item={item}
               onDelete={() => setConnectorsToDelete([item.id])}
             />
+            <RunOperation
+              canExecute={canExecute}
+              item={item}
+              onRun={() => editItem(item, EditConectorTabs.Test)}
+            />
           </EuiFlexGroup>
         );
       },
@@ -212,7 +214,7 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
   const table = (
     <EuiInMemoryTable
       loading={isLoadingActions || isLoadingActionTypes}
-      items={data}
+      items={actionConnectorTableItems}
       sorting={true}
       itemId="id"
       columns={actionsTableColumns}
@@ -346,11 +348,14 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
           </EuiFlexItem>
         </EuiFlexGroup>
       )}
-      {data.length !== 0 && table}
-      {data.length === 0 && canSave && !isLoadingActions && !isLoadingActionTypes && (
-        <EmptyConnectorsPrompt onCTAClicked={() => setAddFlyoutVisibility(true)} />
-      )}
-      {data.length === 0 && !canSave && <NoPermissionPrompt />}
+      {actionConnectorTableItems.length !== 0 && table}
+      {actionConnectorTableItems.length === 0 &&
+        canSave &&
+        !isLoadingActions &&
+        !isLoadingActionTypes && (
+          <EmptyConnectorsPrompt onCTAClicked={() => setAddFlyoutVisibility(true)} />
+        )}
+      {actionConnectorTableItems.length === 0 && !canSave && <NoPermissionPrompt />}
       <ActionsConnectorsContextProvider
         value={{
           actionTypeRegistry,
@@ -361,16 +366,24 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
           docLinks,
         }}
       >
-        <ConnectorAddFlyout
-          addFlyoutVisible={addFlyoutVisible}
-          setAddFlyoutVisibility={setAddFlyoutVisibility}
-        />
-        {editedConnectorItem ? (
+        {addFlyoutVisible ? (
+          <ConnectorAddFlyout
+            onClose={() => {
+              setAddFlyoutVisibility(false);
+            }}
+            onTestConnector={(connector) => editItem(connector, EditConectorTabs.Test)}
+          />
+        ) : null}
+        {editConnectorProps.initialConnector ? (
           <ConnectorEditFlyout
-            key={editedConnectorItem.id}
-            initialConnector={editedConnectorItem}
-            editFlyoutVisible={editFlyoutVisible}
-            setEditFlyoutVisibility={setEditFlyoutVisibility}
+            key={`${editConnectorProps.initialConnector.id}${
+              editConnectorProps.tab ? `:${editConnectorProps.tab}` : ``
+            }`}
+            initialConnector={editConnectorProps.initialConnector}
+            tab={editConnectorProps.tab}
+            onClose={() => {
+              setEditConnectorProps(omit(editConnectorProps, 'initialConnector'));
+            }}
           />
         ) : null}
       </ActionsConnectorsContextProvider>
@@ -427,6 +440,41 @@ const DeleteOperation: React.FunctionComponent<{
           )}
           onClick={onDelete}
           iconType={'trash'}
+        />
+      </EuiToolTip>
+    </EuiFlexItem>
+  );
+};
+
+const RunOperation: React.FunctionComponent<{
+  item: ActionConnectorTableItem;
+  canExecute: boolean;
+  onRun: () => void;
+}> = ({ item, canExecute, onRun }) => {
+  return (
+    <EuiFlexItem grow={false}>
+      <EuiToolTip
+        content={
+          canExecute
+            ? i18n.translate(
+                'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.runConnectorDescription',
+                { defaultMessage: 'Run this connector' }
+              )
+            : i18n.translate(
+                'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.runConnectorDisabledDescription',
+                { defaultMessage: 'Unable to run connectors' }
+              )
+        }
+      >
+        <EuiButtonIcon
+          isDisabled={!canExecute}
+          data-test-subj="runConnector"
+          aria-label={i18n.translate(
+            'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.runConnectorName',
+            { defaultMessage: 'Run' }
+          )}
+          onClick={onRun}
+          iconType={'play'}
         />
       </EuiToolTip>
     </EuiFlexItem>

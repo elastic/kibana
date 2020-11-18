@@ -27,7 +27,7 @@ const getMockContext = () =>
 
 const getMockRequest = () =>
   ({
-    url: { port: '5601', query: '', path: '/foo' },
+    url: { port: '5601', search: '', pathname: '/foo' },
     route: { path: '/foo', options: {} },
   } as KibanaRequest);
 
@@ -130,7 +130,7 @@ describe('authorized_user_pre_routing', function () {
     ).toMatchObject({ body: `Sorry, you don't have access to Reporting` });
   });
 
-  it('should return from handler when security is enabled and user has explicitly allowed role', async function (done) {
+  it('should return from handler when security is enabled and user has explicitly allowed role', function (done) {
     mockCore.getPluginSetupDeps = () =>
       (({
         // @ts-ignore

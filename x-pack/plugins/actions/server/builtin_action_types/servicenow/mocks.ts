@@ -7,8 +7,36 @@
 import { ExternalService, PushToServiceApiParams, ExecutorSubActionPushParams } from './types';
 import { MapRecord } from '../case/types';
 
+export const serviceNowCommonFields = [
+  {
+    column_label: 'Close notes',
+    max_length: '4000',
+    element: 'close_notes',
+  },
+  {
+    column_label: 'Description',
+    max_length: '4000',
+    element: 'description',
+  },
+  {
+    column_label: 'Short description',
+    max_length: '160',
+    element: 'short_description',
+  },
+  {
+    column_label: 'Created by',
+    max_length: '40',
+    element: 'sys_created_by',
+  },
+  {
+    column_label: 'Updated by',
+    max_length: '40',
+    element: 'sys_updated_by',
+  },
+];
 const createMock = (): jest.Mocked<ExternalService> => {
   const service = {
+    getFields: jest.fn().mockImplementation(() => Promise.resolve(serviceNowCommonFields)),
     getIncident: jest.fn().mockImplementation(() =>
       Promise.resolve({
         short_description: 'title from servicenow',
@@ -75,7 +103,7 @@ const executorParams: ExecutorSubActionPushParams = {
   comment: 'test-alert comment',
   severity: '1',
   urgency: '2',
-  impact: '1',
+  impact: '3',
   comments: [
     {
       commentId: 'case-comment-1',

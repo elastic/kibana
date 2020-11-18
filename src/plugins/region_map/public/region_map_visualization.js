@@ -170,27 +170,29 @@ export function createRegionMapVisualization({
     }
 
     async _recreateChoroplethLayer(name, attribution, showAllData) {
+      const selectedLayer = await this._loadConfig(this._params.selectedLayer);
       this._kibanaMap.removeLayer(this._choroplethLayer);
 
       if (this._choroplethLayer) {
         this._choroplethLayer = this._choroplethLayer.cloneChoroplethLayerForNewData(
           name,
           attribution,
-          this._params.selectedLayer.format,
+          selectedLayer.format,
           showAllData,
-          this._params.selectedLayer.meta,
-          this._params.selectedLayer,
-          await getServiceSettings()
+          selectedLayer.meta,
+          selectedLayer,
+          await getServiceSettings(),
+          (await lazyLoadMapsLegacyModules()).L
         );
       } else {
         const { ChoroplethLayer } = await import('./choropleth_layer');
         this._choroplethLayer = new ChoroplethLayer(
           name,
           attribution,
-          this._params.selectedLayer.format,
+          selectedLayer.format,
           showAllData,
-          this._params.selectedLayer.meta,
-          this._params.selectedLayer,
+          selectedLayer.meta,
+          selectedLayer,
           await getServiceSettings(),
           (await lazyLoadMapsLegacyModules()).L
         );

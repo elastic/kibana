@@ -7,15 +7,23 @@
 import request, { Cookie } from 'request';
 import { delay } from 'bluebird';
 import expect from '@kbn/expect';
+import type { AuthenticationProvider } from '../../../../plugins/security/common/types';
+import { getSAMLRequestId, getSAMLResponse } from '../../fixtures/saml/saml_tools';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertestWithoutAuth');
   const es = getService('legacyEs');
   const config = getService('config');
-  const [username, password] = config.get('servers.elasticsearch.auth').split(':');
+  const randomness = getService('randomness');
+  const [basicUsername, basicPassword] = config.get('servers.elasticsearch.auth').split(':');
+  const kibanaServerConfig = config.get('servers.kibana');
 
-  async function checkSessionCookie(sessionCookie: Cookie, providerName: string) {
+  async function checkSessionCookie(
+    sessionCookie: Cookie,
+    username: string,
+    provider: AuthenticationProvider
+  ) {
     const apiResponse = await supertest
       .get('/internal/security/me')
       .set('kbn-xsrf', 'xxx')
@@ -23,11 +31,38 @@ export default function ({ getService }: FtrProviderContext) {
       .expect(200);
 
     expect(apiResponse.body.username).to.be(username);
-    expect(apiResponse.body.authentication_provider).to.be(providerName);
+    expect(apiResponse.body.authentication_provider).to.eql(provider);
   }
 
   async function getNumberOfSessionDocuments() {
-    return (await es.search({ index: '.kibana_security_session*' })).hits.total.value;
+    return (((await es.search({ index: '.kibana_security_session*' })).hits.total as unknown) as {
+      value: number;
+    }).value;
+  }
+
+  async function loginWithSAML(providerName: string) {
+    const handshakeResponse = await supertest
+      .post('/internal/security/login')
+      .set('kbn-xsrf', 'xxx')
+      .send({ providerType: 'saml', providerName, currentURL: '' })
+      .expect(200);
+
+    const authenticationResponse = await supertest
+      .post('/api/security/saml/callback')
+      .set('kbn-xsrf', 'xxx')
+      .set('Cookie', request.cookie(handshakeResponse.headers['set-cookie'][0])!.cookieString())
+      .send({
+        SAMLResponse: await getSAMLResponse({
+          destination: `http://localhost:${kibanaServerConfig.port}/api/security/saml/callback`,
+          sessionIndex: String(randomness.naturalNumber()),
+          inResponseTo: await getSAMLRequestId(handshakeResponse.body.location),
+        }),
+      })
+      .expect(302);
+
+    const cookie = request.cookie(authenticationResponse.headers['set-cookie'][0])!;
+    await checkSessionCookie(cookie, 'a@b.c', { type: 'saml', name: providerName });
+    return cookie;
   }
 
   describe('Session Lifespan cleanup', () => {
@@ -47,14 +82,17 @@ export default function ({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'xxx')
         .send({
           providerType: 'basic',
-          providerName: 'basic',
+          providerName: 'basic1',
           currentURL: '/',
-          params: { username, password },
+          params: { username: basicUsername, password: basicPassword },
         })
         .expect(200);
 
       const sessionCookie = request.cookie(response.headers['set-cookie'][0])!;
-      await checkSessionCookie(sessionCookie, 'basic');
+      await checkSessionCookie(sessionCookie, basicUsername, {
+        type: 'basic',
+        name: 'basic1',
+      });
       expect(await getNumberOfSessionDocuments()).to.be(1);
 
       // Cleanup routine runs every 10s, let's wait for 30s to make sure it runs multiple times and
@@ -68,6 +106,64 @@ export default function ({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'xxx')
         .set('Cookie', sessionCookie.cookieString())
         .expect(401);
+    });
+
+    it('should properly clean up session expired because of lifespan when providers override global session config', async function () {
+      this.timeout(60000);
+
+      const [
+        samlDisableSessionCookie,
+        samlOverrideSessionCookie,
+        samlFallbackSessionCookie,
+      ] = await Promise.all([
+        loginWithSAML('saml_disable'),
+        loginWithSAML('saml_override'),
+        loginWithSAML('saml_fallback'),
+      ]);
+
+      const response = await supertest
+        .post('/internal/security/login')
+        .set('kbn-xsrf', 'xxx')
+        .send({
+          providerType: 'basic',
+          providerName: 'basic1',
+          currentURL: '/',
+          params: { username: basicUsername, password: basicPassword },
+        })
+        .expect(200);
+      const basicSessionCookie = request.cookie(response.headers['set-cookie'][0])!;
+      await checkSessionCookie(basicSessionCookie, basicUsername, {
+        type: 'basic',
+        name: 'basic1',
+      });
+      expect(await getNumberOfSessionDocuments()).to.be(4);
+
+      // Cleanup routine runs every 10s, let's wait for 30s to make sure it runs multiple times and
+      // when lifespan is exceeded.
+      await delay(30000);
+
+      // Session for basic and SAML that used global session settings should not be valid anymore.
+      expect(await getNumberOfSessionDocuments()).to.be(2);
+      await supertest
+        .get('/internal/security/me')
+        .set('kbn-xsrf', 'xxx')
+        .set('Cookie', basicSessionCookie.cookieString())
+        .expect(401);
+      await supertest
+        .get('/internal/security/me')
+        .set('kbn-xsrf', 'xxx')
+        .set('Cookie', samlFallbackSessionCookie.cookieString())
+        .expect(401);
+
+      // But sessions for the SAML with overridden and disabled lifespan should still be valid.
+      await checkSessionCookie(samlOverrideSessionCookie, 'a@b.c', {
+        type: 'saml',
+        name: 'saml_override',
+      });
+      await checkSessionCookie(samlDisableSessionCookie, 'a@b.c', {
+        type: 'saml',
+        name: 'saml_disable',
+      });
     });
   });
 }

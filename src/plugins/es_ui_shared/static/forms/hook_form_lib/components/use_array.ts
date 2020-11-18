@@ -28,21 +28,23 @@ interface Props {
   path: string;
   initialNumberOfItems?: number;
   readDefaultValueOnForm?: boolean;
-  validations?: FieldConfig<any, ArrayItem[]>['validations'];
-  children: (args: {
-    items: ArrayItem[];
-    error: string | null;
-    addItem: () => void;
-    removeItem: (id: number) => void;
-    moveItem: (sourceIdx: number, destinationIdx: number) => void;
-    form: FormHook;
-  }) => JSX.Element;
+  validations?: FieldConfig<ArrayItem[]>['validations'];
+  children: (formFieldArray: FormArrayField) => JSX.Element;
 }
 
 export interface ArrayItem {
   id: number;
   path: string;
   isNew: boolean;
+}
+
+export interface FormArrayField {
+  items: ArrayItem[];
+  error: string | null;
+  addItem: () => void;
+  removeItem: (id: number) => void;
+  moveItem: (sourceIdx: number, destinationIdx: number) => void;
+  form: FormHook;
 }
 
 /**
@@ -71,7 +73,7 @@ export const UseArray = ({
   const uniqueId = useRef(0);
 
   const form = useFormContext();
-  const { getFieldDefaultValue } = form;
+  const { __getFieldDefaultValue } = form;
 
   const getNewItemAtIndex = useCallback(
     (index: number): ArrayItem => ({
@@ -84,7 +86,7 @@ export const UseArray = ({
 
   const fieldDefaultValue = useMemo<ArrayItem[]>(() => {
     const defaultValues = readDefaultValueOnForm
-      ? (getFieldDefaultValue(path) as any[])
+      ? (__getFieldDefaultValue(path) as any[])
       : undefined;
 
     const getInitialItemsFromValues = (values: any[]): ArrayItem[] =>
@@ -97,17 +99,23 @@ export const UseArray = ({
     return defaultValues
       ? getInitialItemsFromValues(defaultValues)
       : new Array(initialNumberOfItems).fill('').map((_, i) => getNewItemAtIndex(i));
-  }, [path, initialNumberOfItems, readDefaultValueOnForm, getFieldDefaultValue, getNewItemAtIndex]);
+  }, [
+    path,
+    initialNumberOfItems,
+    readDefaultValueOnForm,
+    __getFieldDefaultValue,
+    getNewItemAtIndex,
+  ]);
 
-  // Create a new hook field with the "hasValue" set to false so we don't use its value to build the final form data.
+  // Create a new hook field with the "isIncludedInOutput" set to false so we don't use its value to build the final form data.
   // Apart from that the field behaves like a normal field and is hooked into the form validation lifecycle.
-  const fieldConfigBase: FieldConfig<any, ArrayItem[]> & InternalFieldConfig<ArrayItem[]> = {
+  const fieldConfigBase: FieldConfig<ArrayItem[]> & InternalFieldConfig<ArrayItem[]> = {
     defaultValue: fieldDefaultValue,
-    errorDisplayDelay: 0,
+    valueChangeDebounceTime: 0,
     isIncludedInOutput: false,
   };
 
-  const fieldConfig: FieldConfig<any, ArrayItem[]> & InternalFieldConfig<ArrayItem[]> = validations
+  const fieldConfig: FieldConfig<ArrayItem[]> & InternalFieldConfig<ArrayItem[]> = validations
     ? { validations, ...fieldConfigBase }
     : fieldConfigBase;
 

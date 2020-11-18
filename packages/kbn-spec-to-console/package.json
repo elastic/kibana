@@ -7,21 +7,16 @@
     "lib": "lib"
   },
   "scripts": {
-    "test": "jest",
-    "format": "prettier **/*.js --write"
+    "test": "../../node_modules/.bin/jest",
+    "format": "../../node_modules/.bin/prettier **/*.js --write"
   },
   "author": "",
   "license": "Apache-2.0",
+  "kibana": {
+    "devOnly": true
+  },
   "bugs": {
     "url": "https://github.com/jbudz/spec-to-console/issues"
   },
-  "homepage": "https://github.com/jbudz/spec-to-console#readme",
-  "devDependencies": {
-    "jest": "^25.5.4",
-    "prettier": "^2.1.1"
-  },
-  "dependencies": {
-    "commander": "^3.0.2",
-    "glob": "^7.1.2"
-  }
+  "homepage": "https://github.com/jbudz/spec-to-console#readme"
 }

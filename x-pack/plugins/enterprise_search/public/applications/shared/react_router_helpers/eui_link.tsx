@@ -6,19 +6,21 @@
 
 import React from 'react';
 import { useValues } from 'kea';
-import { EuiLink, EuiButton, EuiButtonProps, EuiLinkAnchorProps } from '@elastic/eui';
+import { EuiLink, EuiButton, EuiButtonProps, EuiLinkAnchorProps, EuiPanel } from '@elastic/eui';
+import { EuiPanelProps } from '@elastic/eui/src/components/panel/panel';
 
-import { KibanaLogic } from '../../shared/kibana';
+import { KibanaLogic } from '../kibana';
+import { HttpLogic } from '../http';
 import { letBrowserHandleEvent, createHref } from './';
 
 /**
- * Generates either an EuiLink or EuiButton with a React-Router-ified link
+ * Generates EUI components with React-Router-ified links
  *
  * Based off of EUI's recommendations for handling React Router:
  * https://github.com/elastic/eui/blob/master/wiki/react-router.md#react-router-51
  */
 
-interface IEuiReactRouterProps {
+interface EuiReactRouterProps {
   to: string;
   onClick?(): void;
   // Used to navigate outside of the React Router plugin basename but still within Kibana,
@@ -26,16 +28,17 @@ interface IEuiReactRouterProps {
   shouldNotCreateHref?: boolean;
 }
 
-export const EuiReactRouterHelper: React.FC<IEuiReactRouterProps> = ({
+export const EuiReactRouterHelper: React.FC<EuiReactRouterProps> = ({
   to,
   onClick,
   shouldNotCreateHref,
   children,
 }) => {
   const { navigateToUrl, history } = useValues(KibanaLogic);
+  const { http } = useValues(HttpLogic);
 
   // Generate the correct link href (with basename etc. accounted for)
-  const href = createHref(to, history, { shouldNotCreateHref });
+  const href = createHref(to, { history, http }, { shouldNotCreateHref });
 
   const reactRouterLinkClick = (event: React.MouseEvent) => {
     if (onClick) onClick(); // Run any passed click events (e.g. telemetry)
@@ -52,10 +55,12 @@ export const EuiReactRouterHelper: React.FC<IEuiReactRouterProps> = ({
   return React.cloneElement(children as React.ReactElement, reactRouterProps);
 };
 
-type TEuiReactRouterLinkProps = EuiLinkAnchorProps & IEuiReactRouterProps;
-type TEuiReactRouterButtonProps = EuiButtonProps & IEuiReactRouterProps;
+/**
+ * Component helpers
+ */
 
-export const EuiReactRouterLink: React.FC<TEuiReactRouterLinkProps> = ({
+type EuiReactRouterLinkProps = EuiLinkAnchorProps & EuiReactRouterProps;
+export const EuiReactRouterLink: React.FC<EuiReactRouterLinkProps> = ({
   to,
   onClick,
   shouldNotCreateHref,
@@ -66,7 +71,8 @@ export const EuiReactRouterLink: React.FC<TEuiReactRouterLinkProps> = ({
   </EuiReactRouterHelper>
 );
 
-export const EuiReactRouterButton: React.FC<TEuiReactRouterButtonProps> = ({
+type EuiReactRouterButtonProps = EuiButtonProps & EuiReactRouterProps;
+export const EuiReactRouterButton: React.FC<EuiReactRouterButtonProps> = ({
   to,
   onClick,
   shouldNotCreateHref,
@@ -74,5 +80,17 @@ export const EuiReactRouterButton: React.FC<TEuiReactRouterButtonProps> = ({
 }) => (
   <EuiReactRouterHelper {...{ to, onClick, shouldNotCreateHref }}>
     <EuiButton {...rest} />
+  </EuiReactRouterHelper>
+);
+
+type EuiReactRouterPanelProps = EuiPanelProps & EuiReactRouterProps;
+export const EuiReactRouterPanel: React.FC<EuiReactRouterPanelProps> = ({
+  to,
+  onClick,
+  shouldNotCreateHref,
+  ...rest
+}) => (
+  <EuiReactRouterHelper {...{ to, onClick, shouldNotCreateHref }}>
+    <EuiPanel {...rest} />
   </EuiReactRouterHelper>
 );

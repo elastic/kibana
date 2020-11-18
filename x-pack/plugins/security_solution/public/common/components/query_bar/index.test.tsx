@@ -6,7 +6,7 @@
 
 import { mount } from 'enzyme';
 import React from 'react';
-import { waitFor } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { DEFAULT_FROM, DEFAULT_TO } from '../../../../common/constants';
 import { TestProviders, mockIndexPattern } from '../../mock';
@@ -19,6 +19,20 @@ describe('QueryBar ', () => {
   const mockOnChangeQuery = jest.fn();
   const mockOnSubmitQuery = jest.fn();
   const mockOnSavedQuery = jest.fn();
+
+  const Proxy = (props: QueryBarComponentProps) => (
+    <TestProviders>
+      <QueryBar {...props} />
+    </TestProviders>
+  );
+
+  // The data plugin's `SearchBar` is lazy loaded, so we need to ensure it is
+  // available before we mount our component with Enzyme.
+  const getWrapper = async (Component: ReturnType<typeof Proxy>) => {
+    const { getByTestId } = render(Component);
+    await waitFor(() => getByTestId('queryInput')); // check for presence of query input
+    return mount(Component);
+  };
 
   beforeEach(() => {
     mockOnChangeQuery.mockClear();
@@ -169,14 +183,8 @@ describe('QueryBar ', () => {
   });
 
   describe('state', () => {
-    test('clears draftQuery when filterQueryDraft has been cleared', () => {
-      const Proxy = (props: QueryBarComponentProps) => (
-        <TestProviders>
-          <QueryBar {...props} />
-        </TestProviders>
-      );
-
-      const wrapper = mount(
+    test('clears draftQuery when filterQueryDraft has been cleared', async () => {
+      const wrapper = await getWrapper(
         <Proxy
           dateRangeFrom={DEFAULT_FROM}
           dateRangeTo={DEFAULT_TO}
@@ -209,14 +217,8 @@ describe('QueryBar ', () => {
   });
 
   describe('#onQueryChange', () => {
-    test(' is the only reference that changed when filterQueryDraft props get updated', () => {
-      const Proxy = (props: QueryBarComponentProps) => (
-        <TestProviders>
-          <QueryBar {...props} />
-        </TestProviders>
-      );
-
-      const wrapper = mount(
+    test(' is the only reference that changed when filterQueryDraft props get updated', async () => {
+      const wrapper = await getWrapper(
         <Proxy
           dateRangeFrom={DEFAULT_FROM}
           dateRangeTo={DEFAULT_TO}
@@ -247,14 +249,8 @@ describe('QueryBar ', () => {
   });
 
   describe('#onQuerySubmit', () => {
-    test(' is the only reference that changed when filterQuery props get updated', () => {
-      const Proxy = (props: QueryBarComponentProps) => (
-        <TestProviders>
-          <QueryBar {...props} />
-        </TestProviders>
-      );
-
-      const wrapper = mount(
+    test(' is the only reference that changed when filterQuery props get updated', async () => {
+      const wrapper = await getWrapper(
         <Proxy
           dateRangeFrom={DEFAULT_FROM}
           dateRangeTo={DEFAULT_TO}
@@ -282,14 +278,8 @@ describe('QueryBar ', () => {
       expect(onSavedQueryRef).toEqual(wrapper.find(SearchBar).props().onSavedQueryUpdated);
     });
 
-    test(' is only reference that changed when timelineId props get updated', () => {
-      const Proxy = (props: QueryBarComponentProps) => (
-        <TestProviders>
-          <QueryBar {...props} />
-        </TestProviders>
-      );
-
-      const wrapper = mount(
+    test(' is only reference that changed when timelineId props get updated', async () => {
+      const wrapper = await getWrapper(
         <Proxy
           dateRangeFrom={DEFAULT_FROM}
           dateRangeTo={DEFAULT_TO}
@@ -319,14 +309,8 @@ describe('QueryBar ', () => {
   });
 
   describe('#onSavedQueryUpdated', () => {
-    test('is only reference that changed when dataProviders props get updated', () => {
-      const Proxy = (props: QueryBarComponentProps) => (
-        <TestProviders>
-          <QueryBar {...props} />
-        </TestProviders>
-      );
-
-      const wrapper = mount(
+    test('is only reference that changed when dataProviders props get updated', async () => {
+      const wrapper = await getWrapper(
         <Proxy
           dateRangeFrom={DEFAULT_FROM}
           dateRangeTo={DEFAULT_TO}
@@ -357,13 +341,7 @@ describe('QueryBar ', () => {
 
   describe('SavedQueryManagementComponent state', () => {
     test('popover should hidden when "Save current query" button was clicked', async () => {
-      const Proxy = (props: QueryBarComponentProps) => (
-        <TestProviders>
-          <QueryBar {...props} />
-        </TestProviders>
-      );
-
-      const wrapper = mount(
+      const wrapper = await getWrapper(
         <Proxy
           dateRangeFrom={DEFAULT_FROM}
           dateRangeTo={DEFAULT_TO}

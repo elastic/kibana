@@ -24,7 +24,7 @@ export default function copyToSpaceSpacesAndSecuritySuite({ getService }: TestIn
     createExpectWithConflictsWithoutOverwritingResult,
     createExpectUnauthorizedAtSpaceWithReferencesResult,
     createExpectUnauthorizedAtSpaceWithoutReferencesResult,
-    expectNotFoundResponse,
+    expectRouteForbiddenResponse,
     createMultiNamespaceTestCases,
   } = copyToSpaceTestSuiteFactory(es, esArchiver, supertestWithoutAuth);
 
@@ -61,16 +61,19 @@ export default function copyToSpaceSpacesAndSecuritySuite({ getService }: TestIn
         spaceId,
         user,
         tests: {
-          noConflictsWithoutReferences: { statusCode: 404, response: expectNotFoundResponse },
-          noConflictsWithReferences: { statusCode: 404, response: expectNotFoundResponse },
-          withConflictsOverwriting: { statusCode: 404, response: expectNotFoundResponse },
-          withConflictsWithoutOverwriting: { statusCode: 404, response: expectNotFoundResponse },
-          multipleSpaces: {
-            statusCode: 404,
-            withConflictsResponse: expectNotFoundResponse,
-            noConflictsResponse: expectNotFoundResponse,
+          noConflictsWithoutReferences: { statusCode: 403, response: expectRouteForbiddenResponse },
+          noConflictsWithReferences: { statusCode: 403, response: expectRouteForbiddenResponse },
+          withConflictsOverwriting: { statusCode: 403, response: expectRouteForbiddenResponse },
+          withConflictsWithoutOverwriting: {
+            statusCode: 403,
+            response: expectRouteForbiddenResponse,
           },
-          nonExistentSpace: { statusCode: 404, response: expectNotFoundResponse },
+          multipleSpaces: {
+            statusCode: 403,
+            withConflictsResponse: expectRouteForbiddenResponse,
+            noConflictsResponse: expectRouteForbiddenResponse,
+          },
+          nonExistentSpace: { statusCode: 403, response: expectRouteForbiddenResponse },
           multiNamespaceTestCases: createMultiNamespaceTestCases(spaceId, 'noAccess'),
         },
       });

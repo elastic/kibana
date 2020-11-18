@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import {
   SavedObjectsBaseOptions,
   SavedObjectsBulkCreateObject,
@@ -17,9 +17,11 @@ import {
   SavedObjectsUpdateOptions,
   SavedObjectsAddToNamespacesOptions,
   SavedObjectsDeleteFromNamespacesOptions,
+  SavedObjectsRemoveReferencesToOptions,
   SavedObjectsUtils,
   ISavedObjectTypeRegistry,
 } from '../../../../../src/core/server';
+import { ALL_SPACES_ID } from '../../common/constants';
 import { SpacesServiceSetup } from '../spaces_service/spaces_service';
 import { spaceIdToNamespace } from '../lib/utils/namespace';
 import { SpacesClient } from '../lib/spaces_client';
@@ -168,8 +170,8 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
       const spacesClient = await this.getSpacesClient;
 
       try {
-        const availableSpaces = await spacesClient.getAll('findSavedObjects');
-        if (namespaces.includes('*')) {
+        const availableSpaces = await spacesClient.getAll({ purpose: 'findSavedObjects' });
+        if (namespaces.includes(ALL_SPACES_ID)) {
           namespaces = availableSpaces.map((space) => space.id);
         } else {
           namespaces = namespaces.filter((namespace) =>
@@ -330,6 +332,25 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
   ) {
     throwErrorIfNamespaceSpecified(options);
     return await this.client.bulkUpdate(objects, {
+      ...options,
+      namespace: spaceIdToNamespace(this.spaceId),
+    });
+  }
+
+  /**
+   * Remove outward references to given object.
+   *
+   * @param type
+   * @param id
+   * @param options
+   */
+  public async removeReferencesTo(
+    type: string,
+    id: string,
+    options: SavedObjectsRemoveReferencesToOptions = {}
+  ) {
+    throwErrorIfNamespaceSpecified(options);
+    return await this.client.removeReferencesTo(type, id, {
       ...options,
       namespace: spaceIdToNamespace(this.spaceId),
     });

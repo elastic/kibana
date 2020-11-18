@@ -4,16 +4,31 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { loggingSystemMock } from 'src/core/server/mocks';
-import { createNewPackagePolicyMock } from '../../../ingest_manager/common/mocks';
+import { httpServerMock, loggingSystemMock } from 'src/core/server/mocks';
+import { createNewPackagePolicyMock } from '../../../fleet/common/mocks';
 import { factory as policyConfigFactory } from '../../common/endpoint/models/policy_config';
 import {
   getManifestManagerMock,
   ManifestManagerMockType,
 } from './services/artifacts/manifest_manager/manifest_manager.mock';
 import { getPackagePolicyCreateCallback } from './ingest_integration';
+import { KibanaRequest, RequestHandlerContext } from 'kibana/server';
+import { createMockConfig, requestContextMock } from '../lib/detection_engine/routes/__mocks__';
+import { EndpointAppContextServiceStartContract } from './endpoint_app_context_services';
+import { createMockEndpointAppContextServiceStartContract } from './mocks';
 
 describe('ingest_integration tests ', () => {
+  let endpointAppContextMock: EndpointAppContextServiceStartContract;
+  let req: KibanaRequest;
+  let ctx: RequestHandlerContext;
+  const maxTimelineImportExportSize = createMockConfig().maxTimelineImportExportSize;
+
+  beforeEach(() => {
+    endpointAppContextMock = createMockEndpointAppContextServiceStartContract();
+    ctx = requestContextMock.createTools().context;
+    req = httpServerMock.createKibanaRequest();
+  });
+
   describe('ingest_integration sanity checks', () => {
     test('policy is updated with initial manifest', async () => {
       const logger = loggingSystemMock.create().get('ingest_integration.test');
@@ -21,9 +36,16 @@ describe('ingest_integration tests ', () => {
         mockType: ManifestManagerMockType.InitialSystemState,
       });
 
-      const callback = getPackagePolicyCreateCallback(logger, manifestManager);
+      const callback = getPackagePolicyCreateCallback(
+        logger,
+        manifestManager,
+        endpointAppContextMock.appClientFactory,
+        maxTimelineImportExportSize,
+        endpointAppContextMock.security,
+        endpointAppContextMock.alerts
+      );
       const policyConfig = createNewPackagePolicyMock(); // policy config without manifest
-      const newPolicyConfig = await callback(policyConfig); // policy config WITH manifest
+      const newPolicyConfig = await callback(policyConfig, ctx, req); // policy config WITH manifest
 
       expect(newPolicyConfig.inputs[0]!.type).toEqual('endpoint');
       expect(newPolicyConfig.inputs[0]!.config!.policy.value).toEqual(policyConfigFactory());
@@ -91,9 +113,16 @@ describe('ingest_integration tests ', () => {
       manifestManager.pushArtifacts = jest.fn().mockResolvedValue([new Error('error updating')]);
       const lastComputed = await manifestManager.getLastComputedManifest();
 
-      const callback = getPackagePolicyCreateCallback(logger, manifestManager);
+      const callback = getPackagePolicyCreateCallback(
+        logger,
+        manifestManager,
+        endpointAppContextMock.appClientFactory,
+        maxTimelineImportExportSize,
+        endpointAppContextMock.security,
+        endpointAppContextMock.alerts
+      );
       const policyConfig = createNewPackagePolicyMock();
-      const newPolicyConfig = await callback(policyConfig);
+      const newPolicyConfig = await callback(policyConfig, ctx, req);
 
       expect(newPolicyConfig.inputs[0]!.type).toEqual('endpoint');
       expect(newPolicyConfig.inputs[0]!.config!.policy.value).toEqual(policyConfigFactory());
@@ -111,9 +140,16 @@ describe('ingest_integration tests ', () => {
       expect(lastComputed).toEqual(null);
 
       manifestManager.buildNewManifest = jest.fn().mockRejectedValue(new Error('abcd'));
-      const callback = getPackagePolicyCreateCallback(logger, manifestManager);
+      const callback = getPackagePolicyCreateCallback(
+        logger,
+        manifestManager,
+        endpointAppContextMock.appClientFactory,
+        maxTimelineImportExportSize,
+        endpointAppContextMock.security,
+        endpointAppContextMock.alerts
+      );
       const policyConfig = createNewPackagePolicyMock();
-      const newPolicyConfig = await callback(policyConfig);
+      const newPolicyConfig = await callback(policyConfig, ctx, req);
 
       expect(newPolicyConfig.inputs[0]!.type).toEqual('endpoint');
       expect(newPolicyConfig.inputs[0]!.config!.policy.value).toEqual(policyConfigFactory());
@@ -125,9 +161,16 @@ describe('ingest_integration tests ', () => {
       const lastComputed = await manifestManager.getLastComputedManifest();
 
       manifestManager.buildNewManifest = jest.fn().mockResolvedValue(lastComputed); // no diffs
-      const callback = getPackagePolicyCreateCallback(logger, manifestManager);
+      const callback = getPackagePolicyCreateCallback(
+        logger,
+        manifestManager,
+        endpointAppContextMock.appClientFactory,
+        maxTimelineImportExportSize,
+        endpointAppContextMock.security,
+        endpointAppContextMock.alerts
+      );
       const policyConfig = createNewPackagePolicyMock();
-      const newPolicyConfig = await callback(policyConfig);
+      const newPolicyConfig = await callback(policyConfig, ctx, req);
 
       expect(newPolicyConfig.inputs[0]!.type).toEqual('endpoint');
       expect(newPolicyConfig.inputs[0]!.config!.policy.value).toEqual(policyConfigFactory());

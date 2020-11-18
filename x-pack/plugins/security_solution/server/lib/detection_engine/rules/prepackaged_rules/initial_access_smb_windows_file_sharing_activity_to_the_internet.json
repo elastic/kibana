@@ -5,7 +5,8 @@
   "description": "This rule detects network events that may indicate the use of Windows file sharing (also called SMB or CIFS) traffic to the Internet. SMB is commonly used within networks to share files, printers, and other system resources amongst trusted systems. It should almost never be directly exposed to the Internet, as it is frequently targeted and exploited by threat actors as an initial access or back-door vector or for data exfiltration.",
   "index": [
     "filebeat-*",
-    "packetbeat-*"
+    "packetbeat-*",
+    "logs-endpoint.events.*"
   ],
   "language": "kuery",
   "license": "Elastic License",
@@ -16,15 +17,18 @@
   "severity": "high",
   "tags": [
     "Elastic",
-    "Network"
+    "Host",
+    "Network",
+    "Threat Detection",
+    "Initial Access"
   ],
   "threat": [
     {
       "framework": "MITRE ATT&CK",
       "tactic": {
-        "id": "TA0011",
+        "id": "TA0001",
         "name": "Initial Access",
-        "reference": "https://attack.mitre.org/tactics/TA0011/"
+        "reference": "https://attack.mitre.org/tactics/TA0001/"
       },
       "technique": [
         {
@@ -51,5 +55,5 @@
     }
   ],
   "type": "query",
-  "version": 4
+  "version": 5
 }

@@ -14,5 +14,6 @@ export interface ExpressionRenderError extends Error
 
 |  Property | Type | Description |
 |  --- | --- | --- |
+|  [original](./kibana-plugin-plugins-expressions-public.expressionrendererror.original.md) | <code>Error</code> |  |
 |  [type](./kibana-plugin-plugins-expressions-public.expressionrendererror.type.md) | <code>string</code> |  |
 

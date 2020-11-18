@@ -31,7 +31,8 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
       .then((response: SupertestResponse) => response.body);
   }
 
-  describe('update', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/82804
+  describe.skip('update', () => {
     const objectRemover = new ObjectRemover(supertest);
 
     after(() => objectRemover.removeAll());
@@ -129,6 +130,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
                 scheduledTaskId: createdAlert.scheduledTaskId,
                 createdAt: response.body.createdAt,
                 updatedAt: response.body.updatedAt,
+                executionStatus: response.body.executionStatus,
               });
               expect(Date.parse(response.body.createdAt)).to.be.greaterThan(0);
               expect(Date.parse(response.body.updatedAt)).to.be.greaterThan(0);
@@ -211,6 +213,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
                 scheduledTaskId: createdAlert.scheduledTaskId,
                 createdAt: response.body.createdAt,
                 updatedAt: response.body.updatedAt,
+                executionStatus: response.body.executionStatus,
               });
               expect(Date.parse(response.body.createdAt)).to.be.greaterThan(0);
               expect(Date.parse(response.body.updatedAt)).to.be.greaterThan(0);
@@ -304,6 +307,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
                 scheduledTaskId: createdAlert.scheduledTaskId,
                 createdAt: response.body.createdAt,
                 updatedAt: response.body.updatedAt,
+                executionStatus: response.body.executionStatus,
               });
               expect(Date.parse(response.body.createdAt)).to.be.greaterThan(0);
               expect(Date.parse(response.body.updatedAt)).to.be.greaterThan(0);
@@ -397,6 +401,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
                 scheduledTaskId: createdAlert.scheduledTaskId,
                 createdAt: response.body.createdAt,
                 updatedAt: response.body.updatedAt,
+                executionStatus: response.body.executionStatus,
               });
               expect(Date.parse(response.body.createdAt)).to.be.greaterThan(0);
               expect(Date.parse(response.body.updatedAt)).to.be.greaterThan(0);
@@ -486,6 +491,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
                 scheduledTaskId: createdAlert.scheduledTaskId,
                 createdAt: response.body.createdAt,
                 updatedAt: response.body.updatedAt,
+                executionStatus: response.body.executionStatus,
               });
               expect(Date.parse(response.body.createdAt)).to.be.greaterThan(0);
               expect(Date.parse(response.body.updatedAt)).to.be.greaterThan(0);
@@ -823,6 +829,145 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
                 expect(alertTask.status).to.eql('idle');
                 // ensure the alert is rescheduled to a minute from now
                 ensureDatetimeIsWithinRange(Date.parse(alertTask.runAt), 60 * 1000);
+              });
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
+        });
+
+        it('should handle updates for a long running alert type without failing the underlying tasks due to invalidated ApiKey', async () => {
+          const { body: createdAlert } = await supertest
+            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              enabled: true,
+              name: 'abc',
+              tags: ['foo'],
+              alertTypeId: 'test.longRunning',
+              consumer: 'alertsFixture',
+              schedule: { interval: '1s' },
+              throttle: '1m',
+              actions: [],
+              params: {},
+            })
+            .expect(200);
+          objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
+          const updatedData = {
+            name: 'bcd',
+            tags: ['bar'],
+            params: {
+              foo: true,
+            },
+            schedule: { interval: '1m' },
+            actions: [],
+            throttle: '1m',
+          };
+          const response = await supertestWithoutAuth
+            .put(`${getUrlPrefix(space.id)}/api/alerts/alert/${createdAlert.id}`)
+            .set('kbn-xsrf', 'foo')
+            .auth(user.username, user.password)
+            .send(updatedData);
+
+          const statusUpdates: string[] = [];
+          await retry.try(async () => {
+            const alertTask = (await getAlertingTaskById(createdAlert.scheduledTaskId)).docs[0];
+            statusUpdates.push(alertTask.status);
+            expect(alertTask.status).to.eql('idle');
+          });
+
+          expect(statusUpdates.find((status) => status === 'failed')).to.be(undefined);
+
+          switch (scenario.id) {
+            case 'no_kibana_privileges at space1':
+            case 'space_1_all at space2':
+            case 'global_read at space1':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                error: 'Forbidden',
+                message: getConsumerUnauthorizedErrorMessage(
+                  'update',
+                  'test.longRunning',
+                  'alertsFixture'
+                ),
+                statusCode: 403,
+              });
+              break;
+            case 'superuser at space1':
+            case 'space_1_all at space1':
+            case 'space_1_all_alerts_none_actions at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
+              expect(response.statusCode).to.eql(200);
+              await retry.try(async () => {
+                const alertTask = (await getAlertingTaskById(createdAlert.scheduledTaskId)).docs[0];
+                expect(alertTask.status).to.eql('idle');
+                // ensure the alert is rescheduled to a minute from now
+                ensureDatetimeIsWithinRange(Date.parse(alertTask.runAt), 60 * 1000);
+              });
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
+        });
+
+        it('should handle updates to an alert schedule by setting the new schedule for the underlying task', async () => {
+          const { body: createdAlert } = await supertest
+            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
+            .set('kbn-xsrf', 'foo')
+            .send(
+              getTestAlertData({
+                schedule: { interval: '1m' },
+              })
+            )
+            .expect(200);
+          objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
+
+          await retry.try(async () => {
+            const alertTask = (await getAlertingTaskById(createdAlert.scheduledTaskId)).docs[0];
+            expect(alertTask.status).to.eql('idle');
+            expect(alertTask.schedule).to.eql({ interval: '1m' });
+          });
+
+          const updatedData = {
+            name: 'bcd',
+            tags: ['bar'],
+            params: {
+              foo: true,
+            },
+            schedule: { interval: '1s' },
+            actions: [],
+            throttle: '1m',
+          };
+          const response = await supertestWithoutAuth
+            .put(`${getUrlPrefix(space.id)}/api/alerts/alert/${createdAlert.id}`)
+            .set('kbn-xsrf', 'foo')
+            .auth(user.username, user.password)
+            .send(updatedData);
+
+          switch (scenario.id) {
+            case 'no_kibana_privileges at space1':
+            case 'space_1_all at space2':
+            case 'global_read at space1':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                error: 'Forbidden',
+                message: getConsumerUnauthorizedErrorMessage(
+                  'update',
+                  'test.noop',
+                  'alertsFixture'
+                ),
+                statusCode: 403,
+              });
+              break;
+            case 'superuser at space1':
+            case 'space_1_all at space1':
+            case 'space_1_all_alerts_none_actions at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
+              expect(response.statusCode).to.eql(200);
+              await retry.try(async () => {
+                const alertTask = (await getAlertingTaskById(createdAlert.scheduledTaskId)).docs[0];
+                expect(alertTask.status).to.eql('idle');
+                expect(alertTask.schedule).to.eql({ interval: '1s' });
               });
               break;
             default:

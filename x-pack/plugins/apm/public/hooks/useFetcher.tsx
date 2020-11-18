@@ -4,14 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useContext, useEffect, useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
+import React, { useEffect, useMemo, useState } from 'react';
 import { IHttpFetchError } from 'src/core/public';
 import { toMountPoint } from '../../../../../src/plugins/kibana_react/public';
-import { LoadingIndicatorContext } from '../context/LoadingIndicatorContext';
 import { APMClient, callApmApi } from '../services/rest/createCallApmApi';
 import { useApmPluginContext } from './useApmPluginContext';
-import { useLoadingIndicator } from './useLoadingIndicator';
 
 export enum FETCH_STATUS {
   LOADING = 'loading',
@@ -23,7 +21,7 @@ export enum FETCH_STATUS {
 export interface FetcherResult<Data> {
   data?: Data;
   status: FETCH_STATUS;
-  error?: Error;
+  error?: IHttpFetchError;
 }
 
 // fetcher functions can return undefined OR a promise. Previously we had a more simple type
@@ -44,9 +42,6 @@ export function useFetcher<TReturn>(
 ): FetcherResult<InferResponseType<TReturn>> & { refetch: () => void } {
   const { notifications } = useApmPluginContext().core;
   const { preservePreviousData = true, showToastOnError = true } = options;
-  const { setIsLoading } = useLoadingIndicator();
-
-  const { dispatchStatus } = useContext(LoadingIndicatorContext);
   const [result, setResult] = useState<
     FetcherResult<InferResponseType<TReturn>>
   >({
@@ -67,8 +62,6 @@ export function useFetcher<TReturn>(
         return;
       }
 
-      setIsLoading(true);
-
       setResult((prevResult) => ({
         data: preservePreviousData ? prevResult.data : undefined, // preserve data from previous state while loading next state
         status: FETCH_STATUS.LOADING,
@@ -78,7 +71,6 @@ export function useFetcher<TReturn>(
       try {
         const data = await promise;
         if (!didCancel) {
-          setIsLoading(false);
           setResult({
             data,
             status: FETCH_STATUS.SUCCESS,
@@ -122,7 +114,6 @@ export function useFetcher<TReturn>(
               ),
             });
           }
-          setIsLoading(false);
           setResult({
             data: undefined,
             status: FETCH_STATUS.FAILURE,
@@ -135,7 +126,6 @@ export function useFetcher<TReturn>(
     doFetch();
 
     return () => {
-      setIsLoading(false);
       didCancel = true;
     };
     /* eslint-disable react-hooks/exhaustive-deps */
@@ -143,8 +133,6 @@ export function useFetcher<TReturn>(
     counter,
     preservePreviousData,
     showToastOnError,
-    dispatchStatus,
-    setIsLoading,
     ...fnDeps,
     /* eslint-enable react-hooks/exhaustive-deps */
   ]);

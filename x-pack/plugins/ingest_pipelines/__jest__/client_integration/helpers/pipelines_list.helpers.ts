@@ -6,13 +6,7 @@
 
 import { act } from 'react-dom/test-utils';
 
-import {
-  registerTestBed,
-  TestBed,
-  TestBedConfig,
-  findTestSubject,
-  nextTick,
-} from '../../../../../test_utils';
+import { registerTestBed, TestBed, TestBedConfig, findTestSubject } from '@kbn/test/jest';
 import { PipelinesList } from '../../../public/application/sections/pipelines_list';
 import { WithAppDependencies } from './setup_environment';
 import { getListPath, ROUTES } from '../../../public/application/services/navigation';
@@ -32,13 +26,17 @@ export type PipelineListTestBed = TestBed<PipelineListTestSubjects> & {
 };
 
 const createActions = (testBed: TestBed) => {
-  const { find } = testBed;
-
   /**
    * User Actions
    */
-  const clickReloadButton = () => {
-    find('reloadButton').simulate('click');
+  const clickReloadButton = async () => {
+    const { component, find } = testBed;
+
+    await act(async () => {
+      find('reloadButton').simulate('click');
+    });
+
+    component.update();
   };
 
   const clickPipelineAt = async (index: number) => {
@@ -49,16 +47,19 @@ const createActions = (testBed: TestBed) => {
     await act(async () => {
       const { href } = pipelineLink.props();
       router.navigateTo(href!);
-      await nextTick();
-      component.update();
     });
+    component.update();
   };
 
   const clickActionMenu = (pipelineName: string) => {
     const { component } = testBed;
 
-    // When a table has > 2 actions, EUI displays an overflow menu with an id "<pipeline_name>-actions"
-    component.find(`div[id="${pipelineName}-actions"] button`).simulate('click');
+    act(() => {
+      // When a table has > 2 actions, EUI displays an overflow menu with an id "<pipeline_name>-actions"
+      component.find(`div[id="${pipelineName}-actions"] button`).simulate('click');
+    });
+
+    component.update();
   };
 
   const clickPipelineAction = (pipelineName: string, action: 'edit' | 'clone' | 'delete') => {
@@ -67,7 +68,11 @@ const createActions = (testBed: TestBed) => {
 
     clickActionMenu(pipelineName);
 
-    component.find('.euiContextMenuItem').at(actions.indexOf(action)).simulate('click');
+    act(() => {
+      component.find('.euiContextMenuItem').at(actions.indexOf(action)).simulate('click');
+    });
+
+    component.update();
   };
 
   return {

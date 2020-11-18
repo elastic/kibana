@@ -26,6 +26,7 @@ Object {
   "debug": true,
   "esFrom": "snapshot",
   "extraKbnOpts": undefined,
+  "useDefaultConfig": true,
 }
 `;
 
@@ -35,6 +36,7 @@ Object {
   "createLogger": [Function],
   "esFrom": "snapshot",
   "extraKbnOpts": undefined,
+  "useDefaultConfig": true,
 }
 `;
 
@@ -49,6 +51,7 @@ Object {
   "extraKbnOpts": Object {
     "server.foo": "bar",
   },
+  "useDefaultConfig": true,
 }
 `;
 
@@ -59,6 +62,7 @@ Object {
   "esFrom": "snapshot",
   "extraKbnOpts": undefined,
   "quiet": true,
+  "useDefaultConfig": true,
 }
 `;
 
@@ -69,6 +73,7 @@ Object {
   "esFrom": "snapshot",
   "extraKbnOpts": undefined,
   "silent": true,
+  "useDefaultConfig": true,
 }
 `;
 
@@ -78,6 +83,7 @@ Object {
   "createLogger": [Function],
   "esFrom": "source",
   "extraKbnOpts": undefined,
+  "useDefaultConfig": true,
 }
 `;
 
@@ -87,6 +93,7 @@ Object {
   "createLogger": [Function],
   "esFrom": "source",
   "extraKbnOpts": undefined,
+  "useDefaultConfig": true,
 }
 `;
 
@@ -97,6 +104,7 @@ Object {
   "esFrom": "snapshot",
   "extraKbnOpts": undefined,
   "installDir": "foo",
+  "useDefaultConfig": true,
 }
 `;
 
@@ -106,6 +114,7 @@ Object {
   "createLogger": [Function],
   "esFrom": "snapshot",
   "extraKbnOpts": undefined,
+  "useDefaultConfig": true,
   "verbose": true,
 }
 `;
@@ -116,5 +125,6 @@ Object {
   "createLogger": [Function],
   "esFrom": "snapshot",
   "extraKbnOpts": undefined,
+  "useDefaultConfig": true,
 }
 `;

@@ -7,7 +7,7 @@
 import { Action } from '../../../../../../src/plugins/ui_actions/public';
 import { EmbeddableContext } from '../../../../../../src/plugins/embeddable/public';
 import { DiscoverUrlGeneratorState } from '../../../../../../src/plugins/discover/public';
-import { KibanaURL } from './kibana_url';
+import { KibanaURL } from '../../../../../../src/plugins/share/public';
 import * as shared from './shared';
 import { AbstractExploreDataAction } from './abstract_explore_data_action';
 

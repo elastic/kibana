@@ -26,25 +26,26 @@ import { readFileSync } from 'fs';
 import { ApmAgentConfig } from './types';
 
 const getDefaultConfig = (isDistributable: boolean): ApmAgentConfig => {
-  if (isDistributable) {
-    return {
-      active: false,
-      globalLabels: {},
-    };
-  }
+  // https://www.elastic.co/guide/en/apm/agent/nodejs/current/configuration.html
   return {
-    active: false,
-    serverUrl: 'https://f1542b814f674090afd914960583265f.apm.us-central1.gcp.cloud.es.io:443',
+    active: process.env.ELASTIC_APM_ACTIVE || false,
+    environment: process.env.ELASTIC_APM_ENVIRONMENT || process.env.NODE_ENV || 'development',
+
+    serverUrl: 'https://b1e3b4b4233e44cdad468c127d0af8d8.apm.europe-west1.gcp.cloud.es.io:443',
+
     // The secretToken below is intended to be hardcoded in this file even though
     // it makes it public. This is not a security/privacy issue. Normally we'd
     // instead disable the need for a secretToken in the APM Server config where
     // the data is transmitted to, but due to how it's being hosted, it's easier,
     // for now, to simply leave it in.
-    secretToken: 'R0Gjg46pE9K9wGestd',
-    globalLabels: {},
-    breakdownMetrics: true,
-    centralConfig: false,
+    secretToken: '2OyjjaI6RVkzx2O5CV',
+
     logUncaughtExceptions: true,
+    globalLabels: {},
+    centralConfig: false,
+
+    // Can be performance intensive, disabling by default
+    breakdownMetrics: isDistributable ? false : true,
   };
 };
 
@@ -60,14 +61,14 @@ export class ApmConfiguration {
   ) {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const { version, build } = require(join(this.rootDir, 'package.json'));
-    this.kibanaVersion = version.replace(/\./g, '_');
+    this.kibanaVersion = version;
     this.pkgBuild = build;
   }
 
   public getConfig(serviceName: string): ApmAgentConfig {
     return {
       ...this.getBaseConfig(),
-      serviceName: `${serviceName}-${this.kibanaVersion}`,
+      serviceName,
     };
   }
 
@@ -76,7 +77,9 @@ export class ApmConfiguration {
       const apmConfig = merge(
         getDefaultConfig(this.isDistributable),
         this.getConfigFromKibanaConfig(),
-        this.getDevConfig()
+        this.getDevConfig(),
+        this.getDistConfig(),
+        this.getCIConfig()
       );
 
       const rev = this.getGitRev();
@@ -88,6 +91,8 @@ export class ApmConfiguration {
       if (uuid) {
         apmConfig.globalLabels.kibana_uuid = uuid;
       }
+
+      apmConfig.serviceVersion = this.kibanaVersion;
       this.baseConfig = apmConfig;
     }
 
@@ -121,6 +126,34 @@ export class ApmConfiguration {
     } catch (e) {
       return {};
     }
+  }
+
+  /** Config keys that cannot be overridden in production builds */
+  private getDistConfig(): ApmAgentConfig {
+    if (!this.isDistributable) {
+      return {};
+    }
+
+    return {
+      // Headers & body may contain sensitive info
+      captureHeaders: false,
+      captureBody: 'off',
+    };
+  }
+
+  private getCIConfig(): ApmAgentConfig {
+    if (process.env.ELASTIC_APM_ENVIRONMENT !== 'ci') {
+      return {};
+    }
+
+    return {
+      globalLabels: {
+        branch: process.env.ghprbSourceBranch || '',
+        targetBranch: process.env.ghprbTargetBranch || '',
+        ciJobName: process.env.JOB_NAME || '',
+        ciBuildNumber: process.env.BUILD_NUMBER || '',
+      },
+    };
   }
 
   private getGitRev() {

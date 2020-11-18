@@ -98,6 +98,7 @@ export const StepDetailsSummary: FC<StepDetailsExposedState> = React.memo((props
         paddingSize="s"
       >
         <EuiFormRow
+          data-test-subj={'transformWizardAdvancedSettingsFrequencyLabel'}
           label={i18n.translate('xpack.transform.stepDetailsSummary.frequencyLabel', {
             defaultMessage: 'Frequency',
           })}
@@ -105,6 +106,7 @@ export const StepDetailsSummary: FC<StepDetailsExposedState> = React.memo((props
           <span>{transformFrequency}</span>
         </EuiFormRow>
         <EuiFormRow
+          data-test-subj={'transformWizardAdvancedSettingsMaxPageSearchSizeLabel'}
           label={i18n.translate('xpack.transform.stepDetailsSummary.maxPageSearchSizeLabel', {
             defaultMessage: 'Maximum page search size',
           })}

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { kibanaResponseFactory, RequestHandlerContext } from '../../../../../../../src/core/server';
 import { LicenseCheck } from '../../../../../licensing/server';
 import { defineDeleteRolesRoutes } from './delete';

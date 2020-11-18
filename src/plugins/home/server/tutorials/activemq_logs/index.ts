@@ -53,11 +53,11 @@ export function activemqLogsSpecProvider(context: TutorialContext): TutorialSche
     artifacts: {
       dashboards: [
         {
-          id: '26434790-1464-11ea-8fd8-030a13064883',
+          id: 'ffe86390-145f-11ea-8fd8-030a13064883',
           linkLabel: i18n.translate('home.tutorials.activemqLogs.artifacts.dashboards.linkLabel', {
-            defaultMessage: 'ActiveMQ Application Events',
+            defaultMessage: 'ActiveMQ Audit Events',
           }),
-          isOverview: true,
+          isOverview: false,
         },
       ],
       exportedFields: {

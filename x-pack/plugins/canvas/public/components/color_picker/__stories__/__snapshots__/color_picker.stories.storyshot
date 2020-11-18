@@ -225,7 +225,7 @@ exports[`Storyshots components/Color/ColorPicker interactive 1`] = `
           onClick={[Function]}
           type="button"
         >
-          <div
+          <span
             aria-hidden="true"
             className="euiButtonIcon__icon"
             data-euiicon-type="plusInCircle"
@@ -239,7 +239,7 @@ exports[`Storyshots components/Color/ColorPicker interactive 1`] = `
           onClick={[Function]}
           type="button"
         >
-          <div
+          <span
             aria-hidden="true"
             className="euiButtonIcon__icon"
             data-euiicon-type="minusInCircle"
@@ -305,7 +305,7 @@ exports[`Storyshots components/Color/ColorPicker six colors 1`] = `
               }
             }
           >
-            <div
+            <span
               className="selected-color"
               color="#333"
               data-euiicon-type="check"
@@ -506,7 +506,7 @@ exports[`Storyshots components/Color/ColorPicker six colors 1`] = `
         onClick={[Function]}
         type="button"
       >
-        <div
+        <span
           aria-hidden="true"
           className="euiButtonIcon__icon"
           data-euiicon-type="plusInCircle"
@@ -520,7 +520,7 @@ exports[`Storyshots components/Color/ColorPicker six colors 1`] = `
         onClick={[Function]}
         type="button"
       >
-        <div
+        <span
           aria-hidden="true"
           className="euiButtonIcon__icon"
           data-euiicon-type="minusInCircle"
@@ -760,7 +760,7 @@ exports[`Storyshots components/Color/ColorPicker six colors, value missing 1`] =
         onClick={[Function]}
         type="button"
       >
-        <div
+        <span
           aria-hidden="true"
           className="euiButtonIcon__icon"
           data-euiicon-type="plusInCircle"
@@ -774,7 +774,7 @@ exports[`Storyshots components/Color/ColorPicker six colors, value missing 1`] =
         onClick={[Function]}
         type="button"
       >
-        <div
+        <span
           aria-hidden="true"
           className="euiButtonIcon__icon"
           data-euiicon-type="minusInCircle"
@@ -819,7 +819,7 @@ exports[`Storyshots components/Color/ColorPicker three colors 1`] = `
               }
             }
           >
-            <div
+            <span
               className="selected-color"
               color="#333"
               data-euiicon-type="check"
@@ -939,7 +939,7 @@ exports[`Storyshots components/Color/ColorPicker three colors 1`] = `
         onClick={[Function]}
         type="button"
       >
-        <div
+        <span
           aria-hidden="true"
           className="euiButtonIcon__icon"
           data-euiicon-type="plusInCircle"
@@ -953,7 +953,7 @@ exports[`Storyshots components/Color/ColorPicker three colors 1`] = `
         onClick={[Function]}
         type="button"
       >
-        <div
+        <span
           aria-hidden="true"
           className="euiButtonIcon__icon"
           data-euiicon-type="minusInCircle"

@@ -87,10 +87,10 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
     schema,
   });
   const { getFields, getFormData, submit } = form;
-  const [{ severity: formSeverity }] = (useFormData({
+  const [{ severity: formSeverity }] = useFormData<AboutStepRule>({
     form,
     watch: ['severity'],
-  }) as unknown) as [Partial<AboutStepRule>];
+  });
 
   useEffect(() => {
     const formSeverityValue = formSeverity?.value;
@@ -122,9 +122,13 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
   }, [onSubmit]);
 
   useEffect(() => {
-    if (setForm) {
+    let didCancel = false;
+    if (setForm && !didCancel) {
       setForm(RuleStep.aboutRule, getData);
     }
+    return () => {
+      didCancel = true;
+    };
   }, [getData, setForm]);
 
   return isReadOnlyView ? (
@@ -269,7 +273,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
                 'data-test-subj': 'detectionEngineStepAboutRuleLicense',
                 euiFieldProps: {
                   fullWidth: true,
-                  isDisabled: isLoading,
+                  disabled: isLoading,
                   placeholder: '',
                 },
               }}

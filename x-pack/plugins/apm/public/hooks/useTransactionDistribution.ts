@@ -10,7 +10,7 @@ import { IUrlParams } from '../context/UrlParamsContext/types';
 import { useFetcher } from './useFetcher';
 import { useUiFilters } from '../context/UrlParamsContext';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { TransactionDistributionAPIResponse } from '../../server/lib/transactions/distribution';
+import type { TransactionDistributionAPIResponse } from '../../server/lib/transactions/distribution';
 import { toQuery, fromQuery } from '../components/shared/Links/url_helpers';
 import { maybe } from '../../common/utils/maybe';
 
@@ -75,7 +75,7 @@ export function useTransactionDistribution(urlParams: IUrlParams) {
 
           const preferredSample = maybe(bucketsSortedByCount[0]?.samples[0]);
 
-          history.push({
+          history.replace({
             ...history.location,
             search: fromQuery({
               ...omit(toQuery(history.location.search), [

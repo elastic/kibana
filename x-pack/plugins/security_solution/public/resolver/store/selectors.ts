@@ -257,10 +257,10 @@ export const relatedEventTotalForProcess = composeSelectors(
  * animated. So in order to get the currently visible entities, we need to pass in time.
  */
 export const visibleNodesAndEdgeLines = createSelector(nodesAndEdgelines, boundingBox, function (
-  /* eslint-disable no-shadow */
+  /* eslint-disable @typescript-eslint/no-shadow */
   nodesAndEdgelines,
   boundingBox
-  /* eslint-enable no-shadow */
+  /* eslint-enable @typescript-eslint/no-shadow */
 ) {
   // `boundingBox` and `nodesAndEdgelines` are each memoized.
   return (time: number) => nodesAndEdgelines(boundingBox(time));
@@ -362,6 +362,37 @@ export const relatedEventCountOfTypeForNode = composeSelectors(
 export const nodeEventsInCategory = composeSelectors(
   dataStateSelector,
   dataSelectors.nodeEventsInCategory
+);
+
+/**
+ * Flag used to show a Load More Data button in the nodeEventsOfType panel view.
+ */
+export const lastRelatedEventResponseContainsCursor = composeSelectors(
+  dataStateSelector,
+  dataSelectors.lastRelatedEventResponseContainsCursor
+);
+
+/**
+ * Flag to show an error message when loading more related events.
+ */
+export const hadErrorLoadingNodeEventsInCategory = composeSelectors(
+  dataStateSelector,
+  dataSelectors.hadErrorLoadingNodeEventsInCategory
+);
+/**
+ * Flag used to show a loading view for the initial loading of related events.
+ */
+export const isLoadingNodeEventsInCategory = composeSelectors(
+  dataStateSelector,
+  dataSelectors.isLoadingNodeEventsInCategory
+);
+
+/**
+ * Flag used to show a loading state for any additional related events.
+ */
+export const isLoadingMoreNodeEventsInCategory = composeSelectors(
+  dataStateSelector,
+  dataSelectors.isLoadingMoreNodeEventsInCategory
 );
 
 /**

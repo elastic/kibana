@@ -1,9 +1,12 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`CalendarForm CalendarId shown as title when editing 1`] = `
-<EuiTitle>
+<EuiTitle
+  data-test-subj="mlCalendarTitle"
+>
   <h1
     className="euiTitle euiTitle--medium"
+    data-test-subj="mlCalendarTitle"
   >
     <FormattedMessage
       defaultMessage="Calendar {calendarId}"
@@ -21,7 +24,9 @@ exports[`CalendarForm CalendarId shown as title when editing 1`] = `
 `;
 
 exports[`CalendarForm Renders calendar form 1`] = `
-<EuiForm>
+<EuiForm
+  data-test-subj="mlCalendarFormNew"
+>
   <EuiTitle>
     <h1>
       <FormattedMessage

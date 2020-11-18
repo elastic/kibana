@@ -21,6 +21,7 @@ import { SavedObjectsFindOptions } from '../../types';
 import { SavedObjectsFindResponse } from '..';
 
 export const DEFAULT_NAMESPACE_STRING = 'default';
+export const ALL_NAMESPACES_STRING = '*';
 export const FIND_DEFAULT_PAGE = 1;
 export const FIND_DEFAULT_PER_PAGE = 20;
 

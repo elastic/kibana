@@ -12,6 +12,7 @@ import classNames from 'classnames';
 interface Props extends React.HTMLAttributes<HTMLDivElement> {
   isReady?: boolean;
   reportTitle?: string;
+  reportDescription?: string;
 }
 
 /**
@@ -21,16 +22,24 @@ interface Props extends React.HTMLAttributes<HTMLDivElement> {
 export function VisualizationContainer({
   isReady = true,
   reportTitle,
+  reportDescription,
   children,
   className,
   ...rest
 }: Props) {
+  const attributes: Partial<{ 'data-title': string; 'data-description': string }> = {};
+  if (reportTitle) {
+    attributes['data-title'] = reportTitle;
+  }
+  if (reportDescription) {
+    attributes['data-description'] = reportDescription;
+  }
   return (
     <div
       data-shared-item
       data-render-complete={isReady}
       className={classNames(className, 'lnsVisualizationContainer')}
-      data-title={reportTitle}
+      {...attributes}
       {...rest}
     >
       {children}

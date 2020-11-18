@@ -46,6 +46,7 @@ import {
 } from '../../../common/components/toasters';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { useSourcererScope } from '../../../common/containers/sourcerer';
+import { buildTimeRangeFilter } from './helpers';
 
 interface OwnProps {
   timelineId: TimelineIdLiteral;
@@ -54,6 +55,7 @@ interface OwnProps {
   hasIndexWrite: boolean;
   from: string;
   loading: boolean;
+  onRuleChange?: () => void;
   showBuildingBlockAlerts: boolean;
   onShowBuildingBlockAlertsChanged: (showBuildingBlockAlerts: boolean) => void;
   to: string;
@@ -75,6 +77,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   isSelectAllChecked,
   loading,
   loadingEventIds,
+  onRuleChange,
   selectedEventIds,
   setEventsDeleted,
   setEventsLoading,
@@ -103,13 +106,14 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
           dataProviders: [],
           indexPattern: indexPatterns,
           browserFields,
-          filters: isEmpty(defaultFilters)
-            ? [...globalFilters, ...customFilters]
-            : [...(defaultFilters ?? []), ...globalFilters, ...customFilters],
+          filters: [
+            ...(defaultFilters ?? []),
+            ...globalFilters,
+            ...customFilters,
+            ...buildTimeRangeFilter(from, to),
+          ],
           kqlQuery: globalQuery,
           kqlMode: globalQuery.language,
-          start: from,
-          end: to,
           isEventViewer: true,
         });
       }
@@ -330,6 +334,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
       end={to}
       headerFilterGroup={headerFilterGroup}
       id={timelineId}
+      onRuleChange={onRuleChange}
       scopeId={SourcererScopeName.detections}
       start={from}
       utilityBar={utilityBarCallback}

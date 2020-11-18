@@ -16,13 +16,13 @@
     "search": {
       "properties": {
         "successCount": {
-          "type": "number"
+          "type": "long"
         },
         "errorCount": {
-          "type": "number"
+          "type": "long"
         },
         "averageDuration": {
-          "type": "long"
+          "type": "float"
         }
       }
     },
@@ -1290,6 +1290,235 @@
         }
       }
     },
+    "core": {
+      "properties": {
+        "config": {
+          "properties": {
+            "elasticsearch": {
+              "properties": {
+                "sniffOnStart": {
+                  "type": "boolean"
+                },
+                "sniffIntervalMs": {
+                  "type": "long"
+                },
+                "sniffOnConnectionFault": {
+                  "type": "boolean"
+                },
+                "numberOfHostsConfigured": {
+                  "type": "long"
+                },
+                "requestHeadersWhitelistConfigured": {
+                  "type": "boolean"
+                },
+                "customHeadersConfigured": {
+                  "type": "boolean"
+                },
+                "shardTimeoutMs": {
+                  "type": "long"
+                },
+                "requestTimeoutMs": {
+                  "type": "long"
+                },
+                "pingTimeoutMs": {
+                  "type": "long"
+                },
+                "logQueries": {
+                  "type": "boolean"
+                },
+                "ssl": {
+                  "properties": {
+                    "verificationMode": {
+                      "type": "keyword"
+                    },
+                    "certificateAuthoritiesConfigured": {
+                      "type": "boolean"
+                    },
+                    "certificateConfigured": {
+                      "type": "boolean"
+                    },
+                    "keyConfigured": {
+                      "type": "boolean"
+                    },
+                    "keystoreConfigured": {
+                      "type": "boolean"
+                    },
+                    "truststoreConfigured": {
+                      "type": "boolean"
+                    },
+                    "alwaysPresentCertificate": {
+                      "type": "boolean"
+                    }
+                  }
+                },
+                "apiVersion": {
+                  "type": "keyword"
+                },
+                "healthCheckDelayMs": {
+                  "type": "long"
+                }
+              }
+            },
+            "http": {
+              "properties": {
+                "basePathConfigured": {
+                  "type": "boolean"
+                },
+                "maxPayloadInBytes": {
+                  "type": "long"
+                },
+                "rewriteBasePath": {
+                  "type": "boolean"
+                },
+                "keepaliveTimeout": {
+                  "type": "long"
+                },
+                "socketTimeout": {
+                  "type": "long"
+                },
+                "compression": {
+                  "properties": {
+                    "enabled": {
+                      "type": "boolean"
+                    },
+                    "referrerWhitelistConfigured": {
+                      "type": "boolean"
+                    }
+                  }
+                },
+                "xsrf": {
+                  "properties": {
+                    "disableProtection": {
+                      "type": "boolean"
+                    },
+                    "whitelistConfigured": {
+                      "type": "boolean"
+                    }
+                  }
+                },
+                "requestId": {
+                  "properties": {
+                    "allowFromAnyIp": {
+                      "type": "boolean"
+                    },
+                    "ipAllowlistConfigured": {
+                      "type": "boolean"
+                    }
+                  }
+                },
+                "ssl": {
+                  "properties": {
+                    "certificateAuthoritiesConfigured": {
+                      "type": "boolean"
+                    },
+                    "certificateConfigured": {
+                      "type": "boolean"
+                    },
+                    "cipherSuites": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
+                    },
+                    "keyConfigured": {
+                      "type": "boolean"
+                    },
+                    "keystoreConfigured": {
+                      "type": "boolean"
+                    },
+                    "truststoreConfigured": {
+                      "type": "boolean"
+                    },
+                    "redirectHttpFromPortConfigured": {
+                      "type": "boolean"
+                    },
+                    "supportedProtocols": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
+                    },
+                    "clientAuthentication": {
+                      "type": "keyword"
+                    }
+                  }
+                }
+              }
+            },
+            "logging": {
+              "properties": {
+                "appendersTypesUsed": {
+                  "type": "array",
+                  "items": {
+                    "type": "keyword"
+                  }
+                },
+                "loggersConfiguredCount": {
+                  "type": "long"
+                }
+              }
+            },
+            "savedObjects": {
+              "properties": {
+                "maxImportPayloadBytes": {
+                  "type": "long"
+                },
+                "maxImportExportSizeBytes": {
+                  "type": "long"
+                }
+              }
+            }
+          }
+        },
+        "environment": {
+          "properties": {
+            "memory": {
+              "properties": {
+                "heapSizeLimit": {
+                  "type": "long"
+                },
+                "heapTotalBytes": {
+                  "type": "long"
+                },
+                "heapUsedBytes": {
+                  "type": "long"
+                }
+              }
+            }
+          }
+        },
+        "services": {
+          "properties": {
+            "savedObjects": {
+              "properties": {
+                "indices": {
+                  "type": "array",
+                  "items": {
+                    "properties": {
+                      "docsCount": {
+                        "type": "long"
+                      },
+                      "docsDeleted": {
+                        "type": "long"
+                      },
+                      "alias": {
+                        "type": "text"
+                      },
+                      "primaryStoreSizeBytes": {
+                        "type": "long"
+                      },
+                      "storeSizeBytes": {
+                        "type": "long"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "csp": {
       "properties": {
         "strict": {
@@ -1349,6 +1578,23 @@
               "type": "long"
             }
           }
+        }
+      }
+    },
+    "localization": {
+      "properties": {
+        "locale": {
+          "type": "keyword"
+        },
+        "integrities": {
+          "properties": {
+            "DYNAMIC_KEY": {
+              "type": "text"
+            }
+          }
+        },
+        "labelsCount": {
+          "type": "long"
         }
       }
     },
@@ -1623,6 +1869,751 @@
         }
       }
     },
+    "ui_metric": {
+      "properties": {
+        "console": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "DashboardPanelVersionInUrl": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "Kibana_home": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "visualize": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "canvas": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "cross_cluster_replication": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "index_lifecycle_management": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "index_management": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "ingest_pipelines": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "apm": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "infra_logs": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "infra_metrics": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "stack_monitoring": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "remote_clusters": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "rollup_jobs": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "securitySolution": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "snapshot_restore": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "dashboards": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "dev_tools": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "discover": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "home": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "kibana": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "management": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "short_url_redirect": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "timelion": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "csm": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "dashboard_mode": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "enterpriseSearch": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "appSearch": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "workplaceSearch": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "graph": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "logs": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "metrics": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "infra": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "ingestManager": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "lens": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "maps": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "ml": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "monitoring": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "observability-overview": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "security_account": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "security_access_agreement": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "security_capture_url": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "security_logged_out": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "security_login": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "security_logout": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "security_overwritten_session": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "securitySolution:overview": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "securitySolution:detections": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "securitySolution:hosts": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "securitySolution:network": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "securitySolution:timelines": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "securitySolution:case": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "securitySolution:administration": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "siem": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "space_selector": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "uptime": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        }
+      }
+    },
     "telemetry": {
       "properties": {
         "opt_in_status": {
@@ -1755,6 +2746,48 @@
       "properties": {
         "failed_validations": {
           "type": "long"
+        }
+      }
+    },
+    "vis_type_vega": {
+      "properties": {
+        "vega_lib_specs_total": {
+          "type": "long"
+        },
+        "vega_lite_lib_specs_total": {
+          "type": "long"
+        },
+        "vega_use_map_total": {
+          "type": "long"
+        }
+      }
+    },
+    "visualization_types": {
+      "properties": {
+        "DYNAMIC_KEY": {
+          "properties": {
+            "total": {
+              "type": "long"
+            },
+            "spaces_min": {
+              "type": "long"
+            },
+            "spaces_max": {
+              "type": "long"
+            },
+            "spaces_avg": {
+              "type": "long"
+            },
+            "saved_7_days_total": {
+              "type": "long"
+            },
+            "saved_30_days_total": {
+              "type": "long"
+            },
+            "saved_90_days_total": {
+              "type": "long"
+            }
+          }
         }
       }
     }

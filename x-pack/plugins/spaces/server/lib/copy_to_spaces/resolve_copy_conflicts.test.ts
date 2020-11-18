@@ -290,7 +290,7 @@ describe('resolveCopySavedObjectsToSpacesConflicts', () => {
           new Readable({
             objectMode: true,
             read() {
-              this.emit('error', new Error('Something went wrong while reading this stream'));
+              this.destroy(new Error('Something went wrong while reading this stream'));
             },
           })
         );

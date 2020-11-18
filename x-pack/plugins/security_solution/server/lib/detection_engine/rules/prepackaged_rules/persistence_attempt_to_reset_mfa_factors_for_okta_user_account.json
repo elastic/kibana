@@ -7,13 +7,14 @@
     "Consider adding exceptions to this rule to filter false positives if the MFA factors for Okta user accounts are regularly reset in your organization."
   ],
   "index": [
-    "filebeat-*"
+    "filebeat-*",
+    "logs-okta*"
   ],
   "language": "kuery",
   "license": "Elastic License",
   "name": "Attempt to Reset MFA Factors for Okta User Account",
   "note": "The Okta Filebeat module must be enabled to use this rule.",
-  "query": "event.module:okta and event.dataset:okta.system and event.action:user.mfa.factor.reset_all",
+  "query": "event.dataset:okta.system and event.action:user.mfa.factor.reset_all",
   "references": [
     "https://developer.okta.com/docs/reference/api/system-log/",
     "https://developer.okta.com/docs/reference/api/event-types/"
@@ -23,10 +24,11 @@
   "severity": "low",
   "tags": [
     "Elastic",
+    "Identity",
     "Okta",
+    "Continuous Monitoring",
     "SecOps",
-    "Identity and Access",
-    "Continuous Monitoring"
+    "Identity and Access"
   ],
   "threat": [
     {
@@ -46,5 +48,5 @@
     }
   ],
   "type": "query",
-  "version": 1
+  "version": 2
 }

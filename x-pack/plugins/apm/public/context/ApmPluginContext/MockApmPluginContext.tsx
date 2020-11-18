@@ -9,6 +9,7 @@ import { ApmPluginContext, ApmPluginContextValue } from '.';
 import { ConfigSchema } from '../..';
 import { UI_SETTINGS } from '../../../../../../src/plugins/data/common';
 import { createCallApmApi } from '../../services/rest/createCallApmApi';
+import { MlUrlGenerator } from '../../../../ml/public';
 
 const uiSettings: Record<string, unknown> = {
   [UI_SETTINGS.TIMEPICKER_QUICK_RANGES]: [
@@ -37,6 +38,7 @@ const mockCore = {
   application: {
     capabilities: {
       apm: {},
+      ml: {},
     },
     currentAppId$: new Observable(),
     navigateToUrl: (url: string) => {},
@@ -54,6 +56,7 @@ const mockCore = {
   http: {
     basePath: {
       prepend: (path: string) => `/basepath${path}`,
+      get: () => `/basepath`,
     },
   },
   i18n: {
@@ -78,10 +81,29 @@ const mockConfig: ConfigSchema = {
   },
 };
 
+const mockPlugin = {
+  ml: {
+    urlGenerator: new MlUrlGenerator({
+      appBasePath: '/app/ml',
+      useHash: false,
+    }),
+  },
+  data: {
+    query: {
+      timefilter: { timefilter: { setTime: () => {}, getTime: () => ({}) } },
+    },
+  },
+};
+
+const mockAppMountParameters = {
+  setHeaderActionMenu: () => {},
+};
+
 export const mockApmPluginContextValue = {
+  appMountParameters: mockAppMountParameters,
   config: mockConfig,
   core: mockCore,
-  plugins: {},
+  plugins: mockPlugin,
 };
 
 export function MockApmPluginContextWrapper({

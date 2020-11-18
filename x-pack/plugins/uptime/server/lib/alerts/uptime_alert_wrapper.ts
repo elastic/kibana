@@ -4,17 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ILegacyScopedClusterClient } from 'kibana/server';
+import { ElasticsearchClient, SavedObjectsClientContract } from 'kibana/server';
 import { AlertExecutorOptions, AlertType, AlertTypeState } from '../../../../alerts/server';
 import { savedObjectsAdapter } from '../saved_objects';
 import { DynamicSettings } from '../../../common/runtime_types';
 
 export interface UptimeAlertType extends Omit<AlertType, 'executor' | 'producer'> {
-  executor: (
-    options: AlertExecutorOptions,
-    callES: ILegacyScopedClusterClient['callAsCurrentUser'],
-    dynamicSettings: DynamicSettings
-  ) => Promise<AlertTypeState | void>;
+  executor: ({
+    options,
+    esClient,
+    dynamicSettings,
+  }: {
+    options: AlertExecutorOptions;
+    esClient: ElasticsearchClient;
+    dynamicSettings: DynamicSettings;
+    savedObjectsClient: SavedObjectsClientContract;
+  }) => Promise<AlertTypeState | void>;
 }
 
 export const uptimeAlertWrapper = (uptimeAlert: UptimeAlertType) => ({
@@ -22,13 +27,13 @@ export const uptimeAlertWrapper = (uptimeAlert: UptimeAlertType) => ({
   producer: 'uptime',
   executor: async (options: AlertExecutorOptions) => {
     const {
-      services: { callCluster: callES },
+      services: { scopedClusterClient: esClient, savedObjectsClient },
     } = options;
 
     const dynamicSettings = await savedObjectsAdapter.getUptimeDynamicSettings(
       options.services.savedObjectsClient
     );
 
-    return uptimeAlert.executor(options, callES, dynamicSettings);
+    return uptimeAlert.executor({ options, esClient, dynamicSettings, savedObjectsClient });
   },
 });

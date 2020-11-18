@@ -20,8 +20,8 @@ export const exceptionItemToTrustedAppItem = (
   exceptionListItem: ExceptionListItemSchema
 ): TrustedApp => {
   // eslint-disable-next-line @typescript-eslint/naming-convention
-  const { entries, description, created_by, created_at, name, _tags, id } = exceptionListItem;
-  const os = osFromTagsList(_tags);
+  const { entries, description, created_by, created_at, name, os_types, id } = exceptionListItem;
+  const os = os_types.length ? os_types[0] : 'unknown';
   return {
     entries: entries.map((entry) => {
       if (entry.field.startsWith('process.hash')) {
@@ -41,19 +41,6 @@ export const exceptionItemToTrustedAppItem = (
   } as TrustedApp;
 };
 
-/**
- * Retrieves the OS entry from a list of tags (property returned with ExcptionListItem).
- * For Trusted Apps each entry must have at MOST 1 OS.
- * */
-const osFromTagsList = (tags: string[]): TrustedApp['os'] | 'unknown' => {
-  for (const tag of tags) {
-    if (tag.startsWith('os:')) {
-      return tag.substr(3) as TrustedApp['os'];
-    }
-  }
-  return 'unknown';
-};
-
 export const newTrustedAppItemToExceptionItem = ({
   os,
   entries,
@@ -61,7 +48,6 @@ export const newTrustedAppItemToExceptionItem = ({
   description = '',
 }: NewTrustedApp): NewExceptionItem => {
   return {
-    _tags: tagsListFromOs(os),
     comments: [],
     description,
     // @ts-ignore
@@ -83,13 +69,10 @@ export const newTrustedAppItemToExceptionItem = ({
     meta: undefined,
     name: name.trim(),
     namespaceType: 'agnostic',
+    osTypes: [os],
     tags: [],
     type: 'simple',
   };
-};
-
-const tagsListFromOs = (os: NewTrustedApp['os']): NewExceptionItem['_tags'] => {
-  return [`os:${os}`];
 };
 
 const hashType = (hash: string): 'md5' | 'sha256' | 'sha1' | undefined => {

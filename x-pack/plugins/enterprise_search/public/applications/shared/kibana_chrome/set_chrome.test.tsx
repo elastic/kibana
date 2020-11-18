@@ -4,15 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import '../../__mocks__/kea.mock';
 import '../../__mocks__/shallow_useeffect.mock';
-import '../../__mocks__/react_router_history.mock';
-import { mockKibanaValues } from '../../__mocks__';
+import { setMockValues } from '../../__mocks__/kea.mock';
+import { mockKibanaValues, mockHistory } from '../../__mocks__';
 
 import React from 'react';
 import { shallow } from 'enzyme';
 
 jest.mock('./generate_breadcrumbs', () => ({
+  useGenerateBreadcrumbs: jest.requireActual('./generate_breadcrumbs').useGenerateBreadcrumbs,
   useEnterpriseSearchBreadcrumbs: jest.fn(() => (crumbs: any) => crumbs),
   useAppSearchBreadcrumbs: jest.fn(() => (crumbs: any) => crumbs),
   useWorkplaceSearchBreadcrumbs: jest.fn(() => (crumbs: any) => crumbs),
@@ -33,8 +33,12 @@ import { enterpriseSearchTitle, appSearchTitle, workplaceSearchTitle } from './g
 import { SetEnterpriseSearchChrome, SetAppSearchChrome, SetWorkplaceSearchChrome } from './';
 
 describe('Set Kibana Chrome helpers', () => {
+  const mockCurrentPath = (pathname: string) =>
+    setMockValues({ history: { location: { pathname } } });
+
   beforeEach(() => {
     jest.clearAllMocks();
+    setMockValues({ history: mockHistory });
   });
 
   afterEach(() => {
@@ -44,7 +48,7 @@ describe('Set Kibana Chrome helpers', () => {
 
   describe('SetEnterpriseSearchChrome', () => {
     it('sets breadcrumbs and document title', () => {
-      shallow(<SetEnterpriseSearchChrome text="Hello World" />);
+      shallow(<SetEnterpriseSearchChrome trail={['Hello World']} />);
 
       expect(enterpriseSearchTitle).toHaveBeenCalledWith(['Hello World']);
       expect(useEnterpriseSearchBreadcrumbs).toHaveBeenCalledWith([
@@ -55,8 +59,8 @@ describe('Set Kibana Chrome helpers', () => {
       ]);
     });
 
-    it('sets empty breadcrumbs and document title when isRoot is true', () => {
-      shallow(<SetEnterpriseSearchChrome isRoot />);
+    it('handles empty trails as a root-level page', () => {
+      shallow(<SetEnterpriseSearchChrome />);
 
       expect(enterpriseSearchTitle).toHaveBeenCalledWith([]);
       expect(useEnterpriseSearchBreadcrumbs).toHaveBeenCalledWith([]);
@@ -65,19 +69,19 @@ describe('Set Kibana Chrome helpers', () => {
 
   describe('SetAppSearchChrome', () => {
     it('sets breadcrumbs and document title', () => {
-      shallow(<SetAppSearchChrome text="Engines" />);
+      mockCurrentPath('/engines/{name}/curations');
+      shallow(<SetAppSearchChrome trail={['Engines', 'Some Engine', 'Curations']} />);
 
-      expect(appSearchTitle).toHaveBeenCalledWith(['Engines']);
+      expect(appSearchTitle).toHaveBeenCalledWith(['Curations', 'Some Engine', 'Engines']);
       expect(useAppSearchBreadcrumbs).toHaveBeenCalledWith([
-        {
-          text: 'Engines',
-          path: '/current-path',
-        },
+        { text: 'Engines', path: '/engines' },
+        { text: 'Some Engine', path: '/engines/{name}' },
+        { text: 'Curations', path: '/engines/{name}/curations' },
       ]);
     });
 
-    it('sets empty breadcrumbs and document title when isRoot is true', () => {
-      shallow(<SetAppSearchChrome isRoot />);
+    it('handles empty trails as a root-level page', () => {
+      shallow(<SetAppSearchChrome />);
 
       expect(appSearchTitle).toHaveBeenCalledWith([]);
       expect(useAppSearchBreadcrumbs).toHaveBeenCalledWith([]);
@@ -86,19 +90,25 @@ describe('Set Kibana Chrome helpers', () => {
 
   describe('SetWorkplaceSearchChrome', () => {
     it('sets breadcrumbs and document title', () => {
-      shallow(<SetWorkplaceSearchChrome text="Sources" />);
+      mockCurrentPath('/groups/{id}/source_prioritization');
+      shallow(
+        <SetWorkplaceSearchChrome trail={['Groups', 'Some Group', 'Source Prioritization']} />
+      );
 
-      expect(workplaceSearchTitle).toHaveBeenCalledWith(['Sources']);
+      expect(workplaceSearchTitle).toHaveBeenCalledWith([
+        'Source Prioritization',
+        'Some Group',
+        'Groups',
+      ]);
       expect(useWorkplaceSearchBreadcrumbs).toHaveBeenCalledWith([
-        {
-          text: 'Sources',
-          path: '/current-path',
-        },
+        { text: 'Groups', path: '/groups' },
+        { text: 'Some Group', path: '/groups/{id}' },
+        { text: 'Source Prioritization', path: '/groups/{id}/source_prioritization' },
       ]);
     });
 
-    it('sets empty breadcrumbs and document title when isRoot is true', () => {
-      shallow(<SetWorkplaceSearchChrome isRoot />);
+    it('handles empty trails as a root-level page', () => {
+      shallow(<SetWorkplaceSearchChrome />);
 
       expect(workplaceSearchTitle).toHaveBeenCalledWith([]);
       expect(useWorkplaceSearchBreadcrumbs).toHaveBeenCalledWith([]);

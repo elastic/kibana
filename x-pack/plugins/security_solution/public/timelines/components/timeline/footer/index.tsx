@@ -25,10 +25,10 @@ import styled from 'styled-components';
 import { LoadingPanel } from '../../loading';
 import { OnChangeItemsPerPage, OnChangePage } from '../events';
 
-import { LastUpdatedAt } from './last_updated';
 import * as i18n from './translations';
 import { useEventDetailsWidthContext } from '../../../../common/components/events_viewer/event_details_width_context';
 import { useManageTimeline } from '../../manage_timeline';
+import { LastUpdatedAt } from '../../../../common/components/last_updated';
 
 export const isCompactFooter = (width: number): boolean => width < 600;
 
@@ -174,30 +174,48 @@ export const EventsCount = React.memo(EventsCountComponent);
 
 EventsCount.displayName = 'EventsCount';
 
-export const PagingControlComponent = ({
-  activePage,
-  isLoading,
-  onPageClick,
-  totalPages,
-}: {
+interface PagingControlProps {
   activePage: number;
   isLoading: boolean;
   onPageClick: OnChangePage;
+  totalCount: number;
   totalPages: number;
-}) => (
-  <>
-    {isLoading ? (
-      `${i18n.LOADING}...`
-    ) : (
+}
+
+const TimelinePaginationContainer = styled.div<{ hideLastPage: boolean }>`
+  ul.euiPagination__list {
+    li.euiPagination__item:last-child {
+      ${({ hideLastPage }) => `${hideLastPage ? 'display:none' : ''}`};
+    }
+  }
+`;
+
+export const PagingControlComponent: React.FC<PagingControlProps> = ({
+  activePage,
+  isLoading,
+  onPageClick,
+  totalCount,
+  totalPages,
+}) => {
+  if (isLoading) {
+    return <>{`${i18n.LOADING}...`}</>;
+  }
+
+  if (!totalPages) {
+    return null;
+  }
+
+  return (
+    <TimelinePaginationContainer hideLastPage={totalCount > 9999}>
       <EuiPagination
         data-test-subj="timeline-pagination"
         pageCount={totalPages}
         activePage={activePage}
         onPageClick={onPageClick}
       />
-    )}
-  </>
-);
+    </TimelinePaginationContainer>
+  );
+};
 
 PagingControlComponent.displayName = 'PagingControlComponent';
 
@@ -216,8 +234,7 @@ interface FooterProps {
   itemsPerPageOptions: number[];
   onChangeItemsPerPage: OnChangeItemsPerPage;
   onChangePage: OnChangePage;
-  serverSideEventCount: number;
-  totalPages: number;
+  totalCount: number;
 }
 
 /** Renders a loading indicator and paging controls */
@@ -233,8 +250,7 @@ export const FooterComponent = ({
   itemsPerPageOptions,
   onChangeItemsPerPage,
   onChangePage,
-  serverSideEventCount,
-  totalPages,
+  totalCount,
 }: FooterProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [paginationLoading, setPaginationLoading] = useState(false);
@@ -259,6 +275,30 @@ export const FooterComponent = ({
   ]);
   const closePopover = useCallback(() => setIsPopoverOpen(false), [setIsPopoverOpen]);
 
+  const rowItems = useMemo(
+    () =>
+      itemsPerPageOptions &&
+      itemsPerPageOptions.map((item) => (
+        <EuiContextMenuItem
+          key={item}
+          icon={itemsPerPage === item ? 'check' : 'empty'}
+          data-test-subj={`items-per-page-option-${item}`}
+          onClick={() => {
+            closePopover();
+            onChangeItemsPerPage(item);
+          }}
+        >
+          {`${item} ${i18n.ROWS}`}
+        </EuiContextMenuItem>
+      )),
+    [closePopover, itemsPerPage, itemsPerPageOptions, onChangeItemsPerPage]
+  );
+
+  const totalPages = useMemo(() => Math.ceil(totalCount / itemsPerPage), [
+    itemsPerPage,
+    totalCount,
+  ]);
+
   useEffect(() => {
     if (paginationLoading && !isLoading) {
       setPaginationLoading(false);
@@ -278,22 +318,6 @@ export const FooterComponent = ({
       </LoadingPanelContainer>
     );
   }
-
-  const rowItems =
-    itemsPerPageOptions &&
-    itemsPerPageOptions.map((item) => (
-      <EuiContextMenuItem
-        key={item}
-        icon={itemsPerPage === item ? 'check' : 'empty'}
-        data-test-subj={`items-per-page-option-${item}`}
-        onClick={() => {
-          closePopover();
-          onChangeItemsPerPage(item);
-        }}
-      >
-        {`${item} ${i18n.ROWS}`}
-      </EuiContextMenuItem>
-    ));
 
   return (
     <FooterContainer
@@ -325,7 +349,7 @@ export const FooterComponent = ({
               items={rowItems}
               itemsCount={itemsCount}
               onClick={onButtonClick}
-              serverSideEventCount={serverSideEventCount}
+              serverSideEventCount={totalCount}
             />
           </EuiFlexGroup>
         </EuiFlexItem>
@@ -353,6 +377,7 @@ export const FooterComponent = ({
           ) : (
             <PagingControl
               data-test-subj="paging-control"
+              totalCount={totalCount}
               totalPages={totalPages}
               activePage={activePage}
               onPageClick={handleChangePageClick}

@@ -100,7 +100,7 @@ describe('Error count alert', () => {
       })),
       alertInstanceFactory: jest.fn(() => ({ scheduleActions })),
     };
-    const params = { threshold: 1 };
+    const params = { threshold: 1, windowSize: 5, windowUnit: 'm' };
 
     await alertExecutor!({ services, params });
     [
@@ -117,24 +117,28 @@ describe('Error count alert', () => {
       environment: 'env-foo',
       threshold: 1,
       triggerValue: 2,
+      interval: '5m',
     });
     expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {
       serviceName: 'foo',
       environment: 'env-foo-2',
       threshold: 1,
       triggerValue: 2,
+      interval: '5m',
     });
     expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {
       serviceName: 'bar',
       environment: 'env-bar',
       threshold: 1,
       triggerValue: 2,
+      interval: '5m',
     });
     expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {
       serviceName: 'bar',
       environment: 'env-bar-2',
       threshold: 1,
       triggerValue: 2,
+      interval: '5m',
     });
   });
   it('sends alerts with service name', async () => {
@@ -174,7 +178,7 @@ describe('Error count alert', () => {
       })),
       alertInstanceFactory: jest.fn(() => ({ scheduleActions })),
     };
-    const params = { threshold: 1 };
+    const params = { threshold: 1, windowSize: 5, windowUnit: 'm' };
 
     await alertExecutor!({ services, params });
     ['apm.error_rate_foo', 'apm.error_rate_bar'].forEach((instanceName) =>
@@ -186,12 +190,14 @@ describe('Error count alert', () => {
       environment: undefined,
       threshold: 1,
       triggerValue: 2,
+      interval: '5m',
     });
     expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {
       serviceName: 'bar',
       environment: undefined,
       threshold: 1,
       triggerValue: 2,
+      interval: '5m',
     });
   });
 });

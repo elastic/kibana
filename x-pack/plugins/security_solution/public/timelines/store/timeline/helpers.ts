@@ -26,12 +26,19 @@ import {
   TimelineTypeLiteral,
   TimelineType,
   RowRendererId,
+  TimelineStatus,
+  TimelineId,
 } from '../../../../common/types/timeline';
 import { normalizeTimeRange } from '../../../common/components/url_state/normalize_time_range';
 
 import { timelineDefaults } from './defaults';
 import { ColumnHeaderOptions, KqlMode, TimelineModel } from './model';
 import { TimelineById } from './types';
+import {
+  DEFAULT_FROM_MOMENT,
+  DEFAULT_TO_MOMENT,
+} from '../../../common/utils/default_date_settings';
+import { activeTimeline } from '../../containers/active_timeline_context';
 
 export const isNotNull = <T>(value: T | null): value is T => value !== null;
 
@@ -113,6 +120,17 @@ interface AddTimelineParams {
   timelineById: TimelineById;
 }
 
+export const shouldResetActiveTimelineContext = (
+  id: string,
+  oldTimeline: TimelineModel,
+  newTimeline: TimelineModel
+) => {
+  if (id === TimelineId.active && oldTimeline.savedObjectId !== newTimeline.savedObjectId) {
+    return true;
+  }
+  return false;
+};
+
 /**
  * Add a saved object timeline to the store
  * and default the value to what need to be if values are null
@@ -121,13 +139,27 @@ export const addTimelineToStore = ({
   id,
   timeline,
   timelineById,
-}: AddTimelineParams): TimelineById => ({
-  ...timelineById,
-  [id]: {
-    ...timeline,
-    isLoading: timelineById[id].isLoading,
-  },
-});
+}: AddTimelineParams): TimelineById => {
+  if (shouldResetActiveTimelineContext(id, timelineById[id], timeline)) {
+    activeTimeline.setActivePage(0);
+    activeTimeline.setExpandedEventIds({});
+  }
+  return {
+    ...timelineById,
+    [id]: {
+      ...timeline,
+      isLoading: timelineById[id].isLoading,
+      dateRange:
+        timeline.status === TimelineStatus.immutable &&
+        timeline.timelineType === TimelineType.template
+          ? {
+              start: DEFAULT_FROM_MOMENT.toISOString(),
+              end: DEFAULT_TO_MOMENT.toISOString(),
+            }
+          : timeline.dateRange,
+    },
+  };
+};
 
 interface AddNewTimelineParams {
   columns: ColumnHeaderOptions[];
@@ -1209,17 +1241,20 @@ export const updateTimelinePerPageOptions = ({
 
 const removeAndProvider = (andProviderId: string, providerId: string, timeline: TimelineModel) => {
   const providerIndex = timeline.dataProviders.findIndex((p) => p.id === providerId);
-  const providerAndIndex = timeline.dataProviders[providerIndex].and.findIndex(
+  const providerAndIndex = timeline.dataProviders[providerIndex]?.and.findIndex(
     (p) => p.id === andProviderId
   );
+
   return [
     ...timeline.dataProviders.slice(0, providerIndex),
     {
       ...timeline.dataProviders[providerIndex],
-      and: [
-        ...timeline.dataProviders[providerIndex].and.slice(0, providerAndIndex),
-        ...timeline.dataProviders[providerIndex].and.slice(providerAndIndex + 1),
-      ],
+      and: timeline.dataProviders[providerIndex]?.and
+        ? [
+            ...timeline.dataProviders[providerIndex]?.and.slice(0, providerAndIndex),
+            ...timeline.dataProviders[providerIndex]?.and.slice(providerAndIndex + 1),
+          ]
+        : [],
     },
     ...timeline.dataProviders.slice(providerIndex + 1),
   ];
@@ -1229,7 +1264,7 @@ const removeProvider = (providerId: string, timeline: TimelineModel) => {
   const providerIndex = timeline.dataProviders.findIndex((p) => p.id === providerId);
   return [
     ...timeline.dataProviders.slice(0, providerIndex),
-    ...(timeline.dataProviders[providerIndex].and.length
+    ...(timeline.dataProviders[providerIndex]?.and.length
       ? [
           {
             ...timeline.dataProviders[providerIndex].and.slice(0, 1)[0],

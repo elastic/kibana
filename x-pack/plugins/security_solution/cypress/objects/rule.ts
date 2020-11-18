@@ -215,8 +215,27 @@ export const machineLearningRule: MachineLearningRule = {
 };
 
 export const eqlRule: CustomRule = {
-  customQuery: 'process where process_name == "explorer.exe"',
+  customQuery: 'any where process.name == "which"',
   name: 'New EQL Rule',
+  description: 'New EQL rule description.',
+  severity: 'High',
+  riskScore: '17',
+  tags: ['test', 'newRule'],
+  referenceUrls: ['https://www.google.com/', 'https://elastic.co/'],
+  falsePositivesExamples: ['False1', 'False2'],
+  mitre: [mitre1, mitre2],
+  note: '# test markdown',
+  timelineId: '0162c130-78be-11ea-9718-118a926974a4',
+  runsEvery,
+  lookBack,
+};
+
+export const eqlSequenceRule: CustomRule = {
+  customQuery:
+    'sequence with maxspan=30s\
+     [any where process.name == "which"]\
+     [any where process.name == "xargs"]',
+  name: 'New EQL Sequence Rule',
   description: 'New EQL rule description.',
   severity: 'High',
   riskScore: '17',

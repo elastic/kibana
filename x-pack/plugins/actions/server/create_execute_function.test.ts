@@ -6,7 +6,7 @@
 
 import { KibanaRequest } from 'src/core/server';
 import uuid from 'uuid';
-import { taskManagerMock } from '../../task_manager/server/task_manager.mock';
+import { taskManagerMock } from '../../task_manager/server/mocks';
 import { createExecutionEnqueuerFunction } from './create_execute_function';
 import { savedObjectsClientMock } from '../../../../src/core/server/mocks';
 import { actionTypeRegistryMock } from './action_type_registry.mock';
@@ -15,7 +15,7 @@ import {
   asSavedObjectExecutionSource,
 } from './lib/action_execution_source';
 
-const mockTaskManager = taskManagerMock.start();
+const mockTaskManager = taskManagerMock.createStart();
 const savedObjectsClient = savedObjectsClientMock.create();
 const request = {} as KibanaRequest;
 
@@ -23,9 +23,10 @@ beforeEach(() => jest.resetAllMocks());
 
 describe('execute()', () => {
   test('schedules the action with all given parameters', async () => {
+    const actionTypeRegistry = actionTypeRegistryMock.create();
     const executeFn = createExecutionEnqueuerFunction({
       taskManager: mockTaskManager,
-      actionTypeRegistry: actionTypeRegistryMock.create(),
+      actionTypeRegistry,
       isESOUsingEphemeralEncryptionKey: false,
       preconfiguredActions: [],
     });
@@ -76,6 +77,9 @@ describe('execute()', () => {
       },
       {}
     );
+    expect(actionTypeRegistry.isActionExecutable).toHaveBeenCalledWith('123', 'mock-action', {
+      notifyUsage: true,
+    });
   });
 
   test('schedules the action with all given parameters with a preconfigured action', async () => {

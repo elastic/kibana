@@ -23,7 +23,7 @@ export function metadataQueryStrategyV1(): MetadataQueryStrategy {
   return {
     index: metadataIndexPattern,
     elasticAgentIdProperty: 'elastic.agent.id',
-    hostIdProperty: 'host.id',
+    hostIdProperty: 'agent.id',
     sortProperty: [
       {
         'event.created': {
@@ -33,7 +33,7 @@ export function metadataQueryStrategyV1(): MetadataQueryStrategy {
     ],
     extraBodyProperties: {
       collapse: {
-        field: 'host.id',
+        field: 'agent.id',
         inner_hits: {
           name: 'most_recent',
           size: 1,
@@ -43,7 +43,7 @@ export function metadataQueryStrategyV1(): MetadataQueryStrategy {
       aggs: {
         total: {
           cardinality: {
-            field: 'host.id',
+            field: 'agent.id',
           },
         },
       },
@@ -78,7 +78,7 @@ export function metadataQueryStrategyV2(): MetadataQueryStrategy {
   return {
     index: metadataCurrentIndexPattern,
     elasticAgentIdProperty: 'HostDetails.elastic.agent.id',
-    hostIdProperty: 'HostDetails.host.id',
+    hostIdProperty: 'HostDetails.agent.id',
     sortProperty: [
       {
         'HostDetails.event.created': {
@@ -86,6 +86,9 @@ export function metadataQueryStrategyV2(): MetadataQueryStrategy {
         },
       },
     ],
+    extraBodyProperties: {
+      track_total_hits: true,
+    },
     queryResponseToHostListResult: (
       searchResponse: SearchResponse<HostMetadata | HostMetadataDetails>
     ): HostListQueryResult => {

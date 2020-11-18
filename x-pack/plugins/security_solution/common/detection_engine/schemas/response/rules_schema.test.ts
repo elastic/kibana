@@ -626,7 +626,7 @@ describe('rules_schema', () => {
       const message = pipe(checked, foldLeftRight);
 
       expect(getPaths(left(message.errors))).toEqual([
-        'invalid keys "threat_index,threat_mapping,[{"entries":[{"field":"host.name","type":"mapping","value":"host.name"}]}],threat_query,threat_filters,[{"bool":{"must":[{"query_string":{"query":"host.name: linux","analyze_wildcard":true,"time_zone":"Zulu"}}],"filter":[],"should":[],"must_not":[]}}]"',
+        'invalid keys "threat_index,["index-123"],threat_mapping,[{"entries":[{"field":"host.name","type":"mapping","value":"host.name"}]}],threat_query,threat_filters,[{"bool":{"must":[{"query_string":{"query":"host.name: linux","analyze_wildcard":true,"time_zone":"Zulu"}}],"filter":[],"should":[],"must_not":[]}}]"',
       ]);
       expect(message.schema).toEqual({});
     });
@@ -762,9 +762,9 @@ describe('rules_schema', () => {
       expect(fields).toEqual(expected);
     });
 
-    test('should return 5 fields for a rule of type "threat_match"', () => {
+    test('should return 8 fields for a rule of type "threat_match"', () => {
       const fields = addThreatMatchFields({ type: 'threat_match' });
-      expect(fields.length).toEqual(5);
+      expect(fields.length).toEqual(8);
     });
   });
 

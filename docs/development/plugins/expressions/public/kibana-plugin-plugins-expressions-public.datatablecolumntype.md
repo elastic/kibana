@@ -4,10 +4,10 @@
 
 ## DatatableColumnType type
 
-This type represents the `type` of any `DatatableColumn` in a `Datatable`<!-- -->.
+This type represents the `type` of any `DatatableColumn` in a `Datatable`<!-- -->. its duplicated from KBN\_FIELD\_TYPES
 
 <b>Signature:</b>
 
 ```typescript
-export declare type DatatableColumnType = 'string' | 'number' | 'boolean' | 'date' | 'null';
+export declare type DatatableColumnType = '_source' | 'attachment' | 'boolean' | 'date' | 'geo_point' | 'geo_shape' | 'ip' | 'murmur3' | 'number' | 'string' | 'unknown' | 'conflict' | 'object' | 'nested' | 'histogram' | 'null';
 ```

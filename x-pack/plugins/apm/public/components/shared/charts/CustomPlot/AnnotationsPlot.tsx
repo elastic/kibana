@@ -13,11 +13,11 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { asAbsoluteDateTime } from '../../../../../common/utils/formatters';
 import { useTheme } from '../../../../hooks/useTheme';
 import { Maybe } from '../../../../../typings/common';
 import { Annotation } from '../../../../../common/annotations';
 import { PlotValues, SharedPlot } from './plotUtils';
-import { asAbsoluteDateTime } from '../../../../utils/formatters';
 
 interface Props {
   annotations: Annotation[];

@@ -39,6 +39,8 @@
     // Resolve modules in the same way as Node.js. Aka make `require` works the
     // same in TypeScript as it does in Node.js.
     "moduleResolution": "node",
+    // "resolveJsonModule" allows for importing, extracting types from and generating .json files.
+    "resolveJsonModule": true,
     // Disallow inconsistently-cased references to the same file.
     "forceConsistentCasingInFileNames": true,
     // Forbid unused local variables as the rule was deprecated by ts-lint
@@ -51,7 +53,6 @@
     "types": [
       "node",
       "jest",
-      "react",
       "flot",
       "jest-styled-components",
       "@testing-library/jest-dom"

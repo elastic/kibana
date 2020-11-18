@@ -168,8 +168,11 @@ describe('helpers', () => {
         query: mockQueryBarWithQuery.query,
         savedId: mockQueryBarWithQuery.saved_id,
       });
-      expect(result[0].title).toEqual(<>{i18n.QUERY_LABEL} </>);
-      expect(result[0].description).toEqual(<>{mockQueryBarWithQuery.query} </>);
+
+      expect(result[0].title).toEqual(<>{i18n.QUERY_LABEL}</>);
+      expect(shallow(result[0].description as React.ReactElement).text()).toEqual(
+        mockQueryBarWithQuery.query
+      );
     });
 
     test('returns expected array of ListItems when "savedId" exists', () => {
@@ -434,7 +437,7 @@ describe('helpers', () => {
     it('returns a humanized description for a threat_match type', () => {
       const [result]: ListItems[] = buildRuleTypeDescription('Test label', 'threat_match');
 
-      expect(result.description).toEqual('Threat Match');
+      expect(result.description).toEqual('Indicator Match');
     });
   });
 });

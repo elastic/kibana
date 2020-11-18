@@ -22,6 +22,7 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 
+import { hasEqlSequenceQuery, isEqlRule } from '../../../../../common/detection_engine/utils';
 import { useFetchIndex } from '../../../containers/source';
 import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
 import { useRuleAsync } from '../../../../detections/containers/detection_engine/rules/use_rule_async';
@@ -40,7 +41,6 @@ import { AddExceptionComments } from '../add_exception_comments';
 import {
   enrichExistingExceptionItemWithComments,
   enrichExceptionItemsWithOS,
-  getOperatingSystems,
   entryHasListType,
   entryHasNonEcsType,
   lowercaseHashValues,
@@ -99,6 +99,7 @@ export const EditExceptionModal = memo(function EditExceptionModal({
 }: EditExceptionModalProps) {
   const { http } = useKibana().services;
   const [comment, setComment] = useState('');
+  const [errorsExist, setErrorExists] = useState(false);
   const { rule: maybeRule } = useRuleAsync(ruleId);
   const [updateError, setUpdateError] = useState<ErrorInfo | null>(null);
   const [hasVersionConflict, setHasVersionConflict] = useState(false);
@@ -109,8 +110,11 @@ export const EditExceptionModal = memo(function EditExceptionModal({
   >([]);
   const { addError, addSuccess } = useAppToasts();
   const { loading: isSignalIndexLoading, signalIndexName } = useSignalIndex();
+  const memoSignalIndexName = useMemo(() => (signalIndexName !== null ? [signalIndexName] : []), [
+    signalIndexName,
+  ]);
   const [isSignalIndexPatternLoading, { indexPatterns: signalIndexPatterns }] = useFetchIndex(
-    signalIndexName !== null ? [signalIndexName] : []
+    memoSignalIndexName
   );
 
   const [isIndexPatternLoading, { indexPatterns }] = useFetchIndex(ruleIndices);
@@ -188,17 +192,23 @@ export const EditExceptionModal = memo(function EditExceptionModal({
   }, [shouldDisableBulkClose]);
 
   const isSubmitButtonDisabled = useMemo(
-    () => exceptionItemsToAdd.every((item) => item.entries.length === 0) || hasVersionConflict,
-    [exceptionItemsToAdd, hasVersionConflict]
+    () =>
+      exceptionItemsToAdd.every((item) => item.entries.length === 0) ||
+      hasVersionConflict ||
+      errorsExist,
+    [exceptionItemsToAdd, hasVersionConflict, errorsExist]
   );
 
   const handleBuilderOnChange = useCallback(
     ({
       exceptionItems,
+      errorExists,
     }: {
       exceptionItems: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>;
+      errorExists: boolean;
     }) => {
       setExceptionItemsToAdd(exceptionItems);
+      setErrorExists(errorExists);
     },
     [setExceptionItemsToAdd]
   );
@@ -228,8 +238,7 @@ export const EditExceptionModal = memo(function EditExceptionModal({
       },
     ];
     if (exceptionListType === 'endpoint') {
-      const osTypes = exceptionItem._tags ? getOperatingSystems(exceptionItem._tags) : [];
-      enriched = lowercaseHashValues(enrichExceptionItemsWithOS(enriched, osTypes));
+      enriched = lowercaseHashValues(enrichExceptionItemsWithOS(enriched, exceptionItem.os_types));
     }
     return enriched;
   }, [exceptionItemsToAdd, exceptionItem, comment, exceptionListType]);
@@ -247,6 +256,13 @@ export const EditExceptionModal = memo(function EditExceptionModal({
     shouldBulkCloseAlert,
     signalIndexName,
   ]);
+
+  const isRuleEQLSequenceStatement = useMemo((): boolean => {
+    if (maybeRule != null) {
+      return isEqlRule(maybeRule.type) && hasEqlSequenceQuery(maybeRule.query);
+    }
+    return false;
+  }, [maybeRule]);
 
   return (
     <EuiOverlayMask onClick={onCancel}>
@@ -267,6 +283,15 @@ export const EditExceptionModal = memo(function EditExceptionModal({
         {!isSignalIndexLoading && !addExceptionIsLoading && !isIndexPatternLoading && (
           <>
             <ModalBodySection className="builder-section">
+              {isRuleEQLSequenceStatement && (
+                <>
+                  <EuiCallOut
+                    data-test-subj="eql-sequence-callout"
+                    title={i18n.EDIT_EXCEPTION_SEQUENCE_WARNING}
+                  />
+                  <EuiSpacer />
+                </>
+              )}
               <EuiText>{i18n.EXCEPTION_BUILDER_INFO}</EuiText>
               <EuiSpacer />
               <ExceptionBuilderComponent
@@ -282,6 +307,7 @@ export const EditExceptionModal = memo(function EditExceptionModal({
                 id-aria="edit-exception-modal-builder"
                 onChange={handleBuilderOnChange}
                 indexPatterns={indexPatterns}
+                ruleType={maybeRule?.type}
               />
 
               <EuiSpacer />
