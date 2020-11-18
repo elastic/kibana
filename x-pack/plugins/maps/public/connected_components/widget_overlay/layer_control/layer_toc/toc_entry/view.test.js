@@ -5,7 +5,15 @@
  */
 
 import React from 'react';
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { shallowWithIntl } from '@kbn/test/jest';
+
+jest.mock('../../../../../kibana_services', () => {
+  return {
+    getMapsCapabilities() {
+      return { save: true };
+    },
+  };
+});
 
 import { TOCEntry } from './view';
 

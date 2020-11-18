@@ -8,6 +8,7 @@ import { ApplicationStart } from 'kibana/public';
 import { NewPackagePolicy, PackagePolicy } from '../../../../fleet/common';
 import { ManifestSchema } from '../schema/manifest';
 
+export * from './os';
 export * from './trusted_apps';
 
 /**
@@ -119,6 +120,10 @@ export interface FieldsObject {
  */
 export interface ResolverNode {
   data: FieldsObject;
+  id: string | number;
+  // the very root node might not have the parent field defined
+  parent?: string | number;
+  name?: string;
   stats: EventStats;
 }
 
@@ -950,6 +955,9 @@ export interface PolicyConfig {
         enabled: boolean;
       };
     };
+    antivirus_registration: {
+      enabled: boolean;
+    };
   };
   mac: {
     advanced?: {};
@@ -989,7 +997,10 @@ export interface UIPolicyConfig {
   /**
    * Windows-specific policy configuration that is supported via the UI
    */
-  windows: Pick<PolicyConfig['windows'], 'events' | 'malware' | 'popup' | 'advanced'>;
+  windows: Pick<
+    PolicyConfig['windows'],
+    'events' | 'malware' | 'popup' | 'antivirus_registration' | 'advanced'
+  >;
   /**
    * Mac-specific policy configuration that is supported via the UI
    */

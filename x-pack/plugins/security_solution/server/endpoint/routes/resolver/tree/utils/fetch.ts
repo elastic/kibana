@@ -53,10 +53,10 @@ export class Fetcher {
       return results;
     }, []);
 
-    return this.applyStatsToTree(tree, options);
+    return this.formatResponse(tree, options);
   }
 
-  private async applyStatsToTree(
+  private async formatResponse(
     treeNodes: FieldsObject[],
     options: TreeOptions
   ): Promise<ResolverNode[]> {
@@ -78,11 +78,20 @@ export class Fetcher {
     const statsNodes: ResolverNode[] = [];
     for (const node of treeNodes) {
       const id = getIDField(node, options.schema);
-      const stats = id !== undefined ? eventStats[id] : undefined;
-      statsNodes.push({
-        data: node,
-        stats: stats ?? { total: 0, byCategory: {} },
-      });
+      const parent = getParentField(node, options.schema);
+      const name = getNameField(node, options.schema);
+
+      // at this point id should never be undefined, it should be enforced by the Elasticsearch query
+      // but let's check anyway
+      if (id !== undefined) {
+        statsNodes.push({
+          id,
+          parent,
+          name,
+          data: node,
+          stats: eventStats[id] ?? { total: 0, byCategory: {} },
+        });
+      }
     }
     return statsNodes;
   }
@@ -263,6 +272,22 @@ export function getLeafNodes(
 export function getIDField(obj: FieldsObject, schema: Schema): NodeID | undefined {
   const id: ECSField<NodeID> = obj[schema.id];
   return firstNonNullValue(id);
+}
+
+/**
+ * Retrieves the name field from a document.
+ *
+ * Exposed for testing.
+ * @param obj the doc value fields retrieved from a document returned by Elasticsearch
+ * @param schema the schema used for identifying connections between documents
+ */
+export function getNameField(obj: FieldsObject, schema: Schema): string | undefined {
+  if (!schema.name) {
+    return undefined;
+  }
+
+  const name: ECSField<string | number> = obj[schema.name];
+  return String(firstNonNullValue(name));
 }
 
 /**

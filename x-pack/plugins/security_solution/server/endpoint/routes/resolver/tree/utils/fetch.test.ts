@@ -9,6 +9,7 @@ import {
   getAncestryAsArray,
   getIDField,
   getLeafNodes,
+  getNameField,
   getParentField,
   TreeOptions,
 } from './fetch';
@@ -18,14 +19,18 @@ import { StatsQuery } from '../queries/stats';
 import { IScopedClusterClient } from 'src/core/server';
 import { elasticsearchServiceMock } from 'src/core/server/mocks';
 import { FieldsObject, ResolverNode } from '../../../../../../common/endpoint/types';
+import { Schema } from './index';
 
 jest.mock('../queries/descendants');
 jest.mock('../queries/lifecycle');
 jest.mock('../queries/stats');
 
-function addEmptyStats(results: FieldsObject[]): ResolverNode[] {
+function formatResponse(results: FieldsObject[], schema: Schema): ResolverNode[] {
   return results.map((node) => {
     return {
+      id: getIDField(node, schema) ?? '',
+      parent: getParentField(node, schema),
+      name: getNameField(node, schema),
       data: node,
       stats: {
         total: 0,
@@ -36,6 +41,23 @@ function addEmptyStats(results: FieldsObject[]): ResolverNode[] {
 }
 
 describe('fetcher test', () => {
+  const schemaIDParent = {
+    id: 'id',
+    parent: 'parent',
+  };
+
+  const schemaIDParentAncestry = {
+    id: 'id',
+    parent: 'parent',
+    ancestry: 'ancestry',
+  };
+
+  const schemaIDParentName = {
+    id: 'id',
+    parent: 'parent',
+    name: 'name',
+  };
+
   let client: jest.Mocked<IScopedClusterClient>;
   beforeAll(() => {
     StatsQuery.prototype.search = jest.fn().mockImplementation(async () => {
@@ -142,16 +164,15 @@ describe('fetcher test', () => {
           from: '',
           to: '',
         },
-        schema: {
-          id: 'id',
-          parent: 'parent',
-        },
+        schema: schemaIDParent,
         indexPatterns: [''],
         nodes: ['0'],
       };
 
       const fetcher = new Fetcher(client);
-      expect(await fetcher.tree(options)).toEqual(addEmptyStats([...level1, ...level2]));
+      expect(await fetcher.tree(options)).toEqual(
+        formatResponse([...level1, ...level2], schemaIDParent)
+      );
     });
   });
 
@@ -229,19 +250,62 @@ describe('fetcher test', () => {
           from: '',
           to: '',
         },
-        schema: {
-          id: 'id',
-          parent: 'parent',
-        },
+        schema: schemaIDParent,
         indexPatterns: [''],
         nodes: ['3'],
       };
       const fetcher = new Fetcher(client);
       expect(await fetcher.tree(options)).toEqual(
-        addEmptyStats([
-          { id: '3', parent: '2' },
-          { id: '2', parent: '1' },
-        ])
+        formatResponse(
+          [
+            { id: '3', parent: '2' },
+            { id: '2', parent: '1' },
+          ],
+          schemaIDParent
+        )
+      );
+    });
+
+    it('correctly adds name field to response', async () => {
+      LifecycleQuery.prototype.search = jest
+        .fn()
+        .mockImplementationOnce(async () => {
+          return [
+            {
+              id: '3',
+              parent: '2',
+            },
+          ];
+        })
+        .mockImplementationOnce(async () => {
+          return [
+            {
+              id: '2',
+              parent: '1',
+            },
+          ];
+        });
+      const options: TreeOptions = {
+        descendantLevels: 0,
+        descendants: 0,
+        ancestors: 2,
+        timerange: {
+          from: '',
+          to: '',
+        },
+        schema: schemaIDParentName,
+        indexPatterns: [''],
+        nodes: ['3'],
+      };
+      const fetcher = new Fetcher(client);
+      expect(await fetcher.tree(options)).toEqual(
+        formatResponse(
+          [
+            { id: '3', parent: '2' },
+            { id: '2', parent: '1' },
+          ],
+          schemaIDParentName
+        )
       );
     });
 
@@ -279,16 +343,14 @@ describe('fetcher test', () => {
           from: '',
           to: '',
         },
-        schema: {
-          ancestry: 'ancestry',
-          id: 'id',
-          parent: 'parent',
-        },
+        schema: schemaIDParentAncestry,
         indexPatterns: [''],
         nodes: ['3'],
       };
       const fetcher = new Fetcher(client);
-      expect(await fetcher.tree(options)).toEqual(addEmptyStats([node3, node1, node2]));
+      expect(await fetcher.tree(options)).toEqual(
+        formatResponse([node3, node1, node2], schemaIDParentAncestry)
+      );
     });
   });
 

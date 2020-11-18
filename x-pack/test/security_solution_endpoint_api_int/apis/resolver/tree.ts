@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import expect from '@kbn/expect';
+import { getNameField } from '../../../../plugins/security_solution/server/endpoint/routes/resolver/tree/utils/fetch';
 import { Schema } from '../../../../plugins/security_solution/server/endpoint/routes/resolver/tree/utils';
 import { ResolverNode } from '../../../../plugins/security_solution/common/endpoint/types';
 import {
@@ -52,6 +53,12 @@ export default function ({ getService }: FtrProviderContext) {
   const schemaWithoutAncestry: Schema = {
     id: 'process.entity_id',
     parent: 'process.parent.entity_id',
+  };
+
+  const schemaWithName: Schema = {
+    id: 'process.entity_id',
+    parent: 'process.parent.entity_id',
+    name: 'process.name',
   };
 
   describe('Resolver tree', () => {
@@ -530,6 +537,44 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('ancestry and descendants', () => {
+      it('returns all descendants and ancestors without the ancestry field and they should have the name field', async () => {
+        const { body }: { body: ResolverNode[] } = await supertest
+          .post('/api/endpoint/resolver/tree')
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            descendants: 100,
+            descendantLevels: 10,
+            ancestors: 50,
+            schema: schemaWithName,
+            nodes: [tree.origin.id],
+            timerange: {
+              from: tree.startTime.toISOString(),
+              to: tree.endTime.toISOString(),
+            },
+            indexPatterns: ['logs-*'],
+          })
+          .expect(200);
+        verifyTree({
+          expectations: [
+            // there are 2 levels in the descendant part of the tree and 3 nodes for each
+            // descendant = 3 children for the origin + 3 children for each of the origin's children = 12
+            {
+              origin: tree.origin.id,
+              nodeExpectations: { descendants: 12, descendantLevels: 2, ancestors: 5 },
+            },
+          ],
+          response: body,
+          schema: schemaWithName,
+          genTree: tree,
+          relatedEventsCategories: relatedEventsToGen,
+        });
+
+        for (const node of body) {
+          expect(node.name).to.be(getNameField(node.data, schemaWithName));
+          expect(node.name).to.not.be(undefined);
+        }
+      });
+
       it('returns all descendants and ancestors without the ancestry field', async () => {
         const { body }: { body: ResolverNode[] } = await supertest
           .post('/api/endpoint/resolver/tree')
@@ -561,6 +606,11 @@ export default function ({ getService }: FtrProviderContext) {
           genTree: tree,
           relatedEventsCategories: relatedEventsToGen,
         });
+
+        for (const node of body) {
+          expect(node.name).to.be(getNameField(node.data, schemaWithoutAncestry));
+          expect(node.name).to.be(undefined);
+        }
       });
 
       it('returns all descendants and ancestors with the ancestry field', async () => {
@@ -594,6 +644,11 @@ export default function ({ getService }: FtrProviderContext) {
           genTree: tree,
           relatedEventsCategories: relatedEventsToGen,
         });
+
+        for (const node of body) {
+          expect(node.name).to.be(getNameField(node.data, schemaWithAncestry));
+          expect(node.name).to.be(undefined);
+        }
       });
 
       it('returns an empty response when limits are zero', async () => {
