@@ -687,13 +687,11 @@ export default class QueryStringInputUI extends Component<Props, State> {
               </EuiTextArea>
               {this.props.iconType ? (
                 <div className="euiFormControlLayoutIcons">
-                  <span>
-                    <EuiIcon
-                      className="euiFormControlLayoutCustomIcon__icon"
-                      aria-hidden="true"
-                      type="search"
-                    />
-                  </span>
+                  <EuiIcon
+                    className="euiFormControlLayoutCustomIcon__icon"
+                    aria-hidden="true"
+                    type="search"
+                  />
                 </div>
               ) : null}
             </div>
