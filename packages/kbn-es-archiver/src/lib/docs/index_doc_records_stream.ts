@@ -44,7 +44,21 @@ export function createIndexDocRecordsStream(
       );
     });
 
-    const resp = await client.bulk({ body });
+    const maxTries = 5;
+    let resp;
+
+    for (let currentTry = 1; currentTry <= maxTries; currentTry++) {
+      try {
+        resp = await client.bulk({ body });
+        break;
+      } catch (err) {
+        // ignore error unless it's the last try
+        if (currentTry === maxTries) {
+          throw new Error(err);
+        }
+      }
+    }
+
     if (resp.errors) {
       throw new Error(`Failed to index all documents: ${JSON.stringify(resp, null, 2)}`);
     }
