@@ -32,6 +32,7 @@ import { RenderToolTipContent } from '../../classes/tooltips/tooltip_property';
 import { GeoFieldWithIndex } from '../../components/geo_field_with_index';
 import { MapRefreshConfig } from '../../../common/descriptor_types';
 import 'mapbox-gl/dist/mapbox-gl.css';
+import { OnSingleValueTriggerParams } from '../types';
 
 const RENDER_COMPLETE_EVENT = 'renderComplete';
 
@@ -39,6 +40,7 @@ interface Props {
   addFilters: ((filters: Filter[]) => Promise<void>) | null;
   getFilterActions?: () => Promise<Action[]>;
   getActionContext?: () => ActionExecutionContext;
+  onSingleValueTrigger?: (params: OnSingleValueTriggerParams) => void;
   areLayersLoaded: boolean;
   cancelAllInFlightRequests: () => void;
   exitFullScreen: () => void;
@@ -190,6 +192,7 @@ export class MapContainer extends Component<Props, State> {
       addFilters,
       getFilterActions,
       getActionContext,
+      onSingleValueTrigger,
       flyoutDisplay,
       isFullScreen,
       exitFullScreen,
@@ -246,6 +249,7 @@ export class MapContainer extends Component<Props, State> {
             addFilters={addFilters}
             getFilterActions={getFilterActions}
             getActionContext={getActionContext}
+            onSingleValueTrigger={onSingleValueTrigger}
             geoFields={this.state.geoFields}
             renderTooltipContent={renderTooltipContent}
           />

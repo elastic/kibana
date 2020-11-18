@@ -65,6 +65,8 @@ import { MapContainer } from '../connected_components/map_container';
 import { SavedMap } from '../routes/map_page';
 import { getIndexPatternsFromIds } from '../index_pattern_util';
 import { getMapAttributeService } from '../map_attribute_service';
+import type { OnSingleValueTriggerParams } from '../connected_components/types';
+import { isUrlDrilldown } from '../trigger_actions/trigger_utils';
 
 import {
   MapByValueInput,
@@ -290,6 +292,7 @@ export class MapEmbeddable
       <Provider store={this._savedMap.getStore()}>
         <I18nContext>
           <MapContainer
+            onSingleValueTrigger={this.onSingleValueTrigger}
             addFilters={this.input.hideFilterActions ? null : this.addFilters}
             getFilterActions={this.getFilterActions}
             getActionContext={this.getActionContext}
@@ -320,34 +323,53 @@ export class MapEmbeddable
     return await getIndexPatternsFromIds(queryableIndexPatternIds);
   }
 
+  onSingleValueTrigger = ({
+    actionId,
+    key,
+    label,
+    value,
+    indexPattern,
+  }: OnSingleValueTriggerParams) => {
+    const action = getUiActions().getAction(actionId);
+    if (!action) {
+      throw new Error('Unable to apply action, could not locate action');
+    }
+    action.execute({
+      ...this.getActionContext(),
+      data: {
+        data: [
+          {
+            table: {
+              columns: [
+                {
+                  id: key,
+                  meta: {
+                    name: 'field1',
+                    index: 'indexPattern1',
+                    type: 'number',
+                  },
+                  name: label,
+                },
+              ],
+              rows: [
+                {
+                  column0: value,
+                },
+              ],
+            },
+            column: 0,
+            row: 0,
+            value,
+          },
+        ],
+      },
+    });
+  };
+
   addFilters = async (filters: Filter[], actionId: string = ACTION_GLOBAL_APPLY_FILTER) => {
     const action = getUiActions().getAction(actionId);
     if (!action) {
       throw new Error('Unable to apply filter, could not locate action');
-    }
-    if (action.type === 'URL_DRILLDOWN') {
-      action.execute({
-        ...this.getActionContext(),
-        data: {
-          data: [
-            {
-              table: {
-                columns: [{
-                  id: 'column0',
-                }],
-                rows: [{
-                  id: 'row0',
-                }],
-                type: 'datatable'
-              },
-              column: 0,
-              row: 0,
-              value: 'US',
-            }
-          ]
-        },
-      });
-      return;
     }
     action.execute({
       ...this.getActionContext(),
@@ -360,28 +382,40 @@ export class MapEmbeddable
       embeddable: this,
       filters: [],
     });
-    const valueClickActions = await getUiActions().getTriggerCompatibleActions('VALUE_CLICK_TRIGGER', {
-      embeddable: this,
-      data: {
-        data: [
-          {
-            table: {
-              columns: [{
-                id: 'column0',
-              }],
-              rows: [{
-                id: 'row0',
-              }],
-              type: 'datatable'
+    const valueClickActions = await getUiActions().getTriggerCompatibleActions(
+      'VALUE_CLICK_TRIGGER',
+      {
+        embeddable: this,
+        data: {
+          data: [
+            {
+              table: {
+                columns: [
+                  {
+                    id: 'column0',
+                    meta: {
+                      name: 'field1',
+                      index: 'indexPattern1',
+                      type: 'number',
+                    },
+                    name: 'column0',
+                  },
+                ],
+                rows: [
+                  {
+                    column0: 'fake value',
+                  },
+                ],
+              },
+              column: 0,
+              row: 0,
+              value: 'fake value',
             },
-            column: 0,
-            row: 0,
-            value: 'fake value',
-          }
-        ]
-      },
-    });
-    return [ ...filterActions, ...valueClickActions ];
+          ],
+        },
+      }
+    );
+    return [...filterActions, ...valueClickActions.filter(isUrlDrilldown)];
   };
 
   getActionContext = () => {
