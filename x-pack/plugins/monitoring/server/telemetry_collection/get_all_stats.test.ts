@@ -180,6 +180,7 @@ describe('get_all_stats', () => {
             esClient: esClient as any,
             soClient: soClient as any,
             usageCollection: {} as any,
+            kibanaRequest: undefined,
             timestamp,
           },
           {
@@ -206,6 +207,7 @@ describe('get_all_stats', () => {
             esClient: esClient as any,
             soClient: soClient as any,
             usageCollection: {} as any,
+            kibanaRequest: undefined,
             timestamp,
           },
           {

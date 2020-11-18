@@ -9,6 +9,7 @@
 /x-pack/plugins/discover_enhanced/ @elastic/kibana-app
 /x-pack/plugins/lens/ @elastic/kibana-app
 /x-pack/plugins/graph/ @elastic/kibana-app
+/x-pack/plugins/vis_type_timeseries_enhanced/ @elastic/kibana-app
 /src/plugins/advanced_settings/ @elastic/kibana-app
 /src/plugins/charts/ @elastic/kibana-app
 /src/plugins/discover/ @elastic/kibana-app
