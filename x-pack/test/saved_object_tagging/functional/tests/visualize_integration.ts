@@ -13,7 +13,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const listingTable = getService('listingTable');
   const testSubjects = getService('testSubjects');
   const find = getService('find');
-  const PageObjects = getPageObjects(['visualize', 'tagManagement', 'visEditor']);
+  const PageObjects = getPageObjects(['visualize', 'tagManagement', 'visEditor', 'common']);
 
   /**
    * Select tags in the searchbar's tag filter.
@@ -31,6 +31,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     // click elsewhere to close the filter dropdown
     const searchFilter = await find.byCssSelector('main .euiFieldSearch');
     await searchFilter.click();
+    // wait until the table refreshes
+    await listingTable.waitUntilTableIsLoaded();
   };
 
   const selectSavedObjectTags = async (...tagNames: string[]) => {
@@ -56,6 +58,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     describe('listing', () => {
       beforeEach(async () => {
         await PageObjects.visualize.gotoVisualizationLandingPage();
+        await listingTable.waitUntilTableIsLoaded();
       });
 
       it('allows to manually type tag filter query', async () => {
@@ -83,7 +86,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     describe('creating', () => {
-      it.skip('allows to assign tags to the new visualization', async () => {
+      it('allows to assign tags to the new visualization', async () => {
         await PageObjects.visualize.navigateToNewVisualization();
 
         await PageObjects.visualize.clickMarkdownWidget();
@@ -95,7 +98,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await selectSavedObjectTags('tag-1');
 
         await testSubjects.click('confirmSaveSavedObjectButton');
+        await PageObjects.common.waitForSaveModalToClose();
+
         await PageObjects.visualize.gotoVisualizationLandingPage();
+        await listingTable.waitUntilTableIsLoaded();
 
         await selectFilterTags('tag-1');
         const itemNames = await listingTable.getAllItemsNames();
@@ -133,7 +139,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(await tagModal.isOpened()).to.be(false);
 
         await testSubjects.click('confirmSaveSavedObjectButton');
+        await PageObjects.common.waitForSaveModalToClose();
+
         await PageObjects.visualize.gotoVisualizationLandingPage();
+        await listingTable.waitUntilTableIsLoaded();
 
         await selectFilterTags('my-new-tag');
         const itemNames = await listingTable.getAllItemsNames();
@@ -144,6 +153,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     describe('editing', () => {
       beforeEach(async () => {
         await PageObjects.visualize.gotoVisualizationLandingPage();
+        await listingTable.waitUntilTableIsLoaded();
       });
 
       it('allows to assign tags to an existing visualization', async () => {
@@ -153,7 +163,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await selectSavedObjectTags('tag-2');
 
         await testSubjects.click('confirmSaveSavedObjectButton');
+        await PageObjects.common.waitForSaveModalToClose();
+
         await PageObjects.visualize.gotoVisualizationLandingPage();
+        await listingTable.waitUntilTableIsLoaded();
 
         await selectFilterTags('tag-2');
         const itemNames = await listingTable.getAllItemsNames();
