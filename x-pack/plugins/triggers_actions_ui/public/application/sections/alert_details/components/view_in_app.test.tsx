@@ -38,7 +38,9 @@ describe('view in app', () => {
 
     it('enabled when there is navigation', async () => {
       const alert = mockAlert({ id: 'alert-with-nav', consumer: 'siem' });
-      const { navigateToApp } = useKibana().services;
+      const {
+        application: { navigateToApp },
+      } = useKibana().services;
 
       let component: ReactWrapper;
       act(async () => {
