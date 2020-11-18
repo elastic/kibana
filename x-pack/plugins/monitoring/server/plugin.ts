@@ -173,7 +173,7 @@ export class Plugin {
         },
       });
 
-      registerCollectors(plugins.usageCollection, config, cluster.callAsInternalUser);
+      registerCollectors(plugins.usageCollection, config, cluster);
     }
 
     // Always create the bulk uploader

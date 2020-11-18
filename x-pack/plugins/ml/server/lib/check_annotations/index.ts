@@ -5,7 +5,7 @@
  */
 
 import { IScopedClusterClient } from 'kibana/server';
-import { mlLog } from '../../client/log';
+import { mlLog } from '../../lib/log';
 
 import {
   ML_ANNOTATIONS_INDEX_ALIAS_READ,

@@ -220,7 +220,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThr
       <EuiFormLabel>
         <FormattedMessage
           defaultMessage="Select Index to query:"
-          id="xpack.triggersActionsUI.sections.alertAdd.selectIndex"
+          id="xpack.stackAlerts.threshold.ui.selectIndex"
         />
   ....
       </Fragment>
