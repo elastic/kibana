@@ -5,7 +5,7 @@
  */
 
 import { EuiAccordion, EuiFlexItem, EuiSpacer, EuiFormRow } from '@elastic/eui';
-import React, { FC, memo, useCallback, useEffect, useState } from 'react';
+import React, { FC, memo, useCallback, useEffect, useState, useMemo } from 'react';
 import styled from 'styled-components';
 
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
@@ -40,7 +40,7 @@ import { MarkdownEditorForm } from '../../../../common/components/markdown_edito
 import { SeverityField } from '../severity_mapping';
 import { RiskScoreField } from '../risk_score_mapping';
 import { AutocompleteField } from '../autocomplete_field';
-import { useFetchIndex } from '../../../../common/containers/source';
+import { BrowserField, useFetchIndex } from '../../../../common/containers/source';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -73,9 +73,11 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
   setForm,
 }) => {
   const initialState = defaultValues ?? stepAboutDefaultValue;
+  const indexes = useMemo(() => (defineRuleData != null ? defineRuleData.index : []), [
+    defineRuleData,
+  ]);
   const [severityValue, setSeverityValue] = useState<string>(initialState.severity.value);
-  const [indexPatternLoading, { indexPatterns }] = useFetchIndex(defineRuleData?.index ?? []);
-
+  const [indexPatternLoading, { indexPatterns, browserFields }] = useFetchIndex(indexes);
   const canUseExceptions =
     defineRuleData?.ruleType &&
     !isMlRule(defineRuleData.ruleType) &&
@@ -120,6 +122,20 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
       onSubmit();
     }
   }, [onSubmit]);
+
+  const filterTimestampOverrideCallback = useCallback(
+    (browserField: Partial<BrowserField>) => {
+      const sortedFieldIndices = indexes.every((ind) => (browserField.indexes ?? []).includes(ind));
+      const isRightType = (browserField.esTypes ?? []).includes('date');
+      return isRightType && sortedFieldIndices;
+    },
+    [indexes]
+  );
+
+  const filterBrowserFieldTypeCallback = useCallback(
+    (type: string) => (browserField: Partial<BrowserField>) => browserField.type === type,
+    []
+  );
 
   useEffect(() => {
     let didCancel = false;
@@ -309,11 +325,12 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
               component={AutocompleteField}
               componentProps={{
                 dataTestSubj: 'detectionEngineStepAboutRuleRuleNameOverride',
-                fieldType: 'string',
                 idAria: 'detectionEngineStepAboutRuleRuleNameOverride',
-                indices: indexPatterns,
+                browserFields,
                 isDisabled: isLoading || indexPatternLoading,
+                showOptional: true,
                 placeholder: '',
+                filterCallback: filterBrowserFieldTypeCallback('string'),
               }}
             />
             <EuiSpacer size="l" />
@@ -322,11 +339,12 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
               component={AutocompleteField}
               componentProps={{
                 dataTestSubj: 'detectionEngineStepAboutRuleTimestampOverride',
-                fieldType: 'date',
                 idAria: 'detectionEngineStepAboutRuleTimestampOverride',
-                indices: indexPatterns,
+                browserFields,
                 isDisabled: isLoading || indexPatternLoading,
+                showOptional: true,
                 placeholder: '',
+                filterCallback: filterTimestampOverrideCallback,
               }}
             />
           </EuiAccordion>

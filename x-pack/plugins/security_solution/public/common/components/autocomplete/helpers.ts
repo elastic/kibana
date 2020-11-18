@@ -18,6 +18,8 @@ import {
 } from './operators';
 import { GetGenericComboBoxPropsReturn, OperatorOption } from './types';
 import * as i18n from './translations';
+import { BrowserFields, BrowserField, getAllBrowserFields } from '../../containers/source';
+import { getCategorizedFieldNames } from '../../../timelines/components/edit_data_provider/helpers';
 
 /**
  * Returns the appropriate operators given a field type
@@ -138,3 +140,76 @@ export function getGenericComboBoxProps<T>({
     selectedComboOptions: newSelectedComboOptions,
   };
 }
+
+export const getSelectedFieldToBrowserField = (
+  selectedField: string,
+  browserFields: BrowserFields
+): Partial<BrowserField> | undefined => {
+  const fields = getAllBrowserFields(browserFields);
+  return fields.find((field) => field.name === selectedField);
+};
+
+export const getSelectionToComboBoxOption = (
+  selectedField: string,
+  browserFields: BrowserFields
+): { error: null | string; selection: EuiComboBoxOptionOption[] } => {
+  const field = getSelectedFieldToBrowserField(selectedField, browserFields);
+
+  if (field != null && field.name != null) {
+    return {
+      error: null,
+      selection: [{ label: field.name }],
+    };
+  } else {
+    return {
+      error: i18n.TIMESTAMP_OVERRIDE_ERROR(selectedField),
+      selection: [],
+    };
+  }
+};
+
+export const getFilteredBrowserFields = (
+  browserFields: BrowserFields,
+  filterCallback: (arg: Partial<BrowserField>) => boolean
+): BrowserFields => {
+  const filteredFields = Object.keys(browserFields).reduce((acc, category) => {
+    const categoryFields = browserFields[category].fields;
+
+    if (categoryFields != null) {
+      return {
+        ...acc,
+        [category]: {
+          fields: Object.keys(categoryFields).reduce((fieldAcc, field) => {
+            if (filterCallback(categoryFields[field])) {
+              return {
+                ...fieldAcc,
+                [field]: categoryFields[field],
+              };
+            }
+
+            return fieldAcc;
+          }, {}),
+        },
+      };
+    }
+
+    return acc;
+  }, {});
+
+  return filteredFields;
+};
+
+export const getSelectOptions = (
+  fields: BrowserFields | undefined,
+  filterCallback?: (arg: Partial<BrowserField>) => boolean
+): { options: EuiComboBoxOptionOption[]; fields: BrowserFields | undefined } => {
+  if (fields == null) {
+    return { options: [], fields };
+  } else if (filterCallback != null) {
+    const filteredFields = getFilteredBrowserFields(fields, filterCallback);
+
+    return { options: getCategorizedFieldNames(filteredFields), fields: filteredFields };
+  } else {
+    return { options: getCategorizedFieldNames(fields), fields };
+  }
+};

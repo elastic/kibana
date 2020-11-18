@@ -4,72 +4,74 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, useMemo } from 'react';
-import { EuiFormRow } from '@elastic/eui';
+import React, { useCallback, useMemo, useEffect } from 'react';
+import { BrowserField, BrowserFields } from '../../../../common/containers/source';
 import { FieldHook } from '../../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
 import { FieldComponent } from '../../../../common/components/autocomplete/field';
-import { IFieldType } from '../../../../../../../../src/plugins/data/common/index_patterns/fields';
-import { IIndexPattern } from '../../../../../../../../src/plugins/data/common/index_patterns';
 
 interface AutocompleteFieldProps {
   dataTestSubj: string;
   field: FieldHook;
   idAria: string;
-  indices: IIndexPattern;
+  browserFields: BrowserFields;
   isDisabled: boolean;
-  fieldType: string;
+  showOptional: boolean;
   placeholder?: string;
+  filterCallback: (arg: Partial<BrowserField>) => boolean;
 }
 
 export const AutocompleteField = ({
   dataTestSubj,
   field,
   idAria,
-  indices,
+  browserFields,
   isDisabled,
-  fieldType,
+  showOptional,
+  filterCallback,
   placeholder,
 }: AutocompleteFieldProps) => {
+  const { setErrors, validate } = field;
+
+  useEffect(() => {
+    validate();
+  }, [validate]);
+
+  const handleErrors = useCallback(
+    (error: string | null): void => {
+      const errors = error == null ? [] : [{ message: error }];
+      setErrors(errors);
+    },
+    [setErrors]
+  );
+
   const handleFieldChange = useCallback(
-    ([newField]: IFieldType[]): void => {
-      // TODO: Update onChange type in FieldComponent as newField can be undefined
-      field.setValue(newField?.name ?? '');
+    (newField: string | undefined): void => {
+      field.setValue(newField ?? '');
     },
     [field]
   );
 
-  const selectedField = useMemo(() => {
-    const existingField = (field.value as string) ?? '';
-    const [newSelectedField] = indices.fields.filter(
-      ({ name }) => existingField != null && existingField === name
-    );
-    return newSelectedField;
-  }, [field.value, indices]);
-
-  const fieldTypeFilter = useMemo(() => [fieldType], [fieldType]);
+  const selectedField = useMemo((): string => (field.value as string) ?? '', [field.value]);
 
   return (
-    <EuiFormRow
+    <FieldComponent
+      placeholder={placeholder ?? ''}
+      browserFields={browserFields}
+      selectedField={selectedField}
+      filterCallback={filterCallback}
+      isLoading={false}
+      isDisabled={isDisabled}
+      isClearable={false}
+      onError={handleErrors}
+      onChange={handleFieldChange}
       data-test-subj={dataTestSubj}
-      describedByIds={idAria ? [idAria] : undefined}
-      fullWidth
-      helpText={field.helpText}
-      label={field.label}
-      labelAppend={field.labelAppend}
-    >
-      <FieldComponent
-        placeholder={placeholder ?? ''}
-        indexPattern={indices}
-        selectedField={selectedField}
-        fieldTypeFilter={fieldTypeFilter}
-        isLoading={false}
-        isDisabled={isDisabled}
-        isClearable={false}
-        onChange={handleFieldChange}
-        data-test-subj={dataTestSubj}
-        aria-label={idAria}
-        fieldInputWidth={500}
-      />
-    </EuiFormRow>
+      aria-label={idAria}
+      fieldInputWidth={500}
+      dataTestSubj={dataTestSubj}
+      idAria={idAria}
+      rowLabel={field.label}
+      rowHelpText={field.helpText}
+      showOptional={showOptional}
+    />
   );
 };

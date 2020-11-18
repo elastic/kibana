@@ -65,6 +65,7 @@ export interface BrowserField {
   example: string | number | null;
   fields: Readonly<Record<string, Partial<BrowserField>>>;
   format: string;
+  esTypes: string[];
   indexes: string[];
   name: string;
   searchable: boolean;

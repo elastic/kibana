@@ -15,7 +15,16 @@ import {
   existsOperator,
   doesNotExistOperator,
 } from './operators';
-import { getOperators, checkEmptyValue, paramIsValid, getGenericComboBoxProps } from './helpers';
+import {
+  getOperators,
+  checkEmptyValue,
+  paramIsValid,
+  getGenericComboBoxProps,
+  getFilteredBrowserFields,
+  getSelectedFieldToBrowserField,
+} from './helpers';
+import { mockBrowserFields } from '../../containers/source/mock';
+import { BrowserField, getAllBrowserFields } from '../../containers/source';
 
 describe('helpers', () => {
   // @ts-ignore
@@ -258,6 +267,51 @@ describe('helpers', () => {
           },
         ],
       });
+    });
+  });
+
+  describe('#getFilteredBrowserFields', () => {
+    test('it filters browserfields by type', () => {
+      const allAreOfTypeKeyword = (field: Partial<BrowserField>) =>
+        field.esTypes != null ? field.esTypes.includes('keyword') : false;
+      const result = getFilteredBrowserFields(mockBrowserFields, allAreOfTypeKeyword);
+      const allAreKeyword = getAllBrowserFields(result).every(allAreOfTypeKeyword);
+
+      expect(allAreKeyword).toBeTruthy();
+    });
+
+    test('it filters browserfields by which index they belong to', () => {
+      const isInFilebeatIndex = (field: Partial<BrowserField>) =>
+        field.indexes != null ? field.indexes.includes('filebeat') : false;
+      const result = getFilteredBrowserFields(mockBrowserFields, isInFilebeatIndex);
+      const allAreFromFilebeat = getAllBrowserFields(result).every(isInFilebeatIndex);
+
+      expect(allAreFromFilebeat).toBeTruthy();
+    });
+  });
+
+  describe('#getSelectedFieldToBrowserField', () => {
+    test('it returns matching BrowserField', () => {
+      const result = getSelectedFieldToBrowserField('auditd.data.a0', mockBrowserFields);
+      const expected: Partial<BrowserField> = {
+        aggregatable: true,
+        category: 'auditd',
+        description: null,
+        esTypes: ['keyword'],
+        example: null,
+        format: '',
+        indexes: ['auditbeat'],
+        name: 'auditd.data.a0',
+        searchable: true,
+        type: 'string',
+      };
+      expect(result).toEqual(expected);
+    });
+
+    test('it returns undefined when no matching BrowserField found', () => {
+      const result = getSelectedFieldToBrowserField('blah', mockBrowserFields);
+
+      expect(result).toBeUndefined();
     });
   });
 });

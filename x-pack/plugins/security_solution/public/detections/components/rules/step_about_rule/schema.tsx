@@ -230,7 +230,6 @@ export const schema: FormSchema<AboutStepRule> = {
           'Choose timestamp field used when executing rule. Pick field with timestamp closest to ingest time (e.g. event.ingested).',
       }
     ),
-    labelAppend: OptionalFieldLabel,
   },
   tags: {
     type: FIELD_TYPES.COMBO_BOX,

@@ -9,11 +9,10 @@ import { mount } from 'enzyme';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 
-import {
-  fields,
-  getField,
-} from '../../../../../../../src/plugins/data/common/index_patterns/fields/fields.mocks';
+import * as i18n from './translations';
 import { FieldComponent } from './field';
+import { mockBrowserFields } from '../../containers/source/mock';
+import { BrowserField, getAllBrowserFields } from '../../containers/source';
 
 describe('FieldComponent', () => {
   test('it renders disabled if "isDisabled" is true', () => {
@@ -21,15 +20,12 @@ describe('FieldComponent', () => {
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <FieldComponent
           placeholder="Placeholder text"
-          indexPattern={{
-            id: '1234',
-            title: 'logstash-*',
-            fields,
-          }}
-          selectedField={getField('machine.os.raw')}
+          browserFields={mockBrowserFields}
+          selectedField={'agent.hostname'}
           isLoading={false}
           isClearable={false}
-          isDisabled={true}
+          isDisabled
+          dataTestSubj="testFieldComponent"
           onChange={jest.fn()}
         />
       </ThemeProvider>
@@ -38,6 +34,7 @@ describe('FieldComponent', () => {
     expect(
       wrapper.find(`[data-test-subj="fieldAutocompleteComboBox"] input`).prop('disabled')
     ).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="fieldAutocompleteOptionalLabel"]').exists()).toBeFalsy();
   });
 
   test('it renders loading if "isLoading" is true', () => {
@@ -45,25 +42,63 @@ describe('FieldComponent', () => {
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <FieldComponent
           placeholder="Placeholder text"
-          indexPattern={{
-            id: '1234',
-            title: 'logstash-*',
-            fields,
-          }}
-          selectedField={getField('machine.os.raw')}
-          isLoading={true}
+          browserFields={mockBrowserFields}
+          selectedField={'agent.hostname'}
           isClearable={false}
           isDisabled={false}
+          dataTestSubj="testFieldComponent"
           onChange={jest.fn()}
+          isLoading
         />
       </ThemeProvider>
     );
-    wrapper.find(`[data-test-subj="fieldAutocompleteComboBox"] button`).at(0).simulate('click');
+    wrapper.find('[data-test-subj="fieldAutocompleteComboBox"] button').at(0).simulate('click');
+
     expect(
       wrapper
         .find(`EuiComboBoxOptionsList[data-test-subj="fieldAutocompleteComboBox-optionsList"]`)
         .prop('isLoading')
     ).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="fieldAutocompleteOptionalLabel"]').exists()).toBeFalsy();
+  });
+
+  test('it renders optional label if "showOptional" is true', () => {
+    const wrapper = mount(
+      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+        <FieldComponent
+          placeholder="Placeholder text"
+          browserFields={mockBrowserFields}
+          selectedField={'agent.hostname'}
+          isClearable={false}
+          isDisabled={false}
+          isLoading={false}
+          dataTestSubj="testFieldComponent"
+          onChange={jest.fn()}
+          showOptional
+        />
+      </ThemeProvider>
+    );
+
+    expect(wrapper.find('[data-test-subj="fieldAutocompleteOptionalLabel"]').exists()).toBeTruthy();
+  });
+
+  test('it renders reset button if selected field does not match an option', () => {
+    const wrapper = mount(
+      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+        <FieldComponent
+          placeholder="Placeholder text"
+          browserFields={mockBrowserFields}
+          selectedField={'blah'}
+          isClearable={false}
+          isDisabled={false}
+          isLoading={false}
+          dataTestSubj="testFieldComponent"
+          onChange={jest.fn()}
+        />
+      </ThemeProvider>
+    );
+
+    expect(wrapper.find('[data-test-subj="fieldAutocompleteResetButton"]').exists()).toBeTruthy();
   });
 
   test('it allows user to clear values if "isClearable" is true', () => {
@@ -71,16 +106,13 @@ describe('FieldComponent', () => {
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <FieldComponent
           placeholder="Placeholder text"
-          indexPattern={{
-            id: '1234',
-            title: 'logstash-*',
-            fields,
-          }}
-          selectedField={getField('machine.os.raw')}
+          browserFields={mockBrowserFields}
+          selectedField={'agent.hostname'}
           isLoading={false}
-          isClearable={true}
           isDisabled={false}
+          dataTestSubj="testFieldComponent"
           onChange={jest.fn()}
+          isClearable
         />
       </ThemeProvider>
     );
@@ -97,15 +129,12 @@ describe('FieldComponent', () => {
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <FieldComponent
           placeholder="Placeholder text"
-          indexPattern={{
-            id: '1234',
-            title: 'logstash-*',
-            fields,
-          }}
-          selectedField={getField('machine.os.raw')}
+          browserFields={mockBrowserFields}
+          selectedField={'agent.hostname'}
           isLoading={false}
-          isClearable={false}
           isDisabled={false}
+          isClearable={false}
+          dataTestSubj="testFieldComponent"
           onChange={jest.fn()}
         />
       </ThemeProvider>
@@ -113,7 +142,7 @@ describe('FieldComponent', () => {
 
     expect(
       wrapper.find(`[data-test-subj="fieldAutocompleteComboBox"] EuiComboBoxPill`).at(0).text()
-    ).toEqual('machine.os.raw');
+    ).toEqual('agent.hostname');
   });
 
   test('it invokes "onChange" when option selected', () => {
@@ -122,15 +151,12 @@ describe('FieldComponent', () => {
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <FieldComponent
           placeholder="Placeholder text"
-          indexPattern={{
-            id: '1234',
-            title: 'logstash-*',
-            fields,
-          }}
-          selectedField={getField('machine.os.raw')}
+          browserFields={mockBrowserFields}
+          selectedField={'agent.hostname'}
           isLoading={false}
-          isClearable={false}
           isDisabled={false}
+          isClearable={false}
+          dataTestSubj="testFieldComponent"
           onChange={mockOnChange}
         />
       </ThemeProvider>
@@ -138,19 +164,84 @@ describe('FieldComponent', () => {
 
     ((wrapper.find(EuiComboBox).props() as unknown) as {
       onChange: (a: EuiComboBoxOptionOption[]) => void;
-    }).onChange([{ label: 'machine.os' }]);
+    }).onChange([{ label: 'destination.address' }]);
 
-    expect(mockOnChange).toHaveBeenCalledWith([
-      {
-        aggregatable: true,
-        count: 0,
-        esTypes: ['text'],
-        name: 'machine.os',
-        readFromDocValues: false,
-        scripted: false,
-        searchable: true,
-        type: 'string',
-      },
-    ]);
+    expect(mockOnChange).toHaveBeenCalledWith('destination.address');
+  });
+
+  test('it invokes "onError" when error exists', () => {
+    const mockOnError = jest.fn();
+    mount(
+      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+        <FieldComponent
+          placeholder="Placeholder text"
+          browserFields={mockBrowserFields}
+          selectedField={'blah'}
+          isLoading={false}
+          isDisabled={false}
+          isClearable={false}
+          dataTestSubj="testFieldComponent"
+          onError={mockOnError}
+          onChange={jest.fn()}
+        />
+      </ThemeProvider>
+    );
+
+    expect(mockOnError).toHaveBeenCalledWith(i18n.TIMESTAMP_OVERRIDE_ERROR('blah'));
+  });
+
+  test('it does not filter browserFields if no "filterCallback" is passed', () => {
+    const wrapper = mount(
+      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+        <FieldComponent
+          placeholder="Placeholder text"
+          browserFields={mockBrowserFields}
+          selectedField={'agent.hostname'}
+          isLoading={false}
+          isDisabled={false}
+          isClearable={false}
+          dataTestSubj="testFieldComponent"
+          onChange={jest.fn()}
+        />
+      </ThemeProvider>
+    );
+
+    const comboBoxOptions: EuiComboBoxOptionOption[] = wrapper
+      .find('[data-test-subj="fieldAutocompleteComboBox"]')
+      .at(0)
+      .prop('options');
+    const fields = comboBoxOptions.flatMap(({ options }) => options);
+    const mockFields = getAllBrowserFields(mockBrowserFields);
+    expect(fields.length).toEqual(mockFields.length);
+  });
+
+  test('it does filter browserFields if "filterCallback" is passed', () => {
+    const mockFilterByIndexes = (browserField: Partial<BrowserField>) => {
+      const indexes = ['filebeat', 'auditbeat'];
+      return indexes.every((ind) => (browserField.indexes ?? []).includes(ind));
+    };
+    const wrapper = mount(
+      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+        <FieldComponent
+          placeholder="Placeholder text"
+          browserFields={mockBrowserFields}
+          selectedField={'agent.hostname'}
+          isLoading={false}
+          isDisabled={false}
+          isClearable={false}
+          filterCallback={mockFilterByIndexes}
+          dataTestSubj="testFieldComponent"
+          onChange={jest.fn()}
+        />
+      </ThemeProvider>
+    );
+
+    const comboBoxOptions: EuiComboBoxOptionOption[] = wrapper
+      .find('[data-test-subj="fieldAutocompleteComboBox"]')
+      .at(0)
+      .prop('options');
+    const fields = comboBoxOptions.flatMap(({ options }) => options);
+    const mockFields = getAllBrowserFields(mockBrowserFields);
+    expect(fields.length).not.toEqual(mockFields.length);
   });
 });
