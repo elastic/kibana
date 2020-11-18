@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { first, take, bufferCount } from 'rxjs/operators';
+import { first, take, bufferCount, map } from 'rxjs/operators';
 import { loggingSystemMock } from '../../../../../src/core/server/mocks';
 import {
   WorkloadAggregation,
@@ -473,6 +473,41 @@ describe('Workload Statistics Aggregator', () => {
             session_cleanup: { count: 1, status: { idle: 1 } },
           },
         });
+        resolve();
+      }, reject);
+    });
+  });
+
+  test('recovery after errors occurrs at the next interval', async () => {
+    const refreshInterval = 1000;
+
+    const taskStore = taskStoreMock.create({});
+    const logger = loggingSystemMock.create().get();
+    const workloadAggregator = createWorkloadAggregator(
+      taskStore,
+      of(true),
+      refreshInterval,
+      3000,
+      logger
+    );
+
+    return new Promise((resolve, reject) => {
+      let errorWasThrowAt = 0;
+      taskStore.aggregate.mockImplementation(async () => {
+        if (errorWasThrowAt === 0) {
+          errorWasThrowAt = Date.now();
+          throw new Error(`Elasticsearch has gone poof`);
+        } else if (Date.now() - errorWasThrowAt < refreshInterval) {
+          reject(new Error(`Elasticsearch is still poof`));
+        }
+
+        return setTaskTypeCount(mockAggregatedResult(), 'alerting_telemetry', {
+          idle: 2,
+        });
+      });
+
+      workloadAggregator.pipe(take(2), bufferCount(2)).subscribe((results) => {
+        expect(results.length).toEqual(2);
         resolve();
       }, reject);
     });
