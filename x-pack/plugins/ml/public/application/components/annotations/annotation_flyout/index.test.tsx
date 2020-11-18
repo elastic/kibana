@@ -20,9 +20,13 @@ jest.mock('../../../util/dependency_cache', () => ({
   getToastNotifications: () => ({ addSuccess: jest.fn(), addDanger: jest.fn() }),
 }));
 
-const annotationUpdatesService = new AnnotationUpdatesService();
-
-const MlAnnotationUpdatesContextProvider = ({ children }: { children: React.ReactElement }) => {
+const MlAnnotationUpdatesContextProvider = ({
+  annotationUpdatesService,
+  children,
+}: {
+  annotationUpdatesService: AnnotationUpdatesService;
+  children: React.ReactElement;
+}) => {
   return (
     <MlAnnotationUpdatesContext.Provider value={annotationUpdatesService}>
       <IntlProvider>{children}</IntlProvider>
@@ -30,9 +34,9 @@ const MlAnnotationUpdatesContextProvider = ({ children }: { children: React.Reac
   );
 };
 
-// useObservable wraps the observable in a new component
 const ObservableComponent = (props: any) => {
-  const annotationProp = useObservable(annotationUpdatesService.isAnnotationInitialized$());
+  const { annotationUpdatesService } = props;
+  const annotationProp = useObservable(annotationUpdatesService!.isAnnotationInitialized$());
   if (annotationProp === undefined) {
     return null;
   }
@@ -46,14 +50,19 @@ const ObservableComponent = (props: any) => {
 };
 
 describe('AnnotationFlyout', () => {
+  let annotationUpdatesService: AnnotationUpdatesService | null = null;
+  beforeEach(() => {
+    annotationUpdatesService = new AnnotationUpdatesService();
+  });
+
   test('Update button is disabled with empty annotation', async () => {
     const annotation = mockAnnotations[1] as Annotation;
 
-    annotationUpdatesService.setValue(annotation);
+    annotationUpdatesService!.setValue(annotation);
 
     const { getByTestId } = render(
-      <MlAnnotationUpdatesContextProvider>
-        <ObservableComponent />
+      <MlAnnotationUpdatesContextProvider annotationUpdatesService={annotationUpdatesService!}>
+        <ObservableComponent annotationUpdatesService={annotationUpdatesService!} />
       </MlAnnotationUpdatesContextProvider>
     );
     const updateBtn = getByTestId('annotationFlyoutUpdateButton');
@@ -62,13 +71,11 @@ describe('AnnotationFlyout', () => {
 
   test('Error displayed and update button displayed if annotation text is longer than max chars', async () => {
     const annotation = mockAnnotations[2] as Annotation;
-    annotationUpdatesService.setValue(annotation);
-
-    // useObservable wraps the observable in a new component
+    annotationUpdatesService!.setValue(annotation);
 
     const { getByTestId } = render(
-      <MlAnnotationUpdatesContextProvider>
-        <ObservableComponent />
+      <MlAnnotationUpdatesContextProvider annotationUpdatesService={annotationUpdatesService!}>
+        <ObservableComponent annotationUpdatesService={annotationUpdatesService!} />
       </MlAnnotationUpdatesContextProvider>
     );
     const updateBtn = getByTestId('annotationFlyoutUpdateButton');
@@ -82,11 +89,11 @@ describe('AnnotationFlyout', () => {
   test('Flyout disappears when annotation is updated', async () => {
     const annotation = mockAnnotations[0] as Annotation;
 
-    annotationUpdatesService.setValue(annotation);
+    annotationUpdatesService!.setValue(annotation);
 
     const { getByTestId } = render(
-      <MlAnnotationUpdatesContextProvider>
-        <ObservableComponent />
+      <MlAnnotationUpdatesContextProvider annotationUpdatesService={annotationUpdatesService!}>
+        <ObservableComponent annotationUpdatesService={annotationUpdatesService!} />
       </MlAnnotationUpdatesContextProvider>
     );
     const updateBtn = getByTestId('annotationFlyoutUpdateButton');

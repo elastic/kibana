@@ -13,18 +13,23 @@ import {
   AnnotationUpdatesService,
 } from './annotations_service';
 describe('annotations_service', () => {
+  let annotationUpdatesService: AnnotationUpdatesService | null = null;
+
+  beforeEach(() => {
+    annotationUpdatesService = new AnnotationUpdatesService();
+  });
+
   test('annotationUpdatesService', () => {
-    const annotationUpdatesService = new AnnotationUpdatesService();
     const subscriber = jest.fn();
 
-    annotationUpdatesService.update$().subscribe(subscriber);
+    annotationUpdatesService!.update$().subscribe(subscriber);
 
     // the subscriber should have been triggered with the initial value of null
     expect(subscriber.mock.calls).toHaveLength(1);
     expect(subscriber.mock.calls[0][0]).toBe(null);
 
     const annotation = mockAnnotations[0] as Annotation;
-    annotationUpdatesService.setValue(annotation);
+    annotationUpdatesService!.setValue(annotation);
 
     // the subscriber should have been triggered with the updated annotation value
     expect(subscriber.mock.calls).toHaveLength(2);
