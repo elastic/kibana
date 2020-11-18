@@ -41,7 +41,7 @@ export const EmptyEngineOverview: React.FC = () => {
           <EuiTitle size="l">
             <h1>
               {i18n.translate('xpack.enterpriseSearch.appSearch.engine.overview.empty.heading', {
-                defaultMessage: 'Engine Setup',
+                defaultMessage: 'Engine setup',
               })}
             </h1>
           </EuiTitle>
@@ -50,7 +50,7 @@ export const EmptyEngineOverview: React.FC = () => {
           <EuiButton href={`${DOCS_PREFIX}/index.html`} target="_blank">
             {i18n.translate(
               'xpack.enterpriseSearch.appSearch.engine.overview.empty.headingAction',
-              { defaultMessage: 'View Documentation' }
+              { defaultMessage: 'View documentation' }
             )}
           </EuiButton>
         </EuiPageHeaderSection>
@@ -60,7 +60,7 @@ export const EmptyEngineOverview: React.FC = () => {
           <EuiTitle>
             <h2>
               {i18n.translate('xpack.enterpriseSearch.appSearch.engine.overview.empty.subheading', {
-                defaultMessage: 'Set up the “{engineName}” Engine',
+                defaultMessage: 'Setting up the “{engineName}” Engine',
                 values: { engineName },
               })}
             </h2>

@@ -42,7 +42,7 @@ describe('EngineOverview', () => {
     expect(actions.pollForOverviewMetrics).toHaveBeenCalledTimes(1);
   });
 
-  it('renders a loading component if async data is still loading ', () => {
+  it('renders a loading component if async data is still loading', () => {
     setMockValues({ ...values, dataLoading: true });
     const wrapper = shallow(<EngineOverview />);
     expect(wrapper.find(Loading)).toHaveLength(1);
