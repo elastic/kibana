@@ -166,7 +166,7 @@ export const PackagePoliciesPanel = ({ name, version }: PackagePoliciesPanelProp
         }),
         truncateText: true,
         render(updatedBy) {
-          return <Persona size="s" name={updatedBy} />;
+          return <Persona size="s" name={updatedBy} title={updatedBy} />;
         },
       },
       {

@@ -5,8 +5,10 @@
  */
 
 import { EuiAvatar, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
-import React, { memo, useCallback } from 'react';
+import React, { CSSProperties, memo, useCallback } from 'react';
 import { EuiAvatarProps } from '@elastic/eui/src/components/avatar/avatar';
+
+const MIN_WIDTH: CSSProperties = { minWidth: 0 };
 
 /**
  * Components shows a link for a given value along with a revision number to its right. The display
@@ -27,10 +29,11 @@ export const Persona = memo<EuiAvatarProps>(
       <EuiFlexGroup
         gutterSize="s"
         alignItems="baseline"
-        style={{ minWidth: 0 }}
+        style={MIN_WIDTH}
         className={className}
         data-test-subj={dataTestSubj}
         title={title}
+        responsive={false}
       >
         <EuiFlexItem grow={false}>
           <EuiAvatar name={name} data-test-subj={getTestId('avatar')} {...otherAvatarProps} />

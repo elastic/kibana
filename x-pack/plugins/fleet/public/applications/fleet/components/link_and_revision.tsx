@@ -6,8 +6,11 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { memo } from 'react';
+import React, { CSSProperties, memo } from 'react';
 import { EuiLinkProps } from '@elastic/eui/src/components/link/link';
+
+const MIN_WIDTH: CSSProperties = { minWidth: 0 };
+const NO_WRAP_WHITE_SPACE: CSSProperties = { whiteSpace: 'nowrap' };
 
 export type LinkAndRevisionProps = EuiLinkProps & {
   revision?: string | number;
@@ -21,13 +24,13 @@ export type LinkAndRevisionProps = EuiLinkProps & {
 export const LinkAndRevision = memo<LinkAndRevisionProps>(
   ({ revision, className, ...euiLinkProps }) => {
     return (
-      <EuiFlexGroup gutterSize="s" alignItems="baseline" style={{ minWidth: 0 }}>
+      <EuiFlexGroup gutterSize="s" alignItems="baseline" style={MIN_WIDTH} responsive={false}>
         <EuiFlexItem grow={false} className="eui-textTruncate">
           <EuiLink className={`eui-textTruncate ${className ?? ''}`} {...euiLinkProps} />
         </EuiFlexItem>
         {revision && (
           <EuiFlexItem grow={true}>
-            <EuiText color="subdued" size="xs" style={{ whiteSpace: 'nowrap' }}>
+            <EuiText color="subdued" size="xs" style={NO_WRAP_WHITE_SPACE}>
               <FormattedMessage
                 id="xpack.fleet.policyNameLink.revisionNumber"
                 defaultMessage="rev. {revNumber}"
