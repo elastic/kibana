@@ -33,6 +33,7 @@ import { Network } from './network';
 import { Overview } from './overview';
 import { Timelines } from './timelines';
 import { Management } from './management';
+import { LicensingPluginStart } from '../../licensing/public';
 
 export interface SetupPlugins {
   home?: HomePublicPluginSetup;
@@ -49,6 +50,7 @@ export interface StartPlugins {
   inspector: InspectorStart;
   ingestManager?: IngestManagerStart;
   lists?: ListsPluginStart;
+  licensing: LicensingPluginStart;
   newsfeed?: NewsfeedPublicPluginStart;
   triggersActionsUi: TriggersActionsStart;
   uiActions: UiActionsStart;
