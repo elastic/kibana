@@ -39,11 +39,6 @@ import { DataFrameAnalyticsList } from '../../../../data_frame_analytics/pages/a
 import { AccessDeniedPage } from '../access_denied_page';
 import { SharePluginStart } from '../../../../../../../../../src/plugins/share/public';
 import { SpacesPluginStart } from '../../../../../../../spaces/public';
-import {
-  AnomalyDetectionJobsListState,
-  getDefaultAnomalyDetectionJobsListState,
-} from '../../../../jobs/jobs_list/jobs';
-import { getMlGlobalServices } from '../../../../app';
 import { JobSpacesRepairFlyout } from '../../../../components/job_spaces_repair';
 import { getDefaultAnomalyDetectionJobsListState } from '../../../../jobs/jobs_list/jobs';
 import { getMlGlobalServices } from '../../../../app';
