@@ -147,7 +147,6 @@ export const Expressions: React.FC<Props> = (props) => {
       timeUnit: timeUnit ?? defaultExpression.timeUnit,
     });
     setAlertParams('criteria', exp);
-    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [setAlertParams, alertParams.criteria, timeSize, timeUnit]);
 
   const removeExpression = useCallback(
