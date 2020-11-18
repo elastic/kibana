@@ -31,6 +31,7 @@ import {
   EuiLink,
   htmlIdGenerator,
   EuiPortal,
+  EuiIcon,
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -55,6 +56,7 @@ export interface QueryStringInputProps {
   persistedLog?: PersistedLog;
   bubbleSubmitEvent?: boolean;
   placeholder?: string;
+  disableLanguageSwitcher?: boolean;
   languageSwitcherPopoverAnchorPosition?: PopoverAnchorPosition;
   onBlur?: () => void;
   onChange?: (query: Query) => void;
@@ -64,6 +66,7 @@ export interface QueryStringInputProps {
   size?: SuggestionsListSize;
   className?: string;
   isInvalid?: boolean;
+  iconType?: string;
 }
 
 interface Props extends QueryStringInputProps {
@@ -608,13 +611,17 @@ export default class QueryStringInputUI extends Component<Props, State> {
       'aria-owns': 'kbnTypeahead__items',
     };
     const ariaCombobox = { ...isSuggestionsVisible, role: 'combobox' };
-    const className = classNames(
+    const containerClassName = classNames(
       'euiFormControlLayout euiFormControlLayout--group kbnQueryBar__wrap',
       this.props.className
     );
+    const inputClassName = classNames(
+      'kbnQueryBar__textarea',
+      this.props.iconType ? 'kbnQueryBar__textarea--withIcon' : null
+    );
 
     return (
-      <div className={className}>
+      <div className={containerClassName}>
         {this.props.prepend}
         <EuiOutsideClickDetector onOutsideClick={this.onOutsideClick}>
           <div
@@ -647,7 +654,7 @@ export default class QueryStringInputUI extends Component<Props, State> {
                 onClick={this.onClickInput}
                 onBlur={this.onInputBlur}
                 onFocus={this.handleOnFocus}
-                className="kbnQueryBar__textarea"
+                className={inputClassName}
                 fullWidth
                 rows={1}
                 id={this.textareaId}
@@ -678,6 +685,17 @@ export default class QueryStringInputUI extends Component<Props, State> {
               >
                 {this.getQueryString()}
               </EuiTextArea>
+              {this.props.iconType ? (
+                <div className="euiFormControlLayoutIcons">
+                  <span>
+                    <EuiIcon
+                      className="euiFormControlLayoutCustomIcon__icon"
+                      aria-hidden="true"
+                      type="search"
+                    />
+                  </span>
+                </div>
+              ) : null}
             </div>
             <EuiPortal>
               <SuggestionsComponent
@@ -693,12 +711,13 @@ export default class QueryStringInputUI extends Component<Props, State> {
             </EuiPortal>
           </div>
         </EuiOutsideClickDetector>
-
-        <QueryLanguageSwitcher
-          language={this.props.query.language}
-          anchorPosition={this.props.languageSwitcherPopoverAnchorPosition}
-          onSelectLanguage={this.onSelectLanguage}
-        />
+        {this.props.disableLanguageSwitcher ? null : (
+          <QueryLanguageSwitcher
+            language={this.props.query.language}
+            anchorPosition={this.props.languageSwitcherPopoverAnchorPosition}
+            onSelectLanguage={this.onSelectLanguage}
+          />
+        )}
       </div>
     );
   }
