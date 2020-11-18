@@ -44,8 +44,21 @@ export function initPostCaseConfigure({
           fold(throwErrors(Boom.badRequest), identity)
         );
 
+        console.log('hello 111');
         const myCaseConfigure = await caseConfigureService.find({ client });
-
+        console.log('hello 222');
+        const myConnectorMappings = await connectorMappingsService.find({
+          client,
+          options: {
+            hasReference: {
+              type: CASE_CONFIGURE_SAVED_OBJECT,
+              name: `associated-${CASE_CONFIGURE_SAVED_OBJECT}`,
+              id: post.id,
+            },
+          },
+        });
+        console.log('myCaseConfigure', JSON.stringify(myCaseConfigure));
+        console.log('myConnectorMappings', JSON.stringify(myConnectorMappings));
         if (myCaseConfigure.saved_objects.length > 0) {
           await Promise.all(
             myCaseConfigure.saved_objects.map((cc) =>
@@ -69,36 +82,36 @@ export function initPostCaseConfigure({
           },
         });
 
-        const connectorMappings = connectorMappingsService.post({
-          client,
-          attributes: {
-            mappings: [
-              {
-                source: 'title',
-                target: 'summary',
-                action_type: 'overwrite',
-              },
-              {
-                source: 'description',
-                target: 'description',
-                action_type: 'overwrite',
-              },
-              {
-                source: 'comments',
-                target: '',
-                action_type: 'overwrite',
-              },
-            ],
-          },
-          references: [
-            {
-              type: CASE_CONFIGURE_SAVED_OBJECT,
-              name: `associated-${CASE_CONFIGURE_SAVED_OBJECT}`,
-              id: post.id,
-            },
-          ],
-        });
-        console.log('THE MAPPINGS?!', JSON.stringify(connectorMappings));
+        // const connectorMappings = await connectorMappingsService.post({
+        //   client,
+        //   attributes: {
+        //     mappings: [
+        //       {
+        //         source: 'title',
+        //         target: 'short_description',
+        //         action_type: 'overwrite',
+        //       },
+        //       {
+        //         source: 'description',
+        //         target: 'description',
+        //         action_type: 'overwrite',
+        //       },
+        //       {
+        //         source: 'comments',
+        //         target: 'comments',
+        //         action_type: 'overwrite',
+        //       },
+        //     ],
+        //   },
+        //   references: [
+        //     {
+        //       type: CASE_CONFIGURE_SAVED_OBJECT,
+        //       name: `associated-${CASE_CONFIGURE_SAVED_OBJECT}`,
+        //       id: post.id,
+        //     },
+        //   ],
+        // });
+        // console.log('THE MAPPINGS?!', JSON.stringify(connectorMappings));
 
         return response.ok({
           body: CaseConfigureResponseRt.encode({

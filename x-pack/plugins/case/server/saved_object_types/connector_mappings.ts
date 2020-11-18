@@ -14,14 +14,18 @@ export const caseConnectorMappingsSavedObjectType: SavedObjectsType = {
   namespaceType: 'single',
   mappings: {
     properties: {
-      source: {
-        type: 'keyword',
-      },
-      target: {
-        type: 'keyword',
-      },
-      actionType: {
-        type: 'keyword',
+      mappings: {
+        properties: {
+          source: {
+            type: 'keyword',
+          },
+          target: {
+            type: 'keyword',
+          },
+          action_type: {
+            type: 'keyword',
+          },
+        },
       },
     },
   },
