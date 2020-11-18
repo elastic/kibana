@@ -38,6 +38,8 @@ export function insertOrReplaceColumn(args: ColumnChange): IndexPatternLayer {
   return insertNewColumn(args);
 }
 
+// Insert a column into an empty ID. The field parameter is required when constructing
+// a field-based operation, but will cause the function to fail for any other type of operation.
 export function insertNewColumn({
   op,
   layer,
@@ -51,25 +53,34 @@ export function insertNewColumn({
     throw new Error('No suitable operation found for given parameters');
   }
 
-  const baseOptions = {
-    columns: layer.columns,
-    indexPattern,
-    previousColumn: layer.columns[columnId],
-  };
+  if (layer.columns[columnId]) {
+    throw new Error(`Can't insert a column with an ID that is already in use`);
+  }
+
+  const baseOptions = { indexPattern, previousColumn: layer.columns[columnId] };
 
   if (operationDefinition.input === 'none') {
+    if (field) {
+      throw new Error(`Can't create operation ${op} with the provided field ${field.name}`);
+    }
     const possibleOperation = operationDefinition.getPossibleOperation();
     const isBucketed = Boolean(possibleOperation.isBucketed);
     if (isBucketed) {
-      return addBucket(layer, operationDefinition.buildColumn(baseOptions), columnId);
+      return addBucket(layer, operationDefinition.buildColumn({ ...baseOptions, layer }), columnId);
     } else {
-      return addMetric(layer, operationDefinition.buildColumn(baseOptions), columnId);
+      return addMetric(layer, operationDefinition.buildColumn({ ...baseOptions, layer }), columnId);
     }
   }
 
   if (operationDefinition.input === 'fullReference') {
+    if (field) {
+      throw new Error(`Reference-based operations can't take a field as input when creating`);
+    }
     let tempLayer = { ...layer };
     const referenceIds = operationDefinition.requiredReferences.map((validation) => {
+      // TODO: This logic is too simple because it's not using fields. Once we have
+      // access to the operationSupportMatrix, we should validate the metadata against
+      // the possible fields
       const validOperations = Object.values(operationDefinitionMap).filter(({ type }) =>
         isOperationAllowedAsReference({ validation, operationType: type })
       );
@@ -123,7 +134,7 @@ export function insertNewColumn({
         tempLayer,
         operationDefinition.buildColumn({
           ...baseOptions,
-          columnOrder: layer.columnOrder,
+          layer: tempLayer,
           referenceIds,
         }),
         columnId
@@ -133,7 +144,7 @@ export function insertNewColumn({
         tempLayer,
         operationDefinition.buildColumn({
           ...baseOptions,
-          columnOrder: layer.columnOrder,
+          layer: tempLayer,
           referenceIds,
         }),
         columnId
@@ -153,9 +164,17 @@ export function insertNewColumn({
   }
   const isBucketed = Boolean(possibleOperation.isBucketed);
   if (isBucketed) {
-    return addBucket(layer, operationDefinition.buildColumn({ ...baseOptions, field }), columnId);
+    return addBucket(
+      layer,
+      operationDefinition.buildColumn({ ...baseOptions, layer, field }),
+      columnId
+    );
   } else {
-    return addMetric(layer, operationDefinition.buildColumn({ ...baseOptions, field }), columnId);
+    return addMetric(
+      layer,
+      operationDefinition.buildColumn({ ...baseOptions, layer, field }),
+      columnId
+    );
   }
 }
 
@@ -200,24 +219,25 @@ export function replaceColumn({
 
       const incompleteColumns = { ...(tempLayer.incompleteColumns || {}) };
       delete incompleteColumns[columnId];
+      const newColumns = {
+        ...tempLayer.columns,
+        [columnId]: operationDefinition.buildColumn({
+          ...baseOptions,
+          layer: tempLayer,
+          referenceIds,
+          previousColumn,
+        }),
+      };
       return {
         ...tempLayer,
-        columns: {
-          ...tempLayer.columns,
-          [columnId]: operationDefinition.buildColumn({
-            ...baseOptions,
-            columns: tempLayer.columns,
-            columnOrder: tempLayer.columnOrder,
-            referenceIds,
-            previousColumn,
-          }),
-        },
+        columnOrder: getColumnOrder({ ...tempLayer, columns: newColumns }),
+        columns: newColumns,
         incompleteColumns,
       };
     }
 
     if (operationDefinition.input === 'none') {
-      const newColumn = operationDefinition.buildColumn(baseOptions);
+      const newColumn = operationDefinition.buildColumn({ ...baseOptions, layer: tempLayer });
       if (previousColumn.customLabel) {
         newColumn.customLabel = true;
         newColumn.label = previousColumn.label;
@@ -235,7 +255,7 @@ export function replaceColumn({
       throw new Error(`Invariant error: ${operationDefinition.type} operation requires field`);
     }
 
-    const newColumn = operationDefinition.buildColumn({ ...baseOptions, field });
+    const newColumn = operationDefinition.buildColumn({ ...baseOptions, layer: tempLayer, field });
 
     if (previousColumn.customLabel) {
       newColumn.customLabel = true;
@@ -426,12 +446,28 @@ export function deleteColumn({
 }
 
 export function getColumnOrder(layer: IndexPatternLayer): string[] {
-  const [aggregations, metrics] = _.partition(
+  const [direct, referenceBased] = _.partition(
     Object.entries(layer.columns),
-    ([id, col]) => col.isBucketed
+    ([id, col]) => operationDefinitionMap[col.operationType].input !== 'fullReference'
   );
+  // If a reference has another reference as input, put it last in sort order
+  referenceBased.sort(([idA, a], [idB, b]) => {
+    // @ts-expect-error not statically analyzed
+    if ('references' in a && a.references.includes(idB)) {
+      return 1;
+    }
+    // @ts-expect-error not statically analyzed
+    if ('references' in b && b.references.includes(idA)) {
+      return -1;
+    }
+    return 0;
+  });
+  const [aggregations, metrics] = _.partition(direct, ([, col]) => col.isBucketed);
 
-  return aggregations.map(([id]) => id).concat(metrics.map(([id]) => id));
+  return aggregations
+    .map(([id]) => id)
+    .concat(metrics.map(([id]) => id))
+    .concat(referenceBased.map(([id]) => id));
 }
 
 /**

@@ -1400,6 +1400,60 @@ describe('state_helpers', () => {
         })
       ).toEqual(['col1', 'col3', 'col2']);
     });
+
+    it('should correctly sort references to other references', () => {
+      expect(
+        getColumnOrder({
+          columnOrder: [],
+          indexPatternId: '',
+          columns: {
+            bucket: {
+              label: 'Top values of category',
+              dataType: 'string',
+              isBucketed: true,
+
+              // Private
+              operationType: 'terms',
+              sourceField: 'category',
+              params: {
+                size: 5,
+                orderBy: {
+                  type: 'alphabetical',
+                },
+                orderDirection: 'asc',
+              },
+            },
+            metric: {
+              label: 'Average of bytes',
+              dataType: 'number',
+              isBucketed: false,
+
+              // Private
+              operationType: 'avg',
+              sourceField: 'bytes',
+            },
+            ref2: {
+              label: 'Ref2',
+              dataType: 'number',
+              isBucketed: false,
+
+              // @ts-expect-error only for testing
+              operationType: 'testReference',
+              references: ['ref1'],
+            },
+            ref1: {
+              label: 'Ref',
+              dataType: 'number',
+              isBucketed: false,
+
+              // @ts-expect-error only for testing
+              operationType: 'testReference',
+              references: ['bucket'],
+            },
+          },
+        })
+      ).toEqual(['bucket', 'metric', 'ref1', 'ref2']);
+    });
   });
 
   describe('updateLayerIndexPattern', () => {

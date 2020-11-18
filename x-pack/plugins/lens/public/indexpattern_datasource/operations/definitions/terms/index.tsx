@@ -82,26 +82,16 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
         (!column.params.otherBucket || !newIndexPattern.hasRestrictions)
     );
   },
-  buildColumn({ columns, field, indexPattern }) {
-    const existingMetricColumn = Object.entries(columns)
+  buildColumn({ layer, field, indexPattern }) {
+    const existingMetricColumn = Object.entries(layer.columns)
       .filter(
-        ([columnId, column]) =>
-          column &&
-          !column.isBucketed &&
-          !isReferenced(
-            // Fake layer, but works with real columns
-            {
-              columns,
-              columnOrder: [],
-              indexPatternId: '',
-            },
-            columnId
-          )
+        ([columnId, column]) => column && !column.isBucketed && !isReferenced(layer, columnId)
       )
       .map(([id]) => id)[0];
 
-    const previousBucketsLength = Object.values(columns).filter((col) => col && col.isBucketed)
-      .length;
+    const previousBucketsLength = Object.values(layer.columns).filter(
+      (col) => col && col.isBucketed
+    ).length;
 
     return {
       label: ofName(field.displayName),
