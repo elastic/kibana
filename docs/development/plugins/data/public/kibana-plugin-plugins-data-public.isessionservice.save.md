@@ -9,5 +9,5 @@ Saves a session
 <b>Signature:</b>
 
 ```typescript
-save: (name: string, url: string) => Promise<any>;
+save: (name: string, url: string) => Promise<SavedObject<BackgroundSessionSavedObjectAttributes>>;
 ```

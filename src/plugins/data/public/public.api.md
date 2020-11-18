@@ -69,10 +69,12 @@ import { RequestAdapter } from 'src/plugins/inspector/common';
 import { RequestStatistics } from 'src/plugins/inspector/common';
 import { Required } from '@kbn/utility-types';
 import * as Rx from 'rxjs';
-import { SavedObject } from 'src/core/server';
-import { SavedObject as SavedObject_2 } from 'src/core/public';
+import { SavedObject } from 'kibana/server';
+import { SavedObject as SavedObject_2 } from 'src/core/server';
+import { SavedObject as SavedObject_3 } from 'src/core/public';
 import { SavedObjectReference } from 'src/core/types';
 import { SavedObjectsClientContract } from 'src/core/public';
+import { SavedObjectsFindResponse } from 'kibana/server';
 import { Search } from '@elastic/elasticsearch/api/requestParams';
 import { SearchResponse } from 'elasticsearch';
 import { SerializedFieldFormat as SerializedFieldFormat_2 } from 'src/plugins/expressions/common';
@@ -1388,7 +1390,7 @@ export class IndexPatternsService {
     // Warning: (ae-forgotten-export) The symbol "IndexPatternSavedObjectAttrs" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
-    getCache: () => Promise<SavedObject<IndexPatternSavedObjectAttrs>[] | null | undefined>;
+    getCache: () => Promise<SavedObject_2<IndexPatternSavedObjectAttrs>[] | null | undefined>;
     getDefault: () => Promise<IndexPattern | null>;
     getFieldsForIndexPattern: (indexPattern: IndexPattern | IndexPatternSpec, options?: GetFieldsOptions | undefined) => Promise<any>;
     // Warning: (ae-forgotten-export) The symbol "GetFieldsOptions" needs to be exported by the entry point index.d.ts
@@ -1400,7 +1402,7 @@ export class IndexPatternsService {
     }>>;
     getTitles: (refresh?: boolean) => Promise<string[]>;
     refreshFields: (indexPattern: IndexPattern) => Promise<void>;
-    savedObjectToSpec: (savedObject: SavedObject<IndexPatternAttributes>) => IndexPatternSpec;
+    savedObjectToSpec: (savedObject: SavedObject_2<IndexPatternAttributes>) => IndexPatternSpec;
     setDefault: (id: string, force?: boolean) => Promise<void>;
     updateSavedObject(indexPattern: IndexPattern, saveAttempts?: number, ignoreErrors?: boolean): Promise<void | Error>;
 }
@@ -1501,16 +1503,16 @@ export interface ISessionService {
     clear: () => void;
     delete: (sessionId: string) => Promise<any>;
     // Warning: (ae-forgotten-export) The symbol "SearchSessionFindOptions" needs to be exported by the entry point index.d.ts
-    find: (options: SearchSessionFindOptions) => Promise<any>;
-    get: (sessionId: string) => Promise<any>;
+    find: (options: SearchSessionFindOptions) => Promise<SavedObjectsFindResponse<BackgroundSessionSavedObjectAttributes>>;
+    get: (sessionId: string) => Promise<SavedObject<BackgroundSessionSavedObjectAttributes>>;
     getSession$: () => Observable<string | undefined>;
     getSessionId: () => string | undefined;
     isRestore: () => boolean;
     isStored: () => boolean;
-    restore: (sessionId: string) => Promise<any>;
-    save: (name: string, url: string) => Promise<any>;
-    start: () => string;
     // Warning: (ae-forgotten-export) The symbol "BackgroundSessionSavedObjectAttributes" needs to be exported by the entry point index.d.ts
+    restore: (sessionId: string) => Promise<SavedObject<BackgroundSessionSavedObjectAttributes>>;
+    save: (name: string, url: string) => Promise<SavedObject<BackgroundSessionSavedObjectAttributes>>;
+    start: () => string;
     update: (sessionId: string, attributes: Partial<BackgroundSessionSavedObjectAttributes>) => Promise<any>;
 }
 

@@ -9,5 +9,5 @@ Gets a list of saved sessions
 <b>Signature:</b>
 
 ```typescript
-find: (options: SearchSessionFindOptions) => Promise<any>;
+find: (options: SearchSessionFindOptions) => Promise<SavedObjectsFindResponse<BackgroundSessionSavedObjectAttributes>>;
 ```

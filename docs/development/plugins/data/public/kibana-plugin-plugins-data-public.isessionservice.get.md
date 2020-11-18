@@ -9,5 +9,5 @@ Gets a saved session
 <b>Signature:</b>
 
 ```typescript
-get: (sessionId: string) => Promise<any>;
+get: (sessionId: string) => Promise<SavedObject<BackgroundSessionSavedObjectAttributes>>;
 ```

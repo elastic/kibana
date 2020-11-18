@@ -9,5 +9,5 @@ Restores existing session
 <b>Signature:</b>
 
 ```typescript
-restore: (sessionId: string) => Promise<any>;
+restore: (sessionId: string) => Promise<SavedObject<BackgroundSessionSavedObjectAttributes>>;
 ```
