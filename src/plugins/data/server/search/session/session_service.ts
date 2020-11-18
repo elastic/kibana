@@ -66,7 +66,7 @@ export class BackgroundSessionService {
       name,
       created = new Date().toISOString(),
       expires = new Date(Date.now() + DEFAULT_EXPIRATION).toISOString(),
-      status = BackgroundSessionStatus.INCOMPLETE,
+      status = BackgroundSessionStatus.IN_PROGRESS,
       initialState = {},
       restoreState = {},
     }: Partial<BackgroundSessionSavedObjectAttributes>,

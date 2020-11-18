@@ -85,7 +85,7 @@ export interface ISessionService {
   /**
    * Deletes a session
    */
-  delete: (sessionId: string) => Promise<any>;
+  delete: (sessionId: string) => Promise<void>;
 }
 
 export interface BackgroundSessionSavedObjectAttributes {

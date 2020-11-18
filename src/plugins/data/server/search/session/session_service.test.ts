@@ -143,7 +143,7 @@ describe('BackgroundSessionService', () => {
           expires,
           initialState: {},
           restoreState: {},
-          status: BackgroundSessionStatus.INCOMPLETE,
+          status: BackgroundSessionStatus.IN_PROGRESS,
           idMapping: { [requestHash]: searchId },
         },
         { id: sessionId }
