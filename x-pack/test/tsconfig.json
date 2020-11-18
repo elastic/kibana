@@ -3,7 +3,7 @@
   "compilerOptions": {
     // overhead is too significant
     "incremental": false,
-    "types": ["mocha", "node", "flot"]
+    "types": ["mocha", "node", "flot", "@kbn/test/types/ftr_globals"]
   },
   "include": ["**/*", "../typings/**/*"],
   "exclude": ["../typings/jest.d.ts"],

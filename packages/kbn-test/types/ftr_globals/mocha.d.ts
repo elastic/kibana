@@ -19,27 +19,12 @@
 
 import { Suite } from 'mocha';
 
-type Tags =
-  | 'ciGroup1'
-  | 'ciGroup2'
-  | 'ciGroup3'
-  | 'ciGroup4'
-  | 'ciGroup5'
-  | 'ciGroup6'
-  | 'ciGroup7'
-  | 'ciGroup8'
-  | 'ciGroup9'
-  | 'ciGroup10'
-  | 'ciGroup11'
-  | 'ciGroup12';
-
 // We need to use the namespace here to match the Mocha definition
 declare module 'mocha' {
   interface Suite {
     /**
      * Assign tags to the test suite to determine in which CI job it should be run.
      */
-    tags<T extends Tags>(tags: T | T[]): void;
-    tags<T extends string>(tags: T | T[]): void;
+    tags(tags: string[] | string): void;
   }
 }

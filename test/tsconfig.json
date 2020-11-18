@@ -2,7 +2,7 @@
   "extends": "../tsconfig.base.json",
   "compilerOptions": {
     "tsBuildInfoFile": "../build/tsbuildinfo/test",
-    "types": ["node", "mocha", "flot"]
+    "types": ["node", "mocha", "flot", "@kbn/test/types/ftr_globals"]
   },
   "include": ["**/*", "../typings/elastic__node_crypto.d.ts", "typings/**/*"],
   "exclude": ["plugin_functional/plugins/**/*", "interpreter_functional/plugins/**/*"],

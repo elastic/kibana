@@ -23,8 +23,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     'user.username,user.id,host.ip,user_agent.name,kubernetes.pod.uuid,url.domain,container.id,service.node.name';
 
   describe('Ranges', function () {
-    this.tags();
-
     const url = format({
       pathname: `/api/apm/correlations/ranges`,
       query: { start, end, fieldNames },
