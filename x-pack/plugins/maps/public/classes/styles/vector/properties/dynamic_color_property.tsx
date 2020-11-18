@@ -17,7 +17,11 @@ import {
   // @ts-expect-error
 } from '../components/color/color_stops_utils';
 import { BreakedLegend } from '../components/legend/breaked_legend';
-import { ColorDynamicOptions, OrdinalColorStop } from '../../../../../common/descriptor_types';
+import {
+  ColorDynamicOptions,
+  OrdinalColorStop,
+  StylePropertyField,
+} from '../../../../../common/descriptor_types';
 import { LegendProps } from './style_property';
 
 const EMPTY_STOPS = { stops: [], defaultColor: null };

@@ -195,6 +195,7 @@ export class VectorStyle implements IVectorStyle {
       return !matchingField;
     });
 
+    console.log('inv', invalidStyleProps, previousFields, currentFields);
     let hasChanges = false;
     for (let i = 0; i < previousFields.length; i++) {
       const previousField = previousFields[i];
@@ -203,18 +204,24 @@ export class VectorStyle implements IVectorStyle {
         continue;
       }
 
-      invalidStyleProps.forEach((invalidStyleProp) => {
-        let newFieldDescriptor: StylePropertyField;
+      // invalidStyleProps.forEach(async (invalidStyleProp) => {
+      for (let j = 0; j < invalidStyleProps.length; j++) {
+        const invalidStyleProp = invalidStyleProps[j];
+        let newFieldDescriptor: StylePropertyField | undefined;
+
+        console.log('----------is com', invalidStyleProp, currentField, previousField);
         const isFieldDataTypeCompatible = styleFieldsHelper.isFieldDataTypeCompatibleWithStyleType(
           currentField,
           invalidStyleProp.getStyleName()
         );
+        console.log('is compatible', isFieldDataTypeCompatible);
         if (isFieldDataTypeCompatible) {
-          newFieldDescriptor = invalidStyleProp.rectifyFieldDescriptor(currentField, {
+          newFieldDescriptor = await invalidStyleProp.rectifyFieldDescriptor(currentField, {
             origin: previousField.getOrigin(),
             name: previousField.getName(),
           });
 
+          console.log('nw', newFieldDescriptor);
           if (newFieldDescriptor) {
             hasChanges = true;
           }
@@ -222,9 +229,11 @@ export class VectorStyle implements IVectorStyle {
 
         const originalStyleProp = originalProperties[invalidStyleProp.getStyleName()];
         originalStyleProp!.options!.field = newFieldDescriptor;
-      });
+      }
+      // });
     }
 
+    // Still run correction to revert invalid props to static styling, if necessary
     return VectorStyle.getDescriptorWithDeletedStyleProps(
       currentFields,
       styleFieldsHelper,
@@ -397,30 +406,31 @@ export class VectorStyle implements IVectorStyle {
    * can then use to update store state via dispatch.
    */
   async getDescriptorWithUpdatedStyleProps(
-    nextFields: IESAggField[],
+    currentFields: IESAggField[],
     mapColors: string[],
-    oldFields: IESAggField[]
+    previousFields: IESAggField[]
   ) {
-    const styleFieldsHelper = await createStyleFieldsHelper(nextFields);
+    const styleFieldsHelper = await createStyleFieldsHelper(currentFields);
     const originalProperties = this.getRawProperties();
     const dynamicStyleProperties: DynamicStyleProperty = this.getAllStyleProperties().filter((p) =>
       p.isDynamic()
     ) as DynamicStyleProperty;
 
-    if (oldFields.length === nextFields.length) {
+    console.log(previousFields, currentFields);
+    if (previousFields.length === currentFields.length) {
       // Change in metrics
       return await VectorStyle.getDescriptorWithUpdatedFields(
-        nextFields,
+        currentFields,
         styleFieldsHelper,
         originalProperties,
-        oldFields,
+        previousFields,
         mapColors,
         this.isTimeAware(),
         dynamicStyleProperties
       );
     } else {
       return await VectorStyle.getDescriptorWithDeletedStyleProps(
-        nextFields,
+        currentFields,
         styleFieldsHelper,
         originalProperties,
         mapColors,
