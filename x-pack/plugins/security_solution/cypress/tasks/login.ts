@@ -7,6 +7,7 @@
 import * as yaml from 'js-yaml';
 import Url, { UrlObject } from 'url';
 
+import { ROLES } from '../../common/test';
 import { TIMELINE_FLYOUT_BODY } from '../screens/timeline';
 
 /**
@@ -43,28 +44,6 @@ const ELASTICSEARCH_PASSWORD = 'ELASTICSEARCH_PASSWORD';
  * The Kibana server endpoint used for authentication
  */
 const LOGIN_API_ENDPOINT = '/internal/security/login';
-
-// https://basarat.gitbook.io/typescript/type-system/literal-types
-/** Utility function to create a K:V from a list of strings */
-const strEnum = <T extends string>(o: T[]): { [K in T]: K } => {
-  return o.reduce((res, key) => {
-    res[key] = key;
-    return res;
-  }, Object.create(null));
-};
-
-// For the source of these roles please consult the PR these were introduced https://github.com/elastic/kibana/pull/81866#issue-511165754
-export const ROLES = strEnum([
-  't1_analyst',
-  't2_analyst',
-  'hunter',
-  'rule_author',
-  'soc_manager',
-  'platform_engineer',
-  'detections_admin',
-]);
-
-export type ROLES = keyof typeof ROLES;
 
 /**
  * cy.visit will default to the baseUrl which uses the default kibana test user

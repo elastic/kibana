@@ -20,7 +20,7 @@ import * as socManagerRole from '../../../../plugins/security_solution/server/li
 import * as platformEngineerRole from '../../../../plugins/security_solution/server/lib/detection_engine/scripts/roles_users/platform_engineer/detections_role.json';
 import * as detectionsAdminRole from '../../../../plugins/security_solution/server/lib/detection_engine/scripts/roles_users/detections_admin/detections_role.json';
 
-import { ROLES } from '../../../../plugins/security_solution/cypress/tasks/login';
+import { ROLES } from '../../../../plugins/security_solution/common/test';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 export const createUserAndRole = async (

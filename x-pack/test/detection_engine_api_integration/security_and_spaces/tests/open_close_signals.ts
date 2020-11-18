@@ -26,7 +26,7 @@ import {
   getAllSignals,
 } from '../../utils';
 import { createUserAndRole } from '../roles_users_utils';
-import { ROLES } from '../../../../plugins/security_solution/cypress/tasks/login';
+import { ROLES } from '../../../../plugins/security_solution/common/test';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {

@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { deleteRoleAndUser, loginAndWaitForPageWithoutDateRange, ROLES } from '../tasks/login';
+import { ROLES } from '../../common/test';
+import { deleteRoleAndUser, loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 import { DETECTIONS_URL } from '../urls/navigation';
 import {
   waitForAlertsPanelToBeLoaded,
