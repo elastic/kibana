@@ -171,6 +171,8 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
 
   const appStateHandler = useCallback(
     (action: string, payload?: any) => {
+      const isInitUpdate = appState?.mlTimeSeriesExplorer === undefined;
+
       const mlTimeSeriesExplorer =
         appState?.mlTimeSeriesExplorer !== undefined ? { ...appState.mlTimeSeriesExplorer } : {};
 
@@ -204,7 +206,7 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
           break;
       }
 
-      setAppState('mlTimeSeriesExplorer', mlTimeSeriesExplorer);
+      setAppState('mlTimeSeriesExplorer', mlTimeSeriesExplorer, isInitUpdate);
     },
     [JSON.stringify(appState?.mlTimeSeriesExplorer), setAppState]
   );

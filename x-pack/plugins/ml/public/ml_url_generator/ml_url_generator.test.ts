@@ -87,7 +87,7 @@ describe('MlUrlGenerator', () => {
           },
         });
         expect(url).toBe(
-          "/app/ml/explorer?_g=(ml:(jobIds:!(fq_single_1)),refreshInterval:(pause:!f,value:0),time:(from:'2019-02-07T00:00:00.000Z',mode:absolute,to:'2020-08-13T17:15:00.000Z'))&_a=(mlExplorerFilter:(),mlExplorerSwimlane:(viewByFromPage:2,viewByPerPage:20),query:(analyze_wildcard:!t,query:'*'))"
+          "/app/ml/explorer?_g=(ml:(jobIds:!(fq_single_1)),refreshInterval:(pause:!f,value:0),time:(from:'2019-02-07T00:00:00.000Z',mode:absolute,to:'2020-08-13T17:15:00.000Z'))&_a=(explorer:(mlExplorerFilter:(),mlExplorerSwimlane:(viewByFromPage:2,viewByPerPage:20),query:(analyze_wildcard:!t,query:'*')))"
         );
       });
       it('should generate valid URL for the Anomaly Explorer page for multiple jobIds', async () => {
@@ -103,7 +103,7 @@ describe('MlUrlGenerator', () => {
           },
         });
         expect(url).toBe(
-          "/app/ml/explorer?_g=(ml:(jobIds:!(fq_single_1,logs_categorization_1)),time:(from:'2019-02-07T00:00:00.000Z',mode:absolute,to:'2020-08-13T17:15:00.000Z'))&_a=(mlExplorerFilter:(),mlExplorerSwimlane:())"
+          "/app/ml/explorer?_g=(ml:(jobIds:!(fq_single_1,logs_categorization_1)),time:(from:'2019-02-07T00:00:00.000Z',mode:absolute,to:'2020-08-13T17:15:00.000Z'))&_a=(explorer:(mlExplorerFilter:(),mlExplorerSwimlane:()))"
         );
       });
     });

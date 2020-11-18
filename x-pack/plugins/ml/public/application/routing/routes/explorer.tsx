@@ -22,7 +22,6 @@ import { useSelectedCells } from '../../explorer/hooks/use_selected_cells';
 import { mlJobService } from '../../services/job_service';
 import { ml } from '../../services/ml_api_service';
 import { useExplorerData } from '../../explorer/actions';
-import { ExplorerAppState } from '../../../../common/types/ml_url_generator';
 import { explorerService } from '../../explorer/explorer_dashboard_service';
 import { getDateFormatTz } from '../../explorer/explorer_utils';
 import { useJobSelection } from '../../components/job_selector/use_job_selection';
@@ -34,6 +33,7 @@ import { getBreadcrumbWithUrlForApp } from '../breadcrumbs';
 import { useTimefilter } from '../../contexts/kibana';
 import { isViewBySwimLaneData } from '../../explorer/swimlane_container';
 import { JOB_ID } from '../../../../common/constants/anomalies';
+import { useExplorerUrlState } from '../../explorer/hooks/use_explorer_url_state';
 
 export const explorerRouteFactory = (
   navigateToPath: NavigateToPath,
@@ -72,7 +72,8 @@ interface ExplorerUrlStateManagerProps {
 }
 
 const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTimeRange }) => {
-  const [appState, setAppState] = useUrlState('_a');
+  const [explorerUrlState, setExplorerUrlState] = useExplorerUrlState();
+
   const [globalState, setGlobalState] = useUrlState('_g');
   const [lastRefresh, setLastRefresh] = useState(0);
   const [stoppedPartitions, setStoppedPartitions] = useState<string[] | undefined>();
@@ -151,22 +152,22 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
   }, [JSON.stringify(jobIds)]);
 
   useEffect(() => {
-    const viewByFieldName = appState?.mlExplorerSwimlane?.viewByFieldName;
+    const viewByFieldName = explorerUrlState?.mlExplorerSwimlane?.viewByFieldName;
     if (viewByFieldName !== undefined) {
       explorerService.setViewBySwimlaneFieldName(viewByFieldName);
     }
 
-    const filterData = appState?.mlExplorerFilter;
+    const filterData = explorerUrlState?.mlExplorerFilter;
     if (filterData !== undefined) {
       explorerService.setFilterData(filterData);
     }
 
-    const viewByPerPage = (appState as ExplorerAppState)?.mlExplorerSwimlane?.viewByPerPage;
+    const viewByPerPage = explorerUrlState?.mlExplorerSwimlane?.viewByPerPage;
     if (viewByPerPage) {
       explorerService.setViewByPerPage(viewByPerPage);
     }
 
-    const viewByFromPage = (appState as ExplorerAppState)?.mlExplorerSwimlane?.viewByFromPage;
+    const viewByFromPage = explorerUrlState?.mlExplorerSwimlane?.viewByFromPage;
     if (viewByFromPage) {
       explorerService.setViewByFromPage(viewByFromPage);
     }
@@ -180,12 +181,12 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
   }, [explorerData]);
 
   const explorerAppState = useObservable(explorerService.appState$);
+
+  /** Sync URL state with {@link explorerService} state */
   useEffect(() => {
-    if (
-      explorerAppState !== undefined &&
-      explorerAppState.mlExplorerSwimlane.viewByFieldName !== undefined
-    ) {
-      setAppState(explorerAppState);
+    const replaceState = explorerUrlState?.mlExplorerSwimlane?.viewByFieldName === undefined;
+    if (explorerAppState?.mlExplorerSwimlane?.viewByFieldName !== undefined) {
+      setExplorerUrlState(explorerAppState, replaceState);
     }
   }, [explorerAppState]);
 
@@ -194,7 +195,7 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
   const [tableInterval] = useTableInterval();
   const [tableSeverity] = useTableSeverity();
 
-  const [selectedCells, setSelectedCells] = useSelectedCells(appState, setAppState);
+  const [selectedCells, setSelectedCells] = useSelectedCells(explorerUrlState, setExplorerUrlState);
 
   useEffect(() => {
     explorerService.setSelectedCells(selectedCells);

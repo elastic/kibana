@@ -81,6 +81,16 @@ export interface ExplorerAppState {
     queryString?: string;
   };
   query?: any;
+  mlShowCharts?: boolean;
+  mlSelectInterval?: {
+    display: string;
+    val: string;
+  };
+  mlSelectSeverity?: {
+    val: number;
+    display: string;
+    color: string;
+  };
 }
 export interface ExplorerGlobalState {
   ml: { jobIds: JobId[] };

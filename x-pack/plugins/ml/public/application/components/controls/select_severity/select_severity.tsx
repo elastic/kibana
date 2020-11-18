@@ -7,14 +7,15 @@
 /*
  * React component for rendering a select element with threshold levels.
  */
-import React, { Fragment, FC } from 'react';
+import React, { Fragment, FC, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { EuiHealth, EuiSpacer, EuiSuperSelect, EuiText } from '@elastic/eui';
 
 import { getSeverityColor } from '../../../../../common/util/anomaly_utils';
-import { useUrlState } from '../../../util/url_state';
+import { useExplorerUrlState } from '../../../explorer/hooks/use_explorer_url_state';
+import { ExplorerAppState } from '../../../../../common/types/ml_url_generator';
 
 const warningLabel = i18n.translate('xpack.ml.controls.selectSeverity.warningLabel', {
   defaultMessage: 'warning',
@@ -36,11 +37,7 @@ const optionsMap = {
   [criticalLabel]: 75,
 };
 
-interface TableSeverity {
-  val: number;
-  display: string;
-  color: string;
-}
+type TableSeverity = Exclude<ExplorerAppState['mlSelectSeverity'], undefined>;
 
 export const SEVERITY_OPTIONS: TableSeverity[] = [
   {
@@ -78,15 +75,19 @@ function optionValueToThreshold(value: number) {
 }
 
 const TABLE_SEVERITY_DEFAULT = SEVERITY_OPTIONS[0];
-const TABLE_SEVERITY_APP_STATE_NAME = 'mlSelectSeverity';
 
-export const useTableSeverity = () => {
-  const [appState, setAppState] = useUrlState('_a');
+export const useTableSeverity = (): [TableSeverity, (v: TableSeverity) => void] => {
+  const [explorerUrlState, setExplorerUrlState] = useExplorerUrlState();
 
-  return [
-    (appState && appState[TABLE_SEVERITY_APP_STATE_NAME]) || TABLE_SEVERITY_DEFAULT,
-    (d: TableSeverity) => setAppState(TABLE_SEVERITY_APP_STATE_NAME, d),
-  ];
+  const tableSeverity = explorerUrlState?.mlSelectSeverity ?? TABLE_SEVERITY_DEFAULT;
+  const setTableSeverity = useCallback(
+    (v: TableSeverity) => {
+      setExplorerUrlState({ mlSelectSeverity: v });
+    },
+    [setExplorerUrlState]
+  );
+
+  return [tableSeverity, setTableSeverity];
 };
 
 const getSeverityOptions = () =>

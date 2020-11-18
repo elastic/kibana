@@ -167,14 +167,14 @@ export const useUrlState = (accessor: Accessor) => {
  */
 export const usePageUrlState = <PageUrlState extends {}>(
   pageKey: MlPages,
-  defaultState: PageUrlState
+  defaultState?: PageUrlState
 ): [PageUrlState, (update: Partial<PageUrlState>, replaceState?: boolean) => void] => {
   const [appState, setAppState] = useUrlState('_a');
   const pageState = appState?.[pageKey];
 
   const resultPageState: PageUrlState = useMemo(() => {
     return {
-      ...defaultState,
+      ...(defaultState ?? {}),
       ...(pageState ?? {}),
     };
   }, [pageState]);

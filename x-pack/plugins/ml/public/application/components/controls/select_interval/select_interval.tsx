@@ -4,22 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/*
- * React component for rendering a select element with various aggregation interval levels.
- */
-
-import React, { FC } from 'react';
-
+import React, { FC, useCallback } from 'react';
 import { EuiSelect } from '@elastic/eui';
-
 import { i18n } from '@kbn/i18n';
+import { useExplorerUrlState } from '../../../explorer/hooks/use_explorer_url_state';
+import { ExplorerAppState } from '../../../../../common/types/ml_url_generator';
 
-import { useUrlState } from '../../../util/url_state';
-
-interface TableInterval {
-  display: string;
-  val: string;
-}
+type TableInterval = Exclude<ExplorerAppState['mlSelectInterval'], undefined>;
 
 const OPTIONS = [
   {
@@ -59,17 +50,25 @@ function optionValueToInterval(value: string) {
 }
 
 const TABLE_INTERVAL_DEFAULT = optionValueToInterval('auto');
-const TABLE_INTERVAL_APP_STATE_NAME = 'mlSelectInterval';
 
-export const useTableInterval = () => {
-  const [appState, setAppState] = useUrlState('_a');
+export const useTableInterval = (): [TableInterval, (v: TableInterval) => void] => {
+  const [explorerUrlState, setExplorerUrlState] = useExplorerUrlState();
 
-  return [
-    (appState && appState[TABLE_INTERVAL_APP_STATE_NAME]) || TABLE_INTERVAL_DEFAULT,
-    (d: TableInterval) => setAppState(TABLE_INTERVAL_APP_STATE_NAME, d),
-  ];
+  const interval = explorerUrlState?.mlSelectInterval ?? TABLE_INTERVAL_DEFAULT;
+
+  const setInterval = useCallback(
+    (v: TableInterval) => {
+      setExplorerUrlState({ mlSelectInterval: v });
+    },
+    [setExplorerUrlState]
+  );
+
+  return [interval, setInterval];
 };
 
+/*
+ * React component for rendering a select element with various aggregation interval levels.
+ */
 export const SelectInterval: FC = () => {
   const [interval, setInterval] = useTableInterval();
 

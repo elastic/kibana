@@ -132,9 +132,9 @@ export function createExplorerUrl(
     { useHash: false, storeInHashQuery: false },
     url
   );
-  url = setStateToKbnUrl<Partial<ExplorerAppState>>(
+  url = setStateToKbnUrl<AppPageState<Partial<ExplorerAppState>>>(
     '_a',
-    appState,
+    { [ML_PAGES.ANOMALY_EXPLORER]: appState },
     { useHash: false, storeInHashQuery: false },
     url
   );
