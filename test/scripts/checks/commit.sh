@@ -2,7 +2,7 @@
 
 source src/dev/ci_setup/setup_env.sh
 
-run_quick_commit_checks() {
+export run_quick_commit_checks() {
   echo "!!!!!!!! ATTENTION !!!!!!!!
 That check is intended to provide earlier CI feedback after we remove the automatic install for the local pre-commit hook.
 If you want, you can still manually install the pre-commit hook locally by running 'node scripts/register_git_hook locally'
