@@ -21,6 +21,7 @@ import { Transform } from 'stream';
 import { Client, SearchParams, SearchResponse } from 'elasticsearch';
 import { Stats } from '../stats';
 import { Progress } from '../progress';
+import { isKibanaIndex } from '../indices';
 
 const SCROLL_SIZE = 1000;
 const SCROLL_TIMEOUT = '1m';
@@ -73,7 +74,7 @@ export function createGenerateDocRecordsStream({
               value: {
                 // always rewrite the .kibana_* index to .kibana_1 so that
                 // when it is loaded it can skip migration, if possible
-                index: hit._index.startsWith('.kibana') ? '.kibana_1' : hit._index,
+                index: isKibanaIndex(hit._index) ? '.kibana_1' : hit._index,
                 type: hit._type,
                 id: hit._id,
                 source: hit._source,

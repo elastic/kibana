@@ -23,7 +23,7 @@ import { ToolingLog } from '@kbn/dev-utils';
 
 import { Stats } from '../stats';
 import { deleteIndex } from './delete_index';
-import { cleanKibanaIndices } from './kibana_index';
+import { cleanKibanaIndices, isKibanaIndex } from './kibana_index';
 
 export function createDeleteIndexStream(
   client: Client,
@@ -39,7 +39,7 @@ export function createDeleteIndexStream(
         if (!record || record.type === 'index') {
           const { index } = record.value;
 
-          if (index.startsWith('.kibana')) {
+          if (isKibanaIndex(index)) {
             await cleanKibanaIndices({ client, stats, log, kibanaPluginIds });
           } else {
             await deleteIndex({ client, stats, log, index });

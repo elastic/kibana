@@ -26,6 +26,7 @@ export {
   deleteKibanaIndices,
   migrateKibanaIndex,
   createDefaultSpace,
+  isKibanaIndex,
 } from './indices';
 
 export { createFilterRecordsStream } from './records';

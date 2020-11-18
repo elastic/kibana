@@ -24,7 +24,7 @@ import { Client } from 'elasticsearch';
 import { ToolingLog } from '@kbn/dev-utils';
 
 import { Stats } from '../stats';
-import { deleteKibanaIndices } from './kibana_index';
+import { deleteKibanaIndices, isKibanaIndex } from './kibana_index';
 import { deleteIndex } from './delete_index';
 
 interface DocRecord {
@@ -65,7 +65,7 @@ export function createCreateIndexStream({
 
   async function handleIndex(record: DocRecord) {
     const { index, settings, mappings, aliases } = record.value;
-    const isKibana = index.startsWith('.kibana');
+    const isKibana = isKibanaIndex(index);
 
     async function attemptToCreate(attemptNumber = 1) {
       try {
@@ -86,30 +86,41 @@ export function createCreateIndexStream({
 
         stats.createdIndex(index, { settings });
       } catch (err) {
-        if (
-          err?.body?.error?.reason?.includes('index exists with the same name as the alias') &&
-          attemptNumber < 3
-        ) {
-          kibanaIndexAlreadyDeleted = false;
+        const nameAlreadyInUse = err?.body?.error?.reason?.includes(
+          'index exists with the same name as the alias'
+        );
+        const indexExists = err?.body?.error?.type !== 'resource_already_exists_exception';
+
+        if (nameAlreadyInUse || indexExists) {
           const aliasStr = inspect(aliases);
-          log.info(
-            `failed to create aliases [${aliasStr}] because ES indicated an index/alias already exists, trying again`
+          const errStr = inspect(err?.body?.error ?? '<unknown error>');
+          log.error(
+            `failed to create aliases [${aliasStr}] because ES indicated an index/alias already exists: ${errStr}`
           );
+        }
+
+        // bail if we have already done three attempts, or the error is not expected
+        if (attemptNumber >= 3 || !(nameAlreadyInUse || indexExists)) {
+          throw err;
+        }
+
+        // we empty Kibana indexes weirdly, see https://github.com/elastic/kibana/pull/71910
+        if (isKibana && nameAlreadyInUse) {
+          kibanaIndexAlreadyDeleted = false;
           await attemptToCreate(attemptNumber + 1);
           return;
         }
 
-        if (err?.body?.error?.type !== 'resource_already_exists_exception' || attemptNumber >= 3) {
-          throw err;
-        }
-
-        if (skipExisting) {
+        // if the concrete index exists and we're skipping existing, move on
+        if (indexExists && skipExisting) {
           skipDocsFromIndices.add(index);
           stats.skippedIndex(index);
           return;
         }
 
+        // request index delete and try again
         await deleteIndex({ client, stats, index, log });
+        log.error(`Attempting to create [${index}] again`);
         await attemptToCreate(attemptNumber + 1);
         return;
       }
