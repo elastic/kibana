@@ -28,8 +28,7 @@ export async function interactive(keys, docs, logger) {
     'This tool will ask you a number of questions in order to generate the right set of keys for your needs.\n'
   );
   const setKeys = {};
-  for (let i = 0; i < settings.length; i++) {
-    const setting = settings[i];
+  for (const setting of settings) {
     const include = await confirm(`Set ${setting}?`);
     if (include) setKeys[setting] = keys[setting];
   }
