@@ -21,7 +21,7 @@ import { CopyablePanelField } from './copyable_panel_field';
 import { Breadcrumbs } from './breadcrumbs';
 import { processPath, processPID } from '../../models/process_event';
 import { CubeForProcess } from './cube_for_process';
-import { ResolverGraphNode, SafeResolverEvent } from '../../../../common/endpoint/types';
+import { ResolverNode, SafeResolverEvent } from '../../../../common/endpoint/types';
 import { useCubeAssets } from '../use_cube_assets';
 import { ResolverState } from '../../types';
 import { PanelLoading } from './panel_loading';
@@ -60,7 +60,7 @@ const NodeDetailView = memo(function ({
   graphNode,
   nodeID,
 }: {
-  graphNode: ResolverGraphNode;
+  graphNode: ResolverNode;
   nodeID: string;
 }) {
   const processName = eventModel.processNameSafeVersion(graphNode);

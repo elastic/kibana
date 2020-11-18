@@ -24,7 +24,7 @@ import * as nodeEventsInCategoryModel from './node_events_in_category_model';
 import {
   SafeResolverEvent,
   ResolverGraph,
-  ResolverGraphNode,
+  ResolverNode,
   EventStats,
 } from '../../../../common/endpoint/types';
 import * as resolverGraphModel from '../../models/resolver_graph';
@@ -67,7 +67,7 @@ const resolverGraphResponse = (state: DataState): ResolverGraph | undefined => {
 };
 
 interface NodeDisplayTypePredicateFunctions {
-  isInactiveNode: (node: ResolverGraphNode) => boolean;
+  isInactiveNode: (node: ResolverNode) => boolean;
 }
 /**
  * Injected predicate functions to determine which nodes display as active, terminated, etc...
@@ -125,7 +125,7 @@ export const isNodeInactive = createSelector(inactiveNodes, function (
  */
 export const graphableNodes = createSelector(resolverGraphResponse, function (graphResponse?) {
   // Keep track of the last process event (in array order) for each entity ID
-  const nodes: Map<string, ResolverGraphNode> = new Map();
+  const nodes: Map<string, ResolverNode> = new Map();
   if (graphResponse) {
     for (const node of graphResponse.nodes) {
       const nodeId = nodeModel.nodeID(node);
@@ -193,9 +193,9 @@ export function isCurrentRelatedEventLoading(state: DataState) {
  *
  * @export
  * @param {DataState} state
- * @returns {(ResolverGraphNode | null)} the current related event data for the `event_detail` view
+ * @returns {(ResolverNode | null)} the current related event data for the `event_detail` view
  */
-export function currentRelatedEventData(state: DataState): ResolverGraphNode | null {
+export function currentRelatedEventData(state: DataState): ResolverNode | null {
   return state.currentRelatedEvent.data;
 }
 
@@ -302,7 +302,7 @@ export const layout: (state: DataState) => IsometricTaxiLayout = createSelector(
  */
 export const graphNodeForID: (
   state: DataState
-) => (nodeID: string) => ResolverGraphNode | null = createSelector(
+) => (nodeID: string) => ResolverNode | null = createSelector(
   graph,
   (indexedGraph) => (nodeID: string) => {
     return indexedGraphModel.graphNode(indexedGraph, nodeID);
@@ -352,7 +352,7 @@ export const ariaFlowtoCandidate: (
        * Getting the following sibling of a node has an `O(n)` time complexity where `n` is the number of children the parent of the node has.
        * For this reason, we calculate the following siblings of the node and all of its siblings at once and cache them.
        */
-      const node: ResolverGraphNode | null = nodeGetter(nodeID);
+      const node: ResolverNode | null = nodeGetter(nodeID);
 
       if (!node) {
         // this should never happen.
@@ -363,7 +363,7 @@ export const ariaFlowtoCandidate: (
       // TODO: Only using the first parent for now as we will only have one parent in the tree setting
       const children = indexedGraphModel.children(indexedGraph, nodeModel.parentId(node));
 
-      let previousChild: ResolverGraphNode | null = null;
+      let previousChild: ResolverNode | null = null;
       // Loop over all nodes that have the same parent ID (even if the parent ID is undefined or points to a node that isn't in the tree.)
       for (const child of children) {
         if (previousChild !== null) {
@@ -460,7 +460,7 @@ export const nodesAndEdgelines: (
       maxX,
       maxY,
     });
-    const visibleProcessNodePositions = new Map<ResolverGraphNode, Vector2>(
+    const visibleProcessNodePositions = new Map<ResolverNode, Vector2>(
       entities
         .filter((entity): entity is IndexedGraphNode => entity.type === 'graphNode')
         .map((node) => [node.entity, node.position])
@@ -500,8 +500,8 @@ export function treeRequestParametersToAbort(state: DataState): TreeFetcherParam
  */
 export const statsTotalForNode: (
   state: DataState
-) => (event: ResolverGraphNode) => number | null = createSelector(nodeStats, (getNodeStats) => {
-  return (node: ResolverGraphNode) => {
+) => (event: ResolverNode) => number | null = createSelector(nodeStats, (getNodeStats) => {
+  return (node: ResolverNode) => {
     const nodeID = nodeModel.nodeID(node);
     if (nodeID === undefined) {
       return null;

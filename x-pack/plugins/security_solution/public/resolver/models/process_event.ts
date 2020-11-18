@@ -8,11 +8,7 @@ import { firstNonNullValue } from '../../../common/endpoint/models/ecs_safety_he
 
 import * as eventModel from '../../../common/endpoint/models/event';
 import * as nodeModel from '../../../common/endpoint/models/node';
-import {
-  ResolverEvent,
-  SafeResolverEvent,
-  ResolverGraphNode,
-} from '../../../common/endpoint/types';
+import { ResolverEvent, SafeResolverEvent, ResolverNode } from '../../../common/endpoint/types';
 import { ResolverProcessType } from '../types';
 
 // TODO: These should be handled external to resolver.
@@ -35,7 +31,7 @@ export function isTerminatedProcess(passedEvent: SafeResolverEvent) {
  * ms since Unix epoc, based on timestamp.
  * may return NaN if the timestamp wasn't present or was invalid.
  */
-export function datetime(node: ResolverGraphNode): number | null {
+export function datetime(node: ResolverNode): number | null {
   const timestamp = nodeModel.nodeDataTimestamp(node);
 
   const time = timestamp === undefined ? 0 : new Date(timestamp).getTime();
@@ -139,7 +135,7 @@ export function argsForProcess(passedEvent: ResolverEvent): string | undefined {
  * used to sort events
  */
 // TODO: Replace with a more generalized sorter based on the data attribute to be sorted on selected by the user
-export function orderByTime(first: ResolverGraphNode, second: ResolverGraphNode): number {
+export function orderByTime(first: ResolverNode, second: ResolverNode): number {
   const firstDatetime: number | null = datetime(first);
   const secondDatetime: number | null = datetime(second);
 

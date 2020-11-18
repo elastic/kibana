@@ -6,7 +6,7 @@
 
 import {
   ResolverGraph,
-  ResolverGraphNode,
+  ResolverNode,
   ResolverTree,
   ResolverChildNode,
   SafeResolverEvent,
@@ -21,7 +21,7 @@ import * as nodeModel from '../../../common/endpoint/models/node';
  */
 export function nodesToShowAsInactive(
   graph: ResolverGraph | undefined,
-  predicate?: (node: ResolverGraphNode) => boolean
+  predicate?: (node: ResolverNode) => boolean
 ) {
   if (graph && predicate) {
     return graph.nodes.filter(predicate);
@@ -33,7 +33,7 @@ export function nodesToShowAsInactive(
 /**
  * This returns a map of nodeIds to the associated stats provided by the datasource.
  */
-export function nodeStats(graph: ResolverGraph): Map<ResolverGraphNode['nodeId'], EventStats> {
+export function nodeStats(graph: ResolverGraph): Map<ResolverNode['id'], EventStats> {
   const stats = new Map();
 
   for (const node of graph.nodes) {

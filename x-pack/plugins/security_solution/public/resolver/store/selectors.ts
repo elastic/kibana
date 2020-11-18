@@ -9,7 +9,7 @@ import * as cameraSelectors from './camera/selectors';
 import * as dataSelectors from './data/selectors';
 import * as uiSelectors from './ui/selectors';
 import { ResolverState, IsometricTaxiLayout } from '../types';
-import { EventStats, ResolverGraphNode } from '../../../common/endpoint/types';
+import { EventStats, ResolverNode } from '../../../common/endpoint/types';
 import * as nodeModel from '../../../common/endpoint/models/node';
 
 /**
@@ -63,7 +63,7 @@ export const isNodeInactive = composeSelectors(dataStateSelector, dataSelectors.
  */
 export const graphNodeForId: (
   state: ResolverState
-) => (nodeID: string) => ResolverGraphNode | null = composeSelectors(
+) => (nodeID: string) => ResolverNode | null = composeSelectors(
   dataStateSelector,
   dataSelectors.graphNodeForID
 );

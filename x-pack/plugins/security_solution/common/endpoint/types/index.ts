@@ -127,28 +127,9 @@ export interface ResolverNode {
   stats: EventStats;
 }
 
-/**
- *@description - ResolverGraphNode defines the JS shape of what generates a node and it's given edges
- * nodeId - the user or application defined id for the given data set. Found using the path provided by schema.id in the tree api call
- * connections - these are nodes connected to the current node.
- * data - The data associated with the given id.
- * stats - Related data, metadata, etc... to the given id
- * @export
- * @interface ResolverGraphNode
- */
-export interface ResolverGraphNode {
-  nodeId: string | number | undefined;
-  parent: string | number | undefined; // TODO: neighbors (or adjacents): string[];
-  name: string | number | undefined;
-  data: unknown;
-  stats: EventStats;
-  // TODO: add name
-  // TODO: add sort field
-}
-
 export interface ResolverGraph {
   originId: string | null;
-  nodes: ResolverGraphNode[];
+  nodes: ResolverNode[];
 }
 
 // TODO: Deprecate any types that are no longer being used below

@@ -8,49 +8,11 @@ import { Dispatch, MiddlewareAPI } from 'redux';
 import {
   ResolverEntityIndex,
   ResolverNode,
-  ResolverGraphNode,
   ResolverGraph,
 } from '../../../../common/endpoint/types';
-import { firstNonNullValue } from '../../../../common/endpoint/models/ecs_safety_helpers';
 import { ResolverState, DataAccessLayer, GraphRequestIdSchema } from '../../types';
 import * as selectors from '../selectors';
 import { ResolverAction } from '../actions';
-
-/**
- * This function takes a user or application provided schema, and pulls the given `id` and `parent` fields
- * to the top level of the node to make the graph visualization as datasource agnostic as possible.
- *
- * TODO: while we are recieving `parent`, other datasources may be closer to acyclic or cyclic graphs.
- * In an effort to prepare for those scenarios, we can use a `neighbors` or `adjacents` field which could serve as an array of all nodes directly connected to this one.
- * Scenarios to consider:
- * Directed Acyclic Graph (tree) & Acyclic graphs: neighbors will refer to either outgoing or incoming connections. Edges/Nodes will not be revisited
- * Directed Graph & Graph: With cycles, we will need to check if an edge already exists and what the visual treatment we would want to give
- * We would also need to keep a cache of visited nodes / edges
- *
- * TODO: Should this logic belong in the backend?
- */
-
-const convertNodesToResolverGraphFormat = (
-  data: ResolverNode[],
-  schema: GraphRequestIdSchema
-): ResolverGraphNode[] => {
-  return data.reduce((resolverNodes: ResolverGraphNode[], current: ResolverNode) => {
-    const nodeId = current.data[schema.id];
-    const parent = current.data[schema.parent];
-    const name = current.data[schema.name];
-
-    if (!nodeId || !Array.isArray(nodeId)) return resolverNodes;
-
-    resolverNodes.push({
-      ...current,
-      nodeId: firstNonNullValue(nodeId),
-      parent: firstNonNullValue(parent),
-      name: firstNonNullValue(name),
-    });
-
-    return resolverNodes;
-  }, []);
-};
 
 /**
  * A function that handles syncing ResolverTree data w/ the current entity ID.
@@ -147,7 +109,7 @@ export function ResolverTreeFetcher(
         const resolverGraph: ResolverGraph = {
           // TODO: Should we store this ourselves or have the backend send it back?
           originId: entityIDToFetch,
-          nodes: convertNodesToResolverGraphFormat(result, graphRequestIdSchema),
+          nodes: result,
         };
 
         api.dispatch({

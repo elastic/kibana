@@ -18,7 +18,7 @@ import {
   SafeResolverEvent,
   ResolverPaginatedEvents,
   ResolverGraph,
-  ResolverGraphNode,
+  ResolverNode,
 } from '../../common/endpoint/types';
 
 /**
@@ -169,7 +169,7 @@ export interface IndexedEdgeLineSegment extends BBox {
  */
 export interface IndexedGraphNode extends BBox {
   type: 'graphNode';
-  entity: ResolverGraphNode;
+  entity: ResolverNode;
   position: Vector2;
 }
 
@@ -264,7 +264,7 @@ export interface DataState {
    */
   readonly currentRelatedEvent: {
     loading: boolean;
-    data: ResolverGraphNode | null;
+    data: ResolverNode | null;
   };
 
   readonly graph?: {
@@ -386,11 +386,11 @@ export interface IndexedGraph {
   /**
    * Map of ID to a process's ordered children
    */
-  idToChildren: Map<string | undefined, ResolverGraphNode[]>;
+  idToChildren: Map<string | undefined, ResolverNode[]>;
   /**
    * Map of ID to process
    */
-  idToNode: Map<string, ResolverGraphNode>;
+  idToNode: Map<string, ResolverNode>;
   /**
    * The id of the origin or root node provided by the backend
    */
@@ -400,11 +400,11 @@ export interface IndexedGraph {
 /**
  * A map of `ProcessEvents` (representing process nodes) to the 'width' of their subtrees as calculated by `calculateSubgraphWidths`
  */
-export type ProcessWidths = Map<ResolverGraphNode, number>;
+export type ProcessWidths = Map<ResolverNode, number>;
 /**
  * Map of ProcessEvents (representing process nodes) to their positions. Calculated by `calculateNodePositions`
  */
-export type NodePositions = Map<ResolverGraphNode, Vector2>;
+export type NodePositions = Map<ResolverNode, Vector2>;
 
 export type DurationTypes =
   | 'millisecond'
@@ -458,11 +458,11 @@ export interface EdgeLineSegment {
  * Used to provide pre-calculated info from `calculateSubgraphWidths`. These 'width' values are used in the layout of the graph.
  */
 export type ProcessWithWidthMetadata = {
-  node: ResolverGraphNode;
+  node: ResolverNode;
   width: number;
 } & (
   | {
-      parent: ResolverGraphNode;
+      parent: ResolverNode;
       parentWidth: number;
       isOnlyChild: boolean;
       firstChildWidth: number;
@@ -572,7 +572,7 @@ export interface IsometricTaxiLayout {
   /**
    * A map of events to position. Each event represents its own node.
    */
-  graphNodePositions: Map<ResolverGraphNode, Vector2>;
+  graphNodePositions: Map<ResolverNode, Vector2>;
 
   /**
    * A map of edge-line segments, which graphically connect nodes.
@@ -582,7 +582,7 @@ export interface IsometricTaxiLayout {
   /**
    * defines the aria levels for nodes.
    */
-  ariaLevels: Map<ResolverGraphNode, number>;
+  ariaLevels: Map<ResolverNode, number>;
 }
 
 /**

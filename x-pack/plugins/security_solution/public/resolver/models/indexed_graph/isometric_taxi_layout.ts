@@ -15,7 +15,7 @@ import {
   IsometricTaxiLayout,
 } from '../../types';
 import * as nodeModel from '../../../../common/endpoint/models/node';
-import { ResolverGraphNode } from '../../../../common/endpoint/types';
+import { ResolverNode } from '../../../../common/endpoint/types';
 import * as vector2 from '../vector2';
 import * as indexedGraphModel from './index';
 import { getFriendlyElapsedTime as elapsedTime } from '../../lib/date';
@@ -27,13 +27,13 @@ export function isometricTaxiLayoutFactory(indexedGraph: IndexedGraph): Isometri
   /**
    * Walk the tree in reverse level order, calculating the 'width' of subtrees.
    */
-  const subgraphWidths: Map<ResolverGraphNode, number> = calculateSubgraphWidths(indexedGraph);
+  const subgraphWidths: Map<ResolverNode, number> = calculateSubgraphWidths(indexedGraph);
 
   /**
    * Walk the tree in level order. Using the precalculated widths, calculate the position of nodes.
    * Nodes are positioned relative to their parents and preceding siblings.
    */
-  const nodePositions: Map<ResolverGraphNode, Vector2> = calculateNodePositions(
+  const nodePositions: Map<ResolverNode, Vector2> = calculateNodePositions(
     indexedGraph,
     subgraphWidths
   );
@@ -52,7 +52,7 @@ export function isometricTaxiLayoutFactory(indexedGraph: IndexedGraph): Isometri
    * Transform the positions of nodes and edges so they seem like they are on an isometric grid.
    */
   const transformedEdgeLineSegments: EdgeLineSegment[] = [];
-  const transformedPositions = new Map<ResolverGraphNode, Vector2>();
+  const transformedPositions = new Map<ResolverNode, Vector2>();
 
   for (const [node, position] of nodePositions) {
     transformedPositions.set(node, vector2.applyMatrix3(position, isometricTransformMatrix));
@@ -84,8 +84,8 @@ export function isometricTaxiLayoutFactory(indexedGraph: IndexedGraph): Isometri
 /**
  * Calculate a level (starting at 1) for each node.
  */
-function ariaLevels(indexedGraph: IndexedGraph): Map<ResolverGraphNode, number> {
-  const map: Map<ResolverGraphNode, number> = new Map();
+function ariaLevels(indexedGraph: IndexedGraph): Map<ResolverNode, number> {
+  const map: Map<ResolverNode, number> = new Map();
   for (const node of indexedGraphModel.levelOrder(indexedGraph)) {
     const parentNode = indexedGraphModel.parent(indexedGraph, node);
     if (parentNode === undefined) {
@@ -144,13 +144,13 @@ function ariaLevels(indexedGraph: IndexedGraph): Map<ResolverGraphNode, number> 
  *
  */
 function calculateSubgraphWidths(indexedGraph: IndexedGraph): ProcessWidths {
-  const widths = new Map<ResolverGraphNode, number>();
+  const widths = new Map<ResolverNode, number>();
 
   if (indexedGraphModel.size(indexedGraph) === 0) {
     return widths;
   }
 
-  const nodesInReverseLevelOrder: ResolverGraphNode[] = [
+  const nodesInReverseLevelOrder: ResolverNode[] = [
     ...indexedGraphModel.levelOrder(indexedGraph),
   ].reverse();
 
@@ -307,13 +307,13 @@ function calculateEdgeLineSegments(
 }
 
 function calculateNodePositions(indexedGraph: IndexedGraph, widths: ProcessWidths): NodePositions {
-  const positions = new Map<ResolverGraphNode, Vector2>();
+  const positions = new Map<ResolverNode, Vector2>();
   /**
    * This algorithm iterates the tree in level order. It keeps counters that are reset for each parent.
    * By keeping track of the last parent node, we can know when we are dealing with a new set of siblings and
    * reset the counters.
    */
-  let lastProcessedParentNode: ResolverGraphNode | undefined;
+  let lastProcessedParentNode: ResolverNode | undefined;
   /**
    * Nodes are positioned relative to their siblings. We walk this in level order, so we handle
    * children left -> right.

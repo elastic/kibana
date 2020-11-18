@@ -12,7 +12,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { NodeSubMenu } from './styles';
 import { applyMatrix3 } from '../models/vector2';
 import { Vector2, Matrix3, ResolverState } from '../types';
-import { ResolverGraphNode } from '../../../common/endpoint/types';
+import { ResolverNode } from '../../../common/endpoint/types';
 import { useResolverDispatch } from './use_resolver_dispatch';
 import * as nodeModel from '../../../common/endpoint/models/node';
 import * as selectors from '../store/selectors';
@@ -94,7 +94,7 @@ const UnstyledProcessEventDot = React.memo(
     /**
      * An event which contains details about the graph node.
      */
-    node: ResolverGraphNode;
+    node: ResolverNode;
     /**
      * The unique identifier for the node based on a datasource id
      */
