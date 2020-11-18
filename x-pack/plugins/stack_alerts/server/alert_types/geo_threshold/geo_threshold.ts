@@ -194,7 +194,8 @@ export const getGeoThresholdExecutor = (log: Logger) =>
           services.callCluster,
           log,
           alertId,
-          params.boundaryNameField
+          params.boundaryNameField,
+          params.boundaryIndexQuery
         );
 
     const executeEsQuery = await executeEsQueryFactory(params, services, log, shapesFilters);

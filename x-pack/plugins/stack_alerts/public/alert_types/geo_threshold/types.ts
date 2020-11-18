@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Query } from '../../../../../../src/plugins/data/common';
+
 export enum TrackingEvent {
   entered = 'entered',
   exited = 'exited',
@@ -22,6 +24,8 @@ export interface GeoThresholdAlertParams {
   boundaryGeoField: string;
   boundaryNameField?: string;
   delayOffsetWithUnits?: string;
+  indexQuery?: Query;
+  boundaryIndexQuery?: Query;
 }
 
 // Will eventually include 'geo_shape'
