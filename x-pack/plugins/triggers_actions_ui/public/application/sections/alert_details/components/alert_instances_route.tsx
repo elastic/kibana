@@ -30,19 +30,16 @@ export const AlertInstancesRoute: React.FunctionComponent<WithAlertInstanceSumma
   requestRefresh,
   loadAlertInstanceSummary: loadAlertInstanceSummary,
 }) => {
-  const { toastNotifications } = useKibana().services;
+  const {
+    notifications: { toasts },
+  } = useKibana().services;
 
   const [alertInstanceSummary, setAlertInstanceSummary] = useState<AlertInstanceSummary | null>(
     null
   );
 
   useEffect(() => {
-    getAlertInstanceSummary(
-      alert.id,
-      loadAlertInstanceSummary,
-      setAlertInstanceSummary,
-      toastNotifications
-    );
+    getAlertInstanceSummary(alert.id, loadAlertInstanceSummary, setAlertInstanceSummary, toasts);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [alert]);
 
@@ -70,13 +67,13 @@ export async function getAlertInstanceSummary(
   alertId: string,
   loadAlertInstanceSummary: AlertApis['loadAlertInstanceSummary'],
   setAlertInstanceSummary: React.Dispatch<React.SetStateAction<AlertInstanceSummary | null>>,
-  toastNotifications: Pick<ToastsApi, 'addDanger'>
+  toasts: Pick<ToastsApi, 'addDanger'>
 ) {
   try {
     const loadedInstanceSummary = await loadAlertInstanceSummary(alertId);
     setAlertInstanceSummary(loadedInstanceSummary);
   } catch (e) {
-    toastNotifications.addDanger({
+    toasts.addDanger({
       title: i18n.translate(
         'xpack.triggersActionsUI.sections.alertDetails.unableToLoadAlertInstanceSummaryMessage',
         {

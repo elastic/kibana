@@ -28,7 +28,10 @@ const NO_NAVIGATION = false;
 type AlertNavigationLoadingState = AlertNavigation | false | null;
 
 export const ViewInApp: React.FunctionComponent<ViewInAppProps> = ({ alert }) => {
-  const { navigateToApp, alerts: maybeAlerting } = useKibana().services;
+  const {
+    application: { navigateToApp },
+    alerts: maybeAlerting,
+  } = useKibana().services;
 
   const [alertNavigation, setAlertNavigation] = useState<AlertNavigationLoadingState>(null);
   useEffect(() => {

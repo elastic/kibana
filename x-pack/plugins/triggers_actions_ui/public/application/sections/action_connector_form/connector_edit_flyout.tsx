@@ -24,7 +24,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Option, none, some } from 'fp-ts/lib/Option';
-import { EuiLoadingSpinner } from '@elastic/eui';
 import { ActionConnectorForm, validateBaseProperties } from './action_connector_form';
 import { TestConnectorForm } from './test_connector_form';
 import { ActionConnector, ActionTypeRegistryContract, IErrorObject } from '../../../types';

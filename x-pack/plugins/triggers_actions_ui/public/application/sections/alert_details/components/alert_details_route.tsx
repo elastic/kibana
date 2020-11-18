@@ -36,7 +36,10 @@ export const AlertDetailsRoute: React.FunctionComponent<AlertDetailsRouteProps> 
   loadAlertTypes,
   loadActionTypes,
 }) => {
-  const { http, toastNotifications } = useKibana().services;
+  const {
+    http,
+    notifications: { toasts },
+  } = useKibana().services;
 
   const [alert, setAlert] = useState<Alert | null>(null);
   const [alertType, setAlertType] = useState<AlertType | null>(null);
@@ -51,9 +54,9 @@ export const AlertDetailsRoute: React.FunctionComponent<AlertDetailsRouteProps> 
       setAlert,
       setAlertType,
       setActionTypes,
-      toastNotifications
+      toasts
     );
-  }, [alertId, http, loadActionTypes, loadAlert, loadAlertTypes, toastNotifications, refreshToken]);
+  }, [alertId, http, loadActionTypes, loadAlert, loadAlertTypes, toasts, refreshToken]);
 
   return alert && alertType && actionTypes ? (
     <AlertDetails
@@ -82,7 +85,7 @@ export async function getAlertData(
   setAlert: React.Dispatch<React.SetStateAction<Alert | null>>,
   setAlertType: React.Dispatch<React.SetStateAction<AlertType | null>>,
   setActionTypes: React.Dispatch<React.SetStateAction<ActionType[] | null>>,
-  toastNotifications: Pick<ToastsApi, 'addDanger'>
+  toasts: Pick<ToastsApi, 'addDanger'>
 ) {
   try {
     const loadedAlert = await loadAlert(alertId);
@@ -104,7 +107,7 @@ export async function getAlertData(
     setAlertType(loadedAlertType);
     setActionTypes(loadedActionTypes);
   } catch (e) {
-    toastNotifications.addDanger({
+    toasts.addDanger({
       title: i18n.translate(
         'xpack.triggersActionsUI.sections.alertDetails.unableToLoadAlertMessage',
         {

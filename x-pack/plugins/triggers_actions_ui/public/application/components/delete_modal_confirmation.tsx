@@ -40,7 +40,10 @@ export const DeleteModalConfirmation = ({
     setDeleteModalVisibility(idsToDelete.length > 0);
   }, [idsToDelete]);
 
-  const { http, toastNotifications } = useKibana().services;
+  const {
+    http,
+    notifications: { toasts },
+  } = useKibana().services;
   const numIdsToDelete = idsToDelete.length;
   if (!deleteModalFlyoutVisible) {
     return null;
@@ -86,7 +89,7 @@ export const DeleteModalConfirmation = ({
           const numSuccesses = successes.length;
           const numErrors = errors.length;
           if (numSuccesses > 0) {
-            toastNotifications.addSuccess(
+            toasts.addSuccess(
               i18n.translate(
                 'xpack.triggersActionsUI.components.deleteSelectedIdsSuccessNotification.descriptionText',
                 {
@@ -99,7 +102,7 @@ export const DeleteModalConfirmation = ({
           }
 
           if (numErrors > 0) {
-            toastNotifications.addDanger(
+            toasts.addDanger(
               i18n.translate(
                 'xpack.triggersActionsUI.components.deleteSelectedIdsErrorNotification.descriptionText',
                 {
