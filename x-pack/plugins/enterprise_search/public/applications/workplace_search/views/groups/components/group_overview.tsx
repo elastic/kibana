@@ -26,7 +26,7 @@ import { AppLogic } from '../../../app_logic';
 import { TruncatedContent } from '../../../../shared/truncate';
 import { ContentSection } from '../../../components/shared/content_section';
 import { ViewContentHeader } from '../../../components/shared/view_content_header';
-import { Loading } from '../../../components/shared/loading';
+import { Loading } from '../../../../shared/loading';
 import { SourcesTable } from '../../../components/shared/sources_table';
 
 import { GroupUsersTable } from './group_users_table';

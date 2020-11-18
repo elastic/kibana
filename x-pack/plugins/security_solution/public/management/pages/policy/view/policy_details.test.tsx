@@ -13,8 +13,20 @@ import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_da
 import { AppContextTestRender, createAppRootMockRenderer } from '../../../../common/mock/endpoint';
 import { getPolicyDetailPath, getEndpointListPath } from '../../../common/routing';
 import { policyListApiPathHandlers } from '../store/policy_list/test_mock_utils';
+import { licenseService } from '../../../../common/hooks/use_license';
 
 jest.mock('../../../../common/components/link_to');
+jest.mock('../../../../common/hooks/use_license', () => {
+  const licenseServiceInstance = {
+    isPlatinumPlus: jest.fn(),
+  };
+  return {
+    licenseService: licenseServiceInstance,
+    useLicense: () => {
+      return licenseServiceInstance;
+    },
+  };
+});
 
 describe('Policy Details', () => {
   type FindReactWrapperResponse = ReturnType<ReturnType<typeof render>['find']>;
@@ -273,6 +285,41 @@ describe('Policy Details', () => {
           title: 'Failed!',
           text: expect.any(String),
         });
+      });
+    });
+    describe('when the subscription tier is platinum or higher', () => {
+      beforeEach(() => {
+        (licenseService.isPlatinumPlus as jest.Mock).mockReturnValue(true);
+        policyView = render(<PolicyDetails />);
+      });
+
+      it('malware popup and message customization options are shown', () => {
+        // use query for finding stuff, if it doesn't find it, just returns null
+        const userNotificationCheckbox = policyView.find(
+          'EuiCheckbox[data-test-subj="malwareUserNotificationCheckbox"]'
+        );
+        const userNotificationCustomMessageTextArea = policyView.find(
+          'EuiTextArea[data-test-subj="malwareUserNotificationCustomMessage"]'
+        );
+        expect(userNotificationCheckbox).toHaveLength(1);
+        expect(userNotificationCustomMessageTextArea).toHaveLength(1);
+      });
+    });
+    describe('when the subscription tier is gold or lower', () => {
+      beforeEach(() => {
+        (licenseService.isPlatinumPlus as jest.Mock).mockReturnValue(false);
+        policyView = render(<PolicyDetails />);
+      });
+
+      it('malware popup and message customization options are hidden', () => {
+        const userNotificationCheckbox = policyView.find(
+          'EuiCheckbox[data-test-subj="malwareUserNotificationCheckbox"]'
+        );
+        const userNotificationCustomMessageTextArea = policyView.find(
+          'EuiTextArea[data-test-subj="malwareUserNotificationCustomMessage"]'
+        );
+        expect(userNotificationCheckbox).toHaveLength(0);
+        expect(userNotificationCustomMessageTextArea).toHaveLength(0);
       });
     });
   });
