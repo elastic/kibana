@@ -5,7 +5,7 @@
  */
 
 import { isEqual } from 'lodash';
-import React, { FC, useCallback, useEffect, useState } from 'react';
+import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
 import moment from 'moment';
 
@@ -39,7 +39,8 @@ import { basicResolvers } from '../resolvers';
 import { getBreadcrumbWithUrlForApp } from '../breadcrumbs';
 import { useTimefilter } from '../../contexts/kibana';
 import { useToastNotificationService } from '../../services/toast_notification_service';
-
+import { AnnotationUpdatesService } from '../../services/annotations_service';
+import { MlAnnotationUpdatesContext } from '../../contexts/ml/ml_annotation_updates_context';
 export const timeSeriesExplorerRouteFactory = (
   navigateToPath: NavigateToPath,
   basePath: string
@@ -64,13 +65,16 @@ const PageWrapper: FC<PageProps> = ({ deps }) => {
     jobs: mlJobService.loadJobsWrapper,
     jobsWithTimeRange: () => ml.jobs.jobsWithTimerange(getDateFormatTz()),
   });
+  const annotationUpdatesService = useMemo(() => new AnnotationUpdatesService(), []);
 
   return (
     <PageLoader context={context}>
-      <TimeSeriesExplorerUrlStateManager
-        config={deps.config}
-        jobsWithTimeRange={results.jobsWithTimeRange.jobs}
-      />
+      <MlAnnotationUpdatesContext.Provider value={annotationUpdatesService}>
+        <TimeSeriesExplorerUrlStateManager
+          config={deps.config}
+          jobsWithTimeRange={results.jobsWithTimeRange.jobs}
+        />
+      </MlAnnotationUpdatesContext.Provider>
     </PageLoader>
   );
 };
