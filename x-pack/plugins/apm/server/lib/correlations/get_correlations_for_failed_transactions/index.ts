@@ -105,7 +105,7 @@ export async function getChartsForTopSigTerms({
   const { intervalString } = getBucketSize({ start, end, numBuckets: 30 });
 
   if (isEmpty(topSigTerms)) {
-    return;
+    return {};
   }
 
   const timeseriesAgg = {
@@ -158,7 +158,7 @@ export async function getChartsForTopSigTerms({
   type Agg = NonNullable<typeof response.aggregations>;
 
   if (!response.aggregations) {
-    return;
+    return {};
   }
 
   return {

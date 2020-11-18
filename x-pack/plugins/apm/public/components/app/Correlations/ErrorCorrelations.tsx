@@ -16,12 +16,7 @@ import {
 } from '@elastic/charts';
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import {
-  EuiTitle,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingChart,
-} from '@elastic/eui';
+import { EuiTitle, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/useFetcher';
 import {
@@ -30,12 +25,15 @@ import {
 } from '../../../services/rest/createCallApmApi';
 import { px } from '../../../style/variables';
 import { SignificantTermsTable } from './SignificantTermsTable';
+import { ChartContainer } from '../../shared/charts/chart_container';
 
 type CorrelationsApiResponse = NonNullable<
   APIReturnType<'/api/apm/correlations/failed_transactions', 'GET'>
 >;
 
-type SignificantTerm = CorrelationsApiResponse['significantTerms'][0];
+type SignificantTerm = NonNullable<
+  CorrelationsApiResponse['significantTerms']
+>[0];
 
 export function ErrorCorrelations() {
   const [
@@ -74,7 +72,7 @@ export function ErrorCorrelations() {
           <EuiTitle size="s">
             <h4>Error rate over time</h4>
           </EuiTitle>
-          <LatencyTimeseriesChart
+          <ErrorTimeseriesChart
             data={data}
             status={status}
             selectedSignificantTerm={selectedSignificantTerm}
@@ -92,7 +90,7 @@ export function ErrorCorrelations() {
   );
 }
 
-function LatencyTimeseriesChart({
+function ErrorTimeseriesChart({
   data,
   selectedSignificantTerm,
   status,
@@ -101,56 +99,50 @@ function LatencyTimeseriesChart({
   selectedSignificantTerm: SignificantTerm | null;
   status: FETCH_STATUS;
 }) {
-  if (!data) {
-    if (status === FETCH_STATUS.LOADING) {
-      return <EuiLoadingChart size="m" />;
-    }
-
-    return <div>no data for chart</div>;
-  }
-
   const dateFormatter = timeFormatter('HH:mm:ss');
 
   return (
-    <Chart size={{ height: px(200), width: px(600) }}>
-      <Settings showLegend legendPosition={Position.Bottom} />
+    <ChartContainer height={200} hasData={!!data} status={status}>
+      <Chart size={{ height: px(200), width: px(600) }}>
+        <Settings showLegend legendPosition={Position.Bottom} />
 
-      <Axis
-        id="bottom"
-        position={Position.Bottom}
-        showOverlappingTicks
-        tickFormat={dateFormatter}
-      />
-      <Axis
-        id="left"
-        position={Position.Left}
-        domain={{ min: 0, max: 1 }}
-        tickFormat={(d) => `${roundFloat(d * 100)}%`}
-      />
+        <Axis
+          id="bottom"
+          position={Position.Bottom}
+          showOverlappingTicks
+          tickFormat={dateFormatter}
+        />
+        <Axis
+          id="left"
+          position={Position.Left}
+          domain={{ min: 0, max: 1 }}
+          tickFormat={(d) => `${roundFloat(d * 100)}%`}
+        />
 
-      <LineSeries
-        id="Overall latency"
-        xScaleType={ScaleType.Time}
-        yScaleType={ScaleType.Linear}
-        xAccessor={'x'}
-        yAccessors={['y']}
-        data={data.overall.timeseries}
-        curve={CurveType.CURVE_MONOTONE_X}
-      />
-
-      {selectedSignificantTerm !== null ? (
         <LineSeries
-          id="Error rate for selected term"
+          id="Overall error rate"
           xScaleType={ScaleType.Time}
           yScaleType={ScaleType.Linear}
           xAccessor={'x'}
           yAccessors={['y']}
-          color="red"
-          data={selectedSignificantTerm.timeseries}
+          data={data?.overall?.timeseries ?? []}
           curve={CurveType.CURVE_MONOTONE_X}
         />
-      ) : null}
-    </Chart>
+
+        {selectedSignificantTerm !== null ? (
+          <LineSeries
+            id="Error rate for selected term"
+            xScaleType={ScaleType.Time}
+            yScaleType={ScaleType.Linear}
+            xAccessor={'x'}
+            yAccessors={['y']}
+            color="red"
+            data={selectedSignificantTerm.timeseries}
+            curve={CurveType.CURVE_MONOTONE_X}
+          />
+        ) : null}
+      </Chart>
+    </ChartContainer>
   );
 }
 

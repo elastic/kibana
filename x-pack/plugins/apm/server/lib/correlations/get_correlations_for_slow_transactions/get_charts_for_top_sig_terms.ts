@@ -27,7 +27,7 @@ export async function getChartsForTopSigTerms({
   const { intervalString } = getBucketSize({ start, end, numBuckets: 30 });
 
   if (isEmpty(topSigTerms)) {
-    return;
+    return {};
   }
 
   const maxLatency = await getMaxLatency({
@@ -37,7 +37,7 @@ export async function getChartsForTopSigTerms({
   });
 
   if (!maxLatency) {
-    return;
+    return {};
   }
 
   const intervalBuckets = 20;
