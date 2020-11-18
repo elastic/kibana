@@ -54,6 +54,7 @@ Index patterns provide Rest-like HTTP CRUD+ API with the following endpoints:
 
 - `POST /api/index_patterns/index_pattern` &mdash; create an index pattern
 - `GET /api/index_patterns/index_pattern/{id}` &mdash; fetch an index pattern by `{id}`
+- `DELETE /api/index_patterns/index_pattern/{id}` &mdash; delete an index pattern by `{id}`
 
 #### Create an index pattern
 
@@ -146,6 +147,17 @@ Returns an index pattern object.
     }
 }
 ```
+
+
+### Delete an index pattern by ID
+
+Delete and index pattern by its ID.
+
+```
+DELETE /api/index_patterns/index_pattern/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+```
+
+Returns an '200 OK` response with empty body on success.
 
 
 ## Query
