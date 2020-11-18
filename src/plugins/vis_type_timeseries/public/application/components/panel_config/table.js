@@ -45,6 +45,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { QueryBarWrapper } from '../query_bar_wrapper';
 import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
+import { VisDataContext } from './../../contexts/vis_data_context';
 export class TablePanelConfig extends Component {
   constructor(props) {
     super(props);
@@ -115,13 +116,19 @@ export class TablePanelConfig extends Component {
                       />
                     }
                   >
-                    <FieldSelect
-                      fields={this.props.fields}
-                      value={model.pivot_id}
-                      indexPattern={model.index_pattern}
-                      onChange={this.handlePivotChange}
-                      fullWidth
-                    />
+                    <VisDataContext.Consumer>
+                      {(visData) => (
+                        <FieldSelect
+                          fields={this.props.fields}
+                          value={model.pivot_id}
+                          indexPattern={model.index_pattern}
+                          onChange={this.handlePivotChange}
+                          uiRestrictions={visData.uiRestrictions}
+                          type={'terms'}
+                          fullWidth
+                        />
+                      )}
+                    </VisDataContext.Consumer>
                   </EuiFormRow>
                 </EuiFlexItem>
                 <EuiFlexItem>
