@@ -49,23 +49,19 @@ export class Cache {
     this.codes = LmdbStore.open({
       name: 'codes',
       path: CACHE_DIR,
-      // @ts-expect-error See https://github.com/DoctorEvidence/lmdb-store/pull/18
       maxReaders: 500,
     });
 
-    // @ts-expect-error See https://github.com/DoctorEvidence/lmdb-store/pull/18
     this.atimes = this.codes.openDB({
       name: 'atimes',
       encoding: 'string',
     });
 
-    // @ts-expect-error See https://github.com/DoctorEvidence/lmdb-store/pull/18
     this.mtimes = this.codes.openDB({
       name: 'mtimes',
       encoding: 'string',
     });
 
-    // @ts-expect-error See https://github.com/DoctorEvidence/lmdb-store/pull/18
     this.sourceMaps = this.codes.openDB({
       name: 'sourceMaps',
       encoding: 'msgpack',
