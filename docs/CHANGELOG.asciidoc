@@ -10,74 +10,205 @@
 
 Review important information about {kib} releases. 
 
+* <<release-notes-prototype-minor>>
 * <<release-notes-prototype-major>>
 
 --
 
-[[release-notes-prototype-major]]
-== {kib} 7.0.0 released with a fresh, sleek look and more
+[[release-notes-prototype-minor]]
+== {kib} 7.0.1 released with minor enhancements, bug fixes, and more
 
+For detailed information about the 7.0.1 release, review the following sections.
 
+<<enhancements-7.0.1>> | <<breaking-changes-7.0.1>> | <<bug-fixes-7.0.1>> 
 
-To learn more about the {kib} 7.0.0 release, review the following:
+[float]
+[[enhancements-7.0.1]]
+=== Enhancements
+Management::
+* Enhances design for Search Profiler, including dark mode {kib-pull}33445[#33445]
+Visualize::
+* Sets a default timeout for all "waitFor" methods {kib-pull}34756[#34756]
 
-<<enhancements-7.0.0>> | <<breaking-changes-7.0.0>> | <<deprecations-7.0.0>> | <<bug-fixes-7.0.0>> | <<security-updates-7.0.0>> | <<known-issues-7.0.0>>
-
-[[breaking-changes-7.0.0]]
+[float]
+[[breaking-changes-7.0.1]]
 === Breaking changes
 
-The {kib} 7.0.0 release includes these breaking changes.
+Before you upgrade {kib}, review the <<breaking-changes-7.0.0, breaking changes>>.
 
-Discover::
-* Allows user to use advanced query DSL directly, and does not apply `query:queryString:options` to `query_string` filters automatically {pull}15640[#15640]
-* Removes `default_field` from `query:queryString:options` {pull}18966[#18966]
-* Makes KQL the default query language for new searches {pull}27092[#27092]
+[float]
+[[bug-fixes-7.0.1]]
+=== Bug fixes
+APM::
+* Updates APM migration reindex script {kib-pull}34801[#34801]
+Canvas::
+* Recreates handlers and resets completed state on expression change {kib-pull}33900[#33900]
+* Fixes bad context check {kib-pull}35621[#35621]
 Design::
-* Removes references to K6 EUI, using the default UI theme in its place {pull}29152[#29152]
+* Updates README for KUI to note deprecation {kib-pull}34389[#34389]
+* Resets heading and p tags to EUI font reset {kib-pull}33717[#33717]
+Console::
+* Changes autocomplete suggest for `number_of_shards` to default (1) {kib-pull}35657[#35657]
+Cross-Cluster Replication::
+* Updates the Delete Remote Cluster API to support multiple comma-delimited clusters {kib-pull}34595[#34595]
+* Allows user to use CCR when security is not enabled {kib-pull}35333[#35333]
+* Retrieves paused state of follower index from ES instead of depending upon the client to provide it {kib-pull}35342[#35342]
+* Fixes filling x-axis values for date histogram {kib-pull}35247[#35247]
 Geo::
-* Removes the deprecated `regionmap` and `tilemap` kibana.yml configurations. 
-Removes the backwards compatibility logic that checked for duplicative settings 
-`map.regionmap` and `map.tilemap`. {pull}28609[#28609]
+* Updates map name in breadcrumb when changed {kib-pull}34287[#34287]
+* Filters fields properly for join right field select {kib-pull}35098[#35098]
+* Clears data load error when layer gets correct data {kib-pull}34484[#34484]
+Index Lifecycle Management::
+* Fixes crash when zero replicas configured in a phase for policy {kib-pull}34480[#34480]
+Infrastructure::
+* Fixes metrics chart tooltip alignment {kib-pull}34749[#34749]
+* Sets [System][auth] program name correctly {kib-pull}34212[#34212]
+Kibana Home & Add Data::
+* Adds documentation link to Functionbeat to fix Getting Started Guide {kib-pull}35174[#35174]
+Machine Learning::
+* Ensures cardinality warning is only shown on validity fail {kib-pull}34874[#34874]
+* Adds data-test-subj to some job management elements {kib-pull}35284[#35284]
+* Ensures `viewByFieldName` is retained on Anomaly Explorer initialize {kib-pull}35260[#35260]
 Monitoring::
-* Refactors index patterns from configurable to constants {pull}29528[#29528]
-* Removes `node_resolver` setting {pull}21181[#21181]
-Management::
-* Adds `configPrefix` to Index Management, License Management, Rollup Jobs, and 
-Upgrade Assistant {pull}30149[#30149]
-* Standardizes use of `index_pattern` in UI code and URLs, replacing `indices` 
-and `index`  {pull}29151[#29151] and {pull}29481[#29481]
-* Removes app-specific dark mode options and replaces with a global dark mode uiSetting {pull}29017[#29017]
+* Monitors internal telemetry collection {kib-pull}34609[#34609]
+* Addresses shard allocation color mismatch {kib-pull}34086[#34086]
+* Protects against fields not existing in Logstash Nodes listing {kib-pull}34939[#34939]
+* Fixes field name for "Events Ingested" in Logstash Node List page {kib-pull}35122[#35122]
+* Swaps KUI base class with EUI equivalent {kib-pull}34644[#34644]
+* Allows empty and null key types {kib-pull}35016[#35016]
+* Adds sorting to all columns {kib-pull}35410[#35410]
+* Shows node name instead of UID in breadcrumbs {kib-pull}35553[#35553]
+Observability::
+* Removes crosshair synchronization to avoid display bug {kib-pull}33660[#33660]
+* Switches GQL field from Int to String {kib-pull}33746[#33746]
 Operations::
-* Defers the optimize step in the plugin installer to server start {pull}26983[#26983]
-* Removes tribe node support {pull}16397[#16397]
-* Creates separate startup scripts for development and production {pull}13806[#13806]
-* Sets default port based on protocol  {pull}21564[#21564]
-* Removes deprecated `/shorten` API {pull}21861[#21861]
+* Links stylesheets with `type=text/css` {kib-pull}35546[#35546]
+* Deletes empty stylesheet for status page {kib-pull}35540[#35540]
+* Enables delete of `watch_optimizer_cache_state.json` when data folder is outside of {kib} folder {kib-pull}32446[#32446]
+* Fixes missing flag checks {kib-pull}35187[#35187]
+* Adds ability to register callback for clean up {kib-pull}35119[#35119]
 Platform::
-* Removes deprecated `i18n.defaultLocale` setting {pull}29325[#29325]
-* Removes previously deprecated `elasticsearch*` settings. {pull}29496[#29496]
-* Adds new "references" attribute to saved objects for relationships {pull}28199[#28199]
-Reporting::
-* Removes Phantom dependency {pull}27142[#27142]
-Security::
-* Removes deprecated SSL settings {pull}28622[#28622]
-* Removes legacy fallback {pull}29107[#29107]
+* Fixes import UI to not fail silently when a record other than index-pattern and search is missing {kib-pull}33080[#33080]
+* Avoids validating saved object migrationVersion in tests where not needed {kib-pull}35010[#35010]
+* Exclude usage stats when `exclude_usage` flag is specified {kib-pull}35691[#35691]
+Upgrade Assistant::
+* Specifies `allow_restricted_indices` for `_has_privileges` {kib-pull}35125[#35125]
+* Shows different interstitial text when cluster is upgraded {kib-pull}34762[#34762]
 Visualizations::
-* Removes Timelion from the app switcher by default {pull}30131[#30131]
-* Removes nested table splits from table visualization {pull}26057[#26057]
+* Prevents saving the current timezone in visualizations {kib-pull}34795[#34795]
+* Fixes timepicker problem in Firefox {kib-pull}35279[#35279]
+* Fixes timepicker quick select {kib-pull}34354[#34354]
+* Applies timezone correctly to formatted dates and ticks {kib-pull}33831[#33831]
 
-[[security-updates-7.0.0]]
-=== Security updates
+[[release-notes-prototype-major]]
+== {kib} 7.0.0 released with a fresh, sleek design and more
 
-The {kib} 7.0.0 release includes these security updates.
+For detailed information about the 7.0.0 release, review the following sections.
 
-* In {kib} 7.8.1 and earlier, there is a denial of service (DoS) flaw in Timelion. Attackers can construct a URL that when viewed by a {kib} user, the {kib} process consumes large amounts of CPU and becomes unresponsive, CVE-2020-7016.
-+
-You must upgrade to 7.8.1. If you are unable to upgrade, set timelion.enabled to false in your kibana.yml file to disable Timelion.
+<<enhancements-7.0.0>> | <<security-updates-7.0.0>> | <<breaking-changes-7.0.0>> | <<deprecations-7.0.0>> | <<bug-fixes-7.0.0>> | <<known-issues-7.0.0>>
 
-* In all {kib} versions, region map visualizations contain a stored XSS flaw. Attackers that can edit or create region map visualizations can obtain sensitive information or perform destructive actions on behalf of {kib} users who view the region map visualization, CVE-2020-7017.
-+
-You must upgrade to 7.8.1. If you are unable to upgrade, set xpack.maps.enabled, region_map.enabled, and tile_map.enabled to false in kibana.yml to disable map visualizations.
+[float]
+=== Fresh, sleek design
+
+Since the introduction of the https://elastic.github.io/eui/#/[Elastic UI framework] in 6.2, 
+{kib} has undergone a major design revamp. This release showcases a lighter, more 
+minimal design that brings it all together. The biggest change is a persistent global header, which 
+displays information related to where you are in {kib}. The side navigation 
+is now collapsed by default, giving applications more horizontal space. 
+Dashboards and most of the {kib} applications also got much needed touch-ups. 
+Finally, the font changed to https://rsms.me/inter/[Inter UI], which is closer to 
+more modern system fonts found on your OS of choice. 
+
+
+[role="screenshot"]
+image::images/highlights-7.0.0-design.png[Fresh, sleek Kibana design]
+
+[float]
+=== {kib} Query Language on by default
+
+In 6.3, {kib} introduced the
+{kibana-ref}/kuery-query.html[Kibana Query Language (KQL)], and in 7.0.0, 
+KQL is the default.  KQL offers a simplified query syntax and support for 
+scripted fields. If you have a https://www.elastic.co/subscriptions[Basic license]
+(the default distribution) or above, KQL also provides 
+autocomplete. If you prefer the
+{kibana-ref}/lucene-query.html[Lucene query syntax], you have the option 
+to turn off KQL.
+
+[role="screenshot"]
+image::images/highlights-7.0.0-kql.png[Kibana Query Language]
+
+[float]
+=== {kib} dark theme
+
+{kib} now supports a dark theme across the entire application. To try out this theme, go
+to *Management > Advanced settings*, flip the dark mode switch, and reload your
+page. Because theme selection is saved at the {kibana-ref}/xpack-spaces.html[Spaces] level, 
+you can no longer set a dark or light theme on an individual dashboard.
+
+[role="screenshot"]
+image::images/highlights-7.0.0-dark-theme.png[Kibana dark theme]
+
+
+[float]
+=== Responsive dashboards
+
+experimental[] As part of the enhancements to {kib} dashboards in 7.0, 
+the design is
+more responsive. If you want to view and interact with {kib} on the go, 
+pull it up on your phone and test out this new, experimental responsive layout.
+
+
+[role="screenshot"]
+image::images/highlights-7.0.0-responsive.png[Responsive dashboard]
+
+
+[float]
+=== New look for timepicker and filters
+
+The timepicker now makes it easier to deal with complex date queries.  For example,
+you can mix relative times with absolute ones. The timepicker design is also improved.
+The control no longer pushes the content down the page as you interact 
+with it. The design is also more compact, which is necessary 
+to make it work better on mobile dashboards.
+
+[role="screenshot"]
+image::images/highlights-7.0.0-timepicker.png[Kibana timepicker]
+
+Filters are enhanced in two ways.  Each filter now provides a dropdown menu 
+that clearly defines the actions you can take on the filter. There’s also a 
+new menu for dealing with filters in bulk.
+
+[role="screenshot"]
+image::images/highlights-7.0.0-filters.png[Filters menu]
+
+[float]
+=== Saved objects structure improvements
+
+The {kibana-ref}/breaking-changes-7.0.html#breaking-changes-7.0-saved-objects[structure of saved objects changed],
+so that they are now aware of each other.  
+This means you can now export a dashboard, including all visualization dependencies, 
+from the Saved objects page. 
+You can also easily move objects from one {kib} instance to another or 
+between Spaces.
+
+[float]
+=== Canvas enhancements
+
+Canvas has two notable improvements: an expandable expression editor and 
+additional keyboard shortcuts. 
+
+To maximize or minimize the expression editor, 
+use the expand button image:images/highlights-7.0.0-expand.png[]
+in the top right corner of the editor. To adjust the font size, use the slider 
+at the bottom.
+
+Canvas has more keyboard shortcuts for moving elements to the front and 
+back and for copying your elements. To discover all shortcuts available in Canvas, 
+click the help icon.
+
+[role="screenshot"]
+image::images/highlights-7.0.0-canvas-kbd.png[]
 
 [[enhancements-7.0.0]]
 === Enhancements
@@ -193,6 +324,76 @@ stage available {pull}25702[#25702]
 * Displays interval information in Time Series Visual Builder when building {pull}32117[#32117]
 * Adds controls to toggle disable/enable individual series and annotations {pull}33107[#33107]
 * Updates Vega to version 4 {pull}30628[#30628]
+
+[[security-updates-7.0.0]]
+=== Security updates
+
+The {kib} 7.0.0 release includes these security updates.
+
+* In {kib} 7.8.1 and earlier, there is a denial of service (DoS) flaw in Timelion. Attackers can construct a URL that when viewed by a {kib} user, the {kib} process consumes large amounts of CPU and becomes unresponsive, CVE-2020-7016.
++
+You must upgrade to 7.8.1. If you are unable to upgrade, set timelion.enabled to false in your kibana.yml file to disable Timelion.
+
+* In all {kib} versions, region map visualizations contain a stored XSS flaw. Attackers that can edit or create region map visualizations can obtain sensitive information or perform destructive actions on behalf of {kib} users who view the region map visualization, CVE-2020-7017.
++
+You must upgrade to 7.8.1. If you are unable to upgrade, set xpack.maps.enabled, region_map.enabled, and tile_map.enabled to false in kibana.yml to disable map visualizations.
+
+[[breaking-changes-7.0.0]]
+=== Breaking changes
+
+The {kib} 7.0.0 release includes these breaking changes.
+
+Discover::
+* Allows user to use advanced query DSL directly, and does not apply `query:queryString:options` to `query_string` filters automatically {pull}15640[#15640]
+* Removes `default_field` from `query:queryString:options` {pull}18966[#18966]
+* Makes KQL the default query language for new searches {pull}27092[#27092]
+Design::
+* Removes references to K6 EUI, using the default UI theme in its place {pull}29152[#29152]
+Geo::
+* Removes the deprecated `regionmap` and `tilemap` kibana.yml configurations. 
+Removes the backwards compatibility logic that checked for duplicative settings 
+`map.regionmap` and `map.tilemap`. {pull}28609[#28609]
+Monitoring::
+* Refactors index patterns from configurable to constants {pull}29528[#29528]
+* Removes `node_resolver` setting {pull}21181[#21181]
+Management::
+* Adds `configPrefix` to Index Management, License Management, Rollup Jobs, and 
+Upgrade Assistant {pull}30149[#30149]
+* Standardizes use of `index_pattern` in UI code and URLs, replacing `indices` 
+and `index`  {pull}29151[#29151] and {pull}29481[#29481]
+* Removes app-specific dark mode options and replaces with a global dark mode uiSetting {pull}29017[#29017]
+Operations::
+* Defers the optimize step in the plugin installer to server start {pull}26983[#26983]
+* Removes tribe node support {pull}16397[#16397]
+* Creates separate startup scripts for development and production {pull}13806[#13806]
+* Sets default port based on protocol  {pull}21564[#21564]
+* Removes deprecated `/shorten` API {pull}21861[#21861]
+Platform::
+* Removes deprecated `i18n.defaultLocale` setting {pull}29325[#29325]
+* Removes previously deprecated `elasticsearch*` settings. {pull}29496[#29496]
+* Adds new "references" attribute to saved objects for relationships {pull}28199[#28199]
+Reporting::
+* Removes Phantom dependency {pull}27142[#27142]
+Security::
+* Removes deprecated SSL settings {pull}28622[#28622]
+* Removes legacy fallback {pull}29107[#29107]
+Visualizations::
+* Removes Timelion from the app switcher by default {pull}30131[#30131]
+* Removes nested table splits from table visualization {pull}26057[#26057]
+
+[[deprecations-7.0.0]]
+=== Deprecations
+
+The {kib} 7.0.0 release includes these deprecations.
+
+Geo::
+* Fixes legacy tilemap loading {pull}22095[#22095]
+Machine Learning::
+* Updates REST endpoint calls to remove _xpack {pull}28069[#28069]
+Visualizations::
+* Removes old visualize wizard URL {pull}28982[#28982]
+* Removes legacy response handler {pull}28985[#28985]
+* Removes `legacyIcon` from visualizations {pull}28981[#28981]
 
 [[bug-fixes-7.0.0]]
 === Bug fixes
@@ -554,17 +755,3 @@ Monitoring::
 * If you have a version 7.0 monitoring cluster, a version 6.7 production
 cluster and {kib} version 6.7.0 or 6.7.1, you cannot see the monitoring data in 
 {kib}. {issue}34357[#34357]
-
-[[deprecations-7.0.0]]
-=== Deprecations
-
-The {kib} 7.0.0 release includes these deprecations.
-
-Geo::
-* Fixes legacy tilemap loading {pull}22095[#22095]
-Machine Learning::
-* Updates REST endpoint calls to remove _xpack {pull}28069[#28069]
-Visualizations::
-* Removes old visualize wizard URL {pull}28982[#28982]
-* Removes legacy response handler {pull}28985[#28985]
-* Removes `legacyIcon` from visualizations {pull}28981[#28981]
