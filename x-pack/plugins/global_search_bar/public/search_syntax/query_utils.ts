@@ -13,9 +13,6 @@ export const getFieldValueMap = (query: Query) => {
   query.ast.clauses.forEach((clause) => {
     if (clause.type === 'field') {
       const { field, value } = clause;
-      if (!fieldMap.has(field)) {
-        fieldMap.set(field, []);
-      }
       fieldMap.set(field, [
         ...(fieldMap.get(field) ?? []),
         ...((Array.isArray(value) ? value : [value]) as FilterValues),

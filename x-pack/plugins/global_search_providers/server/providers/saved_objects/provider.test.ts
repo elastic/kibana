@@ -129,7 +129,7 @@ describe('savedObjectsResultProvider', () => {
     });
   });
 
-  it('filters searched types depending on the `types` parameter', async () => {
+  it('filters searchable types depending on the `types` parameter', async () => {
     await provider.find({ term: 'term', types: ['typeA'] }, defaultOption, context).toPromise();
 
     expect(context.core.savedObjects.client.find).toHaveBeenCalledTimes(1);
