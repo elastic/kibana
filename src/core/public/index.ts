@@ -167,7 +167,16 @@ export {
   IHttpResponseInterceptorOverrides,
 } from './http';
 
-export { OverlayStart, OverlayBannersStart, OverlayRef } from './overlays';
+export {
+  OverlayStart,
+  OverlayBannersStart,
+  OverlayRef,
+  OverlayFlyoutStart,
+  OverlayFlyoutOpenOptions,
+  OverlayModalOpenOptions,
+  OverlayModalConfirmOptions,
+  OverlayModalStart,
+} from './overlays';
 
 export {
   Toast,
