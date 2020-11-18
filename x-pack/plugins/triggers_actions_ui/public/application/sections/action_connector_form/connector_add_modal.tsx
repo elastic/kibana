@@ -57,6 +57,7 @@ export const ConnectorAddModal = ({
   consumer,
 }: ConnectorAddModalProps) => {
   let hasErrors = false;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const initialConnector = {
     actionTypeId: actionType.id,
     config: {},
