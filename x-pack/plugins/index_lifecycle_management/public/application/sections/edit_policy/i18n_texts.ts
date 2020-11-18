@@ -46,6 +46,12 @@ export const i18nTexts = {
         defaultMessage: 'Select a node attribute',
       }
     ),
+    searchableSnapshotsFieldLabel: i18n.translate(
+      'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotFieldLabel',
+      {
+        defaultMessage: 'Searchable snapshot (optional)',
+      }
+    ),
     errors: {
       numberRequired: i18n.translate(
         'xpack.indexLifecycleMgmt.editPolicy.errors.numberRequiredErrorMessage',

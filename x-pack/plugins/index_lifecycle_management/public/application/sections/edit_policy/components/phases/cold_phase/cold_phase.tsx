@@ -19,7 +19,12 @@ import { useEditPolicyContext } from '../../../edit_policy_context';
 
 import { LearnMoreLink, ActiveBadge, DescribedFormField } from '../../';
 
-import { MinAgeInputField, DataTierAllocationField, SetPriorityInput } from '../shared_fields';
+import {
+  MinAgeInputField,
+  DataTierAllocationField,
+  SetPriorityInput,
+  SearchableSnapshotsField,
+} from '../shared_fields';
 
 const i18nTexts = {
   dataTierAllocation: {
@@ -91,6 +96,7 @@ export const ColdPhase: FunctionComponent = () => {
         </EuiDescribedFormGroup>
         {enabled && (
           <>
+            <SearchableSnapshotsField phase="cold" />
             {/* Data tier allocation section */}
             <DataTierAllocationField
               description={i18nTexts.dataTierAllocation.description}

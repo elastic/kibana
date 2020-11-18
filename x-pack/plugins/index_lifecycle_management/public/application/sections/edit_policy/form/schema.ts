@@ -183,6 +183,11 @@ export const schema: FormSchema<FormInternal> = {
             serializer: serializers.stringToNumber,
           },
         },
+        searchable_snapshot: {
+          snapshot_repository: {
+            label: i18nTexts.editPolicy.searchableSnapshotsFieldLabel,
+          },
+        },
       },
     },
     warm: {

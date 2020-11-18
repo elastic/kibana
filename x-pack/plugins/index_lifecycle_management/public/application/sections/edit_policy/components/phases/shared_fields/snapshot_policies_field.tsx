@@ -9,17 +9,13 @@ import { get } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
-import {
-  EuiButtonIcon,
-  EuiCallOut,
-  EuiComboBoxOptionOption,
-  EuiLink,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiCallOut, EuiComboBoxOptionOption, EuiLink, EuiSpacer } from '@elastic/eui';
 
 import { UseField, ComboBoxField, useFormData } from '../../../../../../shared_imports';
 import { useLoadSnapshotPolicies } from '../../../../../services/api';
 import { useEditPolicyContext } from '../../../edit_policy_context';
+
+import { FieldLoadingError } from '../../';
 
 const waitForSnapshotFormField = 'phases.delete.actions.wait_for_snapshot.policy';
 
@@ -46,40 +42,28 @@ export const SnapshotPoliciesField: React.FunctionComponent = () => {
   let calloutContent;
   if (error) {
     calloutContent = (
-      <>
-        <EuiSpacer size="m" />
-        <EuiCallOut
-          data-test-subj="policiesErrorCallout"
-          iconType="help"
-          color="warning"
-          title={
-            <>
-              <FormattedMessage
-                id="xpack.indexLifecycleMgmt.editPolicy.deletePhase.noPoliciesLoadedTitle"
-                defaultMessage="Unable to load existing policies"
-              />
-
-              <EuiButtonIcon
-                size="s"
-                color="warning"
-                onClick={resendRequest}
-                iconType="refresh"
-                aria-label={i18n.translate(
-                  'xpack.indexLifecycleMgmt.editPolicy.deletePhase.reloadPoliciesLabel',
-                  {
-                    defaultMessage: 'Reload policies',
-                  }
-                )}
-              />
-            </>
+      <FieldLoadingError
+        resendRequest={resendRequest}
+        data-test-subj="policiesErrorCallout"
+        aria-label={i18n.translate(
+          'xpack.indexLifecycleMgmt.editPolicy.deletePhase.reloadPoliciesLabel',
+          {
+            defaultMessage: 'Reload policies',
           }
-        >
+        )}
+        title={
+          <FormattedMessage
+            id="xpack.indexLifecycleMgmt.editPolicy.deletePhase.noPoliciesLoadedTitle"
+            defaultMessage="Unable to load existing policies"
+          />
+        }
+        body={
           <FormattedMessage
             id="xpack.indexLifecycleMgmt.editPolicy.deletePhase.noPoliciesLoadedMessage"
             defaultMessage="Refresh this field and enter the name of an existing snapshot policy."
           />
-        </EuiCallOut>
-      </>
+        }
+      />
     );
   } else if (data.length === 0) {
     calloutContent = (
