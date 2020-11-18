@@ -183,12 +183,12 @@ export class UiActionsService {
   ): Promise<Array<Action<TriggerContextMapping[T]>>> => {
     const actions = this.getTriggerActions!(triggerId);
     const isCompatibles = await Promise.all(
-      actions.map((action) => {
-        return action.isCompatible({
+      actions.map((action) =>
+        action.isCompatible({
           ...context,
           trigger: this.getTrigger(triggerId),
         })
-      })
+      )
     );
     return actions.reduce(
       (acc: Array<Action<TriggerContextMapping[T]>>, action, i) =>
