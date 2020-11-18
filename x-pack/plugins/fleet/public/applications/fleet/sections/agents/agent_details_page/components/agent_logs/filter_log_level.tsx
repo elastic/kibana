@@ -58,6 +58,7 @@ export const LogLevelFilter: React.FunctionComponent<{
       }
       isOpen={isOpen}
       closePopover={() => setIsOpen(false)}
+      panelPaddingSize="none"
     >
       {levelValues.map((level) => (
         <EuiFilterSelectItem

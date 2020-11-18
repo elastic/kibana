@@ -58,6 +58,7 @@ export const DatasetFilter: React.FunctionComponent<{
       }
       isOpen={isOpen}
       closePopover={() => setIsOpen(false)}
+      panelPaddingSize="none"
     >
       {datasetValues.map((dataset) => (
         <EuiFilterSelectItem
