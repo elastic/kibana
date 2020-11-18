@@ -19,7 +19,7 @@
 
 import { set } from '@elastic/safer-lodash-set';
 
-import { Keystore } from '../../legacy/server/keystore';
+import { Keystore } from '../keystore';
 import { getKeystore } from '../../cli_keystore/get_keystore';
 
 export function readKeystore(keystorePath = getKeystore()) {
