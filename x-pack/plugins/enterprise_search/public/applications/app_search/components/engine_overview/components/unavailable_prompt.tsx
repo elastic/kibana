@@ -22,7 +22,7 @@ export const UnavailablePrompt: React.FC = () => (
     body={
       <p>
         {i18n.translate('xpack.enterpriseSearch.appSearch.engine.overview.unavailableBody', {
-          defaultMessage: 'Please try again in a few minutes',
+          defaultMessage: 'Please try again in a few minutes.',
         })}
       </p>
     }
