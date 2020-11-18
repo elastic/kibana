@@ -455,6 +455,7 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
         successCallback();
       } catch (e) {
         flashAPIErrors(e);
+      } finally {
         actions.setButtonNotLoading();
       }
     },
@@ -487,6 +488,7 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
         successCallback(response.oauthUrl);
       } catch (e) {
         flashAPIErrors(e);
+      } finally {
         actions.setButtonNotLoading();
       }
     },
@@ -560,8 +562,9 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
         if (successCallback) successCallback();
       } catch (e) {
         flashAPIErrors(e);
-        actions.setButtonNotLoading();
         if (!isUpdating) throw new Error(e);
+      } finally {
+        actions.setButtonNotLoading();
       }
     },
     createContentSource: async ({ serviceType, successCallback, errorCallback }) => {
@@ -599,9 +602,10 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
         successCallback();
       } catch (e) {
         flashAPIErrors(e);
-        actions.setButtonNotLoading();
         if (errorCallback) errorCallback();
         throw new Error('Auth Error');
+      } finally {
+        actions.setButtonNotLoading();
       }
     },
     onUpdateSourceName: (name: string) => {
