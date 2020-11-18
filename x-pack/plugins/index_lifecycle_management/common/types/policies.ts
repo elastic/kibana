@@ -93,7 +93,6 @@ export interface SerializedColdPhase extends SerializedPhase {
     /**
      * Only available on enterprise license
      */
-
     searchable_snapshot?: {
       snapshot_repository: string;
     };

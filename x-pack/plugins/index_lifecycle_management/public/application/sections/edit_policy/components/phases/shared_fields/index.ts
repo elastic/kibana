@@ -16,4 +16,4 @@ export { MinAgeInputField } from './min_age_input_field';
 
 export { SnapshotPoliciesField } from './snapshot_policies_field';
 
-export { SearchableSnapshotsField } from './searcable_snapshots_field';
+export { SearchableSnapshotsField } from './searchable_snapshots_field';
