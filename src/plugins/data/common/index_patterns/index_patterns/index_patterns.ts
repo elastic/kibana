@@ -219,7 +219,7 @@ export class IndexPatternsService {
    */
   getFieldsForWildcard = async (options: GetFieldsOptions) => {
     const metaFields = await this.config.get(UI_SETTINGS.META_FIELDS);
-    return this.apiClient.getFieldsForWildcard({
+    return await this.apiClient.getFieldsForWildcard({
       pattern: options.pattern,
       metaFields,
       type: options.type,
@@ -235,7 +235,7 @@ export class IndexPatternsService {
     indexPattern: IndexPattern | IndexPatternSpec,
     options?: GetFieldsOptions
   ) =>
-    this.getFieldsForWildcard({
+    await this.getFieldsForWildcard({
       type: indexPattern.type,
       rollupIndex: indexPattern?.typeMeta?.params?.rollup_index,
       ...options,

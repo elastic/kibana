@@ -19,6 +19,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { IRouter } from 'src/core/server';
+import { handleErrors } from './util/handle_errors';
 
 const serializedFieldFormatSchema = schema.object({
   id: schema.maybe(schema.string()),
@@ -99,23 +100,25 @@ export const registerCreateIndexPatternRoute = (router: IRouter) => {
         }),
       },
     },
-    router.handleLegacyErrors(async (ctx, req, res) => {
-      if (!ctx.indexPatterns) throw new Error('Index pattern context is missing.');
+    router.handleLegacyErrors(
+      handleErrors(async (ctx, req, res) => {
+        if (!ctx.indexPatterns) throw new Error('Index pattern context is missing.');
 
-      const ip = ctx.indexPatterns.indexPatterns;
-      const body = req.body;
-      const indexPattern = await ip.createAndSave(
-        body.index_pattern,
-        body.override || false,
-        body.skip_field_refresh || false,
-        body.make_default || true
-      );
+        const ip = ctx.indexPatterns.indexPatterns;
+        const body = req.body;
+        const indexPattern = await ip.createAndSave(
+          body.index_pattern,
+          body.override || false,
+          body.skip_field_refresh || false,
+          body.make_default || true
+        );
 
-      return res.ok({
-        body: JSON.stringify({
-          index_pattern: indexPattern.toSpec(),
-        }),
-      });
-    })
+        return res.ok({
+          body: JSON.stringify({
+            index_pattern: indexPattern.toSpec(),
+          }),
+        });
+      })
+    )
   );
 };
