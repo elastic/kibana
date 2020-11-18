@@ -6,10 +6,10 @@
 
 import _ from 'lodash';
 import { SearchResponse } from 'elasticsearch';
+import { Logger } from 'src/core/server';
 import { executeEsQueryFactory, getShapesFilters, OTHER_CATEGORY } from './es_query_builder';
 import { AlertServices, AlertTypeState } from '../../../../alerts/server';
 import { ActionGroupId, GEO_THRESHOLD_ID, GeoThresholdParams } from './alert_type';
-import { Logger } from '../../types';
 
 interface LatestEntityLocation {
   location: number[];
@@ -38,7 +38,7 @@ export function transformResults(
         return _.map(subBuckets, (subBucket) => {
           const locationFieldResult = _.get(
             subBucket,
-            `entityHits.hits.hits[0].fields.${geoField}[0]`,
+            `entityHits.hits.hits[0].fields["${geoField}"][0]`,
             ''
           );
           const location = locationFieldResult
@@ -50,7 +50,7 @@ export function transformResults(
             : null;
           const dateInShape = _.get(
             subBucket,
-            `entityHits.hits.hits[0].fields.${dateField}[0]`,
+            `entityHits.hits.hits[0].fields["${dateField}"][0]`,
             null
           );
           const docId = _.get(subBucket, `entityHits.hits.hits[0]._id`);
@@ -169,7 +169,7 @@ function getOffsetTime(delayOffsetWithUnits: string, oldTime: Date): Date {
   return adjustedDate;
 }
 
-export const getGeoThresholdExecutor = ({ logger: log }: { logger: Logger }) =>
+export const getGeoThresholdExecutor = (log: Logger) =>
   async function ({
     previousStartedAt,
     startedAt,
