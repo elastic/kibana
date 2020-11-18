@@ -207,6 +207,22 @@ export const sampleDocSeverity = (
   sort: [],
 });
 
+export const sampleDocRiskScore = (riskScore?: unknown): SignalSourceHit => ({
+  _index: 'myFakeSignalIndex',
+  _type: 'doc',
+  _score: 100,
+  _version: 1,
+  _id: sampleIdGuid,
+  _source: {
+    someKey: 'someValue',
+    '@timestamp': '2020-04-20T21:27:45+0000',
+    event: {
+      risk: riskScore,
+    },
+  },
+  sort: [],
+});
+
 export const sampleEmptyDocSearchResults = (): SignalSearchResponse => ({
   took: 10,
   timed_out: false,
