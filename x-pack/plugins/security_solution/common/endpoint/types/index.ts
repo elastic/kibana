@@ -139,6 +139,7 @@ export interface ResolverNode {
 export interface ResolverGraphNode {
   nodeId: string | number | undefined;
   parent: string | number | undefined; // TODO: neighbors (or adjacents): string[];
+  name: string | number | undefined;
   data: unknown;
   stats: EventStats;
   // TODO: add name

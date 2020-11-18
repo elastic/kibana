@@ -407,15 +407,13 @@ const UnstyledProcessEventDot = React.memo(
                 maxWidth: `${isShowingEventActions ? 400 : 210 * xScale}px`,
               }}
               tabIndex={-1}
-              // TODO: switch to use name when we have it
-              title={nodeModel.nodeID(node)}
+              title={nodeModel.nodeName(node)}
               data-test-subj="resolver:node:primary-button"
               data-test-resolver-node-id={nodeID}
             >
               <span className="euiButton__content">
                 <span className="euiButton__text" data-test-subj={'euiButton__text'}>
-                  {/* TODO: switch to use name when we have it */}
-                  {nodeModel.nodeID(node)}
+                  {nodeModel.nodeName(node)}
                 </span>
               </span>
             </EuiButton>

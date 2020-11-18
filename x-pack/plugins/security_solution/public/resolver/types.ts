@@ -596,6 +596,7 @@ export interface IsometricTaxiLayout {
 export interface GraphRequestIdSchema {
   id: string;
   parent: string; // TODO: Maybe change this to neighbors or adjacents as a more general purpose graph.
+  name: string;
 }
 
 export interface GraphRequestTimerange {

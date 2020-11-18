@@ -91,7 +91,7 @@ export const NodeList = memo(() => {
       const { graphNodePositions } = selectors.layout(state);
       const view: ProcessTableView[] = [];
       for (const graphNode of graphNodePositions.keys()) {
-        const name = nodeModel.nodeID(graphNode); // TODO: get nodeName rather than -> eventModel.processNameSafeVersion(graphNode);
+        const name = nodeModel.nodeName(graphNode);
         const nodeID = nodeModel.nodeID(graphNode);
         if (nodeID !== undefined) {
           view.push({

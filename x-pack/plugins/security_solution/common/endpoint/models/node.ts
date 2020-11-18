@@ -32,3 +32,11 @@ export function nodeDataTimestamp(node: ResolverGraphNode): undefined | number {
 
   return nodeData?.['@timestamp'] ? firstNonNullValue(nodeData?.['@timestamp']) : undefined;
 }
+
+/**
+ * @description - Extract the first non null value from the node name depending on the datasource. If it was never set
+ * default to the ID, and if no ID, then undefined
+ */
+export function nodeName(node: ResolverGraphNode): string | undefined {
+  return node?.name ? String(firstNonNullValue(node.name)) : nodeID(node);
+}

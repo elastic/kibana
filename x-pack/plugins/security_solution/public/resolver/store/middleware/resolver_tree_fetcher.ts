@@ -37,6 +37,7 @@ const convertNodesToResolverGraphFormat = (
   return data.reduce((resolverNodes: ResolverGraphNode[], current: ResolverNode) => {
     const nodeId = current.data[schema.id];
     const parent = current.data[schema.parent];
+    const name = current.data[schema.name];
 
     if (!nodeId || !Array.isArray(nodeId)) return resolverNodes;
 
@@ -44,6 +45,7 @@ const convertNodesToResolverGraphFormat = (
       ...current,
       nodeId: firstNonNullValue(nodeId),
       parent: firstNonNullValue(parent),
+      name: firstNonNullValue(name),
     });
 
     return resolverNodes;
@@ -84,8 +86,9 @@ export function ResolverTreeFetcher(
 
     const graphRequestIdSchema = {
       id: 'process.entity_id',
+      name: 'process.name',
       parent: 'process.parent.entity_id',
-      ancestry: 'process.Ext.ancestry',
+      // ancestry: 'process.Ext.ancestry',
     };
 
     let entityIDToFetch: string | null = null;
