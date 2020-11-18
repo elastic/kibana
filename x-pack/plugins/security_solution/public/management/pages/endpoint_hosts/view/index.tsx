@@ -492,6 +492,7 @@ export const EndpointList = () => {
         ],
       },
     ];
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formatUrl, queryParams, search, agentPolicies, services?.application?.getUrlForApp]);
 
   const renderTableOrEmptyState = useMemo(() => {
