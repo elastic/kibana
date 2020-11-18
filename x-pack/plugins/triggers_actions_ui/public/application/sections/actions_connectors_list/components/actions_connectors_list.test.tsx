@@ -50,7 +50,7 @@ describe('actions_connectors_list component empty', () => {
     // eslint-disable-next-line react-hooks/rules-of-hooks
     useKibanaMock().services.actionTypeRegistry = actionTypeRegistry;
     // eslint-disable-next-line react-hooks/rules-of-hooks
-    useKibanaMock().services.capabilities = {
+    useKibanaMock().services.application.capabilities = {
       ...capabilities,
       actions: {
         delete: true,
@@ -136,7 +136,7 @@ describe('actions_connectors_list component with items', () => {
     // eslint-disable-next-line react-hooks/rules-of-hooks
     useKibanaMock().services.actionTypeRegistry = actionTypeRegistry;
     // eslint-disable-next-line react-hooks/rules-of-hooks
-    useKibanaMock().services.capabilities = {
+    useKibanaMock().services.application.capabilities = {
       ...capabilities,
       actions: {
         delete: true,
@@ -198,7 +198,7 @@ describe('actions_connectors_list component empty with show only capability', ()
     // eslint-disable-next-line react-hooks/rules-of-hooks
     useKibanaMock().services.actionTypeRegistry = actionTypeRegistry;
     // eslint-disable-next-line react-hooks/rules-of-hooks
-    useKibanaMock().services.capabilities = {
+    useKibanaMock().services.application.capabilities = {
       ...capabilities,
       actions: {
         show: true,
@@ -259,7 +259,7 @@ describe('actions_connectors_list with show only capability', () => {
     ] = await mocks.getStartServices();
 
     // eslint-disable-next-line react-hooks/rules-of-hooks
-    useKibanaMock().services.capabilities = {
+    useKibanaMock().services.application.capabilities = {
       ...capabilities,
       actions: {
         show: true,
@@ -334,7 +334,7 @@ describe('actions_connectors_list component with disabled items', () => {
     ] = await mocks.getStartServices();
 
     // eslint-disable-next-line react-hooks/rules-of-hooks
-    useKibanaMock().services.capabilities = {
+    useKibanaMock().services.application.capabilities = {
       ...capabilities,
       actions: {
         show: true,

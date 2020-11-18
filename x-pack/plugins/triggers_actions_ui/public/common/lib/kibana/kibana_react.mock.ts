@@ -6,7 +6,7 @@
 
 import React from 'react';
 
-import { coreMock } from '../../../../../../../src/core/public/mocks';
+import { coreMock, scopedHistoryMock } from '../../../../../../../src/core/public/mocks';
 import { KibanaContextProvider } from '../../../../../../../src/plugins/kibana_react/public';
 import { TriggersAndActionsUiServices } from '../../../application/app';
 import { ValidationResult } from '../../../types';
@@ -30,10 +30,12 @@ export const createStartServicesMock = (): TriggersAndActionsUiServices => {
       actionTypeRegistry: jest.fn(),
       list: jest.fn(),
     },
-    capabilities: {
-      get: jest.fn(() => ({})),
+    application: {
+      capabilities: {
+        get: jest.fn(() => ({})),
+      },
     },
-    toastNotifications: core.notifications.toasts,
+    notifications: core.notifications,
     dataPlugin: jest.fn(),
     navigateToApp: jest.fn(),
     alerts: {
@@ -41,6 +43,8 @@ export const createStartServicesMock = (): TriggersAndActionsUiServices => {
         id === 'alert-with-nav' ? { path: '/alert' } : undefined
       ),
     },
+    history: scopedHistoryMock.create(),
+    setBreadcrumbs: jest.fn(),
   } as unknown) as TriggersAndActionsUiServices;
 };
 

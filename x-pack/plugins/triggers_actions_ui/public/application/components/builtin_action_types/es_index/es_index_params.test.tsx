@@ -6,6 +6,7 @@
 import React from 'react';
 import { mountWithIntl } from '@kbn/test/jest';
 import ParamsFields from './es_index_params';
+jest.mock('../../../../common/lib/kibana');
 
 describe('IndexParamsFields renders', () => {
   test('all params fields is rendered', () => {

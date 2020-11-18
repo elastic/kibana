@@ -6,16 +6,12 @@
 import React from 'react';
 import { mountWithIntl } from '@kbn/test/jest';
 import ResilientParamsFields from './resilient_params';
-import { DocLinksStart } from 'kibana/public';
-
 import { useGetIncidentTypes } from './use_get_incident_types';
 import { useGetSeverity } from './use_get_severity';
-import { coreMock } from 'src/core/public/mocks';
-
-const mocks = coreMock.createSetup();
 
 jest.mock('./use_get_incident_types');
 jest.mock('./use_get_severity');
+jest.mock('../../../../common/lib/kibana');
 
 const useGetIncidentTypesMock = useGetIncidentTypes as jest.Mock;
 const useGetSeverityMock = useGetSeverity as jest.Mock;

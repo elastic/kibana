@@ -33,6 +33,7 @@ import {
   ActionConnector,
   ActionVariables,
   ActionVariable,
+  ActionTypeRegistryContract,
 } from '../../../types';
 import { checkActionFormActionTypeEnabled } from '../../lib/check_action_type_enabled';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
@@ -54,6 +55,7 @@ export type ActionTypeFormProps = {
   setActionParamsProperty: (key: string, value: any, index: number) => void;
   actionTypesIndex: ActionTypeIndex;
   connectors: ActionConnector[];
+  actionTypeRegistry: ActionTypeRegistryContract;
 } & Pick<
   ActionAccordionFormProps,
   | 'defaultActionGroupId'
@@ -87,9 +89,9 @@ export const ActionTypeForm = ({
   messageVariables,
   actionGroups,
   setActionGroupIdByIndex,
+  actionTypeRegistry,
 }: ActionTypeFormProps) => {
   const {
-    actionTypeRegistry,
     application: { capabilities },
   } = useKibana().services;
   const [isOpen, setIsOpen] = useState(true);

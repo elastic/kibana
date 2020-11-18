@@ -344,6 +344,7 @@ export const ActionForm = ({
               onConnectorSelected={(id: string) => {
                 setActionIdByIndex(id, index);
               }}
+              actionTypeRegistry={actionTypeRegistry}
               onDeleteAction={() => {
                 const updatedActions = actions.filter(
                   (_item: AlertAction, i: number) => i !== index
