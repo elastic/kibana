@@ -27,6 +27,12 @@ export const getBulkDeleteAction = ({
     label: i18n.translate('xpack.savedObjectsTagging.management.actions.bulkDelete.label', {
       defaultMessage: 'Delete',
     }),
+    'aria-label': i18n.translate(
+      'xpack.savedObjectsTagging.management.actions.bulkDelete.ariaLabel',
+      {
+        defaultMessage: 'Delete selected tags',
+      }
+    ),
     icon: 'trash',
     refreshAfterExecute: true,
     execute: async (tagIds) => {
