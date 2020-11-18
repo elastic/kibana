@@ -22,19 +22,20 @@ import { KibanaContext } from '../../data/public';
 import { getTimezone, validateInterval } from './application';
 import { getUISettings, getDataStart, getCoreStart } from './services';
 import { MAX_BUCKETS_SETTING, ROUTES } from '../common/constants';
-import { PanelSchema } from '../common/types';
+import { TimeseriesVisParams } from './metrics_fn';
+import { TimeseriesVisData } from './types';
 
 interface MetricsRequestHandlerParams {
   input: KibanaContext | null;
   uiState: Record<string, any>;
-  visParams: PanelSchema;
+  visParams: TimeseriesVisParams;
 }
 
 export const metricsRequestHandler = async ({
   input,
   uiState,
   visParams,
-}: MetricsRequestHandlerParams) => {
+}: MetricsRequestHandlerParams): Promise<TimeseriesVisData | {}> => {
   const config = getUISettings();
   const timezone = getTimezone(config);
   const uiStateObj = uiState[visParams.type] ?? {};

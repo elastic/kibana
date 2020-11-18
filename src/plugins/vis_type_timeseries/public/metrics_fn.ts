@@ -23,6 +23,7 @@ import { ExpressionFunctionDefinition, Render } from '../../expressions/public';
 
 import { PanelSchema } from '../common/types';
 import { metricsRequestHandler } from './request_handler';
+import { TimeseriesVisData } from './types';
 
 type Input = KibanaContext | null;
 type Output = Promise<Render<TimeseriesRenderValue>>;
@@ -35,10 +36,8 @@ interface Arguments {
 export type TimeseriesVisParams = PanelSchema;
 
 export interface TimeseriesRenderValue {
-  visType: 'metrics';
-  visData: Input;
+  visData: TimeseriesVisData | {};
   visParams: TimeseriesVisParams;
-  uiState: any;
 }
 
 export type TimeseriesExpressionFunctionDefinition = ExpressionFunctionDefinition<
@@ -68,7 +67,7 @@ export const createMetricsFn = (): TimeseriesExpressionFunctionDefinition => ({
     },
   },
   async fn(input, args) {
-    const visParams: PanelSchema = JSON.parse(args.params);
+    const visParams: TimeseriesVisParams = JSON.parse(args.params);
     const uiState = JSON.parse(args.uiState);
 
     const response = await metricsRequestHandler({
@@ -77,14 +76,10 @@ export const createMetricsFn = (): TimeseriesExpressionFunctionDefinition => ({
       uiState,
     });
 
-    response.visType = 'metrics';
-
     return {
       type: 'render',
       as: 'timeseries_vis',
       value: {
-        uiState,
-        visType: 'metrics',
         visParams,
         visData: response,
       },

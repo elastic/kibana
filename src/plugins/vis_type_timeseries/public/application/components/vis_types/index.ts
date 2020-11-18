@@ -22,6 +22,10 @@ import React from 'react';
 import { IUiSettingsClient } from 'src/core/public';
 import { PersistedState } from 'src/plugins/visualizations/public';
 
+/**
+ * TSVB visualizations are not typed yet.
+ */
+
 // @ts-expect-error
 import { TimeseriesVisualization as timeseries } from './timeseries/vis';
 // @ts-expect-error
@@ -34,6 +38,8 @@ import { TableVis as table } from './table/vis';
 import { gauge } from './gauge/vis';
 // @ts-expect-error
 import { MarkdownVisualization as markdown } from './markdown/vis';
+import { TimeseriesVisParams } from '../../../metrics_fn';
+import { TimeseriesVisData } from '../../../types';
 
 export const TimeseriesVisTypes: Record<string, React.ComponentType<TimeseriesVisProps>> = {
   timeseries,
@@ -45,7 +51,7 @@ export const TimeseriesVisTypes: Record<string, React.ComponentType<TimeseriesVi
 };
 
 export interface TimeseriesVisProps {
-  model: any;
+  model: TimeseriesVisParams;
   onBrush: (gte: string, lte: string) => void;
   onUiState: (
     field: string,
@@ -55,7 +61,7 @@ export interface TimeseriesVisProps {
     }
   ) => void;
   uiState: PersistedState;
-  visData: any;
+  visData: TimeseriesVisData;
   dateFormat: string;
   getConfig: IUiSettingsClient['get'];
 }

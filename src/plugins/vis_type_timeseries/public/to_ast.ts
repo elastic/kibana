@@ -19,9 +19,9 @@
 
 import { buildExpression, buildExpressionFunction } from '../../expressions/public';
 import { Vis } from '../../visualizations/public';
-import { TimeseriesExpressionFunctionDefinition } from './metrics_fn';
+import { TimeseriesExpressionFunctionDefinition, TimeseriesVisParams } from './metrics_fn';
 
-export const toExpressionAst = (vis: Vis<any>) => {
+export const toExpressionAst = (vis: Vis<TimeseriesVisParams>) => {
   const timeseries = buildExpressionFunction<TimeseriesExpressionFunctionDefinition>('tsvb', {
     params: JSON.stringify(vis.params),
     uiState: JSON.stringify(vis.uiState),

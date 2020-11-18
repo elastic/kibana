@@ -26,17 +26,16 @@ import { PersistedState } from 'src/plugins/visualizations/public';
 // @ts-expect-error
 import { ErrorComponent } from './error';
 import { TimeseriesVisTypes } from './vis_types';
+import { TimeseriesVisParams } from '../../metrics_fn';
+import { TimeseriesVisData } from '../../types';
 
 interface TimeseriesVisualizationProps {
   className?: string;
   dateFormat: string;
   getConfig: IUiSettingsClient['get'];
   handlers: IInterpreterRenderHandlers;
-  model: {
-    id: string;
-    type: keyof typeof TimeseriesVisTypes;
-  };
-  visData: any;
+  model: TimeseriesVisParams;
+  visData: TimeseriesVisData;
   uiState: PersistedState;
 }
 

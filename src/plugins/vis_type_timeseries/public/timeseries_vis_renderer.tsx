@@ -23,15 +23,20 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { IUiSettingsClient } from 'kibana/public';
 import { VisualizationContainer } from '../../visualizations/public';
 import { ExpressionRenderDefinition } from '../../expressions/common/expression_renderers';
-import { TimeseriesRenderValue } from './metrics_fn';
+import { TimeseriesRenderValue, TimeseriesVisParams } from './metrics_fn';
+import { TimeseriesVisData } from './types';
 
 const TimeseriesVisualization = lazy(
   () => import('./application/components/timeseries_visualization')
 );
 
-const checkIfDataExists = (visData: any, model: any) => {
-  const data = visData.type === 'table' ? visData.series : visData[model.id]?.series;
-  return data?.length > 0;
+const checkIfDataExists = (visData: TimeseriesVisData | {}, model: TimeseriesVisParams) => {
+  if ('type' in visData) {
+    const data = visData.type === 'table' ? visData.series : visData?.[model.id]?.series;
+    return Boolean(data?.length);
+  }
+
+  return false;
 };
 
 export const getTimeseriesVisRenderer: (deps: {
@@ -58,7 +63,7 @@ export const getTimeseriesVisRenderer: (deps: {
           getConfig={uiSettings.get.bind(uiSettings)}
           handlers={handlers}
           model={config.visParams}
-          visData={config.visData}
+          visData={config.visData as TimeseriesVisData}
           uiState={handlers.uiState!}
         />
       </VisualizationContainer>,
