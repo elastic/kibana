@@ -185,6 +185,16 @@ export class VectorStyle implements IVectorStyle {
     isTimeAware: boolean,
     dynamicStyleProperties: Array<IDynamicStyleProperty<IStyleProperty<unknown>>>
   ) {
+    // remove style-props that have a valid field config
+    // theoretically possible with re-order, but not in practice
+    const invalidStyleProps = dynamicStyleProperties.filter((styleProp) => {
+      const matchingField = currentFields.find((field) => {
+        const f = styleProp.getField();
+        return f && field.isEqual(f);
+      });
+      return !matchingField;
+    });
+
     let hasChanges = false;
     for (let i = 0; i < previousFields.length; i++) {
       const previousField = previousFields[i];
@@ -193,15 +203,14 @@ export class VectorStyle implements IVectorStyle {
         continue;
       }
 
-      for (let j = 0; j < dynamicStyleProperties.length; j++) {
-        const dynamicStyleProp = dynamicStyleProperties[j];
+      invalidStyleProps.forEach((invalidStyleProp) => {
         let newFieldDescriptor: StylePropertyField;
         const isFieldDataTypeCompatible = styleFieldsHelper.isFieldDataTypeCompatibleWithStyleType(
           currentField,
-          dynamicStyleProp.getStyleName()
+          invalidStyleProp.getStyleName()
         );
         if (isFieldDataTypeCompatible) {
-          newFieldDescriptor = dynamicStyleProp.rectifyFieldDescriptor(currentField, {
+          newFieldDescriptor = invalidStyleProp.rectifyFieldDescriptor(currentField, {
             origin: previousField.getOrigin(),
             name: previousField.getName(),
           });
@@ -211,9 +220,9 @@ export class VectorStyle implements IVectorStyle {
           }
         }
 
-        const originalStyleProp = originalProperties[dynamicStyleProp.getStyleName()];
+        const originalStyleProp = originalProperties[invalidStyleProp.getStyleName()];
         originalStyleProp!.options!.field = newFieldDescriptor;
-      }
+      });
     }
 
     return VectorStyle.getDescriptorWithDeletedStyleProps(
