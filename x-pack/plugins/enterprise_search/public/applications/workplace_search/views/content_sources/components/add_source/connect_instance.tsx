@@ -25,6 +25,8 @@ import {
   EuiBadgeGroup,
 } from '@elastic/eui';
 
+import { LicensingLogic } from '../../../../../../applications/shared/licensing';
+
 import { AppLogic } from '../../../../app_logic';
 import { SourceLogic } from '../../source_logic';
 import { FeatureIds, Configuration, Features } from '../../../../types';
@@ -57,6 +59,9 @@ export const ConnectInstance: React.FC<ConnectInstanceProps> = ({
   header,
 }) => {
   const [formLoading, setFormLoading] = useState(false);
+
+  const { hasPlatinumLicense } = useValues(LicensingLogic);
+
   const {
     getSourceConnectData,
     createContentSource,
@@ -70,14 +75,11 @@ export const ConnectInstance: React.FC<ConnectInstanceProps> = ({
     SourceLogic
   );
 
-  const {
-    isOrganization,
-    fpAccount: { minimumPlatinumLicense },
-  } = useValues(AppLogic);
+  const { isOrganization } = useValues(AppLogic);
 
   // Default indexPermissions to true, if needed
   useEffect(() => {
-    setSourceIndexPermissionsValue(needsPermissions && isOrganization && minimumPlatinumLicense);
+    setSourceIndexPermissionsValue(needsPermissions && isOrganization && hasPlatinumLicense);
   }, []);
 
   const redirectOauth = (oauthUrl: string) => (window.location.href = oauthUrl);
@@ -216,7 +218,7 @@ export const ConnectInstance: React.FC<ConnectInstanceProps> = ({
 
   const formFields = (
     <>
-      {isOrganization && minimumPlatinumLicense && permissionField}
+      {isOrganization && hasPlatinumLicense && permissionField}
       {!hasOauthRedirect && credentialsFields}
       {needsSubdomain && subdomainField}
 

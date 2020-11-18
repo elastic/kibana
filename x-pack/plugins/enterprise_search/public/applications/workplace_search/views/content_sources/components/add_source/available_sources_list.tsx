@@ -19,7 +19,8 @@ import {
 
 import { useValues } from 'kea';
 
-import { AppLogic } from '../../../../app_logic';
+import { LicensingLogic } from '../../../../../../applications/shared/licensing';
+
 import { SourceIcon } from '../../../../components/shared/source_icon';
 import { SourceDataItem } from '../../../../types';
 import { ADD_CUSTOM_PATH, getSourcesPath } from '../../../../routes';
@@ -29,12 +30,10 @@ interface AvailableSourcesListProps {
 }
 
 export const AvailableSourcesList: React.FC<AvailableSourcesListProps> = ({ sources }) => {
-  const {
-    fpAccount: { minimumPlatinumLicense },
-  } = useValues(AppLogic);
+  const { hasPlatinumLicense } = useValues(LicensingLogic);
 
   const getSourceCard = ({ name, serviceType, addPath, accountContextOnly }) => {
-    const disabled = !minimumPlatinumLicense && accountContextOnly;
+    const disabled = !hasPlatinumLicense && accountContextOnly;
     const card = (
       <EuiCard
         titleSize="xs"

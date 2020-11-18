@@ -18,6 +18,8 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
+import { LicensingLogic } from '../../../../../../applications/shared/licensing';
+
 import { AppLogic } from '../../../../app_logic';
 import { LicenseBadge } from '../../../../components/shared/license_badge';
 import { Features, FeatureIds } from '../../../../types';
@@ -30,10 +32,8 @@ interface ConnectInstanceProps {
 }
 
 export const SourceFeatures: React.FC<ConnectInstanceProps> = ({ features, objTypes, name }) => {
-  const {
-    isOrganization,
-    fpAccount: { minimumPlatinumLicense },
-  } = useValues(AppLogic);
+  const { hasPlatinumLicense } = useValues(LicensingLogic);
+  const { isOrganization } = useValues(AppLogic);
 
   const Feature = ({ title, children }: { title: string; children: React.ReactElement }) => (
     <>
@@ -153,13 +153,13 @@ export const SourceFeatures: React.FC<ConnectInstanceProps> = ({ features, objTy
   const IncludedFeatures = () => {
     let includedFeatures: FeatureIds[] | undefined;
 
-    if (!minimumPlatinumLicense && isOrganization) {
+    if (!hasPlatinumLicense && isOrganization) {
       includedFeatures = features?.basicOrgContext;
     }
-    if (minimumPlatinumLicense && isOrganization) {
+    if (hasPlatinumLicense && isOrganization) {
       includedFeatures = features?.platinumOrgContext;
     }
-    if (minimumPlatinumLicense && !isOrganization) {
+    if (hasPlatinumLicense && !isOrganization) {
       includedFeatures = features?.platinumPrivateContext;
     }
 
@@ -182,7 +182,7 @@ export const SourceFeatures: React.FC<ConnectInstanceProps> = ({ features, objTy
   const ExcludedFeatures = () => {
     let excludedFeatures: FeatureIds[] | undefined;
 
-    if (!minimumPlatinumLicense && isOrganization) {
+    if (!hasPlatinumLicense && isOrganization) {
       excludedFeatures = features?.basicOrgContextExcludedFeatures;
     }
 

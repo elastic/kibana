@@ -20,7 +20,8 @@ import {
   EuiSteps,
 } from '@elastic/eui';
 
-import { AppLogic } from '../../../../app_logic';
+import { LicensingLogic } from '../../../../../../applications/shared/licensing';
+
 import { ApiKey } from '../../../../components/shared/api_key';
 import { SourceLogic } from '../../source_logic';
 import { Configuration } from '../../../../types';
@@ -51,6 +52,8 @@ export const SaveConfig: React.FC<SaveConfigProps> = ({
   onDeleteConfig,
   header,
 }) => {
+  const { hasPlatinumLicense } = useValues(LicensingLogic);
+
   const { setClientIdValue, setClientSecretValue, setBaseUrlValue } = useActions(SourceLogic);
 
   const {
@@ -65,9 +68,6 @@ export const SaveConfig: React.FC<SaveConfigProps> = ({
     accountContextOnly,
     configuredFields: { publicKey, consumerKey },
   } = sourceConfigData;
-  const {
-    fpAccount: { minimumPlatinumLicense },
-  } = useValues(AppLogic);
 
   const handleFormSubmission = (e) => {
     e.preventDefault();
@@ -87,7 +87,7 @@ export const SaveConfig: React.FC<SaveConfigProps> = ({
   );
 
   const backButton = <EuiButtonEmpty onClick={goBackStep}>&nbsp;Go back</EuiButtonEmpty>;
-  const showSaveButton = minimumPlatinumLicense || !accountContextOnly;
+  const showSaveButton = hasPlatinumLicense || !accountContextOnly;
 
   const formActions = (
     <EuiFormRow>
