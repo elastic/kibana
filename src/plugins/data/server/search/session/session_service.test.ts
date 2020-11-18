@@ -19,6 +19,7 @@
 
 import type { SavedObject, SavedObjectsClientContract } from 'kibana/server';
 import { savedObjectsClientMock } from '../../../../../core/server/mocks';
+import { BackgroundSessionStatus } from '../../../common';
 import { BACKGROUND_SESSION_TYPE } from '../../saved_objects';
 import { BackgroundSessionService } from './session_service';
 import { createRequestHash } from './utils';
@@ -32,7 +33,6 @@ describe('BackgroundSessionService', () => {
     type: BACKGROUND_SESSION_TYPE,
     attributes: {
       name: 'my_name',
-      url: 'my_url',
       idMapping: {},
     },
     references: [],
@@ -41,6 +41,14 @@ describe('BackgroundSessionService', () => {
   beforeEach(() => {
     savedObjectsClient = savedObjectsClientMock.create();
     service = new BackgroundSessionService();
+  });
+
+  it('save throws if `name` is not provided', () => {
+    const sessionId = 'd7170a35-7e2c-48d6-8dec-9a056721b489';
+
+    expect(() => service.save(sessionId, {}, { savedObjectsClient })).rejects.toMatchInlineSnapshot(
+      `[Error: Name is required]`
+    );
   });
 
   it('get calls saved objects client', async () => {
@@ -113,8 +121,8 @@ describe('BackgroundSessionService', () => {
       const sessionId = 'd7170a35-7e2c-48d6-8dec-9a056721b489';
       const isStored = false;
       const name = 'my saved background search session';
-      const url = '/path/to/restored/session';
-      const expires = new Date();
+      const created = new Date().toISOString();
+      const expires = new Date().toISOString();
 
       await service.trackId(
         searchRequest,
@@ -125,14 +133,17 @@ describe('BackgroundSessionService', () => {
 
       expect(savedObjectsClient.update).not.toHaveBeenCalled();
 
-      await service.save(sessionId, name, url, expires, { savedObjectsClient });
+      await service.save(sessionId, { name, created, expires }, { savedObjectsClient });
 
       expect(savedObjectsClient.create).toHaveBeenCalledWith(
         BACKGROUND_SESSION_TYPE,
         {
           name,
-          url,
-          expires: expires.toISOString(),
+          created,
+          expires,
+          initialState: {},
+          restoreState: {},
+          status: BackgroundSessionStatus.INCOMPLETE,
           idMapping: { [requestHash]: searchId },
         },
         { id: sessionId }
@@ -204,7 +215,6 @@ describe('BackgroundSessionService', () => {
         type: BACKGROUND_SESSION_TYPE,
         attributes: {
           name: 'my_name',
-          url: 'my_url',
           idMapping: { [requestHash]: searchId },
         },
         references: [],

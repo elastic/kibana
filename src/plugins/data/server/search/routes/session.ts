@@ -28,15 +28,22 @@ export function registerSessionRoutes(router: IRouter): void {
         body: schema.object({
           sessionId: schema.string(),
           name: schema.string(),
-          url: schema.string(),
+          expires: schema.maybe(schema.string()),
+          initialState: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+          restoreState: schema.maybe(schema.object({}, { unknowns: 'allow' })),
         }),
       },
     },
     async (context, request, res) => {
-      const { sessionId, name, url } = request.body;
+      const { sessionId, name, expires, initialState, restoreState } = request.body;
 
       try {
-        const response = await context.search!.session.save(sessionId, name, url);
+        const response = await context.search!.session.save(sessionId, {
+          name,
+          expires,
+          initialState,
+          restoreState,
+        });
 
         return res.ok({
           body: response,
@@ -165,16 +172,15 @@ export function registerSessionRoutes(router: IRouter): void {
         }),
         body: schema.object({
           name: schema.maybe(schema.string()),
-          url: schema.maybe(schema.string()),
           expires: schema.maybe(schema.string()),
         }),
       },
     },
     async (context, request, res) => {
       const { id } = request.params;
-      const { name, url, expires } = request.body;
+      const { name, expires } = request.body;
       try {
-        const response = await context.search!.session.update(id, { name, url, expires });
+        const response = await context.search!.session.update(id, { name, expires });
 
         return res.ok({
           body: response,

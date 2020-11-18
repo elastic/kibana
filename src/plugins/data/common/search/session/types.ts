@@ -90,10 +90,11 @@ export interface ISessionService {
 
 export interface BackgroundSessionSavedObjectAttributes {
   name: string;
-  url: string;
   created: string;
   expires: string;
   status: string;
+  initialState: Record<string, unknown>;
+  restoreState: Record<string, unknown>;
   idMapping: Record<string, string>;
 }
 

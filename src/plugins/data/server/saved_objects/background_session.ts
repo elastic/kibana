@@ -30,9 +30,6 @@ export const backgroundSessionMapping: SavedObjectsType = {
       name: {
         type: 'keyword',
       },
-      url: {
-        type: 'keyword',
-      },
       created: {
         type: 'date',
       },
@@ -41,6 +38,14 @@ export const backgroundSessionMapping: SavedObjectsType = {
       },
       status: {
         type: 'keyword',
+      },
+      initialState: {
+        type: 'object',
+        enabled: false,
+      },
+      restoreState: {
+        type: 'object',
+        enabled: false,
       },
       idMapping: {
         type: 'object',

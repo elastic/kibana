@@ -62,23 +62,22 @@ export class BackgroundSessionService {
   // TODO: Generate the `userId` from the realm type/realm name/username
   public save = async (
     sessionId: string,
-    name: string,
-    url: string,
-    expires: Date = new Date(Date.now() + DEFAULT_EXPIRATION),
+    {
+      name,
+      created = new Date().toISOString(),
+      expires = new Date(Date.now() + DEFAULT_EXPIRATION).toISOString(),
+      status = BackgroundSessionStatus.INCOMPLETE,
+      initialState = {},
+      restoreState = {},
+    }: Partial<BackgroundSessionSavedObjectAttributes>,
     { savedObjectsClient }: BackgroundSessionDependencies
   ) => {
+    if (!name) throw new Error('Name is required');
+
     // Get the mapping of request hash/search ID for this session
     const searchMap = this.sessionSearchMap.get(sessionId) ?? new Map<string, string>();
-
     const idMapping = Object.fromEntries(searchMap.entries());
-    const attributes = {
-      name,
-      url,
-      created: new Date().toISOString(),
-      expires: expires.toISOString(),
-      status: BackgroundSessionStatus.INCOMPLETE,
-      idMapping,
-    };
+    const attributes = { name, created, expires, status, initialState, restoreState, idMapping };
     const session = await savedObjectsClient.create<BackgroundSessionSavedObjectAttributes>(
       BACKGROUND_SESSION_TYPE,
       attributes,
@@ -188,8 +187,8 @@ export class BackgroundSessionService {
       });
       const deps = { savedObjectsClient };
       return {
-        save: (sessionId: string, name: string, url: string, expires?: Date) =>
-          this.save(sessionId, name, url, expires, deps),
+        save: (sessionId: string, attributes: Partial<BackgroundSessionSavedObjectAttributes>) =>
+          this.save(sessionId, attributes, deps),
         get: (sessionId: string) => this.get(sessionId, deps),
         find: (options: SearchSessionFindOptions) => this.find(options, deps),
         update: (sessionId: string, attributes: Partial<BackgroundSessionSavedObjectAttributes>) =>

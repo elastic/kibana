@@ -34,11 +34,10 @@ describe('registerSessionRoutes', () => {
     registerSessionRoutes(mockCoreSetup.http.createRouter());
   });
 
-  it('save calls session.save with sessionId, name, and url', async () => {
+  it('save calls session.save with sessionId and attributes', async () => {
     const sessionId = 'd7170a35-7e2c-48d6-8dec-9a056721b489';
     const name = 'my saved background search session';
-    const url = '/path/to/restored/session';
-    const body = { sessionId, name, url };
+    const body = { sessionId, name };
 
     const mockRequest = httpServerMock.createKibanaRequest({ body });
     const mockResponse = httpServerMock.createResponseFactory();
@@ -48,7 +47,7 @@ describe('registerSessionRoutes', () => {
 
     saveHandler(mockContext, mockRequest, mockResponse);
 
-    expect(mockContext.search!.session.save).toHaveBeenCalledWith(sessionId, name, url);
+    expect(mockContext.search!.session.save).toHaveBeenCalledWith(sessionId, { name });
   });
 
   it('get calls session.get with sessionId', async () => {
@@ -85,13 +84,12 @@ describe('registerSessionRoutes', () => {
     expect(mockContext.search!.session.find).toHaveBeenCalledWith(body);
   });
 
-  it('update calls session.update with id, name, url, and expires', async () => {
+  it('update calls session.update with id and attributes', async () => {
     const id = 'd7170a35-7e2c-48d6-8dec-9a056721b489';
     const name = 'my saved background search session';
-    const url = '/path/to/restored/session';
     const expires = new Date().toISOString();
     const params = { id };
-    const body = { name, url, expires };
+    const body = { name, expires };
 
     const mockRequest = httpServerMock.createKibanaRequest({ params, body });
     const mockResponse = httpServerMock.createResponseFactory();
