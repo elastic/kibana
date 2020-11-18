@@ -22,8 +22,8 @@ export function ServiceListMetric({
 
   return (
     <SparkPlotWithValueLabel
-      start={parseFloat(start!)}
-      end={parseFloat(end!)}
+      start={new Date(start!).getTime()}
+      end={new Date(end!).getTime()}
       valueLabel={valueLabel}
       series={series}
       color={color}

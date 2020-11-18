@@ -5,8 +5,8 @@
  */
 
 import expect from '@kbn/expect';
-import qs from 'querystring';
 import { pick, uniqBy } from 'lodash';
+import url from 'url';
 import { expectSnapshot } from '../../../common/match_snapshot';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import archives from '../../../common/archives_metadata';
@@ -22,16 +22,19 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     describe('when data is not loaded', () => {
       it('handles the empty state', async () => {
         const response = await supertest.get(
-          `/api/apm/services/opbeans-java/overview_transaction_groups?${qs.stringify({
-            start,
-            end,
-            uiFilters: '{}',
-            size: 5,
-            numBuckets: 20,
-            pageIndex: 0,
-            sortDirection: 'desc',
-            sortField: 'impact',
-          })}`
+          url.format({
+            pathname: `/api/apm/services/opbeans-java/overview_transaction_groups`,
+            query: {
+              start,
+              end,
+              uiFilters: '{}',
+              size: 5,
+              numBuckets: 20,
+              pageIndex: 0,
+              sortDirection: 'desc',
+              sortField: 'impact',
+            },
+          })
         );
 
         expect(response.status).to.be(200);
@@ -49,16 +52,19 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       it('returns the correct data', async () => {
         const response = await supertest.get(
-          `/api/apm/services/opbeans-java/overview_transaction_groups?${qs.stringify({
-            start,
-            end,
-            uiFilters: '{}',
-            size: 5,
-            numBuckets: 20,
-            pageIndex: 0,
-            sortDirection: 'desc',
-            sortField: 'impact',
-          })}`
+          url.format({
+            pathname: `/api/apm/services/opbeans-java/overview_transaction_groups`,
+            query: {
+              start,
+              end,
+              uiFilters: '{}',
+              size: 5,
+              numBuckets: 20,
+              pageIndex: 0,
+              sortDirection: 'desc',
+              sortField: 'impact',
+            },
+          })
         );
 
         expect(response.status).to.be(200);
@@ -122,16 +128,19 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       it('sorts items in the correct order', async () => {
         const descendingResponse = await supertest.get(
-          `/api/apm/services/opbeans-java/overview_transaction_groups?${qs.stringify({
-            start,
-            end,
-            uiFilters: '{}',
-            size: 5,
-            numBuckets: 20,
-            pageIndex: 0,
-            sortDirection: 'desc',
-            sortField: 'impact',
-          })}`
+          url.format({
+            pathname: `/api/apm/services/opbeans-java/overview_transaction_groups`,
+            query: {
+              start,
+              end,
+              uiFilters: '{}',
+              size: 5,
+              numBuckets: 20,
+              pageIndex: 0,
+              sortDirection: 'desc',
+              sortField: 'impact',
+            },
+          })
         );
 
         expect(descendingResponse.status).to.be(200);
@@ -143,16 +152,19 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(descendingOccurrences).to.eql(descendingOccurrences.concat().sort().reverse());
 
         const ascendingResponse = await supertest.get(
-          `/api/apm/services/opbeans-java/overview_transaction_groups?${qs.stringify({
-            start,
-            end,
-            uiFilters: '{}',
-            size: 5,
-            numBuckets: 20,
-            pageIndex: 0,
-            sortDirection: 'desc',
-            sortField: 'impact',
-          })}`
+          url.format({
+            pathname: `/api/apm/services/opbeans-java/overview_transaction_groups`,
+            query: {
+              start,
+              end,
+              uiFilters: '{}',
+              size: 5,
+              numBuckets: 20,
+              pageIndex: 0,
+              sortDirection: 'desc',
+              sortField: 'impact',
+            },
+          })
         );
 
         const ascendingOccurrences = ascendingResponse.body.transaction_groups.map(
@@ -164,16 +176,19 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       it('sorts items by the correct field', async () => {
         const response = await supertest.get(
-          `/api/apm/services/opbeans-java/overview_transaction_groups?${qs.stringify({
-            start,
-            end,
-            uiFilters: '{}',
-            size: 5,
-            numBuckets: 20,
-            pageIndex: 0,
-            sortDirection: 'desc',
-            sortField: 'latency',
-          })}`
+          url.format({
+            pathname: `/api/apm/services/opbeans-java/overvie)w_transaction_groups`,
+            query: {
+              start,
+              end,
+              uiFilters: '{}',
+              size: 5,
+              numBuckets: 20,
+              pageIndex: 0,
+              sortDirection: 'desc',
+              sortField: 'latency',
+            },
+          })
         );
 
         expect(response.status).to.be(200);
@@ -187,16 +202,19 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         const size = 1;
 
         const firstPage = await supertest.get(
-          `/api/apm/services/opbeans-java/overview_transaction_groups?${qs.stringify({
-            start,
-            end,
-            uiFilters: '{}',
-            size,
-            numBuckets: 20,
-            pageIndex: 0,
-            sortDirection: 'desc',
-            sortField: 'impact',
-          })}`
+          url.format({
+            pathname: `/api/apm/services/opbeans-java/overview_transaction_groups`,
+            query: {
+              start,
+              end,
+              uiFilters: '{}',
+              size,
+              numBuckets: 20,
+              pageIndex: 0,
+              sortDirection: 'desc',
+              sortField: 'impact',
+            },
+          })
         );
 
         expect(firstPage.status).to.eql(200);
@@ -211,16 +229,19 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             const prevItems = await prevItemsPromise;
 
             const thisPage = await supertest.get(
-              `/api/apm/services/opbeans-java/overview_transaction_groups?${qs.stringify({
-                start,
-                end,
-                uiFilters: '{}',
-                size,
-                numBuckets: 20,
-                pageIndex,
-                sortDirection: 'desc',
-                sortField: 'impact',
-              })}`
+              url.format({
+                pathname: '/api/apm/services/opbeans-java/overview_transaction_groups',
+                query: {
+                  start,
+                  end,
+                  uiFilters: '{}',
+                  size,
+                  numBuckets: 20,
+                  pageIndex,
+                  sortDirection: 'desc',
+                  sortField: 'impact',
+                },
+              })
             );
 
             return prevItems.concat(thisPage.body.transaction_groups);

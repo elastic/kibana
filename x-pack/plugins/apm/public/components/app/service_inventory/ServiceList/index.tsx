@@ -176,8 +176,7 @@ export const SERVICE_COLUMNS: Array<ITableColumn<ServiceListItem>> = [
     render: (_, { transactionErrorRate }) => {
       const value = transactionErrorRate?.value;
 
-      const valueLabel =
-        value !== null && value !== undefined ? asPercent(value, 1) : '';
+      const valueLabel = asPercent(value, 1);
 
       return (
         <ServiceListMetric

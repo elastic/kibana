@@ -4,14 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ValuesType } from 'utility-types';
 import { orderBy } from 'lodash';
 import {
   TRANSACTION_PAGE_LOAD,
   TRANSACTION_REQUEST,
 } from '../../../../common/transaction_types';
 import { EventOutcome } from '../../../../common/event_outcome';
-import { PromiseReturnType } from '../../../../../observability/typings/common';
 import { rangeFilter } from '../../../../common/utils/range_filter';
 import {
   EVENT_OUTCOME,
@@ -25,10 +23,6 @@ import {
   getProcessorEventForAggregatedTransactions,
   getTransactionDurationFieldForAggregatedTransactions,
 } from '../../helpers/aggregated_transactions';
-
-export type ServiceTransactionGroupItem = ValuesType<
-  PromiseReturnType<typeof getServiceTransactionGroups>['transaction_groups']
->;
 
 export async function getServiceTransactionGroups({
   serviceName,

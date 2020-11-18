@@ -15,24 +15,32 @@ import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { EuiToolTip } from '@elastic/eui';
+import { ValuesType } from 'utility-types';
 import {
   asDuration,
   asPercent,
   asTransactionRate,
 } from '../../../../../common/utils/formatters';
 import { px, truncate, unit } from '../../../../style/variables';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ServiceTransactionGroupItem } from '../../../../../server/lib/services/get_service_transaction_groups';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/useFetcher';
 import { useUrlParams } from '../../../../hooks/useUrlParams';
-import { callApmApi } from '../../../../services/rest/createCallApmApi';
+import {
+  APIReturnType,
+  callApmApi,
+} from '../../../../services/rest/createCallApmApi';
 import { TransactionDetailLink } from '../../../shared/Links/apm/TransactionDetailLink';
 import { TransactionOverviewLink } from '../../../shared/Links/apm/TransactionOverviewLink';
 import { TableFetchWrapper } from '../../../shared/table_fetch_wrapper';
 import { TableLinkFlexItem } from '../table_link_flex_item';
-import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { SparkPlotWithValueLabel } from '../../../shared/charts/spark_plot/spark_plot_with_value_label';
 import { ImpactBar } from '../../../shared/ImpactBar';
+
+type ServiceTransactionGroupItem = ValuesType<
+  APIReturnType<
+    '/api/apm/services/{serviceName}/overview_transaction_groups',
+    'GET'
+  >['transaction_groups']
+>;
 
 interface Props {
   serviceName: string;
@@ -177,13 +185,9 @@ export function ServiceOverviewTransactionsTable(props: Props) {
             color="euiColorVis1"
             compact
             series={latency.timeseries ?? undefined}
-            valueLabel={
-              latency.value !== null
-                ? asDuration(latency.value)
-                : NOT_AVAILABLE_LABEL
-            }
-            start={parseFloat(start!)}
-            end={parseFloat(end!)}
+            valueLabel={asDuration(latency.value)}
+            start={new Date(start!).getTime()}
+            end={new Date(end!).getTime()}
           />
         );
       },
@@ -203,13 +207,9 @@ export function ServiceOverviewTransactionsTable(props: Props) {
             color="euiColorVis0"
             compact
             series={traffic.timeseries ?? undefined}
-            valueLabel={
-              traffic.value !== null
-                ? asTransactionRate(traffic.value)
-                : NOT_AVAILABLE_LABEL
-            }
-            start={parseFloat(start!)}
-            end={parseFloat(end!)}
+            valueLabel={asTransactionRate(traffic.value)}
+            start={new Date(start!).getTime()}
+            end={new Date(end!).getTime()}
           />
         );
       },
@@ -229,13 +229,9 @@ export function ServiceOverviewTransactionsTable(props: Props) {
             color="euiColorVis7"
             compact
             series={errorRate.timeseries ?? undefined}
-            valueLabel={
-              errorRate.value !== null
-                ? asPercent(errorRate.value, 1)
-                : NOT_AVAILABLE_LABEL
-            }
-            start={parseFloat(start!)}
-            end={parseFloat(end!)}
+            valueLabel={asPercent(errorRate.value, 1)}
+            start={new Date(start!).getTime()}
+            end={new Date(end!).getTime()}
           />
         );
       },
