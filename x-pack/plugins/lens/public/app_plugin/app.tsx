@@ -35,6 +35,7 @@ import { LENS_EMBEDDABLE_TYPE, getFullPath } from '../../common';
 import { LensAppProps, LensAppServices, LensAppState } from './types';
 import { getLensTopNavConfig } from './lens_top_nav';
 import { TagEnhancedSavedObjectSaveModalOrigin } from './tags_saved_object_save_modal_origin_wrapper';
+import { TagEnhancedSavedObjectSaveModalDashboard } from './tags_saved_object_save_modal_dashboard_wrapper';
 import {
   LensByReferenceInput,
   LensEmbeddableInput,
@@ -48,6 +49,7 @@ export function App({
   initialInput,
   incomingState,
   redirectToOrigin,
+  redirectToDashboard,
   setHeaderActionMenu,
   initialContext,
 }: LensAppProps) {
@@ -355,6 +357,7 @@ export function App({
   const runSave = async (
     saveProps: Omit<OnSaveProps, 'onTitleDuplicate' | 'newDescription'> & {
       returnToOrigin: boolean;
+      dashboardId?: string | null;
       onTitleDuplicate?: OnSaveProps['onTitleDuplicate'];
       newDescription?: string;
       newTags?: string[];
@@ -428,6 +431,13 @@ export function App({
           return actions.default();
         });
         redirectToOrigin({ input: newInput, isCopied: saveProps.newCopyOnSave });
+        return;
+      } else if (saveProps.dashboardId && redirectToDashboard) {
+        // disabling the validation on app leave because the document has been saved.
+        onAppLeave((actions) => {
+          return actions.default();
+        });
+        redirectToDashboard(newInput, saveProps.dashboardId);
         return;
       }
 
@@ -562,6 +572,70 @@ export function App({
       ? savedObjectsTagging.ui.getTagIdsFromReferences(state.persistedDoc.references)
       : [];
 
+  const renderModal = () => {
+    if (!state.isSaveModalVisible || !lastKnownDoc) {
+      return;
+    }
+
+    // Use the modal with return-to-origin features if we're in an app's edit flow or if by-value embeddables are disabled
+    if (incomingState?.originatingApp || !dashboardFeatureFlag.allowByValueEmbeddables) {
+      return (
+        <TagEnhancedSavedObjectSaveModalOrigin
+          savedObjectsTagging={savedObjectsTagging}
+          initialTags={tagsIds}
+          originatingApp={incomingState?.originatingApp}
+          onSave={(props) => runSave(props, { saveToLibrary: true })}
+          onClose={() => {
+            setState((s) => ({ ...s, isSaveModalVisible: false }));
+          }}
+          getAppNameFromId={() => getOriginatingAppName()}
+          documentInfo={{
+            id: lastKnownDoc.savedObjectId,
+            title: lastKnownDoc.title || '',
+            description: lastKnownDoc.description || '',
+          }}
+          returnToOriginSwitchLabel={
+            getIsByValueMode() && initialInput
+              ? i18n.translate('xpack.lens.app.updatePanel', {
+                  defaultMessage: 'Update panel on {originatingAppName}',
+                  values: { originatingAppName: getOriginatingAppName() },
+                })
+              : undefined
+          }
+          objectType={i18n.translate('xpack.lens.app.saveModalType', {
+            defaultMessage: 'Lens visualization',
+          })}
+          data-test-subj="lnsApp_saveModalOrigin"
+        />
+      );
+    }
+
+    return (
+      <TagEnhancedSavedObjectSaveModalDashboard
+        savedObjectsTagging={savedObjectsTagging}
+        savedObjectsClient={savedObjectsClient}
+        initialTags={tagsIds}
+        onSave={(props) => {
+          // Save the Lens visualization to library if a dashboard is not selected
+          const saveToLibrary = props.dashboardId === null;
+          runSave({ ...props, returnToOrigin: false }, { saveToLibrary });
+        }}
+        onClose={() => {
+          setState((s) => ({ ...s, isSaveModalVisible: false }));
+        }}
+        documentInfo={{
+          id: lastKnownDoc.savedObjectId,
+          title: lastKnownDoc.title || '',
+          description: lastKnownDoc.description || '',
+        }}
+        objectType={i18n.translate('xpack.lens.app.saveModalType', {
+          defaultMessage: 'Lens visualization',
+        })}
+        data-test-subj="lnsApp_saveModalDashboard"
+      />
+    );
+  };
+
   return (
     <>
       <div className="lnsApp">
@@ -679,35 +753,7 @@ export function App({
           />
         )}
       </div>
-      {lastKnownDoc && state.isSaveModalVisible && (
-        <TagEnhancedSavedObjectSaveModalOrigin
-          savedObjectsTagging={savedObjectsTagging}
-          initialTags={tagsIds}
-          originatingApp={incomingState?.originatingApp}
-          onSave={(props) => runSave(props, { saveToLibrary: true })}
-          onClose={() => {
-            setState((s) => ({ ...s, isSaveModalVisible: false }));
-          }}
-          getAppNameFromId={() => getOriginatingAppName()}
-          documentInfo={{
-            id: lastKnownDoc.savedObjectId,
-            title: lastKnownDoc.title || '',
-            description: lastKnownDoc.description || '',
-          }}
-          returnToOriginSwitchLabel={
-            getIsByValueMode() && initialInput
-              ? i18n.translate('xpack.lens.app.updatePanel', {
-                  defaultMessage: 'Update panel on {originatingAppName}',
-                  values: { originatingAppName: getOriginatingAppName() },
-                })
-              : undefined
-          }
-          objectType={i18n.translate('xpack.lens.app.saveModalType', {
-            defaultMessage: 'Lens visualization',
-          })}
-          data-test-subj="lnsApp_saveModalOrigin"
-        />
-      )}
+      {renderModal()}
     </>
   );
 }

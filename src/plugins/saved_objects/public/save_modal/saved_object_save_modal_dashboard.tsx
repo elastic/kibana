@@ -24,7 +24,6 @@ import { EuiFormRow, EuiRadio, EuiIconTip, EuiComboBox, EuiPanel, EuiSpacer } fr
 import { SavedObjectDashboard } from '../../../../plugins/dashboard/public';
 import { SavedObjectsClientContract } from '../../../../core/public';
 
-// import { i18n } from '@kbn/i18n';
 import { OnSaveProps, SaveModalState, SavedObjectSaveModal } from '.';
 
 interface SaveModalDocumentInfo {
@@ -33,7 +32,7 @@ interface SaveModalDocumentInfo {
   description?: string;
 }
 
-interface DashboardSaveModalProps {
+export interface DashboardSaveModalProps {
   documentInfo: SaveModalDocumentInfo;
   objectType: string;
   onClose: () => void;
