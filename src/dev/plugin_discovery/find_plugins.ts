@@ -39,7 +39,6 @@ export function findPlugins({
     rootDir: REPO_ROOT,
     oss,
     examples,
-    thirdParty: true,
   });
 
   for (const extraScanDir of extraPluginScanDirs) {

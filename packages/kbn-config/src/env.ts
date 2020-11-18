@@ -119,7 +119,6 @@ export class Env {
       rootDir: this.homeDir,
       oss: options.cliArgs.oss,
       examples: options.cliArgs.runExamples,
-      thirdParty: true,
     });
 
     this.cliArgs = Object.freeze(options.cliArgs);

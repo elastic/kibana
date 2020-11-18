@@ -66,7 +66,6 @@ run(
       rootDir: REPO_ROOT,
       oss: false,
       examples: true,
-      thirdParty: false,
     }).map((pluginFolderPath) => `${relative(REPO_ROOT, pluginFolderPath)}/**/*`);
 
     const depTree = await parseDependencyTree(pluginSearchPathGlobs, {
