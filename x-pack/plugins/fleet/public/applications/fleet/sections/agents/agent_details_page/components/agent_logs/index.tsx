@@ -22,15 +22,16 @@ import { TimeRange, esKuery } from '../../../../../../../../../../../src/plugins
 import { LogStream } from '../../../../../../../../../infra/public';
 import { Agent } from '../../../../../types';
 import { useStartServices } from '../../../../../hooks';
-import { DATASET_FIELD, AGENT_DATASET, LOG_LEVEL_FIELD, AGENT_ID_FIELD } from './constants';
+import {
+  DATASET_FIELD,
+  AGENT_DATASET,
+  LOG_LEVEL_FIELD,
+  AGENT_ID_FIELD,
+  DEFAULT_DATE_RANGE,
+} from './constants';
 import { DatasetFilter } from './filter_dataset';
 import { LogLevelFilter } from './filter_log_level';
 import { LogQueryBar } from './query_bar';
-
-const DEFAULT_DATE_RANGE = {
-  start: 'now-15m',
-  end: 'now',
-};
 
 const WrapperFlexGroup = styled(EuiFlexGroup)`
   height: 100%;

@@ -19,3 +19,7 @@ export const LOG_LEVEL_FIELD = {
   type: 'string',
   aggregatable: true,
 };
+export const DEFAULT_DATE_RANGE = {
+  start: 'now-1d',
+  end: 'now',
+};
