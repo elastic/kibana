@@ -256,17 +256,18 @@ export const getGeoThresholdExecutor = (log: Logger) =>
     movedEntities.forEach(({ entityName, currLocation, prevLocation }) => {
       const toBoundaryName = shapesIdsNamesMap[currLocation.shapeId] || currLocation.shapeId;
       const fromBoundaryName = shapesIdsNamesMap[prevLocation.shapeId] || prevLocation.shapeId;
-      let factoryInstance;
-      if (params.trackingEvent === 'crossed') {
-        factoryInstance = `${entityName}-${fromBoundaryName || prevLocation.shapeId}-${
+      let alertInstance;
+      if (params.trackingEvent === 'entered') {
+        alertInstance = `${entityName}-${toBoundaryName || currLocation.shapeId}`;
+      } else if (params.trackingEvent === 'exited') {
+        alertInstance = `${entityName}-${fromBoundaryName || prevLocation.shapeId}`;
+      } else {
+        // == 'crossed'
+        alertInstance = `${entityName}-${fromBoundaryName || prevLocation.shapeId}-${
           toBoundaryName || currLocation.shapeId
         }`;
-      } else if (params.trackingEvent === 'entered') {
-        factoryInstance = `${entityName}-${toBoundaryName || currLocation.shapeId}`;
-      } else if (params.trackingEvent === 'exited') {
-        factoryInstance = `${entityName}-${fromBoundaryName || prevLocation.shapeId}`;
       }
-      services.alertInstanceFactory(factoryInstance).scheduleActions(ActionGroupId, {
+      services.alertInstanceFactory(alertInstance).scheduleActions(ActionGroupId, {
         entityId: entityName,
         timeOfDetection: new Date(currIntervalEndTime).getTime(),
         crossingLine: `LINESTRING (${prevLocation.location[0]} ${prevLocation.location[1]}, ${currLocation.location[0]} ${currLocation.location[1]})`,
