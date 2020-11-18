@@ -150,21 +150,21 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
     }
   }, [connectors, connector, isLoadingConnectors]);
 
-  const ConnectorAddFlyout = triggersActionsUi.getAddConnectorFlyoutFunc(
-    'case',
-    onCloseAddFlyout,
+  const ConnectorAddFlyout = triggersActionsUi.getAddConnectorFlyout({
+    consumer: 'case',
+    onClose: onCloseAddFlyout,
     actionTypes,
-    reloadConnectors
-  );
+    reloadConnectors,
+  });
 
   const ConnectorEditFlyout =
     editedConnectorItem && editFlyoutVisible
-      ? triggersActionsUi.getEditConnectorFlyoutFunc(
-          editedConnectorItem,
-          'case',
-          onCloseEditFlyout,
-          reloadConnectors
-        )
+      ? triggersActionsUi.getEditConnectorFlyout({
+          initialConnector: editedConnectorItem,
+          consumer: 'case',
+          onClose: onCloseEditFlyout,
+          reloadConnectors,
+        })
       : null;
 
   return (

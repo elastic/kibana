@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { ReactElement } from 'react';
 import { FeaturesPluginStart } from '../../features/public';
 import { registerBuiltInActionTypes } from './application/components/builtin_action_types';
-import { ActionConnector, ActionType, ActionTypeModel, AlertTypeModel } from './types';
+import { ActionTypeModel, AlertTypeModel } from './types';
 import { TypeRegistry } from './application/type_registry';
 import {
   ManagementAppMountParams,
@@ -23,14 +23,10 @@ import {
 import { ChartsPluginStart } from '../../../../src/plugins/charts/public';
 import { PluginStartContract as AlertingStart } from '../../alerts/public';
 import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
-import {
-  ConnectorAddFlyoutProps,
-  getAddConnectorFlyout,
-} from './application/sections/action_connector_form/connector_add_flyout';
-import {
-  ConnectorEditProps,
-  getEditConnectorFlyout,
-} from './application/sections/action_connector_form/connector_edit_flyout';
+import { ConnectorAddFlyoutProps } from './application/sections/action_connector_form/connector_add_flyout';
+import { ConnectorEditFlyoutProps } from './application/sections/action_connector_form/connector_edit_flyout';
+import { getAddConnectorFlyoutLazy } from './common/get_add_connector_flyout';
+import { getEditConnectorFlyoutLazy } from './common/get_edit_connector_flyout';
 
 export interface TriggersAndActionsUIPublicPluginSetup {
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
@@ -40,22 +36,12 @@ export interface TriggersAndActionsUIPublicPluginSetup {
 export interface TriggersAndActionsUIPublicPluginStart {
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
   alertTypeRegistry: TypeRegistry<AlertTypeModel>;
-  getAddConnectorFlyoutFunc: (
-    consumer: string,
-    onClose: () => void,
-    actionTypes?: ActionType[],
-    reloadConnectors?: () => Promise<void | Array<
-      ActionConnector<Record<string, any>, Record<string, any>>
-    >>
+  getAddConnectorFlyout: (
+    props: Omit<ConnectorAddFlyoutProps, 'actionTypeRegistry'>
   ) => ReactElement<ConnectorAddFlyoutProps> | null;
-  getEditConnectorFlyoutFunc: (
-    initialConnector: ActionConnector,
-    consumer: string,
-    onClose: () => void,
-    reloadConnectors?: () => Promise<void | Array<
-      ActionConnector<Record<string, any>, Record<string, any>>
-    >>
-  ) => ReactElement<ConnectorEditProps> | null;
+  getEditConnectorFlyout: (
+    props: Omit<ConnectorEditFlyoutProps, 'actionTypeRegistry'>
+  ) => ReactElement<ConnectorEditFlyoutProps> | null;
 }
 
 interface PluginsSetup {
@@ -155,37 +141,14 @@ export class Plugin
     return {
       actionTypeRegistry: this.actionTypeRegistry,
       alertTypeRegistry: this.alertTypeRegistry,
-      getAddConnectorFlyoutFunc: (
-        consumer: string,
-        onClose: () => void,
-        actionTypes?: ActionType[],
-        reloadConnectors?: () => Promise<void | Array<
-          ActionConnector<Record<string, any>, Record<string, any>>
-        >>
-      ) => {
-        return getAddConnectorFlyout(
-          consumer,
-          onClose,
-          this.actionTypeRegistry,
-          actionTypes,
-          reloadConnectors
-        );
+      getAddConnectorFlyout: (props: Omit<ConnectorAddFlyoutProps, 'actionTypeRegistry'>) => {
+        return getAddConnectorFlyoutLazy({ ...props, actionTypeRegistry: this.actionTypeRegistry });
       },
-      getEditConnectorFlyoutFunc: (
-        initialConnector: ActionConnector,
-        consumer: string,
-        onClose: () => void,
-        reloadConnectors?: () => Promise<void | Array<
-          ActionConnector<Record<string, any>, Record<string, any>>
-        >>
-      ) => {
-        return getEditConnectorFlyout(
-          initialConnector,
-          consumer,
-          onClose,
-          this.actionTypeRegistry,
-          reloadConnectors
-        );
+      getEditConnectorFlyout: (props: Omit<ConnectorEditFlyoutProps, 'actionTypeRegistry'>) => {
+        return getEditConnectorFlyoutLazy({
+          ...props,
+          actionTypeRegistry: this.actionTypeRegistry,
+        });
       },
     };
   }

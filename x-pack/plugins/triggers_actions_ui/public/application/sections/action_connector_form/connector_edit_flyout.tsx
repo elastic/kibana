@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useCallback, useReducer, useState, Fragment, lazy, Suspense } from 'react';
+import React, { useCallback, useReducer, useState, Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiTitle,
@@ -38,7 +38,7 @@ import {
 import './connector_edit_flyout.scss';
 import { useKibana } from '../../../common/lib/kibana';
 
-export interface ConnectorEditProps {
+export interface ConnectorEditFlyoutProps {
   initialConnector: ActionConnector;
   onClose: () => void;
   tab?: EditConectorTabs;
@@ -59,7 +59,7 @@ export const ConnectorEditFlyout = ({
   reloadConnectors,
   consumer,
   actionTypeRegistry,
-}: ConnectorEditProps) => {
+}: ConnectorEditFlyoutProps) => {
   const {
     http,
     notifications: { toasts },
@@ -355,34 +355,3 @@ export const ConnectorEditFlyout = ({
 
 // eslint-disable-next-line import/no-default-export
 export { ConnectorEditFlyout as default };
-
-export const getEditConnectorFlyout = (
-  initialConnector: ActionConnector,
-  consumer: string,
-  onClose: () => void,
-  actionTypeRegistry: ActionTypeRegistryContract,
-  reloadConnectors?: () => Promise<void | Array<
-    ActionConnector<Record<string, any>, Record<string, any>>
-  >>
-) => {
-  const ConnectorEditFlyoutForm = lazy(() => import('./connector_edit_flyout'));
-  return (
-    <Suspense
-      fallback={
-        <EuiFlexGroup justifyContent="center">
-          <EuiFlexItem grow={false}>
-            <EuiLoadingSpinner size="m" />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      }
-    >
-      <ConnectorEditFlyoutForm
-        consumer={consumer}
-        onClose={onClose}
-        actionTypeRegistry={actionTypeRegistry}
-        reloadConnectors={reloadConnectors}
-        initialConnector={initialConnector}
-      />
-    </Suspense>
-  );
-};
