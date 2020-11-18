@@ -8,7 +8,10 @@ import type { Logger } from 'kibana/server';
 import type { ApiResponse } from '@elastic/elasticsearch';
 
 import { search } from '../../../../../src/plugins/data/server';
-import { doPartialSearch } from '../../common/search/es_search/es_search_rxjs_utils';
+import {
+  doPartialSearch,
+  normalizeEqlResponse,
+} from '../../common/search/es_search/es_search_rxjs_utils';
 import { getAsyncOptions, getDefaultSearchParams } from './get_default_search_params';
 
 import type { ISearchStrategy, IEsRawSearchResponse } from '../../../../../src/plugins/data/server';
@@ -64,7 +67,7 @@ export const eqlSearchStrategyProvider = (
         (response) => response.body.id,
         request.id,
         options
-      ).pipe(utils.toKibanaSearchResponse());
+      ).pipe(normalizeEqlResponse(), utils.toKibanaSearchResponse());
     },
   };
 };
