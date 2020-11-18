@@ -51,6 +51,7 @@ import {
   unhighlightFocusChartAnnotation,
   ANNOTATION_MIN_WIDTH,
 } from './timeseries_chart_annotations';
+import { distinctUntilChanged } from 'rxjs/operators';
 
 const focusZoomPanelHeight = 25;
 const focusChartHeight = 310;
@@ -570,6 +571,7 @@ class TimeseriesChartIntl extends Component {
   }
 
   renderFocusChart() {
+    console.log('renderFocusChart');
     const {
       focusAggregationInterval,
       focusAnnotationData: focusAnnotationDataOriginalPropValue,
@@ -1475,6 +1477,22 @@ class TimeseriesChartIntl extends Component {
         });
       }
 
+      if (marker.metricFunction) {
+        tooltipData.push({
+          label: i18n.translate(
+            'xpack.ml.timeSeriesExplorer.timeSeriesChart.metricActualPlotFunctionLabel',
+            {
+              defaultMessage: 'function',
+            }
+          ),
+          value: marker.metricFunction,
+          seriesIdentifier: {
+            key: seriesKey,
+          },
+          valueAccessor: 'metric_function',
+        });
+      }
+
       if (modelPlotEnabled === false) {
         // Show actual/typical when available except for rare detectors.
         // Rare detectors always have 1 as actual and the probability as typical.
@@ -1782,7 +1800,15 @@ class TimeseriesChartIntl extends Component {
 }
 
 export const TimeseriesChart = (props) => {
-  const annotationProp = useObservable(annotation$);
+  const annotationProp = useObservable(
+    annotation$.pipe(
+      distinctUntilChanged((prev, curr) => {
+        // prevent re-rendering
+        return prev !== null && curr !== null;
+      })
+    )
+  );
+
   if (annotationProp === undefined) {
     return null;
   }

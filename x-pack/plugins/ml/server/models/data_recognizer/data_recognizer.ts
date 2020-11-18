@@ -37,13 +37,14 @@ import {
   prefixDatafeedId,
   splitIndexPatternNames,
 } from '../../../common/util/job_utils';
-import { mlLog } from '../../client/log';
+import { mlLog } from '../../lib/log';
 import { calculateModelMemoryLimitProvider } from '../calculate_model_memory_limit';
 import { fieldsServiceProvider } from '../fields_service';
 import { jobServiceProvider } from '../job_service';
 import { resultsServiceProvider } from '../results_service';
 import { JobExistResult, JobStat } from '../../../common/types/data_recognizer';
 import { MlJobsStatsResponse } from '../job_service/jobs';
+import { JobSavedObjectService } from '../../saved_objects';
 
 const ML_DIR = 'ml';
 const KIBANA_DIR = 'kibana';
@@ -108,6 +109,8 @@ export class DataRecognizer {
   private _client: IScopedClusterClient;
   private _mlClient: MlClient;
   private _savedObjectsClient: SavedObjectsClientContract;
+  private _jobSavedObjectService: JobSavedObjectService;
+  private _request: KibanaRequest;
 
   private _authorizationHeader: object;
   private _modulesDir = `${__dirname}/modules`;
@@ -127,11 +130,14 @@ export class DataRecognizer {
     mlClusterClient: IScopedClusterClient,
     mlClient: MlClient,
     savedObjectsClient: SavedObjectsClientContract,
+    jobSavedObjectService: JobSavedObjectService,
     request: KibanaRequest
   ) {
     this._client = mlClusterClient;
     this._mlClient = mlClient;
     this._savedObjectsClient = savedObjectsClient;
+    this._jobSavedObjectService = jobSavedObjectService;
+    this._request = request;
     this._authorizationHeader = getAuthorizationHeader(request);
     this._jobsService = jobServiceProvider(mlClusterClient, mlClient);
     this._resultsService = resultsServiceProvider(mlClient);
@@ -394,7 +400,8 @@ export class DataRecognizer {
     end?: number,
     jobOverrides?: JobOverride | JobOverride[],
     datafeedOverrides?: DatafeedOverride | DatafeedOverride[],
-    estimateModelMemory: boolean = true
+    estimateModelMemory: boolean = true,
+    applyToAllSpaces: boolean = false
   ) {
     // load the config from disk
     const moduleConfig = await this.getModule(moduleId, jobPrefix);
@@ -458,7 +465,7 @@ export class DataRecognizer {
       if (useDedicatedIndex === true) {
         moduleConfig.jobs.forEach((job) => (job.config.results_index_name = job.id));
       }
-      saveResults.jobs = await this.saveJobs(moduleConfig.jobs);
+      saveResults.jobs = await this.saveJobs(moduleConfig.jobs, applyToAllSpaces);
     }
 
     // create the datafeeds
@@ -699,8 +706,8 @@ export class DataRecognizer {
   // save the jobs.
   // if any fail (e.g. it already exists), catch the error and mark the result
   // as success: false
-  async saveJobs(jobs: ModuleJob[]): Promise<JobResponse[]> {
-    return await Promise.all(
+  async saveJobs(jobs: ModuleJob[], applyToAllSpaces: boolean = false): Promise<JobResponse[]> {
+    const resp = await Promise.all(
       jobs.map(async (job) => {
         const jobId = job.id;
         try {
@@ -712,6 +719,19 @@ export class DataRecognizer {
         }
       })
     );
+    if (applyToAllSpaces === true) {
+      const canCreateGlobalJobs = await this._jobSavedObjectService.canCreateGlobalJobs(
+        this._request
+      );
+      if (canCreateGlobalJobs === true) {
+        await this._jobSavedObjectService.assignJobsToSpaces(
+          'anomaly-detector',
+          jobs.map((j) => j.id),
+          ['*']
+        );
+      }
+    }
+    return resp;
   }
 
   async saveJob(job: ModuleJob) {

@@ -4,17 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { shallowWithIntl, mountWithIntl } from 'test_utils/enzyme_helpers';
+import { shallowWithIntl, mountWithIntl } from '@kbn/test/jest';
 import React from 'react';
-import * as reactUse from 'react-use';
 import { StepScreenshotDisplay } from '../step_screenshot_display';
 
-describe('StepScreenshotDisplayProps', () => {
-  // @ts-ignore missing fields don't matter in this test, the component in question only relies on `isIntersecting`
-  jest.spyOn(reactUse, 'useIntersection').mockImplementation(() => ({
-    isIntersecting: true,
-  }));
+jest.mock('react-use/lib/useIntersection', () => () => ({
+  isIntersecting: true,
+}));
 
+describe('StepScreenshotDisplayProps', () => {
   it('displays screenshot thumbnail when present', () => {
     const wrapper = mountWithIntl(
       <StepScreenshotDisplay

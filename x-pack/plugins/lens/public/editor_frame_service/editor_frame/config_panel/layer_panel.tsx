@@ -14,6 +14,7 @@ import {
   EuiFlexItem,
   EuiButtonEmpty,
   EuiFormRow,
+  EuiLink,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -25,6 +26,8 @@ import { trackUiEvent } from '../../../lens_ui_telemetry';
 import { generateId } from '../../../id_generator';
 import { ConfigPanelWrapperProps, ActiveDimensionState } from './types';
 import { DimensionContainer } from './dimension_container';
+import { ColorIndicator } from './color_indicator';
+import { PaletteIndicator } from './palette_indicator';
 
 const initialActiveDimensionState = {
   isNew: false,
@@ -181,6 +184,10 @@ export function LayerPanel(
           const newId = generateId();
           const isMissing = !isEmptyLayer && group.required && group.accessors.length === 0;
 
+          const triggerLinkA11yText = i18n.translate('xpack.lens.configure.editConfig', {
+            defaultMessage: 'Click to edit configuration or drag to move',
+          });
+
           return (
             <EuiFormRow
               className={
@@ -207,7 +214,8 @@ export function LayerPanel(
             >
               <>
                 <ReorderProvider id={group.groupId} className={'lnsLayerPanel__group'}>
-                  {group.accessors.map((accessor) => {
+                  {group.accessors.map((accessorConfig) => {
+                    const accessor = accessorConfig.columnId;
                     const { dragging } = dragDropContext;
                     const dragType =
                       isDraggedOperation(dragging) && accessor === dragging.columnId
@@ -235,6 +243,17 @@ export function LayerPanel(
                       dragging.groupId === group.groupId &&
                       dragging.columnId !== accessor &&
                       dragging.groupId !== 'y'; // TODO: remove this line when https://github.com/elastic/elastic-charts/issues/868 is fixed
+
+                    const isDroppable = isDraggedOperation(dragging)
+                      ? dragType === 'reorder'
+                        ? isFromTheSameGroup
+                        : isFromCompatibleGroup
+                      : layerDatasource.canHandleDrop({
+                          ...layerDatasourceDropProps,
+                          columnId: accessor,
+                          filterOperations: group.filterOperations,
+                        });
+
                     return (
                       <DragDrop
                         key={accessor}
@@ -242,7 +261,9 @@ export function LayerPanel(
                         dragType={dragType}
                         dropType={dropType}
                         data-test-subj={group.dataTestSubj}
-                        itemsInGroup={group.accessors}
+                        itemsInGroup={group.accessors.map((a) =>
+                          typeof a === 'string' ? a : a.columnId
+                        )}
                         className={'lnsLayerPanel__dimensionContainer'}
                         value={{
                           columnId: accessor,
@@ -252,11 +273,7 @@ export function LayerPanel(
                         }}
                         isValueEqual={isSameConfiguration}
                         label={columnLabelMap[accessor]}
-                        droppable={
-                          (dragging && !isDraggedOperation(dragging)) ||
-                          isFromCompatibleGroup ||
-                          isFromTheSameGroup
-                        }
+                        droppable={dragging && isDroppable}
                         dropTo={(dropTargetId: string) => {
                           layerDatasource.onDrop({
                             isReorder: true,
@@ -297,26 +314,33 @@ export function LayerPanel(
                         }}
                       >
                         <div className="lnsLayerPanel__dimension">
-                          <NativeRenderer
-                            render={props.datasourceMap[datasourceId].renderDimensionTrigger}
-                            nativeProps={{
-                              ...layerDatasourceConfigProps,
-                              columnId: accessor,
-                              filterOperations: group.filterOperations,
-                              suggestedPriority: group.suggestedPriority,
-                              onClick: () => {
-                                if (activeId) {
-                                  setActiveDimension(initialActiveDimensionState);
-                                } else {
-                                  setActiveDimension({
-                                    isNew: false,
-                                    activeGroup: group,
-                                    activeId: accessor,
-                                  });
-                                }
-                              },
+                          <EuiLink
+                            className="lnsLayerPanel__dimensionLink"
+                            onClick={() => {
+                              if (activeId) {
+                                setActiveDimension(initialActiveDimensionState);
+                              } else {
+                                setActiveDimension({
+                                  isNew: false,
+                                  activeGroup: group,
+                                  activeId: accessor,
+                                });
+                              }
                             }}
-                          />
+                            aria-label={triggerLinkA11yText}
+                            title={triggerLinkA11yText}
+                          >
+                            <ColorIndicator accessorConfig={accessorConfig}>
+                              <NativeRenderer
+                                render={props.datasourceMap[datasourceId].renderDimensionTrigger}
+                                nativeProps={{
+                                  ...layerDatasourceConfigProps,
+                                  columnId: accessor,
+                                  filterOperations: group.filterOperations,
+                                }}
+                              />
+                            </ColorIndicator>
+                          </EuiLink>
                           <EuiButtonIcon
                             className="lnsLayerPanel__dimensionRemove"
                             data-test-subj="indexPattern-dimension-remove"
@@ -350,6 +374,7 @@ export function LayerPanel(
                               );
                             }}
                           />
+                          <PaletteIndicator accessorConfig={accessorConfig} />
                         </div>
                       </DragDrop>
                     );
@@ -403,12 +428,12 @@ export function LayerPanel(
                     >
                       <div className="lnsLayerPanel__dimension lnsLayerPanel__dimension--empty">
                         <EuiButtonEmpty
-                          className="lnsLayerPanel__triggerLink"
+                          className="lnsLayerPanel__triggerText"
                           color="text"
                           size="xs"
                           iconType="plusInCircleFilled"
                           contentProps={{
-                            className: 'lnsLayerPanel__triggerLinkContent',
+                            className: 'lnsLayerPanel__triggerTextContent',
                           }}
                           data-test-subj="lns-empty-dimension"
                           onClick={() => {
@@ -450,7 +475,6 @@ export function LayerPanel(
                     core: props.core,
                     columnId: activeId,
                     filterOperations: activeGroup.filterOperations,
-                    suggestedPriority: activeGroup?.suggestedPriority,
                     dimensionGroups: groups,
                     setState: (newState: unknown) => {
                       props.updateAll(

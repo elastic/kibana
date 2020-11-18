@@ -413,7 +413,7 @@ Index Management by running this series of requests in Console:
 the infrastructure monitoring use-case within Kibana.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/ingest_manager/README.md[ingestManager]
+|{kib-repo}blob/{branch}/x-pack/plugins/fleet/README.md[ingestManager]
 |Fleet needs to have Elasticsearch API keys enabled, and also to have TLS enabled on kibana, (if you want to run Kibana without TLS you can provide the following config flag --xpack.fleet.agents.tlsCheckDisabled=false)
 
 
@@ -477,6 +477,10 @@ Elastic.
 
 |{kib-repo}blob/{branch}/x-pack/plugins/rollup/README.md[rollup]
 |Welcome to the Kibana rollup plugin! This plugin provides Kibana support for Elasticsearch's rollup feature. Please refer to the Elasticsearch documentation to understand rollup indices and how to create rollup jobs.
+
+
+|{kib-repo}blob/{branch}/x-pack/plugins/runtime_fields/README.md[runtimeFields]
+|Welcome to the home of the runtime field editor and everything related to runtime fields!
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/saved_objects_tagging/README.md[savedObjectsTagging]
@@ -552,6 +556,10 @@ in their infrastructure.
 
 |{kib-repo}blob/{branch}/x-pack/plugins/drilldowns/url_drilldown/README.md[urlDrilldown]
 |NOTE: This plugin contains implementation of URL drilldown. For drilldowns infrastructure code refer to ui_actions_enhanced plugin.
+
+
+|{kib-repo}blob/{branch}/x-pack/plugins/vis_type_timeseries_enhanced/README.md[visTypeTimeseriesEnhanced]
+|The vis_type_timeseries_enhanced plugin is the x-pack counterpart to the OSS vis_type_timeseries plugin.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/watcher/README.md[watcher]

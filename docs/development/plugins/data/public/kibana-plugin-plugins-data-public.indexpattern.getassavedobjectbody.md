@@ -10,6 +10,7 @@ Returns index pattern as saved object body for saving
 
 ```typescript
 getAsSavedObjectBody(): {
+        fieldAttrs: string | undefined;
         title: string;
         timeFieldName: string | undefined;
         intervalName: string | undefined;
@@ -23,6 +24,7 @@ getAsSavedObjectBody(): {
 <b>Returns:</b>
 
 `{
+        fieldAttrs: string | undefined;
         title: string;
         timeFieldName: string | undefined;
         intervalName: string | undefined;

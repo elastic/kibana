@@ -11,11 +11,11 @@ import { takeUntil } from 'rxjs/operators';
 import * as i18n from '../translations';
 import { useKibana } from '../../../common/lib/kibana';
 import {
-  AbortError,
   isCompleteResponse,
   isErrorResponse,
   isPartialResponse,
 } from '../../../../../../../src/plugins/data/common';
+import { AbortError } from '../../../../../../../src/plugins/kibana_utils/common';
 import {
   EqlSearchStrategyRequest,
   EqlSearchStrategyResponse,
@@ -74,8 +74,6 @@ export const useEqlPreview = (): [
           .search<EqlSearchStrategyRequest, EqlSearchStrategyResponse<EqlSearchResponse<Source>>>(
             {
               params: {
-                // @ts-expect-error allow_no_indices is missing on EqlSearch
-                allow_no_indices: true,
                 index: index.join(),
                 body: {
                   filter: {

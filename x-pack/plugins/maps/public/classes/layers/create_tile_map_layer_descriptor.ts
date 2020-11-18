@@ -103,7 +103,7 @@ export function createTileMapLayerDescriptor({
 
   const metricSourceKey = getSourceAggKey({
     aggType: metricsDescriptor.type,
-    aggFieldName: metricsDescriptor.field,
+    aggFieldName: 'field' in metricsDescriptor ? metricsDescriptor.field : '',
   });
   const metricStyleField = {
     name: metricSourceKey,

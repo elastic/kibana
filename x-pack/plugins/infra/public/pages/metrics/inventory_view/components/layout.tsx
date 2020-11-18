@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, useEffect } from 'react';
-import { useInterval } from 'react-use';
+import React, { useCallback, useEffect, useState } from 'react';
+import useInterval from 'react-use/lib/useInterval';
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { AutoSizer } from '../../../../components/auto_sizer';
@@ -32,6 +32,7 @@ import { BottomDrawer } from './bottom_drawer';
 import { Legend } from './waffle/legend';
 
 export const Layout = () => {
+  const [showLoading, setShowLoading] = useState(true);
   const { sourceId, source } = useSourceContext();
   const { currentView, shouldLoadDefault } = useSavedViewContext();
   const {
@@ -100,6 +101,16 @@ export const Layout = () => {
     }
   }, [reload, currentView, shouldLoadDefault]);
 
+  useEffect(() => {
+    setShowLoading(true);
+  }, [options.metric, nodeType]);
+
+  useEffect(() => {
+    const hasNodes = nodes && nodes.length;
+    // Don't show loading screen when we're auto-reloading
+    setShowLoading(!hasNodes);
+  }, [nodes]);
+
   return (
     <>
       <PageContent>
@@ -130,6 +141,7 @@ export const Layout = () => {
                         options={options}
                         nodeType={nodeType}
                         loading={loading}
+                        showLoading={showLoading}
                         reload={reload}
                         onDrilldown={applyFilterQuery}
                         currentTime={currentTime}
