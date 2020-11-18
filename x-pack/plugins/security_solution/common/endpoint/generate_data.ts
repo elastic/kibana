@@ -726,7 +726,7 @@ export class EndpointDocGenerator {
       if (eventTimestamp !== undefined) {
         if (eventTimestamp < startTime) {
           startTime = eventTimestamp;
-        } else {
+        } else if (eventTimestamp > endTime) {
           endTime = eventTimestamp;
         }
       }

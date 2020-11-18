@@ -272,14 +272,16 @@ describe('data generator', () => {
       let startTime = new Date(timestampSafeVersion(tree.allEvents[0]) ?? startOfEpoch);
       expect(startTime).not.toEqual(startOfEpoch);
       let endTime = new Date(timestampSafeVersion(tree.allEvents[0]) ?? startOfEpoch);
-      expect(endTime).not.toEqual(startOfEpoch);
+      expect(startTime).not.toEqual(startOfEpoch);
 
       for (const event of tree.allEvents) {
         const currentEventTime = new Date(timestampSafeVersion(event) ?? startOfEpoch);
         expect(currentEventTime).not.toEqual(startOfEpoch);
         if (currentEventTime < startTime) {
           startTime = currentEventTime;
-        } else {
+        }
+
+        if (currentEventTime > endTime) {
           endTime = currentEventTime;
         }
       }
