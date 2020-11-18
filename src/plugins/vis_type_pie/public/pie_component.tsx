@@ -84,7 +84,7 @@ const PieComponent = (props: PieComponentProps) => {
   // const allSeries: Array<string | number> = [];
   const chartTheme = getThemeService().useChartsTheme();
   const chartBaseTheme = getThemeService().useChartsBaseTheme();
-  const defaultPalette = getColorsService().getAll()[0];
+  const defaultPalette = getColorsService().get('kibana_palette');
 
   // const [showLegend, setShowLegend] = useState<boolean>(() => {
   //   // TODO: Check when this bwc can safely be removed
@@ -260,7 +260,7 @@ const PieComponent = (props: PieComponentProps) => {
     minFontSize: 10,
     maxFontSize: 16,
     linkLabel: {
-      maxCount: Number.POSITIVE_INFINITY,
+      maxCount: 5,
       fontSize: 11,
       textColor: chartTheme.axes?.axisTitle?.fill,
       maxTextLength: visParams.labels.truncate ?? undefined,
@@ -298,12 +298,6 @@ const PieComponent = (props: PieComponentProps) => {
   const matchingIndex = visData.columns.findIndex((col) => col.id === lastBucketId);
   const metricColumn = visData.columns[matchingIndex + 1];
 
-  const totalSeriesCount = uniq(
-    visData.rows.map((row) => {
-      return bucketColumns.map(({ id: columnId }) => row[columnId]).join(',');
-    })
-  ).length;
-
   const layers: PartitionLayer[] = bucketColumns.map((col) => {
     return {
       groupByRollup: (d: Datum) => d[col.id] ?? EMPTY_SLICE,
@@ -333,8 +327,8 @@ const PieComponent = (props: PieComponentProps) => {
 
           const outputColor = defaultPalette.getColor(seriesLayers, {
             behindText: visParams.labels.show,
-            maxDepth: visData.columns.length,
-            totalSeries: totalSeriesCount,
+            maxDepth: bucketColumns.length,
+            totalSeries: visData.rows.length,
           });
 
           return outputColor || 'rgba(0,0,0,0)';
@@ -372,6 +366,7 @@ const PieComponent = (props: PieComponentProps) => {
             }}
             theme={chartTheme}
             baseTheme={chartBaseTheme}
+            onRenderChange={onRenderChange}
           />
           <Partition
             id="pie"
