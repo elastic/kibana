@@ -7,10 +7,7 @@ import React from 'react';
 import { mountWithIntl, nextTick } from '@kbn/test/jest';
 import { act } from 'react-dom/test-utils';
 import { EsIndexActionConnector } from '../types';
-import { coreMock } from '../../../../../../../../src/core/public/mocks';
 import IndexActionConnectorFields from './es_index_connector';
-import { TypeRegistry } from '../../../type_registry';
-import { DocLinksStart } from 'kibana/public';
 
 jest.mock('../../../../common/index_controls', () => ({
   firstFieldOption: jest.fn(),
@@ -21,14 +18,6 @@ jest.mock('../../../../common/index_controls', () => ({
 
 describe('IndexActionConnectorFields renders', () => {
   test('all connector fields is rendered', async () => {
-    const mocks = coreMock.createSetup();
-    const [
-      {
-        application: { capabilities },
-      },
-    ] = await mocks.getStartServices();
-    
-
     const { getIndexPatterns } = jest.requireMock('../../../../common/index_controls');
     getIndexPatterns.mockResolvedValueOnce([
       {

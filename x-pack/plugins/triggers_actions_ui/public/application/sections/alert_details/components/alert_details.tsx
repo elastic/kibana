@@ -62,8 +62,8 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
   const history = useHistory();
   const {
     http,
-    toastNotifications,
-    capabilities,
+    notifications: { toasts },
+    application: { capabilities },
     alertTypeRegistry,
     actionTypeRegistry,
     uiSettings,
@@ -153,7 +153,7 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
                             http,
                             actionTypeRegistry,
                             alertTypeRegistry,
-                            toastNotifications,
+                            toastNotifications: toasts,
                             uiSettings,
                             docLinks,
                             charts,

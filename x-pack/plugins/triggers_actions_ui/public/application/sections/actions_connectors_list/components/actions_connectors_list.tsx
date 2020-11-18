@@ -40,7 +40,12 @@ import { EmptyConnectorsPrompt } from '../../../components/prompts/empty_connect
 import { useKibana } from '../../../../common/lib/kibana';
 
 export const ActionsConnectorsList: React.FunctionComponent = () => {
-  const { http, toastNotifications, capabilities, actionTypeRegistry } = useKibana().services;
+  const {
+    http,
+    notifications: { toasts },
+    application: { capabilities },
+    actionTypeRegistry,
+  } = useKibana().services;
   const canDelete = hasDeleteActionsCapability(capabilities);
   const canExecute = hasExecuteActionsCapability(capabilities);
   const canSave = hasSaveActionsCapability(capabilities);
@@ -73,7 +78,7 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
         }
         setActionTypesIndex(index);
       } catch (e) {
-        toastNotifications.addDanger({
+        toasts.addDanger({
           title: i18n.translate(
             'xpack.triggersActionsUI.sections.actionsConnectorsList.unableToLoadActionTypesMessage',
             { defaultMessage: 'Unable to load action types' }
@@ -112,7 +117,7 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
       const actionsResponse = await loadAllActions({ http });
       setActions(actionsResponse);
     } catch (e) {
-      toastNotifications.addDanger({
+      toasts.addDanger({
         title: i18n.translate(
           'xpack.triggersActionsUI.sections.actionsConnectorsList.unableToLoadActionsMessage',
           {

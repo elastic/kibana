@@ -41,7 +41,13 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
   },
   history,
 }) => {
-  const { chrome, capabilities, setBreadcrumbs, docLinks, http } = useKibana().services;
+  const {
+    chrome,
+    application: { capabilities },
+    setBreadcrumbs,
+    docLinks,
+    http,
+  } = useKibana().services;
 
   const canShowActions = hasShowActionsCapability(capabilities);
   const tabs: Array<{
