@@ -38,8 +38,8 @@ export function useTransactionDistribution(urlParams: IUrlParams) {
     async (callApmApi) => {
       if (serviceName && start && end && transactionType && transactionName) {
         const response = await callApmApi({
-          pathname:
-            '/api/apm/services/{serviceName}/transaction_groups/distribution',
+          endpoint:
+            'GET /api/apm/services/{serviceName}/transaction_groups/distribution',
           params: {
             path: {
               serviceName,
