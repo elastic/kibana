@@ -23,7 +23,7 @@ import { VIEW_API_LOGS } from '../constants';
 
 import { EngineLogic } from '../../engine';
 
-export const RecentLogs: React.FC = () => {
+export const RecentApiLogs: React.FC = () => {
   const { engineName } = useValues(EngineLogic);
   const engineRoute = getEngineRoute(engineName);
 
