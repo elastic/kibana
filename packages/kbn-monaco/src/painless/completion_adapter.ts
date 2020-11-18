@@ -102,9 +102,9 @@ export class PainlessCompletionAdapter implements monaco.languages.CompletionIte
       }
     );
 
-    return Promise.resolve({
-      isIncomplete: autocompleteInfo.isIncomplete,
+    return {
+      incomplete: autocompleteInfo.isIncomplete,
       suggestions,
-    });
+    };
   }
 }

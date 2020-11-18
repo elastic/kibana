@@ -169,7 +169,7 @@ export const getAutocompleteSuggestions = (
   painlessContext: PainlessContext,
   words: string[],
   fields?: Field[]
-) => {
+): PainlessCompletionResult => {
   const suggestions = mapContextToData[painlessContext].suggestions;
   // What the user is currently typing
   const activeTyping = words[words.length - 1];

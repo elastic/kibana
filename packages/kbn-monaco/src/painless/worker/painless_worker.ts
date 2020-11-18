@@ -22,11 +22,11 @@ import { PainlessCompletionResult, PainlessContext, Field } from '../types';
 import { getAutocompleteSuggestions } from './lib';
 
 export class PainlessWorker {
-  provideAutocompleteSuggestions(
+  public provideAutocompleteSuggestions(
     currentLineChars: string,
     context: PainlessContext,
     fields?: Field[]
-  ): Promise<PainlessCompletionResult> {
+  ): PainlessCompletionResult {
     // Array of the active line words, e.g., [boolean, isTrue, =, true]
     const words = currentLineChars.replace('\t', '').split(' ');
 
@@ -36,6 +36,6 @@ export class PainlessWorker {
       fields
     );
 
-    return Promise.resolve(autocompleteSuggestions);
+    return autocompleteSuggestions;
   }
 }

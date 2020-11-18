@@ -19,6 +19,7 @@
 
 import { monaco } from '../../monaco_imports';
 import { PainlessWorker } from '../worker';
+import { ID } from '../constants';
 
 export class WorkerProxyService {
   private worker: monaco.editor.MonacoWebWorker<PainlessWorker> | undefined;
@@ -34,7 +35,7 @@ export class WorkerProxyService {
   }
 
   public setup() {
-    this.worker = monaco.editor.createWebWorker({ label: 'painless', moduleId: '' });
+    this.worker = monaco.editor.createWebWorker({ label: ID, moduleId: '' });
   }
 
   public stop() {
