@@ -51,7 +51,9 @@ interface Props {
   nextStepsFilter: (nextStep: AlertMessage) => boolean;
 }
 export const AlertsBadge: React.FC<Props> = (props: Props) => {
-  const { alerts, stateFilter = () => true, nextStepsFilter = () => true } = props;
+  const { stateFilter = () => true, nextStepsFilter = () => true } = props;
+  // We do not always have the alerts that each consumer wants due to licensing
+  const alerts = props.alerts.filter(Boolean);
   const [showPopover, setShowPopover] = React.useState<AlertSeverity | boolean | null>(null);
   const inSetupMode = isInSetupMode(React.useContext(SetupModeContext));
   const alertsContext = React.useContext(AlertsContext);
@@ -66,7 +68,7 @@ export const AlertsBadge: React.FC<Props> = (props: Props) => {
     }
   }, [inSetupMode, showByNode]);
 
-  if (alerts.length === 0) {
+  if (alertCount === 0) {
     return null;
   }
 
@@ -99,8 +101,8 @@ export const AlertsBadge: React.FC<Props> = (props: Props) => {
         nextStepsFilter
       );
 
-  if (panels.length && !inSetupMode) {
-    panels[0].items?.push(
+  if (panels.length && !inSetupMode && panels[0].items) {
+    panels[0].items.push(
       ...[
         {
           isSeparator: true as const,
