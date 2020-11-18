@@ -177,7 +177,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       it('sorts items by the correct field', async () => {
         const response = await supertest.get(
           url.format({
-            pathname: `/api/apm/services/opbeans-java/overvie)w_transaction_groups`,
+            pathname: `/api/apm/services/opbeans-java/overview_transaction_groups`,
             query: {
               start,
               end,
