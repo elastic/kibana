@@ -50,9 +50,12 @@ export const AnalyticsNavigationBar: FC<{ selectedTabId?: string; jobId?: string
     return navTabs;
   }, [jobId !== undefined]);
 
-  const onTabClick = useCallback(async (tab: Tab) => {
-    await navigateToPath(tab.path, true);
-  }, []);
+  const onTabClick = useCallback(
+    async (tab: Tab) => {
+      await navigateToPath(tab.path, true);
+    },
+    [navigateToPath]
+  );
 
   return (
     <EuiTabs>
