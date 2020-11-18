@@ -1014,7 +1014,6 @@ export class TimeSeriesExplorer extends React.Component {
     this.previousShowForecast = showForecast;
     this.previousShowModelBounds = showModelBounds;
 
-    console.log('Timeseriesexplorer rerendered');
     return (
       <TimeSeriesExplorerPage dateFormatTz={dateFormatTz} resizeRef={this.resizeRef}>
         {fieldNamesWithEmptyValues.length > 0 && (
