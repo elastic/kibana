@@ -11,9 +11,7 @@ import { EuiAvatarProps } from '@elastic/eui/src/components/avatar/avatar';
 const MIN_WIDTH: CSSProperties = { minWidth: 0 };
 
 /**
- * Components shows a link for a given value along with a revision number to its right. The display
- * value is truncated if it is longer than the width of where it is displayed, while the revision
- * always remain visible
+ * Shows a user's name along with an avatar. Name is truncated if its wider than the availble space
  */
 export const Persona = memo<EuiAvatarProps>(
   ({ name, className, 'data-test-subj': dataTestSubj, title, ...otherAvatarProps }) => {
