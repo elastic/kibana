@@ -23,7 +23,7 @@ import { LayerPanel } from '../layer_panel';
 import { AddLayerPanel } from '../add_layer_panel';
 import { ExitFullScreenButton } from '../../../../../../src/plugins/kibana_react/public';
 import { getIndexPatternsFromIds } from '../../index_pattern_util';
-import { ES_GEO_FIELD_TYPE } from '../../../common/constants';
+import { ES_GEO_FIELD_TYPE, RawValue } from '../../../common/constants';
 import { indexPatterns as indexPatternsUtils } from '../../../../../../src/plugins/data/public';
 import { FLYOUT_STATE } from '../../reducers/ui';
 import { MapSettingsPanel } from '../map_settings_panel';
@@ -32,7 +32,6 @@ import { RenderToolTipContent } from '../../classes/tooltips/tooltip_property';
 import { GeoFieldWithIndex } from '../../components/geo_field_with_index';
 import { MapRefreshConfig } from '../../../common/descriptor_types';
 import 'mapbox-gl/dist/mapbox-gl.css';
-import { OnSingleValueTriggerParams } from '../types';
 
 const RENDER_COMPLETE_EVENT = 'renderComplete';
 
@@ -40,7 +39,7 @@ interface Props {
   addFilters: ((filters: Filter[]) => Promise<void>) | null;
   getFilterActions?: () => Promise<Action[]>;
   getActionContext?: () => ActionExecutionContext;
-  onSingleValueTrigger?: (params: OnSingleValueTriggerParams) => void;
+  onSingleValueTrigger?: (actionId: string, key: string, value: RawValue) => void;
   areLayersLoaded: boolean;
   cancelAllInFlightRequests: () => void;
   exitFullScreen: () => void;

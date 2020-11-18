@@ -133,16 +133,11 @@ export class FeatureProperties extends React.Component {
               this.props.onCloseTooltip();
 
               if (isUrlDrilldown(action)) {
-                this.props.onSingleValueTrigger({
-                  actionId: action.id,
-                  indexPattern:
-                    'getIndexPattern' in tooltipProperty
-                      ? tooltipProperty.getIndexPattern()
-                      : undefined,
-                  key: tooltipProperty.getPropertyKey(),
-                  label: tooltipProperty.getPropertyName(),
-                  value: tooltipProperty.getRawValue(),
-                });
+                this.props.onSingleValueTrigger(
+                  action.id,
+                  tooltipProperty.getPropertyKey(),
+                  tooltipProperty.getRawValue()
+                );
               } else {
                 const filters = await tooltipProperty.getESFilters();
                 this.props.addFilters(filters, action.id);
