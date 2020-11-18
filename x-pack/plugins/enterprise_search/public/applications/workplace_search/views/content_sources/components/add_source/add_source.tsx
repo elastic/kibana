@@ -121,7 +121,7 @@ export const AddSource: React.FC<AddSourceProps> = ({
   const saveCustomSuccess = () => setStep(Steps.SaveCustomStep);
   const goToSaveCustom = () => createContentSource(CUSTOM_SERVICE_TYPE, saveCustomSuccess);
 
-  const goToFormSourceCreated = (sourceName) => {
+  const goToFormSourceCreated = (sourceName: string) => {
     history.push(`${getSourcesPath(SOURCE_ADDED_PATH, isOrganization)}/?name=${sourceName}`);
   };
 

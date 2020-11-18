@@ -32,7 +32,7 @@ interface AvailableSourcesListProps {
 export const AvailableSourcesList: React.FC<AvailableSourcesListProps> = ({ sources }) => {
   const { hasPlatinumLicense } = useValues(LicensingLogic);
 
-  const getSourceCard = ({ name, serviceType, addPath, accountContextOnly }) => {
+  const getSourceCard = ({ name, serviceType, addPath, accountContextOnly }: SourceDataItem) => {
     const disabled = !hasPlatinumLicense && accountContextOnly;
     const card = (
       <EuiCard

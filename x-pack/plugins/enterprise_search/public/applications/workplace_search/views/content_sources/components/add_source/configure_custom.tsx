@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { ChangeEvent, FormEvent } from 'react';
 
 import { useActions, useValues } from 'kea';
 
@@ -24,7 +24,7 @@ import { SourceLogic } from '../../source_logic';
 interface ConfigureCustomProps {
   header: React.ReactNode;
   helpText: string;
-  advanceStep();
+  advanceStep(): void;
 }
 
 export const ConfigureCustom: React.FC<ConfigureCustomProps> = ({
@@ -35,12 +35,13 @@ export const ConfigureCustom: React.FC<ConfigureCustomProps> = ({
   const { setCustomSourceNameValue } = useActions(SourceLogic);
   const { customSourceNameValue, buttonLoading } = useValues(SourceLogic);
 
-  const handleFormSubmit = (e) => {
+  const handleFormSubmit = (e: FormEvent) => {
     e.preventDefault();
     advanceStep();
   };
 
-  const handleNameChange = (e) => setCustomSourceNameValue(e.target.value);
+  const handleNameChange = (e: ChangeEvent<HTMLInputElement>) =>
+    setCustomSourceNameValue(e.target.value);
 
   return (
     <div className="custom-api-step-1">

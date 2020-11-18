@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { FormEvent } from 'react';
 
 import { useActions, useValues } from 'kea';
 
@@ -32,9 +32,9 @@ interface SaveConfigProps {
   header: React.ReactNode;
   name: string;
   configuration: Configuration;
-  advanceStep();
-  goBackStep?();
-  onDeleteConfig?();
+  advanceStep(): void;
+  goBackStep?(): void;
+  onDeleteConfig?(): void;
 }
 
 export const SaveConfig: React.FC<SaveConfigProps> = ({
@@ -69,7 +69,7 @@ export const SaveConfig: React.FC<SaveConfigProps> = ({
     configuredFields: { publicKey, consumerKey },
   } = sourceConfigData;
 
-  const handleFormSubmission = (e) => {
+  const handleFormSubmission = (e: FormEvent) => {
     e.preventDefault();
     advanceStep();
   };

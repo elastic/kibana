@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, FormEvent } from 'react';
 
 import { Location } from 'history';
 import { useActions, useValues } from 'kea';
@@ -19,6 +19,8 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
+import { EuiCheckboxGroupIdToSelectedMap } from '@elastic/eui/src/components/form/checkbox/checkbox_group';
+
 import { parseQueryParams } from '../../../../../../applications/shared/query_params';
 import { Loading } from '../../../../../../applications/shared/loading';
 import { SourceLogic } from '../../source_logic';
@@ -30,7 +32,7 @@ interface OauthQueryParams {
 interface ConfigureOauthProps {
   header: React.ReactNode;
   name: string;
-  onFormCreated(name: string);
+  onFormCreated(name: string): void;
 }
 
 export const ConfigureOauth: React.FC<ConfigureOauthProps> = ({ name, onFormCreated, header }) => {
@@ -57,10 +59,10 @@ export const ConfigureOauth: React.FC<ConfigureOauthProps> = ({ name, onFormCrea
     getPreContentSourceConfigData(preContentSourceId);
   }, []);
 
-  const handleChange = (option) => setSelectedGithubOrganizations(option);
+  const handleChange = (option: string) => setSelectedGithubOrganizations(option);
   const formSubmitSuccess = () => onFormCreated(name);
   const handleFormSubmitError = () => setFormLoading(false);
-  const handleFormSubmut = (e) => {
+  const handleFormSubmut = (e: FormEvent) => {
     setFormLoading(true);
     e.preventDefault();
     createContentSource(currentServiceType, formSubmitSuccess, handleFormSubmitError);
@@ -79,7 +81,7 @@ export const ConfigureOauth: React.FC<ConfigureOauthProps> = ({ name, onFormCrea
           <EuiFormRow label="Select GitHub organizations to sync">
             <EuiCheckboxGroup
               options={checkboxOptions}
-              idToSelectedMap={selectedGithubOrganizationsMap}
+              idToSelectedMap={selectedGithubOrganizationsMap as EuiCheckboxGroupIdToSelectedMap}
               onChange={handleChange}
             />
           </EuiFormRow>

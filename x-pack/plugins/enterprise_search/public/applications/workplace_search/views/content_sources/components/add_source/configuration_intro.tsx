@@ -22,7 +22,7 @@ import connectionIllustration from 'workplace_search/components/assets/connectio
 interface ConfigurationIntroProps {
   header: React.ReactNode;
   name: string;
-  advanceStep();
+  advanceStep(): void;
 }
 
 export const ConfigurationIntro: React.FC<ConfigurationIntroProps> = ({

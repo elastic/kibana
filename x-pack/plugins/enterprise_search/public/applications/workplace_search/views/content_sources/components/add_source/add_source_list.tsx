@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, ChangeEvent } from 'react';
 import noSharedSourcesIcon from 'workplace_search/components/assets/shareCircle.svg';
 
 import { useActions, useValues } from 'kea';
@@ -77,17 +77,19 @@ export const AddSourceList: React.FC = () => {
   const HAS_SOURCES_TITLE = isOrganization ? ORG_SOURCES_TITLE : PRIVATE_SOURCES_TITLE;
   const SIDEBAR_TITLE = hasSources ? HAS_SOURCES_TITLE : NO_SOURCES_TITLE;
 
-  const handleFilterChange = (e) => setFilterValue(e.target.value);
+  const handleFilterChange = (e: ChangeEvent<HTMLInputElement>) => setFilterValue(e.target.value);
 
-  const filterSources = (source, sources): boolean => {
+  const filterSources = (source: SourceDataItem, sources: SourceDataItem[]): boolean => {
     if (!filterValue) return true;
     const filterSource = sources.find(({ serviceType }) => serviceType === source.serviceType);
     const filteredName = filterSource?.name || '';
     return filteredName.toLowerCase().indexOf(filterValue.toLowerCase()) > -1;
   };
 
-  const filterAvailableSources = (source) => filterSources(source, availableSources);
-  const filterConfiguredSources = (source) => filterSources(source, configuredSources);
+  const filterAvailableSources = (source: SourceDataItem) =>
+    filterSources(source, availableSources);
+  const filterConfiguredSources = (source: SourceDataItem) =>
+    filterSources(source, configuredSources);
 
   const visibleAvailableSources = availableSources.filter(
     filterAvailableSources

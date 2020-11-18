@@ -89,7 +89,7 @@ export const ConfiguredSourcesList: React.FC<ConfiguredSourcesProps> = ({
                 </EuiFlexItem>
                 {(!isOrganization || (isOrganization && !accountContextOnly)) && (
                   <EuiFlexItem grow={false}>
-                    <Link to={`${getSourcesPath(addPath, isOrganization)}/connect`}>
+                    <Link to={`${getSourcesPath(addPath, !!isOrganization)}/connect`}>
                       <EuiButtonEmpty>Connect</EuiButtonEmpty>
                     </Link>
                   </EuiFlexItem>

@@ -31,7 +31,7 @@ interface ConfigCompletedProps {
   name: string;
   accountContextOnly?: boolean;
   privateSourcesEnabled: boolean;
-  advanceStep();
+  advanceStep(): void;
 }
 
 export const ConfigCompleted: React.FC<ConfigCompletedProps> = ({

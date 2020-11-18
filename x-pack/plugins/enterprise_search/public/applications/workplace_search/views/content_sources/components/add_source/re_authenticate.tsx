@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, FormEvent } from 'react';
 
 import { Location } from 'history';
 import { useActions, useValues } from 'kea';
@@ -39,7 +39,7 @@ export const ReAuthenticate: React.FC<ReAuthenticateProps> = ({ name, header }) 
     getSourceReConnectData(sourceId);
   }, []);
 
-  const handleFormSubmit = (e) => {
+  const handleFormSubmit = (e: FormEvent) => {
     e.preventDefault();
     setFormLoading(true);
     window.location.href = oauthUrl;

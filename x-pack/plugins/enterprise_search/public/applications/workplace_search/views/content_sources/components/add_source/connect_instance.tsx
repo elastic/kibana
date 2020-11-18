@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, FormEvent } from 'react';
 
 import { useActions, useValues } from 'kea';
 
@@ -43,7 +43,7 @@ interface ConnectInstanceProps {
   sourceDescription: string;
   connectStepDescription: string;
   needsPermissions: boolean;
-  onFormCreated(name: string);
+  onFormCreated(name: string): void;
 }
 
 export const ConnectInstance: React.FC<ConnectInstanceProps> = ({
@@ -89,7 +89,7 @@ export const ConnectInstance: React.FC<ConnectInstanceProps> = ({
   const onCredentialsFormSubmit = () =>
     createContentSource(serviceType, redirectFormCreated, handleFormSubmitError);
 
-  const handleFormSubmit = (e) => {
+  const handleFormSubmit = (e: FormEvent) => {
     setFormLoading(true);
     e.preventDefault();
     const onSubmit = hasOauthRedirect ? onOauthFormSubmit : onCredentialsFormSubmit;
