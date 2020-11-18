@@ -16,6 +16,7 @@ import { uiFiltersRt, rangeRt } from './default_api_types';
 import { getTransactionSampleForGroup } from '../lib/transaction_groups/get_transaction_sample_for_group';
 import { getSearchAggregatedTransactions } from '../lib/helpers/aggregated_transactions';
 import { getErrorRate } from '../lib/transaction_groups/get_error_rate';
+import { getThroughput } from '../lib/transaction_groups/get_throughput';
 
 export const transactionGroupsRoute = createRoute(() => ({
   path: '/api/apm/services/{serviceName}/transaction_groups',
@@ -168,6 +169,35 @@ export const transactionGroupsBreakdownRoute = createRoute(() => ({
       transactionName,
       transactionType,
       setup,
+    });
+  },
+}));
+
+export const transactionGroupsThroughputRoute = createRoute(() => ({
+  path: '/api/apm/services/{serviceName}/transaction_groups/throughput',
+  params: {
+    path: t.type({
+      serviceName: t.string,
+    }),
+    query: t.intersection([
+      t.type({ transactionType: t.string }),
+      uiFiltersRt,
+      rangeRt,
+    ]),
+  },
+  handler: async ({ context, request }) => {
+    const setup = await setupRequest(context, request);
+    const { serviceName } = context.params.path;
+    const { transactionType } = context.params.query;
+
+    const searchAggregatedTransactions = await getSearchAggregatedTransactions(
+      setup
+    );
+    return getThroughput({
+      searchAggregatedTransactions,
+      serviceName,
+      setup,
+      transactionType,
     });
   },
 }));

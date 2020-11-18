@@ -53,6 +53,7 @@ import {
   transactionGroupsRoute,
   transactionSampleForGroupRoute,
   transactionGroupsErrorRateRoute,
+  transactionGroupsThroughputRoute,
 } from './transaction_groups';
 import {
   errorGroupsLocalFiltersRoute,
@@ -152,6 +153,7 @@ const createApmApi = () => {
     .add(transactionGroupsRoute)
     .add(transactionSampleForGroupRoute)
     .add(transactionGroupsErrorRateRoute)
+    .add(transactionGroupsThroughputRoute)
 
     // UI filters
     .add(errorGroupsLocalFiltersRoute)

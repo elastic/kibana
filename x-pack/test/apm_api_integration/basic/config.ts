@@ -9,5 +9,5 @@ import { createTestConfig } from '../common/config';
 export default createTestConfig({
   license: 'basic',
   name: 'X-Pack APM API integration tests (basic)',
-  testFiles: [require.resolve('./tests')],
+  testFiles: [require.resolve('./tests/transaction_groups/throughput.ts')],
 });
