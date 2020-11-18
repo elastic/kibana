@@ -1,0 +1,824 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`CSM page load dist when there is data returns page load distribution 1`] = `
+Object {
+  "maxDuration": 54.46,
+  "minDuration": 0,
+  "pageLoadDistribution": Array [
+    Object {
+      "x": 0,
+      "y": 0,
+    },
+    Object {
+      "x": 0.5,
+      "y": 0,
+    },
+    Object {
+      "x": 1,
+      "y": 0,
+    },
+    Object {
+      "x": 1.5,
+      "y": 0,
+    },
+    Object {
+      "x": 2,
+      "y": 0,
+    },
+    Object {
+      "x": 2.5,
+      "y": 0,
+    },
+    Object {
+      "x": 3,
+      "y": 16.6666666666667,
+    },
+    Object {
+      "x": 3.5,
+      "y": 0,
+    },
+    Object {
+      "x": 4,
+      "y": 0,
+    },
+    Object {
+      "x": 4.5,
+      "y": 0,
+    },
+    Object {
+      "x": 5,
+      "y": 50,
+    },
+    Object {
+      "x": 5.5,
+      "y": 0,
+    },
+    Object {
+      "x": 6,
+      "y": 0,
+    },
+    Object {
+      "x": 6.5,
+      "y": 0,
+    },
+    Object {
+      "x": 7,
+      "y": 0,
+    },
+    Object {
+      "x": 7.5,
+      "y": 0,
+    },
+    Object {
+      "x": 8,
+      "y": 0,
+    },
+    Object {
+      "x": 8.5,
+      "y": 0,
+    },
+    Object {
+      "x": 9,
+      "y": 0,
+    },
+    Object {
+      "x": 9.5,
+      "y": 0,
+    },
+    Object {
+      "x": 10,
+      "y": 0,
+    },
+    Object {
+      "x": 10.5,
+      "y": 0,
+    },
+    Object {
+      "x": 11,
+      "y": 0,
+    },
+    Object {
+      "x": 11.5,
+      "y": 0,
+    },
+    Object {
+      "x": 12,
+      "y": 0,
+    },
+    Object {
+      "x": 12.5,
+      "y": 0,
+    },
+    Object {
+      "x": 13,
+      "y": 0,
+    },
+    Object {
+      "x": 13.5,
+      "y": 0,
+    },
+    Object {
+      "x": 14,
+      "y": 0,
+    },
+    Object {
+      "x": 14.5,
+      "y": 0,
+    },
+    Object {
+      "x": 15,
+      "y": 0,
+    },
+    Object {
+      "x": 15.5,
+      "y": 0,
+    },
+    Object {
+      "x": 16,
+      "y": 0,
+    },
+    Object {
+      "x": 16.5,
+      "y": 0,
+    },
+    Object {
+      "x": 17,
+      "y": 0,
+    },
+    Object {
+      "x": 17.5,
+      "y": 0,
+    },
+    Object {
+      "x": 18,
+      "y": 0,
+    },
+    Object {
+      "x": 18.5,
+      "y": 0,
+    },
+    Object {
+      "x": 19,
+      "y": 0,
+    },
+    Object {
+      "x": 19.5,
+      "y": 0,
+    },
+    Object {
+      "x": 20,
+      "y": 0,
+    },
+    Object {
+      "x": 20.5,
+      "y": 0,
+    },
+    Object {
+      "x": 21,
+      "y": 0,
+    },
+    Object {
+      "x": 21.5,
+      "y": 0,
+    },
+    Object {
+      "x": 22,
+      "y": 0,
+    },
+    Object {
+      "x": 22.5,
+      "y": 0,
+    },
+    Object {
+      "x": 23,
+      "y": 0,
+    },
+    Object {
+      "x": 23.5,
+      "y": 0,
+    },
+    Object {
+      "x": 24,
+      "y": 0,
+    },
+    Object {
+      "x": 24.5,
+      "y": 0,
+    },
+    Object {
+      "x": 25,
+      "y": 0,
+    },
+    Object {
+      "x": 25.5,
+      "y": 0,
+    },
+    Object {
+      "x": 26,
+      "y": 0,
+    },
+    Object {
+      "x": 26.5,
+      "y": 0,
+    },
+    Object {
+      "x": 27,
+      "y": 0,
+    },
+    Object {
+      "x": 27.5,
+      "y": 0,
+    },
+    Object {
+      "x": 28,
+      "y": 0,
+    },
+    Object {
+      "x": 28.5,
+      "y": 0,
+    },
+    Object {
+      "x": 29,
+      "y": 0,
+    },
+    Object {
+      "x": 29.5,
+      "y": 0,
+    },
+    Object {
+      "x": 30,
+      "y": 0,
+    },
+    Object {
+      "x": 30.5,
+      "y": 0,
+    },
+    Object {
+      "x": 31,
+      "y": 0,
+    },
+    Object {
+      "x": 31.5,
+      "y": 0,
+    },
+    Object {
+      "x": 32,
+      "y": 0,
+    },
+    Object {
+      "x": 32.5,
+      "y": 0,
+    },
+    Object {
+      "x": 33,
+      "y": 0,
+    },
+    Object {
+      "x": 33.5,
+      "y": 0,
+    },
+    Object {
+      "x": 34,
+      "y": 0,
+    },
+    Object {
+      "x": 34.5,
+      "y": 0,
+    },
+    Object {
+      "x": 35,
+      "y": 0,
+    },
+    Object {
+      "x": 35.5,
+      "y": 0,
+    },
+    Object {
+      "x": 36,
+      "y": 0,
+    },
+    Object {
+      "x": 36.5,
+      "y": 0,
+    },
+    Object {
+      "x": 37,
+      "y": 0,
+    },
+    Object {
+      "x": 37.5,
+      "y": 16.6666666666667,
+    },
+    Object {
+      "x": 38,
+      "y": 0,
+    },
+    Object {
+      "x": 38.5,
+      "y": 0,
+    },
+    Object {
+      "x": 39,
+      "y": 0,
+    },
+    Object {
+      "x": 39.5,
+      "y": 0,
+    },
+    Object {
+      "x": 40,
+      "y": 0,
+    },
+    Object {
+      "x": 40.5,
+      "y": 0,
+    },
+    Object {
+      "x": 41,
+      "y": 0,
+    },
+    Object {
+      "x": 41.5,
+      "y": 0,
+    },
+    Object {
+      "x": 42,
+      "y": 0,
+    },
+    Object {
+      "x": 42.5,
+      "y": 0,
+    },
+    Object {
+      "x": 43,
+      "y": 0,
+    },
+    Object {
+      "x": 43.5,
+      "y": 0,
+    },
+    Object {
+      "x": 44,
+      "y": 0,
+    },
+    Object {
+      "x": 44.5,
+      "y": 0,
+    },
+    Object {
+      "x": 45,
+      "y": 0,
+    },
+    Object {
+      "x": 45.5,
+      "y": 0,
+    },
+    Object {
+      "x": 46,
+      "y": 0,
+    },
+    Object {
+      "x": 46.5,
+      "y": 0,
+    },
+    Object {
+      "x": 47,
+      "y": 0,
+    },
+    Object {
+      "x": 47.5,
+      "y": 0,
+    },
+    Object {
+      "x": 48,
+      "y": 0,
+    },
+    Object {
+      "x": 48.5,
+      "y": 0,
+    },
+    Object {
+      "x": 49,
+      "y": 0,
+    },
+    Object {
+      "x": 49.5,
+      "y": 0,
+    },
+    Object {
+      "x": 50,
+      "y": 0,
+    },
+    Object {
+      "x": 50.5,
+      "y": 0,
+    },
+    Object {
+      "x": 51,
+      "y": 0,
+    },
+    Object {
+      "x": 51.5,
+      "y": 0,
+    },
+    Object {
+      "x": 52,
+      "y": 0,
+    },
+    Object {
+      "x": 52.5,
+      "y": 0,
+    },
+    Object {
+      "x": 53,
+      "y": 0,
+    },
+    Object {
+      "x": 53.5,
+      "y": 0,
+    },
+    Object {
+      "x": 54,
+      "y": 0,
+    },
+    Object {
+      "x": 54.5,
+      "y": 16.6666666666667,
+    },
+  ],
+  "percentiles": Object {
+    "50.0": 4.88,
+    "75.0": 37.09,
+    "90.0": 37.09,
+    "95.0": 54.46,
+    "99.0": 54.46,
+  },
+}
+`;
+
+exports[`CSM page load dist when there is data returns page load distribution with breakdown 1`] = `
+Array [
+  Object {
+    "data": Array [
+      Object {
+        "x": 0,
+        "y": 0,
+      },
+      Object {
+        "x": 0.5,
+        "y": 0,
+      },
+      Object {
+        "x": 1,
+        "y": 0,
+      },
+      Object {
+        "x": 1.5,
+        "y": 0,
+      },
+      Object {
+        "x": 2,
+        "y": 0,
+      },
+      Object {
+        "x": 2.5,
+        "y": 0,
+      },
+      Object {
+        "x": 3,
+        "y": 25,
+      },
+      Object {
+        "x": 3.5,
+        "y": 0,
+      },
+      Object {
+        "x": 4,
+        "y": 0,
+      },
+      Object {
+        "x": 4.5,
+        "y": 0,
+      },
+      Object {
+        "x": 5,
+        "y": 25,
+      },
+      Object {
+        "x": 5.5,
+        "y": 0,
+      },
+      Object {
+        "x": 6,
+        "y": 0,
+      },
+      Object {
+        "x": 6.5,
+        "y": 0,
+      },
+      Object {
+        "x": 7,
+        "y": 0,
+      },
+      Object {
+        "x": 7.5,
+        "y": 0,
+      },
+      Object {
+        "x": 8,
+        "y": 0,
+      },
+      Object {
+        "x": 8.5,
+        "y": 0,
+      },
+      Object {
+        "x": 9,
+        "y": 0,
+      },
+      Object {
+        "x": 9.5,
+        "y": 0,
+      },
+      Object {
+        "x": 10,
+        "y": 0,
+      },
+      Object {
+        "x": 10.5,
+        "y": 0,
+      },
+      Object {
+        "x": 11,
+        "y": 0,
+      },
+      Object {
+        "x": 11.5,
+        "y": 0,
+      },
+      Object {
+        "x": 12,
+        "y": 0,
+      },
+      Object {
+        "x": 12.5,
+        "y": 0,
+      },
+      Object {
+        "x": 13,
+        "y": 0,
+      },
+      Object {
+        "x": 13.5,
+        "y": 0,
+      },
+      Object {
+        "x": 14,
+        "y": 0,
+      },
+      Object {
+        "x": 14.5,
+        "y": 0,
+      },
+      Object {
+        "x": 15,
+        "y": 0,
+      },
+      Object {
+        "x": 15.5,
+        "y": 0,
+      },
+      Object {
+        "x": 16,
+        "y": 0,
+      },
+      Object {
+        "x": 16.5,
+        "y": 0,
+      },
+      Object {
+        "x": 17,
+        "y": 0,
+      },
+      Object {
+        "x": 17.5,
+        "y": 0,
+      },
+      Object {
+        "x": 18,
+        "y": 0,
+      },
+      Object {
+        "x": 18.5,
+        "y": 0,
+      },
+      Object {
+        "x": 19,
+        "y": 0,
+      },
+      Object {
+        "x": 19.5,
+        "y": 0,
+      },
+      Object {
+        "x": 20,
+        "y": 0,
+      },
+      Object {
+        "x": 20.5,
+        "y": 0,
+      },
+      Object {
+        "x": 21,
+        "y": 0,
+      },
+      Object {
+        "x": 21.5,
+        "y": 0,
+      },
+      Object {
+        "x": 22,
+        "y": 0,
+      },
+      Object {
+        "x": 22.5,
+        "y": 0,
+      },
+      Object {
+        "x": 23,
+        "y": 0,
+      },
+      Object {
+        "x": 23.5,
+        "y": 0,
+      },
+      Object {
+        "x": 24,
+        "y": 0,
+      },
+      Object {
+        "x": 24.5,
+        "y": 0,
+      },
+      Object {
+        "x": 25,
+        "y": 0,
+      },
+      Object {
+        "x": 25.5,
+        "y": 0,
+      },
+      Object {
+        "x": 26,
+        "y": 0,
+      },
+      Object {
+        "x": 26.5,
+        "y": 0,
+      },
+      Object {
+        "x": 27,
+        "y": 0,
+      },
+      Object {
+        "x": 27.5,
+        "y": 0,
+      },
+      Object {
+        "x": 28,
+        "y": 0,
+      },
+      Object {
+        "x": 28.5,
+        "y": 0,
+      },
+      Object {
+        "x": 29,
+        "y": 0,
+      },
+      Object {
+        "x": 29.5,
+        "y": 0,
+      },
+      Object {
+        "x": 30,
+        "y": 0,
+      },
+      Object {
+        "x": 30.5,
+        "y": 0,
+      },
+      Object {
+        "x": 31,
+        "y": 0,
+      },
+      Object {
+        "x": 31.5,
+        "y": 0,
+      },
+      Object {
+        "x": 32,
+        "y": 0,
+      },
+      Object {
+        "x": 32.5,
+        "y": 0,
+      },
+      Object {
+        "x": 33,
+        "y": 0,
+      },
+      Object {
+        "x": 33.5,
+        "y": 0,
+      },
+      Object {
+        "x": 34,
+        "y": 0,
+      },
+      Object {
+        "x": 34.5,
+        "y": 0,
+      },
+      Object {
+        "x": 35,
+        "y": 0,
+      },
+      Object {
+        "x": 35.5,
+        "y": 0,
+      },
+      Object {
+        "x": 36,
+        "y": 0,
+      },
+      Object {
+        "x": 36.5,
+        "y": 0,
+      },
+      Object {
+        "x": 37,
+        "y": 0,
+      },
+      Object {
+        "x": 37.5,
+        "y": 25,
+      },
+    ],
+    "name": "Chrome",
+  },
+  Object {
+    "data": Array [
+      Object {
+        "x": 0,
+        "y": 0,
+      },
+      Object {
+        "x": 0.5,
+        "y": 0,
+      },
+      Object {
+        "x": 1,
+        "y": 0,
+      },
+      Object {
+        "x": 1.5,
+        "y": 0,
+      },
+      Object {
+        "x": 2,
+        "y": 0,
+      },
+      Object {
+        "x": 2.5,
+        "y": 0,
+      },
+      Object {
+        "x": 3,
+        "y": 0,
+      },
+      Object {
+        "x": 3.5,
+        "y": 0,
+      },
+      Object {
+        "x": 4,
+        "y": 0,
+      },
+      Object {
+        "x": 4.5,
+        "y": 0,
+      },
+      Object {
+        "x": 5,
+        "y": 100,
+      },
+    ],
+    "name": "Chrome Mobile",
+  },
+]
+`;
+
+exports[`CSM page load dist when there is no data returns empty list 1`] = `Object {}`;
+
+exports[`CSM page load dist when there is no data returns empty list with breakdowns 1`] = `Object {}`;
