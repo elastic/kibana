@@ -12,7 +12,7 @@ import { EuiPageHeader, EuiTitle, EuiSpacer } from '@elastic/eui';
 
 import { EngineOverviewLogic } from './';
 
-import { UnavailablePrompt, TotalStats, TotalCharts, RecentLogs } from './components';
+import { UnavailablePrompt, TotalStats, TotalCharts, RecentApiLogs } from './components';
 
 export const EngineOverviewMetrics: React.FC = () => {
   const { apiLogsUnavailable } = useValues(EngineOverviewLogic);
@@ -36,7 +36,7 @@ export const EngineOverviewMetrics: React.FC = () => {
           <EuiSpacer size="xl" />
           <TotalCharts />
           <EuiSpacer size="xl" />
-          <RecentLogs />
+          <RecentApiLogs />
         </>
       )}
     </>

@@ -11,9 +11,9 @@ import { shallow, ShallowWrapper } from 'enzyme';
 
 import { EuiButton } from '../../../../shared/react_router_helpers';
 
-import { RecentLogs } from './recent_logs';
+import { RecentApiLogs } from './recent_api_logs';
 
-describe('RecentLogs', () => {
+describe('RecentApiLogs', () => {
   let wrapper: ShallowWrapper;
 
   beforeAll(() => {
@@ -21,7 +21,7 @@ describe('RecentLogs', () => {
     setMockValues({
       engineName: 'some-engine',
     });
-    wrapper = shallow(<RecentLogs />);
+    wrapper = shallow(<RecentApiLogs />);
   });
 
   it('renders the recent API logs table', () => {

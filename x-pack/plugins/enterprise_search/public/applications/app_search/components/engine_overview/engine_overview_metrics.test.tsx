@@ -9,7 +9,7 @@ import { setMockValues } from '../../../__mocks__/kea.mock';
 import React from 'react';
 import { shallow } from 'enzyme';
 
-import { UnavailablePrompt, TotalStats, TotalCharts, RecentLogs } from './components';
+import { UnavailablePrompt, TotalStats, TotalCharts, RecentApiLogs } from './components';
 import { EngineOverviewMetrics } from './engine_overview_metrics';
 
 describe('EngineOverviewMetrics', () => {
@@ -29,6 +29,6 @@ describe('EngineOverviewMetrics', () => {
     const wrapper = shallow(<EngineOverviewMetrics />);
     expect(wrapper.find(TotalStats)).toHaveLength(1);
     expect(wrapper.find(TotalCharts)).toHaveLength(1);
-    expect(wrapper.find(RecentLogs)).toHaveLength(1);
+    expect(wrapper.find(RecentApiLogs)).toHaveLength(1);
   });
 });
