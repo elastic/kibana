@@ -54,7 +54,7 @@ describe('SearchBar', () => {
   });
 
   const triggerFocus = () => {
-    component.find('input[data-test-subj="header-search"]').simulate('focus');
+    component.find('input[data-test-subj="nav-search-input"]').simulate('focus');
   };
 
   const update = () => {
