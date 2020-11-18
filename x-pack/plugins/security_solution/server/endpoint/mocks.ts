@@ -26,6 +26,7 @@ import {
 import { ManifestManager } from './services/artifacts/manifest_manager/manifest_manager';
 import { getManifestManagerMock } from './services/artifacts/manifest_manager/manifest_manager.mock';
 import { EndpointAppContext } from './types';
+import { MetadataRequestContext } from './routes/metadata/handlers';
 
 /**
  * Creates a mocked EndpointAppContext.
@@ -50,6 +51,7 @@ export const createMockEndpointAppContextService = (
     start: jest.fn(),
     stop: jest.fn(),
     getAgentService: jest.fn(),
+    getAgentPolicyService: jest.fn(),
     getManifestManager: jest.fn().mockReturnValue(mockManifestManager ?? jest.fn()),
     getScopedSavedObjectsClient: jest.fn(),
   } as unknown) as jest.Mocked<EndpointAppContextService>;
@@ -133,6 +135,14 @@ export const createMockFleetStartContract = (indexPattern: string): FleetStartCo
     agentPolicyService: createMockAgentPolicyService(),
     registerExternalCallback: jest.fn((...args: ExternalCallback) => {}),
     packagePolicyService: createPackagePolicyServiceMock(),
+  };
+};
+
+export const createMockMetadataRequestContext = (): jest.Mocked<MetadataRequestContext> => {
+  return {
+    endpointAppContextService: createMockEndpointAppContextService(),
+    logger: loggingSystemMock.create().get('mock_endpoint_app_context'),
+    requestHandlerContext: xpackMocks.createRequestHandlerContext(),
   };
 };
 

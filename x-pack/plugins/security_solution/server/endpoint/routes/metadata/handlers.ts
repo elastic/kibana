@@ -245,7 +245,7 @@ export async function mapToHostResultList(
   }
 }
 
-async function enrichHostMetadata(
+export async function enrichHostMetadata(
   hostMetadata: HostMetadata,
   metadataRequestContext: MetadataRequestContext,
   metadataQueryStrategyVersion: MetadataQueryStrategyVersions
@@ -298,7 +298,7 @@ async function enrichHostMetadata(
         agent?.policy_id!,
         true
       );
-    const endpointPolicy = (agentPolicy?.package_policies as PackagePolicy[]).find(
+    const endpointPolicy = ((agentPolicy?.package_policies || []) as PackagePolicy[]).find(
       (x: PackagePolicy) => x.package?.name === 'endpoint'
     );
 
