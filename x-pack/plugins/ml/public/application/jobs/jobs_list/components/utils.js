@@ -6,7 +6,6 @@
 
 import { each } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import rison from 'rison-node';
 
 import { mlJobService } from '../../../services/job_service';
 import {
@@ -366,32 +365,4 @@ function jobProperty(job, prop) {
     id: 'id',
   };
   return job[propMap[prop]];
-}
-
-function getUrlVars(url) {
-  const vars = {};
-  url.replace(/[?&]+([^=&]+)=([^&]*)/gi, function (_, key, value) {
-    vars[key] = value;
-  });
-  return vars;
-}
-
-export function getSelectedIdFromUrl(url) {
-  const result = {};
-  if (typeof url === 'string') {
-    const isGroup = url.includes('groupIds');
-    url = decodeURIComponent(url);
-
-    if (url.includes('mlManagement')) {
-      const urlParams = getUrlVars(url);
-      const decodedJson = rison.decode(urlParams.mlManagement);
-
-      if (isGroup) {
-        result.groupIds = decodedJson.groupIds;
-      } else {
-        result.jobId = decodedJson.jobId;
-      }
-    }
-  }
-  return result;
 }
