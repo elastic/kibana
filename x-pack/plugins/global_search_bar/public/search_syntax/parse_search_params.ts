@@ -21,8 +21,13 @@ export const parseSearchParams = (term: string): ParsedSearchParams => {
   try {
     query = Query.parse(term);
   } catch (e) {
-    // TODO: what to return?
-    throw e;
+    // if the query fails to parse, we just perform the search against the raw search term.
+    return {
+      term,
+      filters: {
+        unknowns: {},
+      },
+    };
   }
 
   const searchTerm = getSearchTerm(query);
@@ -39,7 +44,6 @@ export const parseSearchParams = (term: string): ParsedSearchParams => {
 
   return {
     term: searchTerm,
-    raw: term,
     filters: {
       tags: filterValues.get('tag') as FilterValues<string>,
       types: filterValues.get('type') as FilterValues<string>,

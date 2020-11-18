@@ -15,11 +15,6 @@ export interface ParsedSearchParams {
    */
   term?: string;
   /**
-   * The raw search term, as the user typed it,
-   * including the potential field terms
-   */
-  raw: string;
-  /**
    * The filters extracted from the field terms.
    */
   filters: {

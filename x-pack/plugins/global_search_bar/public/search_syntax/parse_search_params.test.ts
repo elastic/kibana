@@ -12,6 +12,16 @@ describe('parseSearchParams', () => {
     expect(searchParams.term).toEqual('hello');
   });
 
+  it('returns the raw query as `term` in case of parsing error', () => {
+    const searchParams = parseSearchParams('tag:((()^invalid');
+    expect(searchParams).toEqual({
+      term: 'tag:((()^invalid',
+      filters: {
+        unknowns: {},
+      },
+    });
+  });
+
   it('returns `undefined` term if query only contains field clauses', () => {
     const searchParams = parseSearchParams('tag:(my-tag OR other-tag)');
     expect(searchParams.term).toBeUndefined();
@@ -26,5 +36,40 @@ describe('parseSearchParams', () => {
     });
   });
 
-  // TODO: additional tests
+  it('returns correct filters when field clauses are present', () => {
+    const searchParams = parseSearchParams('tag:foo type:bar hello tag:dolly');
+    expect(searchParams).toEqual({
+      term: 'hello',
+      filters: {
+        tags: ['foo', 'dolly'],
+        types: ['bar'],
+        unknowns: {},
+      },
+    });
+  });
+
+  it('handles unknowns field clauses', () => {
+    const searchParams = parseSearchParams('tag:foo unknown:bar hello');
+    expect(searchParams).toEqual({
+      term: 'hello',
+      filters: {
+        tags: ['foo'],
+        unknowns: {
+          unknown: ['bar'],
+        },
+      },
+    });
+  });
+
+  it('handles aliases field clauses', () => {
+    const searchParams = parseSearchParams('tag:foo tags:bar type:dash types:board hello');
+    expect(searchParams).toEqual({
+      term: 'hello',
+      filters: {
+        tags: ['foo', 'bar'],
+        types: ['dash', 'board'],
+        unknowns: {},
+      },
+    });
+  });
 });
