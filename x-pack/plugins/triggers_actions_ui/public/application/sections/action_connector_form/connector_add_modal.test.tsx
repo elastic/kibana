@@ -11,7 +11,7 @@ import { ValidationResult, ActionType } from '../../../types';
 import { useKibana } from '../../../common/lib/kibana';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 
-jest.mock('../../../../common/lib/kibana');
+jest.mock('../../../common/lib/kibana');
 const mocks = coreMock.createSetup();
 const actionTypeRegistry = actionTypeRegistryMock.create();
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;

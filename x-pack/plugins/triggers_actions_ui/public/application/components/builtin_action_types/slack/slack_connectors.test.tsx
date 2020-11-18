@@ -8,7 +8,7 @@ import { mountWithIntl, nextTick } from '@kbn/test/jest';
 import { act } from '@testing-library/react';
 import { SlackActionConnector } from '../types';
 import SlackActionFields from './slack_connectors';
-import { DocLinksStart } from 'kibana/public';
+jest.mock('../../../../common/lib/kibana');
 
 describe('SlackActionFields renders', () => {
   test('all connector fields is rendered', async () => {
@@ -21,9 +21,6 @@ describe('SlackActionFields renders', () => {
       name: 'email',
       config: {},
     } as SlackActionConnector;
-    const deps = {
-      docLinks: { ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart,
-    };
     const wrapper = mountWithIntl(
       <SlackActionFields
         action={actionConnector}
@@ -50,9 +47,6 @@ describe('SlackActionFields renders', () => {
       config: {},
       secrets: {},
     } as SlackActionConnector;
-    const deps = {
-      docLinks: { ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart,
-    };
     const wrapper = mountWithIntl(
       <SlackActionFields
         action={actionConnector}
@@ -76,9 +70,6 @@ describe('SlackActionFields renders', () => {
       name: 'email',
       config: {},
     } as SlackActionConnector;
-    const deps = {
-      docLinks: { ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart,
-    };
     const wrapper = mountWithIntl(
       <SlackActionFields
         action={actionConnector}

@@ -8,6 +8,7 @@ import { mountWithIntl, nextTick } from '@kbn/test/jest';
 import { act } from 'react-dom/test-utils';
 import { EsIndexActionConnector } from '../types';
 import IndexActionConnectorFields from './es_index_connector';
+jest.mock('../../../../common/lib/kibana');
 
 jest.mock('../../../../common/index_controls', () => ({
   firstFieldOption: jest.fn(),

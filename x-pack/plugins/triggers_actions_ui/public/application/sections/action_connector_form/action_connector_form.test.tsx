@@ -9,7 +9,7 @@ import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import { ValidationResult, UserConfiguredActionConnector } from '../../../types';
 import { ActionConnectorForm } from './action_connector_form';
 const actionTypeRegistry = actionTypeRegistryMock.create();
-jest.mock('../../../../common/lib/kibana');
+jest.mock('../../../common/lib/kibana');
 
 describe('action_connector_form', () => {
   it('renders action_connector_form', () => {

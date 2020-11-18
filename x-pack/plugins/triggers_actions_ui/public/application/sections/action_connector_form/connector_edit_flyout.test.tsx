@@ -11,7 +11,7 @@ import { ValidationResult } from '../../../types';
 import ConnectorEditFlyout from './connector_edit_flyout';
 import { useKibana } from '../../../common/lib/kibana';
 
-jest.mock('../../../../common/lib/kibana');
+jest.mock('../../../common/lib/kibana');
 const actionTypeRegistry = actionTypeRegistryMock.create();
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 

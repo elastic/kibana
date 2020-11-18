@@ -7,8 +7,8 @@ import React from 'react';
 import { mountWithIntl } from '@kbn/test/jest';
 import { EmailActionConnector } from '../types';
 import EmailActionConnectorFields from './email_connector';
-import { DocLinksStart } from 'kibana/public';
 
+jest.mock('../../../../common/lib/kibana');
 describe('EmailActionConnectorFields renders', () => {
   test('all connector fields is rendered', () => {
     const actionConnector = {

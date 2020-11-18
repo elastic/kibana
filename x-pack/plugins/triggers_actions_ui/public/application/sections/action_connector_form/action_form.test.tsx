@@ -12,12 +12,11 @@ import { ValidationResult, Alert, AlertAction } from '../../../types';
 import ActionForm from './action_form';
 import { ResolvedActionGroup } from '../../../../../alerts/common';
 import { useKibana } from '../../../common/lib/kibana';
-jest.mock('../../../../common/lib/kibana');
+jest.mock('../../../common/lib/kibana');
 jest.mock('../../lib/action_connector_api', () => ({
   loadAllActions: jest.fn(),
   loadActionTypes: jest.fn(),
 }));
-const actionTypeRegistry = actionTypeRegistryMock.create();
 const setHasActionsWithBrokenConnector = jest.fn();
 describe('action_form', () => {
   const mockedActionParamsFields = lazy(async () => ({
@@ -115,6 +114,8 @@ describe('action_form', () => {
 
   describe('action_form in alert', () => {
     async function setup(customActions?: AlertAction[]) {
+      const actionTypeRegistry = actionTypeRegistryMock.create();
+
       const { loadAllActions } = jest.requireMock('../../lib/action_connector_api');
       loadAllActions.mockResolvedValueOnce([
         {
