@@ -37,6 +37,7 @@ import { ExceptionListType } from '../../../../../common/shared_imports';
 import { useCreateCaseModal } from '../../../../cases/components/use_create_case_modal';
 import { usePostComment } from '../../../../cases/containers/use_post_comment';
 import { Case } from '../../../../cases/containers/types';
+import { useAllCasesModal } from '../../../../cases/components/use_all_cases_modal';
 
 interface AlertContextMenuProps {
   disabled: boolean;
@@ -98,7 +99,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
   const [{ canUserCRUD, hasIndexWrite }] = useUserData();
 
   const { postComment } = usePostComment();
-  const onCaseCreated = useCallback(
+  const attachAlertToCase = useCallback(
     (theCase: Case) => {
       postComment(
         theCase.id,
@@ -115,8 +116,33 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     [dispatchToaster, eventId, postComment, eventIndex]
   );
 
-  const { Modal: CreateCaseModal, openModal: openCaseModal } = useCreateCaseModal({
+  const onCaseCreated = useCallback((theCase: Case) => attachAlertToCase(theCase), [
+    attachAlertToCase,
+  ]);
+
+  const { Modal: CreateCaseModal, openModal: openCreateCaseModal } = useCreateCaseModal({
     onCaseCreated,
+  });
+
+  const onCaseClicked = useCallback(
+    (theCase) => {
+      /**
+       * No cases listed on the table.
+       * The user pressed the add new case table's button.
+       * We gonna open the create case modal.
+       */
+      if (theCase == null) {
+        openCreateCaseModal();
+        return;
+      }
+
+      attachAlertToCase(theCase);
+    },
+    [attachAlertToCase, openCreateCaseModal]
+  );
+
+  const { Modal: AllCasesModal, openModal: openAllCaseModal } = useAllCasesModal({
+    onRowClick: onCaseClicked,
   });
 
   const isEndpointAlert = useMemo((): boolean => {
@@ -357,8 +383,13 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
 
   const handleAddNewCaseClick = useCallback(() => {
     closePopover();
-    openCaseModal();
-  }, [closePopover, openCaseModal]);
+    openCreateCaseModal();
+  }, [closePopover, openCreateCaseModal]);
+
+  const handleAddExistingCaseClick = useCallback(() => {
+    closePopover();
+    openAllCaseModal();
+  }, [closePopover, openAllCaseModal]);
 
   const addToCasePanel = useMemo(
     () => ({
@@ -377,13 +408,13 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
           key: 'add-existing-case-menu-item',
           'aria-label': 'Add to existing case',
           'data-test-subj': 'add-existing-case-menu-item',
-          onClick: () => {},
+          onClick: handleAddExistingCaseClick,
           disabled: !canUserCRUD,
           name: <EuiText size="m">{i18n.ACTION_ADD_EXISTING_CASE}</EuiText>,
         },
       ],
     }),
-    [canUserCRUD, handleAddNewCaseClick]
+    [canUserCRUD, handleAddExistingCaseClick, handleAddNewCaseClick]
   );
 
   const statusFilters = useMemo(() => {
@@ -455,6 +486,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
         />
       )}
       <CreateCaseModal />
+      <AllCasesModal />
     </>
   );
 };

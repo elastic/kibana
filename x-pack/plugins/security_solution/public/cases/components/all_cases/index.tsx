@@ -82,7 +82,7 @@ const getSortField = (field: string): SortFieldCase => {
 };
 
 interface AllCasesProps {
-  onRowClick?: (id?: string) => void;
+  onRowClick?: (theCase?: Case) => void;
   isModal?: boolean;
   userCanCrud: boolean;
 }
@@ -341,9 +341,9 @@ export const AllCases = React.memo<AllCasesProps>(
 
     const onTableRowClick = useMemo(
       () =>
-        memoize<(id: string) => () => void>((id) => () => {
+        memoize<(theCase: Case) => () => void>((theCase) => () => {
           if (onRowClick) {
-            onRowClick(id);
+            onRowClick(theCase);
           }
         }),
       [onRowClick]
@@ -358,7 +358,7 @@ export const AllCases = React.memo<AllCasesProps>(
         if (isModal) {
           return {
             ...rowProps,
-            onClick: onTableRowClick(item.id),
+            onClick: onTableRowClick(item),
           };
         }
 

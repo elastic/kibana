@@ -14,12 +14,13 @@ import {
 } from '@elastic/eui';
 
 import { useGetUserSavedObjectPermissions } from '../../../common/lib/kibana';
+import { Case } from '../../containers/types';
 import { AllCases } from '../all_cases';
 import * as i18n from './translations';
 
 export interface AllCasesModalProps {
   onCloseCaseModal: () => void;
-  onRowClick: (id?: string) => void;
+  onRowClick: (theCase?: Case) => void;
 }
 
 const AllCasesModalComponent: React.FC<AllCasesModalProps> = ({ onCloseCaseModal, onRowClick }) => {

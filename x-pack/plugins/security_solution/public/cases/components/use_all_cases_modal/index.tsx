@@ -5,10 +5,11 @@
  */
 
 import React, { useState, useCallback, useMemo } from 'react';
+import { Case } from '../../containers/types';
 import { AllCasesModal } from './all_cases_modal';
 
 export interface UseAllCasesModalProps {
-  onRowClick: (id?: string) => void;
+  onRowClick: (theCase?: Case) => void;
 }
 
 export interface UseAllCasesModalReturnedValues {
@@ -25,9 +26,9 @@ export const useAllCasesModal = ({
   const closeModal = useCallback(() => setIsModalOpen(false), []);
   const openModal = useCallback(() => setIsModalOpen(true), []);
   const onClick = useCallback(
-    (id) => {
+    (theCase?: Case) => {
       closeModal();
-      onRowClick(id);
+      onRowClick(theCase);
     },
     [closeModal, onRowClick]
   );
