@@ -6,12 +6,13 @@
 
 import { Observable, Subscription } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { ILicense } from '../../../licensing/common/types';
+import { ILicense, LicenseType } from '../../../licensing/common/types';
 import { SecurityLicenseFeatures } from './license_features';
 
 export interface SecurityLicense {
   isLicenseAvailable(): boolean;
   isEnabled(): boolean;
+  getType(): LicenseType | undefined;
   getFeatures(): SecurityLicenseFeatures;
   features$: Observable<SecurityLicenseFeatures>;
 }
@@ -35,6 +36,8 @@ export class SecurityLicenseService {
         isLicenseAvailable: () => rawLicense?.isAvailable ?? false,
 
         isEnabled: () => this.isSecurityEnabledFromRawLicense(rawLicense),
+
+        getType: () => rawLicense?.type,
 
         getFeatures: () => this.calculateFeaturesFromRawLicense(rawLicense),
 
