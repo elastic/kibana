@@ -24,7 +24,6 @@ import { SideEffectContext } from './side_effect_context';
 import { ResolverProps, ResolverState } from '../types';
 import { PanelRouter } from './panels';
 import { useColors } from './use_colors';
-import { useViewMoving } from './use_drag';
 
 /**
  * The highest level connected Resolver component. Needs a `Provider` in its ancestry to work.
@@ -57,15 +56,11 @@ export const ResolverWithoutProviders = React.memo(
     );
     const terminatedProcesses = useSelector(selectors.terminatedProcesses);
     const { projectionMatrix, ref: cameraRef, onMouseDown } = useCamera();
-    // const { isViewMoving, scrollWindowRef } = useViewMoving();
 
     const ref = useCallback(
       (element: HTMLDivElement | null) => {
         // Supply `useCamera` with the ref
         cameraRef(element);
-
-        // Supply `useViewMoving` with the ref
-        // scrollWindowRef(element);
 
         // If a ref is being forwarded, populate that as well.
         if (typeof refToForward === 'function') {

@@ -8,7 +8,7 @@ import { createSelector, defaultMemoize } from 'reselect';
 import * as cameraSelectors from './camera/selectors';
 import * as dataSelectors from './data/selectors';
 import * as uiSelectors from './ui/selectors';
-import { ResolverState, IsometricTaxiLayout, DataState } from '../types';
+import { ResolverState, IsometricTaxiLayout } from '../types';
 import { ResolverNodeStats, SafeResolverEvent } from '../../../common/endpoint/types';
 import { entityIDSafeVersion } from '../../../common/endpoint/models/event';
 

@@ -134,6 +134,17 @@ export const nodeDataForID: (
   };
 });
 
+// TODO:
+export const nodeDataUnableToLoad: (state: DataState) => (id: string) => boolean = createSelector(
+  nodeDataForID,
+  (nodeInfo) => {
+    return (id: string) => {
+      const info = nodeInfo(id);
+      return info?.status === 'error' || (info?.events.length ?? 0) <= 0;
+    };
+  }
+);
+
 /**
  * Returns a function that can be called to determine if the middleware has received a specific node ID's lifecycle
  * events. If the node is still loading or had an error while loading this will return an empty array.

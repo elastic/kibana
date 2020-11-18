@@ -276,7 +276,7 @@ const UnstyledProcessEventDot = React.memo(
       selectors.relatedEventTotalForProcess(state)(event)
     );
 
-    const nodeData = useSelector(selectors.nodeData);
+    const nodeData = useSelector(selectors.nodeDataForID)(nodeID);
 
     /* eslint-disable jsx-a11y/click-events-have-key-events */
     /**
@@ -298,9 +298,7 @@ const UnstyledProcessEventDot = React.memo(
         id={nodeHTMLID(nodeID)}
         tabIndex={-1}
       >
-        {/* TODO: checking the isViewMoving and if so show the spinner, use selector to find set of loading IDs*/}
-        {/* TODO: can get rid of the isViewMoving by using the map to see if we have requested data for a node, and determine if we have received the results back yet*/}
-        {false ? (
+        {nodeData?.status === 'requested' ? (
           <div data-test-subj="resolver:graph:node:loading" className="loading-container">
             <EuiLoadingSpinner size="s" />
           </div>

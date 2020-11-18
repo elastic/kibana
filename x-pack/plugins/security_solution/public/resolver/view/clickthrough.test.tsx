@@ -139,7 +139,7 @@ describe('Resolver, when analyzing a tree that has no ancestors and 2 children',
       await expect(
         simulator.map(() => {
           /**
-           * This test verifies corectness w.r.t. the tree/treeitem roles
+           * This test verifies correctness w.r.t. the tree/treeitem roles
            * From W3C: `Authors MUST ensure elements with role treeitem are contained in, or owned by, an element with the role group or tree.`
            *
            * https://www.w3.org/TR/wai-aria-1.1/#tree

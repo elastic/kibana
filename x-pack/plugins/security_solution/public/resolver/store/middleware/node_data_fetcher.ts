@@ -45,8 +45,6 @@ export function NodeDataFetcher(
     const visibleNodes: Set<string> = selectors.visibleNodes(state)(time);
     const nodeData = selectors.nodeData(state);
 
-    // TODO: is there a way to optimize this?
-
     // Get the visible nodes that we haven't already requested or received data for
     const newIDsToRequest = nodeDataModel.idsNotInBase(nodeData, visibleNodes);
     if (newIDsToRequest.size <= 0) {
@@ -56,8 +54,9 @@ export function NodeDataFetcher(
     /**
      * Dispatch an action indicating that we are going to request data for a set of nodes so that we can show a loading
      * state for those nodes in the UI.
-     * TODO: talk about when we dispatch, that visible nodes will be the same, nodeData will have the new nodes
-     *  and newIDsToRequest will be an empty set
+     *
+     * When we dispatch this, this middleware will run again but the visible nodes will be the same, the nodeData
+     * state will have the new visible nodes in it, and newIDsToRequest will be an empty set.
      */
     api.dispatch({
       type: 'appRequestingNodeData',
