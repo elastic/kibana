@@ -17,5 +17,5 @@
  * under the License.
  */
 
-require('../setup_node_env');
+require('../setup_node_env/no_transpilation');
 require('./cli_keystore');
