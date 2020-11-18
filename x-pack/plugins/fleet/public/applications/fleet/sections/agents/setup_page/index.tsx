@@ -236,7 +236,7 @@ xpack.security.authc.api_key.enabled: true`}
               values={{
                 encryptionKeyLink: (
                   <EuiLink
-                    href="https://www.elastic.co/guide/en/kibana/current/ingest-manager-settings-kb.html"
+                    href="https://www.elastic.co/guide/en/kibana/current/fleet-settings-kb.html"
                     target="_blank"
                     external
                   >
@@ -262,7 +262,7 @@ xpack.encryptedSavedObjects.encryptionKey: "something_at_least_32_characters"`}
             values={{
               link: (
                 <EuiLink
-                  href="https://www.elastic.co/guide/en/ingest-management/current/index.html"
+                  href="https://www.elastic.co/guide/en/fleet/current/index.html"
                   target="_blank"
                   external
                 >
