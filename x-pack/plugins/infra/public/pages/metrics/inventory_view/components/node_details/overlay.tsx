@@ -11,7 +11,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
 import { euiStyled } from '../../../../../../../observability/public';
 import { InfraWaffleMapNode, InfraWaffleMapOptions } from '../../../../../lib/lib';
 import { InventoryItemType } from '../../../../../../common/inventory_models/types';
-import { MetricsTab } from './tabs/metrics/metrics';
+import { MetricsTab } from './tabs/metrics';
 import { LogsTab } from './tabs/logs';
 import { ProcessesTab } from './tabs/processes';
 import { PropertiesTab } from './tabs/properties';

@@ -15,6 +15,7 @@ interface Props {
 
 export const TimeDropdown = (props: Props) => (
   <EuiSelect
+    compressed
     options={[
       {
         text: i18n.translate('xpack.infra.nodeDetails.metrics.last15Minutes', {
