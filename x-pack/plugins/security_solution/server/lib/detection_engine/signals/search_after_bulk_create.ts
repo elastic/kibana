@@ -94,6 +94,10 @@ export const searchAfterAndBulkCreate = async ({
     services
   );
 
+  if (Object.keys(timestampsAndIndices).length === 0) {
+    throw Error(`No indices contained timestamp fields: ${JSON.stringify(timestampsToSort)}`);
+  }
+
   for (const timestamp of timestampsToSort) {
     const totalToFromTuples = getSignalTimeTuples({
       logger,
