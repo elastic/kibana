@@ -262,10 +262,6 @@ Hides the "Time" column in *Discover* and in all saved searches on dashboards.
 Highlights results in *Discover* and saved searches on dashboards. Highlighting
 slows requests when working on big documents.
 
-[[doctable-legacy]]`doc_table:legacy`:: 
-Control the way the Discover's table looks and works. Set this property to `true` to revert to the legacy implementation.
-
-
 [float]
 [[kibana-ml-settings]]
 ==== Machine learning

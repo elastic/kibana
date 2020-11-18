@@ -18,7 +18,6 @@
  */
 
 import { ISearchSource } from '../../../data/public';
-import { DiscoverGridSettings } from '../application/components/discover_grid/types';
 
 export type SortOrder = [string, string];
 export interface SavedSearch {
@@ -28,7 +27,6 @@ export interface SavedSearch {
   description?: string;
   columns: string[];
   sort: SortOrder[];
-  grid: DiscoverGridSettings;
   destroy: () => void;
   lastSavedTitle?: string;
 }

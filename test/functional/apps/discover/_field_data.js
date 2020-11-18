@@ -34,7 +34,6 @@ export default function ({ getService, getPageObjects }) {
       await esArchiver.load('discover');
       await kibanaServer.uiSettings.replace({
         defaultIndex: 'logstash-*',
-        'doc_table:legacy': true,
       });
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await PageObjects.common.navigateToApp('discover');

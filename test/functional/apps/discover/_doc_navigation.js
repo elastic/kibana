@@ -26,12 +26,10 @@ export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['common', 'discover', 'timePicker', 'context']);
   const esArchiver = getService('esArchiver');
   const retry = getService('retry');
-  const kibanaServer = getService('kibanaServer');
 
   describe('doc link in discover', function contextSize() {
     beforeEach(async function () {
       await esArchiver.loadIfNeeded('logstash_functional');
-      await kibanaServer.uiSettings.replace({ 'doc_table:legacy': true });
       await esArchiver.loadIfNeeded('discover');
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await PageObjects.common.navigateToApp('discover');

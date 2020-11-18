@@ -71,12 +71,6 @@ discover-app {
   height: $euiSize * 12.5;
   padding: $euiSizeS;
 }
-// new slimmer layout for data grid
-.dscHistogramGrid {
-  display: flex;
-  height: $euiSize * 8;
-  padding: $euiSizeS $euiSizeS 0 $euiSizeS;
-}
 
 // SASSTODO: replace the z-index value with a variable
 .dscWrapper {

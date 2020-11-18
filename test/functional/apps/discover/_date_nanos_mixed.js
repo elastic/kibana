@@ -32,7 +32,6 @@ export default function ({ getService, getPageObjects }) {
       await esArchiver.loadIfNeeded('date_nanos_mixed');
       await kibanaServer.uiSettings.replace({
         defaultIndex: 'timestamp-*',
-        'doc_table:legacy': true,
       });
       await security.testUser.setRoles(['kibana_admin', 'kibana_date_nanos_mixed']);
       await PageObjects.common.navigateToApp('discover');

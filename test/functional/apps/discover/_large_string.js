@@ -35,7 +35,6 @@ export default function ({ getService, getPageObjects }) {
       await esArchiver.loadIfNeeded('hamlet');
       await kibanaServer.uiSettings.replace({
         defaultIndex: 'testlargestring',
-        'doc_table:legacy': true,
       });
     });
 

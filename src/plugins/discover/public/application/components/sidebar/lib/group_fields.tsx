@@ -70,13 +70,6 @@ export function groupFields(
       result.unpopular.push(field);
     }
   }
-  // allows removal of columns, that were part of the former index pattern, that have no matching
-  // field in the current index pattern, temporary solution
-  for (const column of columns) {
-    if (!result.selected.find((field) => field.name === column)) {
-      result.selected.push({ name: column, displayName: column } as IndexPatternField);
-    }
-  }
 
   return result;
 }

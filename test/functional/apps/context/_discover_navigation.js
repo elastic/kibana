@@ -29,11 +29,10 @@ export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
   const docTable = getService('docTable');
   const filterBar = getService('filterBar');
-  const PageObjects = getPageObjects(['common', 'discover', 'timePicker', 'settings']);
+  const PageObjects = getPageObjects(['common', 'discover', 'timePicker']);
 
   describe('context link in discover', () => {
     before(async () => {
-      await PageObjects.settings.setLegacyDiscoverTable();
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await PageObjects.common.navigateToApp('discover');
 

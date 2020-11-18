@@ -37,7 +37,6 @@ import { SavedObjectSaveModal, showSaveModal } from '../../../../saved_objects/p
 import { getSortArray, getSortForSearchSource } from './doc_table';
 import * as columnActions from './doc_table/actions/columns';
 import indexTemplateLegacy from './discover_legacy.html';
-import indexTemplateGrid from './discover_datagrid.html';
 import { showOpenSearchPanel } from '../components/top_nav/show_open_search_panel';
 import { addHelpMenuToAppChrome } from '../components/help_menu/help_menu_util';
 import { discoverResponseHandler } from './response_handler';
@@ -74,7 +73,6 @@ import { popularizeField } from '../helpers/popularize_field';
 import { getSwitchIndexPatternAppState } from '../helpers/get_switch_index_pattern_app_state';
 import { getIndexPatternId } from '../helpers/get_index_pattern_id';
 import { addFatalError } from '../../../../kibana_legacy/public';
-import rison from 'rison-node';
 import {
   SAMPLE_SIZE_SETTING,
   SORT_DEFAULT_ORDER_SETTING,
@@ -122,9 +120,7 @@ app.config(($routeProvider) => {
   };
   const discoverRoute = {
     ...defaults,
-    template: getServices().uiSettings.get('doc_table:legacy', true)
-      ? indexTemplateLegacy
-      : indexTemplateGrid,
+    template: indexTemplateLegacy,
     reloadOnSearch: false,
     resolve: {
       savedObjects: function ($route, Promise) {
@@ -342,8 +338,6 @@ function discoverController($element, $route, $scope, $timeout, Promise, uiCapab
   $scope.minimumVisibleRows = 50;
   $scope.fetchStatus = fetchStatuses.UNINITIALIZED;
   $scope.showSaveQuery = uiCapabilities.discover.saveQuery;
-  $scope.useShortDots = config.get('shortDots:enable', false);
-  $scope.useNewGrid = config.get('doc_table:legacy', false);
   $scope.showTimeCol =
     !config.get('doc_table:hideTimeColumn', false) && $scope.indexPattern.timeFieldName;
 
@@ -472,29 +466,6 @@ function discoverController($element, $route, $scope, $timeout, Promise, uiCapab
           isDirty: !savedSearch.id || isAppStateDirty(),
         });
       },
-    };
-
-    $scope.getContextAppHref = (anchorId) => {
-      const path = `#/discover/context/${encodeURIComponent(
-        $scope.indexPattern.id
-      )}/${encodeURIComponent(anchorId)}`;
-      const urlSearchParams = new URLSearchParams();
-
-      urlSearchParams.set(
-        'g',
-        rison.encode({
-          filters: filterManager.getGlobalFilters() || [],
-        })
-      );
-
-      urlSearchParams.set(
-        '_a',
-        rison.encode({
-          columns: $scope.state.columns,
-          filters: (filterManager.getAppFilters() || []).map(esFilters.disableFilter),
-        })
-      );
-      return `${path}?${urlSearchParams.toString()}`;
     };
 
     const inspectSearch = {
@@ -762,7 +733,6 @@ function discoverController($element, $route, $scope, $timeout, Promise, uiCapab
     await $scope.updateDataSource();
 
     savedSearch.columns = $scope.state.columns;
-    savedSearch.grid = $scope.state.grid;
     savedSearch.sort = $scope.state.sort;
 
     try {
@@ -1071,12 +1041,6 @@ function discoverController($element, $route, $scope, $timeout, Promise, uiCapab
     const columns = columnActions.moveColumn($scope.state.columns, columnName, newIndex);
     setAppState({ columns });
   };
-
-  $scope.setColumns = function setColumns(columns) {
-    $scope.state = { ...$scope.state, columns };
-    setAppState({ columns });
-  };
-
   async function setupVisualization() {
     // If no timefield has been specified we don't create a histogram of messages
     if (!getTimeField()) return;

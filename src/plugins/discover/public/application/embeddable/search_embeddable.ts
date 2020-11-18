@@ -36,7 +36,6 @@ import {
 import { Container, Embeddable } from '../../../../embeddable/public';
 import * as columnActions from '../angular/doc_table/actions/columns';
 import searchTemplate from './search_template.html';
-import searchTemplateGrid from './search_template_datagrid.html';
 import { ISearchEmbeddable, SearchInput, SearchOutput } from './types';
 import { SortOrder } from '../angular/doc_table/components/table_header/helpers';
 import { getSortForSearchSource } from '../angular/doc_table';
@@ -49,12 +48,10 @@ import {
 import { SEARCH_EMBEDDABLE_TYPE } from './constants';
 import { SavedSearch } from '../..';
 import { SAMPLE_SIZE_SETTING, SORT_DEFAULT_ORDER_SETTING } from '../../../common';
-import { DiscoverGridSettings } from '../components/discover_grid/types';
 import { DiscoverServices } from '../../build_services';
 
 interface SearchScope extends ng.IScope {
   columns?: string[];
-  settings?: DiscoverGridSettings;
   description?: string;
   sort?: SortOrder[];
   sharedItemTitle?: string;
@@ -172,9 +169,7 @@ export class SearchEmbeddable
     if (!this.searchScope) {
       throw new Error('Search scope not defined');
     }
-    this.searchInstance = this.$compile(
-      this.services.uiSettings.get('doc_table:legacy', true) ? searchTemplate : searchTemplateGrid
-    )(this.searchScope);
+    this.searchInstance = this.$compile(searchTemplate)(this.searchScope);
     const rootNode = angular.element(domNode);
     rootNode.append(this.searchInstance);
 
@@ -250,9 +245,6 @@ export class SearchEmbeddable
       this.updateInput({ columns });
     };
 
-    if (this.savedSearch.grid) {
-      searchScope.settings = this.savedSearch.grid;
-    }
     searchScope.showTimeCol = !this.services.uiSettings.get('doc_table:hideTimeColumn', false);
 
     searchScope.filter = async (field, value, operator) => {

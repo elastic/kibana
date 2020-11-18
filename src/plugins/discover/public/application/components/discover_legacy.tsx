@@ -17,6 +17,7 @@
  * under the License.
  */
 import React, { useState } from 'react';
+import './discover.scss';
 import classNames from 'classnames';
 import { EuiButtonEmpty, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiHideFor } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
