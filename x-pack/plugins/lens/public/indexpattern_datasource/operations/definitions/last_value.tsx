@@ -151,7 +151,7 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
         >
           <EuiSelect
             compressed
-            data-test-subj="indexPattern-lastValue-sortField"
+            data-test-subj="lns-indexPattern-lastValue-sortField"
             options={dateFields?.map((field: IndexPatternField) => {
               return {
                 value: field.name,
