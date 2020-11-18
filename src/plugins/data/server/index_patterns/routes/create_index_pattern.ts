@@ -18,7 +18,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IRouter } from 'src/core/server';
+import { IRouter } from '../../../../../core/server';
 import { handleErrors } from './util/handle_errors';
 
 const serializedFieldFormatSchema = schema.object({
