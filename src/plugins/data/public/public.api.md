@@ -976,7 +976,7 @@ export interface IFieldType {
     // (undocumented)
     count?: number;
     // (undocumented)
-    customName?: string;
+    customLabel?: string;
     // (undocumented)
     displayName?: string;
     // (undocumented)
@@ -1150,7 +1150,7 @@ export class IndexPattern implements IIndexPattern {
     // (undocumented)
     getFieldAttrs: () => {
         [x: string]: {
-            customName: string;
+            customLabel: string;
         };
     };
     // (undocumented)
@@ -1257,8 +1257,8 @@ export class IndexPatternField implements IFieldType {
     get count(): number;
     set count(count: number);
     // (undocumented)
-    get customName(): string | undefined;
-    set customName(label: string | undefined);
+    get customLabel(): string | undefined;
+    set customLabel(customLabel: string | undefined);
     // (undocumented)
     get displayName(): string;
     // (undocumented)
@@ -1297,7 +1297,7 @@ export class IndexPatternField implements IFieldType {
         aggregatable: boolean;
         readFromDocValues: boolean;
         subType: import("../types").IFieldSubType | undefined;
-        customName: string | undefined;
+        customLabel: string | undefined;
     };
     // (undocumented)
     toSpec({ getFormatterForField, }?: {
