@@ -8,7 +8,6 @@ import React, { FunctionComponent } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiComboBoxOptionOption,
-  EuiDescribedFormGroup,
   EuiTextColor,
   EuiSpacer,
   EuiCallOut,
@@ -21,15 +20,15 @@ import { useLoadSnapshotRepositories } from '../../../../../services/api';
 
 import { useEditPolicyContext } from '../../../edit_policy_context';
 
-import { FieldLoadingError } from '../../';
+import { FieldLoadingError, DescribedFormField } from '../../';
 
 interface Props {
   phase: 'hot' | 'cold';
 }
 
 export const SearchableSnapshotsField: FunctionComponent<Props> = ({ phase }) => {
-  const { getUrlForApp } = useEditPolicyContext();
-  const searchableSnapshotsPath = `phases.${phase}.actions.searchable_snapshot.snapshot_repository`;
+  const { getUrlForApp, policy } = useEditPolicyContext();
+  const searchableSnapshotPath = `phases.${phase}.actions.searchable_snapshot.snapshot_repository`;
   const { isLoading, error, data, resendRequest } = useLoadSnapshotRepositories();
 
   const repos = data?.repositories ?? [];
@@ -105,7 +104,16 @@ export const SearchableSnapshotsField: FunctionComponent<Props> = ({ phase }) =>
   }
 
   return (
-    <EuiDescribedFormGroup
+    <DescribedFormField
+      switchProps={{
+        label: i18n.translate(
+          'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotsToggleLabel',
+          { defaultMessage: 'Use searchable snapshot' }
+        ),
+        initialValue: Boolean(
+          policy.phases[phase]?.actions?.searchable_snapshot?.snapshot_repository
+        ),
+      }}
       title={
         <h3>
           {i18n.translate('xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotFieldTitle', {
@@ -125,7 +133,7 @@ export const SearchableSnapshotsField: FunctionComponent<Props> = ({ phase }) =>
       }
       fullWidth
     >
-      <UseField<string> path={searchableSnapshotsPath}>
+      <UseField<string> path={searchableSnapshotPath}>
         {(field) => {
           const singleSelectionArray: [selectedSnapshot?: string] = field.value
             ? [field.value]
@@ -162,6 +170,6 @@ export const SearchableSnapshotsField: FunctionComponent<Props> = ({ phase }) =>
         }}
       </UseField>
       {calloutContent}
-    </EuiDescribedFormGroup>
+    </DescribedFormField>
   );
 };

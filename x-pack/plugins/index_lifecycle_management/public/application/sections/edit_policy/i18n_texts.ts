@@ -49,7 +49,7 @@ export const i18nTexts = {
     searchableSnapshotsFieldLabel: i18n.translate(
       'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotFieldLabel',
       {
-        defaultMessage: 'Searchable snapshot (optional)',
+        defaultMessage: 'Searchable snapshot',
       }
     ),
     errors: {
@@ -138,6 +138,12 @@ export const i18nTexts = {
         'xpack.indexLifecycleMgmt.editPolicy.policyNameTooLongError',
         {
           defaultMessage: 'A policy name cannot be longer than 255 bytes.',
+        }
+      ),
+      searchableSnapshotRepoRequired: i18n.translate(
+        'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotRepoRequiredError',
+        {
+          defaultMessage: 'A snapshot repository name is required.',
         }
       ),
     },
