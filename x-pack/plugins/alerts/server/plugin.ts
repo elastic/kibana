@@ -66,6 +66,10 @@ import { IEventLogger, IEventLogService, IEventLogClientService } from '../../ev
 import { PluginStartContract as FeaturesPluginStart } from '../../features/server';
 import { setupSavedObjects } from './saved_objects';
 import {
+  initializeApiKeyInvalidator,
+  scheduleApiKeyInvalidatorTask,
+} from './invalidate_pending_api_keys/task';
+import {
   getHealthStatusStream,
   scheduleAlertingHealthCheck,
   initializeAlertingHealth,
@@ -195,6 +199,14 @@ export class AlertingPlugin {
       });
     }
 
+    initializeApiKeyInvalidator(
+      this.logger,
+      core.getStartServices(),
+      plugins.taskManager,
+      this.config,
+      this.security
+    );
+
     core.getStartServices().then(async ([, startPlugins]) => {
       core.status.set(
         combineLatest([
@@ -308,7 +320,9 @@ export class AlertingPlugin {
     });
 
     scheduleAlertingTelemetry(this.telemetryLogger, plugins.taskManager);
+
     scheduleAlertingHealthCheck(this.logger, this.config, plugins.taskManager);
+    scheduleApiKeyInvalidatorTask(this.telemetryLogger, this.config, plugins.taskManager);
 
     return {
       listTypes: alertTypeRegistry!.list.bind(this.alertTypeRegistry!),
