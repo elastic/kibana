@@ -27,10 +27,14 @@ function yTickFormat(y?: number | null) {
 }
 
 interface Props {
+  height?: number;
   showAnnotations?: boolean;
 }
 
-export function TransactionErrorRateChart({ showAnnotations = true }: Props) {
+export function TransactionErrorRateChart({
+  height,
+  showAnnotations = true,
+}: Props) {
   const theme = useTheme();
   const { serviceName } = useParams<{ serviceName?: string }>();
   const { urlParams, uiFilters } = useUrlParams();
@@ -71,6 +75,7 @@ export function TransactionErrorRateChart({ showAnnotations = true }: Props) {
       </EuiTitle>
       <LineChart
         id="errorRate"
+        height={height}
         showAnnotations={showAnnotations}
         fetchStatus={status}
         timeseries={[

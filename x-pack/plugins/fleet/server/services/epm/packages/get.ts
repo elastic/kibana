@@ -109,11 +109,7 @@ export async function getPackageInfo(options: {
   pkgVersion: string;
 }): Promise<PackageInfo> {
   const { savedObjectsClient, pkgName, pkgVersion } = options;
-  const [
-    savedObject,
-    latestPackage,
-    { paths: assets, registryPackageInfo: item },
-  ] = await Promise.all([
+  const [savedObject, latestPackage, { paths: assets, packageInfo: item }] = await Promise.all([
     getInstallationObject({ savedObjectsClient, pkgName }),
     Registry.fetchFindLatestPackage(pkgName),
     Registry.getRegistryPackage(pkgName, pkgVersion),
