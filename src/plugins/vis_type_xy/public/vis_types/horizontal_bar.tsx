@@ -122,7 +122,7 @@ export const getHorizontalBarVisTypeDefinition = (
         },
       ],
       addTooltip: true,
-      detailedTooltip: false,
+      detailedTooltip: true,
       addLegend: true,
       legendPosition: Position.Right,
       fittingFunction: Fit.Linear,

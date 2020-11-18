@@ -119,7 +119,7 @@ export const getLineVisTypeDefinition = (
         },
       ],
       addTooltip: true,
-      detailedTooltip: false,
+      detailedTooltip: true,
       addLegend: true,
       legendPosition: Position.Right,
       fittingFunction: Fit.Linear,
