@@ -10,10 +10,12 @@ import { EuiPageHeader, EuiPageHeaderSection, EuiTitle, EuiCallOut } from '@elas
 import { useValues } from 'kea';
 import { i18n } from '@kbn/i18n';
 
+import { DocumentCreationButton } from './document_creation_button';
 import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { FlashMessages } from '../../../shared/flash_messages';
 import { DOCUMENTS_TITLE } from './constants';
 import { EngineLogic } from '../engine';
+import { AppLogic } from '../../app_logic';
 
 const MetaEngineCallout: React.FC = () => (
   <>
@@ -39,6 +41,7 @@ interface Props {
 
 export const Documents: React.FC<Props> = ({ engineBreadcrumb }) => {
   const { isMetaEngine } = useValues(EngineLogic);
+  const { myRole } = useValues(AppLogic);
 
   return (
     <>
@@ -49,6 +52,11 @@ export const Documents: React.FC<Props> = ({ engineBreadcrumb }) => {
             <h1>{DOCUMENTS_TITLE}</h1>
           </EuiTitle>
         </EuiPageHeaderSection>
+        {myRole.canManageEngineDocuments && !isMetaEngine && (
+          <EuiPageHeaderSection>
+            <DocumentCreationButton />
+          </EuiPageHeaderSection>
+        )}
       </EuiPageHeader>
       <FlashMessages />
       {isMetaEngine && <MetaEngineCallout />}
