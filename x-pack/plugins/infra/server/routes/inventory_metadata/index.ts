@@ -9,7 +9,6 @@ import Boom from '@hapi/boom';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
-import { findInventoryModel } from '../../../common/inventory_models';
 import { InfraBackendLibs } from '../../lib/infra_types';
 import { throwErrors } from '../../../common/runtime_types';
 
