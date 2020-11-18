@@ -110,7 +110,7 @@ export const PackagePoliciesPanel = ({ name, version }: PackagePoliciesPanelProp
     () => [
       {
         field: 'name',
-        name: i18n.translate('xpack.ingestManager.epm.packageDetails.integrationList.name', {
+        name: i18n.translate('xpack.fleet.epm.packageDetails.integrationList.name', {
           defaultMessage: 'Integration',
         }),
         render(_, integrationPolicy) {
@@ -119,14 +119,14 @@ export const PackagePoliciesPanel = ({ name, version }: PackagePoliciesPanelProp
       },
       {
         field: 'description',
-        name: i18n.translate('xpack.ingestManager.epm.packageDetails.integrationList.description', {
+        name: i18n.translate('xpack.fleet.epm.packageDetails.integrationList.description', {
           defaultMessage: 'Description',
         }),
         truncateText: true,
       },
       {
         field: 'policy_id',
-        name: i18n.translate('xpack.ingestManager.epm.packageDetails.integrationList.agentPolicy', {
+        name: i18n.translate('xpack.fleet.epm.packageDetails.integrationList.agentPolicy', {
           defaultMessage: 'Agent policy',
         }),
         truncateText: true,
@@ -143,7 +143,7 @@ export const PackagePoliciesPanel = ({ name, version }: PackagePoliciesPanelProp
       },
       {
         field: '',
-        name: i18n.translate('xpack.ingestManager.epm.packageDetails.integrationList.agentCount', {
+        name: i18n.translate('xpack.fleet.epm.packageDetails.integrationList.agentCount', {
           defaultMessage: 'Agents',
         }),
         truncateText: true,
@@ -159,7 +159,7 @@ export const PackagePoliciesPanel = ({ name, version }: PackagePoliciesPanelProp
       },
       {
         field: 'updated_by',
-        name: i18n.translate('xpack.ingestManager.epm.packageDetails.integrationList.updatedBy', {
+        name: i18n.translate('xpack.fleet.epm.packageDetails.integrationList.updatedBy', {
           defaultMessage: 'Last Updated By',
         }),
         truncateText: true,
@@ -169,7 +169,7 @@ export const PackagePoliciesPanel = ({ name, version }: PackagePoliciesPanelProp
       },
       {
         field: 'updated_at',
-        name: i18n.translate('xpack.ingestManager.epm.packageDetails.integrationList.updatedAt', {
+        name: i18n.translate('xpack.fleet.epm.packageDetails.integrationList.updatedAt', {
           defaultMessage: 'Last Updated',
         }),
         truncateText: true,
