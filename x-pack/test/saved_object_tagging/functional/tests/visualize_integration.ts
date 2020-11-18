@@ -102,7 +102,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(itemNames).to.contain('My new markdown viz');
       });
 
-      it('allows to assign tags to the new visualization', async () => {
+      it('allows to create a tag from the tag selector', async () => {
         const { tagModal } = PageObjects.tagManagement;
 
         await PageObjects.visualize.navigateToNewVisualization();
