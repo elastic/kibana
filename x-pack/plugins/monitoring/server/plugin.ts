@@ -159,7 +159,7 @@ export class Plugin {
       registerCollectors(plugins.usageCollection, config, cluster);
       registerMonitoringTelemetryCollection(
         plugins.usageCollection,
-        cluster.callAsInternalUser,
+        cluster,
         config.ui.max_bucket_size
       );
     }
