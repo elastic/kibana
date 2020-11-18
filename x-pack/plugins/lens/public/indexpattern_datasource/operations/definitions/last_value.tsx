@@ -170,8 +170,8 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
                 })
               )
             }
-            aria-label={i18n.translate('xpack.lens.indexPattern.terms.orderBy', {
-              defaultMessage: 'Order by',
+            aria-label={i18n.translate('xpack.lens.indexPattern.lastValue.sortField', {
+              defaultMessage: 'Sort by date field',
             })}
           />
         </EuiFormRow>
