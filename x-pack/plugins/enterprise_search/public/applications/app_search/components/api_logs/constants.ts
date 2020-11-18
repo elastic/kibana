@@ -8,5 +8,5 @@ import { i18n } from '@kbn/i18n';
 
 export const RECENT_API_EVENTS = i18n.translate(
   'xpack.enterpriseSearch.appSearch.engine.apiLogs.recent',
-  { defaultMessage: 'Recent API Events' }
+  { defaultMessage: 'Recent API events' }
 );

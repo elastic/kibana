@@ -28,7 +28,7 @@ describe('EmptyEngineOverview', () => {
 
   it('renders', () => {
     expect(wrapper.find('h1').text()).toEqual('Engine setup');
-    expect(wrapper.find('h2').text()).toEqual('Setting up the “empty-engine” Engine');
+    expect(wrapper.find('h2').text()).toEqual('Setting up the “empty-engine” engine');
     expect(wrapper.find('h3').text()).toEqual('Indexing by API');
   });
 
