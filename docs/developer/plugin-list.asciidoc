@@ -268,7 +268,7 @@ heatmap charts.
 
 |{kib-repo}blob/{branch}/src/plugins/vis_type_xy/README.md[visTypeXy]
 |Contains the new xy-axis chart using the elastic-charts library, which will eventually
-replace the vislib xy-axis charts including bar, area and line.
+replace the vislib xy-axis charts including bar, area, and line.
 
 
 |{kib-repo}blob/{branch}/src/plugins/visualizations/README.md[visualizations]
