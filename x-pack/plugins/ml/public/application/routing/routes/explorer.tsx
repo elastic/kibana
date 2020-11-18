@@ -171,9 +171,10 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
     if (viewByFromPage) {
       explorerService.setViewByFromPage(viewByFromPage);
     }
-  }, []);
+  }, [explorerUrlState]);
 
   const [explorerData, loadExplorerData] = useExplorerData();
+
   useEffect(() => {
     if (explorerData !== undefined && Object.keys(explorerData).length > 0) {
       explorerService.setExplorerData(explorerData);

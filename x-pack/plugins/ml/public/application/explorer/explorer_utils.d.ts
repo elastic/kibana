@@ -185,8 +185,8 @@ export declare interface FilterData {
 
 export declare interface AppStateSelectedCells {
   type: SwimlaneType;
-  lanes: string[];
-  times: number[];
+  lanes?: string[];
+  times?: number[];
   showTopFieldValues?: boolean;
   viewByFieldName?: string;
 }
