@@ -20,6 +20,7 @@ import {
   ActionsStepRule,
   ScheduleStepRule,
   DefineStepRule,
+  IMitreEnterpriseAttack,
 } from '../types';
 import {
   getTimeTypeValue,
@@ -29,6 +30,7 @@ import {
   formatActionsStepData,
   formatRule,
   filterRuleFieldsForType,
+  filterEmptyThreats,
 } from './helpers';
 import {
   mockDefineStepRule,
@@ -80,6 +82,24 @@ describe('helpers', () => {
       const result = getTimeTypeValue('random');
 
       expect(result).toEqual({ unit: '', value: 0 });
+    });
+  });
+
+  describe('filterEmptyThreats', () => {
+    let mockThreat: IMitreEnterpriseAttack;
+
+    beforeEach(() => {
+      mockThreat = mockAboutStepRule().threat[0];
+    });
+
+    test('filters out fields with empty tactics', () => {
+      const threat: IMitreEnterpriseAttack[] = [
+        mockThreat,
+        { ...mockThreat, tactic: { ...mockThreat.tactic, name: 'none' } },
+      ];
+      const result = filterEmptyThreats(threat);
+      const expected = [mockThreat];
+      expect(result).toEqual(expected);
     });
   });
 
@@ -398,6 +418,7 @@ describe('helpers', () => {
                 id: '456',
                 name: 'technique1',
                 reference: 'technique reference',
+                subtechnique: [],
               },
             ],
           },
@@ -485,6 +506,7 @@ describe('helpers', () => {
                 id: '456',
                 name: 'technique1',
                 reference: 'technique reference',
+                subtechnique: [],
               },
             ],
           },
@@ -525,6 +547,7 @@ describe('helpers', () => {
                 id: '456',
                 name: 'technique1',
                 reference: 'technique reference',
+                subtechnique: [],
               },
             ],
           },
@@ -565,6 +588,7 @@ describe('helpers', () => {
                 id: '456',
                 name: 'technique1',
                 reference: 'technique reference',
+                subtechnique: [],
               },
             ],
           },
@@ -588,7 +612,99 @@ describe('helpers', () => {
           {
             framework: 'MITRE ATT&CK',
             tactic: { id: '1234', name: 'tactic1', reference: 'reference1' },
-            technique: [{ id: '456', name: 'technique1', reference: 'technique reference' }],
+            technique: [
+              { id: '456', name: 'technique1', reference: 'technique reference', subtechnique: [] },
+            ],
+          },
+        ],
+      };
+
+      expect(result).toEqual(expected);
+    });
+
+    test('returns formatted object with threats that contain subtechniques', () => {
+      const mockStepData = {
+        ...mockData,
+        threat: [
+          {
+            framework: 'mockFramework',
+            tactic: {
+              id: '1234',
+              name: 'tactic1',
+              reference: 'reference1',
+            },
+            technique: [
+              {
+                id: '456',
+                name: 'technique1',
+                reference: 'technique reference',
+                subtechnique: [],
+              },
+            ],
+          },
+          {
+            framework: 'mockFramework',
+            tactic: {
+              id: '1234',
+              name: 'tactic2',
+              reference: 'reference1',
+            },
+            technique: [
+              {
+                id: '456',
+                name: 'technique1',
+                reference: 'technique reference',
+                subtechnique: [
+                  {
+                    id: '789',
+                    name: 'subtechnique1',
+                    reference: 'subtechnique reference',
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      };
+      const result: AboutStepRuleJson = formatAboutStepData(mockStepData);
+      const expected = {
+        author: ['Elastic'],
+        license: 'Elastic License',
+        description: '24/7',
+        false_positives: ['test'],
+        name: 'Query with rule-id',
+        note: '# this is some markdown documentation',
+        references: ['www.test.co'],
+        risk_score: 21,
+        risk_score_mapping: [],
+        severity: 'low',
+        severity_mapping: [],
+        tags: ['tag1', 'tag2'],
+        threat: [
+          {
+            framework: 'MITRE ATT&CK',
+            tactic: { id: '1234', name: 'tactic1', reference: 'reference1' },
+            technique: [
+              { id: '456', name: 'technique1', reference: 'technique reference', subtechnique: [] },
+            ],
+          },
+          {
+            framework: 'MITRE ATT&CK',
+            tactic: { id: '1234', name: 'tactic2', reference: 'reference1' },
+            technique: [
+              {
+                id: '456',
+                name: 'technique1',
+                reference: 'technique reference',
+                subtechnique: [
+                  {
+                    id: '789',
+                    name: 'subtechnique1',
+                    reference: 'subtechnique reference',
+                  },
+                ],
+              },
+            ],
           },
         ],
       };

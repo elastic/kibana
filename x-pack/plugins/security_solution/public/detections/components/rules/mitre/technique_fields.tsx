@@ -13,18 +13,18 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import { kebabCase, camelCase } from 'lodash/fp';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import styled, { css } from 'styled-components';
 
 import { techniquesOptions } from '../../../mitre/mitre_tactics_techniques';
 import * as Rulei18n from '../../../pages/detection_engine/rules/translations';
-import { FieldHook, getFieldValidityAndErrorMessage } from '../../../../shared_imports';
+import { FieldHook } from '../../../../shared_imports';
 import {
   IMitreAttackTechnique,
   IMitreEnterpriseAttack,
 } from '../../../pages/detection_engine/rules/types';
 import { MyAddItemButton } from '../add_item_form';
-import { hasSubtechniqueOptions, isMitreTechniqueInvalid } from './helpers';
+import { getMitreErrorMessages, hasSubtechniqueOptions, isMitreTechniqueInvalid } from './helpers';
 import * as i18n from './translations';
 import { MitreSubtechniqueFields } from './subtechnique_fields';
 
@@ -52,17 +52,10 @@ export const MitreTechniqueFields: React.FC<AddTechniqueProps> = ({
   onFieldChange,
 }): JSX.Element => {
   const [showValidation, setShowValidation] = useState(false);
-  const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
-  const getErrorMessages = useCallback(() => {
-    if (field.isChangingValue || !field.errors.length) {
-      return null;
-    }
-    return field.errors.reduce((acc: string[], error) => {
-      if (error.path === 'threat.technique') {
-        acc.push(error.message);
-      }
-      return acc;
-    }, []);
+
+  const errorMessage = useMemo(() => {
+    const { techniqueError } = getMitreErrorMessages(field);
+    return techniqueError;
   }, [field]);
 
   const values = field.value as IMitreEnterpriseAttack[];
@@ -177,7 +170,7 @@ export const MitreTechniqueFields: React.FC<AddTechniqueProps> = ({
             }
             fullWidth
             describedByIds={idAria ? [`${idAria} ${i18n.TECHNIQUE}`] : undefined}
-            error={getErrorMessages()}
+            error={errorMessage}
           >
             <EuiFlexGroup gutterSize="s" alignItems="center">
               <EuiFlexItem grow>

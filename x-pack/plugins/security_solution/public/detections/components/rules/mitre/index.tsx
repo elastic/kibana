@@ -6,19 +6,19 @@
 
 import { EuiButtonIcon, EuiFormRow, EuiSuperSelect, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { isEmpty, camelCase } from 'lodash/fp';
-import React, { memo, useCallback, useState } from 'react';
+import React, { memo, useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
 import { isEqual } from 'lodash';
 import { tacticsOptions } from '../../../mitre/mitre_tactics_techniques';
 import * as Rulei18n from '../../../pages/detection_engine/rules/translations';
-import { FieldHook, getFieldValidityAndErrorMessage } from '../../../../shared_imports';
+import { FieldHook } from '../../../../shared_imports';
 import { threatDefault } from '../step_about_rule/default_value';
 import { IMitreEnterpriseAttack } from '../../../pages/detection_engine/rules/types';
 import { MyAddItemButton } from '../add_item_form';
 import * as i18n from './translations';
 import { MitreTechniqueFields } from './technique_fields';
-import { isMitreAttackInvalid } from './helpers';
+import { getMitreErrorMessages, isMitreAttackInvalid } from './helpers';
 
 const MitreContainer = styled.div`
   margin-top: 16px;
@@ -41,17 +41,10 @@ interface AddItemProps {
 
 export const AddMitreThreat = memo(({ field, idAria, isDisabled }: AddItemProps) => {
   const [showValidation, setShowValidation] = useState(false);
-  const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
-  const getErrorMessages = useCallback(() => {
-    if (field.isChangingValue || !field.errors.length) {
-      return null;
-    }
-    return field.errors.reduce((acc: string[], error) => {
-      if (error.path === 'threat.tactic') {
-        acc.push(error.message);
-      }
-      return acc;
-    }, []);
+
+  const errorMessage = useMemo(() => {
+    const { tacticError } = getMitreErrorMessages(field);
+    return tacticError;
   }, [field]);
 
   const removeTactic = useCallback(
@@ -156,8 +149,6 @@ export const AddMitreThreat = memo(({ field, idAria, isDisabled }: AddItemProps)
     [field, isDisabled, removeTactic, showValidation, updateTactic, values, isTacticValid]
   );
 
-  console.log(errorMessage, showValidation, isInvalid);
-
   /**
    * Uses the fieldhook to set a new field value
    *
@@ -181,7 +172,7 @@ export const AddMitreThreat = memo(({ field, idAria, isDisabled }: AddItemProps)
               labelAppend={field.labelAppend}
               describedByIds={idAria ? [`${idAria} ${i18n.TACTIC}`] : undefined}
               isInvalid={showValidation && isTacticValid(threat)}
-              error={getErrorMessages()}
+              error={errorMessage}
             >
               <>{getSelectTactic(threat, index, isDisabled)}</>
             </InitialMitreFormRow>
@@ -189,7 +180,7 @@ export const AddMitreThreat = memo(({ field, idAria, isDisabled }: AddItemProps)
             <EuiFormRow
               fullWidth
               isInvalid={showValidation && isTacticValid(threat)}
-              error={getErrorMessages()}
+              error={errorMessage}
               describedByIds={idAria ? [`${idAria} ${i18n.TACTIC}`] : undefined}
             >
               {getSelectTactic(threat, index, isDisabled)}

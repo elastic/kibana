@@ -180,7 +180,8 @@ export const filterEmptyThreats = (threats: IMitreEnterpriseAttack[]): IMitreEnt
         technique: filterThreatByName(threat.technique).map((technique) => {
           return {
             ...technique,
-            subtechnique: filterThreatByName(technique.subtechnique),
+            subtechnique:
+              technique.subtechnique != null ? filterThreatByName(technique.subtechnique) : [],
           };
         }),
       };

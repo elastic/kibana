@@ -168,24 +168,27 @@ export const buildThreatDescription = ({ label, threat }: BuildThreatDescription
                             {myTechnique != null ? myTechnique.label : ''}
                           </TechniqueLinkItem>
                           <EuiFlexGroup gutterSize="none" alignItems="flexStart" direction="column">
-                            {technique.subtechnique.map((subtechnique, subtechniqueIndex) => {
-                              const mySubtechnique = subtechniquesOptions.find(
-                                (t) => t.id === subtechnique.id
-                              );
-                              return (
-                                <SubtechniqueFlexItem key={mySubtechnique?.id ?? subtechniqueIndex}>
-                                  <TechniqueLinkItem
-                                    data-test-subj="threatSubtechniqueLink"
-                                    href={subtechnique.reference}
-                                    target="_blank"
-                                    iconType={ListTreeIcon}
-                                    size="xs"
+                            {technique.subtechnique != null &&
+                              technique.subtechnique.map((subtechnique, subtechniqueIndex) => {
+                                const mySubtechnique = subtechniquesOptions.find(
+                                  (t) => t.id === subtechnique.id
+                                );
+                                return (
+                                  <SubtechniqueFlexItem
+                                    key={mySubtechnique?.id ?? subtechniqueIndex}
                                   >
-                                    {mySubtechnique != null ? mySubtechnique.label : ''}
-                                  </TechniqueLinkItem>
-                                </SubtechniqueFlexItem>
-                              );
-                            })}
+                                    <TechniqueLinkItem
+                                      data-test-subj="threatSubtechniqueLink"
+                                      href={subtechnique.reference}
+                                      target="_blank"
+                                      iconType={ListTreeIcon}
+                                      size="xs"
+                                    >
+                                      {mySubtechnique != null ? mySubtechnique.label : ''}
+                                    </TechniqueLinkItem>
+                                  </SubtechniqueFlexItem>
+                                );
+                              })}
                           </EuiFlexGroup>
                         </EuiFlexItem>
                       );

@@ -54,16 +54,18 @@ export const MitreSubtechniqueFields: React.FC<AddSubtechniqueProps> = ({
     (index: number) => {
       const threats = [...(field.value as IMitreEnterpriseAttack[])];
       const subtechniques = threats[threatIndex].technique[techniqueIndex].subtechnique;
-      const newSubtechniques = [
-        ...subtechniques.slice(0, index),
-        ...subtechniques.slice(index + 1),
-      ];
+      if (subtechniques != null) {
+        const newSubtechniques = [
+          ...subtechniques.slice(0, index),
+          ...subtechniques.slice(index + 1),
+        ];
 
-      threats[threatIndex].technique[techniqueIndex] = {
-        ...threats[threatIndex].technique[techniqueIndex],
-        subtechnique: newSubtechniques,
-      };
-      onFieldChange(threats);
+        threats[threatIndex].technique[techniqueIndex] = {
+          ...threats[threatIndex].technique[techniqueIndex],
+          subtechnique: newSubtechniques,
+        };
+        onFieldChange(threats);
+      }
     },
     [field, threatIndex, onFieldChange, techniqueIndex]
   );
@@ -73,10 +75,17 @@ export const MitreSubtechniqueFields: React.FC<AddSubtechniqueProps> = ({
 
     const subtechniques = threats[threatIndex].technique[techniqueIndex].subtechnique;
 
-    threats[threatIndex].technique[techniqueIndex] = {
-      ...threats[threatIndex].technique[techniqueIndex],
-      subtechnique: [...subtechniques, { id: 'none', name: 'none', reference: 'none' }],
-    };
+    if (subtechniques != null) {
+      threats[threatIndex].technique[techniqueIndex] = {
+        ...threats[threatIndex].technique[techniqueIndex],
+        subtechnique: [...subtechniques, { id: 'none', name: 'none', reference: 'none' }],
+      };
+    } else {
+      threats[threatIndex].technique[techniqueIndex] = {
+        ...threats[threatIndex].technique[techniqueIndex],
+        subtechnique: [{ id: 'none', name: 'none', reference: 'none' }],
+      };
+    }
 
     onFieldChange(threats);
   }, [field, threatIndex, onFieldChange, techniqueIndex]);
@@ -91,29 +100,31 @@ export const MitreSubtechniqueFields: React.FC<AddSubtechniqueProps> = ({
       };
       const subtechniques = threats[threatIndex].technique[techniqueIndex].subtechnique;
 
-      onFieldChange([
-        ...threats.slice(0, threatIndex),
-        {
-          ...threats[threatIndex],
-          technique: [
-            ...threats[threatIndex].technique.slice(0, techniqueIndex),
-            {
-              ...threats[threatIndex].technique[techniqueIndex],
-              subtechnique: [
-                ...subtechniques.slice(0, index),
-                {
-                  id,
-                  reference,
-                  name,
-                },
-                ...subtechniques.slice(index + 1),
-              ],
-            },
-            ...threats[threatIndex].technique.slice(techniqueIndex + 1),
-          ],
-        },
-        ...threats.slice(threatIndex + 1),
-      ]);
+      if (subtechniques != null) {
+        onFieldChange([
+          ...threats.slice(0, threatIndex),
+          {
+            ...threats[threatIndex],
+            technique: [
+              ...threats[threatIndex].technique.slice(0, techniqueIndex),
+              {
+                ...threats[threatIndex].technique[techniqueIndex],
+                subtechnique: [
+                  ...subtechniques.slice(0, index),
+                  {
+                    id,
+                    reference,
+                    name,
+                  },
+                  ...subtechniques.slice(index + 1),
+                ],
+              },
+              ...threats[threatIndex].technique.slice(techniqueIndex + 1),
+            ],
+          },
+          ...threats.slice(threatIndex + 1),
+        ]);
+      }
     },
     [threatIndex, techniqueIndex, onFieldChange, field]
   );
@@ -159,30 +170,31 @@ export const MitreSubtechniqueFields: React.FC<AddSubtechniqueProps> = ({
 
   return (
     <SubtechniqueContainer>
-      {technique.subtechnique.map((subtechnique, index) => (
-        <div key={index}>
-          <EuiSpacer size="s" />
-          <EuiFormRow
-            fullWidth
-            describedByIds={idAria ? [`${idAria} ${i18n.SUBTECHNIQUE}`] : undefined}
-          >
-            <EuiFlexGroup gutterSize="s" alignItems="center">
-              <EuiFlexItem grow>
-                {getSelectSubtechnique(index, isDisabled, subtechnique)}
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  color="danger"
-                  iconType="trash"
-                  isDisabled={isDisabled}
-                  onClick={() => removeSubtechnique(index)}
-                  aria-label={Rulei18n.DELETE}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFormRow>
-        </div>
-      ))}
+      {technique.subtechnique != null &&
+        technique.subtechnique.map((subtechnique, index) => (
+          <div key={index}>
+            <EuiSpacer size="s" />
+            <EuiFormRow
+              fullWidth
+              describedByIds={idAria ? [`${idAria} ${i18n.SUBTECHNIQUE}`] : undefined}
+            >
+              <EuiFlexGroup gutterSize="s" alignItems="center">
+                <EuiFlexItem grow>
+                  {getSelectSubtechnique(index, isDisabled, subtechnique)}
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonIcon
+                    color="danger"
+                    iconType="trash"
+                    isDisabled={isDisabled}
+                    onClick={() => removeSubtechnique(index)}
+                    aria-label={Rulei18n.DELETE}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFormRow>
+          </div>
+        ))}
       <MyAddItemButton
         data-test-subj="addMitreSubtechnique"
         onClick={addMitreSubtechnique}

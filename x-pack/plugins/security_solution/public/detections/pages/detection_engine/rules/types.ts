@@ -207,7 +207,7 @@ export interface IMitreAttackTechnique {
   id: string;
   name: string;
   reference: string;
-  subtechnique: IMitreAttack[]; // TODO: make optional
+  subtechnique?: IMitreAttack[];
 }
 
 export interface IMitreEnterpriseAttack {
