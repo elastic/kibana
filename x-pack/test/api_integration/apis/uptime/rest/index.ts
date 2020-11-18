@@ -9,12 +9,15 @@ import {
   settingsObjectId,
   settingsObjectType,
 } from '../../../../../plugins/uptime/server/lib/saved_objects';
+import { registerMochaHooksForSnapshots } from '../../../../apm_api_integration/common/match_snapshot';
 
 export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const server = getService('kibanaServer');
 
   describe('uptime REST endpoints', () => {
+    registerMochaHooksForSnapshots();
+
     beforeEach('clear settings', async () => {
       try {
         await server.savedObjects.delete({
