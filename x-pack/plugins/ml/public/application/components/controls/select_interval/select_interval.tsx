@@ -4,13 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, useCallback } from 'react';
+import React, { FC } from 'react';
 import { EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useExplorerUrlState } from '../../../explorer/hooks/use_explorer_url_state';
-import { ExplorerAppState } from '../../../../../common/types/ml_url_generator';
+import { usePageUrlState } from '../../../util/url_state';
 
-type TableInterval = Exclude<ExplorerAppState['mlSelectInterval'], undefined>;
+interface TableInterval {
+  display: string;
+  val: string;
+}
 
 const OPTIONS = [
   {
@@ -52,18 +54,7 @@ function optionValueToInterval(value: string) {
 const TABLE_INTERVAL_DEFAULT = optionValueToInterval('auto');
 
 export const useTableInterval = (): [TableInterval, (v: TableInterval) => void] => {
-  const [explorerUrlState, setExplorerUrlState] = useExplorerUrlState();
-
-  const interval = explorerUrlState?.mlSelectInterval ?? TABLE_INTERVAL_DEFAULT;
-
-  const setInterval = useCallback(
-    (v: TableInterval) => {
-      setExplorerUrlState({ mlSelectInterval: v });
-    },
-    [setExplorerUrlState]
-  );
-
-  return [interval, setInterval];
+  return usePageUrlState<TableInterval>('mlSelectInterval', TABLE_INTERVAL_DEFAULT);
 };
 
 /*

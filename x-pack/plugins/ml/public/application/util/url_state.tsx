@@ -162,11 +162,13 @@ export const useUrlState = (accessor: Accessor) => {
   return [urlState, setUrlState];
 };
 
+type AppStateKey = 'mlSelectSeverity' | 'mlSelectInterval' | MlPages;
+
 /**
  * Hook for managing the URL state of the page.
  */
 export const usePageUrlState = <PageUrlState extends {}>(
-  pageKey: MlPages,
+  pageKey: AppStateKey,
   defaultState?: PageUrlState
 ): [PageUrlState, (update: Partial<PageUrlState>, replaceState?: boolean) => void] => {
   const [appState, setAppState] = useUrlState('_a');
