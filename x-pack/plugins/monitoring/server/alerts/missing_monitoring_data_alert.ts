@@ -21,7 +21,7 @@ import {
   CommonAlertStackProductFilter,
   CommonAlertNodeUuidFilter,
 } from '../../common/types/alerts';
-import { AlertInstance, AlertServices } from '../../../alerts/server';
+import { AlertInstance } from '../../../alerts/server';
 import {
   INDEX_PATTERN,
   ALERT_MISSING_MONITORING_DATA,
@@ -39,16 +39,6 @@ import { getStackProductLabel } from '../lib/alerts/get_stack_product_label';
 import { AlertingDefaults, createLink } from './alert_helpers';
 import { Globals } from '../static_globals';
 
-const RESOLVED = i18n.translate('xpack.monitoring.alerts.missingData.resolved', {
-  defaultMessage: 'resolved',
-});
-const FIRING = i18n.translate('xpack.monitoring.alerts.missingData.firing', {
-  defaultMessage: 'firing',
-});
-
-const DEFAULT_DURATION = '15m';
-const DEFAULT_LIMIT = '1d';
-
 // Go a bit farther back because we need to detect the difference between seeing the monitoring data versus just not looking far enough back
 const LIMIT_BUFFER = 3 * 60 * 1000;
 
@@ -63,8 +53,8 @@ export class MissingMonitoringDataAlert extends BaseAlert {
       id: ALERT_MISSING_MONITORING_DATA,
       name: ALERT_DETAILS[ALERT_MISSING_MONITORING_DATA].label,
       defaultParams: {
-        duration: DEFAULT_DURATION,
-        limit: DEFAULT_LIMIT,
+        duration: '15m',
+        limit: '1d',
       },
       throttle: '6h',
       actionVariables: [
@@ -177,40 +167,7 @@ export class MissingMonitoringDataAlert extends BaseAlert {
   }
 
   protected getUiMessage(alertState: AlertState, item: AlertData): AlertMessage {
-    const { missing, limit } = item.meta as { missing: AlertMissingData; limit: number };
-    if (!alertState.ui.isFiring) {
-      if (missing.gapDuration > limit) {
-        return {
-          text: i18n.translate('xpack.monitoring.alerts.missingData.ui.notQuiteResolvedMessage', {
-            defaultMessage: `We are still not seeing monitoring data for the {stackProduct} {type}: {stackProductName} and will stop trying. To change this, configure the alert to look farther back for data.`,
-            values: {
-              stackProduct: getStackProductLabel(missing.stackProduct),
-              type: getTypeLabelForStackProduct(missing.stackProduct, false),
-              stackProductName: missing.stackProductName,
-            },
-          }),
-        };
-      }
-      return {
-        text: i18n.translate('xpack.monitoring.alerts.missingData.ui.resolvedMessage', {
-          defaultMessage: `We are now seeing monitoring data for the {stackProduct} {type}: {stackProductName}, as of #resolved`,
-          values: {
-            stackProduct: getStackProductLabel(missing.stackProduct),
-            type: getTypeLabelForStackProduct(missing.stackProduct, false),
-            stackProductName: missing.stackProductName,
-          },
-        }),
-        tokens: [
-          {
-            startToken: '#resolved',
-            type: AlertMessageTokenType.Time,
-            isAbsolute: true,
-            isRelative: false,
-            timestamp: alertState.ui.resolvedMS,
-          } as AlertMessageTimeToken,
-        ],
-      };
-    }
+    const { missing } = item.meta as { missing: AlertMissingData; limit: number };
     return {
       text: i18n.translate('xpack.monitoring.alerts.missingData.ui.firingMessage', {
         defaultMessage: `For the past {gapDuration}, we have not detected any monitoring data from the {stackProduct} {type}: {stackProductName}, starting at #absolute`,
@@ -313,140 +270,13 @@ export class MissingMonitoringDataAlert extends BaseAlert {
       instance.scheduleActions('default', {
         internalShortMessage,
         internalFullMessage: Globals.app.isCloud ? internalShortMessage : internalFullMessage,
-        state: FIRING,
+        state: AlertingDefaults.ALERT_STATE.firing,
         stackProducts: firingStackProducts,
         count: firingCount,
         clusterName: cluster.clusterName,
         action,
         actionPlain: shortActionText,
       });
-    } else {
-      const resolvedCount = instanceState.alertStates.filter(
-        (alertState) => !alertState.ui.isFiring
-      ).length;
-      const resolvedStackProducts = instanceState.alertStates
-        .filter((_state) => !(_state as AlertMissingDataState).ui.isFiring)
-        .map((_state) => {
-          const state = _state as AlertMissingDataState;
-          return `${getStackProductLabel(state.stackProduct)} ${getTypeLabelForStackProduct(
-            state.stackProduct,
-            false
-          )}: ${state.stackProductName}`;
-        })
-        .join(',');
-      if (resolvedCount > 0) {
-        instance.scheduleActions('default', {
-          internalShortMessage: i18n.translate(
-            'xpack.monitoring.alerts.missingData.resolved.internalShortMessage',
-            {
-              defaultMessage: `We are now seeing monitoring data for {count} stack product(s) in cluster: {clusterName}.`,
-              values: {
-                count: resolvedCount,
-                clusterName: cluster.clusterName,
-              },
-            }
-          ),
-          internalFullMessage: i18n.translate(
-            'xpack.monitoring.alerts.missingData.resolved.internalFullMessage',
-            {
-              defaultMessage: `We are now seeing monitoring data for {count} stack product(s) in cluster {clusterName}.`,
-              values: {
-                count: resolvedCount,
-                clusterName: cluster.clusterName,
-              },
-            }
-          ),
-          state: RESOLVED,
-          stackProducts: resolvedStackProducts,
-          count: resolvedCount,
-          clusterName: cluster.clusterName,
-        });
-      }
-    }
-  }
-
-  protected async processData(
-    data: AlertData[],
-    clusters: AlertCluster[],
-    services: AlertServices,
-    logger: Logger
-  ) {
-    for (const cluster of clusters) {
-      const stackProducts = data.filter((_item) => _item.clusterUuid === cluster.clusterUuid);
-      if (stackProducts.length === 0) {
-        continue;
-      }
-
-      const firingInstances = stackProducts.reduce((list: string[], stackProduct) => {
-        const { missing } = stackProduct.meta as { missing: AlertMissingData; limit: number };
-        if (stackProduct.shouldFire) {
-          list.push(`${missing.stackProduct}:${missing.stackProductUuid}`);
-        }
-        return list;
-      }, [] as string[]);
-      firingInstances.sort(); // It doesn't matter how we sort, but keep the order consistent
-      const instanceId = `${this.alertOptions.id}:${cluster.clusterUuid}:${firingInstances.join(
-        ','
-      )}`;
-      const instance = services.alertInstanceFactory(instanceId);
-      const instanceState = (instance.getState() as unknown) as AlertInstanceState;
-      const alertInstanceState: AlertInstanceState = {
-        alertStates: instanceState?.alertStates || [],
-      };
-      let shouldExecuteActions = false;
-      for (const stackProduct of stackProducts) {
-        const { missing } = stackProduct.meta as { missing: AlertMissingData; limit: number };
-        let state: AlertMissingDataState;
-        const indexInState = alertInstanceState.alertStates.findIndex((alertState) => {
-          const _alertState = alertState as AlertMissingDataState;
-          return (
-            _alertState.cluster.clusterUuid === cluster.clusterUuid &&
-            _alertState.stackProduct === missing.stackProduct &&
-            _alertState.stackProductUuid === missing.stackProductUuid
-          );
-        });
-        if (indexInState > -1) {
-          state = alertInstanceState.alertStates[indexInState] as AlertMissingDataState;
-        } else {
-          state = this.getDefaultAlertState(cluster, stackProduct) as AlertMissingDataState;
-        }
-
-        state.stackProduct = missing.stackProduct;
-        state.stackProductUuid = missing.stackProductUuid;
-        state.stackProductName = missing.stackProductName;
-        state.gapDuration = missing.gapDuration;
-
-        if (stackProduct.shouldFire) {
-          if (!state.ui.isFiring) {
-            state.ui.triggeredMS = new Date().valueOf();
-          }
-          state.ui.isFiring = true;
-          state.ui.message = this.getUiMessage(state, stackProduct);
-          state.ui.severity = stackProduct.severity;
-          state.ui.resolvedMS = 0;
-          shouldExecuteActions = true;
-        } else if (!stackProduct.shouldFire && state.ui.isFiring) {
-          state.ui.isFiring = false;
-          state.ui.resolvedMS = new Date().valueOf();
-          state.ui.message = this.getUiMessage(state, stackProduct);
-          shouldExecuteActions = true;
-        }
-
-        if (indexInState === -1) {
-          alertInstanceState.alertStates.push(state);
-        } else {
-          alertInstanceState.alertStates = [
-            ...alertInstanceState.alertStates.slice(0, indexInState),
-            state,
-            ...alertInstanceState.alertStates.slice(indexInState + 1),
-          ];
-        }
-      }
-
-      instance.replaceState(alertInstanceState);
-      if (shouldExecuteActions) {
-        this.executeActions(instance, alertInstanceState, null, cluster);
-      }
     }
   }
 }

@@ -16,7 +16,7 @@ import {
   CommonAlertFilter,
   ThreadPoolRejectionsAlertParams,
 } from '../../common/types/alerts';
-import { AlertInstance, AlertServices } from '../../../alerts/server';
+import { AlertInstance } from '../../../alerts/server';
 import { INDEX_PATTERN_ELASTICSEARCH } from '../../common/constants';
 import { fetchThreadPoolRejectionStats } from '../lib/alerts/fetch_thread_pool_rejections_stats';
 import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
@@ -113,11 +113,8 @@ export class ThreadPoolRejectionsAlertBase extends BaseAlert {
     return Boolean(nodeAlerts.length);
   }
 
-  protected getUiMessage(
-    alertState: AlertThreadPoolRejectionsState,
-    rejectionCount: number
-  ): AlertMessage {
-    const { nodeName, nodeId } = alertState;
+  protected getUiMessage(alertState: AlertThreadPoolRejectionsState): AlertMessage {
+    const { nodeName, nodeId, rejectionCount } = alertState;
     return {
       text: i18n.translate('xpack.monitoring.alerts.threadPoolRejections.ui.firingMessage', {
         defaultMessage: `Node #start_link{nodeName}#end_link is reporting {rejectionCount} {type} rejections at #absolute`,
@@ -255,60 +252,5 @@ export class ThreadPoolRejectionsAlertBase extends BaseAlert {
       action,
       actionPlain: shortActionText,
     });
-  }
-
-  protected async processData(
-    data: AlertData[],
-    clusters: AlertCluster[],
-    services: AlertServices,
-    state: { lastChecked?: number }
-  ) {
-    const currentUTC = +new Date();
-    for (const cluster of clusters) {
-      const nodes = data.filter((node) => node.clusterUuid === cluster.clusterUuid);
-      if (!nodes.length) {
-        continue;
-      }
-
-      const firingNodeUuids = nodes.filter((node) => node.shouldFire);
-
-      if (!firingNodeUuids.length) {
-        continue;
-      }
-
-      const instanceSuffix = firingNodeUuids.map((node) => node.meta.nodeId);
-
-      const instancePrefix = `${this.id}:${cluster.clusterUuid}:`;
-      const alertInstanceId = `${instancePrefix}:${instanceSuffix}`;
-      const alertInstance = services.alertInstanceFactory(alertInstanceId);
-      const newAlertStates: AlertThreadPoolRejectionsState[] = [];
-
-      for (const node of nodes) {
-        if (!node.shouldFire) {
-          continue;
-        }
-        const stat = node.meta as AlertThreadPoolRejectionsState;
-        const nodeState = this.getDefaultAlertState(
-          cluster,
-          node
-        ) as AlertThreadPoolRejectionsState;
-        const { nodeId, nodeName, rejectionCount } = stat;
-        nodeState.nodeId = nodeId;
-        nodeState.nodeName = nodeName;
-        nodeState.ui.triggeredMS = currentUTC;
-        nodeState.ui.isFiring = true;
-        nodeState.ui.severity = node.severity;
-        nodeState.ui.message = this.getUiMessage(nodeState, rejectionCount);
-        newAlertStates.push(nodeState);
-      }
-
-      alertInstance.replaceState({ alertStates: newAlertStates });
-      if (newAlertStates.length) {
-        this.executeActions(alertInstance, newAlertStates, cluster);
-      }
-    }
-
-    state.lastChecked = currentUTC;
-    return state;
   }
 }

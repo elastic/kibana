@@ -169,30 +169,7 @@ export class NodesChangedAlert extends BaseAlert {
     }
     const alertState = instanceState.alertStates[0];
     const legacyAlert = item.meta as LegacyAlert;
-    if (!alertState.ui.isFiring) {
-      instance.scheduleActions('default', {
-        internalShortMessage: i18n.translate(
-          'xpack.monitoring.alerts.nodesChanged.resolved.internalShortMessage',
-          {
-            defaultMessage: `Elasticsearch nodes changed alert is resolved for {clusterName}.`,
-            values: {
-              clusterName: cluster.clusterName,
-            },
-          }
-        ),
-        internalFullMessage: i18n.translate(
-          'xpack.monitoring.alerts.nodesChanged.resolved.internalFullMessage',
-          {
-            defaultMessage: `Elasticsearch nodes changed alert is resolved for {clusterName}.`,
-            values: {
-              clusterName: cluster.clusterName,
-            },
-          }
-        ),
-        state: AlertingDefaults.ALERT_STATE.resolved,
-        clusterName: cluster.clusterName,
-      });
-    } else {
+    if (alertState.ui.isFiring) {
       const shortActionText = i18n.translate('xpack.monitoring.alerts.nodesChanged.shortAction', {
         defaultMessage: 'Verify that you added, removed, or restarted nodes.',
       });

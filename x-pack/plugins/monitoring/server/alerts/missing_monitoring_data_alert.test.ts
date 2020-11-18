@@ -126,14 +126,6 @@ describe('MissingMonitoringDataAlert', () => {
 
     it('should fire actions', async () => {
       const alert = new MissingMonitoringDataAlert();
-      alert.initializeAlertType(
-        getUiSettingsService as any,
-        monitoringCluster as any,
-        getLogger as any,
-        config as any,
-        kibanaUrl,
-        false
-      );
       const type = alert.getAlertType();
       await type.executor({
         ...executorOptions,
@@ -182,7 +174,6 @@ describe('MissingMonitoringDataAlert', () => {
                 ],
               },
               severity: 'danger',
-              resolvedMS: 0,
               triggeredMS: 1,
               lastCheckedMS: 0,
             },
@@ -226,7 +217,6 @@ describe('MissingMonitoringDataAlert', () => {
                 ],
               },
               severity: 'danger',
-              resolvedMS: 0,
               triggeredMS: 1,
               lastCheckedMS: 0,
             },
@@ -256,14 +246,6 @@ describe('MissingMonitoringDataAlert', () => {
         ];
       });
       const alert = new MissingMonitoringDataAlert();
-      alert.initializeAlertType(
-        getUiSettingsService as any,
-        monitoringCluster as any,
-        getLogger as any,
-        config as any,
-        kibanaUrl,
-        false
-      );
       const type = alert.getAlertType();
       await type.executor({
         ...executorOptions,
@@ -285,7 +267,6 @@ describe('MissingMonitoringDataAlert', () => {
               isFiring: false,
               lastCheckedMS: 0,
               message: null,
-              resolvedMS: 0,
               severity: 'danger',
               triggeredMS: 0,
             },
@@ -293,98 +274,6 @@ describe('MissingMonitoringDataAlert', () => {
         ],
       });
       expect(scheduleActions).not.toHaveBeenCalled();
-    });
-
-    it('should resolve with a resolved message', async () => {
-      (fetchMissingMonitoringData as jest.Mock).mockImplementation(() => {
-        return [
-          {
-            ...missingData[0],
-            gapDuration: 1,
-          },
-        ];
-      });
-      (getState as jest.Mock).mockImplementation(() => {
-        return {
-          alertStates: [
-            {
-              cluster: {
-                clusterUuid,
-                clusterName,
-              },
-              ccs: null,
-              gapDuration: 1,
-              stackProduct,
-              stackProductName,
-              stackProductUuid,
-              ui: {
-                isFiring: true,
-                message: null,
-                severity: 'danger',
-                resolvedMS: 0,
-                triggeredMS: 1,
-                lastCheckedMS: 0,
-              },
-            },
-          ],
-        };
-      });
-      const alert = new MissingMonitoringDataAlert();
-      alert.initializeAlertType(
-        getUiSettingsService as any,
-        monitoringCluster as any,
-        getLogger as any,
-        config as any,
-        kibanaUrl,
-        false
-      );
-      const type = alert.getAlertType();
-      await type.executor({
-        ...executorOptions,
-        // @ts-ignore
-        params: alert.defaultParams,
-      } as any);
-      const count = 1;
-      expect(replaceState).toHaveBeenCalledWith({
-        alertStates: [
-          {
-            cluster: { clusterUuid, clusterName },
-            ccs: null,
-            gapDuration: 1,
-            stackProduct,
-            stackProductName,
-            stackProductUuid,
-            ui: {
-              isFiring: false,
-              message: {
-                text:
-                  'We are now seeing monitoring data for the Elasticsearch node: esName1, as of #resolved',
-                tokens: [
-                  {
-                    startToken: '#resolved',
-                    type: 'time',
-                    isAbsolute: true,
-                    isRelative: false,
-                    timestamp: 1,
-                  },
-                ],
-              },
-              severity: 'danger',
-              resolvedMS: 1,
-              triggeredMS: 1,
-              lastCheckedMS: 0,
-            },
-          },
-        ],
-      });
-      expect(scheduleActions).toHaveBeenCalledWith('default', {
-        internalFullMessage: `We are now seeing monitoring data for 1 stack product(s) in cluster testCluster.`,
-        internalShortMessage: `We are now seeing monitoring data for 1 stack product(s) in cluster: testCluster.`,
-        clusterName,
-        count,
-        stackProducts: 'Elasticsearch node: esName1',
-        state: 'resolved',
-      });
     });
 
     it('should handle ccs', async () => {
@@ -398,14 +287,6 @@ describe('MissingMonitoringDataAlert', () => {
         ];
       });
       const alert = new MissingMonitoringDataAlert();
-      alert.initializeAlertType(
-        getUiSettingsService as any,
-        monitoringCluster as any,
-        getLogger as any,
-        config as any,
-        kibanaUrl,
-        false
-      );
       const type = alert.getAlertType();
       await type.executor({
         ...executorOptions,
@@ -428,14 +309,6 @@ describe('MissingMonitoringDataAlert', () => {
 
     it('should fire with different messaging for cloud', async () => {
       const alert = new MissingMonitoringDataAlert();
-      alert.initializeAlertType(
-        getUiSettingsService as any,
-        monitoringCluster as any,
-        getLogger as any,
-        config as any,
-        kibanaUrl,
-        true
-      );
       const type = alert.getAlertType();
       await type.executor({
         ...executorOptions,

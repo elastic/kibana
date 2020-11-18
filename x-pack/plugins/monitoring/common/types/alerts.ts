@@ -76,6 +76,7 @@ export interface AlertState {
 export interface AlertNodeState extends AlertState {
   nodeId: string;
   nodeName?: string;
+  [key: string]: unknown;
 }
 
 export interface AlertCpuUsageState extends AlertNodeState {
@@ -108,7 +109,6 @@ export interface AlertUiState {
   isFiring: boolean;
   severity: AlertSeverity;
   message: AlertMessage | null;
-  resolvedMS: number;
   lastCheckedMS: number;
   triggeredMS: number;
 }

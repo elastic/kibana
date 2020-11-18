@@ -114,14 +114,6 @@ describe('LogstashVersionMismatchAlert', () => {
 
     it('should fire actions', async () => {
       const alert = new LogstashVersionMismatchAlert();
-      alert.initializeAlertType(
-        getUiSettingsService as any,
-        monitoringCluster as any,
-        getLogger as any,
-        config as any,
-        kibanaUrl,
-        false
-      );
       const type = alert.getAlertType();
       await type.executor({
         ...executorOptions,
@@ -139,7 +131,6 @@ describe('LogstashVersionMismatchAlert', () => {
                 text: 'Multiple versions of Logstash ([8.0.0, 7.2.1]) running in this cluster.',
               },
               severity: 'warning',
-              resolvedMS: 0,
               triggeredMS: 1,
               lastCheckedMS: 0,
             },
@@ -164,14 +155,6 @@ describe('LogstashVersionMismatchAlert', () => {
         return [];
       });
       const alert = new LogstashVersionMismatchAlert();
-      alert.initializeAlertType(
-        getUiSettingsService as any,
-        monitoringCluster as any,
-        getLogger as any,
-        config as any,
-        kibanaUrl,
-        false
-      );
       const type = alert.getAlertType();
       await type.executor({
         ...executorOptions,
@@ -180,77 +163,6 @@ describe('LogstashVersionMismatchAlert', () => {
       } as any);
       expect(replaceState).not.toHaveBeenCalledWith({});
       expect(scheduleActions).not.toHaveBeenCalled();
-    });
-
-    it('should resolve with a resolved message', async () => {
-      (fetchLegacyAlerts as jest.Mock).mockImplementation(() => {
-        return [
-          {
-            ...legacyAlert,
-            resolved_timestamp: 1,
-          },
-        ];
-      });
-      (getState as jest.Mock).mockImplementation(() => {
-        return {
-          alertStates: [
-            {
-              cluster: {
-                clusterUuid,
-                clusterName,
-              },
-              ccs: undefined,
-              ui: {
-                isFiring: true,
-                message: null,
-                severity: 'danger',
-                resolvedMS: 0,
-                triggeredMS: 1,
-                lastCheckedMS: 0,
-              },
-            },
-          ],
-        };
-      });
-      const alert = new LogstashVersionMismatchAlert();
-      alert.initializeAlertType(
-        getUiSettingsService as any,
-        monitoringCluster as any,
-        getLogger as any,
-        config as any,
-        kibanaUrl,
-        false
-      );
-      const type = alert.getAlertType();
-      await type.executor({
-        ...executorOptions,
-        // @ts-ignore
-        params: alert.defaultParams,
-      } as any);
-      expect(replaceState).toHaveBeenCalledWith({
-        alertStates: [
-          {
-            cluster: { clusterUuid, clusterName },
-            ccs: undefined,
-            ui: {
-              isFiring: false,
-              message: {
-                text: 'All versions of Logstash are the same in this cluster.',
-              },
-              severity: 'danger',
-              resolvedMS: 1,
-              triggeredMS: 1,
-              lastCheckedMS: 0,
-            },
-          },
-        ],
-      });
-      expect(scheduleActions).toHaveBeenCalledWith('default', {
-        internalFullMessage: 'Logstash version mismatch alert is resolved for testCluster.',
-        internalShortMessage: 'Logstash version mismatch alert is resolved for testCluster.',
-        clusterName,
-        state: 'resolved',
-      });
     });
   });
 });

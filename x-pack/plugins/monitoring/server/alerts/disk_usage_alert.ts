@@ -18,7 +18,7 @@ import {
   CommonAlertFilter,
   CommonAlertParams,
 } from '../../common/types/alerts';
-import { AlertInstance, AlertServices } from '../../../alerts/server';
+import { AlertInstance } from '../../../alerts/server';
 import {
   INDEX_PATTERN_ELASTICSEARCH,
   ALERT_DISK_USAGE,
@@ -37,6 +37,7 @@ export class DiskUsageAlert extends BaseAlert {
     super(rawAlert, {
       id: ALERT_DISK_USAGE,
       name: ALERT_DETAILS[ALERT_DISK_USAGE].label,
+      accessorKey: 'diskUsage',
       defaultParams: {
         threshold: 80,
         duration: '5m',
@@ -111,26 +112,6 @@ export class DiskUsageAlert extends BaseAlert {
 
   protected getUiMessage(alertState: AlertState, item: AlertData): AlertMessage {
     const stat = item.meta as AlertDiskUsageState;
-    if (!alertState.ui.isFiring) {
-      return {
-        text: i18n.translate('xpack.monitoring.alerts.diskUsage.ui.resolvedMessage', {
-          defaultMessage: `The disk usage on node {nodeName} is now under the threshold, currently reporting at {diskUsage}% as of #resolved`,
-          values: {
-            nodeName: stat.nodeName,
-            diskUsage: stat.diskUsage.toFixed(2),
-          },
-        }),
-        tokens: [
-          {
-            startToken: '#resolved',
-            type: AlertMessageTokenType.Time,
-            isAbsolute: true,
-            isRelative: false,
-            timestamp: alertState.ui.resolvedMS,
-          } as AlertMessageTimeToken,
-        ],
-      };
-    }
     return {
       text: i18n.translate('xpack.monitoring.alerts.diskUsage.ui.firingMessage', {
         defaultMessage: `Node #start_link{nodeName}#end_link is reporting disk usage of {diskUsage}% at #absolute`,
@@ -245,82 +226,6 @@ export class DiskUsageAlert extends BaseAlert {
         action,
         actionPlain: shortActionText,
       });
-    } else {
-      const resolvedNodes = (alertStates as AlertDiskUsageState[])
-        .filter((state) => !state.ui.isFiring)
-        .map((state) => `${state.nodeName}:${state.diskUsage.toFixed(2)}`);
-      const resolvedCount = resolvedNodes.length;
-
-      if (resolvedCount > 0) {
-        const internalMessage = i18n.translate(
-          'xpack.monitoring.alerts.diskUsage.resolved.internalMessage',
-          {
-            defaultMessage: `Disk usage alert is resolved for {count} node(s) in cluster: {clusterName}.`,
-            values: {
-              count: resolvedCount,
-              clusterName: cluster.clusterName,
-            },
-          }
-        );
-
-        instance.scheduleActions('default', {
-          internalShortMessage: internalMessage,
-          internalFullMessage: internalMessage,
-          state: AlertingDefaults.ALERT_STATE.resolved,
-          nodes: resolvedNodes.join(','),
-          count: resolvedCount,
-          clusterName: cluster.clusterName,
-        });
-      }
     }
-  }
-
-  protected async processData(
-    data: AlertData[],
-    clusters: AlertCluster[],
-    services: AlertServices,
-    state: any
-  ) {
-    const currentUTC = +new Date();
-    for (const cluster of clusters) {
-      const nodes = data.filter((node) => node.clusterUuid === cluster.clusterUuid);
-      if (!nodes.length) {
-        continue;
-      }
-
-      const firingNodeUuids = nodes
-        .filter((node) => node.shouldFire)
-        .map((node) => node.meta.nodeId)
-        .join(',');
-      const instanceId = `${this.alertOptions.id}:${cluster.clusterUuid}:${firingNodeUuids}`;
-      const instance = services.alertInstanceFactory(instanceId);
-      const newAlertStates: AlertDiskUsageState[] = [];
-
-      for (const node of nodes) {
-        const stat = node.meta as AlertDiskUsageState;
-        const nodeState = this.getDefaultAlertState(cluster, node) as AlertDiskUsageState;
-        nodeState.diskUsage = stat.diskUsage;
-        nodeState.nodeId = stat.nodeId;
-        nodeState.nodeName = stat.nodeName;
-
-        if (node.shouldFire) {
-          nodeState.ui.triggeredMS = currentUTC;
-          nodeState.ui.isFiring = true;
-          nodeState.ui.severity = node.severity;
-          newAlertStates.push(nodeState);
-        }
-        nodeState.ui.message = this.getUiMessage(nodeState, node);
-      }
-
-      const alertInstanceState = { alertStates: newAlertStates };
-      instance.replaceState(alertInstanceState);
-      if (newAlertStates.length) {
-        this.executeActions(instance, alertInstanceState, null, cluster);
-        state.lastExecutedAction = currentUTC;
-      }
-    }
-
-    state.lastChecked = currentUTC;
-    return state;
   }
 }

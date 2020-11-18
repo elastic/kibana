@@ -20,7 +20,7 @@ import {
   CommonAlertNodeUuidFilter,
   CommonAlertParams,
 } from '../../common/types/alerts';
-import { AlertInstance, AlertServices } from '../../../alerts/server';
+import { AlertInstance } from '../../../alerts/server';
 import {
   INDEX_PATTERN_ELASTICSEARCH,
   ALERT_CPU_USAGE,
@@ -45,6 +45,7 @@ export class CpuUsageAlert extends BaseAlert {
     super(rawAlert, {
       id: ALERT_CPU_USAGE,
       name: ALERT_DETAILS[ALERT_CPU_USAGE].label,
+      accessorKey: 'cpuUsage',
       defaultParams: {
         threshold: 85,
         duration: '5m',
@@ -140,26 +141,6 @@ export class CpuUsageAlert extends BaseAlert {
 
   protected getUiMessage(alertState: AlertState, item: AlertData): AlertMessage {
     const stat = item.meta as AlertCpuUsageNodeStats;
-    if (!alertState.ui.isFiring) {
-      return {
-        text: i18n.translate('xpack.monitoring.alerts.cpuUsage.ui.resolvedMessage', {
-          defaultMessage: `The cpu usage on node {nodeName} is now under the threshold, currently reporting at {cpuUsage}% as of #resolved`,
-          values: {
-            nodeName: stat.nodeName,
-            cpuUsage: stat.cpuUsage.toFixed(2),
-          },
-        }),
-        tokens: [
-          {
-            startToken: '#resolved',
-            type: AlertMessageTokenType.Time,
-            isAbsolute: true,
-            isRelative: false,
-            timestamp: alertState.ui.resolvedMS,
-          } as AlertMessageTimeToken,
-        ],
-      };
-    }
     return {
       text: i18n.translate('xpack.monitoring.alerts.cpuUsage.ui.firingMessage', {
         defaultMessage: `Node #start_link{nodeName}#end_link is reporting cpu usage of {cpuUsage}% at #absolute`,
@@ -259,121 +240,6 @@ export class CpuUsageAlert extends BaseAlert {
         action,
         actionPlain: shortActionText,
       });
-    } else {
-      const resolvedCount = instanceState.alertStates.filter(
-        (alertState) => !alertState.ui.isFiring
-      ).length;
-      const resolvedNodes = instanceState.alertStates
-        .filter((_state) => !(_state as AlertCpuUsageState).ui.isFiring)
-        .map((_state) => {
-          const state = _state as AlertCpuUsageState;
-          return `${state.nodeName}:${state.cpuUsage.toFixed(2)}`;
-        })
-        .join(',');
-      if (resolvedCount > 0) {
-        instance.scheduleActions('default', {
-          internalShortMessage: i18n.translate(
-            'xpack.monitoring.alerts.cpuUsage.resolved.internalShortMessage',
-            {
-              defaultMessage: `CPU usage alert is resolved for {count} node(s) in cluster: {clusterName}.`,
-              values: {
-                count: resolvedCount,
-                clusterName: cluster.clusterName,
-              },
-            }
-          ),
-          internalFullMessage: i18n.translate(
-            'xpack.monitoring.alerts.cpuUsage.resolved.internalFullMessage',
-            {
-              defaultMessage: `CPU usage alert is resolved for {count} node(s) in cluster: {clusterName}.`,
-              values: {
-                count: resolvedCount,
-                clusterName: cluster.clusterName,
-              },
-            }
-          ),
-          state: AlertingDefaults.ALERT_STATE.resolved,
-          nodes: resolvedNodes,
-          count: resolvedCount,
-          clusterName: cluster.clusterName,
-        });
-      }
-    }
-  }
-
-  protected async processData(
-    data: AlertData[],
-    clusters: AlertCluster[],
-    services: AlertServices
-  ) {
-    for (const cluster of clusters) {
-      const nodes = data.filter((_item) => _item.clusterUuid === cluster.clusterUuid);
-      if (nodes.length === 0) {
-        continue;
-      }
-      const firingNodeUuids = nodes.reduce((list: string[], node) => {
-        const stat = node.meta as AlertCpuUsageNodeStats;
-        if (node.shouldFire) {
-          list.push(stat.nodeId);
-        }
-        return list;
-      }, [] as string[]);
-      firingNodeUuids.sort(); // It doesn't matter how we sort, but keep the order consistent
-      const instanceId = `${this.alertOptions.id}:${cluster.clusterUuid}:${firingNodeUuids.join(
-        ','
-      )}`;
-      const instance = services.alertInstanceFactory(instanceId);
-      const state = (instance.getState() as unknown) as AlertInstanceState;
-      const alertInstanceState: AlertInstanceState = { alertStates: state?.alertStates || [] };
-      let shouldExecuteActions = false;
-      for (const node of nodes) {
-        const stat = node.meta as AlertCpuUsageNodeStats;
-        let nodeState: AlertCpuUsageState;
-        const indexInState = alertInstanceState.alertStates.findIndex((alertState) => {
-          const nodeAlertState = alertState as AlertCpuUsageState;
-          return (
-            nodeAlertState.cluster.clusterUuid === cluster.clusterUuid &&
-            nodeAlertState.nodeId === (node.meta as AlertCpuUsageNodeStats).nodeId
-          );
-        });
-        if (indexInState > -1) {
-          nodeState = alertInstanceState.alertStates[indexInState] as AlertCpuUsageState;
-        } else {
-          nodeState = this.getDefaultAlertState(cluster, node) as AlertCpuUsageState;
-        }
-        nodeState.cpuUsage = stat.cpuUsage;
-        nodeState.nodeId = stat.nodeId;
-        nodeState.nodeName = stat.nodeName;
-
-        if (node.shouldFire) {
-          if (!nodeState.ui.isFiring) {
-            nodeState.ui.triggeredMS = new Date().valueOf();
-          }
-          nodeState.ui.isFiring = true;
-          nodeState.ui.message = this.getUiMessage(nodeState, node);
-          nodeState.ui.severity = node.severity;
-          nodeState.ui.resolvedMS = 0;
-          shouldExecuteActions = true;
-        } else if (!node.shouldFire && nodeState.ui.isFiring) {
-          nodeState.ui.isFiring = false;
-          nodeState.ui.resolvedMS = new Date().valueOf();
-          nodeState.ui.message = this.getUiMessage(nodeState, node);
-          shouldExecuteActions = true;
-        }
-        if (indexInState === -1) {
-          alertInstanceState.alertStates.push(nodeState);
-        } else {
-          alertInstanceState.alertStates = [
-            ...alertInstanceState.alertStates.slice(0, indexInState),
-            nodeState,
-            ...alertInstanceState.alertStates.slice(indexInState + 1),
-          ];
-        }
-      }
-      instance.replaceState(alertInstanceState);
-      if (shouldExecuteActions) {
-        this.executeActions(instance, alertInstanceState, null, cluster);
-      }
     }
   }
 }

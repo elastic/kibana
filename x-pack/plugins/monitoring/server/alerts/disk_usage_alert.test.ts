@@ -125,14 +125,6 @@ describe('DiskUsageAlert', () => {
 
     it('should fire actions', async () => {
       const alert = new DiskUsageAlert() as IDiskUsageAlertMock;
-      alert.initializeAlertType(
-        getUiSettingsService as any,
-        monitoringCluster as any,
-        getLogger as any,
-        config as any,
-        kibanaUrl,
-        false
-      );
       const type = alert.getAlertType();
       await type.executor({
         ...executorOptions,
@@ -162,14 +154,6 @@ describe('DiskUsageAlert', () => {
         ];
       });
       const alert = new DiskUsageAlert() as IDiskUsageAlertMock;
-      alert.initializeAlertType(
-        getUiSettingsService as any,
-        monitoringCluster as any,
-        getLogger as any,
-        config as any,
-        kibanaUrl,
-        false
-      );
       const type = alert.getAlertType();
       await type.executor({
         ...executorOptions,
@@ -190,14 +174,6 @@ describe('DiskUsageAlert', () => {
 
     it('should fire with different messaging for cloud', async () => {
       const alert = new DiskUsageAlert() as IDiskUsageAlertMock;
-      alert.initializeAlertType(
-        getUiSettingsService as any,
-        monitoringCluster as any,
-        getLogger as any,
-        config as any,
-        kibanaUrl,
-        true
-      );
       const type = alert.getAlertType();
       await type.executor({
         ...executorOptions,

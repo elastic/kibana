@@ -17,6 +17,7 @@ import { Alert, RawAlertInstance, SanitizedAlert } from '../../../alerts/common'
 import { ActionsClient } from '../../../actions/server';
 import {
   AlertState,
+  AlertNodeState,
   AlertCluster,
   AlertMessage,
   AlertData,
@@ -34,7 +35,6 @@ import { MonitoringLicenseService } from '../types';
 import { mbSafeQuery } from '../lib/mb_safe_query';
 import { appendMetricbeatIndex } from '../lib/alerts/append_mb_index';
 import { parseDuration } from '../../../alerts/common/parse_duration';
-
 import { Globals } from '../static_globals';
 
 interface AlertOptions {
@@ -46,6 +46,7 @@ interface AlertOptions {
   defaultParams?: CommonAlertParams;
   actionVariables: Array<{ name: string; description: string }>;
   fetchClustersRange?: number;
+  accessorKey?: string;
 }
 
 const defaultAlertOptions = (): AlertOptions => {
@@ -239,11 +240,11 @@ export class BaseAlert {
     }
     const rangeFilter = this.alertOptions.fetchClustersRange
       ? {
-          timestamp: {
-            format: 'epoch_millis',
-            gte: limit - this.alertOptions.fetchClustersRange,
-          },
-        }
+        timestamp: {
+          format: 'epoch_millis',
+          gte: limit - this.alertOptions.fetchClustersRange,
+        },
+      }
       : undefined;
     return await fetchClusters(callCluster, esIndexPattern, rangeFilter);
   }
@@ -259,61 +260,54 @@ export class BaseAlert {
   }
 
   protected async processData(
-    data: Array<AlertData & unknown>,
+    data: AlertData[],
     clusters: AlertCluster[],
     services: AlertServices,
-    instanceState: unknown
-  ): Promise<void | Record<string, any>> {
-    for (const item of data) {
-      const cluster = clusters.find((c: AlertCluster) => c.clusterUuid === item.clusterUuid);
-      if (!cluster) {
-        this.scopedLogger.warn(`Unable to find cluster for clusterUuid='${item.clusterUuid}'`);
+    state: any
+  ) {
+    const currentUTC = +new Date();
+    for (const cluster of clusters) {
+      const nodes = data.filter((node) => node.clusterUuid === cluster.clusterUuid);
+      if (!nodes.length) {
         continue;
       }
 
-      const instance = services.alertInstanceFactory(`${this.alertOptions.id}:${item.instanceKey}`);
-      const state = (instance.getState() as unknown) as AlertInstanceState;
-      const alertInstanceState: AlertInstanceState = { alertStates: state?.alertStates || [] };
-      let alertState: AlertState;
-      const indexInState = this.findIndexInInstanceState(alertInstanceState, cluster);
-      if (indexInState > -1) {
-        alertState = state.alertStates[indexInState];
-      } else {
-        alertState = this.getDefaultAlertState(cluster, item);
+      const firingNodeUuids = nodes
+        .filter((node) => node.shouldFire)
+        .map((node) => node.meta.nodeId)
+        .join(',');
+      const instanceId = `${this.alertOptions.id}:${cluster.clusterUuid}:${firingNodeUuids}`;
+      const instance = services.alertInstanceFactory(instanceId);
+      const newAlertStates: AlertNodeState[] = [];
+      const key = this.alertOptions.accessorKey;
+      for (const node of nodes) {
+        const stat = node.meta as AlertNodeState;
+        const nodeState = this.getDefaultAlertState(cluster, node) as AlertNodeState;
+        if (key) {
+          nodeState[key] = stat[key];
+        }
+        nodeState.nodeId = stat.nodeId;
+        nodeState.nodeName = stat.nodeName;
+
+        if (node.shouldFire) {
+          nodeState.ui.triggeredMS = currentUTC;
+          nodeState.ui.isFiring = true;
+          nodeState.ui.severity = node.severity;
+          newAlertStates.push(nodeState);
+        }
+        nodeState.ui.message = this.getUiMessage(nodeState, node);
       }
 
-      let shouldExecuteActions = false;
-      if (item.shouldFire) {
-        this.scopedLogger.debug(`${this.alertOptions.name} is firing`);
-        alertState.ui.triggeredMS = +new Date();
-        alertState.ui.isFiring = true;
-        alertState.ui.message = this.getUiMessage(alertState, item);
-        alertState.ui.severity = item.severity;
-        alertState.ui.resolvedMS = 0;
-        shouldExecuteActions = true;
-      } else if (!item.shouldFire && alertState.ui.isFiring) {
-        this.scopedLogger.debug(`${this.alertOptions.name} is not firing anymore`);
-        alertState.ui.isFiring = false;
-        alertState.ui.resolvedMS = +new Date();
-        alertState.ui.message = this.getUiMessage(alertState, item);
-        shouldExecuteActions = true;
-      }
-
-      if (indexInState === -1) {
-        alertInstanceState.alertStates.push(alertState);
-      } else {
-        alertInstanceState.alertStates = [
-          ...alertInstanceState.alertStates.slice(0, indexInState),
-          alertState,
-          ...alertInstanceState.alertStates.slice(indexInState + 1),
-        ];
-      }
-
+      const alertInstanceState = { alertStates: newAlertStates };
       instance.replaceState(alertInstanceState);
-      if (shouldExecuteActions) {
-        this.executeActions(instance, alertInstanceState, item, cluster);
+      if (newAlertStates.length) {
+        this.executeActions(instance, alertInstanceState, null, cluster);
+        state.lastExecutedAction = currentUTC;
       }
     }
+
+    state.lastChecked = currentUTC;
+    return state;
   }
 
   protected findIndexInInstanceState(stateInstance: AlertInstanceState, cluster: AlertCluster) {
@@ -330,7 +324,6 @@ export class BaseAlert {
         isFiring: false,
         message: null,
         severity: AlertSeverity.Success,
-        resolvedMS: 0,
         triggeredMS: 0,
         lastCheckedMS: 0,
       },

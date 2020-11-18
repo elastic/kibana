@@ -12,9 +12,6 @@ export class AlertingDefaults {
   public static readonly THROTTLE: string = '1d';
   public static readonly SCHEDULE_INTERVAL: string = '1m';
   public static readonly ALERT_STATE = {
-    resolved: i18n.translate('xpack.monitoring.alerts.state.resolved', {
-      defaultMessage: 'resolved',
-    }),
     firing: i18n.translate('xpack.monitoring.alerts.state.firing', {
       defaultMessage: 'firing',
     }),

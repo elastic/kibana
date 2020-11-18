@@ -41,6 +41,7 @@ export class LicenseExpirationAlert extends BaseAlert {
       id: ALERT_LICENSE_EXPIRATION,
       name: LEGACY_ALERT_DETAILS[ALERT_LICENSE_EXPIRATION].label,
       isLegacy: true,
+      interval: '1d',
       actionVariables: [
         {
           name: 'expiredDate',
@@ -148,31 +149,7 @@ export class LicenseExpirationAlert extends BaseAlert {
     const alertState = instanceState.alertStates[0];
     const legacyAlert = item.meta as LegacyAlert;
     const $expiry = moment(legacyAlert.metadata.time);
-    if (!alertState.ui.isFiring) {
-      instance.scheduleActions('default', {
-        internalShortMessage: i18n.translate(
-          'xpack.monitoring.alerts.licenseExpiration.resolved.internalShortMessage',
-          {
-            defaultMessage: `License expiration alert is resolved for {clusterName}.`,
-            values: {
-              clusterName: cluster.clusterName,
-            },
-          }
-        ),
-        internalFullMessage: i18n.translate(
-          'xpack.monitoring.alerts.licenseExpiration.resolved.internalFullMessage',
-          {
-            defaultMessage: `License expiration alert is resolved for {clusterName}.`,
-            values: {
-              clusterName: cluster.clusterName,
-            },
-          }
-        ),
-        state: AlertingDefaults.ALERT_STATE.resolved,
-        expiredDate: $expiry.format(FORMAT_DURATION_TEMPLATE_SHORT).trim(),
-        clusterName: cluster.clusterName,
-      });
-    } else {
+    if (alertState.ui.isFiring) {
       const actionText = i18n.translate('xpack.monitoring.alerts.licenseExpiration.action', {
         defaultMessage: 'Please update your license.',
       });

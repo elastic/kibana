@@ -128,7 +128,7 @@ export class Plugin {
     const serverInfo = core.http.getServerInfo();
     const alerts = AlertsFactory.getAll();
     for (const alert of alerts) {
-      plugins.alerts?.registerType(alert.getAlertType()); // except this
+      plugins.alerts?.registerType(alert.getAlertType());
     }
 
     // Initialize telemetry

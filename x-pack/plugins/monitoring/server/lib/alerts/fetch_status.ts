@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import moment from 'moment';
+
 import { AlertInstanceState } from '../../../common/types/alerts';
 import { AlertsClient } from '../../../../alerts/server';
 import { AlertsFactory } from '../../alerts';
@@ -20,8 +20,6 @@ export async function fetchStatus(
   licenseService: MonitoringLicenseService,
   alertTypes: string[] | undefined,
   clusterUuid: string,
-  start: number,
-  end: number,
   filters: CommonAlertFilter[] = []
 ): Promise<{ [type: string]: CommonAlertStatus }> {
   const types: Array<{ type: string; result: CommonAlertStatus }> = [];
@@ -60,8 +58,7 @@ export async function fetchStatus(
           }
 
           let firing = false;
-          const isInBetween = moment(state.ui.resolvedMS).isBetween(start, end);
-          if (state.ui.isFiring || isInBetween) {
+          if (state.ui.isFiring) {
             firing = true;
           }
           accum.push({ firing, state, meta });

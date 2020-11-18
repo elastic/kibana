@@ -36,6 +36,7 @@ export class ElasticsearchVersionMismatchAlert extends BaseAlert {
       id: ALERT_ELASTICSEARCH_VERSION_MISMATCH,
       name: LEGACY_ALERT_DETAILS[ALERT_ELASTICSEARCH_VERSION_MISMATCH].label,
       isLegacy: true,
+      interval: '1d',
       actionVariables: [
         {
           name: 'versionList',
@@ -95,17 +96,6 @@ export class ElasticsearchVersionMismatchAlert extends BaseAlert {
   protected getUiMessage(alertState: AlertState, item: AlertData): AlertMessage {
     const legacyAlert = item.meta as LegacyAlert;
     const versions = this.getVersions(legacyAlert);
-    if (!alertState.ui.isFiring) {
-      return {
-        text: i18n.translate(
-          'xpack.monitoring.alerts.elasticsearchVersionMismatch.ui.resolvedMessage',
-          {
-            defaultMessage: `All versions of Elasticsearch are the same in this cluster.`,
-          }
-        ),
-      };
-    }
-
     const text = i18n.translate(
       'xpack.monitoring.alerts.elasticsearchVersionMismatch.ui.firingMessage',
       {
@@ -133,30 +123,7 @@ export class ElasticsearchVersionMismatchAlert extends BaseAlert {
     const alertState = instanceState.alertStates[0];
     const legacyAlert = item.meta as LegacyAlert;
     const versions = this.getVersions(legacyAlert);
-    if (!alertState.ui.isFiring) {
-      instance.scheduleActions('default', {
-        internalShortMessage: i18n.translate(
-          'xpack.monitoring.alerts.elasticsearchVersionMismatch.resolved.internalShortMessage',
-          {
-            defaultMessage: `Elasticsearch version mismatch alert is resolved for {clusterName}.`,
-            values: {
-              clusterName: cluster.clusterName,
-            },
-          }
-        ),
-        internalFullMessage: i18n.translate(
-          'xpack.monitoring.alerts.elasticsearchVersionMismatch.resolved.internalFullMessage',
-          {
-            defaultMessage: `Elasticsearch version mismatch alert is resolved for {clusterName}.`,
-            values: {
-              clusterName: cluster.clusterName,
-            },
-          }
-        ),
-        state: AlertingDefaults.ALERT_STATE.resolved,
-        clusterName: cluster.clusterName,
-      });
-    } else {
+    if (alertState.ui.isFiring) {
       const shortActionText = i18n.translate(
         'xpack.monitoring.alerts.elasticsearchVersionMismatch.shortAction',
         {

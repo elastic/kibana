@@ -149,31 +149,7 @@ export class ClusterHealthAlert extends BaseAlert {
     const alertState = instanceState.alertStates[0];
     const legacyAlert = item.meta as LegacyAlert;
     const health = this.getHealth(legacyAlert);
-    if (!alertState.ui.isFiring) {
-      instance.scheduleActions('default', {
-        internalShortMessage: i18n.translate(
-          'xpack.monitoring.alerts.clusterHealth.resolved.internalShortMessage',
-          {
-            defaultMessage: `Cluster health alert is resolved for {clusterName}.`,
-            values: {
-              clusterName: cluster.clusterName,
-            },
-          }
-        ),
-        internalFullMessage: i18n.translate(
-          'xpack.monitoring.alerts.clusterHealth.resolved.internalFullMessage',
-          {
-            defaultMessage: `Cluster health alert is resolved for {clusterName}.`,
-            values: {
-              clusterName: cluster.clusterName,
-            },
-          }
-        ),
-        state: AlertingDefaults.ALERT_STATE.resolved,
-        clusterHealth: health,
-        clusterName: cluster.clusterName,
-      });
-    } else {
+    if (alertState.ui.isFiring) {
       const actionText =
         health === AlertClusterHealthType.Red
           ? i18n.translate('xpack.monitoring.alerts.clusterHealth.action.danger', {

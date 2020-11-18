@@ -156,10 +156,7 @@ export async function getClustersFromRequest(
               alertsClient,
               req.server.plugins.monitoring.info,
               undefined,
-              cluster.cluster_uuid,
-              start,
-              end,
-              []
+              cluster.cluster_uuid
             ),
             alertsMeta: {
               enabled: true,
