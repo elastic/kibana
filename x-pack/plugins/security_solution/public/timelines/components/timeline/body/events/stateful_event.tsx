@@ -123,7 +123,7 @@ const StatefulEventComponent: React.FC<Props> = ({
     );
 
     if (timelineId === TimelineId.active) {
-      activeTimeline.toggleExpandedEvent({ eventId, indexName });
+      activeTimeline.toggleExpandedEvent({ eventId, indexName, loading: false });
     }
   }, [dispatch, event._id, event._index, timelineId]);
 

@@ -19,6 +19,7 @@ import { KqlMode, TimelineModel, ColumnHeaderOptions } from './model';
 import { TimelineNonEcsData } from '../../../../common/search_strategy/timeline';
 import {
   TimelineEventsType,
+  TimelineExpandedEvent,
   TimelineTypeLiteral,
   RowRendererId,
 } from '../../../../common/types/timeline';
@@ -34,12 +35,11 @@ export const addNoteToEvent = actionCreator<{ id: string; noteId: string; eventI
   'ADD_NOTE_TO_EVENT'
 );
 
-export const toggleExpandedEvent = actionCreator<{
-  timelineId: string;
-  eventId: string;
-  indexName: string;
-  loading: boolean;
-}>('TOGGLE_EXPANDED_EVENT');
+export const toggleExpandedEvent = actionCreator<
+  TimelineExpandedEvent & {
+    timelineId: string;
+  }
+>('TOGGLE_EXPANDED_EVENT');
 
 export const upsertColumn = actionCreator<{
   column: ColumnHeaderOptions;

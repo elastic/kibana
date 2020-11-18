@@ -9,6 +9,7 @@ import React, { useCallback } from 'react';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
 
+import { TimelineExpandedEvent } from '../../../../../common/types/timeline';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { BrowserFields, DocValueFields } from '../../../../common/containers/source';
 import { ColumnHeaderOptions } from '../../../../timelines/store/timeline/model';
@@ -16,7 +17,6 @@ import { StatefulEventDetails } from '../../../../common/components/event_detail
 import { LazyAccordion } from '../../lazy_accordion';
 import { useTimelineEventsDetails } from '../../../containers/details';
 import { timelineActions, timelineSelectors } from '../../../store/timeline';
-import { ActiveTimelineExpandedEvent } from '../../../containers/active_timeline_context';
 import { getColumnHeaders } from '../body/column_headers/helpers';
 import { timelineDefaults } from '../../../store/timeline/defaults';
 import * as i18n from './translations';
@@ -32,7 +32,7 @@ ExpandableDetails.displayName = 'ExpandableDetails';
 interface Props {
   browserFields: BrowserFields;
   docValueFields: DocValueFields[];
-  event: ActiveTimelineExpandedEvent;
+  event: TimelineExpandedEvent;
   timelineId: string;
   toggleColumn: (column: ColumnHeaderOptions) => void;
 }

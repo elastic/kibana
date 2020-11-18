@@ -2100,6 +2100,7 @@ export const mockTimelineModel: TimelineModel = {
   eventIdToNoteIds: {},
   eventType: 'all',
   excludedRowRendererIds: [],
+  expandedEvent: {},
   filters: [
     {
       $state: {
@@ -2219,6 +2220,7 @@ export const defaultTimelineProps: CreateTimelineProps = {
     eventIdToNoteIds: {},
     eventType: 'all',
     excludedRowRendererIds: [],
+    expandedEvent: {},
     filters: [],
     highlightedDropAndProviderId: '',
     historyIds: [],
