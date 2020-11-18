@@ -234,6 +234,7 @@ kibana_vars=(
     xpack.security.authc.oidc.realm
     xpack.security.authc.saml.realm
     xpack.security.authc.saml.maxRedirectURLSize
+    xpack.security.authc.selector.enabled
     xpack.security.cookieName
     xpack.security.enabled
     xpack.security.encryptionKey
