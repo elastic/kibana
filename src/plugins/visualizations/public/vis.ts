@@ -98,13 +98,13 @@ export class Vis<TVisParams = VisParams> {
   public readonly uiState: PersistedState;
 
   constructor(visType: string, visState: SerializedVis = {} as any) {
-    this.type = this.getType<TVisParams>(visType);
+    this.type = this.getType(visType);
     this.params = this.getParams(visState.params);
     this.uiState = new PersistedState(visState.uiState);
     this.id = visState.id;
   }
 
-  private getType<TVisParams>(visType: string) {
+  private getType(visType: string) {
     const type = getTypes().get<TVisParams>(visType);
     if (!type) {
       const errorMessage = i18n.translate('visualizations.visualizationTypeInvalidMessage', {
