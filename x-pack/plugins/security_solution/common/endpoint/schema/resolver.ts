@@ -28,7 +28,14 @@ export const validateTreeEntityID = {
  */
 export const validateTree = {
   body: schema.object({
-    // if the ancestry field is specified this field will be ignored
+    /**
+     * If the ancestry field is specified this field will be ignored
+     *
+     * If the ancestry field is specified we have a much more performant way of retrieving levels so let's not limit
+     * the number of levels that come back in that scenario. We could still limit it, but what we'd likely have to do
+     * is get all the levels back like we normally do with the ancestry array, bucket them together by level, and then
+     * remove the levels that exceeded the requested number which seems kind of wasteful.
+     */
     descendantLevels: schema.number({ defaultValue: 20, min: 0, max: 1000 }),
     descendants: schema.number({ defaultValue: 1000, min: 0, max: 10000 }),
     // if the ancestry array isn't specified allowing 200 might be too high

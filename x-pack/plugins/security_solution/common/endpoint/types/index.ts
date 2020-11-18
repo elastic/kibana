@@ -92,6 +92,7 @@ export interface EventStats {
  *    "@timestamp": [
  *      "2020-11-09T21:13:25.246Z"
  *    ],
+ *    "process.name": "explorer.exe",
  *    "process.parent.entity_id": [
  *      "0i17c2m22c"
  *    ],
