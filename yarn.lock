@@ -18307,9 +18307,9 @@ jsonparse@^1.2.0:
   integrity sha1-P02uSpH6wxX3EGL4UhzCOfE2YoA=
 
 jsonpointer@^4.0.0:
-  version "4.0.1"
-  resolved "https://registry.yarnpkg.com/jsonpointer/-/jsonpointer-4.0.1.tgz#4fd92cb34e0e9db3c89c8622ecf51f9b978c6cb9"
-  integrity sha1-T9kss04OnbPInIYi7PUfm5eMbLk=
+  version "4.1.0"
+  resolved "https://registry.yarnpkg.com/jsonpointer/-/jsonpointer-4.1.0.tgz#501fb89986a2389765ba09e6053299ceb4f2c2cc"
+  integrity sha512-CXcRvMyTlnR53xMcKnuMzfCA5i/nfblTnnr74CZb6C4vG39eu6w51t7nKmU5MfLfbTgGItliNyjO/ciNPDqClg==
 
 jsonwebtoken@^8.3.0, jsonwebtoken@^8.5.1:
   version "8.5.1"
