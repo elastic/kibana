@@ -139,6 +139,12 @@ interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn> {
    * present on the new index pattern.
    */
   transfer?: (column: C, newIndexPattern: IndexPattern) => C;
+  /**
+   * if there is some reason to display the operation in the operations list
+   * but disable it from usage, this function returns the string describing
+   * the status. Otherwise it returns undefined
+   */
+  getDisabledStatus?: (indexPattern: IndexPattern) => string | undefined;
 }
 
 interface BaseBuildColumnArgs {

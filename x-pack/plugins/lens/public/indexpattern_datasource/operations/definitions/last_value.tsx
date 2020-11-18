@@ -5,7 +5,7 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFormRow, EuiSelect, EuiSwitch } from '@elastic/eui';
+import { EuiFormRow, EuiSelect, EuiButtonGroup } from '@elastic/eui';
 import { OperationDefinition } from './index';
 import { FieldBasedIndexPatternColumn } from './column_types';
 import { IndexPatternField, IndexPattern } from '../../types';
@@ -74,25 +74,36 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
       return { dataType: type as DataType, isBucketed: false, scale: 'ordinal' };
     }
   },
+  getDisabledStatus(indexPattern: IndexPattern) {
+    const hasDateFields = indexPattern && getDateFields(indexPattern).length;
+    if (!hasDateFields) {
+      return i18n.translate('xpack.lens.indexPattern.lastValue.disabled', {
+        defaultMessage: 'This function requires the presence of a date field in your index',
+      });
+    }
+  },
   buildColumn({ field, previousColumn, indexPattern }) {
-    console.log(indexPattern);
+    const sortField =
+      indexPattern.timeFieldName ||
+      indexPattern.fields.filter((f) => f.type === 'date')[0].name ||
+      field.name;
+
+    const sortOrder =
+      (previousColumn?.params &&
+        'sortOrder' in previousColumn.params &&
+        previousColumn?.params?.sortOrder) ||
+      'desc';
+
     return {
       label: ofName(field.displayName),
-      dataType: 'number',
+      dataType: field.type as DataType,
       operationType: 'last_value',
       isBucketed: false,
       scale: 'ratio',
       sourceField: field.name,
       params: {
-        sortOrder:
-          (previousColumn?.params &&
-            'sortOrder' in previousColumn.params &&
-            previousColumn?.params?.sortOrder) ||
-          'desc',
-        sortField:
-          indexPattern.timeFieldName ||
-          indexPattern.fields.filter((field) => field.type === 'date')[0] ||
-          field.name,
+        sortOrder,
+        sortField,
       },
     };
   },
@@ -105,87 +116,98 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
       field: column.sourceField,
       aggregate: 'concat',
       size: 1,
-      sortOrder: column.params?.sortOrder,
+      sortOrder: column.params.sortOrder,
       sortField: column.params.sortField,
     },
   }),
 
   isTransferable: (column, newIndexPattern) => {
     const newField = newIndexPattern.getFieldByName(column.sourceField);
-    return Boolean(newField && newField.type === 'number');
+    return Boolean(newField && newField.type === column.dataType);
   },
 
   paramEditor: ({ state, setState, currentColumn, layerId }) => {
     const dateFields = getDateFields(state.indexPatterns[state.layers[layerId].indexPatternId]);
-    if (!dateFields.length) {
-    }
-    // console.log(state.indexPatterns[state.layers[layerId].indexPatternId]);
+    const sortOrderButtons = [
+      {
+        id: `lns-lastValue-ascending`,
+        label: 'Ascending',
+        value: 'asc',
+      },
+      {
+        id: `lns-lastValue-descending`,
+        label: 'Descending',
+        value: 'desc',
+      },
+    ];
     return (
       <>
         <EuiFormRow
-          label={i18n.translate('xpack.lens.indexPattern.lastValue.sortOrder', {
-            defaultMessage: 'Get first value',
+          label={i18n.translate('xpack.lens.indexPattern.lastValue.sortField', {
+            defaultMessage: 'Sort by date field',
           })}
-          display="columnCompressedSwitch"
+          display="columnCompressed"
+          fullWidth
         >
-          <EuiSwitch
+          <EuiSelect
             compressed
-            label={i18n.translate('xpack.lens.indexPattern.lastValue.sortOrder', {
-              defaultMessage: 'Get first value',
+            data-test-subj="indexPattern-lastValue-sortField"
+            options={dateFields?.map((field: IndexPatternField) => {
+              return {
+                value: field.name,
+                text: field.displayName,
+              };
             })}
-            showLabel={false}
-            data-test-subj="indexPattern-lastValue-switch"
-            name="lastValueSwitch"
-            checked={currentColumn.params?.sortOrder === 'desc'}
-            onChange={() => {
-              console.log('chlen');
+            value={currentColumn.params.sortField}
+            onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+              setState(
+                updateColumnParam({
+                  state,
+                  layerId,
+                  currentColumn,
+                  paramName: 'sortField',
+                  value: e.target.value,
+                })
+              )
+            }
+            aria-label={i18n.translate('xpack.lens.indexPattern.terms.orderBy', {
+              defaultMessage: 'Order by',
+            })}
+          />
+        </EuiFormRow>
+        <EuiFormRow
+          label={i18n.translate('xpack.lens.indexPattern.lastValue.sortOrder', {
+            defaultMessage: 'Sort order',
+          })}
+          display="columnCompressed"
+          fullWidth
+        >
+          <EuiButtonGroup
+            isFullWidth
+            legend={i18n.translate('xpack.lens.indexPattern.lastValue.sortOrder', {
+              defaultMessage: 'Sort order',
+            })}
+            buttonSize="compressed"
+            data-test-subj="lns-indexPattern-lastValue-sortOrder"
+            name="sortOrder"
+            options={sortOrderButtons}
+            idSelected={
+              sortOrderButtons.find(({ value }) => value === currentColumn.params?.sortOrder)!.id
+            }
+            onChange={(optionId: string) => {
+              const value = sortOrderButtons.find(({ id }) => id === optionId)!.value;
               setState(
                 updateColumnParam({
                   state,
                   layerId,
                   currentColumn,
                   paramName: 'sortOrder',
-                  value: currentColumn.params?.sortOrder === 'desc' ? 'asc' : 'desc',
+                  value,
                 })
               );
             }}
           />
         </EuiFormRow>
-        {dateFields.length ? (
-          <EuiFormRow
-            label={i18n.translate('xpack.lens.indexPattern.lastValue.sortField', {
-              defaultMessage: 'Sort on',
-            })}
-            display="columnCompressed"
-            fullWidth
-          >
-            <EuiSelect
-              compressed
-              data-test-subj="indexPattern-lastValue-sortField"
-              options={dateFields?.map((field: IndexPatternField) => {
-                return {
-                  value: field.name,
-                  text: field.displayName,
-                };
-              })}
-              value={currentColumn.params.sortField}
-              onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-                setState(
-                  updateColumnParam({
-                    state,
-                    layerId,
-                    currentColumn,
-                    paramName: 'sortField',
-                    value: e.target.value,
-                  })
-                )
-              }
-              aria-label={i18n.translate('xpack.lens.indexPattern.terms.orderBy', {
-                defaultMessage: 'Order by',
-              })}
-            />
-          </EuiFormRow>
-        ) : null}
       </>
     );
   },

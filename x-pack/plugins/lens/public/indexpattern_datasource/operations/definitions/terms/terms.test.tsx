@@ -364,7 +364,7 @@ describe('terms', () => {
   });
 
   describe('onOtherColumnChanged', () => {
-    it('should keep the column if order by column still exists and is metric', () => {
+    it('should keep the column if order by column still exists and is isSortableByColumn metric', () => {
       const initialColumn: TermsIndexPatternColumn = {
         label: 'Top value of category',
         dataType: 'string',
@@ -389,6 +389,41 @@ describe('terms', () => {
         },
       });
       expect(updatedColumn).toBe(initialColumn);
+    });
+
+    it('should switch to alphabetical ordering if metric is of type last_value', () => {
+      const initialColumn: TermsIndexPatternColumn = {
+        label: 'Top value of category',
+        dataType: 'string',
+        isBucketed: true,
+
+        // Private
+        operationType: 'terms',
+        params: {
+          orderBy: { type: 'column', columnId: 'col1' },
+          size: 3,
+          orderDirection: 'asc',
+        },
+        sourceField: 'category',
+      };
+      const updatedColumn = termsOperation.onOtherColumnChanged!(initialColumn, {
+        col1: {
+          label: 'Last Value',
+          dataType: 'number',
+          isBucketed: false,
+          sourceField: 'bytes',
+          operationType: 'last_value',
+          params: {
+            sortOrder: 'desc',
+            sortField: 'time',
+          },
+        },
+      });
+      expect(updatedColumn.params).toEqual(
+        expect.objectContaining({
+          orderBy: { type: 'alphabetical' },
+        })
+      );
     });
 
     it('should switch to alphabetical ordering if there are no columns to order by', () => {
