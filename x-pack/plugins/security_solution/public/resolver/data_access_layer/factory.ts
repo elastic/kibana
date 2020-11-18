@@ -98,21 +98,24 @@ export function dataAccessLayerFactory(
     },
 
     /**
-     * TODO:
+     * Retrieves the node data for a set of node IDs. This is specifically for Endpoint graphs. It
+     * only returns process lifecycle events.
      */
-    async eventsNodeData({
+    async nodeData({
       ids,
       timerange,
       indexPatterns,
+      limit,
     }: {
       ids: string[];
       timerange: Timerange;
       indexPatterns: string[];
+      limit: number;
     }): Promise<SafeResolverEvent[]> {
       const response: ResolverPaginatedEvents = await context.services.http.post(
         '/api/endpoint/resolver/events',
         {
-          query: { limit: 5000 },
+          query: { limit },
           body: JSON.stringify({
             timerange: {
               from: timerange.from.toISOString(),

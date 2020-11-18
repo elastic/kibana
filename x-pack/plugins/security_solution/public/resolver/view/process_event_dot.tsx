@@ -87,7 +87,6 @@ const UnstyledProcessEventDot = React.memo(
     projectionMatrix,
     isProcessTerminated,
     timeAtRender,
-    isViewMoving,
   }: {
     /**
      * A `className` string provided by `styled`
@@ -114,11 +113,6 @@ const UnstyledProcessEventDot = React.memo(
      * The time (unix epoch) at render.
      */
     timeAtRender: number;
-
-    /**
-     * A flag indicating whether the user is panning
-     */
-    isViewMoving: boolean;
   }) => {
     const resolverComponentInstanceID = useSelector(selectors.resolverComponentInstanceID);
     // This should be unique to each instance of Resolver
@@ -306,7 +300,7 @@ const UnstyledProcessEventDot = React.memo(
       >
         {/* TODO: checking the isViewMoving and if so show the spinner, use selector to find set of loading IDs*/}
         {/* TODO: can get rid of the isViewMoving by using the map to see if we have requested data for a node, and determine if we have received the results back yet*/}
-        {isViewMoving ? (
+        {false ? (
           <div data-test-subj="resolver:graph:node:loading" className="loading-container">
             <EuiLoadingSpinner size="s" />
           </div>

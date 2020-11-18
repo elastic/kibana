@@ -395,16 +395,25 @@ export const isLoadingMoreNodeEventsInCategory = composeSelectors(
   dataSelectors.isLoadingMoreNodeEventsInCategory
 );
 
-export const nodeDataState = composeSelectors(
-  dataStateSelector,
-  (dataState: DataState) => dataState.nodeDataState
-);
+/**
+ * Returns a boolean indicating whether data is being loaded by the middleware for a specific node ID.
+ */
+export const isNodeLoading = composeSelectors(dataStateSelector, dataSelectors.isNodeLoading);
 
-export const renderTime = composeSelectors(
-  dataStateSelector,
-  (dataState: DataState) => dataState.renderTime
-);
+/**
+ * Returns a boolean indicating whether an error occurred while the middleware was trying to load data for
+ * specific node ID.
+ */
+export const nodeHadError = composeSelectors(dataStateSelector, dataSelectors.nodeHadError);
 
+/**
+ * Returns an array of events for a specific node ID.
+ */
+export const nodeDataForID = composeSelectors(dataStateSelector, dataSelectors.nodeDataForID);
+
+/**
+ * Returns a Set of node IDs representing the visible nodes in the view.
+ */
 export const visibleNodes: (state: ResolverState) => (time: number) => Set<string> = createSelector(
   visibleNodesAndEdgeLines,
   function (visibleNodesAndEdgeLinesAtTime) {
@@ -423,6 +432,9 @@ export const visibleNodes: (state: ResolverState) => (time: number) => Set<strin
   }
 );
 
+/**
+ * Returns the full node data structure.
+ */
 export const nodeData = composeSelectors(dataStateSelector, dataSelectors.nodeData);
 
 /**

@@ -5,7 +5,7 @@
  */
 
 import rbush from 'rbush';
-import { createSelector, defaultMemoize } from 'reselect';
+import { createSelector, createSelectorCreator, defaultMemoize } from 'reselect';
 import { panelViewAndParameters as panelViewAndParametersFromLocationSearchAndResolverComponentInstanceID } from '../panel_view_and_parameters';
 import {
   DataState,
@@ -17,7 +17,7 @@ import {
   VisibleEntites,
   TreeFetcherParameters,
   IsometricTaxiLayout,
-  IDToNodeEvents,
+  IDToNodeInfo,
 } from '../../types';
 import { isGraphableProcess, isTerminatedProcess } from '../../models/process_event';
 import * as indexedProcessTreeModel from '../../models/indexed_process_tree';
@@ -31,6 +31,7 @@ import {
 } from '../../../../common/endpoint/types';
 import * as resolverTreeModel from '../../models/resolver_tree';
 import * as treeFetcherParametersModel from '../../models/tree_fetcher_parameters';
+import * as aabbModel from '../../models/aabb';
 import * as isometricTaxiLayoutModel from '../../models/indexed_process_tree/isometric_taxi_layout';
 import * as vector2 from '../../models/vector2';
 
@@ -114,18 +115,61 @@ export const isProcessTerminated = createSelector(terminatedProcesses, function 
 });
 
 /**
- * TODO:
+ * Returns a data structure for accessing events for specific nodes in a graph. For Endpoint graphs these nodes will be
+ * process lifecycle events.
  */
-export const nodeData = (state: DataState): IDToNodeEvents | undefined => {
-  return state.nodeDataState?.nodeData;
+export const nodeData = (state: DataState): IDToNodeInfo | undefined => {
+  return state.nodeData;
 };
 
 /**
- * TODO:
+ * Returns a function that can be called to determine if a specific node ID has data being loaded by the middleware.
  */
-export const nodesLoading = (state: DataState): Set<string> | undefined => {
-  return state.nodesLoading;
-};
+export const isNodeLoading: (state: DataState) => (id: string) => boolean = createSelector(
+  nodeData,
+  (nodeInfo) => {
+    return (id: string) => {
+      const info = nodeInfo?.get(id);
+      if (!info) {
+        return false;
+      }
+      return info.status === 'requested';
+    };
+  }
+);
+
+/**
+ * Returns a function that can be called to determine if a specific node ID encountered an error when loading its data
+ * from the backend.
+ */
+export const nodeHadError: (state: DataState) => (id: string) => boolean = createSelector(
+  nodeData,
+  (nodeInfo) => {
+    return (id: string) => {
+      const info = nodeInfo?.get(id);
+      if (!info) {
+        return false;
+      }
+      return info.status === 'error';
+    };
+  }
+);
+
+/**
+ * Returns a function that can be called to determine if the middleware has received a specific node ID's lifecycle
+ * events. If the node is still loading or had an error while loading this will return an empty array.
+ */
+export const nodeDataForID: (
+  state: DataState
+) => (id: string) => SafeResolverEvent[] = createSelector(nodeData, (nodeInfo) => {
+  return (id: string) => {
+    const info = nodeInfo?.get(id);
+    if (!info || info.status !== 'received') {
+      return [];
+    }
+    return info.events;
+  };
+});
 
 /**
  * Process events that will be graphed.
@@ -558,7 +602,6 @@ export const nodesAndEdgelines: (
   /**
    * Memoized for performance and object reference equality.
    */
-  // TODO: passing the isEqual check for bounding box so caching would be better
   return defaultMemoize((boundingBox: AABB) => {
     const {
       minimum: [minX, minY],
@@ -582,8 +625,22 @@ export const nodesAndEdgelines: (
       processNodePositions: visibleProcessNodePositions,
       connectingEdgeLineSegments,
     };
-  });
+  }, aaBBEqualityCheck);
 });
+
+function isAABBType(value: unknown): value is AABB {
+  const castValue = value as AABB;
+  return castValue.maximum !== undefined && castValue.minimum !== undefined;
+}
+
+function aaBBEqualityCheck<T>(a: T, b: T, index: number): boolean {
+  if (isAABBType(a) && isAABBType(b)) {
+    return aabbModel.isEqual(a, b);
+  } else {
+    // this is equivalent to the default equality check for defaultMemoize
+    return a === b;
+  }
+}
 
 /**
  * If there is a pending request that's for a entity ID that doesn't matche the `entityID`, then we should cancel it.

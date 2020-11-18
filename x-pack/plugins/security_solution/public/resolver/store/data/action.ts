@@ -103,28 +103,54 @@ interface ServerReturnedNodeEventsInCategory {
 }
 
 /**
- * TODO:
+ * When events are returned for a set of graph nodes. For Endpoint graphs the events returned are process lifecycle events.
  */
 interface ServerReturnedNodeData {
   readonly type: 'serverReturnedNodeData';
   readonly payload: {
-    renderTime: number;
+    /**
+     * A map of the node's ID to an array of events
+     */
     nodeData: Map<string, SafeResolverEvent[]>;
+    /**
+     * The list of IDs that were originally sent to the server. This won't necessarily equal nodeData.keys() because
+     * data could have been deleted in Elasticsearch since the original graph nodes were returned or the server's
+     * API limit could have been reached.
+     */
+    requestedIDs: Set<string>;
+    /**
+     * A flag indicating that the server returned the same amount of data that we requested. In this case
+     * we might be missing events for some of the requested node IDs. We'll mark those nodes in such a way
+     * that we'll request their data in a subsequent request.
+     */
+    reachedLimit: boolean;
   };
 }
 
 /**
- * TODO:
+ * When the middleware kicks off the request for node data to the server.
  */
-interface ServerRequestingNodeData {
-  readonly type: 'serverRequestingNodeData';
+interface AppRequestingNodeData {
+  readonly type: 'appRequestingNodeData';
   readonly payload: {
-    requestedNodes: Set<string>;
+    /**
+     * The list of IDs that will be sent to the server to retrieve data for.
+     */
+    requestedIDs: Set<string>;
   };
 }
 
+/**
+ * When the server returns an error after the app requests node data for a set of nodes.
+ */
 interface ServerFailedToReturnNodeData {
   readonly type: 'serverFailedToReturnNodeData';
+  readonly payload: {
+    /**
+     * The list of IDs that were sent to the server to retrieve data for.
+     */
+    requestedIDs: Set<string>;
+  };
 }
 
 interface AppRequestedCurrentRelatedEventData {
@@ -138,13 +164,6 @@ interface ServerFailedToReturnCurrentRelatedEventData {
 interface ServerReturnedCurrentRelatedEventData {
   readonly type: 'serverReturnedCurrentRelatedEventData';
   readonly payload: SafeResolverEvent;
-}
-
-interface AppReceivedNewViewPosition {
-  readonly type: 'appReceivedNewViewPosition';
-  readonly payload: {
-    time: number;
-  };
 }
 
 export type DataAction =
@@ -161,4 +180,4 @@ export type DataAction =
   | AppAbortedResolverDataRequest
   | ServerReturnedNodeData
   | ServerFailedToReturnNodeData
-  | AppReceivedNewViewPosition;
+  | AppRequestingNodeData;

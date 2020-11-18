@@ -246,19 +246,22 @@ export enum NodeDataRequestStatus {
   Error,
 }
 
+/**
+ * NodeData contains information about a node in the resolver graph. For Endpoint
+ * graphs, the events will be process lifecycle events.
+ */
 export interface NodeData {
   events: SafeResolverEvent[];
-  status: NodeDataRequestStatus;
+  /**
+   * An indication of the current state for retrieving the data.
+   */
+  status: 'requested' | 'received' | 'error';
 }
 
-export type IDToNodeEvents = Map<string, NodeData>;
-
-export interface NodeDataState {
-  // expand the value of the map so that it contains whether we have a response and the current state of the request
-  nodeData: IDToNodeEvents;
-
-  error?: boolean;
-}
+/**
+ * Convenience type for map of node ID to it's data.
+ */
+export type IDToNodeInfo = Map<string, NodeData>;
 
 /**
  * State for `data` reducer which handles receiving Resolver data from the back-end.
@@ -335,17 +338,12 @@ export interface DataState {
   readonly locationSearch?: string;
 
   /**
-   * Lifecycle events panning state
-   * TODO:
+   * The additional data for each node in the graph. For an Endpoint graph the data will be
+   * process lifecycle events.
+   *
+   * If a node ID exists in the map it means that node came into view in the graph.
    */
-  readonly nodeDataState?: NodeDataState;
-
-  /**
-   * TODO: Should this be collapsed into the NodeDataState?
-   */
-  readonly nodesLoading: Set<string>;
-
-  readonly renderTime?: number;
+  readonly nodeData?: IDToNodeInfo;
 }
 
 /**
@@ -659,17 +657,19 @@ export interface DataAccessLayer {
   }) => Promise<ResolverPaginatedEvents>;
 
   /**
-   * TODO:
-   * @param param0
+   * Retrieves the node data for a set of node IDs. This is specifically for Endpoint graphs. It
+   * only returns process lifecycle events.
    */
-  eventsNodeData({
+  nodeData({
     ids,
     timerange,
     indexPatterns,
+    limit,
   }: {
     ids: string[];
     timerange: Timerange;
     indexPatterns: string[];
+    limit: number;
   }): Promise<SafeResolverEvent[]>;
 
   /**
