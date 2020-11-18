@@ -11,13 +11,7 @@ import { EuiIcon, EuiText, EuiToolTip } from '@elastic/eui';
 import { X509Expiry } from '../../../../../common/runtime_types';
 import { useCertStatus } from '../../../../hooks';
 import { EXPIRED, EXPIRES, EXPIRES_SOON } from '../../../certificates/translations';
-import {
-  CERT_STATUS,
-  SHORT_TIMESPAN_LOCALE,
-  SHORT_TS_LOCALE,
-} from '../../../../../common/constants';
-import { parseTimestamp } from '../parse_timestamp';
-import { getShortTimeStamp } from './monitor_status_column';
+import { CERT_STATUS } from '../../../../../common/constants';
 
 interface Props {
   expiry: X509Expiry;
@@ -41,7 +35,7 @@ export const CertStatusColumn: React.FC<Props> = ({ expiry, boldStyle = false })
   const notAfter = expiry?.not_after;
   const certStatus = useCertStatus(notAfter);
 
-  const relativeDate = getShortTimeStamp(moment(notAfter), true);
+  const relativeDate = moment(notAfter).fromNow();
 
   const CertStatus = ({ color, text }: { color: string; text: string }) => {
     return (
