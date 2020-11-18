@@ -6,6 +6,7 @@
 
 import React, { Fragment, Suspense, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import { isEmpty } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiFlexGroup,
@@ -141,6 +142,10 @@ export const ActionTypeForm = ({
 
   const actionType = actionTypesIndex[actionItem.actionTypeId];
 
+  const isActionGroupDisabledForActionType = (actionGroupId: string): boolean =>
+    !isEmpty(actionType.disabledActionGroups) &&
+    actionType.disabledActionGroups!.includes(actionGroupId);
+
   const optionsList = connectors
     .filter(
       (connectorItem) =>
@@ -191,7 +196,10 @@ export const ActionTypeForm = ({
                   data-test-subj={`addNewActionConnectorActionGroup-${index}`}
                   options={actionGroups.map(({ id: value, name }) => ({
                     value,
-                    inputDisplay: name,
+                    inputDisplay: isActionGroupDisabledForActionType(value)
+                      ? `${name} (Not Currently Supported)`
+                      : name,
+                    disabled: isActionGroupDisabledForActionType(value),
                     'data-test-subj': `addNewActionConnectorActionGroup-${index}-option-${value}`,
                   }))}
                   valueOfSelected={selectedActionGroup.id}

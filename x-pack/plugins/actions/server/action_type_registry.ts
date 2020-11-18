@@ -175,6 +175,7 @@ export class ActionTypeRegistry {
       id: actionTypeId,
       name: actionType.name,
       minimumLicenseRequired: actionType.minimumLicenseRequired,
+      disabledActionGroups: actionType.disabledActionGroups,
       enabled: this.isActionTypeEnabled(actionTypeId),
       enabledInConfig: this.actionsConfigUtils.isActionTypeEnabled(actionTypeId),
       enabledInLicense: this.licenseState.isLicenseValidForActionType(actionType).isValid === true,

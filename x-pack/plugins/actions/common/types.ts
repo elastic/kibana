@@ -13,6 +13,7 @@ export interface ActionType {
   enabledInConfig: boolean;
   enabledInLicense: boolean;
   minimumLicenseRequired: LicenseType;
+  disabledActionGroups?: string[];
 }
 
 export interface ActionResult {
