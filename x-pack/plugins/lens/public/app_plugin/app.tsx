@@ -119,11 +119,13 @@ export function App({
         injectFilterReferences(lastKnownDoc.state?.filters || [], lastKnownDoc.references),
         esFilters.isFilterPinned
       );
+      // do not save the activeData content
+      const { activeData, ...stateWithoutActiveData } = lastKnownDoc.state;
       return pinnedFilters?.length
         ? {
             ...lastKnownDoc,
             state: {
-              ...lastKnownDoc.state,
+              ...stateWithoutActiveData,
               filters: appFilters,
             },
           }
