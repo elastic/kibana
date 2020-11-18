@@ -31,7 +31,6 @@ import { RowRenderer } from './renderers/row_renderer';
 import { Sort } from './sort';
 import { DEFAULT_ICON_BUTTON_WIDTH } from '../helpers';
 import { TimelineEventsType, TimelineId } from '../../../../../common/types/timeline';
-import { ActiveTimelineExpandedEvent } from '../../../containers/active_timeline_context';
 
 export interface BodyProps {
   addNoteToEvent: AddNoteToEvent;
@@ -40,7 +39,6 @@ export interface BodyProps {
   columnRenderers: ColumnRenderer[];
   data: TimelineItem[];
   docValueFields: DocValueFields[];
-  expanded: ActiveTimelineExpandedEvent;
   getNotesByIds: (noteIds: string[]) => Note[];
   graphEventId?: string;
   isEventViewer?: boolean;
@@ -51,7 +49,6 @@ export interface BodyProps {
   onColumnRemoved: OnColumnRemoved;
   onColumnResized: OnColumnResized;
   onColumnSorted: OnColumnSorted;
-  onEventToggled: (event: TimelineItem) => void;
   onRowSelected: OnRowSelected;
   onSelectAll: OnSelectAll;
   onPinEvent: OnPinEvent;
@@ -86,7 +83,6 @@ export const Body = React.memo<BodyProps>(
     columnRenderers,
     data,
     eventIdToNoteIds,
-    expanded,
     getNotesByIds,
     graphEventId,
     isEventViewer = false,
@@ -95,7 +91,6 @@ export const Body = React.memo<BodyProps>(
     onColumnRemoved,
     onColumnResized,
     onColumnSorted,
-    onEventToggled,
     onRowSelected,
     onSelectAll,
     onPinEvent,
@@ -164,7 +159,6 @@ export const Body = React.memo<BodyProps>(
               columnHeaders={columnHeaders}
               columnRenderers={columnRenderers}
               data={data}
-              expanded={expanded}
               eventIdToNoteIds={eventIdToNoteIds}
               getNotesByIds={getNotesByIds}
               id={timelineId}
@@ -174,7 +168,6 @@ export const Body = React.memo<BodyProps>(
               onPinEvent={onPinEvent}
               onRowSelected={onRowSelected}
               onUnPinEvent={onUnPinEvent}
-              onEventToggled={onEventToggled}
               pinnedEventIds={pinnedEventIds}
               refetch={refetch}
               rowRenderers={rowRenderers}

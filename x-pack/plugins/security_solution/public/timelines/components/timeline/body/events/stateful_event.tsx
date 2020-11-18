@@ -4,9 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useRef, useState, useCallback } from 'react';
+import React, { useMemo, useRef, useState, useCallback } from 'react';
 import uuid from 'uuid';
+import { useDispatch } from 'react-redux';
 
+import { TimelineId } from '../../../../../../common/types/timeline';
 import { BrowserFields } from '../../../../../common/containers/source';
 import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
 import {
@@ -27,6 +29,8 @@ import { NoteCards } from '../../../notes/note_cards';
 import { useEventDetailsWidthContext } from '../../../../../common/components/events_viewer/event_details_width_context';
 import { EventColumnView } from './event_column_view';
 import { inputsModel } from '../../../../../common/store';
+import { timelineActions } from '../../../../store/timeline';
+import { activeTimeline } from '../../../../containers/active_timeline_context';
 
 interface Props {
   actionsColumnWidth: number;
@@ -38,10 +42,8 @@ interface Props {
   eventIdToNoteIds: Readonly<Record<string, string[]>>;
   getNotesByIds: (noteIds: string[]) => Note[];
   isEventViewer?: boolean;
-  isExpanded: boolean;
   loadingEventIds: Readonly<string[]>;
   onColumnResized: OnColumnResized;
-  onEventToggled: (event: TimelineItem) => void;
   onPinEvent: OnPinEvent;
   onRowSelected: OnRowSelected;
   onUnPinEvent: OnUnPinEvent;
@@ -77,10 +79,8 @@ const StatefulEventComponent: React.FC<Props> = ({
   getNotesByIds,
   isEventViewer = false,
   isEventPinned = false,
-  isExpanded = false,
   loadingEventIds,
   onColumnResized,
-  onEventToggled,
   onPinEvent,
   onRowSelected,
   onUnPinEvent,
@@ -92,18 +92,40 @@ const StatefulEventComponent: React.FC<Props> = ({
   timelineId,
   updateNote,
 }) => {
+  const dispatch = useDispatch();
   const [showNotes, setShowNotes] = useState<{ [eventId: string]: boolean }>({});
-  const { status: timelineStatus } = useDeepEqualSelector(
+  const { expandedEvent, status: timelineStatus } = useDeepEqualSelector(
     (state) => state.timeline.timelineById[timelineId]
   );
   const divElement = useRef<HTMLDivElement | null>(null);
+
+  const isExpanded = useMemo(() => expandedEvent && expandedEvent.eventId === event._id, [
+    event._id,
+    expandedEvent,
+  ]);
 
   const onToggleShowNotes = useCallback(() => {
     const eventId = event._id;
     setShowNotes((prevShowNotes) => ({ ...prevShowNotes, [eventId]: !prevShowNotes[eventId] }));
   }, [event]);
 
-  const handleOnEventToggled = useCallback(() => onEventToggled(event), [event, onEventToggled]);
+  const handleOnEventToggled = useCallback(() => {
+    const eventId = event._id;
+    const indexName = event._index!;
+
+    dispatch(
+      timelineActions.toggleExpandedEvent({
+        timelineId,
+        eventId,
+        indexName,
+        loading: false,
+      })
+    );
+
+    if (timelineId === TimelineId.active) {
+      activeTimeline.toggleExpandedEvent({ eventId, indexName });
+    }
+  }, [dispatch, event._id, event._index, timelineId]);
 
   const associateNote = useCallback(
     (noteId: string) => {

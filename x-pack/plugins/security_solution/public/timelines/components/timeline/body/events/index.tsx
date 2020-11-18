@@ -13,7 +13,6 @@ import {
   TimelineNonEcsData,
 } from '../../../../../../common/search_strategy/timeline';
 import { ColumnHeaderOptions } from '../../../../../timelines/store/timeline/model';
-import { ActiveTimelineExpandedEvent } from '../../../../containers/active_timeline_context';
 import { Note } from '../../../../../common/lib/note';
 import { AddNoteToEvent, UpdateNote } from '../../../notes/helpers';
 import { OnColumnResized, OnPinEvent, OnRowSelected, OnUnPinEvent } from '../../events';
@@ -30,14 +29,12 @@ interface Props {
   columnHeaders: ColumnHeaderOptions[];
   columnRenderers: ColumnRenderer[];
   data: TimelineItem[];
-  expanded: ActiveTimelineExpandedEvent;
   eventIdToNoteIds: Readonly<Record<string, string[]>>;
   getNotesByIds: (noteIds: string[]) => Note[];
   id: string;
   isEventViewer?: boolean;
   loadingEventIds: Readonly<string[]>;
   onColumnResized: OnColumnResized;
-  onEventToggled: (event: TimelineItem) => void;
   onPinEvent: OnPinEvent;
   onRowSelected: OnRowSelected;
   onUnPinEvent: OnUnPinEvent;
@@ -59,7 +56,6 @@ const EventsComponent: React.FC<Props> = ({
   columnRenderers,
   data,
   eventIdToNoteIds,
-  expanded,
   getNotesByIds,
   id,
   isEventViewer = false,
@@ -70,7 +66,6 @@ const EventsComponent: React.FC<Props> = ({
   onUnPinEvent,
   pinnedEventIds,
   refetch,
-  onEventToggled,
   onRuleChange,
   rowRenderers,
   selectedEventIds,
@@ -90,7 +85,6 @@ const EventsComponent: React.FC<Props> = ({
         getNotesByIds={getNotesByIds}
         isEventPinned={eventIsPinned({ eventId: event._id, pinnedEventIds })}
         isEventViewer={isEventViewer}
-        isExpanded={expanded?.eventId === event._id}
         key={`${event._id}_${event._index}`}
         loadingEventIds={loadingEventIds}
         onColumnResized={onColumnResized}
@@ -99,7 +93,6 @@ const EventsComponent: React.FC<Props> = ({
         onUnPinEvent={onUnPinEvent}
         refetch={refetch}
         rowRenderers={rowRenderers}
-        onEventToggled={onEventToggled}
         onRuleChange={onRuleChange}
         selectedEventIds={selectedEventIds}
         showCheckboxes={showCheckboxes}

@@ -34,6 +34,13 @@ export const addNoteToEvent = actionCreator<{ id: string; noteId: string; eventI
   'ADD_NOTE_TO_EVENT'
 );
 
+export const toggleExpandedEvent = actionCreator<{
+  timelineId: string;
+  eventId: string;
+  indexName: string;
+  loading: boolean;
+}>('TOGGLE_EXPANDED_EVENT');
+
 export const upsertColumn = actionCreator<{
   column: ColumnHeaderOptions;
   id: string;
@@ -56,6 +63,7 @@ export interface TimelineInput {
     end: string;
   };
   excludedRowRendererIds?: RowRendererId[];
+  expandedEvent?: TimelineExpandedEvent;
   filters?: Filter[];
   columns: ColumnHeaderOptions[];
   itemsPerPage?: number;
@@ -164,11 +172,6 @@ export const updateDataProviderType = actionCreator<{
   type: DataProviderType;
   providerId: string;
 }>('UPDATE_PROVIDER_TYPE');
-
-export const updateHighlightedDropAndProviderId = actionCreator<{
-  id: string;
-  providerId: string;
-}>('UPDATE_DROP_AND_PROVIDER');
 
 export const updateDescription = actionCreator<{
   id: string;

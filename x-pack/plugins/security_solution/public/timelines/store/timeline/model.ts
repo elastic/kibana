@@ -57,6 +57,11 @@ export interface TimelineModel {
   eventIdToNoteIds: Record<string, string[]>;
   /** A list of Ids of excluded Row Renderers */
   excludedRowRendererIds: RowRendererId[];
+  expandedEvent: {
+    eventId: string;
+    indexName: string;
+    loading: boolean;
+  };
   filters?: Filter[];
   /** When non-empty, display a graph view for this event */
   graphEventId?: string;

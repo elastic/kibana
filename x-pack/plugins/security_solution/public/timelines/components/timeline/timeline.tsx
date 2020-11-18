@@ -11,15 +11,14 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiProgress,
-  EuiSpacer,
 } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
-import React, { useCallback, useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import styled from 'styled-components';
 
 import { FlyoutHeaderWithCloseButton } from '../flyout/header_with_close_button';
 import { BrowserFields, DocValueFields } from '../../../common/containers/source';
-import { Direction, TimelineItem } from '../../../../common/search_strategy';
+import { Direction } from '../../../../common/search_strategy';
 import { useTimelineEvents } from '../../containers/index';
 import { useKibana } from '../../../common/lib/kibana';
 import { ColumnHeaderOptions, KqlMode } from '../../../timelines/store/timeline/model';
@@ -43,12 +42,8 @@ import {
 import { useManageTimeline } from '../manage_timeline';
 import { TimelineType, TimelineStatusLiteral } from '../../../../common/types/timeline';
 import { requiredFieldsForActions } from '../../../detections/components/alerts_table/default_config';
-import { ExpandableEvent, ExpandableEventTitle } from './expandable_event';
-import {
-  activeTimeline,
-  ActiveTimelineExpandedEvent,
-} from '../../containers/active_timeline_context';
 import { GraphOverlay } from '../graph_overlay';
+import { EventDetails } from './event_details';
 
 const TimelineContainer = styled.div`
   height: 100%;
@@ -178,23 +173,6 @@ export const TimelineComponent: React.FC<Props> = ({
   toggleColumn,
   usersViewing,
 }) => {
-  const [expanded, setExpanded] = useState<ActiveTimelineExpandedEvent>(
-    activeTimeline.getExpandedEvent()
-  );
-
-  const onEventToggled = useCallback((event: TimelineItem) => {
-    const eventId = event._id;
-
-    setExpanded((currentExpanded) => {
-      if (currentExpanded.eventId === eventId) {
-        return {} as ActiveTimelineExpandedEvent;
-      }
-
-      return { eventId, indexName: event._index! };
-    });
-    activeTimeline.toggleExpandedEvent({ eventId, indexName: event._index! });
-  }, []);
-
   const kibana = useKibana();
   const [filterManager] = useState<FilterManager>(new FilterManager(kibana.services.uiSettings));
   const esQueryConfig = useMemo(() => esQuery.getEsQueryConfig(kibana.services.uiSettings), [
@@ -326,9 +304,7 @@ export const TimelineComponent: React.FC<Props> = ({
                   browserFields={browserFields}
                   data={events}
                   docValueFields={docValueFields}
-                  expanded={expanded}
                   id={id}
-                  onEventToggled={onEventToggled}
                   refetch={refetch}
                   sort={sort}
                   toggleColumn={toggleColumn}
@@ -357,12 +333,9 @@ export const TimelineComponent: React.FC<Props> = ({
             </ScrollableFlexItem>
             <VerticalRule />
             <ScrollableFlexItem grow={1}>
-              <ExpandableEventTitle />
-              <EuiSpacer />
-              <ExpandableEvent
+              <EventDetails
                 browserFields={browserFields}
                 docValueFields={docValueFields}
-                event={expanded}
                 timelineId={id}
                 toggleColumn={toggleColumn}
               />
