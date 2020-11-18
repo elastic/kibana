@@ -23,7 +23,6 @@ export const SubSection: FunctionComponent<SubSectionProps> = ({
   isLiveStreaming,
   stopLiveStreaming,
 }) => {
-  /* eslint-disable-next-line react-hooks/exhaustive-deps */
   const metric = useMemo(() => metrics?.find((m) => m.id === id), [id, metrics]);
 
   if (!children || !metric) {
