@@ -25,6 +25,7 @@ import {
   EuiLoadingSpinner,
   EuiBadge,
 } from '@elastic/eui';
+import { ApplicationStart } from 'kibana/public';
 import { ResolvedActionGroup } from '../../../../../alerts/common';
 import {
   IErrorObject,
@@ -39,6 +40,7 @@ import { hasSaveActionsCapability } from '../../lib/capabilities';
 import { ActionAccordionFormProps } from './action_form';
 import { transformActionVariables } from '../../lib/action_variables';
 import { resolvedActionGroupMessage } from '../../constants';
+import { useKibana } from '../../../common/lib/kibana';
 
 export type ActionTypeFormProps = {
   actionItem: AlertAction;
@@ -52,6 +54,7 @@ export type ActionTypeFormProps = {
   onDeleteAction: () => void;
   setActionParamsProperty: (key: string, value: any, index: number) => void;
   actionTypesIndex: ActionTypeIndex;
+  capabilities: ApplicationStart['capabilities'];
   connectors: ActionConnector[];
 } & Pick<
   ActionAccordionFormProps,
@@ -59,13 +62,8 @@ export type ActionTypeFormProps = {
   | 'actionGroups'
   | 'setActionGroupIdByIndex'
   | 'setActionParamsProperty'
-  | 'http'
-  | 'actionTypeRegistry'
-  | 'toastNotifications'
-  | 'docLinks'
   | 'messageVariables'
   | 'defaultActionMessage'
-  | 'capabilities'
 >;
 
 const preconfiguredMessage = i18n.translate(
@@ -86,17 +84,14 @@ export const ActionTypeForm = ({
   setActionParamsProperty,
   actionTypesIndex,
   connectors,
-  http,
-  toastNotifications,
-  docLinks,
-  capabilities,
-  actionTypeRegistry,
   defaultActionGroupId,
   defaultActionMessage,
   messageVariables,
   actionGroups,
   setActionGroupIdByIndex,
+  capabilities,
 }: ActionTypeFormProps) => {
+  const { http, actionTypeRegistry, toastNotifications, docLinks } = useKibana().services;
   const [isOpen, setIsOpen] = useState(true);
   const [availableActionVariables, setAvailableActionVariables] = useState<ActionVariable[]>([]);
   const [availableDefaultActionMessage, setAvailableDefaultActionMessage] = useState<

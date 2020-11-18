@@ -18,11 +18,9 @@ import {
   EuiToolTip,
   EuiLink,
 } from '@elastic/eui';
-import { HttpSetup, ToastsSetup, ApplicationStart, DocLinksStart } from 'kibana/public';
 import { loadActionTypes, loadAllActions as loadConnectors } from '../../lib/action_connector_api';
 import {
   ActionTypeModel,
-  ActionTypeRegistryContract,
   AlertAction,
   ActionTypeIndex,
   ActionConnector,
@@ -37,6 +35,7 @@ import { actionTypeCompare } from '../../lib/action_type_compare';
 import { checkActionFormActionTypeEnabled } from '../../lib/check_action_type_enabled';
 import { VIEW_LICENSE_OPTIONS_LINK, DEFAULT_HIDDEN_ACTION_TYPES } from '../../../common/constants';
 import { ActionGroup } from '../../../../../alerts/common';
+import { useKibana } from '../../../common/lib/kibana';
 
 export interface ActionAccordionFormProps {
   actions: AlertAction[];
@@ -46,16 +45,11 @@ export interface ActionAccordionFormProps {
   setActionGroupIdByIndex?: (group: string, index: number) => void;
   setAlertProperty: (actions: AlertAction[]) => void;
   setActionParamsProperty: (key: string, value: any, index: number) => void;
-  http: HttpSetup;
-  actionTypeRegistry: ActionTypeRegistryContract;
-  toastNotifications: ToastsSetup;
-  docLinks: DocLinksStart;
   actionTypes?: ActionType[];
   messageVariables?: ActionVariables;
   defaultActionMessage?: string;
   setHasActionsDisabled?: (value: boolean) => void;
   setHasActionsWithBrokenConnector?: (value: boolean) => void;
-  capabilities: ApplicationStart['capabilities'];
 }
 
 interface ActiveActionConnectorState {
@@ -71,17 +65,13 @@ export const ActionForm = ({
   setActionGroupIdByIndex,
   setAlertProperty,
   setActionParamsProperty,
-  http,
-  actionTypeRegistry,
   actionTypes,
   messageVariables,
   defaultActionMessage,
-  toastNotifications,
   setHasActionsDisabled,
   setHasActionsWithBrokenConnector,
-  capabilities,
-  docLinks,
 }: ActionAccordionFormProps) => {
+  const { http, toastNotifications, capabilities, actionTypeRegistry } = useKibana().services;
   const [addModalVisible, setAddModalVisibility] = useState<boolean>(false);
   const [activeActionItem, setActiveActionItem] = useState<ActiveActionConnectorState | undefined>(
     undefined
@@ -333,15 +323,11 @@ export const ActionForm = ({
               actionConnector={actionConnector}
               actionParamsErrors={actionParamsErrors}
               index={index}
+              capabilities={capabilities}
               key={`action-form-action-at-${index}`}
               setActionParamsProperty={setActionParamsProperty}
               actionTypesIndex={actionTypesIndex}
               connectors={connectors}
-              http={http}
-              toastNotifications={toastNotifications}
-              docLinks={docLinks}
-              capabilities={capabilities}
-              actionTypeRegistry={actionTypeRegistry}
               defaultActionGroupId={defaultActionGroupId}
               defaultActionMessage={defaultActionMessage}
               messageVariables={messageVariables}
@@ -441,11 +427,6 @@ export const ActionForm = ({
             connectors.push(savedAction);
             setActionIdByIndex(savedAction.id, activeActionItem.index);
           }}
-          actionTypeRegistry={actionTypeRegistry}
-          http={http}
-          toastNotifications={toastNotifications}
-          docLinks={docLinks}
-          capabilities={capabilities}
         />
       ) : null}
     </Fragment>

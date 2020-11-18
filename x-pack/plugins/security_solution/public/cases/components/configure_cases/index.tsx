@@ -12,11 +12,7 @@ import { EuiCallOut } from '@elastic/eui';
 import { useKibana } from '../../../common/lib/kibana';
 import { useConnectors } from '../../containers/configure/use_connectors';
 import { useCaseConfigure } from '../../containers/configure/use_configure';
-import {
-  ActionType,
-  ConnectorAddFlyout,
-  ConnectorEditFlyout,
-} from '../../../../../triggers_actions_ui/public';
+import { ActionType } from '../../../../../triggers_actions_ui/public';
 
 import { ClosureType } from '../../containers/configure/types';
 
@@ -154,6 +150,23 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
     }
   }, [connectors, connector, isLoadingConnectors]);
 
+  const ConnectorAddFlyout = triggersActionsUi.getAddConnectorFlyoutFunc(
+    'case',
+    onCloseAddFlyout,
+    actionTypes,
+    reloadConnectors
+  );
+
+  const ConnectorEditFlyout =
+    editedConnectorItem && editFlyoutVisible
+      ? triggersActionsUi.getEditConnectorFlyoutFunc(
+          editedConnectorItem,
+          'case',
+          onCloseEditFlyout,
+          reloadConnectors
+        )
+      : null;
+
   return (
     <FormWrapper>
       {!connectorIsValid && (
@@ -186,25 +199,8 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
           selectedConnector={connector.id}
         />
       </SectionWrapper>
-      {addFlyoutVisible && (
-        <ConnectorAddFlyout
-          onClose={onCloseAddFlyout}
-          actionTypes={actionTypes}
-          reloadConnectors={reloadConnectors}
-          consumer={'case'}
-          actionTypeRegistry={triggersActionsUi.actionTypeRegistry}
-        />
-      )}
-      {editedConnectorItem && editFlyoutVisible && (
-        <ConnectorEditFlyout
-          key={editedConnectorItem.id}
-          initialConnector={editedConnectorItem}
-          onClose={onCloseEditFlyout}
-          reloadConnectors={reloadConnectors}
-          consumer={'case'}
-          actionTypeRegistry={triggersActionsUi.actionTypeRegistry}
-        />
-      )}
+      {addFlyoutVisible && ConnectorAddFlyout}
+      {ConnectorEditFlyout}
     </FormWrapper>
   );
 };

@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useCallback, useState, Fragment, useReducer } from 'react';
+import React, { useCallback, useState, Fragment, useReducer, lazy, Suspense } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiTitle,
@@ -20,8 +20,9 @@ import {
   EuiCallOut,
   EuiSpacer,
 } from '@elastic/eui';
-import { HttpSetup } from 'kibana/public';
+import { ApplicationStart, HttpSetup } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
+import { EuiLoadingSpinner } from '@elastic/eui';
 import { ActionTypeMenu } from './action_type_menu';
 import { ActionConnectorForm, validateBaseProperties } from './action_connector_form';
 import {
@@ -45,16 +46,17 @@ export interface ConnectorAddFlyoutProps {
   actionTypeRegistry: ActionTypeRegistryContract;
 }
 
-export const ConnectorAddFlyout = ({
+const ConnectorAddFlyout: React.FunctionComponent<ConnectorAddFlyoutProps> = ({
   onClose,
   actionTypes,
   onTestConnector,
   reloadConnectors,
   consumer,
   actionTypeRegistry,
-}: ConnectorAddFlyoutProps) => {
+}) => {
   let hasErrors = false;
-  const { http, toastNotifications, capabilities, docLinks } = useKibana().services;
+  const { http, toastNotifications, application } = useKibana().services;
+  const capabilities = application.capabilities;
   const [actionType, setActionType] = useState<ActionType | undefined>(undefined);
   const [hasActionsUpgradeableByTrial, setHasActionsUpgradeableByTrial] = useState<boolean>(false);
 
@@ -116,7 +118,6 @@ export const ConnectorAddFlyout = ({
       />
     );
   }
-
   const onActionConnectorSave = async (): Promise<ActionConnector | undefined> =>
     await createActionConnector({ http, connector })
       .then((savedConnector) => {
@@ -336,3 +337,34 @@ const UpgradeYourLicenseCallOut = ({ http }: { http: HttpSetup }) => (
 
 // eslint-disable-next-line import/no-default-export
 export { ConnectorAddFlyout as default };
+
+export const getAddConnectorFlyout = (
+  consumer: string,
+  onClose: () => void,
+  actionTypeRegistry: ActionTypeRegistryContract,
+  actionTypes?: ActionType[],
+  reloadConnectors?: () => Promise<void | Array<
+    ActionConnector<Record<string, any>, Record<string, any>>
+  >>
+) => {
+  const ConnectorAddFlyoutForm = lazy(() => import('./connector_add_flyout'));
+  return (
+    <Suspense
+      fallback={
+        <EuiFlexGroup justifyContent="center">
+          <EuiFlexItem grow={false}>
+            <EuiLoadingSpinner size="m" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      }
+    >
+      <ConnectorAddFlyoutForm
+        consumer={consumer}
+        onClose={onClose}
+        actionTypeRegistry={actionTypeRegistry}
+        actionTypes={actionTypes}
+        reloadConnectors={reloadConnectors}
+      />
+    </Suspense>
+  );
+};

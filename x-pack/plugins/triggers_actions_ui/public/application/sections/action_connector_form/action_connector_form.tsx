@@ -72,7 +72,8 @@ export const ActionConnectorForm = ({
   actionTypeRegistry,
   consumer,
 }: ActionConnectorProps) => {
-  const { http, capabilities, docLinks } = useKibana().services;
+  const { http, docLinks, application } = useKibana().services;
+  const capabilities = application.capabilities;
   const canSave = hasSaveActionsCapability(capabilities);
 
   const setActionProperty = (key: string, value: any) => {

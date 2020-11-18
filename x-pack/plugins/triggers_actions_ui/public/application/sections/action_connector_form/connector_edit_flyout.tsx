@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useCallback, useReducer, useState, Fragment } from 'react';
+import React, { useCallback, useReducer, useState, Fragment, lazy, Suspense } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiTitle,
@@ -24,6 +24,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Option, none, some } from 'fp-ts/lib/Option';
+import { EuiLoadingSpinner } from '@elastic/eui';
 import { ActionConnectorForm, validateBaseProperties } from './action_connector_form';
 import { TestConnectorForm } from './test_connector_form';
 import { ActionConnector, ActionTypeRegistryContract, IErrorObject } from '../../../types';
@@ -59,7 +60,9 @@ export const ConnectorEditFlyout = ({
   consumer,
   actionTypeRegistry,
 }: ConnectorEditProps) => {
-  const { http, toastNotifications, capabilities, docLinks } = useKibana().services;
+  const { http, notifications, docLinks, application } = useKibana().services;
+  const toastNotifications = notifications.toasts;
+  const capabilities = application.capabilities;
   const canSave = hasSaveActionsCapability(capabilities);
 
   const [{ connector }, dispatch] = useReducer(connectorReducer, {
@@ -349,3 +352,34 @@ export const ConnectorEditFlyout = ({
 
 // eslint-disable-next-line import/no-default-export
 export { ConnectorEditFlyout as default };
+
+export const getEditConnectorFlyout = (
+  initialConnector: ActionConnector,
+  consumer: string,
+  onClose: () => void,
+  actionTypeRegistry: ActionTypeRegistryContract,
+  reloadConnectors?: () => Promise<void | Array<
+    ActionConnector<Record<string, any>, Record<string, any>>
+  >>
+) => {
+  const ConnectorEditFlyoutForm = lazy(() => import('./connector_edit_flyout'));
+  return (
+    <Suspense
+      fallback={
+        <EuiFlexGroup justifyContent="center">
+          <EuiFlexItem grow={false}>
+            <EuiLoadingSpinner size="m" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      }
+    >
+      <ConnectorEditFlyoutForm
+        consumer={consumer}
+        onClose={onClose}
+        actionTypeRegistry={actionTypeRegistry}
+        reloadConnectors={reloadConnectors}
+        initialConnector={initialConnector}
+      />
+    </Suspense>
+  );
+};

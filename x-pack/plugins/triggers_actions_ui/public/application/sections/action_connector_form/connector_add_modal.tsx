@@ -17,29 +17,18 @@ import {
 import { EuiButtonEmpty } from '@elastic/eui';
 import { EuiOverlayMask } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ToastsApi } from 'kibana/public';
 import { ActionConnectorForm, validateBaseProperties } from './action_connector_form';
 import { connectorReducer } from './connector_reducer';
 import { createActionConnector } from '../../lib/action_connector_api';
 import './connector_add_modal.scss';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
-import {
-  ActionType,
-  ActionConnector,
-  IErrorObject,
-  ActionTypeRegistryContract,
-} from '../../../types';
+import { ActionType, ActionConnector, IErrorObject } from '../../../types';
 import { useKibana } from '../../../common/lib/kibana';
 
 interface ConnectorAddModalProps {
   actionType: ActionType;
   onClose: () => void;
   postSaveEventHandler?: (savedAction: ActionConnector) => void;
-  actionTypeRegistry: ActionTypeRegistryContract;
-  toastNotifications: Pick<
-    ToastsApi,
-    'get$' | 'add' | 'remove' | 'addSuccess' | 'addWarning' | 'addDanger' | 'addError'
-  >;
   consumer?: string;
 }
 
@@ -47,11 +36,10 @@ export const ConnectorAddModal = ({
   actionType,
   onClose,
   postSaveEventHandler,
-  toastNotifications,
-  actionTypeRegistry,
   consumer,
 }: ConnectorAddModalProps) => {
-  const { http, capabilities } = useKibana().services;
+  const { http, actionTypeRegistry, toastNotifications, application } = useKibana().services;
+  const capabilities = application.capabilities;
   let hasErrors = false;
   const initialConnector = {
     actionTypeId: actionType.id,
