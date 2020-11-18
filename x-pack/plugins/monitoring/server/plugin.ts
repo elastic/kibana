@@ -156,7 +156,7 @@ export class Plugin {
         },
       });
 
-      registerCollectors(plugins.usageCollection, config, cluster.callAsInternalUser);
+      registerCollectors(plugins.usageCollection, config, cluster);
       registerMonitoringTelemetryCollection(
         plugins.usageCollection,
         cluster.callAsInternalUser,
