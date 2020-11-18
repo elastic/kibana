@@ -134,20 +134,20 @@ export interface TimeSeriesExplorerGlobalState {
 }
 
 export interface TimeSeriesExplorerAppState {
-  zoom?: {
-    from?: string;
-    to?: string;
-  };
   mlTimeSeriesExplorer?: {
     forecastId?: string;
     detectorIndex?: number;
     entities?: Record<string, string>;
+    zoom?: {
+      from?: string;
+      to?: string;
+    };
   };
   query?: any;
 }
 
 export interface TimeSeriesExplorerPageState
-  extends Pick<TimeSeriesExplorerAppState, 'zoom' | 'query'>,
+  extends Pick<TimeSeriesExplorerAppState, 'query'>,
     Pick<TimeSeriesExplorerGlobalState, 'refreshInterval'> {
   jobIds?: JobId[];
   timeRange?: TimeRange;

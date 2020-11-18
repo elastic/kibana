@@ -130,7 +130,7 @@ describe('MlUrlGenerator', () => {
           },
         });
         expect(url).toBe(
-          "/app/ml/timeseriesexplorer?_g=(ml:(jobIds:!(logs_categorization_1)),refreshInterval:(pause:!f,value:0),time:(from:'2020-07-12T00:39:02.912Z',mode:absolute,to:'2020-07-22T15:52:18.613Z'))&_a=(mlTimeSeriesExplorer:(),query:(query_string:(analyze_wildcard:!t,query:'*')))"
+          "/app/ml/timeseriesexplorer?_g=(ml:(jobIds:!(logs_categorization_1)),refreshInterval:(pause:!f,value:0),time:(from:'2020-07-12T00:39:02.912Z',mode:absolute,to:'2020-07-22T15:52:18.613Z'))&_a=(timeseriesexplorer:(mlTimeSeriesExplorer:(),query:(query_string:(analyze_wildcard:!t,query:'*'))))"
         );
       });
 
@@ -161,7 +161,7 @@ describe('MlUrlGenerator', () => {
           },
         });
         expect(url).toBe(
-          "/app/ml/timeseriesexplorer?_g=(ml:(jobIds:!(logs_categorization_1)),refreshInterval:(pause:!f,value:0),time:(from:'2020-07-12T00:39:02.912Z',mode:absolute,to:'2020-07-22T15:52:18.613Z'))&_a=(mlTimeSeriesExplorer:(detectorIndex:0,entities:(mlcategory:'2')),query:(query_string:(analyze_wildcard:!t,query:'*')),zoom:(from:'2020-07-20T23:58:29.367Z',to:'2020-07-21T11:00:13.173Z'))"
+          "/app/ml/timeseriesexplorer?_g=(ml:(jobIds:!(logs_categorization_1)),refreshInterval:(pause:!f,value:0),time:(from:'2020-07-12T00:39:02.912Z',mode:absolute,to:'2020-07-22T15:52:18.613Z'))&_a=(timeseriesexplorer:(mlTimeSeriesExplorer:(detectorIndex:0,entities:(mlcategory:'2')),query:(query_string:(analyze_wildcard:!t,query:'*'))))"
         );
       });
     });
