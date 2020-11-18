@@ -30,7 +30,7 @@ export type InstallSource = 'registry' | 'upload';
 
 export type EpmPackageInstallStatus = 'installed' | 'installing';
 
-export type DetailViewPanelName = 'overview' | 'policies' | 'settings';
+export type DetailViewPanelName = 'overview' | 'policies' | 'settings' | 'custom';
 export type ServiceName = 'kibana' | 'elasticsearch';
 export type AgentAssetType = typeof agentAssetTypes;
 export type AssetType = KibanaAssetType | ElasticsearchAssetType | ValueOf<AgentAssetType>;

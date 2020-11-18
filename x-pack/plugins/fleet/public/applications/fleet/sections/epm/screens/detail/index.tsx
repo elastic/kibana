@@ -35,6 +35,7 @@ import { RELEASE_BADGE_LABEL, RELEASE_BADGE_DESCRIPTION } from '../../components
 import { UpdateIcon } from '../../components/icons';
 import { Content } from './content';
 import { WithHeaderLayoutProps } from '../../../../layouts/with_header';
+import { useUIExtension } from '../../../../hooks/use_ui_extension';
 
 export const DEFAULT_PANEL: DetailViewPanelName = 'overview';
 
@@ -52,6 +53,9 @@ const PanelDisplayNames: Record<DetailViewPanelName, string> = {
   }),
   settings: i18n.translate('xpack.fleet.epm.packageDetailsNav.settingsLinkText', {
     defaultMessage: 'Settings',
+  }),
+  custom: i18n.translate('xpack.fleet.epm.packageDetailsNav.packageCustomLinkText', {
+    defaultMessage: 'Custom',
   }),
 };
 
@@ -100,6 +104,9 @@ export function Detail() {
   const { data: packageInfoData, error: packageInfoError, isLoading } = useGetPackageInfoByKey(
     pkgkey
   );
+
+  const showCustomTab =
+    useUIExtension(packageInfoData?.response.name ?? '', 'package-detail-custom') !== undefined;
 
   // Track install status state
   useEffect(() => {
@@ -246,10 +253,20 @@ export function Detail() {
 
     return (entries(PanelDisplayNames)
       .filter(([panelId]) => {
-        return (
-          panelId !== 'policies' ||
-          (packageInfoData?.response.status === InstallStatus.installed && false) // Remove `false` when ready to implement policies tab
-        );
+        // Don't show `Policies` tab if package is not installed
+        if (
+          panelId === 'policies' &&
+          packageInfoData?.response.status !== InstallStatus.installed
+        ) {
+          return false;
+        }
+
+        // Don't show `custom` tab if a custom component is not registered
+        if (panelId === 'custom' && !showCustomTab) {
+          return false;
+        }
+
+        return true;
       })
       .map(([panelId, display]) => {
         return {
@@ -262,7 +279,7 @@ export function Detail() {
           }),
         };
       }) as unknown) as WithHeaderLayoutProps['tabs'];
-  }, [getHref, packageInfo, packageInfoData?.response?.status, panel]);
+  }, [getHref, packageInfo, panel, showCustomTab, packageInfoData]);
 
   return (
     <DetailWrapper>
