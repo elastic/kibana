@@ -21,7 +21,6 @@ import { i18n } from '@kbn/i18n';
 
 import { EditorController } from './application';
 import { PANEL_TYPES } from '../common/panel_types';
-import { VisEditor } from './application/components/vis_editor_lazy';
 import { toExpressionAst } from './to_ast';
 import { VIS_EVENT_TO_TRIGGER, VisGroups, VisParams } from '../../visualizations/public';
 import { getDataStart } from './services';
