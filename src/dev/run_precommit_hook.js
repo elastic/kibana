@@ -35,7 +35,7 @@ run(
     }
 
     if (maxFilesCount && files.length > maxFilesCount) {
-      log.info(
+      log.warning(
         `--max-files is set to ${maxFilesCount} and ${files.length} were discovered. The current script execution will be skipped.`
       );
       return;
