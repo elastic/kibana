@@ -53,6 +53,7 @@ Coming soon.
 Index patterns provide Rest-like HTTP CRUD+ API with the following endpoints:
 
 - `POST /api/index_patterns/index_pattern` &mdash; create an index pattern
+- `GET /api/index_patterns/index_pattern/{id}` &mdash; fetch an index pattern by `{id}`
 
 #### Create an index pattern
 
@@ -114,6 +115,35 @@ The endpoint returns the created index pattern object.
 ```json
 {
     "index_pattern": {}
+}
+```
+
+
+### Fetch an index pattern by ID
+
+Retrieve and index pattern by its ID.
+
+```
+GET /api/index_patterns/index_pattern/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+```
+
+Returns an index pattern object.
+
+```json
+{
+    "index_pattern": {
+        "id": "...",
+        "version": "...",
+        "title": "...",
+        "type": "...",
+        "intervalName": "...",
+        "timeFieldName": "...",
+        "sourceFilters": [],
+        "fields": {},
+        "typeMeta": {},
+        "fieldFormats": {},
+        "fieldAttrs": {}
+    }
 }
 ```
 
