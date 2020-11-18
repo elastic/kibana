@@ -128,6 +128,7 @@ export const AgentLogs: React.FunctionComponent<{ agent: Agent }> = memo(({ agen
     query,
   ]);
 
+  // Generate URL to pass page state to Logs UI
   const viewInLogsUrl = useMemo(
     () =>
       http.basePath.prepend(
