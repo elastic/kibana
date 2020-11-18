@@ -396,18 +396,15 @@ export const isLoadingMoreNodeEventsInCategory = composeSelectors(
 );
 
 /**
- * Returns a boolean indicating whether data is being loaded by the middleware for a specific node ID.
- */
-export const isNodeLoading = composeSelectors(dataStateSelector, dataSelectors.isNodeLoading);
-
-/**
- * Returns a boolean indicating whether an error occurred while the middleware was trying to load data for
- * specific node ID.
- */
-export const nodeHadError = composeSelectors(dataStateSelector, dataSelectors.nodeHadError);
-
-/**
  * Returns an array of events for a specific node ID.
+ */
+export const nodeDataEventsForID = composeSelectors(
+  dataStateSelector,
+  dataSelectors.nodeDataEventsForID
+);
+
+/**
+ * Returns an the node data object for a specific node ID.
  */
 export const nodeDataForID = composeSelectors(dataStateSelector, dataSelectors.nodeDataForID);
 

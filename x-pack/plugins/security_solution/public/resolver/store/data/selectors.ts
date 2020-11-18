@@ -5,7 +5,7 @@
  */
 
 import rbush from 'rbush';
-import { createSelector, createSelectorCreator, defaultMemoize } from 'reselect';
+import { createSelector, defaultMemoize } from 'reselect';
 import { panelViewAndParameters as panelViewAndParametersFromLocationSearchAndResolverComponentInstanceID } from '../panel_view_and_parameters';
 import {
   DataState,
@@ -18,6 +18,7 @@ import {
   TreeFetcherParameters,
   IsometricTaxiLayout,
   IDToNodeInfo,
+  NodeData,
 } from '../../types';
 import { isGraphableProcess, isTerminatedProcess } from '../../models/process_event';
 import * as indexedProcessTreeModel from '../../models/indexed_process_tree';
@@ -123,47 +124,26 @@ export const nodeData = (state: DataState): IDToNodeInfo | undefined => {
 };
 
 /**
- * Returns a function that can be called to determine if a specific node ID has data being loaded by the middleware.
+ * Returns a function that can be called to retrieve the node data for a specific node ID.
  */
-export const isNodeLoading: (state: DataState) => (id: string) => boolean = createSelector(
-  nodeData,
-  (nodeInfo) => {
-    return (id: string) => {
-      const info = nodeInfo?.get(id);
-      if (!info) {
-        return false;
-      }
-      return info.status === 'requested';
-    };
-  }
-);
-
-/**
- * Returns a function that can be called to determine if a specific node ID encountered an error when loading its data
- * from the backend.
- */
-export const nodeHadError: (state: DataState) => (id: string) => boolean = createSelector(
-  nodeData,
-  (nodeInfo) => {
-    return (id: string) => {
-      const info = nodeInfo?.get(id);
-      if (!info) {
-        return false;
-      }
-      return info.status === 'error';
-    };
-  }
-);
+export const nodeDataForID: (
+  state: DataState
+) => (id: string) => NodeData | undefined = createSelector(nodeData, (nodeInfo) => {
+  return (id: string) => {
+    const info = nodeInfo?.get(id);
+    return info;
+  };
+});
 
 /**
  * Returns a function that can be called to determine if the middleware has received a specific node ID's lifecycle
  * events. If the node is still loading or had an error while loading this will return an empty array.
  */
-export const nodeDataForID: (
+export const nodeDataEventsForID: (
   state: DataState
-) => (id: string) => SafeResolverEvent[] = createSelector(nodeData, (nodeInfo) => {
+) => (id: string) => SafeResolverEvent[] = createSelector(nodeDataForID, (nodeInfo) => {
   return (id: string) => {
-    const info = nodeInfo?.get(id);
+    const info = nodeInfo(id);
     if (!info || info.status !== 'received') {
       return [];
     }

@@ -11,29 +11,23 @@ import { SafeResolverEvent } from '../../../../common/endpoint/types';
 import { ResolverState, DataAccessLayer } from '../../types';
 import * as selectors from '../selectors';
 import { ResolverAction } from '../actions';
-import * as nodeDataModel from '../../models/node_data_model';
+import * as nodeDataModel from '../../models/node_data';
 
+/**
+ * Max number of nodes to request from the server
+ */
 const nodeDataLimit = 5000;
 
+/**
+ * This fetcher will request data for the nodes that are in the visible region of the resolver graph. Before fetching
+ * the data, it checks to see we already have the data or we're already in the process of getting the data.
+ *
+ * For Endpoint resolver graphs, the node data will be lifecycle process events.
+ */
 export function NodeDataFetcher(
   dataAccessLayer: DataAccessLayer,
   api: MiddlewareAPI<Dispatch<ResolverAction>, ResolverState>
 ): () => void {
-  /**
-   * use the selector to determine if we are animating then just return
-   * if we aren't animating then check the nodes in view and see if we have requested data
-   * for them, if not request the data
-   *
-   * Have a short circuit condition that checks if the nodes in view returned Sets are the same
-   * if they are the same then just return
-   *
-   * Use date.now() or something similar
-   *
-   * Need a way to avoid rerequesting the node data, we need a Set or something for
-   * the nodes that we are requesting, we can start by just using a variable like
-   * lastRenderTime instead of putting it in state for now
-   */
-
   return async () => {
     const state = api.getState();
 
@@ -62,6 +56,8 @@ export function NodeDataFetcher(
     /**
      * Dispatch an action indicating that we are going to request data for a set of nodes so that we can show a loading
      * state for those nodes in the UI.
+     * TODO: talk about when we dispatch, that visible nodes will be the same, nodeData will have the new nodes
+     *  and newIDsToRequest will be an empty set
      */
     api.dispatch({
       type: 'appRequestingNodeData',

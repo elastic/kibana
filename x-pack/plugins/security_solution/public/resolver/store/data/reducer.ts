@@ -10,7 +10,7 @@ import { ResolverAction } from '../actions';
 import * as treeFetcherParameters from '../../models/tree_fetcher_parameters';
 import * as selectors from './selectors';
 import * as nodeEventsInCategoryModel from './node_events_in_category_model';
-import * as nodeDataModel from '../../models/node_data_model';
+import * as nodeDataModel from '../../models/node_data';
 
 const initialState: DataState = {
   currentRelatedEvent: {
