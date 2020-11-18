@@ -17,13 +17,15 @@
  * under the License.
  */
 import { DefaultSearchStrategy } from './default_search_strategy';
+import { ReqFacade } from './abstract_search_strategy';
+import { VisPayload } from '../../../../common/types';
 
 describe('DefaultSearchStrategy', () => {
-  let defaultSearchStrategy;
-  let req;
+  let defaultSearchStrategy: DefaultSearchStrategy;
+  let req: ReqFacade<VisPayload>;
 
   beforeEach(() => {
-    req = {};
+    req = {} as ReqFacade<VisPayload>;
     defaultSearchStrategy = new DefaultSearchStrategy();
   });
 
@@ -34,8 +36,8 @@ describe('DefaultSearchStrategy', () => {
     expect(defaultSearchStrategy.getFieldsForWildcard).toBeDefined();
   });
 
-  test('should check a strategy for viability', () => {
-    const value = defaultSearchStrategy.checkForViability(req);
+  test('should check a strategy for viability', async () => {
+    const value = await defaultSearchStrategy.checkForViability(req);
 
     expect(value.isViable).toBe(true);
     expect(value.capabilities).toEqual({
