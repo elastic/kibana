@@ -123,8 +123,10 @@ export function exportAsCSVs(
     }, {});
   }
 
+  const type = 'text/plain;charset=utf-8';
+
   const downloadQueue = layerIds.map((layerId, i) => {
-    const blob = new Blob([csvs[layerId]]);
+    const blob = new Blob([csvs[layerId]], { type });
     const postFix = layerIds.length > 1 ? `-${i + 1}` : '';
     // TODO: remove this workaround for multiple files when fixed (in filesaver?)
     return () => Promise.resolve().then(() => saveAs(blob, `${filename}${postFix}.csv`));
