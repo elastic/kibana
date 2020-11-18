@@ -258,6 +258,7 @@ export function SearchBar({
         </EuiHeaderSectionItemButton>
       }
       searchProps={{
+        onSearch: () => undefined,
         onKeyUpCapture: (e: React.KeyboardEvent<HTMLInputElement>) =>
           setSearchValue(e.currentTarget.value),
         'data-test-subj': 'header-search',
