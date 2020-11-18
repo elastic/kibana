@@ -11,6 +11,7 @@ import { ToastsApi } from 'kibana/public';
 import { AlertDetailsRoute, getAlertData } from './alert_details_route';
 import { Alert } from '../../../../types';
 import { EuiLoadingSpinner } from '@elastic/eui';
+jest.mock('../../../../common/lib/kibana');
 
 describe('alert_details_route', () => {
   it('render a loader while fetching data', () => {

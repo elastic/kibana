@@ -16,6 +16,7 @@ export {
   AlertTypeModel,
   ActionType,
   ActionTypeRegistryContract,
+  AlertTypeRegistryContract,
   AlertTypeParamsExpressionProps,
   ValidationResult,
   ActionVariable,

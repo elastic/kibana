@@ -9,7 +9,7 @@ import { ConnectorEditFlyoutProps } from '../application/sections/action_connect
 
 export const getEditConnectorFlyoutLazy = (props: ConnectorEditFlyoutProps) => {
   const ConnectorEditFlyoutLazy = lazy(
-    () => import('../application/sections/action_connector_form/connector_add_flyout')
+    () => import('../application/sections/action_connector_form/connector_edit_flyout')
   );
   return (
     <Suspense

@@ -23,6 +23,7 @@ import {
 import { ChartsPluginStart } from '../../../../src/plugins/charts/public';
 import { PluginStartContract as AlertingStart } from '../../alerts/public';
 import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
+import { Storage } from '../../../../src/plugins/kibana_utils/public';
 import { ConnectorAddFlyoutProps } from './application/sections/action_connector_form/connector_add_flyout';
 import { ConnectorEditFlyoutProps } from './application/sections/action_connector_form/connector_edit_flyout';
 import { getAddConnectorFlyoutLazy } from './common/get_add_connector_flyout';
@@ -113,16 +114,17 @@ export class Plugin
         const { renderApp } = await import('./application/app');
         const kibanaFeatures = await pluginsStart.features.getFeatures();
         return renderApp({
-          dataPlugin: pluginsStart.data,
+          ...coreStart,
+          data: pluginsStart.data,
           charts: pluginsStart.charts,
           alerts: pluginsStart.alerts,
           element: params.element,
+          storage: new Storage(window.localStorage),
           setBreadcrumbs: params.setBreadcrumbs,
           history: params.history,
           actionTypeRegistry,
           alertTypeRegistry,
           kibanaFeatures,
-          ...coreStart,
         });
       },
     });

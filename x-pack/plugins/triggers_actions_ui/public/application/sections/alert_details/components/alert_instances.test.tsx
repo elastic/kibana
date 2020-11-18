@@ -9,6 +9,7 @@ import { shallow } from 'enzyme';
 import { AlertInstances, AlertInstanceListItem, alertInstanceToListItem } from './alert_instances';
 import { Alert, AlertInstanceSummary, AlertInstanceStatus, AlertType } from '../../../../types';
 import { EuiBasicTable } from '@elastic/eui';
+jest.mock('../../../../common/lib/kibana');
 
 const fakeNow = new Date('2020-02-09T23:15:41.941Z');
 const fake2MinutesAgo = new Date('2020-02-09T23:13:41.941Z');

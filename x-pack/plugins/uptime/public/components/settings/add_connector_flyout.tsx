@@ -34,7 +34,7 @@ export const AddConnectorFlyout = ({ focusInput }: Props) => {
   }, [addFlyoutVisible, dispatch, focusInput]);
 
   const ConnectorAddFlyout = triggersActionsUi.getAddConnectorFlyout({
-    consumer: 'case',
+    consumer: 'uptime',
     onClose: () => setAddFlyoutVisibility(false),
   });
 

@@ -45,6 +45,7 @@ export const ConnectorAddModal = ({
     application: { capabilities },
   } = useKibana().services;
   let hasErrors = false;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const initialConnector = {
     actionTypeId: actionType.id,
     config: {},

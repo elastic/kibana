@@ -15,6 +15,7 @@ import { ChartsPluginStart } from '../../../../../src/plugins/charts/public';
 import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
 import { PluginStartContract as AlertingStart } from '../../../alerts/public';
 import { suspendedComponentWithProps } from './lib/suspended_component_with_props';
+import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 
 import { setSavedObjectsClient } from '../common/lib/data_apis';
 import { KibanaContextProvider } from '../common/lib/kibana';
@@ -25,13 +26,17 @@ const AlertDetailsRoute = lazy(
 );
 
 export interface TriggersAndActionsUiServices extends CoreStart {
-  dataPlugin: DataPublicPluginStart;
+  data: DataPublicPluginStart;
   charts: ChartsPluginStart;
   alerts?: AlertingStart;
+  storage?: Storage;
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
   actionTypeRegistry: ActionTypeRegistryContract;
   alertTypeRegistry: AlertTypeRegistryContract;
   history: ScopedHistory;
+  savedObjects?: {
+    client: SavedObjectsClientContract;
+  };
   kibanaFeatures: KibanaFeature[];
   element: HTMLElement;
 }

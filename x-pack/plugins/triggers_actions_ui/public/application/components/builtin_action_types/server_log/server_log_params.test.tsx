@@ -9,6 +9,7 @@ import { ServerLogLevelOptions } from '.././types';
 import ServerLogParamsFields from './server_log_params';
 
 describe('ServerLogParamsFields renders', () => {
+  const editAction = jest.fn();
   test('all params fields is rendered', () => {
     const actionParams = {
       level: ServerLogLevelOptions.TRACE,
@@ -18,11 +19,12 @@ describe('ServerLogParamsFields renders', () => {
       <ServerLogParamsFields
         actionParams={actionParams}
         errors={{ message: [] }}
-        editAction={() => {}}
+        editAction={editAction}
         index={0}
         defaultMessage={'test default message'}
       />
     );
+    expect(editAction).not.toHaveBeenCalled();
     expect(wrapper.find('[data-test-subj="loggingLevelSelect"]').length > 0).toBeTruthy();
     expect(
       wrapper.find('[data-test-subj="loggingLevelSelect"]').first().prop('value')
