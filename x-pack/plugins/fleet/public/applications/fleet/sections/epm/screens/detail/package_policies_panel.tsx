@@ -152,8 +152,6 @@ export const PackagePoliciesPanel = ({ name, version }: PackagePoliciesPanelProp
         render(packagePolicy: PackagePolicyEnriched) {
           return (
             <PolicyAgentListLink agentPolicyId={packagePolicy.policy_id}>
-              {/* Fixme:PT follow up as to why `agents` is not part of the type */}
-              {/* @ts-ignore */}
               {packagePolicy._agentPolicy?.agents ?? 0}
             </PolicyAgentListLink>
           );

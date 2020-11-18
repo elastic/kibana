@@ -6,7 +6,10 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { AgentPolicy, PackagePolicy } from '../../../../../../../common/types/models';
-import { GetAgentPoliciesResponse } from '../../../../../../../common/types/rest_spec';
+import {
+  GetAgentPoliciesResponse,
+  GetAgentPoliciesResponseItem,
+} from '../../../../../../../common/types/rest_spec';
 import { useGetPackagePolicies } from '../../../../hooks/use_request';
 import {
   SendConditionalRequestConfig,
@@ -17,7 +20,7 @@ import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../../../../../../common/cons
 import { GetPackagePoliciesResponse } from '../../../../../../../common/types/rest_spec';
 
 export interface PackagePolicyEnriched extends PackagePolicy {
-  _agentPolicy: AgentPolicy | undefined;
+  _agentPolicy: GetAgentPoliciesResponseItem | undefined;
 }
 
 type GetEnrichedPackagePoliciesResponse = Exclude<GetPackagePoliciesResponse, 'items'> & {
