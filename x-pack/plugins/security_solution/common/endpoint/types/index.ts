@@ -299,6 +299,8 @@ export interface HostResultList {
   request_page_index: number;
   /* the version of the query strategy */
   query_strategy_version: MetadataQueryStrategyVersions;
+  /* policy IDs and versions */
+  policy_info?: HostInfo['policy_info'];
 }
 
 /**
