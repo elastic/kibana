@@ -4,5 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { AddSource } from './AddSource';
-export { AddSourceList } from './AddSourceList';
+export { AddSource } from './add_source';
+export { AddSourceList } from './add_source_list';
