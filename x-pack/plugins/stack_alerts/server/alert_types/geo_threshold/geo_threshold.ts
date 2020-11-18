@@ -38,7 +38,7 @@ export function transformResults(
         return _.map(subBuckets, (subBucket) => {
           const locationFieldResult = _.get(
             subBucket,
-            `entityHits.hits.hits[0].fields.${geoField}[0]`,
+            `entityHits.hits.hits[0].fields["${geoField}"][0]`,
             ''
           );
           const location = locationFieldResult
@@ -50,7 +50,7 @@ export function transformResults(
             : null;
           const dateInShape = _.get(
             subBucket,
-            `entityHits.hits.hits[0].fields.${dateField}[0]`,
+            `entityHits.hits.hits[0].fields["${dateField}"][0]`,
             null
           );
           const docId = _.get(subBucket, `entityHits.hits.hits[0]._id`);
@@ -194,7 +194,8 @@ export const getGeoThresholdExecutor = (log: Logger) =>
           services.callCluster,
           log,
           alertId,
-          params.boundaryNameField
+          params.boundaryNameField,
+          params.boundaryIndexQuery
         );
 
     const executeEsQuery = await executeEsQueryFactory(params, services, log, shapesFilters);

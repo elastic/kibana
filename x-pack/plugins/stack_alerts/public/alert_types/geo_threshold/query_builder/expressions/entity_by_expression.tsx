@@ -28,6 +28,7 @@ export const EntityByExpression: FunctionComponent<Props> = ({
   indexFields,
   isInvalid,
 }) => {
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const ENTITY_TYPES = ['string', 'number', 'ip'];
 
   const usePrevious = <T extends unknown>(value: T): T | undefined => {

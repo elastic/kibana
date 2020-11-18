@@ -14,7 +14,7 @@ export declare class IndexPatternField implements IFieldType
 
 |  Constructor | Modifiers | Description |
 |  --- | --- | --- |
-|  [(constructor)(spec, displayName)](./kibana-plugin-plugins-data-public.indexpatternfield._constructor_.md) |  | Constructs a new instance of the <code>IndexPatternField</code> class |
+|  [(constructor)(spec)](./kibana-plugin-plugins-data-public.indexpatternfield._constructor_.md) |  | Constructs a new instance of the <code>IndexPatternField</code> class |
 
 ## Properties
 
@@ -23,6 +23,7 @@ export declare class IndexPatternField implements IFieldType
 |  [aggregatable](./kibana-plugin-plugins-data-public.indexpatternfield.aggregatable.md) |  | <code>boolean</code> |  |
 |  [conflictDescriptions](./kibana-plugin-plugins-data-public.indexpatternfield.conflictdescriptions.md) |  | <code>Record&lt;string, string[]&gt; &#124; undefined</code> | Description of field type conflicts across different indices in the same index pattern |
 |  [count](./kibana-plugin-plugins-data-public.indexpatternfield.count.md) |  | <code>number</code> | Count is used for field popularity |
+|  [customName](./kibana-plugin-plugins-data-public.indexpatternfield.customname.md) |  | <code>string &#124; undefined</code> |  |
 |  [displayName](./kibana-plugin-plugins-data-public.indexpatternfield.displayname.md) |  | <code>string</code> |  |
 |  [esTypes](./kibana-plugin-plugins-data-public.indexpatternfield.estypes.md) |  | <code>string[] &#124; undefined</code> |  |
 |  [filterable](./kibana-plugin-plugins-data-public.indexpatternfield.filterable.md) |  | <code>boolean</code> |  |
