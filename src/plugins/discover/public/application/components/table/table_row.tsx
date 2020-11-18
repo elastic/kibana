@@ -71,6 +71,7 @@ export function DocViewTableRow({
         <FieldName
           fieldName={field}
           fieldType={fieldType}
+          fieldMapping={fieldMapping}
           scripted={Boolean(fieldMapping?.scripted)}
         />
       </td>
