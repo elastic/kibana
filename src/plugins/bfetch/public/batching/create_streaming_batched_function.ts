@@ -28,7 +28,7 @@ import {
 import { fetchStreaming, split } from '../streaming';
 import { normalizeError } from '../../common';
 import { BatchedFunc, BatchItem } from './types';
-import { isBatchDone, getDonePromise } from './batch_utils';
+import { isBatchDone, getDonePromise, rejectOnAbort } from './batch_utils';
 
 export interface BatchedFunctionProtocolError extends ErrorLike {
   code: string;
@@ -104,11 +104,7 @@ export const createStreamingBatchedFunction = <Payload, Result extends object>(
         // Prepare batch
         const batch = items.map((item) => {
           // Subscribe to reject promise on abort
-          const rejectAborted = () => {
-            item.future.reject(new AbortError());
-            item.signal?.removeEventListener('abort', rejectAborted);
-          };
-          item.signal?.addEventListener('abort', rejectAborted);
+          rejectOnAbort(item);
 
           // Track batch progress
           promises.push(getDonePromise(item));

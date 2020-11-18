@@ -18,6 +18,7 @@
  */
 
 import { BatchItem } from './types';
+import { AbortError } from '../../../kibana_utils/public';
 
 export function isBatchDone(items: Array<BatchItem<any, any>>): boolean {
   return items.every((item) => item.done);
@@ -32,4 +33,15 @@ export function getDonePromise(item: BatchItem<any, any>) {
     item.future.promise.then(onDone, onDone);
     item.signal?.addEventListener('abort', onDone);
   });
+}
+
+export function rejectOnAbort(item: BatchItem<any, any>) {
+  const cleanup = () => item.signal?.removeEventListener('abort', rejectAborted);
+  const rejectAborted = () => {
+    item.future.reject(new AbortError());
+    cleanup();
+  };
+
+  item.signal?.addEventListener('abort', rejectAborted);
+  item.future.promise.then(cleanup, cleanup);
 }
