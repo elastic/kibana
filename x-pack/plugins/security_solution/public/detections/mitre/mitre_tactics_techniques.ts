@@ -5868,7 +5868,7 @@ export const subtechniques = [
 export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.bashProfileAndBashrcDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.bashProfileAndBashrcT1546Description',
       { defaultMessage: '.bash_profile and .bashrc (T1546.004)' }
     ),
     id: 'T1546.004',
@@ -5880,7 +5880,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.etcPasswdAndEtcShadowDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.etcPasswdAndEtcShadowT1003Description',
       { defaultMessage: '/etc/passwd and /etc/shadow (T1003.008)' }
     ),
     id: 'T1003.008',
@@ -5892,7 +5892,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.arpCachePoisoningDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.arpCachePoisoningT1557Description',
       { defaultMessage: 'ARP Cache Poisoning (T1557.002)' }
     ),
     id: 'T1557.002',
@@ -5904,7 +5904,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.asRepRoastingDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.asRepRoastingT1558Description',
       { defaultMessage: 'AS-REP Roasting (T1558.004)' }
     ),
     id: 'T1558.004',
@@ -5916,7 +5916,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.accessibilityFeaturesDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.accessibilityFeaturesT1546Description',
       { defaultMessage: 'Accessibility Features (T1546.008)' }
     ),
     id: 'T1546.008',
@@ -5928,7 +5928,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.addOffice365GlobalAdministratorRoleDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.addOffice365GlobalAdministratorRoleT1098Description',
       { defaultMessage: 'Add Office 365 Global Administrator Role (T1098.003)' }
     ),
     id: 'T1098.003',
@@ -5940,7 +5940,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.addInsDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.addInsT1137Description',
       { defaultMessage: 'Add-ins (T1137.006)' }
     ),
     id: 'T1137.006',
@@ -5952,7 +5952,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.additionalCloudCredentialsDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.additionalCloudCredentialsT1098Description',
       { defaultMessage: 'Additional Cloud Credentials (T1098.001)' }
     ),
     id: 'T1098.001',
@@ -5964,7 +5964,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.appCertDlLsDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.appCertDlLsT1546Description',
       { defaultMessage: 'AppCert DLLs (T1546.009)' }
     ),
     id: 'T1546.009',
@@ -5976,7 +5976,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.appInitDlLsDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.appInitDlLsT1546Description',
       { defaultMessage: 'AppInit DLLs (T1546.010)' }
     ),
     id: 'T1546.010',
@@ -5988,7 +5988,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.appleScriptDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.appleScriptT1059Description',
       { defaultMessage: 'AppleScript (T1059.002)' }
     ),
     id: 'T1059.002',
@@ -6000,7 +6000,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.applicationAccessTokenDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.applicationAccessTokenT1550Description',
       { defaultMessage: 'Application Access Token (T1550.001)' }
     ),
     id: 'T1550.001',
@@ -6012,7 +6012,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.applicationExhaustionFloodDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.applicationExhaustionFloodT1499Description',
       { defaultMessage: 'Application Exhaustion Flood (T1499.003)' }
     ),
     id: 'T1499.003',
@@ -6024,7 +6024,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.applicationShimmingDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.applicationShimmingT1546Description',
       { defaultMessage: 'Application Shimming (T1546.011)' }
     ),
     id: 'T1546.011',
@@ -6036,7 +6036,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.applicationOrSystemExploitationDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.applicationOrSystemExploitationT1499Description',
       { defaultMessage: 'Application or System Exploitation (T1499.004)' }
     ),
     id: 'T1499.004',
@@ -6048,7 +6048,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.archiveViaCustomMethodDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.archiveViaCustomMethodT1560Description',
       { defaultMessage: 'Archive via Custom Method (T1560.003)' }
     ),
     id: 'T1560.003',
@@ -6060,7 +6060,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.archiveViaLibraryDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.archiveViaLibraryT1560Description',
       { defaultMessage: 'Archive via Library (T1560.002)' }
     ),
     id: 'T1560.002',
@@ -6072,7 +6072,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.archiveViaUtilityDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.archiveViaUtilityT1560Description',
       { defaultMessage: 'Archive via Utility (T1560.001)' }
     ),
     id: 'T1560.001',
@@ -6084,7 +6084,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.asymmetricCryptographyDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.asymmetricCryptographyT1573Description',
       { defaultMessage: 'Asymmetric Cryptography (T1573.002)' }
     ),
     id: 'T1573.002',
@@ -6096,7 +6096,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.asynchronousProcedureCallDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.asynchronousProcedureCallT1055Description',
       { defaultMessage: 'Asynchronous Procedure Call (T1055.004)' }
     ),
     id: 'T1055.004',
@@ -6108,7 +6108,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.atLinuxDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.atLinuxT1053Description',
       { defaultMessage: 'At (Linux) (T1053.001)' }
     ),
     id: 'T1053.001',
@@ -6120,7 +6120,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.atWindowsDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.atWindowsT1053Description',
       { defaultMessage: 'At (Windows) (T1053.002)' }
     ),
     id: 'T1053.002',
@@ -6132,7 +6132,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.authenticationPackageDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.authenticationPackageT1547Description',
       { defaultMessage: 'Authentication Package (T1547.002)' }
     ),
     id: 'T1547.002',
@@ -6144,7 +6144,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.bashHistoryDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.bashHistoryT1552Description',
       { defaultMessage: 'Bash History (T1552.003)' }
     ),
     id: 'T1552.003',
@@ -6156,7 +6156,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.bidirectionalCommunicationDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.bidirectionalCommunicationT1102Description',
       { defaultMessage: 'Bidirectional Communication (T1102.002)' }
     ),
     id: 'T1102.002',
@@ -6168,7 +6168,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.binaryPaddingDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.binaryPaddingT1027Description',
       { defaultMessage: 'Binary Padding (T1027.001)' }
     ),
     id: 'T1027.001',
@@ -6180,7 +6180,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.bootkitDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.bootkitT1542Description',
       { defaultMessage: 'Bootkit (T1542.003)' }
     ),
     id: 'T1542.003',
@@ -6192,7 +6192,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.botnetDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.botnetT1583Description',
       { defaultMessage: 'Botnet (T1583.005)' }
     ),
     id: 'T1583.005',
@@ -6204,7 +6204,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.botnetDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.botnetT1584Description',
       { defaultMessage: 'Botnet (T1584.005)' }
     ),
     id: 'T1584.005',
@@ -6216,7 +6216,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.businessRelationshipsDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.businessRelationshipsT1591Description',
       { defaultMessage: 'Business Relationships (T1591.002)' }
     ),
     id: 'T1591.002',
@@ -6228,7 +6228,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.bypassUserAccountControlDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.bypassUserAccountControlT1548Description',
       { defaultMessage: 'Bypass User Account Control (T1548.002)' }
     ),
     id: 'T1548.002',
@@ -6240,7 +6240,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.cdNsDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.cdNsT1596Description',
       { defaultMessage: 'CDNs (T1596.004)' }
     ),
     id: 'T1596.004',
@@ -6252,7 +6252,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.cmstpDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.cmstpT1218Description',
       { defaultMessage: 'CMSTP (T1218.003)' }
     ),
     id: 'T1218.003',
@@ -6264,7 +6264,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.corProfilerDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.corProfilerT1574Description',
       { defaultMessage: 'COR_PROFILER (T1574.012)' }
     ),
     id: 'T1574.012',
@@ -6276,7 +6276,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.cachedDomainCredentialsDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.cachedDomainCredentialsT1003Description',
       { defaultMessage: 'Cached Domain Credentials (T1003.005)' }
     ),
     id: 'T1003.005',
@@ -6288,7 +6288,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.changeDefaultFileAssociationDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.changeDefaultFileAssociationT1546Description',
       { defaultMessage: 'Change Default File Association (T1546.001)' }
     ),
     id: 'T1546.001',
@@ -6300,7 +6300,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.clearCommandHistoryDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.clearCommandHistoryT1070Description',
       { defaultMessage: 'Clear Command History (T1070.003)' }
     ),
     id: 'T1070.003',
@@ -6312,7 +6312,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.clearLinuxOrMacSystemLogsDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.clearLinuxOrMacSystemLogsT1070Description',
       { defaultMessage: 'Clear Linux or Mac System Logs (T1070.002)' }
     ),
     id: 'T1070.002',
@@ -6324,7 +6324,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.clearWindowsEventLogsDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.clearWindowsEventLogsT1070Description',
       { defaultMessage: 'Clear Windows Event Logs (T1070.001)' }
     ),
     id: 'T1070.001',
@@ -6336,7 +6336,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.clientConfigurationsDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.clientConfigurationsT1592Description',
       { defaultMessage: 'Client Configurations (T1592.004)' }
     ),
     id: 'T1592.004',
@@ -6348,7 +6348,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.cloudAccountDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.cloudAccountT1136Description',
       { defaultMessage: 'Cloud Account (T1136.003)' }
     ),
     id: 'T1136.003',
@@ -6360,7 +6360,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.cloudAccountDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.cloudAccountT1087Description',
       { defaultMessage: 'Cloud Account (T1087.004)' }
     ),
     id: 'T1087.004',
@@ -6372,7 +6372,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.cloudAccountsDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.cloudAccountsT1078Description',
       { defaultMessage: 'Cloud Accounts (T1078.004)' }
     ),
     id: 'T1078.004',
@@ -6384,7 +6384,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.cloudGroupsDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.cloudGroupsT1069Description',
       { defaultMessage: 'Cloud Groups (T1069.003)' }
     ),
     id: 'T1069.003',
@@ -6396,7 +6396,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.cloudInstanceMetadataApiDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.cloudInstanceMetadataApiT1552Description',
       { defaultMessage: 'Cloud Instance Metadata API (T1552.005)' }
     ),
     id: 'T1552.005',
@@ -6408,7 +6408,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.codeSigningDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.codeSigningT1553Description',
       { defaultMessage: 'Code Signing (T1553.002)' }
     ),
     id: 'T1553.002',
@@ -6420,7 +6420,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.codeSigningCertificatesDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.codeSigningCertificatesT1587Description',
       { defaultMessage: 'Code Signing Certificates (T1587.002)' }
     ),
     id: 'T1587.002',
@@ -6432,7 +6432,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.codeSigningCertificatesDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.codeSigningCertificatesT1588Description',
       { defaultMessage: 'Code Signing Certificates (T1588.003)' }
     ),
     id: 'T1588.003',
@@ -6444,7 +6444,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.compileAfterDeliveryDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.compileAfterDeliveryT1027Description',
       { defaultMessage: 'Compile After Delivery (T1027.004)' }
     ),
     id: 'T1027.004',
@@ -6456,7 +6456,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.compiledHtmlFileDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.compiledHtmlFileT1218Description',
       { defaultMessage: 'Compiled HTML File (T1218.001)' }
     ),
     id: 'T1218.001',
@@ -6468,7 +6468,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.componentFirmwareDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.componentFirmwareT1542Description',
       { defaultMessage: 'Component Firmware (T1542.002)' }
     ),
     id: 'T1542.002',
@@ -6480,7 +6480,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.componentObjectModelDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.componentObjectModelT1559Description',
       { defaultMessage: 'Component Object Model (T1559.001)' }
     ),
     id: 'T1559.001',
@@ -6492,7 +6492,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.componentObjectModelHijackingDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.componentObjectModelHijackingT1546Description',
       { defaultMessage: 'Component Object Model Hijacking (T1546.015)' }
     ),
     id: 'T1546.015',
@@ -6504,7 +6504,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.compromiseHardwareSupplyChainDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.compromiseHardwareSupplyChainT1195Description',
       { defaultMessage: 'Compromise Hardware Supply Chain (T1195.003)' }
     ),
     id: 'T1195.003',
@@ -6516,7 +6516,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.compromiseSoftwareDependenciesAndDevelopmentToolsDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.compromiseSoftwareDependenciesAndDevelopmentToolsT1195Description',
       { defaultMessage: 'Compromise Software Dependencies and Development Tools (T1195.001)' }
     ),
     id: 'T1195.001',
@@ -6528,7 +6528,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.compromiseSoftwareSupplyChainDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.compromiseSoftwareSupplyChainT1195Description',
       { defaultMessage: 'Compromise Software Supply Chain (T1195.002)' }
     ),
     id: 'T1195.002',
@@ -6540,7 +6540,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.confluenceDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.confluenceT1213Description',
       { defaultMessage: 'Confluence (T1213.001)' }
     ),
     id: 'T1213.001',
@@ -6552,7 +6552,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.controlPanelDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.controlPanelT1218Description',
       { defaultMessage: 'Control Panel (T1218.002)' }
     ),
     id: 'T1218.002',
@@ -6564,7 +6564,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.createCloudInstanceDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.createCloudInstanceT1578Description',
       { defaultMessage: 'Create Cloud Instance (T1578.002)' }
     ),
     id: 'T1578.002',
@@ -6576,7 +6576,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.createProcessWithTokenDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.createProcessWithTokenT1134Description',
       { defaultMessage: 'Create Process with Token (T1134.002)' }
     ),
     id: 'T1134.002',
@@ -6588,7 +6588,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.createSnapshotDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.createSnapshotT1578Description',
       { defaultMessage: 'Create Snapshot (T1578.001)' }
     ),
     id: 'T1578.001',
@@ -6600,7 +6600,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.credentialApiHookingDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.credentialApiHookingT1056Description',
       { defaultMessage: 'Credential API Hooking (T1056.004)' }
     ),
     id: 'T1056.004',
@@ -6612,7 +6612,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.credentialStuffingDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.credentialStuffingT1110Description',
       { defaultMessage: 'Credential Stuffing (T1110.004)' }
     ),
     id: 'T1110.004',
@@ -6624,7 +6624,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.credentialsDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.credentialsT1589Description',
       { defaultMessage: 'Credentials (T1589.001)' }
     ),
     id: 'T1589.001',
@@ -6636,7 +6636,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.credentialsInFilesDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.credentialsInFilesT1552Description',
       { defaultMessage: 'Credentials In Files (T1552.001)' }
     ),
     id: 'T1552.001',
@@ -6648,7 +6648,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.credentialsFromWebBrowsersDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.credentialsFromWebBrowsersT1555Description',
       { defaultMessage: 'Credentials from Web Browsers (T1555.003)' }
     ),
     id: 'T1555.003',
@@ -6660,7 +6660,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.credentialsInRegistryDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.credentialsInRegistryT1552Description',
       { defaultMessage: 'Credentials in Registry (T1552.002)' }
     ),
     id: 'T1552.002',
@@ -6672,7 +6672,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.cronDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.cronT1053Description',
       { defaultMessage: 'Cron (T1053.003)' }
     ),
     id: 'T1053.003',
@@ -6684,7 +6684,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.dcSyncDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.dcSyncT1003Description',
       { defaultMessage: 'DCSync (T1003.006)' }
     ),
     id: 'T1003.006',
@@ -6696,7 +6696,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.dllSearchOrderHijackingDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.dllSearchOrderHijackingT1574Description',
       { defaultMessage: 'DLL Search Order Hijacking (T1574.001)' }
     ),
     id: 'T1574.001',
@@ -6708,7 +6708,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.dllSideLoadingDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.dllSideLoadingT1574Description',
       { defaultMessage: 'DLL Side-Loading (T1574.002)' }
     ),
     id: 'T1574.002',
@@ -6720,7 +6720,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.dnsDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.dnsT1071Description',
       { defaultMessage: 'DNS (T1071.004)' }
     ),
     id: 'T1071.004',
@@ -6732,7 +6732,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.dnsDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.dnsT1590Description',
       { defaultMessage: 'DNS (T1590.002)' }
     ),
     id: 'T1590.002',
@@ -6744,7 +6744,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.dnsCalculationDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.dnsCalculationT1568Description',
       { defaultMessage: 'DNS Calculation (T1568.003)' }
     ),
     id: 'T1568.003',
@@ -6756,7 +6756,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.dnsServerDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.dnsServerT1583Description',
       { defaultMessage: 'DNS Server (T1583.002)' }
     ),
     id: 'T1583.002',
@@ -6768,7 +6768,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.dnsServerDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.dnsServerT1584Description',
       { defaultMessage: 'DNS Server (T1584.002)' }
     ),
     id: 'T1584.002',
@@ -6780,7 +6780,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.dnsPassiveDnsDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.dnsPassiveDnsT1596Description',
       { defaultMessage: 'DNS/Passive DNS (T1596.001)' }
     ),
     id: 'T1596.001',
@@ -6792,7 +6792,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.deadDropResolverDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.deadDropResolverT1102Description',
       { defaultMessage: 'Dead Drop Resolver (T1102.001)' }
     ),
     id: 'T1102.001',
@@ -6804,7 +6804,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.defaultAccountsDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.defaultAccountsT1078Description',
       { defaultMessage: 'Default Accounts (T1078.001)' }
     ),
     id: 'T1078.001',
@@ -6816,7 +6816,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.deleteCloudInstanceDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.deleteCloudInstanceT1578Description',
       { defaultMessage: 'Delete Cloud Instance (T1578.003)' }
     ),
     id: 'T1578.003',
@@ -6828,7 +6828,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.determinePhysicalLocationsDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.determinePhysicalLocationsT1591Description',
       { defaultMessage: 'Determine Physical Locations (T1591.001)' }
     ),
     id: 'T1591.001',
@@ -6840,7 +6840,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.digitalCertificatesDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.digitalCertificatesT1587Description',
       { defaultMessage: 'Digital Certificates (T1587.003)' }
     ),
     id: 'T1587.003',
@@ -6852,7 +6852,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.digitalCertificatesDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.digitalCertificatesT1588Description',
       { defaultMessage: 'Digital Certificates (T1588.004)' }
     ),
     id: 'T1588.004',
@@ -6864,7 +6864,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.digitalCertificatesDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.digitalCertificatesT1596Description',
       { defaultMessage: 'Digital Certificates (T1596.003)' }
     ),
     id: 'T1596.003',
@@ -6876,7 +6876,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.directNetworkFloodDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.directNetworkFloodT1498Description',
       { defaultMessage: 'Direct Network Flood (T1498.001)' }
     ),
     id: 'T1498.001',
@@ -6888,7 +6888,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.disableCloudLogsDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.disableCloudLogsT1562Description',
       { defaultMessage: 'Disable Cloud Logs (T1562.008)' }
     ),
     id: 'T1562.008',
@@ -6900,7 +6900,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.disableCryptoHardwareDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.disableCryptoHardwareT1600Description',
       { defaultMessage: 'Disable Crypto Hardware (T1600.002)' }
     ),
     id: 'T1600.002',
@@ -6912,7 +6912,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.disableWindowsEventLoggingDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.disableWindowsEventLoggingT1562Description',
       { defaultMessage: 'Disable Windows Event Logging (T1562.002)' }
     ),
     id: 'T1562.002',
@@ -6924,7 +6924,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.disableOrModifyCloudFirewallDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.disableOrModifyCloudFirewallT1562Description',
       { defaultMessage: 'Disable or Modify Cloud Firewall (T1562.007)' }
     ),
     id: 'T1562.007',
@@ -6936,7 +6936,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.disableOrModifySystemFirewallDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.disableOrModifySystemFirewallT1562Description',
       { defaultMessage: 'Disable or Modify System Firewall (T1562.004)' }
     ),
     id: 'T1562.004',
@@ -6948,7 +6948,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.disableOrModifyToolsDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.disableOrModifyToolsT1562Description',
       { defaultMessage: 'Disable or Modify Tools (T1562.001)' }
     ),
     id: 'T1562.001',
@@ -6960,7 +6960,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.diskContentWipeDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.diskContentWipeT1561Description',
       { defaultMessage: 'Disk Content Wipe (T1561.001)' }
     ),
     id: 'T1561.001',
@@ -6972,7 +6972,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.diskStructureWipeDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.diskStructureWipeT1561Description',
       { defaultMessage: 'Disk Structure Wipe (T1561.002)' }
     ),
     id: 'T1561.002',
@@ -6984,7 +6984,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.distributedComponentObjectModelDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.distributedComponentObjectModelT1021Description',
       { defaultMessage: 'Distributed Component Object Model (T1021.003)' }
     ),
     id: 'T1021.003',
@@ -6996,7 +6996,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.domainAccountDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.domainAccountT1136Description',
       { defaultMessage: 'Domain Account (T1136.002)' }
     ),
     id: 'T1136.002',
@@ -7008,7 +7008,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.domainAccountDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.domainAccountT1087Description',
       { defaultMessage: 'Domain Account (T1087.002)' }
     ),
     id: 'T1087.002',
@@ -7020,7 +7020,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.domainAccountsDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.domainAccountsT1078Description',
       { defaultMessage: 'Domain Accounts (T1078.002)' }
     ),
     id: 'T1078.002',
@@ -7032,7 +7032,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.domainControllerAuthenticationDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.domainControllerAuthenticationT1556Description',
       { defaultMessage: 'Domain Controller Authentication (T1556.001)' }
     ),
     id: 'T1556.001',
@@ -7044,7 +7044,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.domainFrontingDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.domainFrontingT1090Description',
       { defaultMessage: 'Domain Fronting (T1090.004)' }
     ),
     id: 'T1090.004',
@@ -7056,7 +7056,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.domainGenerationAlgorithmsDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.domainGenerationAlgorithmsT1568Description',
       { defaultMessage: 'Domain Generation Algorithms (T1568.002)' }
     ),
     id: 'T1568.002',
@@ -7068,7 +7068,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.domainGroupsDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.domainGroupsT1069Description',
       { defaultMessage: 'Domain Groups (T1069.002)' }
     ),
     id: 'T1069.002',
@@ -7080,7 +7080,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.domainPropertiesDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.domainPropertiesT1590Description',
       { defaultMessage: 'Domain Properties (T1590.001)' }
     ),
     id: 'T1590.001',
@@ -7092,7 +7092,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.domainsDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.domainsT1583Description',
       { defaultMessage: 'Domains (T1583.001)' }
     ),
     id: 'T1583.001',
@@ -7104,7 +7104,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.domainsDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.domainsT1584Description',
       { defaultMessage: 'Domains (T1584.001)' }
     ),
     id: 'T1584.001',
@@ -7116,7 +7116,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.downgradeSystemImageDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.downgradeSystemImageT1601Description',
       { defaultMessage: 'Downgrade System Image (T1601.002)' }
     ),
     id: 'T1601.002',
@@ -7128,7 +7128,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.dylibHijackingDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.dylibHijackingT1574Description',
       { defaultMessage: 'Dylib Hijacking (T1574.004)' }
     ),
     id: 'T1574.004',
@@ -7140,7 +7140,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.dynamicDataExchangeDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.dynamicDataExchangeT1559Description',
       { defaultMessage: 'Dynamic Data Exchange (T1559.002)' }
     ),
     id: 'T1559.002',
@@ -7152,7 +7152,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.dynamicLinkLibraryInjectionDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.dynamicLinkLibraryInjectionT1055Description',
       { defaultMessage: 'Dynamic-link Library Injection (T1055.001)' }
     ),
     id: 'T1055.001',
@@ -7164,7 +7164,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.elevatedExecutionWithPromptDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.elevatedExecutionWithPromptT1548Description',
       { defaultMessage: 'Elevated Execution with Prompt (T1548.004)' }
     ),
     id: 'T1548.004',
@@ -7176,7 +7176,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.emailAccountDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.emailAccountT1087Description',
       { defaultMessage: 'Email Account (T1087.003)' }
     ),
     id: 'T1087.003',
@@ -7188,7 +7188,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.emailAccountsDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.emailAccountsT1585Description',
       { defaultMessage: 'Email Accounts (T1585.002)' }
     ),
     id: 'T1585.002',
@@ -7200,7 +7200,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.emailAccountsDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.emailAccountsT1586Description',
       { defaultMessage: 'Email Accounts (T1586.002)' }
     ),
     id: 'T1586.002',
@@ -7212,7 +7212,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.emailAddressesDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.emailAddressesT1589Description',
       { defaultMessage: 'Email Addresses (T1589.002)' }
     ),
     id: 'T1589.002',
@@ -7224,7 +7224,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.emailForwardingRuleDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.emailForwardingRuleT1114Description',
       { defaultMessage: 'Email Forwarding Rule (T1114.003)' }
     ),
     id: 'T1114.003',
@@ -7236,7 +7236,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.emondDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.emondT1546Description',
       { defaultMessage: 'Emond (T1546.014)' }
     ),
     id: 'T1546.014',
@@ -7248,7 +7248,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.employeeNamesDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.employeeNamesT1589Description',
       { defaultMessage: 'Employee Names (T1589.003)' }
     ),
     id: 'T1589.003',
@@ -7260,7 +7260,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.environmentalKeyingDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.environmentalKeyingT1480Description',
       { defaultMessage: 'Environmental Keying (T1480.001)' }
     ),
     id: 'T1480.001',
@@ -7272,7 +7272,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.exchangeEmailDelegatePermissionsDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.exchangeEmailDelegatePermissionsT1098Description',
       { defaultMessage: 'Exchange Email Delegate Permissions (T1098.002)' }
     ),
     id: 'T1098.002',
@@ -7284,7 +7284,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.executableInstallerFilePermissionsWeaknessDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.executableInstallerFilePermissionsWeaknessT1574Description',
       { defaultMessage: 'Executable Installer File Permissions Weakness (T1574.005)' }
     ),
     id: 'T1574.005',
@@ -7296,7 +7296,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.exfiltrationOverAsymmetricEncryptedNonC2ProtocolDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.exfiltrationOverAsymmetricEncryptedNonC2ProtocolT1048Description',
       { defaultMessage: 'Exfiltration Over Asymmetric Encrypted Non-C2 Protocol (T1048.002)' }
     ),
     id: 'T1048.002',
@@ -7308,7 +7308,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.exfiltrationOverBluetoothDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.exfiltrationOverBluetoothT1011Description',
       { defaultMessage: 'Exfiltration Over Bluetooth (T1011.001)' }
     ),
     id: 'T1011.001',
@@ -7320,7 +7320,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.exfiltrationOverSymmetricEncryptedNonC2ProtocolDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.exfiltrationOverSymmetricEncryptedNonC2ProtocolT1048Description',
       { defaultMessage: 'Exfiltration Over Symmetric Encrypted Non-C2 Protocol (T1048.001)' }
     ),
     id: 'T1048.001',
@@ -7332,7 +7332,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.exfiltrationOverUnencryptedObfuscatedNonC2ProtocolDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.exfiltrationOverUnencryptedObfuscatedNonC2ProtocolT1048Description',
       { defaultMessage: 'Exfiltration Over Unencrypted/Obfuscated Non-C2 Protocol (T1048.003)' }
     ),
     id: 'T1048.003',
@@ -7344,7 +7344,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.exfiltrationOverUsbDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.exfiltrationOverUsbT1052Description',
       { defaultMessage: 'Exfiltration over USB (T1052.001)' }
     ),
     id: 'T1052.001',
@@ -7356,7 +7356,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.exfiltrationToCloudStorageDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.exfiltrationToCloudStorageT1567Description',
       { defaultMessage: 'Exfiltration to Cloud Storage (T1567.002)' }
     ),
     id: 'T1567.002',
@@ -7368,7 +7368,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.exfiltrationToCodeRepositoryDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.exfiltrationToCodeRepositoryT1567Description',
       { defaultMessage: 'Exfiltration to Code Repository (T1567.001)' }
     ),
     id: 'T1567.001',
@@ -7380,7 +7380,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.exploitsDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.exploitsT1587Description',
       { defaultMessage: 'Exploits (T1587.004)' }
     ),
     id: 'T1587.004',
@@ -7392,7 +7392,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.exploitsDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.exploitsT1588Description',
       { defaultMessage: 'Exploits (T1588.005)' }
     ),
     id: 'T1588.005',
@@ -7404,7 +7404,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.externalDefacementDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.externalDefacementT1491Description',
       { defaultMessage: 'External Defacement (T1491.002)' }
     ),
     id: 'T1491.002',
@@ -7416,7 +7416,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.externalProxyDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.externalProxyT1090Description',
       { defaultMessage: 'External Proxy (T1090.002)' }
     ),
     id: 'T1090.002',
@@ -7428,7 +7428,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.extraWindowMemoryInjectionDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.extraWindowMemoryInjectionT1055Description',
       { defaultMessage: 'Extra Window Memory Injection (T1055.011)' }
     ),
     id: 'T1055.011',
@@ -7440,7 +7440,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.fastFluxDnsDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.fastFluxDnsT1568Description',
       { defaultMessage: 'Fast Flux DNS (T1568.001)' }
     ),
     id: 'T1568.001',
@@ -7452,7 +7452,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.fileDeletionDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.fileDeletionT1070Description',
       { defaultMessage: 'File Deletion (T1070.004)' }
     ),
     id: 'T1070.004',
@@ -7464,7 +7464,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.fileTransferProtocolsDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.fileTransferProtocolsT1071Description',
       { defaultMessage: 'File Transfer Protocols (T1071.002)' }
     ),
     id: 'T1071.002',
@@ -7476,7 +7476,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.firmwareDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.firmwareT1592Description',
       { defaultMessage: 'Firmware (T1592.003)' }
     ),
     id: 'T1592.003',
@@ -7488,7 +7488,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.guiInputCaptureDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.guiInputCaptureT1056Description',
       { defaultMessage: 'GUI Input Capture (T1056.002)' }
     ),
     id: 'T1056.002',
@@ -7500,7 +7500,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.gatekeeperBypassDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.gatekeeperBypassT1553Description',
       { defaultMessage: 'Gatekeeper Bypass (T1553.001)' }
     ),
     id: 'T1553.001',
@@ -7512,7 +7512,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.goldenTicketDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.goldenTicketT1558Description',
       { defaultMessage: 'Golden Ticket (T1558.001)' }
     ),
     id: 'T1558.001',
@@ -7524,7 +7524,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.groupPolicyPreferencesDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.groupPolicyPreferencesT1552Description',
       { defaultMessage: 'Group Policy Preferences (T1552.006)' }
     ),
     id: 'T1552.006',
@@ -7536,7 +7536,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.hardwareDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.hardwareT1592Description',
       { defaultMessage: 'Hardware (T1592.001)' }
     ),
     id: 'T1592.001',
@@ -7548,7 +7548,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.hiddenFileSystemDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.hiddenFileSystemT1564Description',
       { defaultMessage: 'Hidden File System (T1564.005)' }
     ),
     id: 'T1564.005',
@@ -7560,7 +7560,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.hiddenFilesAndDirectoriesDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.hiddenFilesAndDirectoriesT1564Description',
       { defaultMessage: 'Hidden Files and Directories (T1564.001)' }
     ),
     id: 'T1564.001',
@@ -7572,7 +7572,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.hiddenUsersDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.hiddenUsersT1564Description',
       { defaultMessage: 'Hidden Users (T1564.002)' }
     ),
     id: 'T1564.002',
@@ -7584,7 +7584,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.hiddenWindowDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.hiddenWindowT1564Description',
       { defaultMessage: 'Hidden Window (T1564.003)' }
     ),
     id: 'T1564.003',
@@ -7596,7 +7596,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.ipAddressesDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.ipAddressesT1590Description',
       { defaultMessage: 'IP Addresses (T1590.005)' }
     ),
     id: 'T1590.005',
@@ -7608,7 +7608,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.identifyBusinessTempoDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.identifyBusinessTempoT1591Description',
       { defaultMessage: 'Identify Business Tempo (T1591.003)' }
     ),
     id: 'T1591.003',
@@ -7620,7 +7620,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.identifyRolesDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.identifyRolesT1591Description',
       { defaultMessage: 'Identify Roles (T1591.004)' }
     ),
     id: 'T1591.004',
@@ -7632,7 +7632,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.imageFileExecutionOptionsInjectionDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.imageFileExecutionOptionsInjectionT1546Description',
       { defaultMessage: 'Image File Execution Options Injection (T1546.012)' }
     ),
     id: 'T1546.012',
@@ -7644,7 +7644,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.impairCommandHistoryLoggingDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.impairCommandHistoryLoggingT1562Description',
       { defaultMessage: 'Impair Command History Logging (T1562.003)' }
     ),
     id: 'T1562.003',
@@ -7656,7 +7656,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.indicatorBlockingDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.indicatorBlockingT1562Description',
       { defaultMessage: 'Indicator Blocking (T1562.006)' }
     ),
     id: 'T1562.006',
@@ -7668,7 +7668,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.indicatorRemovalFromToolsDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.indicatorRemovalFromToolsT1027Description',
       { defaultMessage: 'Indicator Removal from Tools (T1027.005)' }
     ),
     id: 'T1027.005',
@@ -7680,7 +7680,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.installRootCertificateDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.installRootCertificateT1553Description',
       { defaultMessage: 'Install Root Certificate (T1553.004)' }
     ),
     id: 'T1553.004',
@@ -7692,7 +7692,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.installUtilDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.installUtilT1218Description',
       { defaultMessage: 'InstallUtil (T1218.004)' }
     ),
     id: 'T1218.004',
@@ -7704,7 +7704,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.internalDefacementDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.internalDefacementT1491Description',
       { defaultMessage: 'Internal Defacement (T1491.001)' }
     ),
     id: 'T1491.001',
@@ -7716,7 +7716,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.internalProxyDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.internalProxyT1090Description',
       { defaultMessage: 'Internal Proxy (T1090.001)' }
     ),
     id: 'T1090.001',
@@ -7728,7 +7728,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.invalidCodeSignatureDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.invalidCodeSignatureT1036Description',
       { defaultMessage: 'Invalid Code Signature (T1036.001)' }
     ),
     id: 'T1036.001',
@@ -7740,7 +7740,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.javaScriptJScriptDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.javaScriptJScriptT1059Description',
       { defaultMessage: 'JavaScript/JScript (T1059.007)' }
     ),
     id: 'T1059.007',
@@ -7752,7 +7752,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.junkDataDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.junkDataT1001Description',
       { defaultMessage: 'Junk Data (T1001.001)' }
     ),
     id: 'T1001.001',
@@ -7764,7 +7764,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.kerberoastingDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.kerberoastingT1558Description',
       { defaultMessage: 'Kerberoasting (T1558.003)' }
     ),
     id: 'T1558.003',
@@ -7776,7 +7776,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.kernelModulesAndExtensionsDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.kernelModulesAndExtensionsT1547Description',
       { defaultMessage: 'Kernel Modules and Extensions (T1547.006)' }
     ),
     id: 'T1547.006',
@@ -7788,7 +7788,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.keychainDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.keychainT1555Description',
       { defaultMessage: 'Keychain (T1555.001)' }
     ),
     id: 'T1555.001',
@@ -7800,7 +7800,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.keyloggingDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.keyloggingT1056Description',
       { defaultMessage: 'Keylogging (T1056.001)' }
     ),
     id: 'T1056.001',
@@ -7812,7 +7812,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.lcLoadDylibAdditionDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.lcLoadDylibAdditionT1546Description',
       { defaultMessage: 'LC_LOAD_DYLIB Addition (T1546.006)' }
     ),
     id: 'T1546.006',
@@ -7824,7 +7824,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.ldPreloadDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.ldPreloadT1574Description',
       { defaultMessage: 'LD_PRELOAD (T1574.006)' }
     ),
     id: 'T1574.006',
@@ -7836,7 +7836,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.llmnrNbtNsPoisoningAndSmbRelayDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.llmnrNbtNsPoisoningAndSmbRelayT1557Description',
       { defaultMessage: 'LLMNR/NBT-NS Poisoning and SMB Relay (T1557.001)' }
     ),
     id: 'T1557.001',
@@ -7848,7 +7848,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.lsaSecretsDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.lsaSecretsT1003Description',
       { defaultMessage: 'LSA Secrets (T1003.004)' }
     ),
     id: 'T1003.004',
@@ -7860,7 +7860,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.lsassDriverDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.lsassDriverT1547Description',
       { defaultMessage: 'LSASS Driver (T1547.008)' }
     ),
     id: 'T1547.008',
@@ -7872,7 +7872,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.lsassMemoryDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.lsassMemoryT1003Description',
       { defaultMessage: 'LSASS Memory (T1003.001)' }
     ),
     id: 'T1003.001',
@@ -7884,7 +7884,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.launchAgentDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.launchAgentT1543Description',
       { defaultMessage: 'Launch Agent (T1543.001)' }
     ),
     id: 'T1543.001',
@@ -7896,7 +7896,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.launchDaemonDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.launchDaemonT1543Description',
       { defaultMessage: 'Launch Daemon (T1543.004)' }
     ),
     id: 'T1543.004',
@@ -7908,7 +7908,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.launchctlDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.launchctlT1569Description',
       { defaultMessage: 'Launchctl (T1569.001)' }
     ),
     id: 'T1569.001',
@@ -7920,7 +7920,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.launchdDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.launchdT1053Description',
       { defaultMessage: 'Launchd (T1053.004)' }
     ),
     id: 'T1053.004',
@@ -7932,7 +7932,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.linuxAndMacFileAndDirectoryPermissionsModificationDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.linuxAndMacFileAndDirectoryPermissionsModificationT1222Description',
       { defaultMessage: 'Linux and Mac File and Directory Permissions Modification (T1222.002)' }
     ),
     id: 'T1222.002',
@@ -7944,7 +7944,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.localAccountDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.localAccountT1136Description',
       { defaultMessage: 'Local Account (T1136.001)' }
     ),
     id: 'T1136.001',
@@ -7956,7 +7956,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.localAccountDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.localAccountT1087Description',
       { defaultMessage: 'Local Account (T1087.001)' }
     ),
     id: 'T1087.001',
@@ -7968,7 +7968,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.localAccountsDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.localAccountsT1078Description',
       { defaultMessage: 'Local Accounts (T1078.003)' }
     ),
     id: 'T1078.003',
@@ -7980,7 +7980,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.localDataStagingDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.localDataStagingT1074Description',
       { defaultMessage: 'Local Data Staging (T1074.001)' }
     ),
     id: 'T1074.001',
@@ -7992,7 +7992,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.localEmailCollectionDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.localEmailCollectionT1114Description',
       { defaultMessage: 'Local Email Collection (T1114.001)' }
     ),
     id: 'T1114.001',
@@ -8004,7 +8004,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.localGroupsDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.localGroupsT1069Description',
       { defaultMessage: 'Local Groups (T1069.001)' }
     ),
     id: 'T1069.001',
@@ -8016,7 +8016,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.logonScriptMacDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.logonScriptMacT1037Description',
       { defaultMessage: 'Logon Script (Mac) (T1037.002)' }
     ),
     id: 'T1037.002',
@@ -8028,7 +8028,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.logonScriptWindowsDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.logonScriptWindowsT1037Description',
       { defaultMessage: 'Logon Script (Windows) (T1037.001)' }
     ),
     id: 'T1037.001',
@@ -8040,7 +8040,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.msBuildDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.msBuildT1127Description',
       { defaultMessage: 'MSBuild (T1127.001)' }
     ),
     id: 'T1127.001',
@@ -8052,7 +8052,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.mailProtocolsDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.mailProtocolsT1071Description',
       { defaultMessage: 'Mail Protocols (T1071.003)' }
     ),
     id: 'T1071.003',
@@ -8064,7 +8064,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.makeAndImpersonateTokenDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.makeAndImpersonateTokenT1134Description',
       { defaultMessage: 'Make and Impersonate Token (T1134.003)' }
     ),
     id: 'T1134.003',
@@ -8076,7 +8076,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.maliciousFileDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.maliciousFileT1204Description',
       { defaultMessage: 'Malicious File (T1204.002)' }
     ),
     id: 'T1204.002',
@@ -8088,7 +8088,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.maliciousLinkDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.maliciousLinkT1204Description',
       { defaultMessage: 'Malicious Link (T1204.001)' }
     ),
     id: 'T1204.001',
@@ -8100,7 +8100,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.malwareDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.malwareT1587Description',
       { defaultMessage: 'Malware (T1587.001)' }
     ),
     id: 'T1587.001',
@@ -8112,7 +8112,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.malwareDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.malwareT1588Description',
       { defaultMessage: 'Malware (T1588.001)' }
     ),
     id: 'T1588.001',
@@ -8124,7 +8124,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.masqueradeTaskOrServiceDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.masqueradeTaskOrServiceT1036Description',
       { defaultMessage: 'Masquerade Task or Service (T1036.004)' }
     ),
     id: 'T1036.004',
@@ -8136,7 +8136,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.matchLegitimateNameOrLocationDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.matchLegitimateNameOrLocationT1036Description',
       { defaultMessage: 'Match Legitimate Name or Location (T1036.005)' }
     ),
     id: 'T1036.005',
@@ -8148,7 +8148,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.mshtaDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.mshtaT1218Description',
       { defaultMessage: 'Mshta (T1218.005)' }
     ),
     id: 'T1218.005',
@@ -8160,7 +8160,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.msiexecDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.msiexecT1218Description',
       { defaultMessage: 'Msiexec (T1218.007)' }
     ),
     id: 'T1218.007',
@@ -8172,7 +8172,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.multiHopProxyDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.multiHopProxyT1090Description',
       { defaultMessage: 'Multi-hop Proxy (T1090.003)' }
     ),
     id: 'T1090.003',
@@ -8184,7 +8184,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.ntdsDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.ntdsT1003Description',
       { defaultMessage: 'NTDS (T1003.003)' }
     ),
     id: 'T1003.003',
@@ -8196,7 +8196,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.ntfsFileAttributesDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.ntfsFileAttributesT1564Description',
       { defaultMessage: 'NTFS File Attributes (T1564.004)' }
     ),
     id: 'T1564.004',
@@ -8208,7 +8208,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.netshHelperDllDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.netshHelperDllT1546Description',
       { defaultMessage: 'Netsh Helper DLL (T1546.007)' }
     ),
     id: 'T1546.007',
@@ -8220,7 +8220,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.networkAddressTranslationTraversalDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.networkAddressTranslationTraversalT1599Description',
       { defaultMessage: 'Network Address Translation Traversal (T1599.001)' }
     ),
     id: 'T1599.001',
@@ -8232,7 +8232,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.networkDeviceAuthenticationDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.networkDeviceAuthenticationT1556Description',
       { defaultMessage: 'Network Device Authentication (T1556.004)' }
     ),
     id: 'T1556.004',
@@ -8244,7 +8244,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.networkDeviceCliDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.networkDeviceCliT1059Description',
       { defaultMessage: 'Network Device CLI (T1059.008)' }
     ),
     id: 'T1059.008',
@@ -8256,7 +8256,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.networkDeviceConfigurationDumpDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.networkDeviceConfigurationDumpT1602Description',
       { defaultMessage: 'Network Device Configuration Dump (T1602.002)' }
     ),
     id: 'T1602.002',
@@ -8268,7 +8268,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.networkLogonScriptDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.networkLogonScriptT1037Description',
       { defaultMessage: 'Network Logon Script (T1037.003)' }
     ),
     id: 'T1037.003',
@@ -8280,7 +8280,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.networkSecurityAppliancesDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.networkSecurityAppliancesT1590Description',
       { defaultMessage: 'Network Security Appliances (T1590.006)' }
     ),
     id: 'T1590.006',
@@ -8292,7 +8292,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.networkShareConnectionRemovalDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.networkShareConnectionRemovalT1070Description',
       { defaultMessage: 'Network Share Connection Removal (T1070.005)' }
     ),
     id: 'T1070.005',
@@ -8304,7 +8304,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.networkTopologyDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.networkTopologyT1590Description',
       { defaultMessage: 'Network Topology (T1590.004)' }
     ),
     id: 'T1590.004',
@@ -8316,7 +8316,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.networkTrustDependenciesDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.networkTrustDependenciesT1590Description',
       { defaultMessage: 'Network Trust Dependencies (T1590.003)' }
     ),
     id: 'T1590.003',
@@ -8328,7 +8328,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.nonStandardEncodingDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.nonStandardEncodingT1132Description',
       { defaultMessage: 'Non-Standard Encoding (T1132.002)' }
     ),
     id: 'T1132.002',
@@ -8340,7 +8340,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.osExhaustionFloodDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.osExhaustionFloodT1499Description',
       { defaultMessage: 'OS Exhaustion Flood (T1499.001)' }
     ),
     id: 'T1499.001',
@@ -8352,7 +8352,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.odbcconfDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.odbcconfT1218Description',
       { defaultMessage: 'Odbcconf (T1218.008)' }
     ),
     id: 'T1218.008',
@@ -8364,7 +8364,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.officeTemplateMacrosDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.officeTemplateMacrosT1137Description',
       { defaultMessage: 'Office Template Macros (T1137.001)' }
     ),
     id: 'T1137.001',
@@ -8376,7 +8376,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.officeTestDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.officeTestT1137Description',
       { defaultMessage: 'Office Test (T1137.002)' }
     ),
     id: 'T1137.002',
@@ -8388,7 +8388,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.oneWayCommunicationDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.oneWayCommunicationT1102Description',
       { defaultMessage: 'One-Way Communication (T1102.003)' }
     ),
     id: 'T1102.003',
@@ -8400,7 +8400,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.outlookFormsDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.outlookFormsT1137Description',
       { defaultMessage: 'Outlook Forms (T1137.003)' }
     ),
     id: 'T1137.003',
@@ -8412,7 +8412,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.outlookHomePageDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.outlookHomePageT1137Description',
       { defaultMessage: 'Outlook Home Page (T1137.004)' }
     ),
     id: 'T1137.004',
@@ -8424,7 +8424,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.outlookRulesDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.outlookRulesT1137Description',
       { defaultMessage: 'Outlook Rules (T1137.005)' }
     ),
     id: 'T1137.005',
@@ -8436,7 +8436,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.parentPidSpoofingDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.parentPidSpoofingT1134Description',
       { defaultMessage: 'Parent PID Spoofing (T1134.004)' }
     ),
     id: 'T1134.004',
@@ -8448,7 +8448,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.passTheHashDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.passTheHashT1550Description',
       { defaultMessage: 'Pass the Hash (T1550.002)' }
     ),
     id: 'T1550.002',
@@ -8460,7 +8460,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.passTheTicketDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.passTheTicketT1550Description',
       { defaultMessage: 'Pass the Ticket (T1550.003)' }
     ),
     id: 'T1550.003',
@@ -8472,7 +8472,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.passwordCrackingDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.passwordCrackingT1110Description',
       { defaultMessage: 'Password Cracking (T1110.002)' }
     ),
     id: 'T1110.002',
@@ -8484,7 +8484,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.passwordFilterDllDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.passwordFilterDllT1556Description',
       { defaultMessage: 'Password Filter DLL (T1556.002)' }
     ),
     id: 'T1556.002',
@@ -8496,7 +8496,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.passwordGuessingDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.passwordGuessingT1110Description',
       { defaultMessage: 'Password Guessing (T1110.001)' }
     ),
     id: 'T1110.001',
@@ -8508,7 +8508,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.passwordSprayingDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.passwordSprayingT1110Description',
       { defaultMessage: 'Password Spraying (T1110.003)' }
     ),
     id: 'T1110.003',
@@ -8520,7 +8520,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.patchSystemImageDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.patchSystemImageT1601Description',
       { defaultMessage: 'Patch System Image (T1601.001)' }
     ),
     id: 'T1601.001',
@@ -8532,7 +8532,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.pathInterceptionByPathEnvironmentVariableDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.pathInterceptionByPathEnvironmentVariableT1574Description',
       { defaultMessage: 'Path Interception by PATH Environment Variable (T1574.007)' }
     ),
     id: 'T1574.007',
@@ -8544,7 +8544,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.pathInterceptionBySearchOrderHijackingDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.pathInterceptionBySearchOrderHijackingT1574Description',
       { defaultMessage: 'Path Interception by Search Order Hijacking (T1574.008)' }
     ),
     id: 'T1574.008',
@@ -8556,7 +8556,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.pathInterceptionByUnquotedPathDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.pathInterceptionByUnquotedPathT1574Description',
       { defaultMessage: 'Path Interception by Unquoted Path (T1574.009)' }
     ),
     id: 'T1574.009',
@@ -8568,7 +8568,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.plistModificationDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.plistModificationT1547Description',
       { defaultMessage: 'Plist Modification (T1547.011)' }
     ),
     id: 'T1547.011',
@@ -8580,7 +8580,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.pluggableAuthenticationModulesDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.pluggableAuthenticationModulesT1556Description',
       { defaultMessage: 'Pluggable Authentication Modules (T1556.003)' }
     ),
     id: 'T1556.003',
@@ -8592,7 +8592,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.portKnockingDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.portKnockingT1205Description',
       { defaultMessage: 'Port Knocking (T1205.001)' }
     ),
     id: 'T1205.001',
@@ -8604,7 +8604,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.portMonitorsDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.portMonitorsT1547Description',
       { defaultMessage: 'Port Monitors (T1547.010)' }
     ),
     id: 'T1547.010',
@@ -8616,7 +8616,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.portableExecutableInjectionDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.portableExecutableInjectionT1055Description',
       { defaultMessage: 'Portable Executable Injection (T1055.002)' }
     ),
     id: 'T1055.002',
@@ -8628,7 +8628,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.powerShellDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.powerShellT1059Description',
       { defaultMessage: 'PowerShell (T1059.001)' }
     ),
     id: 'T1059.001',
@@ -8640,7 +8640,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.powerShellProfileDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.powerShellProfileT1546Description',
       { defaultMessage: 'PowerShell Profile (T1546.013)' }
     ),
     id: 'T1546.013',
@@ -8652,7 +8652,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.printProcessorsDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.printProcessorsT1547Description',
       { defaultMessage: 'Print Processors (T1547.012)' }
     ),
     id: 'T1547.012',
@@ -8664,7 +8664,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.privateKeysDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.privateKeysT1552Description',
       { defaultMessage: 'Private Keys (T1552.004)' }
     ),
     id: 'T1552.004',
@@ -8676,7 +8676,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.procFilesystemDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.procFilesystemT1003Description',
       { defaultMessage: 'Proc Filesystem (T1003.007)' }
     ),
     id: 'T1003.007',
@@ -8688,7 +8688,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.procMemoryDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.procMemoryT1055Description',
       { defaultMessage: 'Proc Memory (T1055.009)' }
     ),
     id: 'T1055.009',
@@ -8700,7 +8700,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.processDoppelgangingDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.processDoppelgangingT1055Description',
       { defaultMessage: 'Process Doppelgänging (T1055.013)' }
     ),
     id: 'T1055.013',
@@ -8712,7 +8712,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.processHollowingDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.processHollowingT1055Description',
       { defaultMessage: 'Process Hollowing (T1055.012)' }
     ),
     id: 'T1055.012',
@@ -8724,7 +8724,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.protocolImpersonationDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.protocolImpersonationT1001Description',
       { defaultMessage: 'Protocol Impersonation (T1001.003)' }
     ),
     id: 'T1001.003',
@@ -8736,7 +8736,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.ptraceSystemCallsDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.ptraceSystemCallsT1055Description',
       { defaultMessage: 'Ptrace System Calls (T1055.008)' }
     ),
     id: 'T1055.008',
@@ -8748,7 +8748,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.pubPrnDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.pubPrnT1216Description',
       { defaultMessage: 'PubPrn (T1216.001)' }
     ),
     id: 'T1216.001',
@@ -8760,7 +8760,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.purchaseTechnicalDataDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.purchaseTechnicalDataT1597Description',
       { defaultMessage: 'Purchase Technical Data (T1597.002)' }
     ),
     id: 'T1597.002',
@@ -8772,7 +8772,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.pythonDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.pythonT1059Description',
       { defaultMessage: 'Python (T1059.006)' }
     ),
     id: 'T1059.006',
@@ -8784,7 +8784,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.rdpHijackingDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.rdpHijackingT1563Description',
       { defaultMessage: 'RDP Hijacking (T1563.002)' }
     ),
     id: 'T1563.002',
@@ -8796,7 +8796,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.rommoNkitDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.rommoNkitT1542Description',
       { defaultMessage: 'ROMMONkit (T1542.004)' }
     ),
     id: 'T1542.004',
@@ -8808,7 +8808,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.rcCommonDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.rcCommonT1037Description',
       { defaultMessage: 'Rc.common (T1037.004)' }
     ),
     id: 'T1037.004',
@@ -8820,7 +8820,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.reOpenedApplicationsDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.reOpenedApplicationsT1547Description',
       { defaultMessage: 'Re-opened Applications (T1547.007)' }
     ),
     id: 'T1547.007',
@@ -8832,7 +8832,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.reduceKeySpaceDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.reduceKeySpaceT1600Description',
       { defaultMessage: 'Reduce Key Space (T1600.001)' }
     ),
     id: 'T1600.001',
@@ -8844,7 +8844,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.reflectionAmplificationDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.reflectionAmplificationT1498Description',
       { defaultMessage: 'Reflection Amplification (T1498.002)' }
     ),
     id: 'T1498.002',
@@ -8856,7 +8856,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.registryRunKeysStartupFolderDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.registryRunKeysStartupFolderT1547Description',
       { defaultMessage: 'Registry Run Keys / Startup Folder (T1547.001)' }
     ),
     id: 'T1547.001',
@@ -8868,7 +8868,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.regsvcsRegasmDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.regsvcsRegasmT1218Description',
       { defaultMessage: 'Regsvcs/Regasm (T1218.009)' }
     ),
     id: 'T1218.009',
@@ -8880,7 +8880,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.regsvr32Description',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.regsvr32T1218Description',
       { defaultMessage: 'Regsvr32 (T1218.010)' }
     ),
     id: 'T1218.010',
@@ -8892,7 +8892,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.remoteDataStagingDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.remoteDataStagingT1074Description',
       { defaultMessage: 'Remote Data Staging (T1074.002)' }
     ),
     id: 'T1074.002',
@@ -8904,7 +8904,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.remoteDesktopProtocolDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.remoteDesktopProtocolT1021Description',
       { defaultMessage: 'Remote Desktop Protocol (T1021.001)' }
     ),
     id: 'T1021.001',
@@ -8916,7 +8916,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.remoteEmailCollectionDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.remoteEmailCollectionT1114Description',
       { defaultMessage: 'Remote Email Collection (T1114.002)' }
     ),
     id: 'T1114.002',
@@ -8928,7 +8928,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.renameSystemUtilitiesDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.renameSystemUtilitiesT1036Description',
       { defaultMessage: 'Rename System Utilities (T1036.003)' }
     ),
     id: 'T1036.003',
@@ -8940,7 +8940,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.revertCloudInstanceDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.revertCloudInstanceT1578Description',
       { defaultMessage: 'Revert Cloud Instance (T1578.004)' }
     ),
     id: 'T1578.004',
@@ -8952,7 +8952,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.rightToLeftOverrideDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.rightToLeftOverrideT1036Description',
       { defaultMessage: 'Right-to-Left Override (T1036.002)' }
     ),
     id: 'T1036.002',
@@ -8964,7 +8964,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.runVirtualInstanceDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.runVirtualInstanceT1564Description',
       { defaultMessage: 'Run Virtual Instance (T1564.006)' }
     ),
     id: 'T1564.006',
@@ -8976,7 +8976,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.rundll32Description',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.rundll32T1218Description',
       { defaultMessage: 'Rundll32 (T1218.011)' }
     ),
     id: 'T1218.011',
@@ -8988,7 +8988,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.runtimeDataManipulationDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.runtimeDataManipulationT1565Description',
       { defaultMessage: 'Runtime Data Manipulation (T1565.003)' }
     ),
     id: 'T1565.003',
@@ -9000,7 +9000,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.sidHistoryInjectionDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.sidHistoryInjectionT1134Description',
       { defaultMessage: 'SID-History Injection (T1134.005)' }
     ),
     id: 'T1134.005',
@@ -9012,7 +9012,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.sipAndTrustProviderHijackingDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.sipAndTrustProviderHijackingT1553Description',
       { defaultMessage: 'SIP and Trust Provider Hijacking (T1553.003)' }
     ),
     id: 'T1553.003',
@@ -9024,7 +9024,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.smbWindowsAdminSharesDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.smbWindowsAdminSharesT1021Description',
       { defaultMessage: 'SMB/Windows Admin Shares (T1021.002)' }
     ),
     id: 'T1021.002',
@@ -9036,7 +9036,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.snmpMibDumpDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.snmpMibDumpT1602Description',
       { defaultMessage: 'SNMP (MIB Dump) (T1602.001)' }
     ),
     id: 'T1602.001',
@@ -9048,7 +9048,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.sqlStoredProceduresDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.sqlStoredProceduresT1505Description',
       { defaultMessage: 'SQL Stored Procedures (T1505.001)' }
     ),
     id: 'T1505.001',
@@ -9060,7 +9060,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.sshDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.sshT1021Description',
       { defaultMessage: 'SSH (T1021.004)' }
     ),
     id: 'T1021.004',
@@ -9072,7 +9072,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.sshAuthorizedKeysDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.sshAuthorizedKeysT1098Description',
       { defaultMessage: 'SSH Authorized Keys (T1098.004)' }
     ),
     id: 'T1098.004',
@@ -9084,7 +9084,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.sshHijackingDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.sshHijackingT1563Description',
       { defaultMessage: 'SSH Hijacking (T1563.001)' }
     ),
     id: 'T1563.001',
@@ -9096,7 +9096,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.scanDatabasesDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.scanDatabasesT1596Description',
       { defaultMessage: 'Scan Databases (T1596.005)' }
     ),
     id: 'T1596.005',
@@ -9108,7 +9108,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.scanningIpBlocksDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.scanningIpBlocksT1595Description',
       { defaultMessage: 'Scanning IP Blocks (T1595.001)' }
     ),
     id: 'T1595.001',
@@ -9120,7 +9120,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.scheduledTaskDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.scheduledTaskT1053Description',
       { defaultMessage: 'Scheduled Task (T1053.005)' }
     ),
     id: 'T1053.005',
@@ -9132,7 +9132,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.screensaverDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.screensaverT1546Description',
       { defaultMessage: 'Screensaver (T1546.002)' }
     ),
     id: 'T1546.002',
@@ -9144,7 +9144,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.searchEnginesDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.searchEnginesT1593Description',
       { defaultMessage: 'Search Engines (T1593.002)' }
     ),
     id: 'T1593.002',
@@ -9156,7 +9156,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.securityAccountManagerDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.securityAccountManagerT1003Description',
       { defaultMessage: 'Security Account Manager (T1003.002)' }
     ),
     id: 'T1003.002',
@@ -9168,7 +9168,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.securitySoftwareDiscoveryDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.securitySoftwareDiscoveryT1518Description',
       { defaultMessage: 'Security Software Discovery (T1518.001)' }
     ),
     id: 'T1518.001',
@@ -9180,7 +9180,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.securitySupportProviderDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.securitySupportProviderT1547Description',
       { defaultMessage: 'Security Support Provider (T1547.005)' }
     ),
     id: 'T1547.005',
@@ -9192,7 +9192,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.securitydMemoryDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.securitydMemoryT1555Description',
       { defaultMessage: 'Securityd Memory (T1555.002)' }
     ),
     id: 'T1555.002',
@@ -9204,7 +9204,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.serverDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.serverT1583Description',
       { defaultMessage: 'Server (T1583.004)' }
     ),
     id: 'T1583.004',
@@ -9216,7 +9216,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.serverDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.serverT1584Description',
       { defaultMessage: 'Server (T1584.004)' }
     ),
     id: 'T1584.004',
@@ -9228,7 +9228,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.serviceExecutionDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.serviceExecutionT1569Description',
       { defaultMessage: 'Service Execution (T1569.002)' }
     ),
     id: 'T1569.002',
@@ -9240,7 +9240,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.serviceExhaustionFloodDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.serviceExhaustionFloodT1499Description',
       { defaultMessage: 'Service Exhaustion Flood (T1499.002)' }
     ),
     id: 'T1499.002',
@@ -9252,7 +9252,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.servicesFilePermissionsWeaknessDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.servicesFilePermissionsWeaknessT1574Description',
       { defaultMessage: 'Services File Permissions Weakness (T1574.010)' }
     ),
     id: 'T1574.010',
@@ -9264,7 +9264,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.servicesRegistryPermissionsWeaknessDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.servicesRegistryPermissionsWeaknessT1574Description',
       { defaultMessage: 'Services Registry Permissions Weakness (T1574.011)' }
     ),
     id: 'T1574.011',
@@ -9276,7 +9276,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.setuidAndSetgidDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.setuidAndSetgidT1548Description',
       { defaultMessage: 'Setuid and Setgid (T1548.001)' }
     ),
     id: 'T1548.001',
@@ -9288,7 +9288,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.sharepointDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.sharepointT1213Description',
       { defaultMessage: 'Sharepoint (T1213.002)' }
     ),
     id: 'T1213.002',
@@ -9300,7 +9300,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.shortcutModificationDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.shortcutModificationT1547Description',
       { defaultMessage: 'Shortcut Modification (T1547.009)' }
     ),
     id: 'T1547.009',
@@ -9312,7 +9312,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.silverTicketDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.silverTicketT1558Description',
       { defaultMessage: 'Silver Ticket (T1558.002)' }
     ),
     id: 'T1558.002',
@@ -9324,7 +9324,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.socialMediaDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.socialMediaT1593Description',
       { defaultMessage: 'Social Media (T1593.001)' }
     ),
     id: 'T1593.001',
@@ -9336,7 +9336,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.socialMediaAccountsDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.socialMediaAccountsT1585Description',
       { defaultMessage: 'Social Media Accounts (T1585.001)' }
     ),
     id: 'T1585.001',
@@ -9348,7 +9348,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.socialMediaAccountsDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.socialMediaAccountsT1586Description',
       { defaultMessage: 'Social Media Accounts (T1586.001)' }
     ),
     id: 'T1586.001',
@@ -9360,7 +9360,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.softwareDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.softwareT1592Description',
       { defaultMessage: 'Software (T1592.002)' }
     ),
     id: 'T1592.002',
@@ -9372,7 +9372,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.softwarePackingDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.softwarePackingT1027Description',
       { defaultMessage: 'Software Packing (T1027.002)' }
     ),
     id: 'T1027.002',
@@ -9384,7 +9384,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.spaceAfterFilenameDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.spaceAfterFilenameT1036Description',
       { defaultMessage: 'Space after Filename (T1036.006)' }
     ),
     id: 'T1036.006',
@@ -9396,7 +9396,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.spearphishingAttachmentDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.spearphishingAttachmentT1566Description',
       { defaultMessage: 'Spearphishing Attachment (T1566.001)' }
     ),
     id: 'T1566.001',
@@ -9408,7 +9408,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.spearphishingAttachmentDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.spearphishingAttachmentT1598Description',
       { defaultMessage: 'Spearphishing Attachment (T1598.002)' }
     ),
     id: 'T1598.002',
@@ -9420,7 +9420,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.spearphishingLinkDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.spearphishingLinkT1566Description',
       { defaultMessage: 'Spearphishing Link (T1566.002)' }
     ),
     id: 'T1566.002',
@@ -9432,7 +9432,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.spearphishingLinkDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.spearphishingLinkT1598Description',
       { defaultMessage: 'Spearphishing Link (T1598.003)' }
     ),
     id: 'T1598.003',
@@ -9444,7 +9444,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.spearphishingServiceDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.spearphishingServiceT1598Description',
       { defaultMessage: 'Spearphishing Service (T1598.001)' }
     ),
     id: 'T1598.001',
@@ -9456,7 +9456,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.spearphishingViaServiceDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.spearphishingViaServiceT1566Description',
       { defaultMessage: 'Spearphishing via Service (T1566.003)' }
     ),
     id: 'T1566.003',
@@ -9468,7 +9468,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.standardEncodingDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.standardEncodingT1132Description',
       { defaultMessage: 'Standard Encoding (T1132.001)' }
     ),
     id: 'T1132.001',
@@ -9480,7 +9480,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.startupItemsDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.startupItemsT1037Description',
       { defaultMessage: 'Startup Items (T1037.005)' }
     ),
     id: 'T1037.005',
@@ -9492,7 +9492,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.steganographyDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.steganographyT1027Description',
       { defaultMessage: 'Steganography (T1027.003)' }
     ),
     id: 'T1027.003',
@@ -9504,7 +9504,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.steganographyDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.steganographyT1001Description',
       { defaultMessage: 'Steganography (T1001.002)' }
     ),
     id: 'T1001.002',
@@ -9516,7 +9516,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.storedDataManipulationDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.storedDataManipulationT1565Description',
       { defaultMessage: 'Stored Data Manipulation (T1565.001)' }
     ),
     id: 'T1565.001',
@@ -9528,7 +9528,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.sudoAndSudoCachingDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.sudoAndSudoCachingT1548Description',
       { defaultMessage: 'Sudo and Sudo Caching (T1548.003)' }
     ),
     id: 'T1548.003',
@@ -9540,7 +9540,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.symmetricCryptographyDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.symmetricCryptographyT1573Description',
       { defaultMessage: 'Symmetric Cryptography (T1573.001)' }
     ),
     id: 'T1573.001',
@@ -9552,7 +9552,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.systemChecksDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.systemChecksT1497Description',
       { defaultMessage: 'System Checks (T1497.001)' }
     ),
     id: 'T1497.001',
@@ -9564,7 +9564,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.systemFirmwareDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.systemFirmwareT1542Description',
       { defaultMessage: 'System Firmware (T1542.001)' }
     ),
     id: 'T1542.001',
@@ -9576,7 +9576,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.systemdServiceDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.systemdServiceT1543Description',
       { defaultMessage: 'Systemd Service (T1543.002)' }
     ),
     id: 'T1543.002',
@@ -9588,7 +9588,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.systemdTimersDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.systemdTimersT1053Description',
       { defaultMessage: 'Systemd Timers (T1053.006)' }
     ),
     id: 'T1053.006',
@@ -9600,7 +9600,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.tftpBootDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.tftpBootT1542Description',
       { defaultMessage: 'TFTP Boot (T1542.005)' }
     ),
     id: 'T1542.005',
@@ -9612,7 +9612,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.threadExecutionHijackingDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.threadExecutionHijackingT1055Description',
       { defaultMessage: 'Thread Execution Hijacking (T1055.003)' }
     ),
     id: 'T1055.003',
@@ -9624,7 +9624,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.threadLocalStorageDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.threadLocalStorageT1055Description',
       { defaultMessage: 'Thread Local Storage (T1055.005)' }
     ),
     id: 'T1055.005',
@@ -9636,7 +9636,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.threatIntelVendorsDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.threatIntelVendorsT1597Description',
       { defaultMessage: 'Threat Intel Vendors (T1597.001)' }
     ),
     id: 'T1597.001',
@@ -9648,7 +9648,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.timeBasedEvasionDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.timeBasedEvasionT1497Description',
       { defaultMessage: 'Time Based Evasion (T1497.003)' }
     ),
     id: 'T1497.003',
@@ -9660,7 +9660,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.timeProvidersDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.timeProvidersT1547Description',
       { defaultMessage: 'Time Providers (T1547.003)' }
     ),
     id: 'T1547.003',
@@ -9672,7 +9672,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.timestompDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.timestompT1070Description',
       { defaultMessage: 'Timestomp (T1070.006)' }
     ),
     id: 'T1070.006',
@@ -9684,7 +9684,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.tokenImpersonationTheftDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.tokenImpersonationTheftT1134Description',
       { defaultMessage: 'Token Impersonation/Theft (T1134.001)' }
     ),
     id: 'T1134.001',
@@ -9696,7 +9696,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.toolDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.toolT1588Description',
       { defaultMessage: 'Tool (T1588.002)' }
     ),
     id: 'T1588.002',
@@ -9708,7 +9708,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.trafficDuplicationDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.trafficDuplicationT1020Description',
       { defaultMessage: 'Traffic Duplication (T1020.001)' }
     ),
     id: 'T1020.001',
@@ -9720,7 +9720,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.transmittedDataManipulationDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.transmittedDataManipulationT1565Description',
       { defaultMessage: 'Transmitted Data Manipulation (T1565.002)' }
     ),
     id: 'T1565.002',
@@ -9732,7 +9732,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.transportAgentDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.transportAgentT1505Description',
       { defaultMessage: 'Transport Agent (T1505.002)' }
     ),
     id: 'T1505.002',
@@ -9744,7 +9744,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.trapDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.trapT1546Description',
       { defaultMessage: 'Trap (T1546.005)' }
     ),
     id: 'T1546.005',
@@ -9756,7 +9756,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.unixShellDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.unixShellT1059Description',
       { defaultMessage: 'Unix Shell (T1059.004)' }
     ),
     id: 'T1059.004',
@@ -9768,7 +9768,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.userActivityBasedChecksDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.userActivityBasedChecksT1497Description',
       { defaultMessage: 'User Activity Based Checks (T1497.002)' }
     ),
     id: 'T1497.002',
@@ -9780,7 +9780,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.vbaStompingDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.vbaStompingT1564Description',
       { defaultMessage: 'VBA Stomping (T1564.007)' }
     ),
     id: 'T1564.007',
@@ -9792,7 +9792,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.vdsoHijackingDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.vdsoHijackingT1055Description',
       { defaultMessage: 'VDSO Hijacking (T1055.014)' }
     ),
     id: 'T1055.014',
@@ -9804,7 +9804,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.vncDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.vncT1021Description',
       { defaultMessage: 'VNC (T1021.005)' }
     ),
     id: 'T1021.005',
@@ -9816,7 +9816,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.verclsidDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.verclsidT1218Description',
       { defaultMessage: 'Verclsid (T1218.012)' }
     ),
     id: 'T1218.012',
@@ -9828,7 +9828,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.virtualPrivateServerDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.virtualPrivateServerT1583Description',
       { defaultMessage: 'Virtual Private Server (T1583.003)' }
     ),
     id: 'T1583.003',
@@ -9840,7 +9840,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.virtualPrivateServerDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.virtualPrivateServerT1584Description',
       { defaultMessage: 'Virtual Private Server (T1584.003)' }
     ),
     id: 'T1584.003',
@@ -9852,7 +9852,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.visualBasicDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.visualBasicT1059Description',
       { defaultMessage: 'Visual Basic (T1059.005)' }
     ),
     id: 'T1059.005',
@@ -9864,7 +9864,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.vulnerabilitiesDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.vulnerabilitiesT1588Description',
       { defaultMessage: 'Vulnerabilities (T1588.006)' }
     ),
     id: 'T1588.006',
@@ -9876,7 +9876,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.vulnerabilityScanningDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.vulnerabilityScanningT1595Description',
       { defaultMessage: 'Vulnerability Scanning (T1595.002)' }
     ),
     id: 'T1595.002',
@@ -9888,7 +9888,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.whoisDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.whoisT1596Description',
       { defaultMessage: 'WHOIS (T1596.002)' }
     ),
     id: 'T1596.002',
@@ -9900,7 +9900,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.webPortalCaptureDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.webPortalCaptureT1056Description',
       { defaultMessage: 'Web Portal Capture (T1056.003)' }
     ),
     id: 'T1056.003',
@@ -9912,7 +9912,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.webProtocolsDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.webProtocolsT1071Description',
       { defaultMessage: 'Web Protocols (T1071.001)' }
     ),
     id: 'T1071.001',
@@ -9924,7 +9924,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.webServicesDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.webServicesT1583Description',
       { defaultMessage: 'Web Services (T1583.006)' }
     ),
     id: 'T1583.006',
@@ -9936,7 +9936,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.webServicesDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.webServicesT1584Description',
       { defaultMessage: 'Web Services (T1584.006)' }
     ),
     id: 'T1584.006',
@@ -9948,7 +9948,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.webSessionCookieDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.webSessionCookieT1550Description',
       { defaultMessage: 'Web Session Cookie (T1550.004)' }
     ),
     id: 'T1550.004',
@@ -9960,7 +9960,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.webShellDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.webShellT1505Description',
       { defaultMessage: 'Web Shell (T1505.003)' }
     ),
     id: 'T1505.003',
@@ -9972,7 +9972,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.windowsCommandShellDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.windowsCommandShellT1059Description',
       { defaultMessage: 'Windows Command Shell (T1059.003)' }
     ),
     id: 'T1059.003',
@@ -9984,7 +9984,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.windowsFileAndDirectoryPermissionsModificationDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.windowsFileAndDirectoryPermissionsModificationT1222Description',
       { defaultMessage: 'Windows File and Directory Permissions Modification (T1222.001)' }
     ),
     id: 'T1222.001',
@@ -9996,7 +9996,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.windowsManagementInstrumentationEventSubscriptionDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.windowsManagementInstrumentationEventSubscriptionT1546Description',
       { defaultMessage: 'Windows Management Instrumentation Event Subscription (T1546.003)' }
     ),
     id: 'T1546.003',
@@ -10008,7 +10008,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.windowsRemoteManagementDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.windowsRemoteManagementT1021Description',
       { defaultMessage: 'Windows Remote Management (T1021.006)' }
     ),
     id: 'T1021.006',
@@ -10020,7 +10020,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.windowsServiceDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.windowsServiceT1543Description',
       { defaultMessage: 'Windows Service (T1543.003)' }
     ),
     id: 'T1543.003',
@@ -10032,7 +10032,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.winlogonHelperDllDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.winlogonHelperDllT1547Description',
       { defaultMessage: 'Winlogon Helper DLL (T1547.004)' }
     ),
     id: 'T1547.004',

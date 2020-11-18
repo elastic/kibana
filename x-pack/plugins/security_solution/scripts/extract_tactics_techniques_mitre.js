@@ -52,9 +52,9 @@ const getSubtechniquesOptions = (subtechniques) =>
   subtechniques.map((t) =>
     `{
   label: i18n.translate(
-    'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.${camelCase(
-      t.name
-    )}Description', {
+    'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.${camelCase(t.name)}${
+      t.techniqueId // Seperates subtechniques that have the same name but belong to different techniques
+    }Description', {
       defaultMessage: '${t.name} (${t.id})'
   }),
   id: '${t.id}',

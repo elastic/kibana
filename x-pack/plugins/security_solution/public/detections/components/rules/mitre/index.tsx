@@ -93,7 +93,9 @@ export const AddMitreThreat = memo(({ field, idAria, isDisabled }: AddItemProps)
     [field]
   );
 
-  const values = [...(field.value as IMitreEnterpriseAttack[])];
+  const values = useMemo(() => {
+    return [...(field.value as IMitreEnterpriseAttack[])];
+  }, [field]);
 
   const isTacticValid = useCallback((threat: IMitreEnterpriseAttack) => {
     return isMitreAttackInvalid(threat.tactic.name, threat.technique);
