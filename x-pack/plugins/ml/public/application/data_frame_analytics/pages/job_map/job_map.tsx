@@ -48,7 +48,7 @@ export const JobMapTitle: React.FC<{ analyticsId?: string; modelId?: string }> =
             defaultMessage: 'Map for analytics ID {analyticsId}',
             values: { analyticsId },
           })
-        : i18n.translate('xpack.ml.dataframe.analyticsMap.analyticsIdTitle', {
+        : i18n.translate('xpack.ml.dataframe.analyticsMap.modelIdTitle', {
             defaultMessage: 'Map for trained model ID {modelId}',
             values: { modelId },
           })}

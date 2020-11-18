@@ -68,5 +68,20 @@ export const JobMapLegend: FC = () => (
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiFlexItem>
+    <EuiFlexItem grow={false}>
+      <EuiFlexGroup gutterSize="xs" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <span className="mlJobMapLegend__sourceNode" />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiText size="xs" color="subdued">
+            <FormattedMessage
+              id="xpack.ml.dataframe.analyticsMap.legend.rootNodeLabel"
+              defaultMessage="source node"
+            />
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiFlexItem>
   </EuiFlexGroup>
 );
