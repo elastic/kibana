@@ -10,6 +10,7 @@ node scripts/build_kibana_platform_plugins \
   --filter '!alertingExample' \
   --scan-dir "$KIBANA_DIR/test/plugin_functional/plugins" \
   --scan-dir "$KIBANA_DIR/test/interpreter_functional/plugins" \
+  --scan-dir "$KIBANA_DIR/test/common/fixtures/plugins" \
   --verbose
 tc_end_block "Build Platform Plugins"
 

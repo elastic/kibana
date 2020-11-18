@@ -7,6 +7,7 @@ source "$(dirname "${0}")/../util.sh"
 tc_start_block "Build Platform Plugins"
 node scripts/build_kibana_platform_plugins \
   --scan-dir "$KIBANA_DIR/test/plugin_functional/plugins" \
+  --scan-dir "$KIBANA_DIR/test/common/fixtures/plugins" \
   --scan-dir "$XPACK_DIR/test/plugin_functional/plugins" \
   --scan-dir "$XPACK_DIR/test/functional_with_es_ssl/fixtures/plugins" \
   --scan-dir "$XPACK_DIR/test/alerting_api_integration/plugins" \
