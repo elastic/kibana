@@ -8,33 +8,137 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  // See: https://github.com/elastic/kibana/issues/81397
-  describe.skip('GlobalSearchBar', function () {
-    const { common } = getPageObjects(['common']);
-    const find = getService('find');
-    const testSubjects = getService('testSubjects');
+  describe('GlobalSearchBar', function () {
+    const { common, navigationalSearch } = getPageObjects(['common', 'navigationalSearch']);
+    const esArchiver = getService('esArchiver');
     const browser = getService('browser');
 
     before(async () => {
+      await esArchiver.load('global_search/search_syntax');
       await common.navigateToApp('home');
     });
 
-    it('basically works', async () => {
-      const field = await testSubjects.find('header-search');
-      await field.click();
+    after(async () => {
+      await esArchiver.unload('global_search/search_syntax');
+    });
 
-      expect((await testSubjects.findAll('header-search-option')).length).to.be(15);
+    afterEach(async () => {
+      await navigationalSearch.blur();
+    });
 
-      field.type('d');
+    it('shows the popover on focus', async () => {
+      await navigationalSearch.focus();
 
-      const options = await testSubjects.findAll('header-search-option');
+      expect(await navigationalSearch.isPopoverDisplayed()).to.eql(true);
 
-      expect(options.length).to.be(6);
+      await navigationalSearch.blur();
 
-      await options[1].click();
+      expect(await navigationalSearch.isPopoverDisplayed()).to.eql(false);
+    });
+
+    it('redirects to the correct page', async () => {
+      await navigationalSearch.searchFor('type:application discover');
+      await navigationalSearch.clickOnOption(0);
 
       expect(await browser.getCurrentUrl()).to.contain('discover');
-      expect(await (await find.activeElement()).getTagName()).to.be('body');
+    });
+
+    describe('advanced search syntax', () => {
+      it('allows to filter by type', async () => {
+        await navigationalSearch.searchFor('type:dashboard');
+
+        const results = await navigationalSearch.getDisplayedResults();
+
+        expect(results.map((result) => result.label)).to.eql([
+          'dashboard 1 (tag-2)',
+          'dashboard 2 (tag-3)',
+          'dashboard 3 (tag-1 and tag-3)',
+        ]);
+      });
+
+      it('allows to filter by multiple types', async () => {
+        await navigationalSearch.searchFor('type:(dashboard OR visualization)');
+
+        const results = await navigationalSearch.getDisplayedResults();
+
+        expect(results.map((result) => result.label)).to.eql([
+          'Visualization 1 (tag-1)',
+          'Visualization 2 (tag-2)',
+          'Visualization 3 (tag-1 + tag-3)',
+          'Visualization 4 (tag-2)',
+          'My awesome vis (tag-4)',
+          'dashboard 1 (tag-2)',
+          'dashboard 2 (tag-3)',
+          'dashboard 3 (tag-1 and tag-3)',
+        ]);
+      });
+
+      it('allows to filter by tag', async () => {
+        await navigationalSearch.searchFor('tag:tag-1');
+
+        const results = await navigationalSearch.getDisplayedResults();
+
+        expect(results.map((result) => result.label)).to.eql([
+          'Visualization 1 (tag-1)',
+          'Visualization 3 (tag-1 + tag-3)',
+          'dashboard 3 (tag-1 and tag-3)',
+        ]);
+      });
+
+      it('allows to filter by multiple tags', async () => {
+        await navigationalSearch.searchFor('tag:tag-1 tag:tag-3');
+
+        const results = await navigationalSearch.getDisplayedResults();
+
+        expect(results.map((result) => result.label)).to.eql([
+          'Visualization 1 (tag-1)',
+          'Visualization 3 (tag-1 + tag-3)',
+          'dashboard 2 (tag-3)',
+          'dashboard 3 (tag-1 and tag-3)',
+        ]);
+      });
+
+      it('allows to filter by type and tag', async () => {
+        await navigationalSearch.searchFor('type:dashboard tag:tag-3');
+
+        const results = await navigationalSearch.getDisplayedResults();
+
+        expect(results.map((result) => result.label)).to.eql([
+          'dashboard 2 (tag-3)',
+          'dashboard 3 (tag-1 and tag-3)',
+        ]);
+      });
+
+      it('allows to filter by multiple types and tags', async () => {
+        await navigationalSearch.searchFor(
+          'type:(dashboard OR visualization) tag:(tag-1 OR tag-3)'
+        );
+
+        const results = await navigationalSearch.getDisplayedResults();
+
+        expect(results.map((result) => result.label)).to.eql([
+          'Visualization 1 (tag-1)',
+          'Visualization 3 (tag-1 + tag-3)',
+          'dashboard 2 (tag-3)',
+          'dashboard 3 (tag-1 and tag-3)',
+        ]);
+      });
+
+      it('allows to filter by term and type', async () => {
+        await navigationalSearch.searchFor('type:visualization awesome');
+
+        const results = await navigationalSearch.getDisplayedResults();
+
+        expect(results.map((result) => result.label)).to.eql(['My awesome vis (tag-4)']);
+      });
+
+      it('allows to filter by term and tag', async () => {
+        await navigationalSearch.searchFor('tag:tag-4 awesome');
+
+        const results = await navigationalSearch.getDisplayedResults();
+
+        expect(results.map((result) => result.label)).to.eql(['My awesome vis (tag-4)']);
+      });
     });
   });
 }

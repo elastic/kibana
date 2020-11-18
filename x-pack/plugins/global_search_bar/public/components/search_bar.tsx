@@ -76,6 +76,7 @@ const resultToOption = (result: GlobalSearchResult): EuiSelectableTemplateSitewi
     label: title,
     url,
     type,
+    'data-test-subj': `nav-search-option`,
   };
 
   if (icon) {
@@ -221,7 +222,7 @@ export function SearchBar({
   };
 
   const emptyMessage = (
-    <EuiSelectableMessage style={{ minHeight: 300 }}>
+    <EuiSelectableMessage style={{ minHeight: 300 }} data-test-subj="nav-search-no-results">
       <EuiImage
         alt={i18n.translate('xpack.globalSearchBar.searchBar.noResultsImageAlt', {
           defaultMessage: 'Illustration of black hole',
@@ -270,7 +271,7 @@ export function SearchBar({
         onSearch: () => undefined,
         onKeyUpCapture: (e: React.KeyboardEvent<HTMLInputElement>) =>
           setSearchValue(e.currentTarget.value),
-        'data-test-subj': 'header-search',
+        'data-test-subj': 'nav-search-input',
         inputRef: setSearchRef,
         compressed: true,
         placeholder: i18n.translate('xpack.globalSearchBar.searchBar.placeholder', {
@@ -281,6 +282,8 @@ export function SearchBar({
         },
       }}
       popoverProps={{
+        'data-test-subj': 'nav-search-popover',
+        panelClassName: 'navSearch__panel',
         repositionOnScroll: true,
         buttonRef: setButtonRef,
       }}
