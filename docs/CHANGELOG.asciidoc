@@ -10,30 +10,18 @@
 
 Review important information about {kib} releases. 
 
-* <<release-notes-prototype>>
+* <<release-notes-prototype-major>>
 
 --
 
-[[release-notes-prototype]]
-== {kib} 7.0.0 -- high-level of cool, or group of cool, new features in this release
+[[release-notes-prototype-major]]
+== {kib} 7.0.0 released with a fresh, sleek look and more
 
-coming[7.0.0]
 
-This is a summary of a cool, or a group of cool, new features in this release. For the features introduced in 7.0.0, refer to link:https://www.elastic.co/blog/kibana-7-0-0-released[Kibana 7.0.0 released].
 
 To learn more about the {kib} 7.0.0 release, review the following:
 
-* <<enhancements-7.0.0>>
-
-* <<breaking-changes-7.0.0>>
-
-* <<deprecations-7.0.0>>
-
-* <<bug-fixes-7.0.0>>
-
-* <<security-updates-7.0.0>>
-
-* <<known-issues-7.0.0>>
+<<enhancements-7.0.0>> | <<breaking-changes-7.0.0>> | <<deprecations-7.0.0>> | <<bug-fixes-7.0.0>> | <<security-updates-7.0.0>> | <<known-issues-7.0.0>>
 
 [[breaking-changes-7.0.0]]
 === Breaking changes
