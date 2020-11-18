@@ -107,7 +107,7 @@ describe('applicationResultProvider', () => {
     expect(getAppResultsMock).toHaveBeenCalledWith('term', [expectApp('app1'), expectApp('app2')]);
   });
 
-  it('do not calls `getAppResults` and return no results when filtering by type with `application` not included', async () => {
+  it('does not call `getAppResults` and return no results when filtering by type with `application` not included', async () => {
     application.applications$ = of(
       createAppMap([
         createApp({ id: 'app1', title: 'App 1' }),
@@ -125,7 +125,23 @@ describe('applicationResultProvider', () => {
     expect(results).toEqual([]);
   });
 
-  ////////
+  it('does not call `getAppResults` and returns no results when filtering by tag', async () => {
+    application.applications$ = of(
+      createAppMap([
+        createApp({ id: 'app1', title: 'App 1' }),
+        createApp({ id: 'app2', title: 'App 2' }),
+        createApp({ id: 'app3', title: 'App 3' }),
+      ])
+    );
+    const provider = createApplicationResultProvider(Promise.resolve(application));
+
+    const results = await provider
+      .find({ term: 'term', tags: ['some-tag-id'] }, defaultOption)
+      .toPromise();
+
+    expect(getAppResultsMock).not.toHaveBeenCalled();
+    expect(results).toEqual([]);
+  });
 
   it('ignores inaccessible apps', async () => {
     application.applications$ = of(

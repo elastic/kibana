@@ -30,11 +30,13 @@ import {
   GlobalSearchResult,
   GlobalSearchFindParams,
 } from '../../../global_search/public';
+import { SavedObjectTaggingPluginStart } from '../../../saved_objects_tagging/public';
 import { parseSearchParams } from '../search_syntax';
 
 interface Props {
   globalSearch: GlobalSearchPluginStart['find'];
   navigateToUrl: ApplicationStart['navigateToUrl'];
+  taggingApi?: SavedObjectTaggingPluginStart;
   trackUiMetric: (metricType: UiStatsMetricType, eventName: string | string[]) => void;
   basePathUrl: string;
   darkMode: boolean;
@@ -91,6 +93,7 @@ const resultToOption = (result: GlobalSearchResult): EuiSelectableTemplateSitewi
 
 export function SearchBar({
   globalSearch,
+  taggingApi,
   navigateToUrl,
   trackUiMetric,
   basePathUrl,
@@ -129,10 +132,16 @@ export function SearchBar({
       }
 
       const rawParams = parseSearchParams(searchValue);
+      const tagIds =
+        taggingApi && rawParams.filters.tags
+          ? rawParams.filters.tags
+              .map((tagName) => taggingApi.ui.getTagIdFromName(tagName))
+              .filter((tagId): tagId is string => tagId !== undefined)
+          : undefined;
       const searchParams: GlobalSearchFindParams = {
         term: rawParams.term,
         types: rawParams.filters.types,
-        tags: rawParams.filters.tags, // TODO: use savedObjectTagging API to retrieve ids from names.
+        tags: tagIds,
       };
 
       searchSubscription.current = globalSearch(searchParams, {}).subscribe({
