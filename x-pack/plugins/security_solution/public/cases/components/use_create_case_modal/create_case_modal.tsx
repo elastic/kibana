@@ -22,7 +22,7 @@ import * as i18n from '../../translations';
 
 export interface CreateCaseModalProps {
   onCloseCaseModal: () => void;
-  onCaseCreated: (theCase: Case) => void;
+  onSuccess: (theCase: Case) => void;
 }
 
 const Container = styled.div`
@@ -32,18 +32,7 @@ const Container = styled.div`
   `}
 `;
 
-const CreateModalComponent: React.FC<CreateCaseModalProps> = ({
-  onCloseCaseModal,
-  onCaseCreated,
-}) => {
-  const onSuccess = useCallback(
-    (theCase) => {
-      onCaseCreated(theCase);
-      onCloseCaseModal();
-    },
-    [onCaseCreated, onCloseCaseModal]
-  );
-
+const CreateModalComponent: React.FC<CreateCaseModalProps> = ({ onCloseCaseModal, onSuccess }) => {
   return (
     <EuiOverlayMask data-test-subj="all-cases-modal">
       <EuiModal onClose={onCloseCaseModal}>

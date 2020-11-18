@@ -22,13 +22,18 @@ export const useCreateCaseModal = ({ onCaseCreated }: Props) => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const closeModal = useCallback(() => setIsModalOpen(false), []);
   const openModal = useCallback(() => setIsModalOpen(true), []);
+  const onSuccess = useCallback(
+    (theCase) => {
+      onCaseCreated(theCase);
+      closeModal();
+    },
+    [onCaseCreated, closeModal]
+  );
 
   const Modal: React.FC = useCallback(
     () =>
-      isModalOpen ? (
-        <CreateCaseModal onCloseCaseModal={closeModal} onCaseCreated={onCaseCreated} />
-      ) : null,
-    [closeModal, isModalOpen, onCaseCreated]
+      isModalOpen ? <CreateCaseModal onCloseCaseModal={closeModal} onSuccess={onSuccess} /> : null,
+    [closeModal, isModalOpen, onSuccess]
   );
 
   const state = useMemo(
