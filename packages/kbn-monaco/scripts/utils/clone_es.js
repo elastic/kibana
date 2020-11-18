@@ -21,8 +21,10 @@ const { accessSync, mkdirSync } = require('fs');
 const { join } = require('path');
 const simpleGit = require('simple-git');
 
-// TODO: Temporarily pointing to Stu's fork
-const esRepo = 'https://github.com/stu-elastic/elasticsearch.git';
+// Note: The generated whitelists have not yet been merged to master
+// so this script may fail until code in this branch has been merged:
+// https://github.com/stu-elastic/elasticsearch/tree/scripting/whitelists
+const esRepo = 'https://github.com/elastic/elasticsearch.git';
 
 const esFolder = join(__dirname, '..', '..', 'elasticsearch');
 const esPainlessContextFolder = join(
