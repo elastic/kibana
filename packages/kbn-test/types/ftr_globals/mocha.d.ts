@@ -19,7 +19,6 @@
 
 import { Suite } from 'mocha';
 
-// We need to use the namespace here to match the Mocha definition
 declare module 'mocha' {
   interface Suite {
     /**
