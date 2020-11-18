@@ -12,7 +12,7 @@ import {
 } from '../../../../common/endpoint/types';
 import { mockEndpointEvent } from '../../mocks/endpoint_event';
 import { mockTreeWithNoAncestorsAnd2Children } from '../../mocks/resolver_tree';
-import { DataAccessLayer } from '../../types';
+import { DataAccessLayer, Timerange } from '../../types';
 
 interface Metadata {
   /**
@@ -56,7 +56,15 @@ export function noAncestorsTwoChildenInIndexCalledAwesomeIndex(): {
       /**
        * Fetch related events for an entity ID
        */
-      relatedEvents(entityID: string): Promise<ResolverRelatedEvents> {
+      relatedEvents({
+        entityID,
+        timerange,
+        indexPatterns,
+      }: {
+        entityID: string;
+        timerange: Timerange;
+        indexPatterns: string[];
+      }): Promise<ResolverRelatedEvents> {
         return Promise.resolve({
           entityID,
           events: [
@@ -70,11 +78,19 @@ export function noAncestorsTwoChildenInIndexCalledAwesomeIndex(): {
         });
       },
 
-      async eventsWithEntityIDAndCategory(
-        entityID: string,
+      async eventsWithEntityIDAndCategory({
+        entityID,
         category,
-        after?: string
-      ): Promise<{
+        after,
+        timerange,
+        indexPatterns,
+      }: {
+        entityID: string;
+        category: string;
+        after?: string;
+        timerange: Timerange;
+        indexPatterns: string[];
+      }): Promise<{
         events: SafeResolverEvent[];
         nextEvent: string | null;
       }> {
@@ -89,11 +105,37 @@ export function noAncestorsTwoChildenInIndexCalledAwesomeIndex(): {
         };
       },
 
-      async event(eventID: string): Promise<SafeResolverEvent | null> {
+      async event({
+        eventID,
+        timerange,
+        indexPatterns,
+      }: {
+        eventID: string;
+        timerange: Timerange;
+        indexPatterns: string[];
+      }): Promise<SafeResolverEvent | null> {
         return mockEndpointEvent({
           entityID: metadata.entityIDs.origin,
           eventID,
         });
+      },
+
+      async nodeData({
+        ids,
+        timerange,
+        indexPatterns,
+        limit,
+      }: {
+        ids: string[];
+        timerange: Timerange;
+        indexPatterns: string[];
+        limit: number;
+      }): Promise<SafeResolverEvent[]> {
+        return ids.map((id: string) =>
+          mockEndpointEvent({
+            entityID: id,
+          })
+        );
       },
 
       /**

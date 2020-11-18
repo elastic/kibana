@@ -18,7 +18,8 @@ type PausableRequests =
   | 'resolverTree'
   | 'entities'
   | 'eventsWithEntityIDAndCategory'
-  | 'event';
+  | 'event'
+  | 'nodeData';
 
 interface Metadata<T> {
   /**
@@ -49,12 +50,14 @@ export function pausifyMock<T>({
   let relatedEventsPromise = Promise.resolve();
   let eventsWithEntityIDAndCategoryPromise = Promise.resolve();
   let eventPromise = Promise.resolve();
+  let nodeDataPromise = Promise.resolve();
   let resolverTreePromise = Promise.resolve();
   let entitiesPromise = Promise.resolve();
 
   let relatedEventsResolver: (() => void) | null;
   let eventsWithEntityIDAndCategoryResolver: (() => void) | null;
   let eventResolver: (() => void) | null;
+  let nodeDataResolver: (() => void) | null;
   let resolverTreeResolver: (() => void) | null;
   let entitiesResolver: (() => void) | null;
 
@@ -68,6 +71,7 @@ export function pausifyMock<T>({
         'eventsWithEntityIDAndCategory'
       );
       const pauseEventRequest = pausableRequests.includes('event');
+      const pauseNodeDataRequest = pausableRequests.includes('nodeData');
 
       if (pauseRelatedEventsRequest && !relatedEventsResolver) {
         relatedEventsPromise = new Promise((resolve) => {
@@ -87,6 +91,11 @@ export function pausifyMock<T>({
       if (pauseRelatedEventsRequest && !relatedEventsResolver) {
         relatedEventsPromise = new Promise((resolve) => {
           relatedEventsResolver = resolve;
+        });
+      }
+      if (pauseNodeDataRequest && !nodeDataResolver) {
+        nodeDataPromise = new Promise((resolve) => {
+          nodeDataResolver = resolve;
         });
       }
       if (pauseResolverTreeRequest && !resolverTreeResolver) {
@@ -159,6 +168,11 @@ export function pausifyMock<T>({
       async event(...args): Promise<SafeResolverEvent | null> {
         await eventPromise;
         return dataAccessLayer.event(...args);
+      },
+
+      async nodeData(...args): Promise<SafeResolverEvent[]> {
+        await nodeDataPromise;
+        return dataAccessLayer.nodeData(...args);
       },
 
       /**

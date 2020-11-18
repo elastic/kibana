@@ -130,6 +130,40 @@ describe('node data model', () => {
             requestedNodes: new Set(['1']),
             reachedLimit: true,
           })
+        ).toEqual(new Map([['2', { events: node2Events, status: 'error' }]]));
+      });
+
+      it('attempts to remove entries from the map even if they do not exist', () => {
+        expect(
+          updateWithReceivedNodes({
+            storedNodeInfo: state,
+            receivedNodes: new Map(),
+            requestedNodes: new Set(['10']),
+            reachedLimit: true,
+          })
+        ).toEqual(
+          new Map([
+            ['1', { events: node1Events, status: 'error' }],
+            ['2', { events: node2Events, status: 'error' }],
+          ])
+        );
+      });
+
+      it('does not delete the entry if it exists in the received node data from the server', () => {
+        const genNodeEvent = generator.generateEvent({ entityID: '3' });
+        const received = new Map<string, SafeResolverEvent[]>([['1', [genNodeEvent]]]);
+        expect(
+          updateWithReceivedNodes({
+            storedNodeInfo: state,
+            receivedNodes: received,
+            requestedNodes: new Set(['1']),
+            reachedLimit: true,
+          })
+        ).toEqual(
+          new Map([
+            ['1', { events: [genNodeEvent], status: 'received' }],
+            ['2', { events: node2Events, status: 'error' }],
+          ])
         );
       });
     });

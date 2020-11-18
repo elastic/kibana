@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DataAccessLayer } from '../../types';
+import { DataAccessLayer, Timerange } from '../../types';
 import { mockTreeWithNoAncestorsAndTwoChildrenAndRelatedEventsOnOrigin } from '../../mocks/resolver_tree';
 import {
   ResolverRelatedEvents,
@@ -58,7 +58,15 @@ export function noAncestorsTwoChildrenWithRelatedEventsOnOrigin(): {
       /**
        * Fetch related events for an entity ID
        */
-      async relatedEvents(entityID: string): Promise<ResolverRelatedEvents> {
+      async relatedEvents({
+        entityID,
+        timerange,
+        indexPatterns,
+      }: {
+        entityID: string;
+        timerange: Timerange;
+        indexPatterns: string[];
+      }): Promise<ResolverRelatedEvents> {
         /**
          * Respond with the mocked related events when the origin's related events are fetched.
          **/
@@ -76,10 +84,19 @@ export function noAncestorsTwoChildrenWithRelatedEventsOnOrigin(): {
        * `entityID` must match the origin node's `process.entity_id`.
        * Does not respect the `_after` parameter.
        */
-      async eventsWithEntityIDAndCategory(
-        entityID: string,
-        category: string
-      ): Promise<{ events: SafeResolverEvent[]; nextEvent: string | null }> {
+      async eventsWithEntityIDAndCategory({
+        entityID,
+        category,
+        after,
+        timerange,
+        indexPatterns,
+      }: {
+        entityID: string;
+        category: string;
+        after?: string;
+        timerange: Timerange;
+        indexPatterns: string[];
+      }): Promise<{ events: SafeResolverEvent[]; nextEvent: string | null }> {
         const events =
           entityID === metadata.entityIDs.origin
             ? tree.relatedEvents.events.filter((event) =>
@@ -95,10 +112,32 @@ export function noAncestorsTwoChildrenWithRelatedEventsOnOrigin(): {
       /**
        * Any of the origin's related events by event.id
        */
-      async event(eventID: string): Promise<SafeResolverEvent | null> {
+      async event({
+        eventID,
+        timerange,
+        indexPatterns,
+      }: {
+        eventID: string;
+        timerange: Timerange;
+        indexPatterns: string[];
+      }): Promise<SafeResolverEvent | null> {
         return (
           tree.relatedEvents.events.find((event) => eventModel.eventID(event) === eventID) ?? null
         );
+      },
+
+      async nodeData({
+        ids,
+        timerange,
+        indexPatterns,
+        limit,
+      }: {
+        ids: string[];
+        timerange: Timerange;
+        indexPatterns: string[];
+        limit: number;
+      }): Promise<SafeResolverEvent[]> {
+        return [];
       },
 
       /**

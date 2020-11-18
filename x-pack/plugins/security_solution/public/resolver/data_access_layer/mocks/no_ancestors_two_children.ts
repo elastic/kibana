@@ -11,7 +11,7 @@ import {
   ResolverEntityIndex,
 } from '../../../../common/endpoint/types';
 import { mockTreeWithNoAncestorsAnd2Children } from '../../mocks/resolver_tree';
-import { DataAccessLayer } from '../../types';
+import { DataAccessLayer, Timerange } from '../../types';
 
 interface Metadata {
   /**
@@ -51,7 +51,15 @@ export function noAncestorsTwoChildren(): { dataAccessLayer: DataAccessLayer; me
       /**
        * Fetch related events for an entity ID
        */
-      relatedEvents(entityID: string): Promise<ResolverRelatedEvents> {
+      relatedEvents({
+        entityID,
+        timerange,
+        indexPatterns,
+      }: {
+        entityID: string;
+        timerange: Timerange;
+        indexPatterns: string[];
+      }): Promise<ResolverRelatedEvents> {
         return Promise.resolve({
           entityID,
           events: [],
@@ -63,11 +71,19 @@ export function noAncestorsTwoChildren(): { dataAccessLayer: DataAccessLayer; me
        * Return events that have `process.entity_id` that includes `entityID` and that have
        * a `event.category` that includes `category`.
        */
-      async eventsWithEntityIDAndCategory(
-        entityID: string,
-        category: string,
-        after?: string
-      ): Promise<{
+      async eventsWithEntityIDAndCategory({
+        entityID,
+        category,
+        after,
+        timerange,
+        indexPatterns,
+      }: {
+        entityID: string;
+        category: string;
+        after?: string;
+        timerange: Timerange;
+        indexPatterns: string[];
+      }): Promise<{
         events: SafeResolverEvent[];
         nextEvent: string | null;
       }> {
@@ -78,8 +94,30 @@ export function noAncestorsTwoChildren(): { dataAccessLayer: DataAccessLayer; me
         };
       },
 
-      async event(_eventID: string): Promise<SafeResolverEvent | null> {
+      async event({
+        eventID,
+        timerange,
+        indexPatterns,
+      }: {
+        eventID: string;
+        timerange: Timerange;
+        indexPatterns: string[];
+      }): Promise<SafeResolverEvent | null> {
         return null;
+      },
+
+      async nodeData({
+        ids,
+        timerange,
+        indexPatterns,
+        limit,
+      }: {
+        ids: string[];
+        timerange: Timerange;
+        indexPatterns: string[];
+        limit: number;
+      }): Promise<SafeResolverEvent[]> {
+        return [];
       },
 
       /**
