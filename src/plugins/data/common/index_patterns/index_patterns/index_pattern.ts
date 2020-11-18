@@ -18,7 +18,7 @@
  */
 
 import _, { each, reject } from 'lodash';
-import { FieldAttrs } from '../..';
+import { FieldAttrs, FieldAttrSet } from '../..';
 import { DuplicateField } from '../../../../kibana_utils/common';
 
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES, IIndexPattern, IFieldType } from '../../../common';
@@ -135,8 +135,19 @@ export class IndexPattern implements IIndexPattern {
     const newFieldAttrs = { ...this.fieldAttrs };
 
     this.fields.forEach((field) => {
+      const attrs: FieldAttrSet = {};
+      let hasAttr = false;
       if (field.customName) {
-        newFieldAttrs[field.name] = { customName: field.customName };
+        attrs.customName = field.customName;
+        hasAttr = true;
+      }
+      if (field.count) {
+        attrs.count = field.count;
+        hasAttr = true;
+      }
+
+      if (hasAttr) {
+        newFieldAttrs[field.name] = attrs;
       } else {
         delete newFieldAttrs[field.name];
       }

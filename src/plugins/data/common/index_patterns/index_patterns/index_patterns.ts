@@ -293,7 +293,11 @@ export class IndexPatternsService {
    */
   fieldArrayToMap = (fields: FieldSpec[], fieldAttrs?: FieldAttrs) =>
     fields.reduce<IndexPatternFieldMap>((collector, field) => {
-      collector[field.name] = { ...field, customName: fieldAttrs?.[field.name]?.customName };
+      collector[field.name] = {
+        ...field,
+        customName: fieldAttrs?.[field.name]?.customName,
+        count: fieldAttrs?.[field.name]?.count,
+      };
       return collector;
     }, {});
 

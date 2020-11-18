@@ -52,7 +52,12 @@ export interface IndexPatternAttributes {
 }
 
 export interface FieldAttrs {
-  [key: string]: { customName: string };
+  [key: string]: FieldAttrSet;
+}
+
+export interface FieldAttrSet {
+  customName?: string;
+  count?: number;
 }
 
 export type OnNotification = (toastInputFields: ToastInputFields) => void;
