@@ -375,7 +375,7 @@ export class IndexPatternsService {
           pattern: title as string,
           metaFields: await this.config.get(UI_SETTINGS.META_FIELDS),
           type,
-          rollupIndex: typeMeta?.params?.rollupIndex,
+          rollupIndex: typeMeta?.params?.rollup_index,
         },
         spec.fieldAttrs
       );
