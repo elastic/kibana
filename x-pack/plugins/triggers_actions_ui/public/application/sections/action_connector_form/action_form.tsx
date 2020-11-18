@@ -26,6 +26,7 @@ import {
   ActionConnector,
   ActionType,
   ActionVariables,
+  ActionTypeRegistryContract,
 } from '../../../types';
 import { SectionLoading } from '../../components/section_loading';
 import { ConnectorAddModal } from './connector_add_modal';
@@ -50,6 +51,7 @@ export interface ActionAccordionFormProps {
   defaultActionMessage?: string;
   setHasActionsDisabled?: (value: boolean) => void;
   setHasActionsWithBrokenConnector?: (value: boolean) => void;
+  actionTypeRegistry: ActionTypeRegistryContract;
 }
 
 interface ActiveActionConnectorState {
@@ -70,8 +72,12 @@ export const ActionForm = ({
   defaultActionMessage,
   setHasActionsDisabled,
   setHasActionsWithBrokenConnector,
+  actionTypeRegistry,
 }: ActionAccordionFormProps) => {
-  const { http, toastNotifications, capabilities, actionTypeRegistry } = useKibana().services;
+  const {
+    http,
+    notifications: { toasts },
+  } = useKibana().services;
   const [addModalVisible, setAddModalVisibility] = useState<boolean>(false);
   const [activeActionItem, setActiveActionItem] = useState<ActiveActionConnectorState | undefined>(
     undefined
@@ -101,7 +107,7 @@ export const ActionForm = ({
         }
         setActionTypesIndex(index);
       } catch (e) {
-        toastNotifications.addDanger({
+        toasts.addDanger({
           title: i18n.translate(
             'xpack.triggersActionsUI.sections.alertForm.unableToLoadActionTypesMessage',
             { defaultMessage: 'Unable to load action types' }
@@ -122,7 +128,7 @@ export const ActionForm = ({
         const loadedConnectors = await loadConnectors({ http });
         setConnectors(loadedConnectors);
       } catch (e) {
-        toastNotifications.addDanger({
+        toasts.addDanger({
           title: i18n.translate(
             'xpack.triggersActionsUI.sections.alertForm.unableToLoadActionsMessage',
             {
@@ -171,7 +177,7 @@ export const ActionForm = ({
 
   function addActionType(actionTypeModel: ActionTypeModel) {
     if (!defaultActionGroupId) {
-      toastNotifications!.addDanger({
+      toasts!.addDanger({
         title: i18n.translate('xpack.triggersActionsUI.sections.alertForm.unableToAddAction', {
           defaultMessage: 'Unable to add action, because default action group is not defined',
         }),
@@ -292,7 +298,6 @@ export const ActionForm = ({
                 key={`action-form-action-at-${index}`}
                 actionTypeRegistry={actionTypeRegistry}
                 defaultActionGroupId={defaultActionGroupId}
-                capabilities={capabilities}
                 emptyActionsIds={emptyActionsIds}
                 onDeleteConnector={() => {
                   const updatedActions = actions.filter(
@@ -323,7 +328,6 @@ export const ActionForm = ({
               actionConnector={actionConnector}
               actionParamsErrors={actionParamsErrors}
               index={index}
-              capabilities={capabilities}
               key={`action-form-action-at-${index}`}
               setActionParamsProperty={setActionParamsProperty}
               actionTypesIndex={actionTypesIndex}

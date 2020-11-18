@@ -23,7 +23,7 @@ describe('connector_add_modal', () => {
         application: { capabilities },
       },
     ] = await mocks.getStartServices();
-    useKibanaMock().services.capabilities = {
+    useKibanaMock().services.application.capabilities = {
       ...capabilities,
       actions: {
         show: true,

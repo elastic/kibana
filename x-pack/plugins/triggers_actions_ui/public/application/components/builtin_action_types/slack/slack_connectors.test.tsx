@@ -30,7 +30,6 @@ describe('SlackActionFields renders', () => {
         errors={{ index: [], webhookUrl: [] }}
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
-        docLinks={deps!.docLinks}
         readOnly={false}
       />
     );
@@ -60,7 +59,6 @@ describe('SlackActionFields renders', () => {
         errors={{ index: [], webhookUrl: [] }}
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
-        docLinks={deps!.docLinks}
         readOnly={false}
       />
     );
@@ -87,7 +85,6 @@ describe('SlackActionFields renders', () => {
         errors={{ index: [], webhookUrl: [] }}
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
-        docLinks={deps!.docLinks}
         readOnly={false}
       />
     );

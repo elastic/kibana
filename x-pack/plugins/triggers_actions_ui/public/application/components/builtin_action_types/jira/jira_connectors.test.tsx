@@ -5,7 +5,6 @@
  */
 import React from 'react';
 import { mountWithIntl } from '@kbn/test/jest';
-import { DocLinksStart } from 'kibana/public';
 import JiraConnectorFields from './jira_connectors';
 import { JiraActionConnector } from './types';
 
@@ -25,16 +24,12 @@ describe('JiraActionConnectorFields renders', () => {
         projectKey: 'CK',
       },
     } as JiraActionConnector;
-    const deps = {
-      docLinks: { ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart,
-    };
     const wrapper = mountWithIntl(
       <JiraConnectorFields
         action={actionConnector}
         errors={{ apiUrl: [], email: [], apiToken: [], projectKey: [] }}
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
-        docLinks={deps!.docLinks}
         readOnly={false}
       />
     );
@@ -68,16 +63,12 @@ describe('JiraActionConnectorFields renders', () => {
         projectKey: 'CK',
       },
     } as JiraActionConnector;
-    const deps = {
-      docLinks: { ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart,
-    };
     const wrapper = mountWithIntl(
       <JiraConnectorFields
         action={actionConnector}
         errors={{ apiUrl: [], email: [], apiToken: [], projectKey: [] }}
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
-        docLinks={deps!.docLinks}
         readOnly={false}
         consumer={'case'}
       />
@@ -104,16 +95,12 @@ describe('JiraActionConnectorFields renders', () => {
       secrets: {},
       config: {},
     } as JiraActionConnector;
-    const deps = {
-      docLinks: { ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart,
-    };
     const wrapper = mountWithIntl(
       <JiraConnectorFields
         action={actionConnector}
         errors={{ apiUrl: [], email: [], apiToken: [], projectKey: [] }}
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
-        docLinks={deps!.docLinks}
         readOnly={false}
       />
     );
@@ -136,16 +123,12 @@ describe('JiraActionConnectorFields renders', () => {
         projectKey: 'CK',
       },
     } as JiraActionConnector;
-    const deps = {
-      docLinks: { ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart,
-    };
     const wrapper = mountWithIntl(
       <JiraConnectorFields
         action={actionConnector}
         errors={{ apiUrl: [], email: [], apiToken: [], projectKey: [] }}
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
-        docLinks={deps!.docLinks}
         readOnly={false}
       />
     );

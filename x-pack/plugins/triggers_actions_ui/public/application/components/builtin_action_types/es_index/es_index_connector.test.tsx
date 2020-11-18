@@ -27,20 +27,7 @@ describe('IndexActionConnectorFields renders', () => {
         application: { capabilities },
       },
     ] = await mocks.getStartServices();
-    const deps = {
-      toastNotifications: mocks.notifications.toasts,
-      http: mocks.http,
-      capabilities: {
-        ...capabilities,
-        actions: {
-          delete: true,
-          save: true,
-          show: true,
-        },
-      },
-      actionTypeRegistry: {} as TypeRegistry<any>,
-      docLinks: { ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart,
-    };
+    
 
     const { getIndexPatterns } = jest.requireMock('../../../../common/index_controls');
     getIndexPatterns.mockResolvedValueOnce([
@@ -86,8 +73,6 @@ describe('IndexActionConnectorFields renders', () => {
         errors={{ index: [] }}
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
-        http={deps!.http}
-        docLinks={deps!.docLinks}
         readOnly={false}
       />
     );

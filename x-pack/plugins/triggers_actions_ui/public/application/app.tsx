@@ -5,14 +5,7 @@
  */
 import React, { lazy } from 'react';
 import { Switch, Route, Redirect, Router } from 'react-router-dom';
-import {
-  ToastsSetup,
-  ApplicationStart,
-  ChromeBreadcrumb,
-  CoreStart,
-  ScopedHistory,
-  SavedObjectsClientContract,
-} from 'kibana/public';
+import { ChromeBreadcrumb, CoreStart, ScopedHistory } from 'kibana/public';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { I18nProvider } from '@kbn/i18n/react';
 import { KibanaFeature } from '../../../features/common';
@@ -35,24 +28,20 @@ export interface TriggersAndActionsUiServices extends CoreStart {
   dataPlugin: DataPublicPluginStart;
   charts: ChartsPluginStart;
   alerts?: AlertingStart;
-  navigateToApp: CoreStart['application']['navigateToApp'];
-  toastNotifications: ToastsSetup;
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
-  capabilities: ApplicationStart['capabilities'];
   actionTypeRegistry: ActionTypeRegistryContract;
   alertTypeRegistry: AlertTypeRegistryContract;
   history: ScopedHistory;
   kibanaFeatures: KibanaFeature[];
   element: HTMLElement;
-  savedObjectsClient: SavedObjectsClientContract;
 }
 
 export const renderApp = (deps: TriggersAndActionsUiServices) => {
-  const { element, savedObjectsClient } = deps;
+  const { element, savedObjects } = deps;
   const sections: Section[] = ['alerts', 'connectors'];
 
   const sectionsRegex = sections.join('|');
-  setSavedObjectsClient(savedObjectsClient);
+  setSavedObjectsClient(savedObjects.client);
 
   render(
     <I18nProvider>

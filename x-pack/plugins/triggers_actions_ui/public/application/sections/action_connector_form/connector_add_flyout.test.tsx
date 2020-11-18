@@ -9,12 +9,13 @@ import { coreMock } from '../../../../../../../src/core/public/mocks';
 import ConnectorAddFlyout from './connector_add_flyout';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import { ValidationResult } from '../../../types';
+import { useKibana } from '../../../common/lib/kibana';
+jest.mock('../../../../common/lib/kibana');
 
 const actionTypeRegistry = actionTypeRegistryMock.create();
+const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
 describe('connector_add_flyout', () => {
-  let deps: any;
-
   beforeAll(async () => {
     const mocks = coreMock.createSetup();
     const [
@@ -22,19 +23,13 @@ describe('connector_add_flyout', () => {
         application: { capabilities },
       },
     ] = await mocks.getStartServices();
-    deps = {
-      toastNotifications: mocks.notifications.toasts,
-      http: mocks.http,
-      capabilities: {
-        ...capabilities,
-        actions: {
-          delete: true,
-          save: true,
-          show: true,
-        },
+    useKibanaMock().services.application.capabilities = {
+      ...capabilities,
+      actions: {
+        show: true,
+        save: true,
+        delete: true,
       },
-      actionTypeRegistry,
-      docLinks: { ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' },
     };
   });
 
@@ -59,6 +54,7 @@ describe('connector_add_flyout', () => {
         reloadConnectors={() => {
           return new Promise<void>(() => {});
         }}
+        actionTypeRegistry={actionTypeRegistry}
       />
     );
     expect(wrapper.find('ActionTypeMenu')).toHaveLength(1);
@@ -98,6 +94,7 @@ describe('connector_add_flyout', () => {
         reloadConnectors={() => {
           return new Promise<void>(() => {});
         }}
+        actionTypeRegistry={actionTypeRegistry}
       />
     );
     const callout = wrapper.find('UpgradeYourLicenseCallOut');
@@ -147,6 +144,7 @@ describe('connector_add_flyout', () => {
         reloadConnectors={() => {
           return new Promise<void>(() => {});
         }}
+        actionTypeRegistry={actionTypeRegistry}
       />
     );
     const callout = wrapper.find('UpgradeYourLicenseCallOut');
@@ -184,6 +182,7 @@ describe('connector_add_flyout', () => {
         reloadConnectors={() => {
           return new Promise<void>(() => {});
         }}
+        actionTypeRegistry={actionTypeRegistry}
       />
     );
     const callout = wrapper.find('UpgradeYourLicenseCallOut');

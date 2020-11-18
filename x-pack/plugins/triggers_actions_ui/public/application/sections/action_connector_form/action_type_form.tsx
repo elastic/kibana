@@ -25,7 +25,6 @@ import {
   EuiLoadingSpinner,
   EuiBadge,
 } from '@elastic/eui';
-import { ApplicationStart } from 'kibana/public';
 import { ResolvedActionGroup } from '../../../../../alerts/common';
 import {
   IErrorObject,
@@ -54,7 +53,6 @@ export type ActionTypeFormProps = {
   onDeleteAction: () => void;
   setActionParamsProperty: (key: string, value: any, index: number) => void;
   actionTypesIndex: ActionTypeIndex;
-  capabilities: ApplicationStart['capabilities'];
   connectors: ActionConnector[];
 } & Pick<
   ActionAccordionFormProps,
@@ -89,9 +87,11 @@ export const ActionTypeForm = ({
   messageVariables,
   actionGroups,
   setActionGroupIdByIndex,
-  capabilities,
 }: ActionTypeFormProps) => {
-  const { http, actionTypeRegistry, toastNotifications, docLinks } = useKibana().services;
+  const {
+    actionTypeRegistry,
+    application: { capabilities },
+  } = useKibana().services;
   const [isOpen, setIsOpen] = useState(true);
   const [availableActionVariables, setAvailableActionVariables] = useState<ActionVariable[]>([]);
   const [availableDefaultActionMessage, setAvailableDefaultActionMessage] = useState<
@@ -265,9 +265,6 @@ export const ActionTypeForm = ({
             editAction={setActionParamsProperty}
             messageVariables={availableActionVariables}
             defaultMessage={availableDefaultActionMessage}
-            docLinks={docLinks}
-            http={http}
-            toastNotifications={toastNotifications}
             actionConnector={actionConnector}
           />
         </Suspense>

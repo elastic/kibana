@@ -43,8 +43,6 @@ export interface ActionConnectorFieldsProps<TActionConnector> {
   editActionConfig: (property: string, value: any) => void;
   editActionSecrets: (property: string, value: any) => void;
   errors: IErrorObject;
-  docLinks: DocLinksStart;
-  http?: HttpSetup;
   readOnly: boolean;
   consumer?: string;
 }
@@ -56,9 +54,6 @@ export interface ActionParamsProps<TParams> {
   errors: IErrorObject;
   messageVariables?: ActionVariable[];
   defaultMessage?: string;
-  docLinks: DocLinksStart;
-  http: HttpSetup;
-  toastNotifications: ToastsSetup;
   actionConnector?: ActionConnector;
 }
 

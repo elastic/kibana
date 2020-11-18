@@ -87,9 +87,6 @@ describe('ResilientParamsFields renders', () => {
         editAction={() => {}}
         index={0}
         messageVariables={[{ name: 'alertId', description: '' }]}
-        docLinks={{ ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart}
-        toastNotifications={mocks.notifications.toasts}
-        http={mocks.http}
         actionConnector={connector}
       />
     );
@@ -113,9 +110,6 @@ describe('ResilientParamsFields renders', () => {
         editAction={() => {}}
         index={0}
         messageVariables={[]}
-        docLinks={{ ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart}
-        toastNotifications={mocks.notifications.toasts}
-        http={mocks.http}
         actionConnector={connector}
       />
     );
@@ -132,9 +126,6 @@ describe('ResilientParamsFields renders', () => {
         editAction={() => {}}
         index={0}
         messageVariables={[]}
-        docLinks={{ ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart}
-        toastNotifications={mocks.notifications.toasts}
-        http={mocks.http}
         actionConnector={connector}
       />
     );
@@ -157,9 +148,6 @@ describe('ResilientParamsFields renders', () => {
         editAction={() => {}}
         index={0}
         messageVariables={[]}
-        docLinks={{ ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart}
-        toastNotifications={mocks.notifications.toasts}
-        http={mocks.http}
         actionConnector={connector}
       />
     );
@@ -179,9 +167,6 @@ describe('ResilientParamsFields renders', () => {
         editAction={() => {}}
         index={0}
         messageVariables={[]}
-        docLinks={{ ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart}
-        toastNotifications={mocks.notifications.toasts}
-        http={mocks.http}
         actionConnector={connector}
       />
     );
@@ -204,9 +189,6 @@ describe('ResilientParamsFields renders', () => {
         editAction={() => {}}
         index={0}
         messageVariables={[]}
-        docLinks={{ ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart}
-        toastNotifications={mocks.notifications.toasts}
-        http={mocks.http}
         actionConnector={connector}
       />
     );

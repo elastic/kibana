@@ -20,7 +20,7 @@ import {
   EuiCallOut,
   EuiSpacer,
 } from '@elastic/eui';
-import { ApplicationStart, HttpSetup } from 'kibana/public';
+import { HttpSetup } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { ActionTypeMenu } from './action_type_menu';
@@ -55,8 +55,11 @@ const ConnectorAddFlyout: React.FunctionComponent<ConnectorAddFlyoutProps> = ({
   actionTypeRegistry,
 }) => {
   let hasErrors = false;
-  const { http, toastNotifications, application } = useKibana().services;
-  const capabilities = application.capabilities;
+  const {
+    http,
+    notifications: { toasts },
+    application: { capabilities },
+  } = useKibana().services;
   const [actionType, setActionType] = useState<ActionType | undefined>(undefined);
   const [hasActionsUpgradeableByTrial, setHasActionsUpgradeableByTrial] = useState<boolean>(false);
 
@@ -121,8 +124,8 @@ const ConnectorAddFlyout: React.FunctionComponent<ConnectorAddFlyoutProps> = ({
   const onActionConnectorSave = async (): Promise<ActionConnector | undefined> =>
     await createActionConnector({ http, connector })
       .then((savedConnector) => {
-        if (toastNotifications) {
-          toastNotifications.addSuccess(
+        if (toasts) {
+          toasts.addSuccess(
             i18n.translate(
               'xpack.triggersActionsUI.sections.addConnectorForm.updateSuccessNotificationText',
               {
@@ -137,7 +140,7 @@ const ConnectorAddFlyout: React.FunctionComponent<ConnectorAddFlyoutProps> = ({
         return savedConnector;
       })
       .catch((errorRes) => {
-        toastNotifications.addDanger(
+        toasts.addDanger(
           errorRes.body?.message ??
             i18n.translate(
               'xpack.triggersActionsUI.sections.addConnectorForm.updateErrorNotificationText',

@@ -72,8 +72,10 @@ export const ActionConnectorForm = ({
   actionTypeRegistry,
   consumer,
 }: ActionConnectorProps) => {
-  const { http, docLinks, application } = useKibana().services;
-  const capabilities = application.capabilities;
+  const {
+    docLinks,
+    application: { capabilities },
+  } = useKibana().services;
   const canSave = hasSaveActionsCapability(capabilities);
 
   const setActionProperty = (key: string, value: any) => {
@@ -190,8 +192,6 @@ export const ActionConnectorForm = ({
               readOnly={!canSave}
               editActionConfig={setActionConfigProperty}
               editActionSecrets={setActionSecretsProperty}
-              http={http}
-              docLinks={docLinks}
               consumer={consumer}
             />
           </Suspense>

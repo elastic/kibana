@@ -26,7 +26,10 @@ export const ActionTypeMenu = ({
   setHasActionsUpgradeableByTrial,
   actionTypeRegistry,
 }: Props) => {
-  const { http, toastNotifications } = useKibana().services;
+  const {
+    http,
+    notifications: { toasts },
+  } = useKibana().services;
   const [actionTypesIndex, setActionTypesIndex] = useState<ActionTypeIndex | undefined>(undefined);
 
   useEffect(() => {
@@ -49,8 +52,8 @@ export const ActionTypeMenu = ({
           setHasActionsUpgradeableByTrial(hasActionsUpgradeableByTrial);
         }
       } catch (e) {
-        if (toastNotifications) {
-          toastNotifications.addDanger({
+        if (toasts) {
+          toasts.addDanger({
             title: i18n.translate(
               'xpack.triggersActionsUI.sections.actionsConnectorsList.unableToLoadActionTypesMessage',
               { defaultMessage: 'Unable to load action types' }

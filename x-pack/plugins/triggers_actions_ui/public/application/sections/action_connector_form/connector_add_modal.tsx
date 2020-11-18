@@ -38,8 +38,12 @@ export const ConnectorAddModal = ({
   postSaveEventHandler,
   consumer,
 }: ConnectorAddModalProps) => {
-  const { http, actionTypeRegistry, toastNotifications, application } = useKibana().services;
-  const capabilities = application.capabilities;
+  const {
+    http,
+    actionTypeRegistry,
+    notifications: { toasts },
+    application: { capabilities },
+  } = useKibana().services;
   let hasErrors = false;
   const initialConnector = {
     actionTypeId: actionType.id,
@@ -76,8 +80,8 @@ export const ConnectorAddModal = ({
   const onActionConnectorSave = async (): Promise<ActionConnector | undefined> =>
     await createActionConnector({ http, connector })
       .then((savedConnector) => {
-        if (toastNotifications) {
-          toastNotifications.addSuccess(
+        if (toasts) {
+          toasts.addSuccess(
             i18n.translate(
               'xpack.triggersActionsUI.sections.addModalConnectorForm.updateSuccessNotificationText',
               {

@@ -30,7 +30,6 @@ describe('EmailActionConnectorFields renders', () => {
         errors={{ from: [], port: [], host: [], user: [], password: [] }}
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
-        docLinks={{ ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart}
         readOnly={false}
       />
     );
@@ -61,7 +60,6 @@ describe('EmailActionConnectorFields renders', () => {
         errors={{ from: [], port: [], host: [], user: [], password: [] }}
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
-        docLinks={{ ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart}
         readOnly={false}
       />
     );
@@ -89,7 +87,6 @@ describe('EmailActionConnectorFields renders', () => {
         errors={{ from: [], port: [], host: [], user: [], password: [] }}
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
-        docLinks={{ ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart}
         readOnly={false}
       />
     );
@@ -114,7 +111,6 @@ describe('EmailActionConnectorFields renders', () => {
         errors={{ from: [], port: [], host: [], user: [], password: [] }}
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
-        docLinks={{ ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart}
         readOnly={false}
       />
     );

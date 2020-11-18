@@ -60,9 +60,12 @@ export const ConnectorEditFlyout = ({
   consumer,
   actionTypeRegistry,
 }: ConnectorEditProps) => {
-  const { http, notifications, docLinks, application } = useKibana().services;
-  const toastNotifications = notifications.toasts;
-  const capabilities = application.capabilities;
+  const {
+    http,
+    notifications: { toasts },
+    docLinks,
+    application: { capabilities },
+  } = useKibana().services;
   const canSave = hasSaveActionsCapability(capabilities);
 
   const [{ connector }, dispatch] = useReducer(connectorReducer, {
@@ -106,7 +109,7 @@ export const ConnectorEditFlyout = ({
   const onActionConnectorSave = async (): Promise<ActionConnector | undefined> =>
     await updateActionConnector({ http, connector, id: connector.id })
       .then((savedConnector) => {
-        toastNotifications.addSuccess(
+        toasts.addSuccess(
           i18n.translate(
             'xpack.triggersActionsUI.sections.editConnectorForm.updateSuccessNotificationText',
             {
@@ -120,7 +123,7 @@ export const ConnectorEditFlyout = ({
         return savedConnector;
       })
       .catch((errorRes) => {
-        toastNotifications.addDanger(
+        toasts.addDanger(
           errorRes.body?.message ??
             i18n.translate(
               'xpack.triggersActionsUI.sections.editConnectorForm.updateErrorNotificationText',
