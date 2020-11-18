@@ -4,20 +4,27 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { schema } from '@kbn/config-schema';
-import { TrustedApp } from '../types';
+import { schema, Type } from '@kbn/config-schema';
+import { ConditionEntry, ConditionEntryField, OperatingSystem } from '../types';
 
-const hashLengths: readonly number[] = [
+const HASH_LENGTHS: readonly number[] = [
   32, // MD5
   40, // SHA1
   64, // SHA256
 ];
-const hasInvalidCharacters = /[^0-9a-f]/i;
+const INVALID_CHARACTERS_PATTERN = /[^0-9a-f]/i;
 
-const entryFieldLabels: { [k in TrustedApp['entries'][0]['field']]: string } = {
-  'process.hash.*': 'Hash',
-  'process.executable.caseless': 'Path',
-  'process.code_signature': 'Signer',
+const entryFieldLabels: { [k in ConditionEntryField]: string } = {
+  [ConditionEntryField.HASH]: 'Hash',
+  [ConditionEntryField.PATH]: 'Path',
+  [ConditionEntryField.SIGNER]: 'Signer',
+};
+
+const isValidHash = (value: string) => {
+  // TODO: I believe this should be more a task for UI to correct values
+  const trimmed = value.trim();
+
+  return HASH_LENGTHS.includes(trimmed.length) && !INVALID_CHARACTERS_PATTERN.test(trimmed);
 };
 
 export const DeleteTrustedAppsRequestSchema = {
@@ -33,17 +40,29 @@ export const GetTrustedAppsRequestSchema = {
   }),
 };
 
-export const PostTrustedAppCreateRequestSchema = {
-  body: schema.object({
-    name: schema.string({ minLength: 1, maxLength: 256 }),
-    description: schema.maybe(schema.string({ minLength: 0, maxLength: 256, defaultValue: '' })),
-    os: schema.oneOf([schema.literal('linux'), schema.literal('macos'), schema.literal('windows')]),
+const NameSchema = schema.string({ minLength: 1, maxLength: 256 });
+const DescriptionSchema = schema.maybe(
+  schema.string({ minLength: 0, maxLength: 256, defaultValue: '' })
+);
+const LinuxSchema = schema.literal('linux');
+const MacosSchema = schema.literal('macos');
+const WindowsSchema = schema.literal('windows');
+
+const HashFieldSchema = schema.literal(ConditionEntryField.HASH);
+const PathFieldSchema = schema.literal(ConditionEntryField.PATH);
+const SignerFieldSchema = schema.literal(ConditionEntryField.SIGNER);
+
+const createNewTrustedAppForOsScheme = <O extends OperatingSystem, F extends ConditionEntryField>(
+  osSchema: Type<O>,
+  fieldSchema: Type<F>
+) =>
+  schema.object({
+    name: NameSchema,
+    description: DescriptionSchema,
+    os: osSchema,
     entries: schema.arrayOf(
       schema.object({
-        field: schema.oneOf([
-          schema.literal('process.hash.*'),
-          schema.literal('process.executable.caseless'),
-        ]),
+        field: fieldSchema,
         type: schema.literal('match'),
         operator: schema.literal('included'),
         value: schema.string({ minLength: 1 }),
@@ -51,27 +70,36 @@ export const PostTrustedAppCreateRequestSchema = {
       {
         minSize: 1,
         validate(entries) {
-          const usedFields: string[] = [];
-          for (const { field, value } of entries) {
-            if (usedFields.includes(field)) {
+          const usedFields = new Set();
+
+          for (const entry of entries) {
+            // unfortunately combination of generics and Type<...> for "field" causes type errors
+            const { field, value } = entry as ConditionEntry<ConditionEntryField>;
+
+            if (usedFields.has(field)) {
               return `[${entryFieldLabels[field]}] field can only be used once`;
             }
 
-            usedFields.push(field);
+            usedFields.add(field);
 
-            if (field === 'process.hash.*') {
-              const trimmedValue = value.trim();
-
-              if (
-                !hashLengths.includes(trimmedValue.length) ||
-                hasInvalidCharacters.test(trimmedValue)
-              ) {
-                return `Invalid hash value [${value}]`;
-              }
+            if (field === ConditionEntryField.HASH && !isValidHash(value)) {
+              return `Invalid hash value [${value}]`;
             }
           }
         },
       }
     ),
-  }),
+  });
+
+export const PostTrustedAppCreateRequestSchema = {
+  body: schema.oneOf([
+    createNewTrustedAppForOsScheme(
+      schema.oneOf([LinuxSchema, MacosSchema]),
+      schema.oneOf([HashFieldSchema, PathFieldSchema])
+    ),
+    createNewTrustedAppForOsScheme(
+      WindowsSchema,
+      schema.oneOf([HashFieldSchema, PathFieldSchema, SignerFieldSchema])
+    ),
+  ]),
 };
