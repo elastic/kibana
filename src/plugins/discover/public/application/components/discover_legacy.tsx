@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import './discover.scss';
 import classNames from 'classnames';
 import { EuiButtonEmpty, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiHideFor } from '@elastic/eui';
@@ -124,6 +124,7 @@ export function DiscoverLegacy({
   updateQuery,
   updateSavedQueryId,
 }: DiscoverProps) {
+  const scrollable = useRef<HTMLDivElement>(null);
   const [toggleOn, toggleChart] = useState(true);
   const [isSidebarClosed, setIsSidebarClosed] = useState(false);
   const { TopNavMenu } = getServices().navigation.ui;
@@ -256,6 +257,7 @@ export function DiscoverLegacy({
                   <section
                     className="dscTable dscTableFixedScroll"
                     aria-labelledby="documentsAriaLabel"
+                    ref={scrollable}
                   >
                     <h2 className="euiScreenReaderOnly" id="documentsAriaLabel">
                       <FormattedMessage
@@ -292,13 +294,10 @@ export function DiscoverLegacy({
                             />
 
                             <EuiButtonEmpty
-                              onClick={(ev: React.MouseEvent) => {
-                                // TODO: make it right
-                                // @ts-ignore
-                                ev.currentTarget?.parentNode?.parentNode?.parentNode?.scrollTo(
-                                  0,
-                                  0
-                                );
+                              onClick={() => {
+                                if (scrollable.current) {
+                                  scrollable.current.scrollTo(0, 0);
+                                }
                               }}
                             >
                               <FormattedMessage
