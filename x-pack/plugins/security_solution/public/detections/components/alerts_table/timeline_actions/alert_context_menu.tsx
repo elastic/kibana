@@ -6,13 +6,7 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import {
-  EuiText,
-  EuiButtonIcon,
-  EuiContextMenuPanel,
-  EuiPopover,
-  EuiContextMenuItem,
-} from '@elastic/eui';
+import { EuiText, EuiButtonIcon, EuiContextMenu, EuiPopover } from '@elastic/eui';
 import styled from 'styled-components';
 import { getOr } from 'lodash/fp';
 
@@ -208,18 +202,16 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     setEventsLoading,
   ]);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const openAlertActionComponent = (
-    <EuiContextMenuItem
-      key="open-alert"
-      aria-label="Open alert"
-      data-test-subj="open-alert-status"
-      id={FILTER_OPEN}
-      onClick={openAlertActionOnClick}
-      disabled={!canUserCRUD || !hasIndexWrite}
-    >
-      <EuiText size="m">{i18n.ACTION_OPEN_ALERT}</EuiText>
-    </EuiContextMenuItem>
+  const openAlertActionPanelItem = useMemo(
+    () => ({
+      name: <EuiText size="m">{i18n.ACTION_OPEN_ALERT}</EuiText>,
+      key: 'open-alert',
+      'aria-label': 'Open alert',
+      'data-test-subj': 'open-alert-status',
+      onClick: openAlertActionOnClick,
+      disabled: !canUserCRUD || !hasIndexWrite,
+    }),
+    [canUserCRUD, hasIndexWrite, openAlertActionOnClick]
   );
 
   const closeAlertActionClick = useCallback(() => {
@@ -241,18 +233,16 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     setEventsLoading,
   ]);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const closeAlertActionComponent = (
-    <EuiContextMenuItem
-      key="close-alert"
-      aria-label="Close alert"
-      data-test-subj="close-alert-status"
-      id={FILTER_CLOSED}
-      onClick={closeAlertActionClick}
-      disabled={!canUserCRUD || !hasIndexWrite}
-    >
-      <EuiText size="m">{i18n.ACTION_CLOSE_ALERT}</EuiText>
-    </EuiContextMenuItem>
+  const closeAlertActionPanelItem = useMemo(
+    () => ({
+      name: <EuiText size="m">{i18n.ACTION_CLOSE_ALERT}</EuiText>,
+      key: 'close-alert',
+      'aria-label': 'Close alert',
+      'data-test-subj': 'close-alert-status',
+      onClick: closeAlertActionClick,
+      disabled: !canUserCRUD || !hasIndexWrite,
+    }),
+    [canUserCRUD, closeAlertActionClick, hasIndexWrite]
   );
 
   const inProgressAlertActionClick = useCallback(() => {
@@ -274,18 +264,17 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     setEventsLoading,
   ]);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const inProgressAlertActionComponent = (
-    <EuiContextMenuItem
-      key="in-progress-alert"
-      aria-label="Mark alert in progress"
-      data-test-subj="in-progress-alert-status"
-      id={FILTER_IN_PROGRESS}
-      onClick={inProgressAlertActionClick}
-      disabled={!canUserCRUD || !hasIndexWrite}
-    >
-      <EuiText size="m">{i18n.ACTION_IN_PROGRESS_ALERT}</EuiText>
-    </EuiContextMenuItem>
+  const inProgressAlertActionPanelItem = useMemo(
+    () => ({
+      name: <EuiText size="m">{i18n.ACTION_IN_PROGRESS_ALERT}</EuiText>,
+      key: 'in-progress-alert',
+      'aria-label': 'Mark alert in progress',
+      'data-test-subj': 'in-progress-alert-status',
+      id: FILTER_IN_PROGRESS,
+      onClick: inProgressAlertActionClick,
+      disabled: !canUserCRUD || !hasIndexWrite,
+    }),
+    [canUserCRUD, hasIndexWrite, inProgressAlertActionClick]
   );
 
   const button = (
@@ -304,18 +293,16 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     setOpenAddExceptionModal('endpoint');
   }, [closePopover]);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const addEndpointExceptionComponent = (
-    <EuiContextMenuItem
-      key="add-endpoint-exception-menu-item"
-      aria-label="Add Endpoint Exception"
-      data-test-subj="add-endpoint-exception-menu-item"
-      id="addEndpointException"
-      onClick={handleAddEndpointExceptionClick}
-      disabled={!canUserCRUD || !hasIndexWrite || !isEndpointAlert}
-    >
-      <EuiText size="m">{i18n.ACTION_ADD_ENDPOINT_EXCEPTION}</EuiText>
-    </EuiContextMenuItem>
+  const addEndpointExceptionPanelItem = useMemo(
+    () => ({
+      key: 'add-endpoint-exception-menu-item',
+      'aria-label': 'Add Endpoint Exception',
+      'data-test-subj': 'add-endpoint-exception-menu-item',
+      onClick: handleAddEndpointExceptionClick,
+      disabled: !canUserCRUD || !hasIndexWrite || !isEndpointAlert,
+      name: <EuiText size="m">{i18n.ACTION_ADD_ENDPOINT_EXCEPTION}</EuiText>,
+    }),
+    [canUserCRUD, handleAddEndpointExceptionClick, hasIndexWrite, isEndpointAlert]
   );
 
   const handleAddExceptionClick = useCallback((): void => {
@@ -329,20 +316,16 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     return !isThresholdRule(ruleType);
   }, [ecsRowData]);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const addExceptionComponent = (
-    <EuiContextMenuItem
-      key="add-exception-menu-item"
-      aria-label="Add Exception"
-      data-test-subj="add-exception-menu-item"
-      id="addException"
-      onClick={handleAddExceptionClick}
-      disabled={!canUserCRUD || !hasIndexWrite || !areExceptionsAllowed}
-    >
-      <EuiText data-test-subj="addExceptionButton" size="m">
-        {i18n.ACTION_ADD_EXCEPTION}
-      </EuiText>
-    </EuiContextMenuItem>
+  const addExceptionPanelItem = useMemo(
+    () => ({
+      key: 'add-exception-menu-item',
+      'aria-label': 'Add Exception',
+      'data-test-subj': 'add-exception-menu-item',
+      onClick: handleAddExceptionClick,
+      disabled: !canUserCRUD || !hasIndexWrite || !areExceptionsAllowed,
+      name: <EuiText size="m">{i18n.ACTION_ADD_EXCEPTION}</EuiText>,
+    }),
+    [areExceptionsAllowed, canUserCRUD, handleAddExceptionClick, hasIndexWrite]
   );
 
   const statusFilters = useMemo(() => {
@@ -352,24 +335,29 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
 
     switch (alertStatus) {
       case 'open':
-        return [inProgressAlertActionComponent, closeAlertActionComponent];
+        return [inProgressAlertActionPanelItem, closeAlertActionPanelItem];
       case 'in-progress':
-        return [openAlertActionComponent, closeAlertActionComponent];
+        return [openAlertActionPanelItem, closeAlertActionPanelItem];
       case 'closed':
-        return [openAlertActionComponent, inProgressAlertActionComponent];
+        return [openAlertActionPanelItem, inProgressAlertActionPanelItem];
       default:
         return [];
     }
   }, [
     alertStatus,
-    closeAlertActionComponent,
-    inProgressAlertActionComponent,
-    openAlertActionComponent,
+    closeAlertActionPanelItem,
+    inProgressAlertActionPanelItem,
+    openAlertActionPanelItem,
   ]);
 
-  const items = useMemo(
-    () => [...statusFilters, addEndpointExceptionComponent, addExceptionComponent],
-    [addEndpointExceptionComponent, addExceptionComponent, statusFilters]
+  const panels = useMemo(
+    () => [
+      {
+        id: 0,
+        items: [...statusFilters, addEndpointExceptionPanelItem, addExceptionPanelItem],
+      },
+    ],
+    [addEndpointExceptionPanelItem, addExceptionPanelItem, statusFilters]
   );
 
   return (
@@ -385,7 +373,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
             anchorPosition="downLeft"
             repositionOnScroll
           >
-            <ContextMenuPanel items={items} />
+            <ContextMenu initialPanelId={0} panels={panels} />
           </EuiPopover>
         </EventsTdContent>
       </EventsTd>
@@ -406,10 +394,10 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
   );
 };
 
-const ContextMenuPanel = styled(EuiContextMenuPanel)`
+const ContextMenu = styled(EuiContextMenu)`
   font-size: ${({ theme }) => theme.eui.euiFontSizeS};
 `;
 
-ContextMenuPanel.displayName = 'ContextMenuPanel';
+ContextMenu.displayName = 'ContextMenu';
 
 export const AlertContextMenu = React.memo(AlertContextMenuComponent);
