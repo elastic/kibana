@@ -140,6 +140,11 @@ export const setThirdPartyToMapping = (
 const CallOut = styled(EuiCallOut)`
   margin-top: 10px;
 `;
+
+interface ValidateFields {
+  message: string;
+  type: 'error' | 'warning';
+}
 export const FieldMappingFlyout = ({ connector, onClose }: Props) => {
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [newMapping, setNewMapping] = useState<CasesConfigurationMapping[]>([]);
@@ -168,20 +173,26 @@ export const FieldMappingFlyout = ({ connector, onClose }: Props) => {
     [fields]
   );
 
-  const validateFields: string | null = useMemo(() => {
+  const validateFields: ValidateFields | null = useMemo(() => {
     if (isFieldsLoading) {
       return null;
+    }
+    if (fields.length === 0) {
+      return { message: i18n.NO_FIELDS_ERROR(connector.name), type: 'error' };
     }
     // strictly typed, but these will definitely be strings. see createDefaultMapping.. Blerg typescript
     const titleMapping = activeMapping.find((m) => m.source === 'title')?.target as string;
     const descMapping = activeMapping.find((m) => m.source === 'description')?.target as string;
     if (titleMapping === 'not_mapped' && descMapping === 'not_mapped') {
-      return i18n.BLANK_MAPPINGS(connector.name);
+      return { message: i18n.BLANK_MAPPINGS(connector.name), type: 'warning' };
     } else if (!requiredFields.includes(titleMapping) && !requiredFields.includes(descMapping)) {
-      return i18n.REQUIRED_MAPPINGS(connector.name, JSON.stringify(requiredFields));
+      return {
+        message: i18n.REQUIRED_MAPPINGS(connector.name, JSON.stringify(requiredFields)),
+        type: 'warning',
+      };
     }
     return null;
-  }, [activeMapping, connector.name, isFieldsLoading, requiredFields]);
+  }, [activeMapping, connector.name, fields.length, isFieldsLoading, requiredFields]);
   const isSaveDisabled = useMemo(() => isFieldsLoading || validateFields != null, [
     isFieldsLoading,
     validateFields,
@@ -255,10 +266,38 @@ export const FieldMappingFlyout = ({ connector, onClose }: Props) => {
         </EuiFlexGroup>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        {mappingComponent}
-        {validateFields != null && (
-          <CallOut title={validateFields} color="warning" iconType="help" />
-        )}
+        <EuiFlexGroup direction="column" gutterSize="none">
+          <EuiFlexItem>
+            {' '}
+            <EuiFlexGroup>
+              <EuiFlexItem>
+                <span className="euiFormLabel">{i18n.FIELD_MAPPING_FIRST_COL}</span>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <span className="euiFormLabel">
+                  {i18n.FIELD_MAPPING_SECOND_COL(connector.name)}
+                </span>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <span className="euiFormLabel">{i18n.FIELD_MAPPING_THIRD_COL}</span>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiFlexGroup direction="column" gutterSize="s">
+              {mappingComponent}
+            </EuiFlexGroup>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            {validateFields != null && (
+              <CallOut
+                color={validateFields.type === 'error' ? 'danger' : 'warning'}
+                iconType={validateFields.type === 'error' ? 'alert' : 'help'}
+                title={validateFields.message}
+              />
+            )}
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">

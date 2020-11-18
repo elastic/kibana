@@ -48,47 +48,49 @@ const FieldMappingRowComponent: React.FC<RowProps> = ({
     securitySolutionField,
   ]);
   return (
-    <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
-      <EuiFlexItem>
-        <EuiFlexGroup component="span" justifyContent="spaceBetween">
-          <EuiFlexItem component="span" grow={false}>
-            {securitySolutionFieldCapitalized}
-          </EuiFlexItem>
-          <EuiFlexItem component="span" grow={false}>
-            <EuiIcon type="sortRight" />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiSuperSelect
-          disabled={securitySolutionField === 'comments' ? true : disabled}
-          isLoading={securitySolutionField === 'comments' ? false : disabled}
-          options={
-            securitySolutionField !== 'comments'
-              ? thirdPartyOptions
-              : [
-                  {
-                    value: 'comments',
-                    inputDisplay: i18n.COMMENT,
-                    'data-test-subj': 'dropdown-mapping-comment',
-                  },
-                ]
-          }
-          valueOfSelected={securitySolutionField !== 'comments' ? selectedThirdParty : 'comments'}
-          onChange={onChangeThirdParty.bind(null, securitySolutionField)}
-          data-test-subj={`case-configure-third-party-select-${id}`}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiSuperSelect
-          disabled={disabled}
-          options={actionTypeOptions}
-          valueOfSelected={selectedActionType}
-          onChange={onChangeActionType.bind(null, securitySolutionField)}
-          data-test-subj={`case-configure-action-type-select-${id}`}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <EuiFlexItem>
+      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+        <EuiFlexItem>
+          <EuiFlexGroup component="span" justifyContent="spaceBetween">
+            <EuiFlexItem component="span" grow={false}>
+              {securitySolutionFieldCapitalized}
+            </EuiFlexItem>
+            <EuiFlexItem component="span" grow={false}>
+              <EuiIcon type="sortRight" />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiSuperSelect
+            disabled={securitySolutionField === 'comments' ? true : disabled}
+            isLoading={securitySolutionField === 'comments' ? false : disabled}
+            options={
+              securitySolutionField !== 'comments'
+                ? thirdPartyOptions
+                : [
+                    {
+                      value: 'comments',
+                      inputDisplay: i18n.COMMENT,
+                      'data-test-subj': 'dropdown-mapping-comment',
+                    },
+                  ]
+            }
+            valueOfSelected={securitySolutionField !== 'comments' ? selectedThirdParty : 'comments'}
+            onChange={onChangeThirdParty.bind(null, securitySolutionField)}
+            data-test-subj={`case-configure-third-party-select-${id}`}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiSuperSelect
+            disabled={disabled}
+            options={actionTypeOptions}
+            valueOfSelected={selectedActionType}
+            onChange={onChangeActionType.bind(null, securitySolutionField)}
+            data-test-subj={`case-configure-action-type-select-${id}`}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiFlexItem>
   );
 };
 

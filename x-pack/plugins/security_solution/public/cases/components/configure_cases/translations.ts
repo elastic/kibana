@@ -184,6 +184,14 @@ export const COMMENT = i18n.translate('xpack.securitySolution.case.configureCase
   defaultMessage: 'Comments',
 });
 
+export const NO_FIELDS_ERROR = (connectorName: string): string => {
+  return i18n.translate('xpack.securitySolution.case.configureCases.noFieldsError', {
+    values: { connectorName },
+    defaultMessage:
+      'No { connectorName } fields found. Please check your { connectorName } connector settings or your { connectorName } instance settings to resolve.',
+  });
+};
+
 export const BLANK_MAPPINGS = (connectorName: string): string => {
   return i18n.translate('xpack.securitySolution.case.configureCases.blankMappings', {
     values: { connectorName },

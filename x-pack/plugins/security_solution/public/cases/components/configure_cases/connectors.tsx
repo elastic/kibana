@@ -72,8 +72,7 @@ const ConnectorsComponent: React.FC<Props> = ({
         </EuiFlexItem>
       </EuiFlexGroup>
     ),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [connectorsName, updateConnectorDisabled]
+    [connectorsName, handleShowEditFlyout, updateConnectorDisabled]
   );
   return (
     <>
