@@ -8,10 +8,7 @@ import React, { useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useDispatch } from 'react-redux';
 import { EuiButtonEmpty } from '@elastic/eui';
-import {
-  ConnectorAddFlyout,
-  TriggersAndActionsUiServices,
-} from '../../../../triggers_actions_ui/public';
+import { TriggersAndActionsUIPublicPluginStart } from '../../../../triggers_actions_ui/public';
 import { getConnectorsAction } from '../../state/alerts/alerts';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 
@@ -19,11 +16,15 @@ interface Props {
   focusInput: () => void;
 }
 
+interface KibanaDeps {
+  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
+}
+
 export const AddConnectorFlyout = ({ focusInput }: Props) => {
   const [addFlyoutVisible, setAddFlyoutVisibility] = useState<boolean>(false);
   const {
-    services: { actionTypeRegistry },
-  } = useKibana<TriggersAndActionsUiServices>();
+    services: { triggersActionsUi },
+  } = useKibana<KibanaDeps>();
 
   const dispatch = useDispatch();
 
@@ -31,6 +32,11 @@ export const AddConnectorFlyout = ({ focusInput }: Props) => {
     dispatch(getConnectorsAction.get());
     focusInput();
   }, [addFlyoutVisible, dispatch, focusInput]);
+
+  const ConnectorAddFlyout = triggersActionsUi.getAddConnectorFlyout({
+    consumer: 'case',
+    onClose: () => setAddFlyoutVisibility(false),
+  });
 
   return (
     <>
@@ -44,12 +50,7 @@ export const AddConnectorFlyout = ({ focusInput }: Props) => {
           defaultMessage="Create connector"
         />
       </EuiButtonEmpty>
-      {addFlyoutVisible ? (
-        <ConnectorAddFlyout
-          onClose={() => setAddFlyoutVisibility(false)}
-          actionTypeRegistry={actionTypeRegistry}
-        />
-      ) : null}
+      {addFlyoutVisible ? ConnectorAddFlyout : null}
     </>
   );
 };
