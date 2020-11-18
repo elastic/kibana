@@ -61,10 +61,7 @@ describe('encryption key generation interactive', () => {
     jest.spyOn(crypto, 'randomBytes').mockReturnValue('random-key');
     fs.writeFileSync = jest.fn();
     await generate(encryptionConfig, { interactive: true });
-    expect(fs.writeFileSync).toHaveBeenCalledWith(
-      '/foo/bar',
-      `xpack.encryptedSavedObjects.encryptionKey: random-key\n`
-    );
+    expect(fs.writeFileSync.mock.calls).toMatchSnapshot();
   });
   afterEach(() => {
     jest.restoreAllMocks();
