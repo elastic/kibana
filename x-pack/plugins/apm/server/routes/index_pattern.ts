@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import * as t from 'io-ts';
 import { createStaticIndexPattern } from '../lib/index_pattern/create_static_index_pattern';
 import { createRoute } from './create_route';
 import { setupRequest } from '../lib/helpers/setup_request';
@@ -13,11 +12,11 @@ import { getDynamicIndexPattern } from '../lib/index_pattern/get_dynamic_index_p
 import { getApmIndices } from '../lib/settings/apm_indices/get_apm_indices';
 
 export const staticIndexPatternRoute = createRoute((core) => ({
-  method: 'POST',
-  path: '/api/apm/index_pattern/static',
+  endpoint: 'POST /api/apm/index_pattern/static',
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     const savedObjectsClient = await getInternalSavedObjectsClient(core);
+
     await createStaticIndexPattern(setup, context, savedObjectsClient);
 
     // send empty response regardless of outcome
@@ -25,17 +24,8 @@ export const staticIndexPatternRoute = createRoute((core) => ({
   },
 }));
 
-export const dynamicIndexPatternRoute = createRoute(() => ({
-  path: '/api/apm/index_pattern/dynamic',
-  params: {
-    query: t.partial({
-      processorEvent: t.union([
-        t.literal('transaction'),
-        t.literal('metric'),
-        t.literal('error'),
-      ]),
-    }),
-  },
+export const dynamicIndexPatternRoute = createRoute({
+  endpoint: 'GET /api/apm/index_pattern/dynamic',
   handler: async ({ context }) => {
     const indices = await getApmIndices({
       config: context.config,
@@ -49,11 +39,11 @@ export const dynamicIndexPatternRoute = createRoute(() => ({
 
     return { dynamicIndexPattern };
   },
-}));
+});
 
-export const apmIndexPatternTitleRoute = createRoute(() => ({
-  path: '/api/apm/index_pattern/title',
+export const apmIndexPatternTitleRoute = createRoute({
+  endpoint: 'GET /api/apm/index_pattern/title',
   handler: async ({ context }) => {
     return getApmIndexPatternTitle(context);
   },
-}));
+});

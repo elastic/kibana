@@ -15,9 +15,9 @@ import {
 import * as apmApi from '../../../../../../services/rest/createCallApmApi';
 
 describe('LinkPreview', () => {
-  let callApmApiSpy: jest.SpyInstance<any, never>;
+  let callApmApiSpy: jest.SpyInstance<any, any>;
   beforeAll(() => {
-    callApmApiSpy = jest.spyOn(apmApi, 'callApmApi').mockReturnValue({
+    callApmApiSpy = jest.spyOn(apmApi, 'callApmApi').mockResolvedValue({
       transaction: { id: 'foo' },
     });
   });

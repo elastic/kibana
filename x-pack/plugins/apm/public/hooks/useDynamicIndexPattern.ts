@@ -10,20 +10,12 @@ import { UIProcessorEvent } from '../../common/processor_event';
 export function useDynamicIndexPattern(
   processorEvent: UIProcessorEvent | undefined
 ) {
-  const { data, status } = useFetcher(
-    (callApmApi) => {
-      return callApmApi({
-        pathname: '/api/apm/index_pattern/dynamic',
-        isCachable: true,
-        params: {
-          query: {
-            processorEvent,
-          },
-        },
-      });
-    },
-    [processorEvent]
-  );
+  const { data, status } = useFetcher((callApmApi) => {
+    return callApmApi({
+      endpoint: 'GET /api/apm/index_pattern/dynamic',
+      isCachable: true,
+    });
+  }, []);
 
   return {
     indexPattern: data?.dynamicIndexPattern,

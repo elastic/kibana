@@ -157,7 +157,7 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
     }
 
     return callApmApi({
-      pathname: '/api/apm/services/{serviceName}/error_groups',
+      endpoint: 'GET /api/apm/services/{serviceName}/error_groups',
       params: {
         path: { serviceName },
         query: {
