@@ -21,10 +21,10 @@ import {
 
 import { AppLogic } from '../../../../app_logic';
 import { ContentSection } from '../../../../components/shared/content_section';
+import { ViewContentHeader } from '../../../../components/shared/view_content_header';
 import { Loading } from '../../../../../../applications/shared/loading';
 import { CUSTOM_SERVICE_TYPE } from '../../../../constants';
 import { SourceDataItem } from '../../../../types';
-import { SOURCES_PATH, getSourcesPath } from '../../../../routes';
 
 import { SourcesLogic } from '../../sources_logic';
 import { AvailableSourcesList } from './available_sources_list';
@@ -64,18 +64,14 @@ export const AddSourceList: React.FC = () => {
     ({ serviceType }) => serviceType !== CUSTOM_SERVICE_TYPE
   );
 
-  const breadcrumbs = {
-    topLevelPath: getSourcesPath(SOURCES_PATH, isOrganization),
-    topLevelName: `${isOrganization ? 'Shared' : 'Private'} content sources`,
-    activeName: 'Add',
-  };
-
-  const SIDEBAR_DESCRIPTION = hasSources ? '' : NEW_SOURCE_DESCRIPTION;
-  const SIDEBAR_CONTEXT_DESCRIPTION = isOrganization
+  const BASE_DESCRIPTION = hasSources ? '' : NEW_SOURCE_DESCRIPTION;
+  const PAGE_CONTEXT_DESCRIPTION = isOrganization
     ? ORG_SOURCE_DESCRIPTION
     : PRIVATE_SOURCE_DESCRIPTION;
+
+  const PAGE_DESCRIPTION = BASE_DESCRIPTION + PAGE_CONTEXT_DESCRIPTION;
   const HAS_SOURCES_TITLE = isOrganization ? ORG_SOURCES_TITLE : PRIVATE_SOURCES_TITLE;
-  const SIDEBAR_TITLE = hasSources ? HAS_SOURCES_TITLE : NO_SOURCES_TITLE;
+  const PAGE_TITLE = hasSources ? HAS_SOURCES_TITLE : NO_SOURCES_TITLE;
 
   const handleFilterChange = (e: ChangeEvent<HTMLInputElement>) => setFilterValue(e.target.value);
 
@@ -98,48 +94,56 @@ export const AddSourceList: React.FC = () => {
     filterConfiguredSources
   ) as SourceDataItem[];
 
-  return showConfiguredSourcesList || isOrganization ? (
-    <ContentSection>
-      <EuiSpacer />
-      <EuiFormRow>
-        <EuiFieldSearch
-          data-test-subj="FilterSourcesInput"
-          value={filterValue}
-          onChange={handleFilterChange}
-          fullWidth={true}
-          placeholder={PLACEHOLDER}
-        />
-      </EuiFormRow>
-      <EuiSpacer size="xxl" />
-      {showConfiguredSourcesList && (
-        <ConfiguredSourcesList isOrganization={isOrganization} sources={visibleConfiguredSources} />
-      )}
-      {isOrganization && <AvailableSourcesList sources={visibleAvailableSources} />}
-    </ContentSection>
-  ) : (
-    <ContentSection>
-      <EuiFlexGroup justifyContent="center" alignItems="stretch">
-        <EuiFlexItem>
-          <EuiSpacer size="xl" />
-          <EuiPanel className="euiPanel euiPanel--inset">
-            <EuiSpacer size="s" />
-            <EuiSpacer size="xxl" />
-            <EuiEmptyPrompt
-              iconType={noSharedSourcesIcon}
-              title={<h2>No available sources</h2>}
-              body={
-                <p>
-                  Sources will be available for search when an administrator adds them to this
-                  organization.
-                </p>
-              }
+  return (
+    <>
+      <ViewContentHeader title={PAGE_TITLE} description={PAGE_DESCRIPTION} />
+      {showConfiguredSourcesList || isOrganization ? (
+        <ContentSection>
+          <EuiSpacer />
+          <EuiFormRow>
+            <EuiFieldSearch
+              data-test-subj="FilterSourcesInput"
+              value={filterValue}
+              onChange={handleFilterChange}
+              fullWidth={true}
+              placeholder={PLACEHOLDER}
             />
-            <EuiSpacer size="xxl" />
-            <EuiSpacer size="m" />
-          </EuiPanel>
-          <EuiSpacer size="xl" />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </ContentSection>
+          </EuiFormRow>
+          <EuiSpacer size="xxl" />
+          {showConfiguredSourcesList && (
+            <ConfiguredSourcesList
+              isOrganization={isOrganization}
+              sources={visibleConfiguredSources}
+            />
+          )}
+          {isOrganization && <AvailableSourcesList sources={visibleAvailableSources} />}
+        </ContentSection>
+      ) : (
+        <ContentSection>
+          <EuiFlexGroup justifyContent="center" alignItems="stretch">
+            <EuiFlexItem>
+              <EuiSpacer size="xl" />
+              <EuiPanel className="euiPanel euiPanel--inset">
+                <EuiSpacer size="s" />
+                <EuiSpacer size="xxl" />
+                <EuiEmptyPrompt
+                  iconType={noSharedSourcesIcon}
+                  title={<h2>No available sources</h2>}
+                  body={
+                    <p>
+                      Sources will be available for search when an administrator adds them to this
+                      organization.
+                    </p>
+                  }
+                />
+                <EuiSpacer size="xxl" />
+                <EuiSpacer size="m" />
+              </EuiPanel>
+              <EuiSpacer size="xl" />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </ContentSection>
+      )}
+    </>
   );
 };

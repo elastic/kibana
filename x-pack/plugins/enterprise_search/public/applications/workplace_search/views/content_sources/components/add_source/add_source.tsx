@@ -12,11 +12,12 @@ import { useHistory } from 'react-router-dom';
 
 import { AppLogic } from '../../../../app_logic';
 import { Loading } from '../../../../../../applications/shared/loading';
+import { ViewContentHeader } from '../../../../components/shared/view_content_header';
 import { CUSTOM_SERVICE_TYPE } from '../../../../constants';
 import { staticSourceData } from '../../source_data';
 import { SourceLogic } from '../../source_logic';
 import { SourceDataItem, FeatureIds } from '../../../../types';
-import { ADD_SOURCE_PATH, SOURCE_ADDED_PATH, getSourcesPath } from '../../../../routes';
+import { SOURCE_ADDED_PATH, getSourcesPath } from '../../../../routes';
 
 import { AddSourceHeader } from './add_source_header';
 import { ConfigCompleted } from './config_completed';
@@ -88,11 +89,6 @@ export const AddSource: React.FC<AddSourceProps> = ({
     return resetSourceState;
   }, []);
 
-  const breadcrumbs = {
-    topLevelPath: getSourcesPath(ADD_SOURCE_PATH, isOrganization),
-    topLevelName: '← Back to sources',
-  };
-
   const isCustom = serviceType === CUSTOM_SERVICE_TYPE;
   const isRemote = features?.platinumPrivateContext.includes(FeatureIds.Remote);
 
@@ -125,7 +121,7 @@ export const AddSource: React.FC<AddSourceProps> = ({
     history.push(`${getSourcesPath(SOURCE_ADDED_PATH, isOrganization)}/?name=${sourceName}`);
   };
 
-  const sidebarTitle = () => {
+  const pageTitle = () => {
     if (currentStep === Steps.ConnectInstanceStep || currentStep === Steps.ConfigureOauthStep) {
       return 'Connect';
     }
@@ -172,17 +168,17 @@ export const AddSource: React.FC<AddSourceProps> = ({
     ? CONNECT_ORGANIZATION_SOURCE_SIDEBAR_BLURB
     : CONNECT_PRIVATE_SOURCE_SIDEBAR_BLURB;
 
-  const sidebarBlurb =
+  const PAGE_DESCRIPTION =
     currentStep === Steps.ConnectInstanceStep ? CONNECT_SIDEBAR_BLURB : CONFIG_SIDEBAR_BLURB;
 
   const header = <AddSourceHeader name={name} serviceType={serviceType} categories={categories} />;
 
   return (
     <>
+      <ViewContentHeader title={pageTitle()} description={PAGE_DESCRIPTION} />
       {currentStep === Steps.ConfigIntroStep && (
         <ConfigurationIntro name={name} advanceStep={goToSaveConfig} header={header} />
       )}
-
       {currentStep === Steps.SaveConfigStep && (
         <SaveConfig
           name={name}
@@ -192,7 +188,6 @@ export const AddSource: React.FC<AddSourceProps> = ({
           header={header}
         />
       )}
-
       {currentStep === Steps.ConfigCompletedStep && (
         <ConfigCompleted
           name={name}
@@ -202,7 +197,6 @@ export const AddSource: React.FC<AddSourceProps> = ({
           header={header}
         />
       )}
-
       {currentStep === Steps.ConnectInstanceStep && (
         <ConnectInstance
           name={name}
@@ -217,7 +211,6 @@ export const AddSource: React.FC<AddSourceProps> = ({
           header={header}
         />
       )}
-
       {currentStep === Steps.ConfigureCustomStep && (
         <ConfigureCustom
           helpText={configuration.helpText}
@@ -225,11 +218,9 @@ export const AddSource: React.FC<AddSourceProps> = ({
           header={header}
         />
       )}
-
       {currentStep === Steps.ConfigureOauthStep && (
         <ConfigureOauth name={name} onFormCreated={goToFormSourceCreated} header={header} />
       )}
-
       {currentStep === Steps.SaveCustomStep && (
         <SaveCustom
           documentationUrl={configuration.documentationUrl}
@@ -238,7 +229,6 @@ export const AddSource: React.FC<AddSourceProps> = ({
           header={header}
         />
       )}
-
       {currentStep === Steps.ReAuthenticateStep && <ReAuthenticate name={name} header={header} />}
     </>
   );
