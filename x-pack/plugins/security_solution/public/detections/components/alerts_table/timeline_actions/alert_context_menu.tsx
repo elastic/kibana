@@ -10,6 +10,7 @@ import { EuiText, EuiButtonIcon, EuiContextMenu, EuiPopover } from '@elastic/eui
 import styled from 'styled-components';
 import { getOr } from 'lodash/fp';
 
+import { CommentType } from '../../../../../../case/common/api';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { TimelineId } from '../../../../../common/types/timeline';
 import { DEFAULT_INDEX_PATTERN } from '../../../../../common/constants';
@@ -33,6 +34,9 @@ import {
 import { inputsModel } from '../../../../common/store';
 import { useUserData } from '../../user_info';
 import { ExceptionListType } from '../../../../../common/shared_imports';
+import { useCreateCaseModal } from '../../../../cases/components/use_create_case_modal';
+import { usePostComment } from '../../../../cases/containers/use_post_comment';
+import { Case } from '../../../../cases/containers/types';
 
 interface AlertContextMenuProps {
   disabled: boolean;
@@ -56,6 +60,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     (ecsRowData.signal?.status && (ecsRowData.signal.status[0] as Status)) ?? undefined
   );
   const eventId = ecsRowData._id;
+  const eventIndex = ecsRowData._index;
   const ruleId = useMemo(
     (): string | null =>
       (ecsRowData.signal?.rule && ecsRowData.signal.rule.id && ecsRowData.signal.rule.id[0]) ??
@@ -91,6 +96,28 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
   }, []);
   const [exceptionModalType, setOpenAddExceptionModal] = useState<ExceptionListType | null>(null);
   const [{ canUserCRUD, hasIndexWrite }] = useUserData();
+
+  const { postComment } = usePostComment();
+  const onCaseCreated = useCallback(
+    (theCase: Case) => {
+      postComment(
+        theCase.id,
+        {
+          type: CommentType.alert as const,
+          alertId: eventId,
+          index: eventIndex ?? '',
+        },
+        () => {
+          displaySuccessToast(i18n.CASE_CREATED_SUCCESS_TOAST(theCase.title), dispatchToaster);
+        }
+      );
+    },
+    [dispatchToaster, eventId, postComment, eventIndex]
+  );
+
+  const { Modal: CreateCaseModal, openModal: openCaseModal } = useCreateCaseModal({
+    onCaseCreated,
+  });
 
   const isEndpointAlert = useMemo((): boolean => {
     if (ecsRowData == null) {
@@ -328,28 +355,36 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     [areExceptionsAllowed, canUserCRUD, handleAddExceptionClick, hasIndexWrite]
   );
 
-  const addToCasePanel = {
-    id: 1,
-    title: i18n.ACTION_ADD_CASE,
-    items: [
-      {
-        key: 'add-new-case-menu-item',
-        'aria-label': 'Add to new case',
-        'data-test-subj': 'add-new-case-item',
-        onClick: () => {},
-        disabled: !canUserCRUD,
-        name: <EuiText size="m">{i18n.ACTION_ADD_NEW_CASE}</EuiText>,
-      },
-      {
-        key: 'add-existing-case-menu-item',
-        'aria-label': 'Add to existing case',
-        'data-test-subj': 'add-existing-case-menu-item',
-        onClick: () => {},
-        disabled: !canUserCRUD,
-        name: <EuiText size="m">{i18n.ACTION_ADD_EXISTING_CASE}</EuiText>,
-      },
-    ],
-  };
+  const handleAddNewCaseClick = useCallback(() => {
+    closePopover();
+    openCaseModal();
+  }, [closePopover, openCaseModal]);
+
+  const addToCasePanel = useMemo(
+    () => ({
+      id: 1,
+      title: i18n.ACTION_ADD_CASE,
+      items: [
+        {
+          key: 'add-new-case-menu-item',
+          'aria-label': 'Add to new case',
+          'data-test-subj': 'add-new-case-item',
+          onClick: handleAddNewCaseClick,
+          disabled: !canUserCRUD,
+          name: <EuiText size="m">{i18n.ACTION_ADD_NEW_CASE}</EuiText>,
+        },
+        {
+          key: 'add-existing-case-menu-item',
+          'aria-label': 'Add to existing case',
+          'data-test-subj': 'add-existing-case-menu-item',
+          onClick: () => {},
+          disabled: !canUserCRUD,
+          name: <EuiText size="m">{i18n.ACTION_ADD_EXISTING_CASE}</EuiText>,
+        },
+      ],
+    }),
+    [canUserCRUD, handleAddNewCaseClick]
+  );
 
   const statusFilters = useMemo(() => {
     if (!alertStatus) {
@@ -419,6 +454,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
           onRuleChange={onRuleChange}
         />
       )}
+      <CreateCaseModal />
     </>
   );
 };
