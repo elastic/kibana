@@ -20,8 +20,8 @@
 import path from 'path';
 import { readKeystore } from './read_keystore';
 
-jest.mock('../../legacy/server/keystore');
-import { Keystore } from '../../legacy/server/keystore';
+jest.mock('../keystore');
+import { Keystore } from '../keystore';
 
 describe('cli/serve/read_keystore', () => {
   beforeEach(() => {
