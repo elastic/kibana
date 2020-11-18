@@ -22,6 +22,7 @@ import { HttpServiceSetup, RequestHandlerContext } from 'kibana/server';
 import { IndexPatternsFetcher } from './fetcher';
 import { registerCreateIndexPatternRoute } from './routes/create_index_pattern';
 import { registerGetIndexPatternRoute } from './routes/get_index_pattern';
+import { registerDeleteIndexPatternRoute } from './routes/delete_index_pattern';
 
 export function registerRoutes(http: HttpServiceSetup) {
   const parseMetaFields = (metaFields: string | string[]) => {
@@ -38,6 +39,7 @@ export function registerRoutes(http: HttpServiceSetup) {
 
   registerCreateIndexPatternRoute(router);
   registerGetIndexPatternRoute(router);
+  registerDeleteIndexPatternRoute(router);
 
   router.get(
     {
