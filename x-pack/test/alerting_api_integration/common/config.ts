@@ -92,6 +92,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           ...xPackApiIntegrationTestsConfig.get('kbnTestServer.serverArgs'),
           `--xpack.actions.allowedHosts=${JSON.stringify(['localhost', 'some.non.existent.com'])}`,
           '--xpack.encryptedSavedObjects.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"',
+          '--xpack.alerts.invalidateApiKeysTask.interval="15s"',
           `--xpack.actions.enabledActionTypes=${JSON.stringify(enabledActionTypes)}`,
           ...actionsProxyUrl,
 

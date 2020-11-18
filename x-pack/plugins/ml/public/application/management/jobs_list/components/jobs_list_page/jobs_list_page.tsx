@@ -45,25 +45,36 @@ import {
 } from '../../../../jobs/jobs_list/jobs';
 import { getMlGlobalServices } from '../../../../app';
 import { JobSpacesRepairFlyout } from '../../../../components/job_spaces_repair';
+import { getDefaultAnomalyDetectionJobsListState } from '../../../../jobs/jobs_list/jobs';
+import { getMlGlobalServices } from '../../../../app';
+import { ListingPageUrlState } from '../../../../../../common/types/common';
+import { getDefaultDFAListState } from '../../../../data_frame_analytics/pages/analytics_management/page';
 
 interface Tab extends EuiTabbedContentTab {
   'data-test-subj': string;
 }
 
-function useTabs(isMlEnabledInSpace: boolean, spacesEnabled: boolean): Tab[] {
-  const [jobsViewState, setJobsViewState] = useState<AnomalyDetectionJobsListState>(
-    getDefaultAnomalyDetectionJobsListState()
-  );
+function usePageState<T extends ListingPageUrlState>(
+  defaultState: T
+): [T, (update: Partial<T>) => void] {
+  const [pageState, setPageState] = useState<T>(defaultState);
 
   const updateState = useCallback(
-    (update: Partial<AnomalyDetectionJobsListState>) => {
-      setJobsViewState({
-        ...jobsViewState,
+    (update: Partial<T>) => {
+      setPageState({
+        ...pageState,
         ...update,
       });
     },
-    [jobsViewState]
+    [pageState]
   );
+
+  return [pageState, updateState];
+}
+
+function useTabs(isMlEnabledInSpace: boolean, spacesEnabled: boolean): Tab[] {
+  const [adPageState, updateAdPageState] = usePageState(getDefaultAnomalyDetectionJobsListState());
+  const [dfaPageState, updateDfaPageState] = usePageState(getDefaultDFAListState());
 
   return useMemo(
     () => [
@@ -77,8 +88,8 @@ function useTabs(isMlEnabledInSpace: boolean, spacesEnabled: boolean): Tab[] {
           <Fragment>
             <EuiSpacer size="m" />
             <JobsListView
-              jobsViewState={jobsViewState}
-              onJobsViewStateUpdate={updateState}
+              jobsViewState={adPageState}
+              onJobsViewStateUpdate={updateAdPageState}
               isManagementTable={true}
               isMlEnabledInSpace={isMlEnabledInSpace}
               spacesEnabled={spacesEnabled}
@@ -99,12 +110,14 @@ function useTabs(isMlEnabledInSpace: boolean, spacesEnabled: boolean): Tab[] {
               isManagementTable={true}
               isMlEnabledInSpace={isMlEnabledInSpace}
               spacesEnabled={spacesEnabled}
+              pageState={dfaPageState}
+              updatePageState={updateDfaPageState}
             />
           </Fragment>
         ),
       },
     ],
-    [isMlEnabledInSpace, jobsViewState, updateState]
+    [isMlEnabledInSpace, adPageState, updateAdPageState, dfaPageState, updateDfaPageState]
   );
 }
 
