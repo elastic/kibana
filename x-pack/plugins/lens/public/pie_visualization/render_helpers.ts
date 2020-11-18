@@ -6,22 +6,13 @@
 
 import { Datum, LayerValue } from '@elastic/charts';
 import { KibanaDatatable, KibanaDatatableColumn } from 'src/plugins/expressions/public';
-import { ColumnGroups } from './types';
 import { LensFilterEvent } from '../types';
 
-export function getSliceValueWithFallback(
-  d: Datum,
-  reverseGroups: ColumnGroups,
-  metricColumn: KibanaDatatableColumn
-) {
+export function getSliceValue(d: Datum, metricColumn: KibanaDatatableColumn) {
   if (typeof d[metricColumn.id] === 'number' && d[metricColumn.id] !== 0) {
     return d[metricColumn.id];
   }
-  // Sometimes there is missing data for outer groups
-  // When there is missing data, we fall back to the next groups
-  // This creates a sunburst effect
-  const hasMetric = reverseGroups.find((group) => group.metrics.length && d[group.metrics[0].id]);
-  return hasMetric ? d[hasMetric.metrics[0].id] || Number.EPSILON : Number.EPSILON;
+  return Number.EPSILON;
 }
 
 export function getFilterContext(

@@ -5,79 +5,47 @@
  */
 
 import { KibanaDatatable } from 'src/plugins/expressions/public';
-import { getSliceValueWithFallback, getFilterContext } from './render_helpers';
+import { getSliceValue, getFilterContext } from './render_helpers';
 
 describe('render helpers', () => {
-  describe('#getSliceValueWithFallback', () => {
-    describe('without fallback', () => {
-      const columnGroups = [
-        { col: { id: 'a', name: 'A' }, metrics: [] },
-        { col: { id: 'b', name: 'C' }, metrics: [] },
-      ];
-
-      it('returns the metric when positive number', () => {
-        expect(
-          getSliceValueWithFallback({ a: 'Cat', b: 'Home', c: 5 }, columnGroups, {
+  describe('#getSliceValue', () => {
+    it('returns the metric when positive number', () => {
+      expect(
+        getSliceValue(
+          { a: 'Cat', b: 'Home', c: 5 },
+          {
             id: 'c',
             name: 'C',
-          })
-        ).toEqual(5);
-      });
-
-      it('returns the metric when negative number', () => {
-        expect(
-          getSliceValueWithFallback({ a: 'Cat', b: 'Home', c: -100 }, columnGroups, {
-            id: 'c',
-            name: 'C',
-          })
-        ).toEqual(-100);
-      });
-
-      it('returns epsilon when metric is 0 without fallback', () => {
-        expect(
-          getSliceValueWithFallback({ a: 'Cat', b: 'Home', c: 0 }, columnGroups, {
-            id: 'c',
-            name: 'C',
-          })
-        ).toEqual(Number.EPSILON);
-      });
+            meta: { type: 'number' },
+          }
+        )
+      ).toEqual(5);
     });
 
-    describe('fallback behavior', () => {
-      const columnGroups = [
-        { col: { id: 'a', name: 'A' }, metrics: [{ id: 'a_subtotal', name: '' }] },
-        { col: { id: 'b', name: 'C' }, metrics: [] },
-      ];
+    it('returns the metric when negative number', () => {
+      expect(
+        getSliceValue(
+          { a: 'Cat', b: 'Home', c: -100 },
+          {
+            id: 'c',
+            name: 'C',
+            meta: { type: 'number' },
+          }
+        )
+      ).toEqual(-100);
+    });
 
-      it('falls back to metric from previous column if available', () => {
-        expect(
-          getSliceValueWithFallback(
-            { a: 'Cat', a_subtotal: 5, b: 'Home', c: undefined },
-            columnGroups,
-            { id: 'c', name: 'C' }
-          )
-        ).toEqual(5);
-      });
-
-      it('uses epsilon if fallback is 0', () => {
-        expect(
-          getSliceValueWithFallback(
-            { a: 'Cat', a_subtotal: 0, b: 'Home', c: undefined },
-            columnGroups,
-            { id: 'c', name: 'C' }
-          )
-        ).toEqual(Number.EPSILON);
-      });
-
-      it('uses epsilon if fallback is missing', () => {
-        expect(
-          getSliceValueWithFallback(
-            { a: 'Cat', a_subtotal: undefined, b: 'Home', c: undefined },
-            columnGroups,
-            { id: 'c', name: 'C' }
-          )
-        ).toEqual(Number.EPSILON);
-      });
+    it('returns epsilon when metric is 0 without fallback', () => {
+      expect(
+        getSliceValue(
+          { a: 'Cat', b: 'Home', c: 0 },
+          {
+            id: 'c',
+            name: 'C',
+            meta: { type: 'number' },
+          }
+        )
+      ).toEqual(Number.EPSILON);
     });
   });
 
