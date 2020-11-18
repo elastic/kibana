@@ -24,8 +24,9 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { VisOptionsProps } from 'src/plugins/vis_default_editor/public';
 import { TruncateLabelsOption } from './truncate_labels';
-import { BasicOptions, SwitchOption } from '../../../../charts/public';
+import { BasicOptions, SwitchOption, SelectOption } from '../../../../charts/public';
 import { PieVisParams } from '../../types';
+import { getLabelPositions, getValuesFormats } from '../collections';
 
 function PieOptions(props: VisOptionsProps<PieVisParams>) {
   const { stateParams, setValue } = props;
@@ -55,6 +56,14 @@ function PieOptions(props: VisOptionsProps<PieVisParams>) {
           setValue={setValue}
         />
         <BasicOptions {...props} />
+        <SwitchOption
+          label={i18n.translate('visTypePie.editors.pie.nestedLegendLabel', {
+            defaultMessage: 'Nested Legend',
+          })}
+          paramName="nestedLegend"
+          value={stateParams.nestedLegend}
+          setValue={setValue}
+        />
       </EuiPanel>
 
       <EuiSpacer size="s" />
@@ -77,12 +86,14 @@ function PieOptions(props: VisOptionsProps<PieVisParams>) {
           value={stateParams.labels.show}
           setValue={setLabels}
         />
-        <SwitchOption
-          label={i18n.translate('visTypePie.editors.pie.showTopLevelOnlyLabel', {
-            defaultMessage: 'Show top level only',
+        <SelectOption
+          label={i18n.translate('visTypePie.editors.pie.labelPositionLabel', {
+            defaultMessage: 'Label position',
           })}
-          paramName="last_level"
-          value={stateParams.labels.last_level}
+          disabled={!stateParams.labels.show}
+          options={getLabelPositions()}
+          paramName="position"
+          value={stateParams.labels.position}
           setValue={setLabels}
         />
         <SwitchOption
@@ -91,6 +102,16 @@ function PieOptions(props: VisOptionsProps<PieVisParams>) {
           })}
           paramName="values"
           value={stateParams.labels.values}
+          setValue={setLabels}
+        />
+        <SelectOption
+          label={i18n.translate('visTypePie.editors.pie.valueFormatsLabel', {
+            defaultMessage: 'Values',
+          })}
+          disabled={!stateParams.labels.values}
+          options={getValuesFormats()}
+          paramName="valuesFormat"
+          value={stateParams.labels.valuesFormat}
           setValue={setLabels}
         />
         <TruncateLabelsOption value={stateParams.labels.truncate} setValue={setLabels} />

@@ -19,8 +19,9 @@
 
 import { i18n } from '@kbn/i18n';
 import { Position } from '@elastic/charts';
+import { LabelPositions, ValueFormats } from '../types';
 
-export const getPositions = () => [
+export const getLegendPositions = () => [
   {
     text: i18n.translate('visTypePie.legendPositions.topText', {
       defaultMessage: 'Top',
@@ -47,7 +48,32 @@ export const getPositions = () => [
   },
 ];
 
-export const getConfigCollections = () => ({
-  legendPositions: getPositions(),
-  positions: getPositions(),
-});
+export const getLabelPositions = () => [
+  {
+    text: i18n.translate('visTypePie.labelPositions.insideText', {
+      defaultMessage: 'Inside',
+    }),
+    value: LabelPositions.INSIDE,
+  },
+  {
+    text: i18n.translate('visTypePie.labelPositions.insideOrOutsideText', {
+      defaultMessage: 'Inside or outside',
+    }),
+    value: LabelPositions.DEFAULT,
+  },
+];
+
+export const getValuesFormats = () => [
+  {
+    text: i18n.translate('visTypePie.valuesFormats.percent', {
+      defaultMessage: 'Show Percent',
+    }),
+    value: ValueFormats.PERCENT,
+  },
+  {
+    text: i18n.translate('visTypePie.valuesFormats.value', {
+      defaultMessage: 'Show value',
+    }),
+    value: ValueFormats.VALUE,
+  },
+];

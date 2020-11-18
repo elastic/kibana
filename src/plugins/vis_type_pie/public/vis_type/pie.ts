@@ -26,9 +26,9 @@ import { Schemas } from '../../../vis_default_editor/public';
 import { AggGroupNames } from '../../../data/public';
 import { VIS_EVENT_TO_TRIGGER, BaseVisTypeOptions } from '../../../visualizations/public';
 
-import { PieVisParams } from '../types';
+import { PieVisParams, LabelPositions, ValueFormats } from '../types';
 import { toExpressionAst } from '../to_ast';
-import { getPositions, PieOptions } from '../editor';
+import { getLegendPositions, PieOptions } from '../editor';
 
 export const getPieVisTypeDefinition = (
   showElasticChartsOptions = false
@@ -47,18 +47,20 @@ export const getPieVisTypeDefinition = (
       addTooltip: true,
       addLegend: true,
       legendPosition: Position.Right,
+      nestedLegend: false,
       isDonut: true,
       labels: {
-        show: false,
+        show: true,
         values: true,
-        last_level: true,
+        valuesFormat: ValueFormats.PERCENT,
         truncate: 100,
+        position: LabelPositions.DEFAULT,
       },
     },
   },
   editorConfig: {
     collections: {
-      legendPositions: getPositions(),
+      legendPositions: getLegendPositions(),
     },
     optionsTemplate: PieOptions,
     schemas: new Schemas([

@@ -17,6 +17,7 @@
  * under the License.
  */
 import { Position } from '@elastic/charts';
+import { DatatableColumn } from '../../../expressions/public';
 
 export interface Dimension {
   accessor: number;
@@ -38,13 +39,15 @@ export interface PieVisParams {
   addTooltip: boolean;
   addLegend: boolean;
   legendPosition: Position;
+  nestedLegend: boolean;
   dimensions: Dimensions;
   isDonut: boolean;
   labels: {
     show: boolean;
+    position: LabelPositions;
     values: boolean;
-    last_level: boolean;
     truncate: number | null;
+    valuesFormat: ValueFormats;
   };
 }
 
@@ -70,4 +73,21 @@ export interface Table {
   columns: Column[];
   rows: Row[];
   $parent?: TableParent;
+}
+
+export interface BucketColumns extends DatatableColumn {
+  format?: {
+    id?: string;
+    params?: { pattern?: string; [key: string]: any };
+  };
+}
+
+export enum LabelPositions {
+  INSIDE = 'inside',
+  DEFAULT = 'default',
+}
+
+export enum ValueFormats {
+  PERCENT = 'percent',
+  VALUE = 'value',
 }

@@ -56,8 +56,9 @@ import { SeriesLayer } from '../../charts/public';
 import { Datatable, DatatableColumn, IInterpreterRenderHandlers } from '../../expressions/public';
 import { ValueClickContext } from '../../embeddable/public';
 
-import { PieVisParams } from './types';
+import { PieVisParams, BucketColumns, LabelPositions, ValueFormats } from './types';
 import { getThemeService, getColorsService, getFormatService } from './services';
+import { getTooltip } from './components';
 // import { colorSchemas } from 'src/plugins/charts/public';
 // import { ChartType } from '../common';
 
@@ -67,17 +68,12 @@ export interface PieComponentProps {
   visParams: PieVisParams;
   visData: Datatable;
   uiState: IInterpreterRenderHandlers['uiState'];
+  visFormattedData: any;
   fireEvent: IInterpreterRenderHandlers['event'];
   renderComplete: IInterpreterRenderHandlers['done'];
 }
 
 export type PieComponentType = typeof PieComponent;
-interface BucketColumns extends DatatableColumn {
-  format?: {
-    id?: string;
-    params?: { pattern?: string; [key: string]: any };
-  };
-}
 
 const EMPTY_SLICE = Symbol('empty_slice');
 
@@ -199,10 +195,7 @@ const PieComponent = (props: PieComponentProps) => {
     [props.uiState?.emit, props.uiState?.get, props.uiState?.set, props.uiState?.setSilent]
   );
 
-  const { visData, visParams } = props;
-
-  // console.dir(visData);
-  // console.dir(visParams);
+  const { visData, visParams, visFormattedData } = props;
 
   // const config = getConfig(visData, visParams);
   // const legendPosition = useMemo(() => config.legend.position ?? Position.Right, [
@@ -281,8 +274,9 @@ const PieComponent = (props: PieComponentProps) => {
     // Force all labels to be linked, then prevent links from showing
     config.linkLabel = { maxCount: 0, maximumSection: Number.POSITIVE_INFINITY };
   }
-
-  const metricColumn = visData.columns[visParams.dimensions.metric.accessor];
+  if (visParams.labels.position === LabelPositions.INSIDE) {
+    config.linkLabel = { maxCount: 0 };
+  }
   const metricFieldFormatter = getFormatService().deserialize(visParams.dimensions.metric.format);
   const percentFormatter = getFormatService().deserialize({
     id: 'percent',
@@ -299,6 +293,10 @@ const PieComponent = (props: PieComponentProps) => {
   } else {
     bucketColumns.push(visData.columns[0]);
   }
+  // calclulate metric column --> move to utils
+  const lastBucketId = bucketColumns[bucketColumns.length - 1].id;
+  const matchingIndex = visData.columns.findIndex((col) => col.id === lastBucketId);
+  const metricColumn = visData.columns[matchingIndex + 1];
 
   const totalSeriesCount = uniq(
     visData.rows.map((row) => {
@@ -334,7 +332,7 @@ const PieComponent = (props: PieComponentProps) => {
           }
 
           const outputColor = defaultPalette.getColor(seriesLayers, {
-            behindText: true,
+            behindText: visParams.labels.show,
             maxDepth: visData.columns.length,
             totalSeries: totalSeriesCount,
           });
@@ -347,6 +345,12 @@ const PieComponent = (props: PieComponentProps) => {
 
   const tooltip: TooltipProps = {
     type: visParams.addTooltip ? TooltipType.Follow : TooltipType.None,
+    // customTooltip: getTooltip(
+    //   visData,
+    //   metricFieldFormatter,
+    //   bucketColumns,
+    //   metricColumn
+    // ),
   };
 
   return (
@@ -361,7 +365,7 @@ const PieComponent = (props: PieComponentProps) => {
           <Settings
             showLegend={showLegend}
             legendPosition={visParams.legendPosition || Position.Right}
-            legendMaxDepth={undefined}
+            legendMaxDepth={visParams.nestedLegend ? undefined : 1}
             tooltip={tooltip}
             onElementClick={(args) => {
               handleFilterClick(args[0][0] as LayerValue[], bucketColumns, visData);
@@ -374,7 +378,11 @@ const PieComponent = (props: PieComponentProps) => {
             data={visData.rows}
             valueAccessor={(d: Datum) => getSliceValue(d, metricColumn)}
             percentFormatter={(d: number) => percentFormatter.convert(d / 100)}
-            valueGetter={!visParams.labels.show ? undefined : 'percent'}
+            valueGetter={
+              !visParams.labels.show || visParams.labels.valuesFormat === ValueFormats.VALUE
+                ? undefined
+                : 'percent'
+            }
             valueFormatter={(d: number) =>
               !visParams.labels.show ? '' : metricFieldFormatter.convert(d)
             }

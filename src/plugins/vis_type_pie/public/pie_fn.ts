@@ -20,6 +20,7 @@
 import { i18n } from '@kbn/i18n';
 import { ExpressionFunctionDefinition, Datatable, Render } from '../../expressions/public';
 import { PieVisParams } from './types';
+import { vislibSlicesResponseHandler } from './utils';
 
 export const vislibPieName = 'pie_vis';
 
@@ -30,6 +31,7 @@ interface Arguments {
 export interface RenderValue {
   visData: Datatable;
   visType: string;
+  visFormattedData: any;
   visConfig: PieVisParams;
 }
 
@@ -56,12 +58,14 @@ export const createPieVisFn = (): VisTypePieExpressionFunctionDefinition => ({
   },
   fn(context, args) {
     const visConfig = JSON.parse(args.visConfig) as PieVisParams;
+    const visFormattedData = vislibSlicesResponseHandler(context, visConfig.dimensions);
 
     return {
       type: 'render',
       as: vislibPieName,
       value: {
         visData: context,
+        visFormattedData,
         visConfig,
         visType: 'pie',
         params: {
