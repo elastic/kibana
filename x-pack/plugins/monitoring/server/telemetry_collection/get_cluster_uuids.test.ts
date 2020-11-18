@@ -13,6 +13,7 @@ import {
 } from './get_cluster_uuids';
 
 describe('get_cluster_uuids', () => {
+  const kibanaRequest = undefined;
   const callCluster = sinon.stub();
   const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
   const soClient = savedObjectsRepositoryMock.create();
@@ -33,7 +34,7 @@ describe('get_cluster_uuids', () => {
       callCluster.withArgs('search').returns(Promise.resolve(response));
       expect(
         await getClusterUuids(
-          { callCluster, esClient, soClient, timestamp, usageCollection: {} as any },
+          { callCluster, esClient, soClient, timestamp, kibanaRequest, usageCollection: {} as any },
           {
             maxBucketSize: 1,
           } as any
@@ -47,7 +48,7 @@ describe('get_cluster_uuids', () => {
       callCluster.returns(Promise.resolve(response));
       expect(
         await fetchClusterUuids(
-          { callCluster, esClient, soClient, timestamp, usageCollection: {} as any },
+          { callCluster, esClient, soClient, timestamp, kibanaRequest, usageCollection: {} as any },
           {
             maxBucketSize: 1,
           } as any
