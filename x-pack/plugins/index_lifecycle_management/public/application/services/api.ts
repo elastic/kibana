@@ -112,3 +112,5 @@ export const useLoadSnapshotPolicies = () => {
     initialData: [],
   });
 };
+
+export const useLoadSnapshotRepositories = () => {};
