@@ -5,7 +5,6 @@
  */
 
 import {
-  EuiBasicTable,
   EuiBasicTableColumn,
   EuiFlexGroup,
   EuiFlexItem,
@@ -34,6 +33,7 @@ import { TableFetchWrapper } from '../../../shared/table_fetch_wrapper';
 import { TableLinkFlexItem } from '../table_link_flex_item';
 import { SparkPlotWithValueLabel } from '../../../shared/charts/spark_plot/spark_plot_with_value_label';
 import { ImpactBar } from '../../../shared/ImpactBar';
+import { ServiceOverviewTable } from '../service_overview_table';
 
 type ServiceTransactionGroupItem = ValuesType<
   APIReturnType<
@@ -244,7 +244,7 @@ export function ServiceOverviewTransactionsTable(props: Props) {
           defaultMessage: 'Impact',
         }
       ),
-      width: px(unit * 4),
+      width: px(unit * 5),
       render: (_, { impact }) => {
         return <ImpactBar value={impact ?? 0} size="m" />;
       },
@@ -282,7 +282,7 @@ export function ServiceOverviewTransactionsTable(props: Props) {
       <EuiFlexItem>
         <EuiFlexItem>
           <TableFetchWrapper status={status}>
-            <EuiBasicTable
+            <ServiceOverviewTable
               columns={columns}
               items={items}
               pagination={{
