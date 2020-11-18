@@ -1115,8 +1115,8 @@ exports[`MonitorList component renders the monitor list 1`] = `
                       style="flex-basis:40px"
                     >
                       <span
-                        class="euiBadge euiBadge--iconLeft"
-                        style="background-color:#ff7e62;color:#000;display:block"
+                        class="euiBadge euiBadge--iconLeft eui-textCenter"
+                        style="background-color:#ff7e62;color:#000"
                       >
                         <span
                           class="euiBadge__content"
@@ -1354,8 +1354,8 @@ exports[`MonitorList component renders the monitor list 1`] = `
                       style="flex-basis:40px"
                     >
                       <span
-                        class="euiBadge euiBadge--iconLeft"
-                        style="background-color:#ff7e62;color:#000;display:block"
+                        class="euiBadge euiBadge--iconLeft eui-textCenter"
+                        style="background-color:#ff7e62;color:#000"
                       >
                         <span
                           class="euiBadge__content"

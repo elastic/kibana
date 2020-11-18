@@ -44,7 +44,7 @@ export const getHealthMessage = (status: string): string | null => {
   }
 };
 
-const getShortTimeStamp = (timeStamp: moment.Moment, relative = false) => {
+export const getShortTimeStamp = (timeStamp: moment.Moment, relative = false) => {
   if (relative) {
     const prevLocale: string = moment.locale() ?? 'en';
 
@@ -153,8 +153,8 @@ export const MonitorListStatusColumn = ({
       <StatusColumnFlexG alignItems="center" gutterSize="none" wrap={false} responsive={false}>
         <EuiFlexItem grow={false} style={{ flexBasis: 40 }}>
           <EuiBadge
+            className="eui-textCenter"
             color={status === STATUS.UP ? 'secondary' : dangerBehindText}
-            style={{ display: 'block' }}
           >
             {getHealthMessage(status)}
           </EuiBadge>

@@ -17,12 +17,8 @@ exports[`MonitorListStatusColumn can handle a non-numeric timestamp value 1`] = 
       }
     >
       <EuiBadge
+        className="eui-textCenter"
         color="secondary"
-        style={
-          Object {
-            "display": "block",
-          }
-        }
       >
         Up
       </EuiBadge>
@@ -102,12 +98,8 @@ exports[`MonitorListStatusColumn provides expected tooltip and display times 1`]
       }
     >
       <EuiBadge
+        className="eui-textCenter"
         color="secondary"
-        style={
-          Object {
-            "display": "block",
-          }
-        }
       >
         Up
       </EuiBadge>
@@ -187,12 +179,8 @@ exports[`MonitorListStatusColumn will display location status 1`] = `
       }
     >
       <EuiBadge
+        className="eui-textCenter"
         color="secondary"
-        style={
-          Object {
-            "display": "block",
-          }
-        }
       >
         Up
       </EuiBadge>
@@ -271,8 +259,8 @@ exports[`MonitorListStatusColumn will render display location status 1`] = `
       style="flex-basis:40px"
     >
       <span
-        class="euiBadge euiBadge--iconLeft"
-        style="background-color:#6dccb1;color:#000;display:block"
+        class="euiBadge euiBadge--iconLeft eui-textCenter"
+        style="background-color:#6dccb1;color:#000"
       >
         <span
           class="euiBadge__content"
