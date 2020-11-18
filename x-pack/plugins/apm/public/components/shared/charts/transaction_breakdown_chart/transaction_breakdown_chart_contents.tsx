@@ -17,6 +17,7 @@ import {
 import moment from 'moment';
 import React, { useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
+import { useChartTheme } from '../../../../../../observability/public';
 import { asPercent } from '../../../../../common/utils/formatters';
 import { TimeSeries } from '../../../../../typings/timeseries';
 import { FETCH_STATUS } from '../../../../hooks/useFetcher';
@@ -40,6 +41,7 @@ export function TransactionBreakdownChartContents({
 }: Props) {
   const history = useHistory();
   const chartRef = React.createRef<Chart>();
+  const chartTheme = useChartTheme();
   const { event, setEvent } = useChartsSync2();
   const { urlParams } = useUrlParams();
   const { start, end } = urlParams;
@@ -63,6 +65,7 @@ export function TransactionBreakdownChartContents({
           showLegend
           showLegendExtra
           legendPosition={Position.Bottom}
+          theme={chartTheme}
           xDomain={{ min, max }}
           flatLegend
           onPointerUpdate={(currEvent: any) => {

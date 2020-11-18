@@ -41,17 +41,7 @@ export function SparkPlot(props: Props) {
 
   return (
     <Chart size={{ height: px(24), width: px(64) }}>
-      <Settings
-        theme={{
-          ...chartTheme,
-          background: {
-            ...chartTheme.background,
-            color: 'transparent',
-          },
-        }}
-        showLegend={false}
-        tooltip="none"
-      />
+      <Settings theme={chartTheme} showLegend={false} tooltip="none" />
       <AreaSeries
         id="area"
         xScaleType={ScaleType.Time}
