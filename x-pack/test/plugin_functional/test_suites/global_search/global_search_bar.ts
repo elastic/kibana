@@ -139,6 +139,18 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         expect(results.map((result) => result.label)).to.eql(['My awesome vis (tag-4)']);
       });
+
+      it('returns no results when searching for an unknown tag', async () => {
+        await navigationalSearch.searchFor('tag:unknown');
+
+        expect(await navigationalSearch.isNoResultsPlaceholderDisplayed()).to.eql(true);
+      });
+
+      it('returns no results when searching for an unknown type', async () => {
+        await navigationalSearch.searchFor('type:unknown');
+
+        expect(await navigationalSearch.isNoResultsPlaceholderDisplayed()).to.eql(true);
+      });
     });
   });
 }

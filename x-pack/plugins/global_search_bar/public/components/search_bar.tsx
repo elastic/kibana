@@ -132,9 +132,9 @@ export function SearchBar({
       const rawParams = parseSearchParams(searchValue);
       const tagIds =
         taggingApi && rawParams.filters.tags
-          ? rawParams.filters.tags
-              .map((tagName) => taggingApi.ui.getTagIdFromName(tagName))
-              .filter((tagId): tagId is string => tagId !== undefined)
+          ? rawParams.filters.tags.map(
+              (tagName) => taggingApi.ui.getTagIdFromName(tagName) ?? '__unknown__'
+            )
           : undefined;
       const searchParams: GlobalSearchFindParams = {
         term: rawParams.term,

@@ -22,7 +22,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     }, t);
   };
 
-  describe('TOTO GlobalSearch - SavedObject provider', function () {
+  describe('GlobalSearch - SavedObject provider', function () {
     before(async () => {
       await esArchiver.load('global_search/basic');
     });

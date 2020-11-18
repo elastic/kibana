@@ -57,19 +57,25 @@ export function NavigationalSearchProvider({ getService, getPageObjects }: FtrPr
       await options[index].click();
     }
 
-    async waitForResultsLoaded() {
+    async waitForResultsLoaded(waitUntil: number = 3000) {
       await testSubjects.exists('nav-search-option');
       // results are emitted in multiple batches. Each individual batch causes a re-render of
       // the component, causing the current elements to become stale. We can't perform DOM access
       // without heavy flakiness in this situation.
       // there is NO ui indication of any kind to detect when all the emissions are done,
       // so we are forced to fallback to awaiting a given amount of time once the first options are displayed.
-      await delay(3000);
+      await delay(waitUntil);
     }
 
     async getDisplayedResults() {
       const resultElements = await testSubjects.findAll('nav-search-option');
       return Promise.all(resultElements.map((el) => this.convertResultElement(el)));
+    }
+
+    async isNoResultsPlaceholderDisplayed(checkAfter: number = 3000) {
+      // see comment in `waitForResultsLoaded`
+      await delay(checkAfter);
+      return testSubjects.exists('nav-search-no-results');
     }
 
     private async convertResultElement(resultEl: WebElementWrapper): Promise<SearchResult> {
@@ -84,11 +90,6 @@ export function NavigationalSearchProvider({ getService, getPageObjects }: FtrPr
       };
     }
   }
-
-  // nav-search-popover
-  // nav-search-option
-  // euiSelectableTemplateSitewide__listItemTitle
-  // euiSelectableTemplateSitewide__optionMeta
 
   return new NavigationalSearch();
 }
