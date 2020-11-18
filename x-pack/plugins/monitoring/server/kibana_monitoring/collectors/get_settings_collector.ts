@@ -44,15 +44,23 @@ interface EmailSettingData {
   xpack: { default_admin_email: string | null };
 }
 
-export interface KibanaSettingsCollector extends Collector<EmailSettingData | undefined> {
+export interface KibanaSettingsCollectorExtraOptions {
   getEmailValueStructure(email: string | null): EmailSettingData;
 }
+
+export type KibanaSettingsCollector = Collector<EmailSettingData | undefined> &
+  KibanaSettingsCollectorExtraOptions;
 
 export function getSettingsCollector(
   usageCollection: UsageCollectionSetup,
   config: MonitoringConfig
 ) {
-  return usageCollection.makeStatsCollector({
+  return usageCollection.makeStatsCollector<
+    EmailSettingData | undefined,
+    unknown,
+    false,
+    KibanaSettingsCollectorExtraOptions
+  >({
     type: KIBANA_SETTINGS_TYPE,
     isReady: () => true,
     schema: {
@@ -60,7 +68,7 @@ export function getSettingsCollector(
         default_admin_email: { type: 'text' },
       },
     },
-    async fetch(this: KibanaSettingsCollector) {
+    async fetch() {
       let kibanaSettingsData;
       const defaultAdminEmail = await checkForEmailValue(config);
 

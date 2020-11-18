@@ -34,8 +34,9 @@ export function CustomLinkOverview() {
     CustomLink | undefined
   >();
 
-  const { data: customLinks, status, refetch } = useFetcher(
-    (callApmApi) => callApmApi({ pathname: '/api/apm/settings/custom_links' }),
+  const { data: customLinks = [], status, refetch } = useFetcher(
+    (callApmApi) =>
+      callApmApi({ endpoint: 'GET /api/apm/settings/custom_links' }),
     []
   );
 
