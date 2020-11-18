@@ -25,10 +25,6 @@ export class ESTooltipProperty implements ITooltipProperty {
     this._field = field;
   }
 
-  getIndexPattern(): IndexPattern {
-    return this._indexPattern;
-  }
-
   getPropertyKey(): string {
     return this._tooltipProperty.getPropertyKey();
   }
