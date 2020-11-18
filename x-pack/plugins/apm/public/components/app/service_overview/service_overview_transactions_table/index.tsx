@@ -285,7 +285,7 @@ export function ServiceOverviewTransactionsTable(props: Props) {
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiFlexItem>
-          <TableFetchWrapper hasData={!!items.length} status={status}>
+          <TableFetchWrapper status={status}>
             <EuiBasicTable
               columns={columns}
               items={items}
