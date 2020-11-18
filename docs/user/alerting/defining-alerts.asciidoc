@@ -77,13 +77,13 @@ Actions are not required on alerts. In some cases you may want to run an alert w
 [float]
 === Global actions configuration
 Some actions configuration options apply to all actions.
-If you are using an *on-premises* Elastic Stack deployment, you can set these in the kibana.yml file.
+If you are using an *on-prem* Elastic Stack deployment, you can set these in the kibana.yml file.
 If you are using a cloud deployment, you can set these via the console.
 
 Here's a list of the available global configuration options and an explanation of what each one does:
 
-* `xpack.actions.allowedHosts`: Set to an array of host names which actions such as email, slack, pagerduty, and webhook can connect to. An element of * indicates any host can be connected to. An empty array indicates no hosts can be connected to. Default: [ {asterisk} ]
-* `xpack.actions.enabledActionTypes`: Set to an array of action types that are enabled. An * indicates all action types registered are enabled. The action types that {kib} provides are: .server-log, .slack, .email, .index, .pagerduty, .webhook. Default: [ {asterisk} ]
+* `xpack.actions.allowedHosts`: Specifies an array of host names which actions such as email, Slack, PagerDuty, and webhook can connect to. An element of * indicates any host can be connected to. An empty array indicates no hosts can be connected to. Default: [ {asterisk} ]
+* `xpack.actions.enabledActionTypes`: Specifies to an array of action types that are enabled. An {asterisk} indicates all action types registered are enabled. The action types that {kib} provides are: .server-log, .slack, .email, .index, .pagerduty, .webhook. Default: [ {asterisk} ]
 * `xpack.actions.proxyUrl`: Specifies the proxy URL to use, if using a proxy for actions.
 * `xpack.actions.proxyHeader`: Specifies HTTP headers for proxy, if using a proxy for actions.
 * `xpack.actions.proxyRejectUnauthorizedCertificates`: Set to `false` to bypass certificate validation for proxy, if using a proxy for actions.
