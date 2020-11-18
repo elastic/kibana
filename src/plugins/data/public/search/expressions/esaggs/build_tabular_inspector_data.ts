@@ -18,35 +18,41 @@
  */
 
 import { set } from '@elastic/safer-lodash-set';
-import { FormattedData } from '../../../../../plugins/inspector/public';
-import { TabbedTable } from '../../../common';
-import { FormatFactory } from '../../../common/field_formats/utils';
-import { createFilter } from './create_filter';
+import {
+  FormattedData,
+  TabularData,
+  TabularDataValue,
+} from '../../../../../../plugins/inspector/common';
+import { Filter, TabbedTable } from '../../../../common';
+import { FormatFactory } from '../../../../common/field_formats/utils';
+import { createFilter } from '../create_filter';
 
 /**
- * @deprecated
+ * Type borrowed from the client-side FilterManager['addFilters'].
  *
- * Do not use this function.
+ * We need to use a custom type to make this isomorphic since FilterManager
+ * doesn't exist on the server.
  *
- * @todo This function is used only by Courier. Courier will
- *   soon be removed, and this function will be deleted, too. If Courier is not removed,
- *   move this function inside Courier.
- *
- * ---
- *
+ * @internal
+ */
+export type AddFilters = (filters: Filter[] | Filter, pinFilterStatus?: boolean) => void;
+
+/**
  * This function builds tabular data from the response and attaches it to the
  * inspector. It will only be called when the data view in the inspector is opened.
+ *
+ * @internal
  */
 export async function buildTabularInspectorData(
   table: TabbedTable,
   {
-    queryFilter,
+    addFilters,
     deserializeFieldFormat,
   }: {
-    queryFilter: { addFilters: (filter: any) => void };
+    addFilters?: AddFilters;
     deserializeFieldFormat: FormatFactory;
   }
-) {
+): Promise<TabularData> {
   const aggConfigs = table.columns.map((column) => column.aggConfig);
   const rows = table.rows.map((row) => {
     return table.columns.reduce<Record<string, FormattedData>>((prev, cur, colIndex) => {
@@ -74,20 +80,22 @@ export async function buildTabularInspectorData(
       name: col.name,
       field: `col-${colIndex}-${col.aggConfig.id}`,
       filter:
+        addFilters &&
         isCellContentFilterable &&
-        ((value: { raw: unknown }) => {
+        ((value: TabularDataValue) => {
           const rowIndex = rows.findIndex(
             (row) => row[`col-${colIndex}-${col.aggConfig.id}`].raw === value.raw
           );
           const filter = createFilter(aggConfigs, table, colIndex, rowIndex, value.raw);
 
           if (filter) {
-            queryFilter.addFilters(filter);
+            addFilters(filter);
           }
         }),
       filterOut:
+        addFilters &&
         isCellContentFilterable &&
-        ((value: { raw: unknown }) => {
+        ((value: TabularDataValue) => {
           const rowIndex = rows.findIndex(
             (row) => row[`col-${colIndex}-${col.aggConfig.id}`].raw === value.raw
           );
@@ -101,7 +109,7 @@ export async function buildTabularInspectorData(
             } else {
               set(filter, 'meta.negate', notOther && notMissing);
             }
-            queryFilter.addFilters(filter);
+            addFilters(filter);
           }
         }),
     };
