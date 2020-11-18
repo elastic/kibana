@@ -11,6 +11,8 @@ import React from 'react';
 import { shallow, ShallowWrapper } from 'enzyme';
 import { EuiButton } from '@elastic/eui';
 
+import { CURRENT_MAJOR_VERSION } from '../../../../../common/version';
+
 import { EmptyEngineOverview } from './engine_overview_empty';
 
 describe('EmptyEngineOverview', () => {
@@ -32,9 +34,7 @@ describe('EmptyEngineOverview', () => {
 
   it('renders correctly versioned documentation URLs', () => {
     expect(wrapper.find(EuiButton).prop('href')).toEqual(
-      expect.stringMatching(
-        /^(https:\/\/www\.elastic\.co\/guide\/en\/app-search\/)(\d\.\d)(\/index\.html)$/
-      )
+      `https://www.elastic.co/guide/en/app-search/${CURRENT_MAJOR_VERSION}/index.html`
     );
   });
 });
