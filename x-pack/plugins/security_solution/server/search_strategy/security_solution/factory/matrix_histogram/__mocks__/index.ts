@@ -1945,6 +1945,14 @@ export const formattedDnsSearchStrategyResponse: MatrixHistogramStrategyResponse
                   size: 1000000,
                 },
                 aggs: {
+                  dns_question_name: {
+                    date_histogram: {
+                      field: '@timestamp',
+                      fixed_interval: '2700000ms',
+                      min_doc_count: 0,
+                      extended_bounds: { min: 1599579675528, max: 1599666075529 },
+                    },
+                  },
                   bucket_sort: {
                     bucket_sort: {
                       sort: [
@@ -1966,27 +1974,6 @@ export const formattedDnsSearchStrategyResponse: MatrixHistogramStrategyResponse
                   unique_domains: {
                     cardinality: {
                       field: 'dns.question.name',
-                    },
-                  },
-                  dns_bytes_in: {
-                    sum: {
-                      field: 'source.bytes',
-                    },
-                  },
-                  dns_bytes_out: {
-                    sum: {
-                      field: 'destination.bytes',
-                    },
-                  },
-                  dns_question_name: {
-                    date_histogram: {
-                      field: '@timestamp',
-                      fixed_interval: '2700000ms',
-                      min_doc_count: 0,
-                      extended_bounds: {
-                        min: 1599579675528,
-                        max: 1599666075529,
-                      },
                     },
                   },
                 },

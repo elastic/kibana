@@ -5,38 +5,18 @@
  */
 
 import { isEmpty } from 'lodash/fp';
+import moment from 'moment';
 
 import {
   Direction,
-  SortField,
-  NetworkDnsRequestOptions,
-  NetworkDnsFields,
+  NetworkDnsHistogramRequestOptions,
 } from '../../../../../../common/search_strategy';
-import { createQueryFilterClauses } from '../../../../../utils/build_query';
+import {
+  calculateTimeSeriesInterval,
+  createQueryFilterClauses,
+} from '../../../../../utils/build_query';
 
 const HUGE_QUERY_SIZE = 1000000;
-
-type QueryOrder =
-  | { _count: { order: Direction } }
-  | { _key: { order: Direction } }
-  | { unique_domains: { order: Direction } }
-  | { dns_bytes_in: { order: Direction } }
-  | { dns_bytes_out: { order: Direction } };
-
-const getQueryOrder = (sort: SortField<NetworkDnsFields>): QueryOrder => {
-  switch (sort.field) {
-    case NetworkDnsFields.queryCount:
-      return { _count: { order: sort.direction } };
-    case NetworkDnsFields.dnsName:
-      return { _key: { order: sort.direction } };
-    case NetworkDnsFields.uniqueDomains:
-      return { unique_domains: { order: sort.direction } };
-    case NetworkDnsFields.dnsBytesIn:
-      return { dns_bytes_in: { order: sort.direction } };
-    case NetworkDnsFields.dnsBytesOut:
-      return { dns_bytes_out: { order: sort.direction } };
-  }
-};
 
 const getCountAgg = () => ({
   dns_count: {
@@ -61,16 +41,31 @@ const createIncludePTRFilter = (isPtrIncluded: boolean) =>
         ],
       };
 
-export const buildDnsQuery = ({
+const getHistogramAggregation = ({ from, to }: { from: string; to: string }) => {
+  const interval = calculateTimeSeriesInterval(from, to);
+  const histogramTimestampField = '@timestamp';
+
+  return {
+    date_histogram: {
+      field: histogramTimestampField,
+      fixed_interval: interval,
+      min_doc_count: 0,
+      extended_bounds: {
+        min: moment(from).valueOf(),
+        max: moment(to).valueOf(),
+      },
+    },
+  };
+};
+
+export const buildDnsHistogramQuery = ({
   defaultIndex,
   docValueFields,
   filterQuery,
   isPtrIncluded = false,
-  sort,
-  pagination,
   stackByField = 'dns.question.registered_domain',
   timerange: { from, to },
-}: NetworkDnsRequestOptions) => {
+}: NetworkDnsHistogramRequestOptions) => {
   const filter = [
     ...createQueryFilterClauses(filterQuery),
     {
@@ -83,7 +78,6 @@ export const buildDnsQuery = ({
       },
     },
   ];
-  const { cursorStart, querySize } = pagination ?? {};
 
   const dslQuery = {
     allowNoIndices: true,
@@ -99,26 +93,20 @@ export const buildDnsQuery = ({
             size: HUGE_QUERY_SIZE,
           },
           aggs: {
+            dns_question_name: getHistogramAggregation({ from, to }),
             bucket_sort: {
               bucket_sort: {
-                sort: [getQueryOrder(sort), { _key: { order: Direction.asc } }],
-                from: cursorStart,
-                size: querySize,
+                sort: [
+                  { unique_domains: { order: Direction.desc } },
+                  { _key: { order: Direction.asc } },
+                ],
+                from: 0,
+                size: 10,
               },
             },
             unique_domains: {
               cardinality: {
                 field: 'dns.question.name',
-              },
-            },
-            dns_bytes_in: {
-              sum: {
-                field: 'source.bytes',
-              },
-            },
-            dns_bytes_out: {
-              sum: {
-                field: 'destination.bytes',
               },
             },
           },

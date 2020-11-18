@@ -13,12 +13,7 @@ import { inputsModel } from '../../../common/store';
 import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { useKibana } from '../../../common/lib/kibana';
 import { createFilter } from '../../../common/containers/helpers';
-import {
-  NetworkDnsEdges,
-  NetworkDnsFields,
-  PageInfoPaginated,
-  SortField,
-} from '../../../../common/search_strategy';
+import { NetworkDnsEdges, PageInfoPaginated } from '../../../../common/search_strategy';
 import { generateTablePaginationOptions } from '../../../common/components/paginated_table/helpers';
 import { networkModel, networkSelectors } from '../../store';
 import {
@@ -65,7 +60,7 @@ export const useNetworkDns = ({
   skip,
   startDate,
   type,
-}: UseNetworkDns): [boolean, NetworkDnsArgs, SortField<NetworkDnsFields>, boolean] => {
+}: UseNetworkDns): [boolean, NetworkDnsArgs, boolean] => {
   const getNetworkDnsSelector = networkSelectors.dnsSelector();
   const { activePage, sort, isPtrIncluded, limit } = useShallowEqualSelector(getNetworkDnsSelector);
   const { data, notifications } = useKibana().services;
@@ -215,5 +210,5 @@ export const useNetworkDns = ({
     networkDnsSearch(networkDnsRequest);
   }, [networkDnsRequest, networkDnsSearch]);
 
-  return [loading, networkDnsResponse, sort, isPtrIncluded];
+  return [loading, networkDnsResponse, isPtrIncluded];
 };

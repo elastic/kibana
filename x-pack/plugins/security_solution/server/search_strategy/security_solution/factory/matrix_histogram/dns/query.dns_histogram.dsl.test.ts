@@ -3,13 +3,11 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
 import { buildDnsHistogramQuery } from './query.dns_histogram.dsl';
-import { getDnsParsedData } from './helpers';
+import { mockOptions, expectedDsl } from './__mocks__/';
 
-export const dnsMatrixHistogramConfig = {
-  buildDsl: buildDnsHistogramQuery,
-  aggName: 'aggregations.dns_name_query_count.buckets',
-  parseKey: 'dns_question_name.buckets',
-  parser: getDnsParsedData,
-};
+describe('buildDnsHistogramQuery', () => {
+  test('build query from options correctly', () => {
+    expect(buildDnsHistogramQuery(mockOptions)).toEqual(expectedDsl);
+  });
+});

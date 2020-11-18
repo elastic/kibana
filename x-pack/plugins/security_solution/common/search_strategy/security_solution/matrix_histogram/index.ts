@@ -6,8 +6,8 @@
 
 import { IEsSearchResponse } from '../../../../../../../src/plugins/data/common';
 import { AuthenticationHit } from '../hosts';
-import { Inspect, Maybe, SortField, TimerangeInput } from '../../common';
-import { NetworkDnsFields, RequestBasicOptions } from '../';
+import { Inspect, Maybe, TimerangeInput } from '../../common';
+import { RequestBasicOptions } from '../';
 import { AlertsGroupData } from './alerts';
 import { AnomaliesActionGroupData, AnomalyHit } from './anomalies';
 import { DnsHistogramGroupData } from './dns';
@@ -40,9 +40,7 @@ export interface MatrixHistogramBasicRequestOptions extends RequestBasicOptions 
 }
 
 export interface DnsMatrixHistogramRequestOptions extends MatrixHistogramBasicRequestOptions {
-  sort: SortField<NetworkDnsFields>;
   isPtrIncluded: boolean;
-  isHistogram: boolean;
 }
 
 export type MatrixHistogramRequestOptions<T = null> = T extends MatrixHistogramType.dns

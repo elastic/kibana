@@ -24,11 +24,15 @@ export enum NetworkDnsFields {
 }
 
 export interface NetworkDnsRequestOptions extends RequestBasicOptions {
-  isPtrIncluded?: boolean;
-  isHistogram?: boolean;
-  sort?: SortField<NetworkDnsFields>;
+  isPtrIncluded: boolean;
+  sort: SortField<NetworkDnsFields>;
   stackByField?: Maybe<string>;
-  pagination?: PaginationInputPaginated;
+  pagination: PaginationInputPaginated;
+}
+
+export interface NetworkDnsHistogramRequestOptions extends RequestBasicOptions {
+  isPtrIncluded?: boolean;
+  stackByField?: Maybe<string>;
 }
 
 export interface NetworkDnsStrategyResponse extends IEsSearchResponse {

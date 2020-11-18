@@ -64,7 +64,6 @@ const DnsQueryTabBodyComponent: React.FC<NetworkComponentQueryProps> = ({
   const [
     loading,
     { totalCount, networkDns, pageInfo, loadPage, id, inspect, isInspected, refetch },
-    sort,
     isPtrIncluded,
   ] = useNetworkDns({
     endDate,
@@ -99,7 +98,6 @@ const DnsQueryTabBodyComponent: React.FC<NetworkComponentQueryProps> = ({
         setQuery={setQuery}
         showLegend={true}
         startDate={startDate}
-        sort={sort}
         {...dnsHistogramConfigs}
       />
       <NetworkDnsTableManage

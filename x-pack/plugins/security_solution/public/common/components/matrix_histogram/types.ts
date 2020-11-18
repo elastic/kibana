@@ -12,7 +12,6 @@ import { InputsModelId } from '../../store/inputs/constants';
 import { MatrixHistogramType } from '../../../../common/search_strategy/security_solution';
 import { UpdateDateRange } from '../charts/common';
 import { GlobalTimeArgs } from '../../containers/use_global_time';
-import { NetworkDnsFields, SortField } from '../../../../common/search_strategy';
 
 export type MatrixHistogramMappingTypes = Record<
   string,
@@ -77,12 +76,11 @@ export interface MatrixHistogramBasicQueryProps {
 
 export interface MatrixHistogramDnsQueryProps extends MatrixHistogramBasicQueryProps {
   isPtrIncluded: boolean;
-  sort: SortField<NetworkDnsFields>;
 }
 
-export type MatrixHistogramQueryProps =
-  | MatrixHistogramDnsQueryProps
-  | MatrixHistogramBasicQueryProps;
+export type MatrixHistogramQueryProps = MatrixHistogramBasicQueryProps & {
+  isPtrIncluded?: boolean;
+};
 
 export interface MatrixHistogramProps extends MatrixHistogramBasicProps {
   legendPosition?: Position;
