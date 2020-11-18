@@ -17,31 +17,19 @@
  * under the License.
  */
 
-import { filter, mergeMap } from 'rxjs/operators';
-import { from } from 'rxjs';
 import { BatchItem } from './types';
 
 export function isBatchDone(items: Array<BatchItem<any, any>>): boolean {
   return items.every((item) => item.done);
 }
 
-export function getBatchDone$(items: Array<BatchItem<any, any>>) {
-  // Triggers when all requests were resolved, rejected or aborted
-  return from(items).pipe(
-    mergeMap((item) => {
-      return new Promise<boolean>((resolve) => {
-        const onDone = () => {
-          if (item.done) return;
-
-          item.done = true;
-          item.signal?.removeEventListener('abort', onDone);
-          resolve(isBatchDone(items));
-        };
-
-        item.signal?.addEventListener('abort', onDone);
-        item.future.promise.then(onDone, onDone);
-      });
-    }),
-    filter((allDone) => allDone)
-  );
+export function getDonePromise(item: BatchItem<any, any>) {
+  return new Promise<void>((resolve) => {
+    const onDone = () => {
+      item.signal?.removeEventListener('abort', onDone);
+      resolve();
+    };
+    item.future.promise.then(onDone, onDone);
+    item.signal?.addEventListener('abort', onDone);
+  });
 }

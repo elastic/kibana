@@ -18,182 +18,66 @@
  */
 
 import { BatchItem } from './types';
-import { getBatchDone$ } from './batch_utils';
+import { getDonePromise } from './batch_utils';
 import { defer } from 'src/plugins/kibana_utils/common';
 
 const tick = () => new Promise((resolve) => setTimeout(resolve, 1));
 
-describe('getBatchDone$()', () => {
-  test('Triggers when all are aborted', async () => {
-    const abortControllers = [new AbortController(), new AbortController()];
-    const items: Array<BatchItem<any, any>> = [
-      {
-        future: defer<any>(),
-        payload: null,
-        done: false,
-        signal: abortControllers[0].signal,
-      },
-      {
-        future: defer<any>(),
-        payload: null,
-        done: false,
-        signal: abortControllers[1].signal,
-      },
-    ];
-    const b = getBatchDone$(items);
-
-    const spy = {
-      next: jest.fn(),
-      complete: jest.fn(),
-    };
-
-    b.subscribe(spy);
-
-    abortControllers[0].abort();
-    await tick();
-    expect(spy.next).toHaveBeenCalledTimes(0);
-
-    abortControllers[1].abort();
-    await tick();
-    expect(spy.next).toHaveBeenCalledTimes(1);
-    expect(spy.complete).toHaveBeenCalledTimes(1);
-  });
-
-  test('Triggers when all are resolved', async () => {
-    const items: Array<BatchItem<any, any>> = [
-      {
-        future: defer<any>(),
-        payload: null,
-        done: false,
-      },
-      {
-        future: defer<any>(),
-        payload: null,
-        done: false,
-      },
-    ];
-    const b = getBatchDone$(items);
-
-    const spy = {
-      next: jest.fn(),
-      complete: jest.fn(),
-    };
-
-    b.subscribe(spy);
-
-    items[0].future.resolve(null);
-    await tick();
-    expect(spy.next).toHaveBeenCalledTimes(0);
-
-    items[1].future.resolve(null);
-    await tick();
-    expect(spy.next).toHaveBeenCalledTimes(1);
-    expect(spy.complete).toHaveBeenCalledTimes(1);
-  });
-
-  test('Triggers when its a mix', async () => {
+describe('getDonePromise()', () => {
+  test('Triggers when aborted', async () => {
     const abortController = new AbortController();
-    const items: Array<BatchItem<any, any>> = [
-      {
-        future: defer<any>(),
-        payload: null,
-        done: false,
-      },
-      {
-        future: defer<any>(),
-        payload: null,
-        done: false,
-        signal: abortController.signal,
-      },
-    ];
-    const b = getBatchDone$(items);
-
-    const spy = {
-      next: jest.fn(),
-      complete: jest.fn(),
+    const item: BatchItem<any, any> = {
+      future: defer<any>(),
+      payload: null,
+      done: false,
+      signal: abortController.signal,
     };
+    const b = getDonePromise(item);
 
-    b.subscribe(spy);
+    const spy = jest.fn();
 
-    items[0].future.resolve(null);
-    await tick();
-    expect(spy.next).toHaveBeenCalledTimes(0);
+    b.then(spy);
 
     abortController.abort();
     await tick();
-    expect(spy.next).toHaveBeenCalledTimes(1);
-    expect(spy.complete).toHaveBeenCalledTimes(1);
+    expect(spy).toHaveBeenCalledTimes(1);
   });
 
-  test('Triggers correctly if an item is resolved then aborted', async () => {
+  test('Triggers when resolved', async () => {
     const abortController = new AbortController();
-    const items: Array<BatchItem<any, any>> = [
-      {
-        future: defer<any>(),
-        payload: null,
-        done: false,
-        signal: abortController.signal,
-      },
-      {
-        future: defer<any>(),
-        payload: null,
-        done: false,
-      },
-    ];
-    const b = getBatchDone$(items);
-
-    const spy = {
-      next: jest.fn(),
-      complete: jest.fn(),
+    const item: BatchItem<any, any> = {
+      future: defer<any>(),
+      payload: null,
+      done: false,
+      signal: abortController.signal,
     };
+    const b = getDonePromise(item);
 
-    b.subscribe(spy);
+    const spy = jest.fn();
 
-    items[0].future.resolve(null);
-    await tick();
-    abortController.abort();
-    await tick();
-    expect(spy.next).toHaveBeenCalledTimes(0);
+    b.then(spy);
 
-    items[1].future.resolve(null);
+    item.future.resolve(null);
     await tick();
-    expect(spy.next).toHaveBeenCalledTimes(1);
-    expect(spy.complete).toHaveBeenCalledTimes(1);
+    expect(spy).toHaveBeenCalledTimes(1);
   });
 
-  test('Triggers correctly if an item is aborted then resolved', async () => {
+  test('Triggers when rejected', async () => {
     const abortController = new AbortController();
-    const items: Array<BatchItem<any, any>> = [
-      {
-        future: defer<any>(),
-        payload: null,
-        done: false,
-      },
-      {
-        future: defer<any>(),
-        payload: null,
-        done: false,
-        signal: abortController.signal,
-      },
-    ];
-    const b = getBatchDone$(items);
-
-    const spy = {
-      next: jest.fn(),
-      complete: jest.fn(),
+    const item: BatchItem<any, any> = {
+      future: defer<any>(),
+      payload: null,
+      done: false,
+      signal: abortController.signal,
     };
+    const b = getDonePromise(item);
 
-    b.subscribe(spy);
+    const spy = jest.fn();
 
-    items[0].future.resolve(null);
-    await tick();
-    expect(spy.next).toHaveBeenCalledTimes(0);
+    b.then(spy);
 
-    abortController.abort();
+    item.future.reject(null);
     await tick();
-    items[1].future.resolve(null);
-    await tick();
-    expect(spy.next).toHaveBeenCalledTimes(1);
-    expect(spy.complete).toHaveBeenCalledTimes(1);
+    expect(spy).toHaveBeenCalledTimes(1);
   });
 });

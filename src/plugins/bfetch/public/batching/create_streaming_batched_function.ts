@@ -28,7 +28,7 @@ import {
 import { fetchStreaming, split } from '../streaming';
 import { normalizeError } from '../../common';
 import { BatchedFunc, BatchItem } from './types';
-import { isBatchDone, getBatchDone$ } from './batch_utils';
+import { isBatchDone, getDonePromise } from './batch_utils';
 
 export interface BatchedFunctionProtocolError extends ErrorLike {
   code: string;
@@ -90,6 +90,9 @@ export const createStreamingBatchedFunction = <Payload, Result extends object>(
     },
     onBatch: async (items) => {
       try {
+        const promises: Array<Promise<void>> = [];
+        const abortController = new AbortController();
+
         // Filter out and reject any items who's signal is already aborted
         items = items.filter((item) => {
           if (item.signal?.aborted) {
@@ -100,17 +103,22 @@ export const createStreamingBatchedFunction = <Payload, Result extends object>(
 
         // Prepare batch
         const batch = items.map((item) => {
+          // Subscribe to reject promise on abort
           const rejectAborted = () => {
             item.future.reject(new AbortError());
             item.signal?.removeEventListener('abort', rejectAborted);
           };
           item.signal?.addEventListener('abort', rejectAborted);
+
+          // Track batch progress
+          promises.push(getDonePromise(item));
+
+          // Return payload to be sent
           return item.payload;
         });
 
-        // Prepare abort controller
-        const abortController = new AbortController();
-        getBatchDone$(items).subscribe(() => abortController.abort());
+        // abort when all items were either resolved, rejected or aborted
+        Promise.all(promises).then(() => abortController.abort());
 
         const { stream } = fetchStreamingInjected({
           url,
