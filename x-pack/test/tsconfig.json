@@ -3,9 +3,9 @@
   "compilerOptions": {
     // overhead is too significant
     "incremental": false,
-    "types": ["mocha", "node", "flot", "@kbn/test/types/ftr_globals"]
+    "types": ["mocha", "node", "flot"]
   },
-  "include": ["**/*", "../typings/**/*"],
+  "include": ["**/*", "../typings/**/*", "../../packages/kbn-test/types/ftr_globals/**/*"],
   "exclude": ["../typings/jest.d.ts"],
   "references": [
     { "path": "../../src/core/tsconfig.json" },
