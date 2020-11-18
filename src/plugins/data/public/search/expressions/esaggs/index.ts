@@ -17,32 +17,4 @@
  * under the License.
  */
 
-export interface TabularDataValue {
-  formatted: string;
-  raw: unknown;
-}
-
-export interface TabularDataColumn {
-  name: string;
-  field: string;
-  filter?: (value: TabularDataValue) => void;
-  filterOut?: (value: TabularDataValue) => void;
-}
-
-export type TabularDataRow = Record<TabularDataColumn['field'], TabularDataValue>;
-
-export interface TabularData {
-  columns: TabularDataColumn[];
-  rows: TabularDataRow[];
-}
-
-export type TabularCallback = () => TabularData | Promise<TabularData>;
-
-export interface TabularHolder {
-  data: TabularData | null;
-  options: TabularLoaderOptions;
-}
-
-export interface TabularLoaderOptions {
-  returnsFormattedValues?: boolean;
-}
+export * from './esaggs_fn';
