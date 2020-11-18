@@ -68,7 +68,7 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
                 content={i18n.translate(
                   'xpack.idxMgmt.dataStreamList.table.managedDataStreamTooltip',
                   {
-                    defaultMessage: 'Created and managed by Ingest Manager',
+                    defaultMessage: 'Created and managed by Fleet',
                   }
                 )}
               >
