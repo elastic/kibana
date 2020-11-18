@@ -15,7 +15,6 @@ import {
   ObjectRemover,
 } from '../../../../../common/lib';
 import { createEsDocuments } from './create_test_data';
-import { getAlertType } from '../../../../../../../plugins/triggers_actions_ui/public/application/components/builtin_alert_types/threshold/';
 
 const ALERT_TYPE_ID = '.index-threshold';
 const ACTION_TYPE_ID = '.index';
@@ -27,7 +26,7 @@ const ALERT_INTERVALS_TO_WRITE = 5;
 const ALERT_INTERVAL_SECONDS = 3;
 const ALERT_INTERVAL_MILLIS = ALERT_INTERVAL_SECONDS * 1000;
 
-const DefaultActionMessage = getAlertType().defaultActionMessage;
+const DefaultActionMessage = `alert {{alertName}} group {{context.group}} value {{context.value}} exceeded threshold {{context.function}} over {{params.timeWindowSize}}{{params.timeWindowUnit}} on {{context.date}}`;
 
 // eslint-disable-next-line import/no-default-export
 export default function alertTests({ getService }: FtrProviderContext) {
@@ -63,10 +62,6 @@ export default function alertTests({ getService }: FtrProviderContext) {
       await objectRemover.removeAll();
       await esTestIndexTool.destroy();
       await esTestIndexToolOutput.destroy();
-    });
-
-    it('has a default action message', () => {
-      expect(DefaultActionMessage).to.be.ok();
     });
 
     // The tests below create two alerts, one that will fire, one that will

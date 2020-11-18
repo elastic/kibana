@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useEffect, useState, Fragment, FC } from 'react';
+import React, { useEffect, useState, Fragment, FC, useMemo, useCallback } from 'react';
 import { Router } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { CoreStart } from 'kibana/public';
@@ -35,6 +35,10 @@ import { JobsListView } from '../../../../jobs/jobs_list/components/jobs_list_vi
 import { DataFrameAnalyticsList } from '../../../../data_frame_analytics/pages/analytics_management/components/analytics_list';
 import { AccessDeniedPage } from '../access_denied_page';
 import { SharePluginStart } from '../../../../../../../../../src/plugins/share/public';
+import { getDefaultAnomalyDetectionJobsListState } from '../../../../jobs/jobs_list/jobs';
+import { getMlGlobalServices } from '../../../../app';
+import { ListingPageUrlState } from '../../../../../../common/types/common';
+import { getDefaultDFAListState } from '../../../../data_frame_analytics/pages/analytics_management/page';
 
 interface Tab {
   'data-test-subj': string;
@@ -43,38 +47,69 @@ interface Tab {
   content: any;
 }
 
-function getTabs(isMlEnabledInSpace: boolean): Tab[] {
-  return [
-    {
-      'data-test-subj': 'mlStackManagementJobsListAnomalyDetectionTab',
-      id: 'anomaly_detection_jobs',
-      name: i18n.translate('xpack.ml.management.jobsList.anomalyDetectionTab', {
-        defaultMessage: 'Anomaly detection',
-      }),
-      content: (
-        <Fragment>
-          <EuiSpacer size="m" />
-          <JobsListView isManagementTable={true} isMlEnabledInSpace={isMlEnabledInSpace} />
-        </Fragment>
-      ),
+function usePageState<T extends ListingPageUrlState>(
+  defaultState: T
+): [T, (update: Partial<T>) => void] {
+  const [pageState, setPageState] = useState<T>(defaultState);
+
+  const updateState = useCallback(
+    (update: Partial<T>) => {
+      setPageState({
+        ...pageState,
+        ...update,
+      });
     },
-    {
-      'data-test-subj': 'mlStackManagementJobsListAnalyticsTab',
-      id: 'analytics_jobs',
-      name: i18n.translate('xpack.ml.management.jobsList.analyticsTab', {
-        defaultMessage: 'Analytics',
-      }),
-      content: (
-        <Fragment>
-          <EuiSpacer size="m" />
-          <DataFrameAnalyticsList
-            isManagementTable={true}
-            isMlEnabledInSpace={isMlEnabledInSpace}
-          />
-        </Fragment>
-      ),
-    },
-  ];
+    [pageState]
+  );
+
+  return [pageState, updateState];
+}
+
+function useTabs(isMlEnabledInSpace: boolean): Tab[] {
+  const [adPageState, updateAdPageState] = usePageState(getDefaultAnomalyDetectionJobsListState());
+  const [dfaPageState, updateDfaPageState] = usePageState(getDefaultDFAListState());
+
+  return useMemo(
+    () => [
+      {
+        'data-test-subj': 'mlStackManagementJobsListAnomalyDetectionTab',
+        id: 'anomaly_detection_jobs',
+        name: i18n.translate('xpack.ml.management.jobsList.anomalyDetectionTab', {
+          defaultMessage: 'Anomaly detection',
+        }),
+        content: (
+          <Fragment>
+            <EuiSpacer size="m" />
+            <JobsListView
+              jobsViewState={adPageState}
+              onJobsViewStateUpdate={updateAdPageState}
+              isManagementTable={true}
+              isMlEnabledInSpace={isMlEnabledInSpace}
+            />
+          </Fragment>
+        ),
+      },
+      {
+        'data-test-subj': 'mlStackManagementJobsListAnalyticsTab',
+        id: 'analytics_jobs',
+        name: i18n.translate('xpack.ml.management.jobsList.analyticsTab', {
+          defaultMessage: 'Analytics',
+        }),
+        content: (
+          <Fragment>
+            <EuiSpacer size="m" />
+            <DataFrameAnalyticsList
+              isManagementTable={true}
+              isMlEnabledInSpace={isMlEnabledInSpace}
+              pageState={dfaPageState}
+              updatePageState={updateDfaPageState}
+            />
+          </Fragment>
+        ),
+      },
+    ],
+    [isMlEnabledInSpace, adPageState, updateAdPageState, dfaPageState, updateDfaPageState]
+  );
 }
 
 export const JobsListPage: FC<{
@@ -85,7 +120,7 @@ export const JobsListPage: FC<{
   const [initialized, setInitialized] = useState(false);
   const [accessDenied, setAccessDenied] = useState(false);
   const [isMlEnabledInSpace, setIsMlEnabledInSpace] = useState(false);
-  const tabs = getTabs(isMlEnabledInSpace);
+  const tabs = useTabs(isMlEnabledInSpace);
   const [currentTabId, setCurrentTabId] = useState(tabs[0].id);
   const I18nContext = coreStart.i18n.Context;
 
@@ -129,7 +164,7 @@ export const JobsListPage: FC<{
           setCurrentTabId(id);
         }}
         size="s"
-        tabs={getTabs(isMlEnabledInSpace)}
+        tabs={tabs}
         initialSelectedTab={tabs[0]}
       />
     );
@@ -142,7 +177,9 @@ export const JobsListPage: FC<{
   return (
     <RedirectAppLinks application={coreStart.application}>
       <I18nContext>
-        <KibanaContextProvider services={{ ...coreStart, share }}>
+        <KibanaContextProvider
+          services={{ ...coreStart, share, mlServices: getMlGlobalServices(coreStart.http) }}
+        >
           <Router history={history}>
             <EuiPageContent
               id="kibanaManagementMLSection"

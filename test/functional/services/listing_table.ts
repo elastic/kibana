@@ -20,21 +20,19 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
 
+type AppName = 'visualize' | 'dashboard' | 'map';
+
 export function ListingTableProvider({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const find = getService('find');
   const log = getService('log');
   const retry = getService('retry');
   const { common, header } = getPageObjects(['common', 'header']);
-  const prefixMap = { visualize: 'vis', dashboard: 'dashboard' };
+  const prefixMap = { visualize: 'vis', dashboard: 'dashboard', map: 'map' };
 
-  /**
-   * This class provides functions for dashboard and visualize landing pages
-   */
   class ListingTable {
     private async getSearchFilter() {
-      const searchFilter = await find.allByCssSelector('main .euiFieldSearch');
-      return searchFilter[0];
+      return await testSubjects.find('tableListSearchBox');
     }
 
     /**
@@ -86,9 +84,8 @@ export function ListingTableProvider({ getService, getPageObjects }: FtrProvider
 
     /**
      * Returns items count on landing page
-     * @param appName 'visualize' | 'dashboard'
      */
-    public async expectItemsCount(appName: 'visualize' | 'dashboard', count: number) {
+    public async expectItemsCount(appName: AppName, count: number) {
       await retry.try(async () => {
         const elements = await find.allByCssSelector(
           `[data-test-subj^="${prefixMap[appName]}ListingTitleLink"]`
@@ -126,14 +123,8 @@ export function ListingTableProvider({ getService, getPageObjects }: FtrProvider
 
     /**
      * Searches for item on Landing page and retruns items count that match `ListingTitleLink-${name}` pattern
-     * @param appName 'visualize' | 'dashboard'
-     * @param name item name
      */
-    public async searchAndExpectItemsCount(
-      appName: 'visualize' | 'dashboard',
-      name: string,
-      count: number
-    ) {
+    public async searchAndExpectItemsCount(appName: AppName, name: string, count: number) {
       await this.searchForItemWithName(name);
       await retry.try(async () => {
         const links = await testSubjects.findAll(
@@ -165,10 +156,8 @@ export function ListingTableProvider({ getService, getPageObjects }: FtrProvider
 
     /**
      * Clicks item on Landing page by link name if it is present
-     * @param appName 'dashboard' | 'visualize'
-     * @param name item name
      */
-    public async clickItemLink(appName: 'dashboard' | 'visualize', name: string) {
+    public async clickItemLink(appName: AppName, name: string) {
       await testSubjects.click(
         `${prefixMap[appName]}ListingTitleLink-${name.split(' ').join('-')}`
       );
@@ -202,6 +191,12 @@ export function ListingTableProvider({ getService, getPageObjects }: FtrProvider
           // no items exist, click createPromptButton to create new dashboard/visualization
           await testSubjects.click(promptBtnTestSubj);
         }
+      });
+    }
+
+    public async onListingPage(appName: AppName) {
+      return await testSubjects.exists(`${appName}LandingPage`, {
+        timeout: 5000,
       });
     }
   }
