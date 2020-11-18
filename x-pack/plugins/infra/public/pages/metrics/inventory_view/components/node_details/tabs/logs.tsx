@@ -22,7 +22,7 @@ import { getNodeLogsUrl } from '../../../../../link_to';
 const TabComponent = (props: TabProps) => {
   const [textQuery, setTextQuery] = useState('');
   const endTimestamp = props.currentTime;
-  const startTimestamp = endTimestamp - 60 * 60 * 1000; // 15 minutes
+  const startTimestamp = endTimestamp - 60 * 60 * 1000; // 60 minutes
   const { nodeType } = useWaffleOptionsContext();
   const { options, node } = props;
 
