@@ -139,9 +139,6 @@ interface PreContentSourceResponse {
   githubOrganizations: string[];
 }
 
-const ACCOUNT_CREATE_SOURCE_ROUTE = '/api/workplace_search/account/create_source';
-const ORG_CREATE_SOURCE_ROUTE = '/api/workplace_search/org/create_source';
-
 export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
   actions: {
     onInitializeSource: (contentSource: ContentSourceFullData) => contentSource,
@@ -570,7 +567,9 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
     createContentSource: async ({ serviceType, successCallback, errorCallback }) => {
       FlashMessagesLogic.actions.clearFlashMessages();
       const { isOrganization } = AppLogic.values;
-      const route = isOrganization ? ORG_CREATE_SOURCE_ROUTE : ACCOUNT_CREATE_SOURCE_ROUTE;
+      const route = isOrganization
+        ? '/api/workplace_search/org/create_source'
+        : '/api/workplace_search/account/create_source';
 
       const {
         selectedGithubOrganizations: githubOrganizations,
