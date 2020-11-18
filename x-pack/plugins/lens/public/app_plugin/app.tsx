@@ -120,7 +120,7 @@ export function App({
         esFilters.isFilterPinned
       );
       // do not save the activeData content
-      const { activeData, ...stateWithoutActiveData } = lastKnownDoc.state;
+      const { activeData, ...stateWithoutActiveData } = lastKnownDoc.state ?? {};
       return pinnedFilters?.length
         ? {
             ...lastKnownDoc,
