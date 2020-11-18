@@ -17,21 +17,23 @@
  * under the License.
  */
 
-import { uiSettingsServiceMock } from '../../../../../core/server/mocks';
+import { loggingSystemMock, uiSettingsServiceMock } from '../../../../../core/server/mocks';
 import {
-  CollectorOptions,
+  Collector,
   createUsageCollectionSetupMock,
   createCollectorFetchContextMock,
 } from '../../../../usage_collection/server/usage_collection.mock';
 
 import { registerManagementUsageCollector } from './';
 
+const logger = loggingSystemMock.createLogger();
+
 describe('telemetry_application_usage_collector', () => {
-  let collector: CollectorOptions;
+  let collector: Collector<unknown, unknown>;
 
   const usageCollectionMock = createUsageCollectionSetupMock();
   usageCollectionMock.makeUsageCollector.mockImplementation((config) => {
-    collector = config;
+    collector = new Collector(logger, config);
     return createUsageCollectionSetupMock().makeUsageCollector(config);
   });
 
