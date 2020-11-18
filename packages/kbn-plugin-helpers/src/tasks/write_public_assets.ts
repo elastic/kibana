@@ -17,21 +17,29 @@
  * under the License.
  */
 
-import { set } from '@elastic/safer-lodash-set';
+import { pipeline } from 'stream';
+import { promisify } from 'util';
 
-import { Keystore } from '../../legacy/server/keystore';
-import { getKeystore } from '../../cli_keystore/get_keystore';
+import vfs from 'vinyl-fs';
 
-export function readKeystore(keystorePath = getKeystore()) {
-  const keystore = new Keystore(keystorePath);
-  keystore.load();
+import { BuildContext } from '../build_context';
 
-  const keys = Object.keys(keystore.data);
-  const data = {};
+const asyncPipeline = promisify(pipeline);
 
-  keys.forEach((key) => {
-    set(data, key, keystore.data[key]);
-  });
+export async function writePublicAssets({ log, plugin, sourceDir, buildDir }: BuildContext) {
+  if (!plugin.manifest.ui) {
+    return;
+  }
 
-  return data;
+  log.info('copying assets from `public/assets` to build');
+
+  await asyncPipeline(
+    vfs.src(['public/assets/**/*'], {
+      cwd: sourceDir,
+      base: sourceDir,
+      buffer: true,
+      allowEmpty: true,
+    }),
+    vfs.dest(buildDir)
+  );
 }
