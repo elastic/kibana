@@ -13,7 +13,7 @@ import { PackageUsage, getPackageUsage } from './package_collectors';
 import { FleetConfigType } from '..';
 
 interface Usage {
-  fleet_enabled: boolean;
+  agents_enabled: boolean;
   agents: AgentUsage;
   packages: PackageUsage[];
 }
@@ -36,13 +36,13 @@ export function registerIngestManagerUsageCollector(
     fetch: async () => {
       const soClient = await getInternalSavedObjectsClient(core);
       return {
-        fleet_enabled: getIsFleetEnabled(config),
+        agents_enabled: getIsFleetEnabled(config),
         agents: await getAgentUsage(soClient),
         packages: await getPackageUsage(soClient),
       };
     },
     schema: {
-      fleet_enabled: { type: 'boolean' },
+      agents_enabled: { type: 'boolean' },
       agents: {
         total: { type: 'long' },
         online: { type: 'long' },

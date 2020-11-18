@@ -1780,7 +1780,7 @@
     },
     "fleet": {
       "properties": {
-        "fleet_enabled": {
+        "agents_enabled": {
           "type": "boolean"
         },
         "agents": {
