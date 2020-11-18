@@ -227,7 +227,7 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
                   content={i18n.translate(
                     'xpack.idxMgmt.dataStreamListControls.includeManagedSwitchToolTip',
                     {
-                      defaultMessage: 'Display data streams managed by Ingest Manager',
+                      defaultMessage: 'Display data streams managed by Fleet',
                     }
                   )}
                   position="top"
