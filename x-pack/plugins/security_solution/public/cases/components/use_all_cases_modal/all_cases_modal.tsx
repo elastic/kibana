@@ -25,6 +25,7 @@ export interface AllCasesModalProps {
 const AllCasesModalComponent: React.FC<AllCasesModalProps> = ({ onCloseCaseModal, onRowClick }) => {
   const userPermissions = useGetUserSavedObjectPermissions();
   const userCanCrud = userPermissions?.crud ?? false;
+
   return (
     <EuiOverlayMask data-test-subj="all-cases-modal">
       <EuiModal onClose={onCloseCaseModal}>
