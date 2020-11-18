@@ -19,8 +19,8 @@ export function useTransactionBreakdown() {
     (callApmApi) => {
       if (serviceName && start && end && transactionType) {
         return callApmApi({
-          pathname:
-            '/api/apm/services/{serviceName}/transaction_groups/breakdown',
+          endpoint:
+            'GET /api/apm/services/{serviceName}/transaction_groups/breakdown',
           params: {
             path: { serviceName },
             query: {

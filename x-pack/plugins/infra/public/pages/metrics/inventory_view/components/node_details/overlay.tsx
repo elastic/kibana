@@ -33,6 +33,7 @@ export const NodeContextPopover = ({
   options,
   onClose,
 }: Props) => {
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const tabConfigs = [MetricsTab, LogsTab, ProcessesTab, PropertiesTab];
 
   const tabs = useMemo(() => {
