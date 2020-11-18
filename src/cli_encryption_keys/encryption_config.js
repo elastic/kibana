@@ -62,12 +62,13 @@ export class EncryptionConfig {
     return crypto.randomBytes(16).toString('hex');
   }
 
-  docs() {
+  docs({ comment } = {}) {
+    const commentString = comment ? '#' : '';
     let docs = '';
     this.#encryptionKeyPaths.forEach((key) => {
-      docs += `${key}
-    ${this.#encryptionMeta[key].description}
-    ${this.#encryptionMeta[key].docs}
+      docs += `${commentString}${key}
+    ${commentString}${this.#encryptionMeta[key].description}
+    ${commentString}${this.#encryptionMeta[key].docs}
 \n`;
     });
     return docs;

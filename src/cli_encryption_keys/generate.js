@@ -40,7 +40,7 @@ export async function generate(encryptionConfig, command) {
       logger.log('Definitions should be set in the kibana.yml used configure Kibana.\n');
     }
     if (command.interactive) {
-      await interactive(keys, logger);
+      await interactive(keys, encryptionConfig.docs({ comment: true }), logger);
     } else {
       if (!command.quiet) logger.log('Settings:');
       logger.log(safeDump(keys));

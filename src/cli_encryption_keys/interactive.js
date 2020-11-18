@@ -22,7 +22,7 @@ import { confirm, question } from '../cli_keystore/utils';
 import { getConfigDirectory } from '@kbn/utils';
 import { safeDump } from 'js-yaml';
 
-export async function interactive(keys, logger) {
+export async function interactive(keys, docs, logger) {
   const settings = Object.keys(keys);
   logger.log(
     'This tool will ask you a number of questions in order to generate the right set of keys for your needs.\n'
@@ -47,7 +47,7 @@ export async function interactive(keys, logger) {
       `What filename should be used for the sample Kibana config file? [${defaultSaveLocation}])`
     );
     const saveLocation = promptedSaveLocation || defaultSaveLocation;
-    writeFileSync(saveLocation, safeDump(setKeys));
+    writeFileSync(saveLocation, docs + safeDump(setKeys));
     logger.log(`Wrote configuration to ${saveLocation}`);
   } else {
     logger.log('\nSettings:');
