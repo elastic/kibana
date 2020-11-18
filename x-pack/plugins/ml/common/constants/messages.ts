@@ -442,6 +442,16 @@ export const getMessages = once(() => {
       url:
         'https://www.elastic.co/guide/en/elasticsearch/reference/{{version}}/ml-job-resource.html#ml-job-resource',
     },
+    missing_summary_count_field_name: {
+      status: VALIDATION_STATUS.ERROR,
+      text: i18n.translate(
+        'xpack.ml.models.jobValidation.messages.missingSummaryCountFieldNameMessage',
+        {
+          defaultMessage:
+            'A job configured with a datafeed with aggregations must set summary_count_field_name; use doc_count or suitable alternative.',
+        }
+      ),
+    },
     skipped_extended_tests: {
       status: VALIDATION_STATUS.WARNING,
       text: i18n.translate('xpack.ml.models.jobValidation.messages.skippedExtendedTestsMessage', {
