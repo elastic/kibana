@@ -10,7 +10,7 @@ import React from 'react';
 // eslint-disable-next-line no-restricted-imports
 import _camelCase from 'lodash/camelCase';
 
-import { images } from '../assets';
+import { images } from '../assets/source_icons';
 
 interface SourceIconProps {
   serviceType: string;
