@@ -53,7 +53,7 @@ export const DatePickerWrapper: FC = () => {
 
   const setRefreshInterval = useCallback(
     (refreshIntervalUpdate: RefreshInterval) => {
-      setGlobalState('refreshInterval', refreshIntervalUpdate);
+      setGlobalState('refreshInterval', refreshIntervalUpdate, true);
     },
     [setGlobalState]
   );

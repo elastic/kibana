@@ -67,6 +67,12 @@ export class JobsListView extends Component {
     // used to block timeouts for results polling
     // which can run after unmounting
     this._isMounted = false;
+    /**
+     * Indicates if the filters has been initialized by {@link JobFilterBar} component
+     * @type {boolean}
+     * @private
+     */
+    this._isFiltersSet = false;
   }
 
   componentDidMount() {
@@ -226,9 +232,15 @@ export class JobsListView extends Component {
     const filterClauses = (query && query.ast && query.ast.clauses) || [];
     const filteredJobsSummaryList = filterJobs(this.state.jobsSummaryList, filterClauses);
 
-    this.props.onJobsViewStateUpdate({
-      queryText: query?.text,
-    });
+    this.props.onJobsViewStateUpdate(
+      {
+        queryText: query?.text,
+      },
+      // Replace the URL state on filters initialization
+      this._isFiltersSet === false
+    );
+
+    this._isFiltersSet = true;
 
     this.setState({ filteredJobsSummaryList, filterClauses }, () => {
       this.refreshSelectedJobs();

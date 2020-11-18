@@ -19,7 +19,8 @@ type Accessor = '_a' | '_g';
 export type SetUrlState = (
   accessor: Accessor,
   attribute: string | Dictionary<any>,
-  value?: any
+  value?: any,
+  replaceState?: boolean
 ) => void;
 export interface UrlState {
   searchString: string;
@@ -78,7 +79,12 @@ export const UrlStateProvider: FC = ({ children }) => {
   const { search: searchString } = useLocation();
 
   const setUrlState: SetUrlState = useCallback(
-    (accessor: Accessor, attribute: string | Dictionary<any>, value?: any) => {
+    (
+      accessor: Accessor,
+      attribute: string | Dictionary<any>,
+      value?: any,
+      replaceState?: boolean
+    ) => {
       const prevSearchString = searchString;
       const urlState = parseUrlState(prevSearchString);
       const parsedQueryString = parse(prevSearchString, { sort: false });
@@ -120,7 +126,11 @@ export const UrlStateProvider: FC = ({ children }) => {
 
         if (oldLocationSearchString !== newLocationSearchString) {
           const newSearchString = stringify(parsedQueryString, { sort: false });
-          history.push({ search: newSearchString });
+          if (replaceState) {
+            history.replace({ search: newSearchString });
+          } else {
+            history.push({ search: newSearchString });
+          }
         }
       } catch (error) {
         // eslint-disable-next-line no-console
@@ -144,8 +154,8 @@ export const useUrlState = (accessor: Accessor) => {
   }, [searchString]);
 
   const setUrlState = useCallback(
-    (attribute: string | Dictionary<any>, value?: any) => {
-      setUrlStateContext(accessor, attribute, value);
+    (attribute: string | Dictionary<any>, value?: any, replaceState?: boolean) => {
+      setUrlStateContext(accessor, attribute, value, replaceState);
     },
     [accessor, setUrlStateContext]
   );
@@ -158,7 +168,7 @@ export const useUrlState = (accessor: Accessor) => {
 export const usePageUrlState = <PageUrlState extends {}>(
   pageKey: MlPages,
   defaultState: PageUrlState
-): [PageUrlState, (update: Partial<PageUrlState>) => void] => {
+): [PageUrlState, (update: Partial<PageUrlState>, replaceState?: boolean) => void] => {
   const [appState, setAppState] = useUrlState('_a');
   const pageState = appState?.[pageKey];
 
@@ -170,11 +180,15 @@ export const usePageUrlState = <PageUrlState extends {}>(
   }, [pageState]);
 
   const onStateUpdate = useCallback(
-    (update: Partial<PageUrlState>, replace?: boolean) => {
-      setAppState(pageKey, {
-        ...(replace ? {} : resultPageState),
-        ...update,
-      });
+    (update: Partial<PageUrlState>, replaceState?: boolean) => {
+      setAppState(
+        pageKey,
+        {
+          ...resultPageState,
+          ...update,
+        },
+        replaceState
+      );
     },
     [pageKey, resultPageState, setAppState]
   );

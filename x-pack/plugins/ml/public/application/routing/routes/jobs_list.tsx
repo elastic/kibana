@@ -54,7 +54,7 @@ const PageWrapper: FC<PageProps> = ({ deps }) => {
       refreshValue === 0 && refreshPause === true
         ? { pause: false, value: DEFAULT_REFRESH_INTERVAL_MS }
         : { pause: refreshPause, value: refreshValue };
-    setGlobalState({ refreshInterval });
+    setGlobalState({ refreshInterval }, undefined, true);
     timefilter.setRefreshInterval(refreshInterval);
   }, []);
 
