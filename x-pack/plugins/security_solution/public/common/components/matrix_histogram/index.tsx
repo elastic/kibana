@@ -47,7 +47,6 @@ export type MatrixHistogramComponentProps = MatrixHistogramProps &
     subtitle?: string | GetSubTitle;
     timelineId?: string;
     title: string | GetTitle;
-    isPtrIncluded?: boolean;
   };
 
 const DEFAULT_PANEL_HEIGHT = 300;

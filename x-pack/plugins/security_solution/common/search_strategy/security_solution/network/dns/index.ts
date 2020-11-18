@@ -30,11 +30,6 @@ export interface NetworkDnsRequestOptions extends RequestBasicOptions {
   pagination: PaginationInputPaginated;
 }
 
-export interface NetworkDnsHistogramRequestOptions extends RequestBasicOptions {
-  isPtrIncluded?: boolean;
-  stackByField?: Maybe<string>;
-}
-
 export interface NetworkDnsStrategyResponse extends IEsSearchResponse {
   edges: NetworkDnsEdges[];
   totalCount: number;

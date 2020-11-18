@@ -14,7 +14,6 @@ import { createFilter } from '../../../common/containers/helpers';
 import { useKibana } from '../../../common/lib/kibana';
 import {
   MatrixHistogramQuery,
-  MatrixHistogramBasicRequestOptions,
   MatrixHistogramRequestOptions,
   MatrixHistogramStrategyResponse,
   MatrixHistogramData,
@@ -65,7 +64,7 @@ export const useMatrixHistogram = ({
   const abortCtrl = useRef(new AbortController());
   const [loading, setLoading] = useState(false);
 
-  const options: MatrixHistogramBasicRequestOptions = useMemo(
+  const options: MatrixHistogramRequestOptions = useMemo(
     () =>
       MatrixHistogramType.dns === histogramType
         ? {

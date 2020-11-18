@@ -31,21 +31,14 @@ export enum MatrixHistogramType {
   dns = 'dns',
 }
 
-export interface MatrixHistogramBasicRequestOptions extends RequestBasicOptions {
+export interface MatrixHistogramRequestOptions extends RequestBasicOptions {
   timerange: TimerangeInput;
   histogramType: MatrixHistogramType;
   stackByField: string;
   threshold?: { field: string | undefined; value: number } | undefined;
   inspect?: Maybe<Inspect>;
+  isPtrIncluded?: boolean;
 }
-
-export interface DnsMatrixHistogramRequestOptions extends MatrixHistogramBasicRequestOptions {
-  isPtrIncluded: boolean;
-}
-
-export type MatrixHistogramRequestOptions<T = null> = T extends MatrixHistogramType.dns
-  ? DnsMatrixHistogramRequestOptions
-  : MatrixHistogramBasicRequestOptions;
 
 export interface MatrixHistogramStrategyResponse extends IEsSearchResponse {
   inspect?: Maybe<Inspect>;
@@ -65,7 +58,7 @@ export interface MatrixHistogramBucket {
 }
 
 export interface MatrixHistogramSchema<T> {
-  buildDsl: <T>(options: MatrixHistogramRequestOptions<T>) => {};
+  buildDsl: (options: MatrixHistogramRequestOptions) => {};
   aggName: string;
   parseKey: string;
   parser?: <T>(data: MatrixHistogramParseData<T>, keyBucket: string) => MatrixHistogramData[];

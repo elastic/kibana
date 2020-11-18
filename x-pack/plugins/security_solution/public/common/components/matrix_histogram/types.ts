@@ -56,7 +56,7 @@ interface MatrixHistogramBasicProps {
   titleSize?: EuiTitleSize;
 }
 
-export interface MatrixHistogramBasicQueryProps {
+export interface MatrixHistogramQueryProps {
   endDate: string;
   errorMessage: string;
   indexNames: string[];
@@ -72,15 +72,8 @@ export interface MatrixHistogramBasicQueryProps {
   histogramType: MatrixHistogramType;
   threshold?: { field: string | undefined; value: number } | undefined;
   skip?: boolean;
-}
-
-export interface MatrixHistogramDnsQueryProps extends MatrixHistogramBasicQueryProps {
-  isPtrIncluded: boolean;
-}
-
-export type MatrixHistogramQueryProps = MatrixHistogramBasicQueryProps & {
   isPtrIncluded?: boolean;
-};
+}
 
 export interface MatrixHistogramProps extends MatrixHistogramBasicProps {
   legendPosition?: Position;

@@ -7,10 +7,7 @@
 import { isEmpty } from 'lodash/fp';
 import moment from 'moment';
 
-import {
-  Direction,
-  NetworkDnsHistogramRequestOptions,
-} from '../../../../../../common/search_strategy';
+import { Direction, MatrixHistogramRequestOptions } from '../../../../../../common/search_strategy';
 import {
   calculateTimeSeriesInterval,
   createQueryFilterClauses,
@@ -65,7 +62,7 @@ export const buildDnsHistogramQuery = ({
   isPtrIncluded = false,
   stackByField = 'dns.question.registered_domain',
   timerange: { from, to },
-}: NetworkDnsHistogramRequestOptions) => {
+}: MatrixHistogramRequestOptions) => {
   const filter = [
     ...createQueryFilterClauses(filterQuery),
     {
