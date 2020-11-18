@@ -170,9 +170,13 @@ const RepairItem: FC<{ id: string; title: JSX.Element; items: string[] }> = ({
 }) => (
   <EuiAccordion id={id} buttonContent={title} paddingSize="l">
     <EuiText size="s">
-      {items.map((item) => (
-        <div key={item}>{item}</div>
-      ))}
+      {items.length && (
+        <ul>
+          {items.map((item) => (
+            <li key={item}>{item}</li>
+          ))}
+        </ul>
+      )}
     </EuiText>
   </EuiAccordion>
 );
