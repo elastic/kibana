@@ -17,10 +17,66 @@
  * under the License.
  */
 
+import { first } from 'rxjs/operators';
 import { schema } from '@kbn/config-schema';
 import type { IRouter } from 'src/core/server';
+import { getRequestAbortedSignal } from '../../lib';
+import { shimHitsTotal } from './shim_hits_total';
 
 export function registerSearchRoute(router: IRouter): void {
+  router.post(
+    {
+      path: '/internal/search/{strategy}/{id?}',
+      validate: {
+        params: schema.object({
+          strategy: schema.string(),
+          id: schema.maybe(schema.string()),
+        }),
+
+        query: schema.object({}, { unknowns: 'allow' }),
+
+        body: schema.object({}, { unknowns: 'allow' }),
+      },
+    },
+    async (context, request, res) => {
+      const searchRequest = request.body;
+      const { strategy, id } = request.params;
+      const abortSignal = getRequestAbortedSignal(request.events.aborted$);
+
+      try {
+        const response = await context
+          .search!.search(
+            { ...searchRequest, id },
+            {
+              abortSignal,
+              strategy,
+            }
+          )
+          .pipe(first())
+          .toPromise();
+
+        return res.ok({
+          body: {
+            ...response,
+            ...{
+              rawResponse: shimHitsTotal(response.rawResponse),
+            },
+          },
+        });
+      } catch (err) {
+        return res.customError({
+          statusCode: err.statusCode || 500,
+          body: {
+            message: err.message,
+            attributes: {
+              error: err.body?.error || err.message,
+            },
+          },
+        });
+      }
+    }
+  );
+
   router.delete(
     {
       path: '/internal/search/{strategy}/{id}',
