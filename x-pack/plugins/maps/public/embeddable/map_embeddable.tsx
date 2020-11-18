@@ -18,6 +18,7 @@ import {
 import { ACTION_GLOBAL_APPLY_FILTER } from '../../../../../src/plugins/data/public';
 import {
   APPLY_FILTER_TRIGGER,
+  VALUE_CLICK_TRIGGER,
   ActionExecutionContext,
   TriggerContextMapping,
 } from '../../../../../src/plugins/ui_actions/public';
@@ -66,7 +67,7 @@ import { SavedMap } from '../routes/map_page';
 import { getIndexPatternsFromIds } from '../index_pattern_util';
 import { getMapAttributeService } from '../map_attribute_service';
 import type { OnSingleValueTriggerParams } from '../connected_components/types';
-import { isUrlDrilldown } from '../trigger_actions/trigger_utils';
+import { isUrlDrilldown, toUrlDrilldownDatatable } from '../trigger_actions/trigger_utils';
 
 import {
   MapByValueInput,
@@ -204,7 +205,7 @@ export class MapEmbeddable
   }
 
   public supportedTriggers(): Array<keyof TriggerContextMapping> {
-    return [APPLY_FILTER_TRIGGER, 'VALUE_CLICK_TRIGGER'];
+    return [APPLY_FILTER_TRIGGER, VALUE_CLICK_TRIGGER];
   }
 
   setRenderTooltipContent = (renderTooltipContent: RenderToolTipContent) => {
@@ -337,31 +338,7 @@ export class MapEmbeddable
     action.execute({
       ...this.getActionContext(),
       data: {
-        data: [
-          {
-            table: {
-              columns: [
-                {
-                  id: key,
-                  meta: {
-                    name: 'field1',
-                    index: 'indexPattern1',
-                    type: 'number',
-                  },
-                  name: label,
-                },
-              ],
-              rows: [
-                {
-                  column0: value,
-                },
-              ],
-            },
-            column: 0,
-            row: 0,
-            value,
-          },
-        ],
+        data: toUrlDrilldownDatatable(key, value),
       },
     });
   };
@@ -383,35 +360,15 @@ export class MapEmbeddable
       filters: [],
     });
     const valueClickActions = await getUiActions().getTriggerCompatibleActions(
-      'VALUE_CLICK_TRIGGER',
+      VALUE_CLICK_TRIGGER,
       {
         embeddable: this,
         data: {
-          data: [
-            {
-              table: {
-                columns: [
-                  {
-                    id: 'column0',
-                    meta: {
-                      name: 'field1',
-                      index: 'indexPattern1',
-                      type: 'number',
-                    },
-                    name: 'column0',
-                  },
-                ],
-                rows: [
-                  {
-                    column0: 'fake value',
-                  },
-                ],
-              },
-              column: 0,
-              row: 0,
-              value: 'fake value',
-            },
-          ],
+          // uiActions.getTriggerCompatibleActions validates action againts context
+          // so if event.key and event.value are used in the URL template but can not be parsed from context
+          // then the action is filtered out.
+          // To prevent filtering out actions, provide dummy context when initially fetching actions
+          data: toUrlDrilldownDatatable('anyfield', 'anyvalue'),
         },
       }
     );
