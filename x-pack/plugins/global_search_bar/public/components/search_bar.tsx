@@ -76,12 +76,9 @@ const resultToOption = (result: GlobalSearchResult): EuiSelectableTemplateSitewi
     label: title,
     url,
     type,
+    icon: { type: icon ?? 'empty' },
     'data-test-subj': `nav-search-option`,
   };
-
-  if (icon) {
-    option.icon = { type: icon };
-  }
 
   if (type === 'application') {
     option.meta = [{ text: meta?.categoryLabel as string }];
