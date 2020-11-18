@@ -1,0 +1,21 @@
+.documents-search-experience {
+  .sui-results-container {
+    flex-grow: 1;
+    padding: 0;
+  }
+
+  .documents-search-experience__sidebar {
+    flex-grow: 1;
+    min-width: 300px;
+  }
+
+  .documents-search-experience__content {
+    flex-grow: 4;
+  }
+
+  .documents-search-experience__paging-info {
+    flex-grow: 0;
+  }
+}
+
+  

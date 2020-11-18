@@ -6,7 +6,7 @@
 
 import React from 'react';
 
-import { EuiPageHeader, EuiPageHeaderSection, EuiTitle, EuiCallOut } from '@elastic/eui';
+import { EuiPageHeader, EuiPageHeaderSection, EuiTitle, EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { useValues } from 'kea';
 import { i18n } from '@kbn/i18n';
 
@@ -16,6 +16,7 @@ import { FlashMessages } from '../../../shared/flash_messages';
 import { DOCUMENTS_TITLE } from './constants';
 import { EngineLogic } from '../engine';
 import { AppLogic } from '../../app_logic';
+import { SearchExperience } from './search_experience';
 
 const MetaEngineCallout: React.FC = () => (
   <>
@@ -32,6 +33,7 @@ const MetaEngineCallout: React.FC = () => (
         })}
       </p>
     </EuiCallOut>
+    <EuiSpacer />
   </>
 );
 
@@ -60,6 +62,7 @@ export const Documents: React.FC<Props> = ({ engineBreadcrumb }) => {
       </EuiPageHeader>
       <FlashMessages />
       {isMetaEngine && <MetaEngineCallout />}
+      <SearchExperience />
     </>
   );
 };

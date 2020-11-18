@@ -10,6 +10,7 @@ import { shallow } from 'enzyme';
 import { EuiPageHeader, EuiCallOut } from '@elastic/eui';
 
 import { DocumentCreationButton } from './document_creation_button';
+import { SearchExperience } from './search_experience';
 import { Documents } from '.';
 
 describe('Documents', () => {
@@ -36,6 +37,11 @@ describe('Documents', () => {
 
     const wrapper = shallow(<Documents engineBreadcrumb={['test']} />);
     expect(wrapper.find(DocumentCreationButton).length).toEqual(1);
+  });
+
+  it('renders a SearchExperience', () => {
+    const wrapper = shallow(<Documents engineBreadcrumb={['test']} />);
+    expect(wrapper.find(SearchExperience).length).toEqual(1);
   });
 
   describe('Meta Engines', () => {
