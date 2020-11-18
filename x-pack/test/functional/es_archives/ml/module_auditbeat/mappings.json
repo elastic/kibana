@@ -4640,23 +4640,13 @@
     },
     "settings": {
       "index": {
-        "blocks": {
-          "write": "true"
-        },
         "mapping": {
           "total_fields": {
             "limit": "5000"
           }
         },
         "number_of_replicas": "1",
-        "number_of_shards": "1",
-        "resize": {
-          "source": {
-            "name": "security-7.10-auditbeat-downsample",
-            "uuid": "iPssX0K8RJ-yEMY8Pa-1IA"
-          }
-        },
-        "routing_partition_size": "1"
+        "number_of_shards": "1"
       }
     }
   }

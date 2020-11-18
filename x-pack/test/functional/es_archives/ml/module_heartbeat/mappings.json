@@ -3382,18 +3382,8 @@
     },
     "settings": {
       "index": {
-        "blocks": {
-          "write": "true"
-        },
         "number_of_replicas": "1",
-        "number_of_shards": "1",
-        "resize": {
-          "source": {
-            "name": "heartbeat-qa",
-            "uuid": "yt99bWRRSW6Hryc9aEtWxw"
-          }
-        },
-        "routing_partition_size": "1"
+        "number_of_shards": "1"
       }
     }
   }
