@@ -6,15 +6,17 @@
 
 import expect from '@kbn/expect/expect.js';
 import { FtrProviderContext } from '../../ftr_provider_context';
-
-interface FLSFieldMappingResponse {
+interface FLSMappingResponse {
   flstest: {
     mappings: {
-      [fieldName: string]: {
-        mapping: {
-          [fieldName: string]: {
-            type: string;
-          };
+      runtime?: {
+        [fieldName: string]: {
+          type: string;
+        };
+      };
+      properties: {
+        [fieldName: string]: {
+          type: string;
         };
       };
     };
@@ -56,16 +58,10 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('should not include runtime fields', async () => {
         // First, make sure the mapping actually includes a runtime field
-        const fieldMapping = (await es.indices.getFieldMapping({
-          index: 'flstest',
-          fields: '*',
-          includeDefaults: true,
-        })) as FLSFieldMappingResponse;
+        const mapping = (await es.indices.getMapping({ index: 'flstest' })) as FLSMappingResponse;
 
-        expect(Object.keys(fieldMapping.flstest.mappings)).to.contain('runtime_customer_ssn');
-        expect(
-          fieldMapping.flstest.mappings.runtime_customer_ssn.mapping.runtime_customer_ssn.type
-        ).to.eql('runtime');
+        expect(Object.keys(mapping.flstest.mappings)).to.contain('runtime');
+        expect(Object.keys(mapping.flstest.mappings.runtime!)).to.contain('runtime_customer_ssn');
 
         // Now, make sure it's not returned here
         const { body: actualFields } = (await supertest
