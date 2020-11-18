@@ -5,10 +5,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { DataPublicPluginStart, exportAsCSVs } from 'src/plugins/data/public';
-import { IEmbeddable } from 'src/plugins/embeddable/public';
-import { Action } from 'src/plugins/ui_actions/public';
-import { CoreStart } from 'src/core/public';
+import { FormatFactory } from 'src/plugins/data/common/field_formats/utils';
+import { DataPublicPluginStart, exportAsCSVs } from '../../../../../../src/plugins/data/public';
+import { Adapters, IEmbeddable } from '../../../../../../src/plugins/embeddable/public';
+import { Action } from '../../../../../../src/plugins/ui_actions/public';
+import { CoreStart } from '../../../../../../src/core/public';
 
 export const ACTION_EXPORT_CSV = 'ACTION_EXPORT_CSV';
 
@@ -44,15 +45,58 @@ export class ExportCSVAction implements Action<ExportContext, typeof ACTION_EXPO
     });
 
   public async isCompatible(context: ExportContext): Promise<boolean> {
-    return Boolean(context.embeddable && 'getInspectorAdapters' in context.embeddable);
+    return Boolean(
+      context.embeddable &&
+        'getInspectorAdapters' in context.embeddable &&
+        this.hasDatatableContent(context.embeddable.getInspectorAdapters())
+    );
   }
 
-  protected readonly exportCSV = async (context: ExportContext): Promise<void> => {
-    if (context.embeddable) {
-      exportAsCSVs(context.embeddable.getTitle()!, context.embeddable.getInspectorAdapters(), {
+  private hasDatatableContent = (adapters: Adapters | undefined) => {
+    return adapters && (adapters.data || adapters[Object.keys(adapters)[0]]?.columns);
+  };
+
+  private getFormatter = (type: string | undefined): FormatFactory | undefined => {
+    if (type === 'visualize') {
+      return (() => ({
+        convert: (item: { raw: string; formatted: string }) => item.formatted,
+      })) as FormatFactory;
+    }
+    if (type === 'lens') {
+      return this.params.data.fieldFormats.deserialize;
+    }
+  };
+
+  private getDataTableContent = async (adapters: Adapters | undefined) => {
+    if (!adapters) {
+      return;
+    }
+    // Visualize
+    if (adapters.data) {
+      const datatable = await adapters.data.tabular();
+      datatable.columns = datatable.columns.map(({ field, ...rest }: { field: string }) => ({
+        id: field,
+        field,
+        ...rest,
+      }));
+      return { type: 'visualize', datatables: { layer1: datatable } };
+    }
+    // Lens
+    if (adapters[Object.keys(adapters)[0]]?.columns) {
+      return { type: 'lens', datatables: adapters };
+    }
+    return;
+  };
+
+  private exportCSV = async (context: ExportContext): Promise<void> => {
+    const content = await this.getDataTableContent(context?.embeddable?.getInspectorAdapters());
+    const formatFactory = this.getFormatter(content?.type);
+
+    if (content && formatFactory) {
+      exportAsCSVs(context?.embeddable?.getTitle()!, content.datatables, {
         csvSeparator: this.params.core.uiSettings.get('csv:separator', ','),
         quoteValues: this.params.core.uiSettings.get('csv:quoteValues', true),
-        formatFactory: this.params.data.fieldFormats.deserialize,
+        formatFactory,
       });
     }
   };
