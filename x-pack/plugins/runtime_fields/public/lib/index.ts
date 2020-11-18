@@ -4,5 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export function getSelectedIdFromUrl(str: string): { groupIds?: string[]; jobId?: string };
-export function clearSelectedJobIdFromUrl(str: string): void;
+export { getLinks } from './documentation';
