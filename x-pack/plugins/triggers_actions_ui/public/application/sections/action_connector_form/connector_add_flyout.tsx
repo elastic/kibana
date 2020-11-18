@@ -73,10 +73,8 @@ export const ConnectorAddFlyout = ({
   const [isSaving, setIsSaving] = useState<boolean>(false);
 
   const closeFlyout = useCallback(() => {
-    setActionType(undefined);
-    setConnector(initialConnector);
     onClose();
-  }, [onClose, initialConnector]);
+  }, [onClose]);
 
   const canSave = hasSaveActionsCapability(capabilities);
 
