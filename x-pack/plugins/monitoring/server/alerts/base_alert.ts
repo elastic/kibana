@@ -240,11 +240,11 @@ export class BaseAlert {
     }
     const rangeFilter = this.alertOptions.fetchClustersRange
       ? {
-        timestamp: {
-          format: 'epoch_millis',
-          gte: limit - this.alertOptions.fetchClustersRange,
-        },
-      }
+          timestamp: {
+            format: 'epoch_millis',
+            gte: limit - this.alertOptions.fetchClustersRange,
+          },
+        }
       : undefined;
     return await fetchClusters(callCluster, esIndexPattern, rangeFilter);
   }
