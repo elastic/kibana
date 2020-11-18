@@ -143,7 +143,7 @@ export const getSelectedLayerId = ({ map }: MapStoreState): string | null => {
   return !map.selectedLayerId || !map.layerList ? null : map.selectedLayerId;
 };
 
-export const getLayerListRaw = ({ map }: MapStoreState = {}): LayerDescriptor[] =>
+export const getLayerListRaw = ({ map }: MapStoreState): LayerDescriptor[] =>
   map.layerList ? map.layerList : [];
 
 export const getWaitingForMapReadyLayerListRaw = ({ map }: MapStoreState): LayerDescriptor[] =>

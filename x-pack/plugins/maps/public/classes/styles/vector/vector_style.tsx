@@ -183,8 +183,10 @@ export class VectorStyle implements IVectorStyle {
     previousFields: IESAggField[],
     mapColors: string[],
     isTimeAware: boolean,
-    dynamicStyleProperties: Array<IDynamicStyleProperty<IStyleProperty>>
+    dynamicStyleProperties: Array<IDynamicStyleProperty<IStyleProperty<unknown>>>
   ) {
+    // Try and correct metrics first.
+
     let hasChanges = false;
     for (let i = 0; i < previousFields.length; i++) {
       const previousField = previousFields[i];
@@ -392,9 +394,12 @@ export class VectorStyle implements IVectorStyle {
   ) {
     const styleFieldsHelper = await createStyleFieldsHelper(nextFields);
     const originalProperties = this.getRawProperties();
-    const dynamicStyleProperties = this.getAllStyleProperties().filter((p) => p.isDynamic());
+    const dynamicStyleProperties: DynamicStyleProperty = this.getAllStyleProperties().filter((p) =>
+      p.isDynamic()
+    ) as DynamicStyleProperty;
 
     if (oldFields.length === nextFields.length) {
+      // Change in metrics
       return await VectorStyle.getDescriptorWithUpdatedFields(
         nextFields,
         styleFieldsHelper,

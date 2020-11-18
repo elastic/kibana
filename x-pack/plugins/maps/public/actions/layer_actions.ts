@@ -45,9 +45,6 @@ import { IVectorLayer } from '../classes/layers/vector_layer/vector_layer';
 import { LAYER_STYLE_TYPE, LAYER_TYPE } from '../../common/constants';
 import { IVectorStyle } from '../classes/styles/vector/vector_style';
 import { notifyLicensedFeatureUsage } from '../licensed_features';
-import { IVectorSource } from '../classes/sources/vector_source';
-import { IESSource } from '../classes/sources/es_source';
-import { IESAggSource } from '../classes/sources/es_agg_source';
 import { IESAggField } from '../classes/fields/agg';
 
 export function trackCurrentLayerState(layerId: string) {
@@ -300,7 +297,7 @@ export function updateSourceProp(
       if (newLayerType) {
         dispatch(updateLayerType(layerId, newLayerType));
       }
-      await dispatch(updateStyleProperties(layerId, oldFields));
+      await dispatch(updateStyleProperties(layerId, oldFields as IESAggField[]));
       dispatch(syncDataForLayerId(layerId));
     } else {
       dispatch({
@@ -312,7 +309,7 @@ export function updateSourceProp(
       if (newLayerType) {
         dispatch(updateLayerType(layerId, newLayerType));
       }
-      await dispatch(updateStyleProperties(layerId));
+      // await dispatch(updateStyleProperties(layerId));
       dispatch(syncDataForLayerId(layerId));
     }
   };
@@ -445,7 +442,7 @@ function removeLayerFromLayerList(layerId: string) {
   };
 }
 
-export function updateStyleProperties(layerId: string, oldFields: IESAggField[]) {
+export function updateStyleProperties(layerId: string, previousFields: IESAggField[]) {
   return async (
     dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
     getState: () => MapStoreState
@@ -467,7 +464,7 @@ export function updateStyleProperties(layerId: string, oldFields: IESAggField[])
     } = await (style as IVectorStyle).getDescriptorWithUpdatedStyleProps(
       nextFields as IESAggField[],
       getMapColors(getState()),
-      oldFields
+      previousFields
     );
     if (hasChanges && nextStyleDescriptor) {
       dispatch(updateLayerStyle(layerId, nextStyleDescriptor));
@@ -515,7 +512,8 @@ export function setJoinsForLayer(layer: ILayer, joins: JoinDescriptor[]) {
       joins,
     });
 
-    await dispatch(updateStyleProperties(layer.getId()));
+    const previousFields = await (layer as IVectorLayer).getFields();
+    await dispatch(updateStyleProperties(layer.getId(), previousFields));
     dispatch(syncDataForLayerId(layer.getId()));
   };
 }

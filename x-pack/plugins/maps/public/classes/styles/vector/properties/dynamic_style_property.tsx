@@ -18,6 +18,7 @@ import {
   VECTOR_STYLES,
   RawValue,
   FieldFormatter,
+  TOP_TERM_PERCENTAGE_SUFFIX,
 } from '../../../../../common/constants';
 import { OrdinalFieldMetaPopover } from '../components/field_meta/ordinal_field_meta_popover';
 import { CategoricalFieldMetaPopover } from '../components/field_meta/categorical_field_meta_popover';
@@ -251,6 +252,12 @@ export class DynamicStyleProperty<T>
     previousFieldDescriptor: StylePropertyField
   ): StylePropertyField | null {
     // Todo: individual style property classes would need to override this with "smart" behavior
+
+    if (previousFieldDescriptor.name.endsWith(TOP_TERM_PERCENTAGE_SUFFIX)) {
+      // Don't support auto-switching for top-term-percentages
+      return null;
+    }
+
     return {
       origin: previousFieldDescriptor.origin,
       name: currentField.getName(),
