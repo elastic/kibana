@@ -479,6 +479,10 @@ Elastic.
 |Welcome to the Kibana rollup plugin! This plugin provides Kibana support for Elasticsearch's rollup feature. Please refer to the Elasticsearch documentation to understand rollup indices and how to create rollup jobs.
 
 
+|{kib-repo}blob/{branch}/x-pack/plugins/runtime_fields/README.md[runtimeFields]
+|Welcome to the home of the runtime field editor and everything related to runtime fields!
+
+
 |{kib-repo}blob/{branch}/x-pack/plugins/saved_objects_tagging/README.md[savedObjectsTagging]
 |Add tagging capability to saved objects
 

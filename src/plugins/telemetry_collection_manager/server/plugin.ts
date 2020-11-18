@@ -157,7 +157,10 @@ export class TelemetryCollectionManagerPlugin
     const soClient = config.unencrypted
       ? collectionSoService.getScopedClient(config.request)
       : collectionSoService.createInternalRepository();
-    return { callCluster, timestamp, usageCollection, esClient, soClient };
+    // Provide the kibanaRequest so opted-in plugins can scope their custom clients only if the request is not encrypted
+    const kibanaRequest = config.unencrypted ? request : void 0;
+
+    return { callCluster, timestamp, usageCollection, esClient, soClient, kibanaRequest };
   }
 
   private async getOptInStats(optInStatus: boolean, config: StatsGetterConfig) {
