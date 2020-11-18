@@ -2,7 +2,7 @@
 
 source src/dev/ci_setup/setup_env.sh
 
-export run_quick_commit_checks() {
+function run_quick_commit_checks() {
   echo "!!!!!!!! ATTENTION !!!!!!!!
 That check is intended to provide earlier CI feedback after we remove the automatic install for the local pre-commit hook.
 If you want, you can still manually install the pre-commit hook locally by running 'node scripts/register_git_hook locally'
@@ -10,6 +10,8 @@ If you want, you can still manually install the pre-commit hook locally by runni
 
   node scripts/precommit_hook.js --ref HEAD~1..HEAD --max-files 200 --verbose
 }
+
+export -f run_quick_commit_checks
 
 # Runs pre-commit hook script for the files touched in the last commit.
 # That way we can ensure a set of quick commit checks earlier as we removed
