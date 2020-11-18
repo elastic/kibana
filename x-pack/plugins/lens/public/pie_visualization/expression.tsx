@@ -139,6 +139,7 @@ export const getPieRenderer = (dependencies: {
           chartsThemeService={dependencies.chartsThemeService}
           paletteService={dependencies.paletteService}
           onClickValue={onClickValue}
+          renderMode={handlers.getMode()}
         />
       </I18nProvider>,
       domNode,
