@@ -69,4 +69,5 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
   isTransferable: () => {
     return true;
   },
+  timeScalingMode: 'optional',
 };

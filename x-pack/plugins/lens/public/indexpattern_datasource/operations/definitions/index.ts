@@ -99,6 +99,8 @@ export interface ParamEditorProps<C> {
   data: DataPublicPluginStart;
 }
 
+export type TimeScalingMode = 'disabled' | 'mandatory' | 'optional';
+
 interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn> {
   type: C['operationType'];
   /**
@@ -146,6 +148,13 @@ interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn> {
    * present on the new index pattern.
    */
   transfer?: (column: C, newIndexPattern: IndexPattern) => C;
+  /**
+   * Flag whether this operation can be scaled by time unit if a date histogram is available.
+   * If set to mandatory or optional, a UI element is shown in the config flyout to configure the time unit
+   * to scale by. The chosen unit will be persisted as `timeScale` property of the column.
+   * If set to optional, time scaling won't be enabled by default and can be removed.
+   */
+  timeScalingMode?: TimeScalingMode;
 }
 
 interface BaseBuildColumnArgs {

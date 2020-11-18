@@ -44,9 +44,13 @@ export function buildResultColumns(
   input: Datatable,
   outputColumnId: string,
   inputColumnId: string,
-  outputColumnName: string | undefined
+  outputColumnName: string | undefined,
+  options: { allowColumnOverride: boolean } = { allowColumnOverride: false }
 ) {
-  if (input.columns.some((column) => column.id === outputColumnId)) {
+  if (
+    !options.allowColumnOverride &&
+    input.columns.some((column) => column.id === outputColumnId)
+  ) {
     throw new Error(
       i18n.translate('expressions.functions.seriesCalculations.columnConflictMessage', {
         defaultMessage:

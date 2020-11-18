@@ -59,7 +59,6 @@ function getExpressionForLayer(layer: IndexPatternLayer, indexPattern: IndexPatt
           }
       >
     >;
-
     const columnsWithFormatters = columnEntries.filter(
       ([, col]) =>
         col.params &&
@@ -84,6 +83,40 @@ function getExpressionForLayer(layer: IndexPatternLayer, indexPattern: IndexPatt
         };
 
         return base;
+      }
+    );
+
+    const firstDateHistogramColumn = columnEntries.find(
+      ([, col]) => col.operationType === 'date_histogram'
+    );
+
+    const columnsWithTimeScale = firstDateHistogramColumn
+      ? columnEntries.filter(([, col]) => col.timeScale)
+      : [];
+    const timeScaleFunctions: ExpressionFunctionAST[] = columnsWithTimeScale.flatMap(
+      ([id, col]) => {
+        const scalingCall: ExpressionFunctionAST = {
+          type: 'function',
+          function: 'lens_time_scale',
+          arguments: {
+            dateColumnId: [firstDateHistogramColumn![0]],
+            inputColumnId: [id],
+            outputColumnId: [id],
+            targetUnit: [col.timeScale!],
+          },
+        };
+
+        const formatCall: ExpressionFunctionAST = {
+          type: 'function',
+          function: 'lens_format_column',
+          arguments: {
+            format: [''],
+            columnId: [id],
+            parentFormat: [JSON.stringify({ id: 'suffix', params: { unit: col.timeScale } })],
+          },
+        };
+
+        return [scalingCall, formatCall];
       }
     );
 
@@ -117,6 +150,7 @@ function getExpressionForLayer(layer: IndexPatternLayer, indexPattern: IndexPatt
         },
         ...formatterOverrides,
         ...expressions,
+        ...timeScaleFunctions,
       ],
     };
   }

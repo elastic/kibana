@@ -34,6 +34,7 @@ import { BucketNestingEditor } from './bucket_nesting_editor';
 import { IndexPattern, IndexPatternLayer } from '../types';
 import { trackUiEvent } from '../../lens_ui_telemetry';
 import { FormatSelector } from './format_selector';
+import { TimeScaling } from './time_scaling';
 
 const operationPanels = getOperationDisplay();
 
@@ -332,6 +333,16 @@ export function DimensionEditor(props: DimensionEditorProps) {
             />
           </EuiFormRow>
         ) : null}
+
+        {!currentFieldIsInvalid && !incompatibleSelectedOperationType && selectedColumn && (
+          <TimeScaling
+            selectedColumn={selectedColumn}
+            columnId={columnId}
+            layerId={layerId}
+            state={state}
+            setState={setState}
+          />
+        )}
 
         {!currentFieldIsInvalid &&
           !incompatibleSelectedOperationType &&

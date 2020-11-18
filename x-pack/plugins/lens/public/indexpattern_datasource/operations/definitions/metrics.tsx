@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { OperationDefinition } from './index';
+import { OperationDefinition, TimeScalingMode } from './index';
 import { FormattedIndexPatternColumn, FieldBasedIndexPatternColumn } from './column_types';
 
 type MetricColumn<T> = FormattedIndexPatternColumn &
@@ -18,17 +18,20 @@ function buildMetricOperation<T extends MetricColumn<string>>({
   displayName,
   ofName,
   priority,
+  timeScalingMode,
 }: {
   type: T['operationType'];
   displayName: string;
   ofName: (name: string) => string;
   priority?: number;
+  timeScalingMode?: TimeScalingMode;
 }) {
   return {
     type,
     priority,
     displayName,
     input: 'field',
+    timeScalingMode,
     getPossibleOperationForField: ({ aggregationRestrictions, aggregatable, type: fieldType }) => {
       if (
         fieldType === 'number' &&
@@ -138,6 +141,7 @@ export const sumOperation = buildMetricOperation<SumIndexPatternColumn>({
       defaultMessage: 'Sum of {name}',
       values: { name },
     }),
+  timeScalingMode: 'optional',
 });
 
 export const medianOperation = buildMetricOperation<MedianIndexPatternColumn>({
