@@ -17,7 +17,7 @@ export function useServiceTransactionTypes(urlParams: IUrlParams) {
     (callApmApi) => {
       if (serviceName && start && end) {
         return callApmApi({
-          pathname: '/api/apm/services/{serviceName}/transaction_types',
+          endpoint: 'GET /api/apm/services/{serviceName}/transaction_types',
           params: {
             path: { serviceName },
             query: { start, end },
