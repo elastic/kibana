@@ -28,6 +28,17 @@ interface ErrorWithData {
   data?: object;
 }
 
+/**
+ * This higher order request handler makes sure that errors are returned with
+ * body formatted in the following shape:
+ *
+ * ```json
+ * {
+ *   "message": "...",
+ *   "attributes": {}
+ * }
+ * ```
+ */
 export const handleErrors = <A, B, C, D extends RouteMethod>(
   handler: RequestHandler<A, B, C, D>
 ): RequestHandler<A, B, C, D> => async (context, request, response) => {

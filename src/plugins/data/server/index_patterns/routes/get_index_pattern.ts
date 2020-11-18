@@ -19,6 +19,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { IRouter } from '../../../../../core/server';
+import { assertIndexPatternsContext } from './util/assert_index_patterns_context';
 import { handleErrors } from './util/handle_errors';
 
 export const registerGetIndexPatternRoute = (router: IRouter) => {
@@ -38,19 +39,19 @@ export const registerGetIndexPatternRoute = (router: IRouter) => {
       },
     },
     router.handleLegacyErrors(
-      handleErrors(async (ctx, req, res) => {
-        if (!ctx.indexPatterns) throw new Error('Index pattern context is missing.');
+      handleErrors(
+        assertIndexPatternsContext(async (ctx, req, res) => {
+          const ip = ctx.indexPatterns.indexPatterns;
+          const id = req.params.id;
+          const indexPattern = await ip.get(id);
 
-        const ip = ctx.indexPatterns.indexPatterns;
-        const id = req.params.id;
-        const indexPattern = await ip.get(id);
-
-        return res.ok({
-          body: JSON.stringify({
-            index_pattern: indexPattern.toSpec(),
-          }),
-        });
-      })
+          return res.ok({
+            body: JSON.stringify({
+              index_pattern: indexPattern.toSpec(),
+            }),
+          });
+        })
+      )
     )
   );
 };

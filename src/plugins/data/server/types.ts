@@ -17,6 +17,13 @@
  * under the License.
  */
 
+import {
+  IKibanaResponse,
+  KibanaRequest,
+  KibanaResponseFactory,
+  RequestHandlerContext,
+  RouteMethod,
+} from 'src/core/server';
 import type { IndexPatternsContract } from '../common';
 
 export interface IndexPatternsRequestHandlerContext {
@@ -28,3 +35,18 @@ declare module 'src/core/server' {
     indexPatterns?: IndexPatternsRequestHandlerContext;
   }
 }
+
+export type IndexPatternsRouteContext = RequestHandlerContext &
+  Required<Pick<IndexPatternsRequestHandlerContext, 'indexPatterns'>>;
+
+export type IndexPatternsRequestHandler<
+  P = unknown,
+  Q = unknown,
+  B = unknown,
+  Method extends RouteMethod = any,
+  ResponseFactory extends KibanaResponseFactory = KibanaResponseFactory
+> = (
+  context: IndexPatternsRouteContext,
+  request: KibanaRequest<P, Q, B, Method>,
+  response: ResponseFactory
+) => IKibanaResponse<any> | Promise<IKibanaResponse<any>>;
