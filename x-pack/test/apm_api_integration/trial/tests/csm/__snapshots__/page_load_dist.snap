@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`CSM page load dist when there is data returns page load distribution 1`] = `
+exports[`UX page load dist when there is data returns page load distribution 1`] = `
 Object {
   "maxDuration": 54.46,
   "minDuration": 0,
@@ -456,7 +456,7 @@ Object {
 }
 `;
 
-exports[`CSM page load dist when there is data returns page load distribution with breakdown 1`] = `
+exports[`UX page load dist when there is data returns page load distribution with breakdown 1`] = `
 Array [
   Object {
     "data": Array [
@@ -819,6 +819,6 @@ Array [
 ]
 `;
 
-exports[`CSM page load dist when there is no data returns empty list 1`] = `Object {}`;
+exports[`UX page load dist when there is no data returns empty list 1`] = `Object {}`;
 
-exports[`CSM page load dist when there is no data returns empty list with breakdowns 1`] = `Object {}`;
+exports[`UX page load dist when there is no data returns empty list with breakdowns 1`] = `Object {}`;
