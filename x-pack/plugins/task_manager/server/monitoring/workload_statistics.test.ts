@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { first, take, bufferCount, map } from 'rxjs/operators';
+import { first, take, bufferCount } from 'rxjs/operators';
 import { loggingSystemMock } from '../../../../../src/core/server/mocks';
 import {
   WorkloadAggregation,
