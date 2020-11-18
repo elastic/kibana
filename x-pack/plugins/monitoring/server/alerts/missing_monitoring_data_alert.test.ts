@@ -140,7 +140,7 @@ describe('MissingMonitoringDataAlert', () => {
         // @ts-ignore
         params: alert.defaultParams,
       } as any);
-      const count = 2;
+      const count = 1;
       expect(replaceState).toHaveBeenCalledWith({
         alertStates: [
           {
@@ -195,53 +195,25 @@ describe('MissingMonitoringDataAlert', () => {
             stackProductName: 'kibanaInstance1',
             stackProductUuid: 'kibanaUuid1',
             ui: {
-              isFiring: true,
-              message: {
-                text:
-                  'For the past an hour, we have not detected any monitoring data from the Kibana instance: kibanaInstance1, starting at #absolute',
-                nextSteps: [
-                  {
-                    text: '#start_linkView all Kibana instances#end_link',
-                    tokens: [
-                      {
-                        startToken: '#start_link',
-                        endToken: '#end_link',
-                        type: 'link',
-                        url: 'kibana/instances',
-                      },
-                    ],
-                  },
-                  {
-                    text: 'Verify monitoring settings on the instance',
-                  },
-                ],
-                tokens: [
-                  {
-                    startToken: '#absolute',
-                    type: 'time',
-                    isAbsolute: true,
-                    isRelative: false,
-                    timestamp: 1,
-                  },
-                ],
-              },
+              isFiring: false,
+              message: null,
               severity: 'danger',
               resolvedMS: 0,
-              triggeredMS: 1,
+              triggeredMS: 0,
               lastCheckedMS: 0,
             },
           },
         ],
       });
       expect(scheduleActions).toHaveBeenCalledWith('default', {
-        internalFullMessage: `We have not detected any monitoring data for 2 stack product(s) in cluster: testCluster. [View what monitoring data we do have for these stack products.](http://localhost:5601/app/monitoring#/overview?_g=(cluster_uuid:abc123))`,
-        internalShortMessage: `We have not detected any monitoring data for 2 stack product(s) in cluster: testCluster. Verify these stack products are up and running, then double check the monitoring settings.`,
+        internalFullMessage: `We have not detected any monitoring data for 1 stack product(s) in cluster: testCluster. [View what monitoring data we do have for these stack products.](http://localhost:5601/app/monitoring#/overview?_g=(cluster_uuid:abc123))`,
+        internalShortMessage: `We have not detected any monitoring data for 1 stack product(s) in cluster: testCluster. Verify these stack products are up and running, then double check the monitoring settings.`,
         action: `[View what monitoring data we do have for these stack products.](http://localhost:5601/app/monitoring#/overview?_g=(cluster_uuid:abc123))`,
         actionPlain:
           'Verify these stack products are up and running, then double check the monitoring settings.',
         clusterName,
         count,
-        stackProducts: 'Elasticsearch node: esName1, Kibana instance: kibanaInstance1',
+        stackProducts: 'Elasticsearch node: esName1',
         state: 'firing',
       });
     });
@@ -442,16 +414,16 @@ describe('MissingMonitoringDataAlert', () => {
         // @ts-ignore
         params: alert.defaultParams,
       } as any);
-      const count = 2;
+      const count = 1;
       expect(scheduleActions).toHaveBeenCalledWith('default', {
-        internalFullMessage: `We have not detected any monitoring data for 2 stack product(s) in cluster: testCluster. Verify these stack products are up and running, then double check the monitoring settings.`,
-        internalShortMessage: `We have not detected any monitoring data for 2 stack product(s) in cluster: testCluster. Verify these stack products are up and running, then double check the monitoring settings.`,
+        internalFullMessage: `We have not detected any monitoring data for 1 stack product(s) in cluster: testCluster. Verify these stack products are up and running, then double check the monitoring settings.`,
+        internalShortMessage: `We have not detected any monitoring data for 1 stack product(s) in cluster: testCluster. Verify these stack products are up and running, then double check the monitoring settings.`,
         action: `[View what monitoring data we do have for these stack products.](http://localhost:5601/app/monitoring#/overview?_g=(cluster_uuid:abc123))`,
         actionPlain:
           'Verify these stack products are up and running, then double check the monitoring settings.',
         clusterName,
         count,
-        stackProducts: 'Elasticsearch node: esName1, Kibana instance: kibanaInstance1',
+        stackProducts: 'Elasticsearch node: esName1',
         state: 'firing',
       });
     });
