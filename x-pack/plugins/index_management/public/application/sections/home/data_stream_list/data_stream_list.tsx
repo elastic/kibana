@@ -213,7 +213,7 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
                   label={i18n.translate(
                     'xpack.idxMgmt.dataStreamListControls.includeManagedSwitchLabel',
                     {
-                      defaultMessage: 'Include managed',
+                      defaultMessage: 'Include Fleet-managed streams',
                     }
                   )}
                   checked={isIncludeManagedChecked}
