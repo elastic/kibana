@@ -21,7 +21,7 @@ refer https://www.elastic.co/subscriptions[the subscription page].
 ==============================================
 
 [float]
-[[dashboard-drilldown]]
+[[dashboard-drilldowns]]
 ==== Dashboard drilldowns
 
 Dashboard drilldowns enable you to open a dashboard from another dashboard,
@@ -33,7 +33,7 @@ you can create a drilldown that navigates from the overall status dashboard to a
 that shows a single data center or server.
 
 [float]
-[[url-drilldown]]
+[[url-drilldowns]]
 ==== URL drilldowns
 
 beta[] URL drilldowns enable you to navigate from a dashboard to internal or external URLs.
