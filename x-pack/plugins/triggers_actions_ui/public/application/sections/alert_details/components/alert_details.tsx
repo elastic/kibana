@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, Fragment, useEffect } from 'react';
+import React, { useState, Fragment, useEffect, useReducer } from 'react';
 import { keyBy } from 'lodash';
 import { useHistory } from 'react-router-dom';
 import {
@@ -41,6 +41,7 @@ import { AlertEdit } from '../../alert_form';
 import { AlertsContextProvider } from '../../../context/alerts_context';
 import { routeToAlertDetails } from '../../../constants';
 import { alertsErrorReasonTranslationsMapping } from '../../alerts_list/translations';
+import { alertReducer } from '../../alert_form/alert_reducer';
 
 type AlertDetailsProps = {
   alert: Alert;
@@ -73,6 +74,10 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
     setBreadcrumbs,
     chrome,
   } = useAppDependencies();
+  const [{}, dispatch] = useReducer(alertReducer, { alert });
+  const setInitialAlert = (key: string, value: any) => {
+    dispatch({ command: { type: 'setAlert' }, payload: { key, value } });
+  };
 
   // Set breadcrumb and page title
   useEffect(() => {
@@ -166,7 +171,10 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
                         >
                           <AlertEdit
                             initialAlert={alert}
-                            onClose={() => setEditFlyoutVisibility(false)}
+                            onClose={() => {
+                              setInitialAlert('alert', alert);
+                              setEditFlyoutVisibility(false);
+                            }}
                           />
                         </AlertsContextProvider>
                       )}
