@@ -164,21 +164,6 @@ This content has moved. See
 
 This content has moved. See {ref}/index-mgmt.html[Index management].
 
-[role="exclude",id="trigger-picker"]
-== Picking a trigger for a URL drilldown
-
-This content has moved. Refer to <<url-drilldown>>.
-
-[role="exclude",id="templating"]
-== URL templating language	
-
-This content has moved. Refer to <<url_templating-language>>.
-
-[role="exclude",id="variables"]
-== URL template variables
-
-This content has moved. Refer to <<url-template-variables>>.
-
 [role="exclude",id="field-filter"]
 == Filter by field
 
@@ -201,3 +186,28 @@ This content has moved. See <<discover, **Discover**>>.
 
 This content has moved. See <<discover, **Discover**>>.
 
+[role="exclude",id="lens"]
+== Lens
+
+This page was deleted. Refer to <<create-panels-with-lens>>.
+
+[role="exclude",id="url-drilldown"]
+== URL drilldown
+
+[float]
+[[trigger-picker]]
+=== Picking a trigger for a URL drilldown
+
+This page has moved. Refer to <<url-drilldown>>.
+
+[float]
+[[templating]]
+=== URL templating
+
+This page has moved. Refer to <<url_templating-language>>.
+
+[float]
+[[variables]]
+=== Variables
+
+This page has moved. Refer to <<url-template-variables>>.
