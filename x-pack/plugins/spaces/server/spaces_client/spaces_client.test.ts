@@ -5,10 +5,10 @@
  */
 
 import { SpacesClient } from './spaces_client';
-import { ConfigType, ConfigSchema } from '../../config';
+import { ConfigType, ConfigSchema } from '../config';
 import { ISavedObjectsRepository } from 'src/core/server';
-import { GetAllSpacesPurpose } from '../../../common/model/types';
-import { savedObjectsRepositoryMock } from '../../../../../../src/core/server/mocks';
+import { GetAllSpacesPurpose } from '../../common/model/types';
+import { savedObjectsRepositoryMock } from '../../../../../src/core/server/mocks';
 
 const createMockDebugLogger = () => {
   return jest.fn();

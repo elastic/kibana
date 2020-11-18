@@ -5,7 +5,7 @@
  */
 
 import { SpacesServiceSetup, SpacesServiceStart } from './spaces_service';
-import { spacesClientMock } from '../lib/spaces_client/spaces_client.mock';
+import { spacesClientMock } from '../spaces_client/spaces_client.mock';
 import { DEFAULT_SPACE_ID } from '../../common/constants';
 import { namespaceToSpaceId, spaceIdToNamespace } from '../lib/utils/namespace';
 
@@ -14,11 +14,6 @@ const createSetupContractMock = (spaceId = DEFAULT_SPACE_ID) => {
     namespaceToSpaceId: jest.fn().mockImplementation(namespaceToSpaceId),
     spaceIdToNamespace: jest.fn().mockImplementation(spaceIdToNamespace),
     getSpaceId: jest.fn().mockReturnValue(spaceId),
-
-    clientService: {
-      registerClientWrapper: jest.fn(),
-      setClientRepositoryFactory: jest.fn(),
-    },
   };
   return setupContract;
 };

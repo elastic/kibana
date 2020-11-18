@@ -14,7 +14,7 @@ import {
   createResolveSavedObjectsImportErrorsMock,
   createMockSavedObjectsService,
 } from '../__fixtures__';
-import { CoreSetup, kibanaResponseFactory, RouteValidatorConfig } from 'src/core/server';
+import { kibanaResponseFactory, RouteValidatorConfig } from 'src/core/server';
 import {
   loggingSystemMock,
   httpServiceMock,
@@ -38,6 +38,7 @@ import {
   importSavedObjectsFromStream,
   resolveSavedObjectsImportErrors,
 } from '../../../../../../../src/core/server';
+import { SpacesClientService } from '../../../spaces_client';
 
 describe('copy to space', () => {
   const spacesSavedObjects = createSpaces();
@@ -71,15 +72,22 @@ describe('copy to space', () => {
     const { savedObjects } = createMockSavedObjectsService(spaces);
     coreStart.savedObjects = savedObjects;
 
-    const service = new SpacesService(log);
-    const spacesServiceSetup = service.setup({
-      http: (httpService as unknown) as CoreSetup['http'],
-      config$: Rx.of(spacesConfig),
+    const clientService = new SpacesClientService(jest.fn());
+    clientService
+      .setup({ config$: Rx.of(spacesConfig) })
+      .setClientRepositoryFactory(() => savedObjectsRepositoryMock);
+
+    const service = new SpacesService();
+    service.setup({
+      basePath: httpService.basePath,
     });
 
-    spacesServiceSetup.clientService.setClientRepositoryFactory(() => savedObjectsRepositoryMock);
+    const clientServiceStart = clientService.start(coreStart);
 
-    const spacesServiceStart = service.start(coreStart);
+    const spacesServiceStart = service.start({
+      basePath: coreStart.http.basePath,
+      spacesClientService: clientServiceStart,
+    });
 
     initCopyToSpacesApi({
       externalRouter: router,

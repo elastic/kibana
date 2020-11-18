@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DEFAULT_SPACE_ID } from '../../../common/constants';
-import { Space } from '../../../common/model/space';
+import { DEFAULT_SPACE_ID } from '../../common/constants';
+import { Space } from '../../common/model/space';
 import { SpacesClient } from './spaces_client';
 
 const createSpacesClientMock = () =>

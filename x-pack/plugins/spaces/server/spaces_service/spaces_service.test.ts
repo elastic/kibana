@@ -5,7 +5,7 @@
  */
 import * as Rx from 'rxjs';
 import { SpacesService } from './spaces_service';
-import { coreMock, httpServerMock, loggingSystemMock } from 'src/core/server/mocks';
+import { coreMock, httpServerMock } from 'src/core/server/mocks';
 import {
   KibanaRequest,
   SavedObjectsErrorHelpers,
@@ -15,11 +15,10 @@ import {
 import { DEFAULT_SPACE_ID } from '../../common/constants';
 import { getSpaceIdFromPath } from '../../common/lib/spaces_url_parser';
 import { spacesConfig } from '../lib/__fixtures__';
-
-const mockLogger = loggingSystemMock.createLogger();
+import { SpacesClientService } from '../spaces_client';
 
 const createService = (serverBasePath: string = '') => {
-  const spacesService = new SpacesService(mockLogger);
+  const spacesService = new SpacesService();
 
   const coreStart = coreMock.createStart();
 
@@ -67,11 +66,20 @@ const createService = (serverBasePath: string = '') => {
   coreStart.http.basePath = httpSetup.basePath;
 
   const spacesServiceSetup = spacesService.setup({
-    http: httpSetup,
+    basePath: httpSetup.basePath,
+  });
+
+  const spacesClientService = new SpacesClientService(jest.fn());
+  spacesClientService.setup({
     config$: Rx.of(spacesConfig),
   });
 
-  const spacesServiceStart = spacesService.start(coreStart);
+  const spacesClientServiceStart = spacesClientService.start(coreStart);
+
+  const spacesServiceStart = spacesService.start({
+    basePath: coreStart.http.basePath,
+    spacesClientService: spacesClientServiceStart,
+  });
 
   return {
     spacesServiceSetup,

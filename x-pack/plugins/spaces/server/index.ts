@@ -17,7 +17,7 @@ import { Plugin } from './plugin';
 
 export { SpacesPluginSetup, SpacesPluginStart } from './plugin';
 export { SpacesServiceSetup, SpacesServiceStart } from './spaces_service';
-export { ISpacesClient } from './lib/spaces_client';
+export { ISpacesClient } from './spaces_client';
 export { Space } from '../common/model/space';
 
 export const config = { schema: ConfigSchema };

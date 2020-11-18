@@ -11,7 +11,7 @@ import {
   mockRouteContext,
 } from '../__fixtures__';
 import { initGetSpaceApi } from './get';
-import { CoreSetup, kibanaResponseFactory } from 'src/core/server';
+import { kibanaResponseFactory } from 'src/core/server';
 import {
   loggingSystemMock,
   httpServiceMock,
@@ -20,6 +20,7 @@ import {
 } from 'src/core/server/mocks';
 import { SpacesService } from '../../../spaces_service';
 import { spacesConfig } from '../../../lib/__fixtures__';
+import { SpacesClientService } from '../../../spaces_client';
 
 describe('GET space', () => {
   const spacesSavedObjects = createSpaces();
@@ -35,15 +36,22 @@ describe('GET space', () => {
 
     const log = loggingSystemMock.create().get('spaces');
 
-    const service = new SpacesService(log);
-    const spacesServiceSetup = service.setup({
-      http: (httpService as unknown) as CoreSetup['http'],
-      config$: Rx.of(spacesConfig),
+    const clientService = new SpacesClientService(jest.fn());
+    clientService
+      .setup({ config$: Rx.of(spacesConfig) })
+      .setClientRepositoryFactory(() => savedObjectsRepositoryMock);
+
+    const service = new SpacesService();
+    service.setup({
+      basePath: httpService.basePath,
     });
 
-    spacesServiceSetup.clientService.setClientRepositoryFactory(() => savedObjectsRepositoryMock);
+    const clientServiceStart = clientService.start(coreStart);
 
-    const spacesServiceStart = service.start(coreStart);
+    const spacesServiceStart = service.start({
+      basePath: coreStart.http.basePath,
+      spacesClientService: clientServiceStart,
+    });
 
     initGetSpaceApi({
       externalRouter: router,

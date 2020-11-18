@@ -4,27 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Observable, Subscription } from 'rxjs';
-import type { Logger, KibanaRequest, CoreSetup, CoreStart, IBasePath } from 'src/core/server';
-import {
-  SpacesClientService,
-  SpacesClientServiceSetup,
-  SpacesClientServiceStart,
-} from '../lib/spaces_client';
-import { ConfigType } from '../config';
+import { Subscription } from 'rxjs';
+import type { KibanaRequest, IBasePath } from 'src/core/server';
+import { SpacesClientServiceStart } from '../spaces_client';
 import { getSpaceIdFromPath } from '../../common/lib/spaces_url_parser';
 import { DEFAULT_SPACE_ID } from '../../common/constants';
 import { spaceIdToNamespace, namespaceToSpaceId } from '../lib/utils/namespace';
 import { Space } from '..';
 
 export interface SpacesServiceSetup {
-  /**
-   * Customize the construction of the SpacesClient.
-   *
-   * @private
-   */
-  clientService: SpacesClientServiceSetup;
-
   /**
    * Retrieves the space id associated with the provided request.
    * @param request
@@ -87,63 +75,49 @@ export interface SpacesServiceStart {
   namespaceToSpaceId(namespace: string | undefined): string;
 }
 
-interface SpacesServiceDeps {
-  http: CoreSetup['http'];
-  config$: Observable<ConfigType>;
+interface SpacesServiceSetupDeps {
+  basePath: IBasePath;
+}
+
+interface SpacesServiceStartDeps {
+  basePath: IBasePath;
+  spacesClientService: SpacesClientServiceStart;
 }
 
 export class SpacesService {
   private configSubscription$?: Subscription;
 
-  private readonly spacesClientService: SpacesClientService;
+  constructor() {}
 
-  private spacesClientServiceStart?: ReturnType<SpacesClientService['start']>;
-
-  constructor(private readonly log: Logger) {
-    this.spacesClientService = new SpacesClientService((message: string) =>
-      this.log.debug(message)
-    );
-  }
-
-  public setup({ http, config$ }: SpacesServiceDeps): SpacesServiceSetup {
+  public setup({ basePath }: SpacesServiceSetupDeps): SpacesServiceSetup {
     return {
       getSpaceId: (request: KibanaRequest) => {
-        return this.getSpaceId(request, http.basePath);
+        return this.getSpaceId(request, basePath);
       },
       spaceIdToNamespace,
       namespaceToSpaceId,
-      clientService: this.spacesClientService.setup({ config$ }),
     };
   }
 
-  public start(coreStart: CoreStart) {
-    this.spacesClientServiceStart = this.spacesClientService!.start(coreStart);
-
-    const getScopedClient = (request: KibanaRequest) => {
-      if (!this.spacesClientServiceStart) {
-        throw new Error('Spaces Service has not been started yet!');
-      }
-      return this.spacesClientServiceStart?.createSpacesClient(request);
-    };
-
+  public start({ basePath, spacesClientService }: SpacesServiceStartDeps) {
     return {
       getSpaceId: (request: KibanaRequest) => {
-        return this.getSpaceId(request, coreStart.http.basePath);
+        return this.getSpaceId(request, basePath);
       },
 
       getActiveSpace: (request: KibanaRequest) => {
-        const spaceId = this.getSpaceId(request, coreStart.http.basePath);
-        return getScopedClient(request).get(spaceId);
+        const spaceId = this.getSpaceId(request, basePath);
+        return spacesClientService.createSpacesClient(request).get(spaceId);
       },
 
       isInDefaultSpace: (request: KibanaRequest) => {
-        const spaceId = this.getSpaceId(request, coreStart.http.basePath);
+        const spaceId = this.getSpaceId(request, basePath);
 
         return spaceId === DEFAULT_SPACE_ID;
       },
 
       createSpacesClient: (request: KibanaRequest) =>
-        this.spacesClientServiceStart!.createSpacesClient(request),
+        spacesClientService.createSpacesClient(request),
 
       spaceIdToNamespace,
       namespaceToSpaceId,

@@ -10,7 +10,7 @@ import {
   mockRouteContext,
   mockRouteContextWithInvalidLicense,
 } from '../__fixtures__';
-import { CoreSetup, kibanaResponseFactory } from 'src/core/server';
+import { kibanaResponseFactory } from 'src/core/server';
 import {
   loggingSystemMock,
   httpServiceMock,
@@ -21,6 +21,7 @@ import { SpacesService } from '../../../spaces_service';
 import { initGetAllSpacesApi } from './get_all';
 import { spacesConfig } from '../../../lib/__fixtures__';
 import { ObjectType } from '@kbn/config-schema';
+import { SpacesClientService } from '../../../spaces_client';
 
 describe('GET /spaces/space', () => {
   const spacesSavedObjects = createSpaces();
@@ -36,15 +37,22 @@ describe('GET /spaces/space', () => {
 
     const log = loggingSystemMock.create().get('spaces');
 
-    const service = new SpacesService(log);
-    const spacesServiceSetup = service.setup({
-      http: (httpService as unknown) as CoreSetup['http'],
-      config$: Rx.of(spacesConfig),
+    const clientService = new SpacesClientService(jest.fn());
+    clientService
+      .setup({ config$: Rx.of(spacesConfig) })
+      .setClientRepositoryFactory(() => savedObjectsRepositoryMock);
+
+    const service = new SpacesService();
+    service.setup({
+      basePath: httpService.basePath,
     });
 
-    spacesServiceSetup.clientService.setClientRepositoryFactory(() => savedObjectsRepositoryMock);
+    const clientServiceStart = clientService.start(coreStart);
 
-    const spacesServiceStart = service.start(coreStart);
+    const spacesServiceStart = service.start({
+      basePath: coreStart.http.basePath,
+      spacesClientService: clientServiceStart,
+    });
 
     initGetAllSpacesApi({
       externalRouter: router,

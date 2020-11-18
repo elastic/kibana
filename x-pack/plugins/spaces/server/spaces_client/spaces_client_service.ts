@@ -11,7 +11,7 @@ import {
   ISavedObjectsRepository,
   SavedObjectsServiceStart,
 } from 'src/core/server';
-import { ConfigType } from '../../config';
+import { ConfigType } from '../config';
 import { SpacesClient, ISpacesClient } from './spaces_client';
 
 export type SpacesClientWrapper = (

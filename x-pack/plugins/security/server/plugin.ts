@@ -37,7 +37,7 @@ import { securityFeatures } from './features';
 import { ElasticsearchService } from './elasticsearch';
 import { SessionManagementService } from './session_management';
 import { registerSecurityUsageCollector } from './usage_collector';
-import { SecureSpacesClientWrapper, LegacySpacesAuditLogger } from './spaces';
+import { setupSpacesClient } from './spaces';
 
 export type SpacesService = Pick<
   SpacesPluginSetup['spacesService'],
@@ -211,23 +211,11 @@ export class Plugin {
       getCurrentUser: this.authc.getCurrentUser,
     });
 
-    if (spaces) {
-      spaces.spacesService.clientService.setClientRepositoryFactory(
-        (request, savedObjectsStart) => {
-          if (authz.mode.useRbacForRequest(request)) {
-            return savedObjectsStart.createInternalRepository(['space']);
-          }
-          return savedObjectsStart.createScopedRepository(request, ['space']);
-        }
-      );
-
-      const spacesAuditLogger = new LegacySpacesAuditLogger(audit.getLogger());
-
-      spaces.spacesService.clientService.registerClientWrapper(
-        (request, baseClient) =>
-          new SecureSpacesClientWrapper(baseClient, request, authz, spacesAuditLogger)
-      );
-    }
+    setupSpacesClient({
+      spaces,
+      audit,
+      authz,
+    });
 
     setupSavedObjects({
       legacyAuditLogger,

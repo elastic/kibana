@@ -12,7 +12,6 @@ import {
   mockRouteContextWithInvalidLicense,
 } from '../__fixtures__';
 import {
-  CoreSetup,
   kibanaResponseFactory,
   RouteValidatorConfig,
   SavedObjectsErrorHelpers,
@@ -27,6 +26,7 @@ import { SpacesService } from '../../../spaces_service';
 import { initDeleteSpacesApi } from './delete';
 import { spacesConfig } from '../../../lib/__fixtures__';
 import { ObjectType } from '@kbn/config-schema';
+import { SpacesClientService } from '../../../spaces_client';
 
 describe('Spaces Public API', () => {
   const spacesSavedObjects = createSpaces();
@@ -41,15 +41,22 @@ describe('Spaces Public API', () => {
 
     const coreStart = coreMock.createStart();
 
-    const service = new SpacesService(log);
-    const spacesServiceSetup = service.setup({
-      http: (httpService as unknown) as CoreSetup['http'],
-      config$: Rx.of(spacesConfig),
+    const clientService = new SpacesClientService(jest.fn());
+    clientService
+      .setup({ config$: Rx.of(spacesConfig) })
+      .setClientRepositoryFactory(() => savedObjectsRepositoryMock);
+
+    const service = new SpacesService();
+    service.setup({
+      basePath: httpService.basePath,
     });
 
-    spacesServiceSetup.clientService.setClientRepositoryFactory(() => savedObjectsRepositoryMock);
+    const clientServiceStart = clientService.start(coreStart);
 
-    const spacesServiceStart = service.start(coreStart);
+    const spacesServiceStart = service.start({
+      basePath: coreStart.http.basePath,
+      spacesClientService: clientServiceStart,
+    });
 
     initDeleteSpacesApi({
       externalRouter: router,

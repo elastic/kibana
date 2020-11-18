@@ -4,17 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as Rx from 'rxjs';
 import { DEFAULT_SPACE_ID } from '../../common/constants';
 import { createSpacesTutorialContextFactory } from './spaces_tutorial_context_factory';
 import { SpacesService } from '../spaces_service';
-import { coreMock, loggingSystemMock } from '../../../../../src/core/server/mocks';
+import { coreMock } from '../../../../../src/core/server/mocks';
 import { spacesServiceMock } from '../spaces_service/spaces_service.mock';
-import { spacesConfig } from './__fixtures__';
+import { spacesClientServiceMock } from '../spaces_client/spaces_client_service.mock';
 
-const log = loggingSystemMock.createLogger();
-
-const service = new SpacesService(log);
+const service = new SpacesService();
 
 describe('createSpacesTutorialContextFactory', () => {
   it('should create a valid context factory', async () => {
@@ -36,11 +33,13 @@ describe('createSpacesTutorialContextFactory', () => {
 
   it('should create context with the current space id for the default space', async () => {
     service.setup({
-      http: coreMock.createSetup().http,
-      config$: Rx.of(spacesConfig),
+      basePath: coreMock.createSetup().http.basePath,
     });
     const contextFactory = createSpacesTutorialContextFactory(() =>
-      service.start(coreMock.createStart())
+      service.start({
+        basePath: coreMock.createStart().http.basePath,
+        spacesClientService: spacesClientServiceMock.createStart(),
+      })
     );
 
     const request = {};

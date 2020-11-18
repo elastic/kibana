@@ -24,7 +24,7 @@ import {
 import { ALL_SPACES_ID } from '../../common/constants';
 import { SpacesServiceStart } from '../spaces_service/spaces_service';
 import { spaceIdToNamespace } from '../lib/utils/namespace';
-import { ISpacesClient } from '../lib/spaces_client';
+import { ISpacesClient } from '../spaces_client';
 
 interface SpacesSavedObjectsClientOptions {
   baseClient: SavedObjectsClientContract;

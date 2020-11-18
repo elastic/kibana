@@ -28,10 +28,6 @@ describe('Spaces Plugin', () => {
             "setClientRepositoryFactory": [Function],
           },
           "spacesService": Object {
-            "clientService": Object {
-              "registerClientWrapper": [Function],
-              "setClientRepositoryFactory": [Function],
-            },
             "getSpaceId": [Function],
             "namespaceToSpaceId": [Function],
             "spaceIdToNamespace": [Function],

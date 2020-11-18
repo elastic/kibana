@@ -6,7 +6,7 @@
 
 import { httpServerMock } from '../../../../../src/core/server/mocks';
 
-import { SecureSpacesClientWrapper } from '.';
+import { SecureSpacesClientWrapper } from './secure_spaces_client_wrapper';
 
 import { spacesClientMock } from '../../../spaces/server/mocks';
 import { deepFreeze } from '@kbn/std';
