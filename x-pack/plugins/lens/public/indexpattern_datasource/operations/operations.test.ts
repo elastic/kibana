@@ -279,6 +279,34 @@ describe('getOperationTypesForField', () => {
               },
             ],
           },
+          Object {
+            "operationMetaData": Object {
+              "dataType": "number",
+              "isBucketed": false,
+              "scale": "ordinal",
+            },
+            "operations": Array [
+              Object {
+                "field": "bytes",
+                "operationType": "last_value",
+                "type": "field",
+              },
+            ],
+          },
+          Object {
+            "operationMetaData": Object {
+              "dataType": "string",
+              "isBucketed": false,
+              "scale": "ordinal",
+            },
+            "operations": Array [
+              Object {
+                "field": "source",
+                "operationType": "last_value",
+                "type": "field",
+              },
+            ],
+          },
         ]
       `);
     });
