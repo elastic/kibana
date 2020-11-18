@@ -15,11 +15,14 @@ interface Tab {
   path: string;
 }
 
-export const AnalyticsNavigationBar: FC<{ selectedTabId?: string }> = ({ selectedTabId }) => {
+export const AnalyticsNavigationBar: FC<{ selectedTabId?: string; jobId?: string }> = ({
+  jobId,
+  selectedTabId,
+}) => {
   const navigateToPath = useNavigateToPath();
 
-  const tabs = useMemo(
-    () => [
+  const tabs = useMemo(() => {
+    const navTabs = [
       {
         id: 'data_frame_analytics',
         name: i18n.translate('xpack.ml.dataframe.jobsTabLabel', {
@@ -34,13 +37,25 @@ export const AnalyticsNavigationBar: FC<{ selectedTabId?: string }> = ({ selecte
         }),
         path: '/data_frame_analytics/models',
       },
-    ],
-    []
-  );
+    ];
+    if (jobId !== undefined) {
+      navTabs.push({
+        id: 'map',
+        name: i18n.translate('xpack.ml.dataframe.mapTabLabel', {
+          defaultMessage: 'Map',
+        }),
+        path: '/data_frame_analytics/map',
+      });
+    }
+    return navTabs;
+  }, [jobId !== undefined]);
 
-  const onTabClick = useCallback(async (tab: Tab) => {
-    await navigateToPath(tab.path);
-  }, []);
+  const onTabClick = useCallback(
+    async (tab: Tab) => {
+      await navigateToPath(tab.path, true);
+    },
+    [navigateToPath]
+  );
 
   return (
     <EuiTabs>

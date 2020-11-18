@@ -34,7 +34,7 @@ import {
   gridlinesConfig,
 } from './types';
 import { createMockExecutionContext } from '../../../../../src/plugins/expressions/common/mocks';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
 import { EmptyPlaceholder } from '../shared_components/empty_placeholder';
 
@@ -1386,13 +1386,13 @@ describe('xy_expression', () => {
             yAccessor: 'a',
             seriesKeys: ['a'],
           })
-        ).toEqual('black');
+        ).toEqual('blue');
         expect(
           (component.find(LineSeries).at(1).prop('color') as Function)!({
             yAccessor: 'c',
             seriesKeys: ['c'],
           })
-        ).toEqual('black');
+        ).toEqual('blue');
       });
     });
 

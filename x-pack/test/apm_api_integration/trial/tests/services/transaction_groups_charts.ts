@@ -5,7 +5,7 @@
  */
 
 import expect from '@kbn/expect';
-import { PromiseReturnType } from '../../../../../plugins/apm/typings/common';
+import { PromiseReturnType } from '../../../../../plugins/observability/typings/common';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import archives_metadata from '../../../common/archives_metadata';
 

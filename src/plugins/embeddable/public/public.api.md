@@ -28,6 +28,7 @@ import { EuiComboBoxProps } from '@elastic/eui';
 import { EuiConfirmModalProps } from '@elastic/eui';
 import { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { EuiGlobalToastListToast } from '@elastic/eui';
+import { EventEmitter } from 'events';
 import { ExclusiveUnion } from '@elastic/eui';
 import { ExpressionAstFunction } from 'src/plugins/expressions/common';
 import { History } from 'history';
@@ -59,7 +60,7 @@ import { PublicMethodsOf } from '@kbn/utility-types';
 import { PublicUiSettingsParams } from 'src/core/server/types';
 import React from 'react';
 import { RecursiveReadonly } from '@kbn/utility-types';
-import { RequestAdapter } from 'src/plugins/inspector/common';
+import { RequestAdapter as RequestAdapter_2 } from 'src/plugins/inspector/common';
 import { Required } from '@kbn/utility-types';
 import * as Rx from 'rxjs';
 import { SavedObject as SavedObject_2 } from 'src/core/server';
@@ -80,6 +81,7 @@ import { TransportRequestParams } from '@elastic/elasticsearch/lib/Transport';
 import { TransportRequestPromise } from '@elastic/elasticsearch/lib/Transport';
 import { TypeOf } from '@kbn/config-schema';
 import { UiComponent } from 'src/plugins/kibana_utils/public';
+import { UiStatsMetricType } from '@kbn/analytics';
 import { UnregisterCallback } from 'history';
 import { UserProvidedValues } from 'src/core/server/types';
 
@@ -99,6 +101,14 @@ export const ACTION_EDIT_PANEL = "editPanel";
 export interface Adapters {
     // (undocumented)
     [key: string]: any;
+    // Warning: (ae-forgotten-export) The symbol "DataAdapter" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    data?: DataAdapter;
+    // Warning: (ae-forgotten-export) The symbol "RequestAdapter" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    requests?: RequestAdapter;
 }
 
 // Warning: (ae-forgotten-export) The symbol "ActionContext" needs to be exported by the entry point index.d.ts

@@ -6,9 +6,9 @@
 
 import expect from '@kbn/expect';
 import { format } from 'url';
-import { PromiseReturnType } from '../../../../../plugins/apm/typings/common';
-import { FtrProviderContext } from '../../../common/ftr_provider_context';
+import { PromiseReturnType } from '../../../../../plugins/observability/typings/common';
 import archives_metadata from '../../../common/archives_metadata';
+import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -22,7 +22,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const fieldNames =
     'user.username,user.id,host.ip,user_agent.name,kubernetes.pod.uuid,url.domain,container.id,service.node.name';
 
-  describe('Ranges', () => {
+  describe('Ranges', function () {
+    this.tags();
+
     const url = format({
       pathname: `/api/apm/correlations/ranges`,
       query: { start, end, fieldNames },
