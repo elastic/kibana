@@ -16,12 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { INTERVAL_STRING_RE } from '../../../../common/interval_regexp';
 import { sortBy, isNumber } from 'lodash';
+import { Unit } from '@elastic/datemath';
+
+/** @ts-ignore */
+import { INTERVAL_STRING_RE } from '../../../../common/interval_regexp';
 
 export const ASCENDING_UNIT_ORDER = ['ms', 's', 'm', 'h', 'd', 'w', 'M', 'y'];
 
-const units = {
+const units: Record<Unit, number> = {
   ms: 0.001,
   s: 1,
   m: 60,
@@ -32,49 +35,53 @@ const units = {
   y: 86400 * 7 * 4 * 12, // Leap year?
 };
 
-const sortedUnits = sortBy(Object.keys(units), (key) => units[key]);
+const sortedUnits = sortBy(Object.keys(units), (key: Unit) => units[key]);
 
-export const parseInterval = (intervalString) => {
-  let value;
-  let unit;
+interface ParsedInterval {
+  value: number;
+  unit: Unit;
+}
 
+export const parseInterval = (intervalString: string): ParsedInterval | undefined => {
   if (intervalString) {
     const matches = intervalString.match(INTERVAL_STRING_RE);
 
     if (matches) {
-      value = Number(matches[1]);
-      unit = matches[2];
+      return {
+        value: Number(matches[1]),
+        unit: matches[2] as Unit,
+      };
     }
   }
-
-  return { value, unit };
 };
 
-export const convertIntervalToUnit = (intervalString, newUnit) => {
+export const convertIntervalToUnit = (
+  intervalString: string,
+  newUnit: Unit
+): ParsedInterval | undefined => {
   const parsedInterval = parseInterval(intervalString);
-  let value;
-  let unit;
 
-  if (parsedInterval.value && units[newUnit]) {
-    value = Number(
-      ((parsedInterval.value * units[parsedInterval.unit]) / units[newUnit]).toFixed(2)
-    );
-    unit = newUnit;
+  if (parsedInterval && units[newUnit]) {
+    return {
+      value: Number(
+        ((parsedInterval.value * units[parsedInterval.unit!]) / units[newUnit]).toFixed(2)
+      ),
+      unit: newUnit,
+    };
   }
-
-  return { value, unit };
 };
 
-export const getSuitableUnit = (intervalInSeconds) =>
+export const getSuitableUnit = (intervalInSeconds: string | number) =>
   sortedUnits.find((key, index, array) => {
-    const nextUnit = array[index + 1];
+    const nextUnit = array[index + 1] as Unit;
     const isValidInput = isNumber(intervalInSeconds) && intervalInSeconds > 0;
     const isLastItem = index + 1 === array.length;
 
     return (
       isValidInput &&
-      ((intervalInSeconds >= units[key] && intervalInSeconds < units[nextUnit]) || isLastItem)
+      ((intervalInSeconds >= units[key as Unit] && intervalInSeconds < units[nextUnit]) ||
+        isLastItem)
     );
-  });
+  }) as Unit;
 
-export const getUnitValue = (unit) => units[unit];
+export const getUnitValue = (unit: Unit) => units[unit];

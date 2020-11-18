@@ -4,4 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { registerRollupSearchStrategy } from './register_rollup_search_strategy';
+import { PluginInitializerContext } from 'src/core/server';
+import { VisTypeTimeseriesEnhanced } from './plugin';
+
+export const plugin = (initializerContext: PluginInitializerContext) =>
+  new VisTypeTimeseriesEnhanced(initializerContext);
