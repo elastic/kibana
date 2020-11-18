@@ -18,6 +18,7 @@
  */
 
 import { Observable } from 'rxjs';
+import type { SavedObject, SavedObjectsFindResponse } from 'kibana/server';
 
 export interface ISessionService {
   /**
@@ -49,7 +50,7 @@ export interface ISessionService {
   /**
    * Restores existing session
    */
-  restore: (sessionId: string) => Promise<any>;
+  restore: (sessionId: string) => Promise<SavedObject<BackgroundSessionSavedObjectAttributes>>;
 
   /**
    * Clears the active session.
@@ -59,17 +60,19 @@ export interface ISessionService {
   /**
    * Saves a session
    */
-  save: (name: string, url: string) => Promise<any>;
+  save: (name: string, url: string) => Promise<SavedObject<BackgroundSessionSavedObjectAttributes>>;
 
   /**
    * Gets a saved session
    */
-  get: (sessionId: string) => Promise<any>;
+  get: (sessionId: string) => Promise<SavedObject<BackgroundSessionSavedObjectAttributes>>;
 
   /**
    * Gets a list of saved sessions
    */
-  find: (options: SearchSessionFindOptions) => Promise<any>;
+  find: (
+    options: SearchSessionFindOptions
+  ) => Promise<SavedObjectsFindResponse<BackgroundSessionSavedObjectAttributes>>;
 
   /**
    * Updates a session
@@ -88,7 +91,9 @@ export interface ISessionService {
 export interface BackgroundSessionSavedObjectAttributes {
   name: string;
   url: string;
+  created: string;
   expires: string;
+  status: string;
   idMapping: Record<string, string>;
 }
 

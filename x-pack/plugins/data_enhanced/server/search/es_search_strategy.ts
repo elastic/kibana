@@ -57,7 +57,7 @@ export const enhancedEsSearchStrategyProvider = (
           utils.toSnakeCase({
             ...(await getDefaultSearchParams(uiSettingsClient)),
             batchedReduceSize: 64,
-            keepOnCompletion: true, // Always return an ID, even if the request completes quickly
+            keepOnCompletion: !!options.sessionId, // Always return an ID, even if the request completes quickly
             ...asyncOptions,
             ...request.params,
           })

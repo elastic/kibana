@@ -34,7 +34,7 @@ export class SessionService implements ISessionService {
   }
   private appChangeSubscription$?: Subscription;
   private curApp?: string;
-  private http?: HttpStart;
+  private http!: HttpStart;
 
   /**
    * Has the session already been stored (i.e. "sent to background")?
@@ -106,17 +106,17 @@ export class SessionService implements ISessionService {
     this._isStored = true;
     this._isRestore = true;
     this.session$.next(sessionId);
-    return this.http!.get(`/internal/session/${encodeURIComponent(sessionId)}`);
+    return this.http.get(`/internal/session/${encodeURIComponent(sessionId)}`);
   }
 
   public clear() {
     this._isStored = false;
-    this._isRestore = true;
+    this._isRestore = false;
     this.session$.next(undefined);
   }
 
   public async save(name: string, url: string) {
-    const response = await this.http!.post(`/internal/session`, {
+    const response = await this.http.post(`/internal/session`, {
       body: JSON.stringify({
         name,
         url,
@@ -128,22 +128,22 @@ export class SessionService implements ISessionService {
   }
 
   public get(sessionId: string) {
-    return this.http!.get(`/internal/session/${encodeURIComponent(sessionId)}}`);
+    return this.http.get(`/internal/session/${encodeURIComponent(sessionId)}`);
   }
 
   public find(options: SearchSessionFindOptions) {
-    return this.http!.post(`/internal/session`, {
+    return this.http.post(`/internal/session`, {
       body: JSON.stringify(options),
     });
   }
 
   public update(sessionId: string, attributes: Partial<BackgroundSessionSavedObjectAttributes>) {
-    return this.http!.put(`/internal/session/${encodeURIComponent(sessionId)}}`, {
+    return this.http.put(`/internal/session/${encodeURIComponent(sessionId)}`, {
       body: JSON.stringify(attributes),
     });
   }
 
   public delete(sessionId: string) {
-    return this.http!.delete(`/internal/session/${encodeURIComponent(sessionId)}}`);
+    return this.http.delete(`/internal/session/${encodeURIComponent(sessionId)}`);
   }
 }

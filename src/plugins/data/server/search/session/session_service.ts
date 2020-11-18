@@ -23,6 +23,7 @@ import {
   IKibanaSearchRequest,
   ISearchOptions,
   SearchSessionFindOptions,
+  BackgroundSessionStatus,
 } from '../../../common';
 import { BACKGROUND_SESSION_TYPE } from '../../saved_objects';
 import { createRequestHash } from './utils';
@@ -70,7 +71,14 @@ export class BackgroundSessionService {
     const searchMap = this.sessionSearchMap.get(sessionId) ?? new Map<string, string>();
 
     const idMapping = Object.fromEntries(searchMap.entries());
-    const attributes = { name, url, expires: expires.toISOString(), idMapping };
+    const attributes = {
+      name,
+      url,
+      created: new Date().toISOString(),
+      expires: expires.toISOString(),
+      status: BackgroundSessionStatus.INCOMPLETE,
+      idMapping,
+    };
     const session = await savedObjectsClient.create<BackgroundSessionSavedObjectAttributes>(
       BACKGROUND_SESSION_TYPE,
       attributes,

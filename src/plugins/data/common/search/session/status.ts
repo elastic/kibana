@@ -17,5 +17,10 @@
  * under the License.
  */
 
-export * from './status';
-export * from './types';
+export enum BackgroundSessionStatus {
+  INCOMPLETE = 'incomplete',
+  ERROR = 'error',
+  COMPLETE = 'complete',
+  CANCELLED = 'cancelled',
+  EXPIRED = 'expired',
+}
