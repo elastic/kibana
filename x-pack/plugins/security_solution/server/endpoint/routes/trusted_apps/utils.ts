@@ -5,74 +5,122 @@
  */
 
 import uuid from 'uuid';
-import { ExceptionListItemSchema } from '../../../../../lists/common/shared_exports';
-import { NewTrustedApp, TrustedApp } from '../../../../common/endpoint/types';
-import { ExceptionListClient } from '../../../../../lists/server';
+
+import { OsType } from '../../../../../lists/common/schemas/common';
+import {
+  EntriesArray,
+  EntryMatch,
+  EntryNested,
+  ExceptionListItemSchema,
+} from '../../../../../lists/common/shared_exports';
 import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '../../../../../lists/common/constants';
+import { ExceptionListClient } from '../../../../../lists/server';
+import {
+  ConditionEntryField,
+  ConditionEntry,
+  NewTrustedApp,
+  OperatingSystem,
+  TrustedApp,
+} from '../../../../common/endpoint/types';
+import { NestedEntriesArray } from '../../../../../lists/common/schemas/types';
 
 type NewExceptionItem = Parameters<ExceptionListClient['createExceptionListItem']>[0];
 
+type ConditionEntriesMap = { [K in ConditionEntryField]?: ConditionEntry<K> };
+type Mapping<T extends string, U> = { [K in T]: U };
+
+const OS_TYPE_TO_OPERATING_SYSTEM: Mapping<OsType, OperatingSystem> = {
+  linux: 'linux',
+  macos: 'macos',
+  windows: 'windows',
+};
+
+const OPERATING_SYSTEM_TO_OS_TYPE: Mapping<OperatingSystem, OsType> = {
+  linux: 'linux',
+  macos: 'macos',
+  windows: 'windows',
+};
+
+const filterUndefined = <T>(list: Array<T | undefined>): T[] => {
+  return list.filter((item: T | undefined): item is T => item !== undefined);
+};
+
+const createConditionEntry = <T extends ConditionEntryField>(
+  field: T,
+  value: string
+): ConditionEntry<T> => {
+  return { field, value, type: 'match', operator: 'included' };
+};
+
+const entriesToConditionEntriesMap = (entries: EntriesArray): ConditionEntriesMap => {
+  return entries.reduce((result, entry) => {
+    if (entry.field.startsWith('process.hash') && entry.type === 'match') {
+      return {
+        ...result,
+        [ConditionEntryField.HASH]: createConditionEntry(ConditionEntryField.HASH, entry.value),
+      };
+    } else if (entry.field === 'process.executable.caseless' && entry.type === 'match') {
+      return {
+        ...result,
+        [ConditionEntryField.PATH]: createConditionEntry(ConditionEntryField.PATH, entry.value),
+      };
+    } else if (entry.field === 'process.Ext.code_signature' && entry.type === 'nested') {
+      const subjectNameCondition = entry.entries.find((subEntry): subEntry is EntryMatch => {
+        return subEntry.field === 'subject_name' && subEntry.type === 'match';
+      });
+
+      if (subjectNameCondition) {
+        return {
+          ...result,
+          [ConditionEntryField.SIGNER]: createConditionEntry(
+            ConditionEntryField.SIGNER,
+            subjectNameCondition.value
+          ),
+        };
+      }
+    }
+
+    return result;
+  }, {} as ConditionEntriesMap);
+};
+
 /**
- * Map an ExcptionListItem to a TrustedApp item
+ * Map an ExceptionListItem to a TrustedApp item
  * @param exceptionListItem
  */
 export const exceptionItemToTrustedAppItem = (
   exceptionListItem: ExceptionListItemSchema
 ): TrustedApp => {
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  const { entries, description, created_by, created_at, name, os_types, id } = exceptionListItem;
-  const os = os_types.length ? os_types[0] : 'unknown';
-  return {
-    entries: entries.map((entry) => {
-      if (entry.field.startsWith('process.hash')) {
-        return {
-          ...entry,
-          field: 'process.hash.*',
-        };
-      }
-      return entry;
-    }),
-    description,
-    created_at,
-    created_by,
-    name,
-    os,
-    id,
-  } as TrustedApp;
-};
+  if (exceptionListItem.os_types[0]) {
+    const os = OS_TYPE_TO_OPERATING_SYSTEM[exceptionListItem.os_types[0]];
+    const grouped = entriesToConditionEntriesMap(exceptionListItem.entries);
 
-export const newTrustedAppItemToExceptionItem = ({
-  os,
-  entries,
-  name,
-  description = '',
-}: NewTrustedApp): NewExceptionItem => {
-  return {
-    comments: [],
-    description,
-    // @ts-ignore
-    entries: entries.map(({ value, ...newEntry }) => {
-      let newValue = value.trim();
-
-      if (newEntry.field === 'process.hash.*') {
-        newValue = newValue.toLowerCase();
-        newEntry.field = `process.hash.${hashType(newValue)}`;
-      }
-
-      return {
-        ...newEntry,
-        value: newValue,
-      };
-    }),
-    itemId: uuid.v4(),
-    listId: ENDPOINT_TRUSTED_APPS_LIST_ID,
-    meta: undefined,
-    name: name.trim(),
-    namespaceType: 'agnostic',
-    osTypes: [os],
-    tags: [],
-    type: 'simple',
-  };
+    return {
+      id: exceptionListItem.id,
+      name: exceptionListItem.name,
+      description: exceptionListItem.description,
+      created_at: exceptionListItem.created_at,
+      created_by: exceptionListItem.created_by,
+      ...(os === 'linux' || os === 'macos'
+        ? {
+            os,
+            entries: filterUndefined([
+              grouped[ConditionEntryField.HASH],
+              grouped[ConditionEntryField.PATH],
+            ]),
+          }
+        : {
+            os,
+            entries: filterUndefined([
+              grouped[ConditionEntryField.HASH],
+              grouped[ConditionEntryField.PATH],
+              grouped[ConditionEntryField.SIGNER],
+            ]),
+          }),
+    };
+  } else {
+    throw new Error('Unknown Operating System assigned to trusted application.');
+  }
 };
 
 const hashType = (hash: string): 'md5' | 'sha256' | 'sha1' | undefined => {
@@ -84,4 +132,53 @@ const hashType = (hash: string): 'md5' | 'sha256' | 'sha1' | undefined => {
     case 64:
       return 'sha256';
   }
+};
+
+const createEntryMatch = (field: string, value: string): EntryMatch => {
+  return { field, value, type: 'match', operator: 'included' };
+};
+
+const createEntryNested = (field: string, entries: NestedEntriesArray): EntryNested => {
+  return { field, entries, type: 'nested' };
+};
+
+export const conditionEntriesToEntries = (
+  conditionEntries: Array<ConditionEntry<ConditionEntryField>>
+): EntriesArray => {
+  return conditionEntries.map((conditionEntry) => {
+    if (conditionEntry.field === ConditionEntryField.HASH) {
+      return createEntryMatch(
+        `process.hash.${hashType(conditionEntry.value)}`,
+        conditionEntry.value
+      );
+    } else if (conditionEntry.field === ConditionEntryField.SIGNER) {
+      return createEntryNested(`process.Ext.code_signature`, [
+        createEntryMatch('trusted', 'true'),
+        createEntryMatch('subject_name', conditionEntry.value),
+      ]);
+    } else {
+      return createEntryMatch(`process.executable.caseless`, conditionEntry.value);
+    }
+  });
+};
+
+export const newTrustedAppItemToExceptionItem = ({
+  os,
+  entries,
+  name,
+  description = '',
+}: NewTrustedApp): NewExceptionItem => {
+  return {
+    comments: [],
+    description,
+    entries: conditionEntriesToEntries(entries),
+    itemId: uuid.v4(),
+    listId: ENDPOINT_TRUSTED_APPS_LIST_ID,
+    meta: undefined,
+    name,
+    namespaceType: 'agnostic',
+    osTypes: [OPERATING_SYSTEM_TO_OS_TYPE[os]],
+    tags: [],
+    type: 'simple',
+  };
 };
