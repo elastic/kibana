@@ -10,9 +10,8 @@ import { History } from 'history';
 import { useActions, useValues } from 'kea';
 import { useHistory } from 'react-router-dom';
 
-import FlashMessages from 'shared/components/FlashMessages';
 import { AppLogic } from 'workplace_search/App/AppLogic';
-import { SidebarNavigation, Loading, AppView } from 'workplace_search/components';
+import { Loading } from 'workplace_search/components';
 import { CUSTOM_SERVICE_TYPE } from 'workplace_search/constants';
 import { staticSourceData } from 'workplace_search/ContentSources/sourceData';
 import { SourceLogic } from 'workplace_search/ContentSources/SourceLogic';
@@ -73,7 +72,6 @@ export const AddSource: React.FC<AddSourceProps> = ({
       privateSourcesEnabled,
     },
     dataLoading,
-    flashMessages,
     newCustomSource,
   } = useValues(SourceLogic);
 
@@ -181,19 +179,10 @@ export const AddSource: React.FC<AddSourceProps> = ({
   const sidebarBlurb =
     currentStep === Steps.ConnectInstanceStep ? CONNECT_SIDEBAR_BLURB : CONFIG_SIDEBAR_BLURB;
 
-  const sidebar = (
-    <SidebarNavigation
-      title={`${sidebarTitle()} ${name}`}
-      description={sidebarBlurb}
-      breadcrumbs={breadcrumbs}
-    />
-  );
   const header = <AddSourceHeader name={name} serviceType={serviceType} categories={categories} />;
 
   return (
-    <AppView sidebar={sidebar} className="adding-a-source">
-      {!!flashMessages && <FlashMessages {...flashMessages} />}
-
+    <>
       {currentStep === Steps.ConfigIntroStep && (
         <ConfigurationIntro name={name} advanceStep={goToSaveConfig} header={header} />
       )}
@@ -255,6 +244,6 @@ export const AddSource: React.FC<AddSourceProps> = ({
       )}
 
       {currentStep === Steps.ReAuthenticateStep && <ReAuthenticate name={name} header={header} />}
-    </AppView>
+    </>
   );
 };

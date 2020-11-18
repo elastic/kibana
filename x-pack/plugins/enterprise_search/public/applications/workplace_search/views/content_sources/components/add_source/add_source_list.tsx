@@ -20,7 +20,7 @@ import {
 } from '@elastic/eui';
 
 import { AppLogic } from 'workplace_search/App/AppLogic';
-import { SidebarNavigation, ContentSection, Loading, AppView } from 'workplace_search/components';
+import { ContentSection, Loading } from 'workplace_search/components';
 import { CUSTOM_SERVICE_TYPE } from 'workplace_search/constants';
 import { SourceDataItem } from 'workplace_search/types';
 import { SOURCES_PATH, getSourcesPath } from 'workplace_search/utils/routePaths';
@@ -95,64 +95,48 @@ export const AddSourceList: React.FC = () => {
     filterConfiguredSources
   ) as SourceDataItem[];
 
-  const sidebar = (
-    <SidebarNavigation
-      title={SIDEBAR_TITLE}
-      description={SIDEBAR_DESCRIPTION}
-      breadcrumbs={hasSources && breadcrumbs}
-      headerChildren={<p>{SIDEBAR_CONTEXT_DESCRIPTION}</p>}
-    />
-  );
-
-  return (
-    <AppView sidebar={sidebar}>
-      {showConfiguredSourcesList || isOrganization ? (
-        <ContentSection>
-          <EuiSpacer />
-          <EuiFormRow>
-            <EuiFieldSearch
-              data-test-subj="FilterSourcesInput"
-              value={filterValue}
-              onChange={handleFilterChange}
-              fullWidth={true}
-              placeholder={PLACEHOLDER}
-            />
-          </EuiFormRow>
-          <EuiSpacer size="xxl" />
-          {showConfiguredSourcesList && (
-            <ConfiguredSourcesList
-              isOrganization={isOrganization}
-              sources={visibleConfiguredSources}
-            />
-          )}
-          {isOrganization && <AvailableSourcesList sources={visibleAvailableSources} />}
-        </ContentSection>
-      ) : (
-        <ContentSection>
-          <EuiFlexGroup justifyContent="center" alignItems="stretch">
-            <EuiFlexItem>
-              <EuiSpacer size="xl" />
-              <EuiPanel className="euiPanel euiPanel--inset">
-                <EuiSpacer size="s" />
-                <EuiSpacer size="xxl" />
-                <EuiEmptyPrompt
-                  iconType={noSharedSourcesIcon}
-                  title={<h2>No available sources</h2>}
-                  body={
-                    <p>
-                      Sources will be available for search when an administrator adds them to this
-                      organization.
-                    </p>
-                  }
-                />
-                <EuiSpacer size="xxl" />
-                <EuiSpacer size="m" />
-              </EuiPanel>
-              <EuiSpacer size="xl" />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </ContentSection>
+  return showConfiguredSourcesList || isOrganization ? (
+    <ContentSection>
+      <EuiSpacer />
+      <EuiFormRow>
+        <EuiFieldSearch
+          data-test-subj="FilterSourcesInput"
+          value={filterValue}
+          onChange={handleFilterChange}
+          fullWidth={true}
+          placeholder={PLACEHOLDER}
+        />
+      </EuiFormRow>
+      <EuiSpacer size="xxl" />
+      {showConfiguredSourcesList && (
+        <ConfiguredSourcesList isOrganization={isOrganization} sources={visibleConfiguredSources} />
       )}
-    </AppView>
+      {isOrganization && <AvailableSourcesList sources={visibleAvailableSources} />}
+    </ContentSection>
+  ) : (
+    <ContentSection>
+      <EuiFlexGroup justifyContent="center" alignItems="stretch">
+        <EuiFlexItem>
+          <EuiSpacer size="xl" />
+          <EuiPanel className="euiPanel euiPanel--inset">
+            <EuiSpacer size="s" />
+            <EuiSpacer size="xxl" />
+            <EuiEmptyPrompt
+              iconType={noSharedSourcesIcon}
+              title={<h2>No available sources</h2>}
+              body={
+                <p>
+                  Sources will be available for search when an administrator adds them to this
+                  organization.
+                </p>
+              }
+            />
+            <EuiSpacer size="xxl" />
+            <EuiSpacer size="m" />
+          </EuiPanel>
+          <EuiSpacer size="xl" />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </ContentSection>
   );
 };
