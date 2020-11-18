@@ -23,7 +23,7 @@ export const EngineOverviewMetrics: React.FC = () => {
         <EuiTitle size="l">
           <h1>
             {i18n.translate('xpack.enterpriseSearch.appSearch.engine.overview.heading', {
-              defaultMessage: 'Engine Overview',
+              defaultMessage: 'Engine overview',
             })}
           </h1>
         </EuiTitle>

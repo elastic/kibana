@@ -15,7 +15,7 @@ import { EngineOverviewMetrics } from './engine_overview_metrics';
 describe('EngineOverviewMetrics', () => {
   it('renders', () => {
     const wrapper = shallow(<EngineOverviewMetrics />);
-    expect(wrapper.find('h1').text()).toEqual('Engine Overview');
+    expect(wrapper.find('h1').text()).toEqual('Engine overview');
   });
 
   it('renders an unavailable prompt if engine data is still indexing', () => {

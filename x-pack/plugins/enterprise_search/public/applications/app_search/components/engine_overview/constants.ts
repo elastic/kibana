@@ -13,12 +13,12 @@ export const OVERVIEW_TITLE = i18n.translate(
 
 export const VIEW_ANALYTICS = i18n.translate(
   'xpack.enterpriseSearch.appSearch.engine.overview.analyticsLink',
-  { defaultMessage: 'View Analytics' }
+  { defaultMessage: 'View analytics' }
 );
 
 export const VIEW_API_LOGS = i18n.translate(
   'xpack.enterpriseSearch.appSearch.engine.overview.apiLogsLink',
-  { defaultMessage: 'View API Logs' }
+  { defaultMessage: 'View API logs' }
 );
 
 export const LAST_7_DAYS = i18n.translate(

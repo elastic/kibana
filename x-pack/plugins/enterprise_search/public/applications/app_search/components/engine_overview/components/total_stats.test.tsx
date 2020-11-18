@@ -30,7 +30,7 @@ describe('TotalStats', () => {
 
     const card = wrapper.find(EuiStat).at(0);
     expect(card.prop('title')).toEqual(11);
-    expect(card.prop('description')).toEqual('Total Queries');
+    expect(card.prop('description')).toEqual('Total queries');
   });
 
   it('renders the total documents stat', () => {
@@ -38,7 +38,7 @@ describe('TotalStats', () => {
 
     const card = wrapper.find(EuiStat).at(1);
     expect(card.prop('title')).toEqual(22);
-    expect(card.prop('description')).toEqual('Total Documents');
+    expect(card.prop('description')).toEqual('Total documents');
   });
 
   it('renders the total clicks stat', () => {
@@ -46,6 +46,6 @@ describe('TotalStats', () => {
 
     const card = wrapper.find(EuiStat).at(2);
     expect(card.prop('title')).toEqual(33);
-    expect(card.prop('description')).toEqual('Total Clicks');
+    expect(card.prop('description')).toEqual('Total clicks');
   });
 });

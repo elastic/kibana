@@ -25,7 +25,7 @@ describe('RecentApiLogs', () => {
   });
 
   it('renders the recent API logs table', () => {
-    expect(wrapper.find('h2').text()).toEqual('Recent API Events');
+    expect(wrapper.find('h2').text()).toEqual('Recent API events');
     expect(wrapper.find(EuiButton).prop('to')).toEqual('/engines/some-engine/api-logs');
     // TODO: expect(wrapper.find(ApiLogsTable)).toHaveLength(1)
   });

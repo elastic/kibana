@@ -8,20 +8,20 @@ import { i18n } from '@kbn/i18n';
 
 export const TOTAL_DOCUMENTS = i18n.translate(
   'xpack.enterpriseSearch.appSearch.engine.analytics.totalDocuments',
-  { defaultMessage: 'Total Documents' }
+  { defaultMessage: 'Total documents' }
 );
 
 export const TOTAL_API_OPERATIONS = i18n.translate(
   'xpack.enterpriseSearch.appSearch.engine.analytics.totalApiOperations',
-  { defaultMessage: 'Total API Operations' }
+  { defaultMessage: 'Total API operations' }
 );
 
 export const TOTAL_QUERIES = i18n.translate(
   'xpack.enterpriseSearch.appSearch.engine.analytics.totalQueries',
-  { defaultMessage: 'Total Queries' }
+  { defaultMessage: 'Total queries' }
 );
 
 export const TOTAL_CLICKS = i18n.translate(
   'xpack.enterpriseSearch.appSearch.engine.analytics.totalClicks',
-  { defaultMessage: 'Total Clicks' }
+  { defaultMessage: 'Total clicks' }
 );

@@ -60,7 +60,7 @@ export const EmptyEngineOverview: React.FC = () => {
           <EuiTitle>
             <h2>
               {i18n.translate('xpack.enterpriseSearch.appSearch.engine.overview.empty.subheading', {
-                defaultMessage: 'Setting up the “{engineName}” Engine',
+                defaultMessage: 'Setting up the “{engineName}” engine',
                 values: { engineName },
               })}
             </h2>

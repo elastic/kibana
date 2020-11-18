@@ -31,7 +31,7 @@ describe('TotalCharts', () => {
   it('renders the total queries chart', () => {
     const chart = wrapper.find('[data-test-subj="TotalQueriesChart"]');
 
-    expect(chart.find('h2').text()).toEqual('Total Queries');
+    expect(chart.find('h2').text()).toEqual('Total queries');
     expect(chart.find(EuiButton).prop('to')).toEqual('/engines/some-engine/analytics');
     // TODO: find chart component
   });
@@ -39,7 +39,7 @@ describe('TotalCharts', () => {
   it('renders the total API operations chart', () => {
     const chart = wrapper.find('[data-test-subj="TotalApiOperationsChart"]');
 
-    expect(chart.find('h2').text()).toEqual('Total API Operations');
+    expect(chart.find('h2').text()).toEqual('Total API operations');
     expect(chart.find(EuiButton).prop('to')).toEqual('/engines/some-engine/api-logs');
     // TODO: find chart component
   });
