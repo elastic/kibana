@@ -54,7 +54,7 @@ export interface IDynamicStyleProperty<T> extends IStyleProperty<T> {
   rectifyFieldDescriptor(
     currentField: IESAggField,
     previousFieldDescriptor: StylePropertyField
-  ): StylePropertyField | null;
+  ): StylePropertyField | undefined;
   enrichGeoJsonAndMbFeatureState(
     featureCollection: FeatureCollection,
     mbMap: MbMap,
@@ -250,12 +250,12 @@ export class DynamicStyleProperty<T>
   rectifyFieldDescriptor(
     currentField: IESAggField,
     previousFieldDescriptor: StylePropertyField
-  ): StylePropertyField | null {
+  ): StylePropertyField | undefined {
     // Todo: individual style property classes would need to override this with "smart" behavior
 
     if (previousFieldDescriptor.name.endsWith(TOP_TERM_PERCENTAGE_SUFFIX)) {
       // Don't support auto-switching for top-term-percentages
-      return null;
+      return;
     }
 
     return {

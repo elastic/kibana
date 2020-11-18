@@ -185,8 +185,6 @@ export class VectorStyle implements IVectorStyle {
     isTimeAware: boolean,
     dynamicStyleProperties: Array<IDynamicStyleProperty<IStyleProperty<unknown>>>
   ) {
-    // Try and correct metrics first.
-
     let hasChanges = false;
     for (let i = 0; i < previousFields.length; i++) {
       const previousField = previousFields[i];
@@ -197,17 +195,24 @@ export class VectorStyle implements IVectorStyle {
 
       for (let j = 0; j < dynamicStyleProperties.length; j++) {
         const dynamicStyleProp = dynamicStyleProperties[j];
+        let newFieldDescriptor: StylePropertyField;
+        const isFieldDataTypeCompatible = styleFieldsHelper.isFieldDataTypeCompatibleWithStyleType(
+          currentField,
+          dynamicStyleProp.getStyleName()
+        );
+        if (isFieldDataTypeCompatible) {
+          newFieldDescriptor = dynamicStyleProp.rectifyFieldDescriptor(currentField, {
+            origin: previousField.getOrigin(),
+            name: previousField.getName(),
+          });
 
-        const newFieldDescriptor = dynamicStyleProp.rectifyFieldDescriptor(currentField, {
-          origin: previousField.getOrigin(),
-          name: previousField.getName(),
-        });
-
-        if (newFieldDescriptor !== null) {
-          const originalStyleProp = originalProperties[dynamicStyleProp.getStyleName()];
-          originalStyleProp!.options!.field! = newFieldDescriptor;
-          hasChanges = true;
+          if (newFieldDescriptor) {
+            hasChanges = true;
+          }
         }
+
+        const originalStyleProp = originalProperties[dynamicStyleProp.getStyleName()];
+        originalStyleProp!.options!.field = newFieldDescriptor;
       }
     }
 
@@ -219,11 +224,6 @@ export class VectorStyle implements IVectorStyle {
       hasChanges,
       isTimeAware
     );
-
-    // return {
-    //   hasChanges,
-    //   nextStyleDescriptor: VectorStyle.createDescriptor(originalProperties, isTimeAware),
-    // };
   }
 
   static async getDescriptorWithDeletedStyleProps(
