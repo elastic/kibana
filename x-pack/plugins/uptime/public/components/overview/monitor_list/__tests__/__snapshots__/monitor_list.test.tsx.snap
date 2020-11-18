@@ -852,7 +852,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
 }
 
 <div
-  class="euiPanel euiPanel--paddingMedium"
+  class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow"
 >
   <div
     class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive c0"

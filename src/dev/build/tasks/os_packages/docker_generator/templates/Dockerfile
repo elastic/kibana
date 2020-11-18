@@ -46,16 +46,9 @@ EXPOSE 5601
 {{#ubi}}
   # https://github.com/rpm-software-management/microdnf/issues/50
   RUN mkdir -p /run/user/$(id -u)
-
-  # crypto-policies not currently compatible with libnss :sadpanda:
-  RUN printf "[main]\nexclude=crypto-policies" >  /etc/dnf/dnf.conf
 {{/ubi}}
 
 RUN for iter in {1..10}; do \
-      {{#ubi}}
-        # update microdnf to have exclusion feature for dnf configuration
-        {{packageManager}} update microdnf --setopt=tsflags=nodocs -y && \
-      {{/ubi}}
       {{packageManager}} update --setopt=tsflags=nodocs -y && \
       {{packageManager}} install --setopt=tsflags=nodocs -y \
         fontconfig freetype shadow-utils libnss3.so {{#ubi}}findutils{{/ubi}} && \

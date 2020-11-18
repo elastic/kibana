@@ -17,10 +17,27 @@
  * under the License.
  */
 
-const DOT_PREFIX_RE = /(.).+?\./g;
+import { Plugin } from 'kibana/server';
 
-/**
- * Convert a dot.notated.string into a short
- * version (d.n.string)
- */
-export const shortenDottedString = (input: string) => input.replace(DOT_PREFIX_RE, '$1.');
+declare global {
+  interface Window {
+    __coverage__: any;
+    flushCoverageToLog: any;
+  }
+}
+
+export class CodeCoverageReportingPlugin implements Plugin {
+  constructor() {}
+
+  public start() {}
+
+  public setup() {
+    window.flushCoverageToLog = function () {
+      if (window.__coverage__) {
+        // eslint-disable-next-line no-console
+        console.log('coveragejson:' + btoa(JSON.stringify(window.__coverage__)));
+      }
+    };
+    window.addEventListener('beforeunload', window.flushCoverageToLog);
+  }
+}
