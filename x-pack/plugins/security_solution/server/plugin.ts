@@ -32,8 +32,7 @@ import { PluginSetupContract as FeaturesSetup } from '../../features/server';
 import { MlPluginSetup as MlSetup } from '../../ml/server';
 import { ListPluginSetup } from '../../lists/server';
 import { EncryptedSavedObjectsPluginSetup as EncryptedSavedObjectsSetup } from '../../encrypted_saved_objects/server';
-import { SpacesPluginSetup as SpacesSetup } from '../../spaces/server';
-import { LicensingPluginSetup } from '../../licensing/server';
+import { ILicense, LicensingPluginStart } from '../../licensing/server';
 import { FleetStartContract, ExternalCallback } from '../../fleet/server';
 import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
 import { initServer } from './init_server';
@@ -74,13 +73,13 @@ import {
   TelemetryPluginStart,
   TelemetryPluginSetup,
 } from '../../../../src/plugins/telemetry/server';
+import { licenseService } from './lib/license/license';
 
 export interface SetupPlugins {
   alerts: AlertingSetup;
   data: DataPluginSetup;
   encryptedSavedObjects?: EncryptedSavedObjectsSetup;
   features: FeaturesSetup;
-  licensing: LicensingPluginSetup;
   lists?: ListPluginSetup;
   ml?: MlSetup;
   security?: SecuritySetup;
@@ -94,6 +93,7 @@ export interface StartPlugins {
   alerts: AlertPluginStartContract;
   data: DataPluginStart;
   fleet?: FleetStartContract;
+  licensing: LicensingPluginStart;
   taskManager?: TaskManagerStartContract;
   telemetry?: TelemetryPluginStart;
 }
@@ -125,6 +125,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   private readonly telemetryEventsSender: TelemetryEventsSender;
 
   private lists: ListPluginSetup | undefined; // TODO: can we create ListPluginStart?
+  private licensing$!: Observable<ILicense>;
 
   private manifestTask: ManifestTask | undefined;
   private exceptionsCache: LRU<string, Buffer>;
@@ -364,6 +365,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     }
 
     this.telemetryEventsSender.start(core, plugins.telemetry);
+    this.licensing$ = plugins.licensing.license$;
+    licenseService.start(this.licensing$);
 
     return {};
   }
@@ -372,5 +375,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     this.logger.debug('Stopping plugin');
     this.telemetryEventsSender.stop();
     this.endpointAppContextService.stop();
+    licenseService.stop();
   }
 }

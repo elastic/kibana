@@ -4,4 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { registerRollupSearchStrategy } from './register_rollup_search_strategy';
+import { LicenseService } from '../../../common/license/license';
+
+export const licenseService = new LicenseService();
