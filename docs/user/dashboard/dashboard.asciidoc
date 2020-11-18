@@ -185,7 +185,7 @@ image:images/Dashboard_add_new_visualization.png[Example add new visualization t
 {kib} provides you with several editors that help you create panels.
 
 [float]
-[[create-panels-with-lens]]
+[[lens]]
 === Create panels with Lens
 
 *Lens* is the simplest and fastest way to create powerful visualizations of your data. To use *Lens*, you drag and drop as many data fields
