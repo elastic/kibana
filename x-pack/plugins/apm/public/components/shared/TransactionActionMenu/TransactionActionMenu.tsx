@@ -65,14 +65,13 @@ export function TransactionActionMenu({ transaction }: Props) {
         { key: 'transaction.name', value: transaction?.transaction.name },
         { key: 'transaction.type', value: transaction?.transaction.type },
       ].filter((filter): filter is Filter => typeof filter.value === 'string'),
-    /* eslint-disable-next-line react-hooks/exhaustive-deps */
     [transaction]
   );
 
   const { data: customLinks = [], status, refetch } = useFetcher(
     (callApmApi) =>
       callApmApi({
-        pathname: '/api/apm/settings/custom_links',
+        endpoint: 'GET /api/apm/settings/custom_links',
         params: { query: convertFiltersToQuery(filters) },
       }),
     [filters]

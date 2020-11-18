@@ -148,6 +148,7 @@ export interface RawAlert extends SavedObjectAttributes {
   createdBy: string | null;
   updatedBy: string | null;
   createdAt: string;
+  updatedAt: string;
   apiKey: string | null;
   apiKeyOwner: string | null;
   throttle: string | null;
@@ -178,6 +179,18 @@ export interface AlertsConfigType {
   healthCheck: {
     interval: string;
   };
+}
+
+export interface AlertsConfigType {
+  invalidateApiKeysTask: {
+    interval: string;
+    removalDelay: string;
+  };
+}
+
+export interface InvalidatePendingApiKey {
+  apiKeyId: string;
+  createdAt: string;
 }
 
 export type AlertTypeRegistry = PublicMethodsOf<OrigAlertTypeRegistry>;
