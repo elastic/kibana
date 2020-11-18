@@ -29,6 +29,14 @@ export const getCloudMetadata = async (
   currentTime: number
 ): Promise<CloudMetaData> => {
   const model = findInventoryModel(nodeType);
+  // Only run this for AWS modules, eventually we might have more.
+  if (model.requiredModule !== 'aws') {
+    return {
+      accounts: [],
+      projects: [],
+      regions: [],
+    };
+  }
 
   const metricQuery = {
     allowNoIndices: true,

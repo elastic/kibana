@@ -39,19 +39,6 @@ export const initInventoryMetaRoute = (libs: InfraBackendLibs) => {
           fold(throwErrors(Boom.badRequest), identity)
         );
 
-        const model = findInventoryModel(nodeType);
-
-        // Only run this for AWS modules, eventually we might have more.
-        if (model.requiredModule !== 'aws') {
-          return response.ok({
-            body: {
-              accounts: [],
-              projects: [],
-              regions: [],
-            },
-          });
-        }
-
         const { configuration } = await libs.sources.getSourceConfiguration(
           requestContext.core.savedObjects.client,
           sourceId
