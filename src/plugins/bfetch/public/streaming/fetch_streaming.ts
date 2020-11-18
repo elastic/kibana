@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { Observable } from 'rxjs';
 import { fromStreamingXhr } from './from_streaming_xhr';
 
 export interface FetchStreamingParams {

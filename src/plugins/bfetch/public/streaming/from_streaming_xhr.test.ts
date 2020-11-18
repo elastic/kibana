@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { Subject } from 'rxjs';
 import { fromStreamingXhr } from './from_streaming_xhr';
 
 const createXhr = (): XMLHttpRequest =>
