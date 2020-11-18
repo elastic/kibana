@@ -186,11 +186,6 @@ This content has moved. See <<discover, **Discover**>>.
 
 This content has moved. See <<discover, **Discover**>>.
 
-[role="exclude",id="lens"]
-== Lens
-
-This page was deleted. Refer to <<create-panels-with-lens>>.
-
 [role="exclude",id="url-drilldown"]
 == URL drilldown
 
