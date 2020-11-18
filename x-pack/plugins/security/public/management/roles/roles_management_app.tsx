@@ -68,10 +68,14 @@ export const rolesManagementApp = Object.freeze({
         const EditRolePageWithBreadcrumbs = ({ action }: { action: 'edit' | 'clone' }) => {
           const { roleName } = useParams<{ roleName?: string }>();
 
+          // Additional decoding is a workaround for a bug in react-router's version of the `history` module.
+          // See https://github.com/elastic/kibana/issues/82440
+          const decodedRoleName = roleName ? decodeURIComponent(roleName) : undefined;
+
           setBreadcrumbs([
             ...rolesBreadcrumbs,
             action === 'edit' && roleName
-              ? { text: roleName, href: `/edit/${encodeURIComponent(roleName)}` }
+              ? { text: decodedRoleName, href: `/edit/${encodeURIComponent(roleName)}` }
               : {
                   text: i18n.translate('xpack.security.roles.createBreadcrumb', {
                     defaultMessage: 'Create',
@@ -82,7 +86,7 @@ export const rolesManagementApp = Object.freeze({
           return (
             <EditRolePage
               action={action}
-              roleName={roleName}
+              roleName={decodedRoleName}
               rolesAPIClient={rolesAPIClient}
               userAPIClient={new UserAPIClient(http)}
               indicesAPIClient={new IndicesAPIClient(http)}

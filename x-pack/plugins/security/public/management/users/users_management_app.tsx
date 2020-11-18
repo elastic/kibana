@@ -66,10 +66,14 @@ export const usersManagementApp = Object.freeze({
         const EditUserPageWithBreadcrumbs = () => {
           const { username } = useParams<{ username?: string }>();
 
+          // Additional decoding is a workaround for a bug in react-router's version of the `history` module.
+          // See https://github.com/elastic/kibana/issues/82440
+          const decodedUsername = username ? decodeURIComponent(username) : undefined;
+
           setBreadcrumbs([
             ...usersBreadcrumbs,
             username
-              ? { text: username, href: `/edit/${encodeURIComponent(username)}` }
+              ? { text: decodedUsername, href: `/edit/${encodeURIComponent(username)}` }
               : {
                   text: i18n.translate('xpack.security.users.createBreadcrumb', {
                     defaultMessage: 'Create',
@@ -83,7 +87,7 @@ export const usersManagementApp = Object.freeze({
               userAPIClient={userAPIClient}
               rolesAPIClient={new RolesAPIClient(http)}
               notifications={notifications}
-              username={username}
+              username={decodedUsername}
               history={history}
             />
           );
