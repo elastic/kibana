@@ -79,6 +79,7 @@ export interface StatsCollectionConfig {
   timestamp: number;
   esClient: ElasticsearchClient;
   soClient: SavedObjectsClientContract | ISavedObjectsRepository;
+  kibanaRequest: KibanaRequest | undefined; // intentionally `| undefined` to enforce providing the parameter
 }
 
 export interface BasicStatsPayload {
