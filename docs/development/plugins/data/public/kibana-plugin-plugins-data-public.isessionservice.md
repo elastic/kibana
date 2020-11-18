@@ -15,7 +15,7 @@ export interface ISessionService
 |  Property | Type | Description |
 |  --- | --- | --- |
 |  [clear](./kibana-plugin-plugins-data-public.isessionservice.clear.md) | <code>() =&gt; void</code> | Clears the active session. |
-|  [delete](./kibana-plugin-plugins-data-public.isessionservice.delete.md) | <code>(sessionId: string) =&gt; Promise&lt;any&gt;</code> | Deletes a session |
+|  [delete](./kibana-plugin-plugins-data-public.isessionservice.delete.md) | <code>(sessionId: string) =&gt; Promise&lt;void&gt;</code> | Deletes a session |
 |  [find](./kibana-plugin-plugins-data-public.isessionservice.find.md) | <code>(options: SearchSessionFindOptions) =&gt; Promise&lt;SavedObjectsFindResponse&lt;BackgroundSessionSavedObjectAttributes&gt;&gt;</code> | Gets a list of saved sessions |
 |  [get](./kibana-plugin-plugins-data-public.isessionservice.get.md) | <code>(sessionId: string) =&gt; Promise&lt;SavedObject&lt;BackgroundSessionSavedObjectAttributes&gt;&gt;</code> | Gets a saved session |
 |  [getSession$](./kibana-plugin-plugins-data-public.isessionservice.getsession_.md) | <code>() =&gt; Observable&lt;string &#124; undefined&gt;</code> | Returns the observable that emits an update every time the session ID changes |

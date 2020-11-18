@@ -1501,7 +1501,7 @@ export const isErrorResponse: (response?: IKibanaSearchResponse<any> | undefined
 // @public (undocumented)
 export interface ISessionService {
     clear: () => void;
-    delete: (sessionId: string) => Promise<any>;
+    delete: (sessionId: string) => Promise<void>;
     // Warning: (ae-forgotten-export) The symbol "SearchSessionFindOptions" needs to be exported by the entry point index.d.ts
     find: (options: SearchSessionFindOptions) => Promise<SavedObjectsFindResponse<BackgroundSessionSavedObjectAttributes>>;
     get: (sessionId: string) => Promise<SavedObject<BackgroundSessionSavedObjectAttributes>>;

@@ -9,5 +9,5 @@ Deletes a session
 <b>Signature:</b>
 
 ```typescript
-delete: (sessionId: string) => Promise<any>;
+delete: (sessionId: string) => Promise<void>;
 ```
