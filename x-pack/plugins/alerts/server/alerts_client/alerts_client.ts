@@ -228,15 +228,17 @@ export class AlertsClient {
 
     this.validateActions(alertType, data.actions);
 
+    const createTime = Date.now();
     const { references, actions } = await this.denormalizeActions(data.actions);
+
     const rawAlert: RawAlert = {
       ...data,
       ...this.apiKeyAsAlertAttributes(createdAPIKey, username),
       actions,
       createdBy: username,
       updatedBy: username,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+      createdAt: new Date(createTime).toISOString(),
+      updatedAt: new Date(createTime).toISOString(),
       params: validatedAlertTypeParams as RawAlert['params'],
       muteAll: false,
       mutedInstanceIds: [],
