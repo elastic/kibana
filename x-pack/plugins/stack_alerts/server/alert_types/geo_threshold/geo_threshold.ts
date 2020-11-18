@@ -256,27 +256,35 @@ export const getGeoThresholdExecutor = (log: Logger) =>
     movedEntities.forEach(({ entityName, currLocation, prevLocation }) => {
       const toBoundaryName = shapesIdsNamesMap[currLocation.shapeId] || currLocation.shapeId;
       const fromBoundaryName = shapesIdsNamesMap[prevLocation.shapeId] || prevLocation.shapeId;
-      services
-        .alertInstanceFactory(`${entityName}-${toBoundaryName || currLocation.shapeId}`)
-        .scheduleActions(ActionGroupId, {
-          entityId: entityName,
-          timeOfDetection: new Date(currIntervalEndTime).getTime(),
-          crossingLine: `LINESTRING (${prevLocation.location[0]} ${prevLocation.location[1]}, ${currLocation.location[0]} ${currLocation.location[1]})`,
+      let factoryInstance;
+      if (params.trackingEvent === 'crossed') {
+        factoryInstance = `${entityName}-${fromBoundaryName || prevLocation.shapeId}-${
+          toBoundaryName || currLocation.shapeId
+        }`;
+      } else if (params.trackingEvent === 'entered') {
+        factoryInstance = `${entityName}-${toBoundaryName || currLocation.shapeId}`;
+      } else if (params.trackingEvent === 'exited') {
+        factoryInstance = `${entityName}-${fromBoundaryName || prevLocation.shapeId}`;
+      }
+      services.alertInstanceFactory(factoryInstance).scheduleActions(ActionGroupId, {
+        entityId: entityName,
+        timeOfDetection: new Date(currIntervalEndTime).getTime(),
+        crossingLine: `LINESTRING (${prevLocation.location[0]} ${prevLocation.location[1]}, ${currLocation.location[0]} ${currLocation.location[1]})`,
 
-          toEntityLocation: `POINT (${currLocation.location[0]} ${currLocation.location[1]})`,
-          toEntityDateTime: currLocation.date,
-          toEntityDocumentId: currLocation.docId,
+        toEntityLocation: `POINT (${currLocation.location[0]} ${currLocation.location[1]})`,
+        toEntityDateTime: currLocation.date,
+        toEntityDocumentId: currLocation.docId,
 
-          toBoundaryId: currLocation.shapeId,
-          toBoundaryName,
+        toBoundaryId: currLocation.shapeId,
+        toBoundaryName,
 
-          fromEntityLocation: `POINT (${prevLocation.location[0]} ${prevLocation.location[1]})`,
-          fromEntityDateTime: prevLocation.date,
-          fromEntityDocumentId: prevLocation.docId,
+        fromEntityLocation: `POINT (${prevLocation.location[0]} ${prevLocation.location[1]})`,
+        fromEntityDateTime: prevLocation.date,
+        fromEntityDocumentId: prevLocation.docId,
 
-          fromBoundaryId: prevLocation.shapeId,
-          fromBoundaryName,
-        });
+        fromBoundaryId: prevLocation.shapeId,
+        fromBoundaryName,
+      });
     });
 
     // Combine previous results w/ current results for state of next run
