@@ -44,6 +44,7 @@ export const getDatasetForField = async (
       },
       size: 1,
       _source: ['event.dataset'],
+      sort: [{ [timerange.field]: { order: 'desc' } }],
     },
   };
 
