@@ -31,6 +31,18 @@ export function getLensTopNavConfig(options: {
         defaultMessage: 'Save',
       });
 
+  topNavMenu.push({
+    label: i18n.translate('xpack.lens.app.downloadCSV', {
+      defaultMessage: 'Download as CSV',
+    }),
+    run: actions.exportToCSV,
+    testId: 'lnsApp_downloadCSVButton',
+    description: i18n.translate('xpack.lens.app.downloadButtonAriaLabel', {
+      defaultMessage: 'Download the data as CSV file',
+    }),
+    disableButton: !enableExportToCSV,
+  });
+
   if (showCancel) {
     topNavMenu.push({
       label: i18n.translate('xpack.lens.app.cancel', {
@@ -43,18 +55,6 @@ export function getLensTopNavConfig(options: {
       }),
     });
   }
-
-  topNavMenu.push({
-    label: i18n.translate('xpack.lens.app.downloadCSV', {
-      defaultMessage: 'Download as CSV',
-    }),
-    run: actions.exportToCSV,
-    testId: 'lnsApp_downloadCSVButton',
-    description: i18n.translate('xpack.lens.app.downloadButtonAriaLabel', {
-      defaultMessage: 'Download the data as CSV file',
-    }),
-    disableButton: !enableExportToCSV,
-  });
 
   topNavMenu.push({
     label: saveButtonLabel,
