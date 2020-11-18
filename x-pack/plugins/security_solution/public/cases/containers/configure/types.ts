@@ -7,7 +7,6 @@
 import { ElasticUser } from '../types';
 import {
   ActionType,
-  CasesConfigurationMaps,
   CaseField,
   ClosureType,
   ThirdPartyField,
@@ -16,15 +15,7 @@ import {
   CaseConnector,
 } from '../../../../../case/common/api';
 
-export {
-  ActionType,
-  CasesConfigurationMaps,
-  CaseField,
-  ClosureType,
-  ThirdPartyField,
-  ActionConnector,
-  CaseConnector,
-};
+export { ActionType, CaseField, ClosureType, ThirdPartyField, ActionConnector, CaseConnector };
 
 export interface CasesConfigurationMapping {
   source: CaseField;
@@ -40,8 +31,4 @@ export interface CaseConfigure {
   updatedAt: string;
   updatedBy: ElasticUser;
   version: string;
-}
-
-export interface CCMapsCombinedActionAttributes extends CasesConfigurationMaps {
-  actionType?: ActionType;
 }

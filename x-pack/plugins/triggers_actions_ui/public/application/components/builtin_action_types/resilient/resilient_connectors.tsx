@@ -17,26 +17,18 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { isEmpty } from 'lodash';
 import { ActionConnectorFieldsProps } from '../../../../types';
 import * as i18n from './translations';
 import { ResilientActionConnector } from './types';
-import { connectorConfiguration } from './config';
-import { FieldMapping, CasesConfigurationMapping, createDefaultMapping } from '../case_mappings';
 
 const ResilientConnectorFields: React.FC<ActionConnectorFieldsProps<ResilientActionConnector>> = ({
   action,
   editActionSecrets,
   editActionConfig,
   errors,
-  consumer,
   readOnly,
-  docLinks,
 }) => {
-  // TODO: remove incidentConfiguration later, when Case Resilient will move their fields to the level of action execution
-  const { apiUrl, orgId, incidentConfiguration, isCaseOwned } = action.config;
-  const mapping = incidentConfiguration ? incidentConfiguration.mapping : [];
-
+  const { apiUrl, orgId } = action.config;
   const isApiUrlInvalid: boolean = errors.apiUrl.length > 0 && apiUrl != null;
 
   const { apiKeyId, apiKeySecret } = action.secrets;
@@ -45,39 +37,14 @@ const ResilientConnectorFields: React.FC<ActionConnectorFieldsProps<ResilientAct
   const isApiKeyInvalid: boolean = errors.apiKeyId.length > 0 && apiKeyId != null;
   const isApiKeySecretInvalid: boolean = errors.apiKeySecret.length > 0 && apiKeySecret != null;
 
-  // TODO: remove this block later, when Case ServiceNow will move their fields to the level of action execution
-  if (consumer === 'case') {
-    if (isEmpty(mapping)) {
-      editActionConfig('incidentConfiguration', {
-        mapping: createDefaultMapping(connectorConfiguration.fields as any),
-      });
-    }
-
-    if (!isCaseOwned) {
-      editActionConfig('isCaseOwned', true);
-    }
-  }
-
   const handleOnChangeActionConfig = useCallback(
     (key: string, value: string) => editActionConfig(key, value),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
+    [editActionConfig]
   );
 
   const handleOnChangeSecretConfig = useCallback(
     (key: string, value: string) => editActionSecrets(key, value),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
-  );
-
-  const handleOnChangeMappingConfig = useCallback(
-    (newMapping: CasesConfigurationMapping[]) =>
-      editActionConfig('incidentConfiguration', {
-        ...action.config.incidentConfiguration,
-        mapping: newMapping,
-      }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [action.config]
+    [editActionSecrets]
   );
 
   return (
@@ -202,21 +169,6 @@ const ResilientConnectorFields: React.FC<ActionConnectorFieldsProps<ResilientAct
           </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
-      {consumer === 'case' && ( // TODO: remove this block later, when Case Resilient will move their fields to the level of action execution
-        <>
-          <EuiSpacer size="l" />
-          <EuiFlexGroup>
-            <EuiFlexItem data-test-subj="case-resilient-mappings">
-              <FieldMapping
-                disabled={true}
-                connectorConfiguration={connectorConfiguration}
-                mapping={mapping as CasesConfigurationMapping[]}
-                onChangeMapping={handleOnChangeMappingConfig}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </>
-      )}
     </>
   );
 };

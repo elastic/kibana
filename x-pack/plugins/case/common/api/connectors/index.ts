@@ -12,6 +12,7 @@ import { ServiceNowFieldsRT } from './servicenow';
 export * from './jira';
 export * from './servicenow';
 export * from './resilient';
+export * from './mappings';
 
 export const ConnectorFieldsRt = rt.union([
   JiraFieldsRT,

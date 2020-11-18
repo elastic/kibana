@@ -29,6 +29,7 @@ export function getActionType({
   logger,
   caseService,
   caseConfigureService,
+  connectorMappingsService,
   userActionService,
 }: GetActionTypeParams): CaseActionType {
   return {
@@ -39,13 +40,25 @@ export function getActionType({
       config: CaseConfigurationSchema,
       params: CaseExecutorParamsSchema,
     },
-    executor: curry(executor)({ logger, caseService, caseConfigureService, userActionService }),
+    executor: curry(executor)({
+      logger,
+      caseService,
+      caseConfigureService,
+      connectorMappingsService,
+      userActionService,
+    }),
   };
 }
 
 // action executor
 async function executor(
-  { logger, caseService, caseConfigureService, userActionService }: GetActionTypeParams,
+  {
+    logger,
+    caseService,
+    caseConfigureService,
+    connectorMappingsService,
+    userActionService,
+  }: GetActionTypeParams,
   execOptions: CaseActionTypeExecutorOptions
 ): Promise<ActionTypeExecutorResult<CaseExecutorResponse | {}>> {
   const { actionId, params, services } = execOptions;
@@ -58,6 +71,7 @@ async function executor(
     request: {} as KibanaRequest,
     caseService,
     caseConfigureService,
+    connectorMappingsService,
     userActionService,
   });
 

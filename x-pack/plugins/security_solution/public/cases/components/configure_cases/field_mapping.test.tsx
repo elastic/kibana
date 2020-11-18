@@ -17,11 +17,8 @@ import { TestProviders } from '../../../common/mock';
 
 describe('FieldMappingRow', () => {
   let wrapper: ReactWrapper;
-  const onChangeMapping = jest.fn();
   const props: FieldMappingProps = {
-    disabled: false,
     mapping,
-    onChangeMapping,
     connectorActionTypeId: '.servicenow',
   };
 

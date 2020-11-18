@@ -10,6 +10,7 @@ import { actionsMock } from '../../../../actions/server/mocks';
 import { validateParams } from '../../../../actions/server/lib';
 import { ConnectorTypes, CommentType } from '../../../common/api';
 import {
+  connectorMappingsServiceMock,
   createCaseServiceMock,
   createConfigureServiceMock,
   createUserActionServiceMock,
@@ -33,11 +34,13 @@ describe('case connector', () => {
     const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
     const caseService = createCaseServiceMock();
     const caseConfigureService = createConfigureServiceMock();
+    const connectorMappingsService = connectorMappingsServiceMock();
     const userActionService = createUserActionServiceMock();
     caseActionType = getActionType({
       logger,
       caseService,
       caseConfigureService,
+      connectorMappingsService,
       userActionService,
     });
   });

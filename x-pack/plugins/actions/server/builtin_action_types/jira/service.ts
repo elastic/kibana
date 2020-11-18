@@ -339,7 +339,6 @@ export const createExternalService = (
     const capabilitiesResponse = await getCapabilities();
     const supportsNewAPI = hasSupportForNewAPI(capabilitiesResponse);
     try {
-      console.log('try getIssueTypes');
       if (!supportsNewAPI) {
         const res = await request({
           axios: axiosInstance,
@@ -350,7 +349,6 @@ export const createExternalService = (
         });
 
         const issueTypes = res.data.projects[0]?.issuetypes ?? [];
-        console.log('issueTypes000', JSON.stringify(res.data));
         return normalizeIssueTypes(issueTypes);
       } else {
         const res = await request({
@@ -362,11 +360,9 @@ export const createExternalService = (
         });
 
         const issueTypes = res.data.values;
-        console.log('issueTypes', issueTypes);
         return normalizeIssueTypes(issueTypes);
       }
     } catch (error) {
-      console.log('catch getIssueTypes', error.response?.data);
       throw new Error(
         getErrorMessage(
           i18n.NAME,
@@ -409,7 +405,6 @@ export const createExternalService = (
           }),
           {}
         );
-        console.log('fields', fields);
         return normalizeFields(fields);
       }
     } catch (error) {

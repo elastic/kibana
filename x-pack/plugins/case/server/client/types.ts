@@ -17,6 +17,7 @@ import {
   CaseServiceSetup,
   CaseUserActionServiceSetup,
 } from '../services';
+import { ConnectorMappingsServiceSetup } from '../services/connector_mappings';
 
 export interface CaseClientCreate {
   theCase: CasePostRequest;
@@ -32,15 +33,16 @@ export interface CaseClientAddComment {
 }
 
 export interface CaseClientFactoryArguments {
-  savedObjectsClient: SavedObjectsClientContract;
-  request: KibanaRequest;
   caseConfigureService: CaseConfigureServiceSetup;
   caseService: CaseServiceSetup;
+  connectorMappingsService: ConnectorMappingsServiceSetup;
+  request: KibanaRequest;
+  savedObjectsClient: SavedObjectsClientContract;
   userActionService: CaseUserActionServiceSetup;
 }
 
 export interface CaseClient {
+  addComment: (args: CaseClientAddComment) => Promise<CaseResponse>;
   create: (args: CaseClientCreate) => Promise<CaseResponse>;
   update: (args: CaseClientUpdate) => Promise<CasesResponse>;
-  addComment: (args: CaseClientAddComment) => Promise<CaseResponse>;
 }

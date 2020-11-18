@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CasesConfigurationMapping } from '../case_mappings';
 import { UserConfiguredActionConnector } from '../../../../types';
 
 export type ResilientActionConnector = UserConfiguredActionConnector<
@@ -25,15 +24,9 @@ export interface ResilientActionParams {
   };
 }
 
-interface IncidentConfiguration {
-  mapping: CasesConfigurationMapping[];
-}
-
 export interface ResilientConfig {
   apiUrl: string;
   orgId: string;
-  incidentConfiguration?: IncidentConfiguration;
-  isCaseOwned?: boolean;
 }
 
 export interface ResilientSecrets {

@@ -8,6 +8,7 @@ import { KibanaRequest } from 'kibana/server';
 import { savedObjectsClientMock } from '../../../../../src/core/server/mocks';
 import { createCaseClient } from '.';
 import {
+  connectorMappingsServiceMock,
   createCaseServiceMock,
   createConfigureServiceMock,
   createUserActionServiceMock,
@@ -21,11 +22,12 @@ jest.mock('./cases/create');
 jest.mock('./cases/update');
 jest.mock('./comments/add');
 
-const caseService = createCaseServiceMock();
 const caseConfigureService = createConfigureServiceMock();
-const userActionService = createUserActionServiceMock();
-const savedObjectsClient = savedObjectsClientMock.create();
+const caseService = createCaseServiceMock();
+const connectorMappingsService = connectorMappingsServiceMock();
 const request = {} as KibanaRequest;
+const savedObjectsClient = savedObjectsClientMock.create();
+const userActionService = createUserActionServiceMock();
 
 const createMock = create as jest.Mock;
 const updateMock = update as jest.Mock;
@@ -34,34 +36,38 @@ const addCommentMock = addComment as jest.Mock;
 describe('createCaseClient()', () => {
   test('it creates the client correctly', async () => {
     createCaseClient({
-      savedObjectsClient,
-      request,
       caseConfigureService,
       caseService,
+      connectorMappingsService,
+      request,
+      savedObjectsClient,
       userActionService,
     });
 
     expect(createMock).toHaveBeenCalledWith({
-      savedObjectsClient,
-      request,
       caseConfigureService,
       caseService,
+      connectorMappingsService,
+      request,
+      savedObjectsClient,
       userActionService,
     });
 
     expect(updateMock).toHaveBeenCalledWith({
-      savedObjectsClient,
-      request,
       caseConfigureService,
       caseService,
+      connectorMappingsService,
+      request,
+      savedObjectsClient,
       userActionService,
     });
 
     expect(addCommentMock).toHaveBeenCalledWith({
-      savedObjectsClient,
-      request,
       caseConfigureService,
       caseService,
+      connectorMappingsService,
+      request,
+      savedObjectsClient,
       userActionService,
     });
   });

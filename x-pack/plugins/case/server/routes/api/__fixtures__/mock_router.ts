@@ -5,7 +5,7 @@
  */
 
 import { loggingSystemMock, httpServiceMock } from '../../../../../../../src/core/server/mocks';
-import { CaseService, CaseConfigureService } from '../../../services';
+import { CaseService, CaseConfigureService, ConnectorMappingsService } from '../../../services';
 import { authenticationMock } from '../__fixtures__';
 import { RouteDeps } from '../types';
 
@@ -21,15 +21,18 @@ export const createRoute = async (
 
   const caseServicePlugin = new CaseService(log);
   const caseConfigureServicePlugin = new CaseConfigureService(log);
+  const connectorMappingsServicePlugin = new ConnectorMappingsService(log);
 
   const caseService = await caseServicePlugin.setup({
     authentication: badAuth ? authenticationMock.createInvalid() : authenticationMock.create(),
   });
   const caseConfigureService = await caseConfigureServicePlugin.setup();
+  const connectorMappingsService = await connectorMappingsServicePlugin.setup();
 
   api({
     caseConfigureService,
     caseService,
+    connectorMappingsService,
     router,
     userActionService: {
       postUserActions: jest.fn(),

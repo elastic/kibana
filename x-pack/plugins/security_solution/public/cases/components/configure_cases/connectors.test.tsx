@@ -11,6 +11,7 @@ import { Connectors, Props } from './connectors';
 import { TestProviders } from '../../../common/mock';
 import { ConnectorsDropdown } from './connectors_dropdown';
 import { connectors } from './__mock__';
+import { ConnectorTypes } from '../../../../../case/common/api/connectors';
 
 describe('Connectors', () => {
   let wrapper: ReactWrapper;
@@ -21,9 +22,10 @@ describe('Connectors', () => {
     disabled: false,
     updateConnectorDisabled: false,
     connectors,
-    selectedConnector: 'none',
+    selectedConnector: { id: 'none', type: ConnectorTypes.none },
     isLoading: false,
     onChangeConnector,
+    onClickUpdateMappings: jest.fn(),
     handleShowEditFlyout,
   };
 
@@ -51,7 +53,7 @@ describe('Connectors', () => {
       disabled: false,
       isLoading: false,
       connectors,
-      selectedConnector: 'none',
+      selectedConnector: { id: 'none', type: ConnectorTypes.none },
       onChange: props.onChangeConnector,
     });
   });
@@ -66,15 +68,21 @@ describe('Connectors', () => {
 
   test('the connector is changed successfully to none', () => {
     onChangeConnector.mockClear();
-    const newWrapper = mount(<Connectors {...props} selectedConnector={'servicenow-1'} />, {
-      wrappingComponent: TestProviders,
-    });
+    const newWrapper = mount(
+      <Connectors
+        {...props}
+        selectedConnector={{ id: 'servicenow-1', type: ConnectorTypes.servicenow }}
+      />,
+      {
+        wrappingComponent: TestProviders,
+      }
+    );
 
     newWrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
     newWrapper.find('button[data-test-subj="dropdown-connector-no-connector"]').simulate('click');
 
     expect(onChangeConnector).toHaveBeenCalled();
-    expect(onChangeConnector).toHaveBeenCalledWith('none');
+    expect(onChangeConnector).toHaveBeenCalledWith({ id: 'none', type: ConnectorTypes.none });
   });
 
   test('it shows the add connector button', () => {
@@ -87,9 +95,15 @@ describe('Connectors', () => {
   });
 
   test('the text of the update button is shown correctly', () => {
-    const newWrapper = mount(<Connectors {...props} selectedConnector={'servicenow-1'} />, {
-      wrappingComponent: TestProviders,
-    });
+    const newWrapper = mount(
+      <Connectors
+        {...props}
+        selectedConnector={{ id: 'servicenow-1', type: ConnectorTypes.servicenow }}
+      />,
+      {
+        wrappingComponent: TestProviders,
+      }
+    );
 
     expect(
       newWrapper

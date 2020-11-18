@@ -16,12 +16,10 @@ describe('Mapping', () => {
   const onChangeMapping = jest.fn();
   const setEditFlyoutVisibility = jest.fn();
   const props: MappingProps = {
-    disabled: false,
-    mapping,
-    updateConnectorDisabled: false,
-    onChangeMapping,
-    setEditFlyoutVisibility,
     connectorActionTypeId: '.servicenow',
+    mapping,
+    setEditFlyoutVisibility,
+    updateFieldMappingsDisabled: false,
   };
 
   beforeEach(() => {

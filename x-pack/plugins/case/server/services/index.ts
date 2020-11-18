@@ -30,6 +30,7 @@ import { readTags } from './tags/read_tags';
 
 export { CaseConfigureService, CaseConfigureServiceSetup } from './configure';
 export { CaseUserActionService, CaseUserActionServiceSetup } from './user_actions';
+export { ConnectorMappingsService, ConnectorMappingsServiceSetup } from './connector_mappings';
 
 export interface ClientArgs {
   client: SavedObjectsClientContract;

@@ -21,8 +21,14 @@ import {
   transformCaseConnectorToEsConnector,
   transformESConnectorToCaseConnector,
 } from '../helpers';
+import { CASE_CONFIGURE_SAVED_OBJECT } from '../../../../saved_object_types';
 
-export function initPostCaseConfigure({ caseConfigureService, caseService, router }: RouteDeps) {
+export function initPostCaseConfigure({
+  caseConfigureService,
+  caseService,
+  connectorMappingsService,
+  router,
+}: RouteDeps) {
   router.post(
     {
       path: CASE_CONFIGURE_URL,
@@ -62,6 +68,37 @@ export function initPostCaseConfigure({ caseConfigureService, caseService, route
             updated_by: null,
           },
         });
+
+        const connectorMappings = connectorMappingsService.post({
+          client,
+          attributes: {
+            mappings: [
+              {
+                source: 'title',
+                target: 'summary',
+                action_type: 'overwrite',
+              },
+              {
+                source: 'description',
+                target: 'description',
+                action_type: 'overwrite',
+              },
+              {
+                source: 'comments',
+                target: '',
+                action_type: 'overwrite',
+              },
+            ],
+          },
+          references: [
+            {
+              type: CASE_CONFIGURE_SAVED_OBJECT,
+              name: `associated-${CASE_CONFIGURE_SAVED_OBJECT}`,
+              id: post.id,
+            },
+          ],
+        });
+        console.log('THE MAPPINGS?!', JSON.stringify(connectorMappings));
 
         return response.ok({
           body: CaseConfigureResponseRt.encode({

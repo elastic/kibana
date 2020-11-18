@@ -4,10 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CaseConfigureServiceSetup, CaseServiceSetup, CaseUserActionServiceSetup } from '.';
+import {
+  CaseConfigureServiceSetup,
+  CaseServiceSetup,
+  CaseUserActionServiceSetup,
+  ConnectorMappingsServiceSetup,
+} from '.';
 
 export type CaseServiceMock = jest.Mocked<CaseServiceSetup>;
 export type CaseConfigureServiceMock = jest.Mocked<CaseConfigureServiceSetup>;
+export type ConnectorMappingsServiceMock = jest.Mocked<ConnectorMappingsServiceSetup>;
 export type CaseUserActionServiceMock = jest.Mocked<CaseUserActionServiceSetup>;
 
 export const createCaseServiceMock = (): CaseServiceMock => ({
@@ -30,6 +36,14 @@ export const createCaseServiceMock = (): CaseServiceMock => ({
 });
 
 export const createConfigureServiceMock = (): CaseConfigureServiceMock => ({
+  delete: jest.fn(),
+  get: jest.fn(),
+  find: jest.fn(),
+  patch: jest.fn(),
+  post: jest.fn(),
+});
+
+export const connectorMappingsServiceMock = (): ConnectorMappingsServiceMock => ({
   delete: jest.fn(),
   get: jest.fn(),
   find: jest.fn(),

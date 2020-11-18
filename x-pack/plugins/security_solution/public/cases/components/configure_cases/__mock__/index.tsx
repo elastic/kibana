@@ -9,7 +9,7 @@ import { UseConnectorsResponse } from '../../../containers/configure/use_connect
 import { connectorsMock } from '../../../containers/configure/mock';
 import { ReturnUseCaseConfigure } from '../../../containers/configure/use_configure';
 import { ConnectorTypes } from '../../../../../../case/common/api';
-
+export { mapping } from '../../../containers/configure/mock';
 export const connectors: ActionConnector[] = connectorsMock;
 
 // x - pack / plugins / triggers_actions_ui;

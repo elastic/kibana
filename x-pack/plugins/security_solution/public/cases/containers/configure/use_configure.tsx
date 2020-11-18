@@ -103,6 +103,7 @@ export const configureCasesReducer = (state: State, action: Action) => {
       };
     }
     case 'setMapping': {
+      console.log('setMapping', { state, mapping: action.mapping });
       return {
         ...state,
         mapping: action.mapping,

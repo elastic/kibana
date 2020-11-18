@@ -8,62 +8,10 @@ import * as rt from 'io-ts';
 
 import { ActionResult } from '../../../../actions/common';
 import { UserRT } from '../user';
-import { JiraCaseFieldsRt } from '../connectors/jira';
-import { ServiceNowCaseFieldsRT } from '../connectors/servicenow';
-import { ResilientCaseFieldsRT } from '../connectors/resilient';
+// import { JiraCaseFieldsRt } from '../connectors/jira';
+// import { ServiceNowCaseFieldsRT } from '../connectors/servicenow';
+// import { ResilientCaseFieldsRT } from '../connectors/resilient';
 import { CaseConnectorRt, ESCaseConnector } from '../connectors';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { Field } from '../../../server/routes/api/cases/configure/get_fields';
-
-/*
- * This types below are related to the service now configuration
- * mapping between our case and [service-now, jira]
- *
- */
-
-const ActionTypeRT = rt.union([
-  rt.literal('append'),
-  rt.literal('nothing'),
-  rt.literal('overwrite'),
-]);
-
-const CaseFieldRT = rt.union([
-  rt.literal('title'),
-  rt.literal('description'),
-  rt.literal('comments'),
-]);
-
-const ThirdPartyFieldRT = rt.union([
-  JiraCaseFieldsRt,
-  ServiceNowCaseFieldsRT,
-  ResilientCaseFieldsRT,
-  rt.literal('not_mapped'),
-]);
-
-export const CasesConfigurationMapsRT = rt.type({
-  source: CaseFieldRT,
-  target: ThirdPartyFieldRT,
-  action_type: ActionTypeRT,
-});
-
-export const CasesConfigurationRT = rt.type({
-  mapping: rt.array(CasesConfigurationMapsRT),
-});
-
-export const CasesConnectorConfigurationRT = rt.type({
-  cases_configuration: CasesConfigurationRT,
-  // version: rt.string,
-});
-
-export type ActionType = rt.TypeOf<typeof ActionTypeRT>;
-export type CaseField = rt.TypeOf<typeof CaseFieldRT>;
-export type ThirdPartyField = rt.TypeOf<typeof ThirdPartyFieldRT>;
-
-export type CasesConfigurationMaps = rt.TypeOf<typeof CasesConfigurationMapsRT>;
-export type CasesConfiguration = rt.TypeOf<typeof CasesConfigurationRT>;
-export type CasesConnectorConfiguration = rt.TypeOf<typeof CasesConnectorConfigurationRT>;
-
-/** ********************************************************************** */
 
 export type ActionConnector = ActionResult;
 

@@ -83,15 +83,15 @@ interface ServiceNowResponse {
   data: ServiceNowGetFieldsResponse;
   status: 'ok' | 'error';
 }
-interface RequestResponse {
-  actionId: string;
-  data: GetFieldsResponse;
-  status: 'ok' | 'error';
-}
-type GetFieldsResponse =
-  | JiraGetFieldsResponse
-  | ResilientGetFieldsResponse
-  | ServiceNowGetFieldsResponse;
+// interface RequestResponse {
+//   actionId: string;
+//   data: GetFieldsResponse;
+//   status: 'ok' | 'error';
+// }
+// type GetFieldsResponse =
+//   | JiraGetFieldsResponse
+//   | ResilientGetFieldsResponse
+//   | ServiceNowGetFieldsResponse;
 type FieldType = 'text' | 'textarea';
 type ThirdPartyFields =
   | {

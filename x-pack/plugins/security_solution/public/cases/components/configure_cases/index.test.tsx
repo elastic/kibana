@@ -133,7 +133,7 @@ describe('ConfigureCases', () => {
     beforeEach(() => {
       useCaseConfigureMock.mockImplementation(() => ({
         ...useCaseConfigureResponse,
-        mapping: connectors[0].config.incidentConfiguration.mapping,
+        mapping: null,
         closureType: 'close-by-user',
         connector: {
           id: 'servicenow-1',
@@ -211,7 +211,7 @@ describe('ConfigureCases', () => {
     beforeEach(() => {
       useCaseConfigureMock.mockImplementation(() => ({
         ...useCaseConfigureResponse,
-        mapping: connectors[1].config.incidentConfiguration.mapping,
+        mapping: null,
         closureType: 'close-by-user',
         connector: {
           id: 'resilient-2',
@@ -338,7 +338,7 @@ describe('ConfigureCases', () => {
       persistCaseConfigure = jest.fn();
       useCaseConfigureMock.mockImplementation(() => ({
         ...useCaseConfigureResponse,
-        mapping: connectors[0].config.incidentConfiguration.mapping,
+        mapping: null,
         closureType: 'close-by-user',
         connector: {
           id: 'resilient-2',
@@ -426,7 +426,7 @@ describe('closure options', () => {
     persistCaseConfigure = jest.fn();
     useCaseConfigureMock.mockImplementation(() => ({
       ...useCaseConfigureResponse,
-      mapping: connectors[0].config.incidentConfiguration.mapping,
+      mapping: null,
       closureType: 'close-by-user',
       connector: {
         id: 'servicenow-1',
@@ -472,7 +472,7 @@ describe('user interactions', () => {
   beforeEach(() => {
     useCaseConfigureMock.mockImplementation(() => ({
       ...useCaseConfigureResponse,
-      mapping: connectors[1].config.incidentConfiguration.mapping,
+      mapping: null,
       closureType: 'close-by-user',
       connector: {
         id: 'resilient-2',

@@ -6,7 +6,12 @@
 
 import { KibanaRequest } from 'kibana/server';
 import { loggingSystemMock } from '../../../../../src/core/server/mocks';
-import { CaseService, CaseConfigureService, CaseUserActionServiceSetup } from '../services';
+import {
+  CaseService,
+  CaseConfigureService,
+  CaseUserActionServiceSetup,
+  ConnectorMappingsService,
+} from '../services';
 import { CaseClient } from './types';
 import { authenticationMock } from '../routes/api/__fixtures__';
 import { createCaseClient } from '.';
@@ -30,11 +35,14 @@ export const createCaseClientWithMockSavedObjectsClient = async (
 
   const caseServicePlugin = new CaseService(log);
   const caseConfigureServicePlugin = new CaseConfigureService(log);
+  const connectorMappingsServicePlugin = new ConnectorMappingsService(log);
 
   const caseService = await caseServicePlugin.setup({
     authentication: badAuth ? authenticationMock.createInvalid() : authenticationMock.create(),
   });
   const caseConfigureService = await caseConfigureServicePlugin.setup();
+
+  const connectorMappingsService = await connectorMappingsServicePlugin.setup();
   const userActionService = {
     postUserActions: jest.fn(),
     getUserActions: jest.fn(),
@@ -46,6 +54,7 @@ export const createCaseClientWithMockSavedObjectsClient = async (
       request,
       caseService,
       caseConfigureService,
+      connectorMappingsService,
       userActionService,
     }),
     services: { userActionService },
