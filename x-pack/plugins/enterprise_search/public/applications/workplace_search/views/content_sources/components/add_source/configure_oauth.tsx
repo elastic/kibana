@@ -10,8 +10,6 @@ import { Location } from 'history';
 import { useActions, useValues } from 'kea';
 import { useLocation } from 'react-router-dom';
 
-import { parseQueryParams } from 'app_search/utils/queryParams';
-
 import {
   EuiButton,
   EuiCheckboxGroup,
@@ -21,8 +19,9 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { Loading } from 'workplace_search/components';
-import { SourceLogic } from 'workplace_search/ContentSources/SourceLogic';
+import { parseQueryParams } from '../../../../../../applications/shared/query_params';
+import { Loading } from '../../../../../../applications/shared/loading';
+import { SourceLogic } from '../../source_logic';
 
 interface OauthQueryParams {
   preContentSourceId: string;

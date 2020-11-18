@@ -19,15 +19,16 @@ import {
   EuiEmptyPrompt,
 } from '@elastic/eui';
 
-import { AppLogic } from 'workplace_search/App/AppLogic';
-import { ContentSection, Loading } from 'workplace_search/components';
-import { CUSTOM_SERVICE_TYPE } from 'workplace_search/constants';
-import { SourceDataItem } from 'workplace_search/types';
-import { SOURCES_PATH, getSourcesPath } from 'workplace_search/utils/routePaths';
+import { AppLogic } from '../../../../app_logic';
+import { ContentSection } from '../../../../components/shared/content_section';
+import { Loading } from '../../../../../../applications/shared/loading';
+import { CUSTOM_SERVICE_TYPE } from '../../../../constants';
+import { SourceDataItem } from '../../../../types';
+import { SOURCES_PATH, getSourcesPath } from '../../../../routes';
 
-import { SourcesLogic } from 'workplace_search/ContentSources/SourcesLogic';
-import { AvailableSourcesList } from './AvailableSourcesList';
-import { ConfiguredSourcesList } from './ConfiguredSourcesList';
+import { SourcesLogic } from '../../sources_logic';
+import { AvailableSourcesList } from './available_sources_list';
+import { ConfiguredSourcesList } from './configured_sources_list';
 
 const NEW_SOURCE_DESCRIPTION =
   'When configuring and connecting a source, you are creating distinct entities with searchable content synchronized from the content platform itself. A source can be added using one of the available source connectors or via Custom API Sources, for additional flexibility.';

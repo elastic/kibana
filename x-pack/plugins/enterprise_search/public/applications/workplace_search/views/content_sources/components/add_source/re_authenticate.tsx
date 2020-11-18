@@ -10,11 +10,10 @@ import { Location } from 'history';
 import { useActions, useValues } from 'kea';
 import { useLocation } from 'react-router-dom';
 
-import { parseQueryParams } from 'app_search/utils/queryParams';
-
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSpacer } from '@elastic/eui';
+import { parseQueryParams } from '../../../../../../applications/shared/query_params';
 
-import { SourceLogic } from 'workplace_search/ContentSources/SourceLogic';
+import { SourceLogic } from '../../source_logic';
 
 interface SourceQueryParams {
   sourceId: string;

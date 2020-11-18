@@ -18,10 +18,10 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { AppLogic } from 'workplace_search/App/AppLogic';
-import { LicenseBadge } from 'workplace_search/components';
-import { Features, FeatureIds } from 'workplace_search/types';
-import { ENT_SEARCH_LICENSE_MANAGEMENT } from 'workplace_search/utils/routePaths';
+import { AppLogic } from '../../../../app_logic';
+import { LicenseBadge } from '../../../../components/shared/license_badge';
+import { Features, FeatureIds } from '../../../../types';
+import { ENT_SEARCH_LICENSE_MANAGEMENT } from '../../../../routes';
 
 interface ConnectInstanceProps {
   features?: Features;

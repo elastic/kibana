@@ -24,7 +24,7 @@ import {
   ADD_SOURCE_PATH,
   SECURITY_PATH,
   PRIVATE_SOURCES_DOCS_URL,
-} from 'workplace_search/utils/routePaths';
+} from '../../../../routes';
 
 interface ConfigCompletedProps {
   header: React.ReactNode;

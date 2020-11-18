@@ -19,10 +19,10 @@ import {
 
 import { useValues } from 'kea';
 
-import { AppLogic } from 'workplace_search/App/AppLogic';
-import { SourceIcon } from 'workplace_search/components';
-import { SourceDataItem } from 'workplace_search/types';
-import { ADD_CUSTOM_PATH, getSourcesPath } from 'workplace_search/utils/routePaths';
+import { AppLogic } from '../../../../app_logic';
+import { SourceIcon } from '../../../../components/shared/source_icon';
+import { SourceDataItem } from '../../../../types';
+import { ADD_CUSTOM_PATH, getSourcesPath } from '../../../../routes';
 
 interface AvailableSourcesListProps {
   sources: SourceDataItem[];

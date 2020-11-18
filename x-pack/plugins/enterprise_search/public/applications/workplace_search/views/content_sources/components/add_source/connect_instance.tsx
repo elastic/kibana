@@ -25,11 +25,11 @@ import {
   EuiBadgeGroup,
 } from '@elastic/eui';
 
-import { AppLogic } from 'workplace_search/App/AppLogic';
-import { SourceLogic } from 'workplace_search/ContentSources/SourceLogic';
-import { FeatureIds, Configuration, Features } from 'workplace_search/types';
-import { DOCUMENT_PERMISSIONS_DOCS_URL } from 'workplace_search/utils/routePaths';
-import { SourceFeatures } from './SourceFeatures';
+import { AppLogic } from '../../../../app_logic';
+import { SourceLogic } from '../../source_logic';
+import { FeatureIds, Configuration, Features } from '../../../../types';
+import { DOCUMENT_PERMISSIONS_DOCS_URL } from '../../../../routes';
+import { SourceFeatures } from './source_features';
 
 interface ConnectInstanceProps {
   header: React.ReactNode;

@@ -20,11 +20,11 @@ import {
   EuiLink,
   EuiPanel,
 } from '@elastic/eui';
-import { CredentialItem } from 'workplace_search/components/CredentialItem';
 
-import { LicenseBadge } from 'workplace_search/components';
+import { CredentialItem } from '../../../../components/shared/credential_item';
+import { LicenseBadge } from '../../../../components/shared/license_badge';
 
-import { CustomSource } from 'workplace_search/types';
+import { CustomSource } from '../../../../types';
 import {
   SOURCES_PATH,
   SOURCE_DISPLAY_SETTINGS_PATH,
@@ -32,7 +32,7 @@ import {
   ENT_SEARCH_LICENSE_MANAGEMENT,
   getContentSourcePath,
   getSourcesPath,
-} from 'workplace_search/utils/routePaths';
+} from '../../../../routes';
 
 interface SaveCustomProps {
   documentationUrl: string;

@@ -20,9 +20,9 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 
-import { SourceIcon } from 'workplace_search/components';
-import { SourceDataItem } from 'workplace_search/types';
-import { getSourcesPath } from 'workplace_search/utils/routePaths';
+import { SourceIcon } from '../../../../components/shared/source_icon';
+import { SourceDataItem } from '../../../../types';
+import { getSourcesPath } from '../../../../routes';
 
 interface ConfiguredSourcesProps {
   sources: SourceDataItem[];

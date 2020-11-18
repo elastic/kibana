@@ -10,27 +10,23 @@ import { History } from 'history';
 import { useActions, useValues } from 'kea';
 import { useHistory } from 'react-router-dom';
 
-import { AppLogic } from 'workplace_search/App/AppLogic';
-import { Loading } from 'workplace_search/components';
-import { CUSTOM_SERVICE_TYPE } from 'workplace_search/constants';
-import { staticSourceData } from 'workplace_search/ContentSources/sourceData';
-import { SourceLogic } from 'workplace_search/ContentSources/SourceLogic';
-import { SourceDataItem, FeatureIds } from 'workplace_search/types';
-import {
-  ADD_SOURCE_PATH,
-  SOURCE_ADDED_PATH,
-  getSourcesPath,
-} from 'workplace_search/utils/routePaths';
+import { AppLogic } from '../../../../app_logic';
+import { Loading } from '../../../../../../applications/shared/loading';
+import { CUSTOM_SERVICE_TYPE } from '../../../../constants';
+import { staticSourceData } from '../../source_data';
+import { SourceLogic } from '../../source_logic';
+import { SourceDataItem, FeatureIds } from '../../../../types';
+import { ADD_SOURCE_PATH, SOURCE_ADDED_PATH, getSourcesPath } from '../../../../routes';
 
-import { AddSourceHeader } from './AddSourceHeader';
-import { ConfigCompleted } from './ConfigCompleted';
-import { ConfigurationIntro } from './ConfigurationIntro';
-import { ConfigureCustom } from './ConfigureCustom';
-import { ConfigureOauth } from './ConfigureOauth';
-import { ConnectInstance } from './ConnectInstance';
-import { ReAuthenticate } from './ReAuthenticate';
-import { SaveConfig } from './SaveConfig';
-import { SaveCustom } from './SaveCustom';
+import { AddSourceHeader } from './add_source_header';
+import { ConfigCompleted } from './config_completed';
+import { ConfigurationIntro } from './configuration_intro';
+import { ConfigureCustom } from './configure_custom';
+import { ConfigureOauth } from './configure_oauth';
+import { ConnectInstance } from './connect_instance';
+import { ReAuthenticate } from './re_authenticate';
+import { SaveConfig } from './save_config';
+import { SaveCustom } from './save_custom';
 
 enum Steps {
   ConfigIntroStep = 'Config Intro',

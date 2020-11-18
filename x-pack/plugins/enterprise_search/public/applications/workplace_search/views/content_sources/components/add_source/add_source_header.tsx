@@ -10,7 +10,7 @@ import { startCase } from 'lodash';
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiTextColor } from '@elastic/eui';
 
-import { SourceIcon } from 'workplace_search/components';
+import { SourceIcon } from '../../../../components/shared/source_icon';
 
 interface AddSourceHeaderProps {
   name: string;

@@ -18,8 +18,8 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-import { CUSTOM_SOURCE_DOCS_URL } from 'workplace_search/utils/routePaths';
-import { SourceLogic } from '../../SourceLogic';
+import { CUSTOM_SOURCE_DOCS_URL } from '../../../../routes';
+import { SourceLogic } from '../../source_logic';
 
 interface ConfigureCustomProps {
   header: React.ReactNode;

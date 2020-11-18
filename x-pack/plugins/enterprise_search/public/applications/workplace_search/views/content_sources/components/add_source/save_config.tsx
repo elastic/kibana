@@ -20,12 +20,12 @@ import {
   EuiSteps,
 } from '@elastic/eui';
 
-import { AppLogic } from 'workplace_search/App/AppLogic';
-import { ApiKey } from 'workplace_search/components';
-import { SourceLogic } from 'workplace_search/ContentSources/SourceLogic';
-import { Configuration } from 'workplace_search/types';
+import { AppLogic } from '../../../../app_logic';
+import { ApiKey } from '../../../../components/shared/api_key';
+import { SourceLogic } from '../../source_logic';
+import { Configuration } from '../../../../types';
 
-import { ConfigDocsLinks } from './ConfigDocsLinks';
+import { ConfigDocsLinks } from './config_docs_links';
 
 interface SaveConfigProps {
   header: React.ReactNode;
