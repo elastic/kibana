@@ -21,11 +21,18 @@ import { schema } from '@kbn/config-schema';
 import stringify from 'json-stable-stringify';
 import { createPromiseFromStreams, createMapStream, createConcatStream } from '../../utils/streams';
 import { IRouter } from '../../http';
+import { CoreTelemetryServiceSetup } from '../../core_telemetry';
 import { SavedObjectConfig } from '../saved_objects_config';
 import { exportSavedObjectsToStream } from '../export';
 import { validateTypes, validateObjects } from './utils';
 
-export const registerExportRoute = (router: IRouter, config: SavedObjectConfig) => {
+interface RouteDependencies {
+  config: SavedObjectConfig;
+  coreTelemetry: CoreTelemetryServiceSetup;
+}
+
+export const registerExportRoute = (router: IRouter, deps: RouteDependencies) => {
+  const { config, coreTelemetry } = deps;
   const { maxImportExportSize } = config;
 
   const referenceSchema = schema.object({
@@ -93,6 +100,9 @@ export const registerExportRoute = (router: IRouter, config: SavedObjectConfig) 
           });
         }
       }
+
+      const telemetryClient = await coreTelemetry.getClient();
+      await telemetryClient.incrementSavedObjectsExport({ types, supportedTypes });
 
       const exportStream = await exportSavedObjectsToStream({
         savedObjectsClient,

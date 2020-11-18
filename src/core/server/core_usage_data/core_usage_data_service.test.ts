@@ -30,6 +30,7 @@ import { config as RawLoggingConfig } from '../logging/logging_config';
 import { config as RawKibanaConfig } from '../kibana_config';
 import { savedObjectsConfig as RawSavedObjectsConfig } from '../saved_objects/saved_objects_config';
 import { metricsServiceMock } from '../metrics/metrics_service.mock';
+import { coreTelemetryServiceMock } from '../core_telemetry/core_telemetry_service.mock';
 import { savedObjectsServiceMock } from '../saved_objects/saved_objects_service.mock';
 
 import { CoreUsageDataService } from './core_usage_data_service';
@@ -65,9 +66,10 @@ describe('CoreUsageDataService', () => {
 
   describe('start', () => {
     describe('getCoreUsageData', () => {
-      it('returns core metrics for default config', () => {
+      it('returns core metrics for default config', async () => {
         const metrics = metricsServiceMock.createInternalSetupContract();
-        service.setup({ metrics });
+        const coreTelemetry = coreTelemetryServiceMock.createSetupContract();
+        service.setup({ metrics, coreTelemetry });
         const elasticsearch = elasticsearchServiceMock.createStart();
         elasticsearch.client.asInternalUser.cat.indices.mockResolvedValueOnce({
           body: [
@@ -97,6 +99,7 @@ describe('CoreUsageDataService', () => {
           { name: 'type 2', indexPattern: '.kibana_task_manager' },
         ] as any);
 
+        await coreTelemetry.getClient(); // wait for this to resolve, which happens before this service is started
         const { getCoreUsageData } = service.start({
           savedObjects: savedObjectsServiceMock.createInternalStartContract(typeRegistry),
           elasticsearch,
@@ -243,8 +246,9 @@ describe('CoreUsageDataService', () => {
           observables.push(newObservable);
           return newObservable as Observable<any>;
         });
+        const coreTelemetry = coreTelemetryServiceMock.createSetupContract();
 
-        service.setup({ metrics });
+        service.setup({ metrics, coreTelemetry });
 
         // Use the stopTimer$ to delay calling stop() until the third frame
         const stopTimer$ = cold('---a|');

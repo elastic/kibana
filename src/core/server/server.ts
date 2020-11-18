@@ -31,7 +31,7 @@ import { LegacyService, ensureValidConfiguration } from './legacy';
 import { Logger, LoggerFactory, LoggingService, ILoggingSystem } from './logging';
 import { UiSettingsService } from './ui_settings';
 import { PluginsService, config as pluginsConfig } from './plugins';
-import { SavedObjectsService } from './saved_objects';
+import { SavedObjectsService, SavedObjectsServiceStart } from './saved_objects';
 import { MetricsService, opsConfig } from './metrics';
 import { CapabilitiesService } from './capabilities';
 import { EnvironmentService, config as pidConfig } from './environment';
@@ -53,6 +53,7 @@ import { RequestHandlerContext } from '.';
 import { InternalCoreSetup, InternalCoreStart, ServiceConfigDescriptor } from './internal_types';
 import { CoreUsageDataService } from './core_usage_data';
 import { CoreRouteHandlerContext } from './core_route_handler_context';
+import { CoreTelemetryService } from './core_telemetry';
 
 const coreId = Symbol('core');
 const rootConfigPath = '';
@@ -68,6 +69,7 @@ export class Server {
   private readonly log: Logger;
   private readonly plugins: PluginsService;
   private readonly savedObjects: SavedObjectsService;
+  private readonly coreTelemetry: CoreTelemetryService;
   private readonly uiSettings: UiSettingsService;
   private readonly environment: EnvironmentService;
   private readonly metrics: MetricsService;
@@ -77,6 +79,9 @@ export class Server {
   private readonly coreApp: CoreApp;
   private readonly coreUsageData: CoreUsageDataService;
   private readonly i18n: I18nService;
+
+  private readonly savedObjectsStartPromise: Promise<SavedObjectsServiceStart>;
+  private savedObjectsStartPromiseResolver!: (value: SavedObjectsServiceStart) => void;
 
   #pluginsInitialized?: boolean;
   private coreStart?: InternalCoreStart;
@@ -98,6 +103,7 @@ export class Server {
     this.plugins = new PluginsService(core);
     this.legacy = new LegacyService(core);
     this.elasticsearch = new ElasticsearchService(core);
+    this.coreTelemetry = new CoreTelemetryService(core);
     this.savedObjects = new SavedObjectsService(core);
     this.uiSettings = new UiSettingsService(core);
     this.capabilities = new CapabilitiesService(core);
@@ -109,6 +115,10 @@ export class Server {
     this.logging = new LoggingService(core);
     this.coreUsageData = new CoreUsageDataService(core);
     this.i18n = new I18nService(core);
+
+    this.savedObjectsStartPromise = new Promise((resolve) => {
+      this.savedObjectsStartPromiseResolver = resolve;
+    });
   }
 
   public async setup() {
@@ -155,9 +165,14 @@ export class Server {
       http: httpSetup,
     });
 
+    const coreTelemetrySetup = this.coreTelemetry.setup({
+      savedObjectsStartPromise: this.savedObjectsStartPromise,
+    });
+
     const savedObjectsSetup = await this.savedObjects.setup({
       http: httpSetup,
       elasticsearch: elasticsearchServiceSetup,
+      coreTelemetry: coreTelemetrySetup,
     });
 
     const uiSettingsSetup = await this.uiSettings.setup({
@@ -191,7 +206,10 @@ export class Server {
       loggingSystem: this.loggingSystem,
     });
 
-    this.coreUsageData.setup({ metrics: metricsSetup });
+    this.coreUsageData.setup({
+      metrics: metricsSetup,
+      coreTelemetry: coreTelemetrySetup,
+    });
 
     const coreSetup: InternalCoreSetup = {
       capabilities: capabilitiesSetup,
@@ -235,6 +253,8 @@ export class Server {
       elasticsearch: elasticsearchStart,
       pluginsInitialized: this.#pluginsInitialized,
     });
+    await this.savedObjectsStartPromiseResolver(savedObjectsStart);
+
     soStartSpan?.end();
     const capabilitiesStart = this.capabilities.start();
     const uiSettingsStart = await this.uiSettings.start();

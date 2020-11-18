@@ -115,6 +115,33 @@ export function getCoreUsageCollector(
           },
         },
       },
+      apiCalls: {
+        savedObjectsImport: {
+          total: { type: 'long' },
+          createNewCopies: {
+            enabled: { type: 'long' },
+            disabled: { type: 'long' },
+          },
+          overwrite: {
+            enabled: { type: 'long' },
+            disabled: { type: 'long' },
+          },
+        },
+        savedObjectsResolveImportErrors: {
+          total: { type: 'long' },
+          createNewCopies: {
+            enabled: { type: 'long' },
+            disabled: { type: 'long' },
+          },
+        },
+        savedObjectsExport: {
+          total: { type: 'long' },
+          allTypes: {
+            yes: { type: 'long' },
+            no: { type: 'long' },
+          },
+        },
+      },
     },
     fetch() {
       return getCoreUsageDataService().getCoreUsageData();

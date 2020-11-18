@@ -25,12 +25,16 @@ import { savedObjectsClientMock } from '../../../../../core/server/mocks';
 import { SavedObjectConfig } from '../../saved_objects_config';
 import { setupServer, createExportableType } from '../test_utils';
 import { SavedObjectsErrorHelpers } from '../..';
+import { CoreTelemetryClient } from 'src/core/server/core_telemetry';
+import { coreTelemetryClientMock } from 'src/core/server/core_telemetry/core_telemetry_client.mock';
+import { coreTelemetryServiceMock } from 'src/core/server/core_telemetry/core_telemetry_service.mock';
 
 type SetupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
 
 const { v4: uuidv4 } = jest.requireActual('uuid');
 const allowedTypes = ['index-pattern', 'visualization', 'dashboard'];
 const config = { maxImportPayloadBytes: 26214400, maxImportExportSize: 10000 } as SavedObjectConfig;
+let coreTelemetryClient: jest.Mocked<CoreTelemetryClient>;
 const URL = '/internal/saved_objects/_import';
 
 describe(`POST ${URL}`, () => {
@@ -71,7 +75,9 @@ describe(`POST ${URL}`, () => {
     savedObjectsClient.checkConflicts.mockResolvedValue({ errors: [] });
 
     const router = httpSetup.createRouter('/internal/saved_objects/');
-    registerImportRoute(router, config);
+    coreTelemetryClient = coreTelemetryClientMock.create();
+    const coreTelemetry = coreTelemetryServiceMock.createSetupContract(coreTelemetryClient);
+    registerImportRoute(router, { config, coreTelemetry });
 
     await server.start();
   });
@@ -80,7 +86,7 @@ describe(`POST ${URL}`, () => {
     await server.stop();
   });
 
-  it('formats successful response', async () => {
+  it('formats successful response and records telemetry data', async () => {
     const result = await supertest(httpSetup.server.listener)
       .post(URL)
       .set('content-Type', 'multipart/form-data; boundary=BOUNDARY')
@@ -98,6 +104,10 @@ describe(`POST ${URL}`, () => {
 
     expect(result.body).toEqual({ success: true, successCount: 0 });
     expect(savedObjectsClient.bulkCreate).not.toHaveBeenCalled(); // no objects were created
+    expect(coreTelemetryClient.incrementSavedObjectsImport).toHaveBeenCalledWith({
+      createNewCopies: false,
+      overwrite: false,
+    });
   });
 
   it('defaults migrationVersion to empty object', async () => {

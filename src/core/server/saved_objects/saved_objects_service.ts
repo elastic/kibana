@@ -27,6 +27,7 @@ import {
 } from './';
 import { KibanaMigrator, IKibanaMigrator } from './migrations';
 import { CoreContext } from '../core_context';
+import { CoreTelemetryServiceSetup } from '../core_telemetry';
 import {
   ElasticsearchClient,
   IClusterClient,
@@ -253,6 +254,7 @@ export interface SavedObjectsRepositoryFactory {
 export interface SavedObjectsSetupDeps {
   http: InternalHttpServiceSetup;
   elasticsearch: InternalElasticsearchServiceSetup;
+  coreTelemetry: CoreTelemetryServiceSetup;
 }
 
 interface WrappedClientFactoryWrapper {
@@ -288,6 +290,7 @@ export class SavedObjectsService
     this.logger.debug('Setting up SavedObjects service');
 
     this.setupDeps = setupDeps;
+    const { http, elasticsearch, coreTelemetry } = setupDeps;
 
     const savedObjectsConfig = await this.coreContext.configService
       .atPath<SavedObjectsConfigType>('savedObjects')
@@ -299,8 +302,11 @@ export class SavedObjectsService
       .toPromise();
     this.config = new SavedObjectConfig(savedObjectsConfig, savedObjectsMigrationConfig);
 
+    coreTelemetry.registerTypeMappings(this.typeRegistry);
+
     registerRoutes({
-      http: setupDeps.http,
+      http,
+      coreTelemetry,
       logger: this.logger,
       config: this.config,
       migratorPromise: this.migrator$.pipe(first()).toPromise(),
@@ -309,7 +315,7 @@ export class SavedObjectsService
     return {
       status$: calculateStatus$(
         this.migrator$.pipe(switchMap((migrator) => migrator.getStatus$())),
-        setupDeps.elasticsearch.status$
+        elasticsearch.status$
       ),
       setClientFactoryProvider: (provider) => {
         if (this.started) {

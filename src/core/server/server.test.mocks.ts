@@ -50,6 +50,12 @@ jest.doMock('@kbn/config', () => ({
   ConfigService: jest.fn(() => mockConfigService),
 }));
 
+import { coreTelemetryServiceMock } from './core_telemetry/core_telemetry_service.mock';
+export const mockCoreTelemetryService = coreTelemetryServiceMock.create();
+jest.doMock('./core_telemetry/core_telemetry_service', () => ({
+  CoreTelemetryService: jest.fn(() => mockCoreTelemetryService),
+}));
+
 import { savedObjectsServiceMock } from './saved_objects/saved_objects_service.mock';
 export const mockSavedObjectsService = savedObjectsServiceMock.create();
 jest.doMock('./saved_objects/saved_objects_service', () => ({

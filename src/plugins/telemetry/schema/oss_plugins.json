@@ -1516,6 +1516,71 @@
               }
             }
           }
+        },
+        "apiCalls": {
+          "properties": {
+            "savedObjectsImport": {
+              "properties": {
+                "total": {
+                  "type": "long"
+                },
+                "createNewCopies": {
+                  "properties": {
+                    "enabled": {
+                      "type": "long"
+                    },
+                    "disabled": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "overwrite": {
+                  "properties": {
+                    "enabled": {
+                      "type": "long"
+                    },
+                    "disabled": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "savedObjectsResolveImportErrors": {
+              "properties": {
+                "total": {
+                  "type": "long"
+                },
+                "createNewCopies": {
+                  "properties": {
+                    "enabled": {
+                      "type": "long"
+                    },
+                    "disabled": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "savedObjectsExport": {
+              "properties": {
+                "total": {
+                  "type": "long"
+                },
+                "allTypes": {
+                  "properties": {
+                    "yes": {
+                      "type": "long"
+                    },
+                    "no": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            }
+          }
         }
       }
     },

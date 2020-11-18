@@ -74,8 +74,15 @@ import {
   CoreEnvironmentUsageData,
   CoreServicesUsageData,
 } from './core_usage_data';
+import { CoreTelemetry } from './core_telemetry';
 
-export { CoreUsageData, CoreConfigUsageData, CoreEnvironmentUsageData, CoreServicesUsageData };
+export {
+  CoreUsageData,
+  CoreConfigUsageData,
+  CoreEnvironmentUsageData,
+  CoreServicesUsageData,
+  CoreTelemetry,
+};
 
 export { bootstrap } from './bootstrap';
 export { Capabilities, CapabilitiesProvider, CapabilitiesSwitcher } from './capabilities';

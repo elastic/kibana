@@ -520,8 +520,40 @@ export interface CoreStatus {
     savedObjects: ServiceStatus;
 }
 
+// @internal (undocumented)
+export interface CoreTelemetry {
+    // (undocumented)
+    apiCalls?: {
+        savedObjectsImport?: {
+            total: number;
+            createNewCopies: {
+                enabled: number;
+                disabled: number;
+            };
+            overwrite: {
+                enabled: number;
+                disabled: number;
+            };
+        };
+        savedObjectsResolveImportErrors?: {
+            total: number;
+            createNewCopies: {
+                enabled: number;
+                disabled: number;
+            };
+        };
+        savedObjectsExport?: {
+            total: number;
+            allTypes: {
+                yes: number;
+                no: number;
+            };
+        };
+    };
+}
+
 // @internal
-export interface CoreUsageData {
+export interface CoreUsageData extends CoreTelemetry {
     // (undocumented)
     config: CoreConfigUsageData;
     // (undocumented)
