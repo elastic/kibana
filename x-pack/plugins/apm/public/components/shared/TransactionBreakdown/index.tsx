@@ -6,7 +6,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useTransactionBreakdown } from '../../../hooks/useTransactionBreakdown';
+import { useTransactionBreakdown } from '../../../hooks/use_transaction_breakdown';
 import { TransactionBreakdownGraph } from './TransactionBreakdownGraph';
 
 function TransactionBreakdown() {

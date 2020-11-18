@@ -23,7 +23,7 @@ import { ServiceMap } from '../ServiceMap';
 import { ServiceMetrics } from '../ServiceMetrics';
 import { ServiceNodeOverview } from '../ServiceNodeOverview';
 import { ServiceOverview } from '../service_overview';
-import { TransactionOverview } from '../TransactionOverview';
+import { TransactionOverview } from '../transaction_overview';
 
 interface Tab {
   key: string;

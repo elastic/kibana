@@ -29,7 +29,7 @@ import { useTransactionCharts } from '../../../hooks/useTransactionCharts';
 import { useTransactionList } from '../../../hooks/useTransactionList';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { useTransactionType } from '../../../hooks/use_transaction_type';
-import { TransactionCharts } from '../../shared/charts/TransactionCharts';
+import { TransactionCharts } from '../../shared/charts/transaction_charts';
 import { ElasticDocsLink } from '../../shared/Links/ElasticDocsLink';
 import { fromQuery, toQuery } from '../../shared/Links/url_helpers';
 import { LocalUIFilters } from '../../shared/LocalUIFilters';

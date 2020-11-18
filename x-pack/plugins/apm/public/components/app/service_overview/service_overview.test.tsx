@@ -14,12 +14,11 @@ import {
   MockApmPluginContextWrapper,
 } from '../../../context/ApmPluginContext/MockApmPluginContext';
 import { MockUrlParamsContextProvider } from '../../../context/UrlParamsContext/MockUrlParamsContextProvider';
-import * as useAnnotationsHooks from '../../../hooks/use_annotations';
 import * as useDynamicIndexPatternHooks from '../../../hooks/useDynamicIndexPattern';
 import * as useFetcherHooks from '../../../hooks/useFetcher';
-import * as useTransactionBreakdownHooks from '../../../hooks/useTransactionBreakdown';
 import { FETCH_STATUS } from '../../../hooks/useFetcher';
-
+import * as useAnnotationsHooks from '../../../hooks/use_annotations';
+import * as useTransactionBreakdownHooks from '../../../hooks/use_transaction_breakdown';
 import { renderWithTheme } from '../../../utils/testHelpers';
 import { ServiceOverview } from './';
 
