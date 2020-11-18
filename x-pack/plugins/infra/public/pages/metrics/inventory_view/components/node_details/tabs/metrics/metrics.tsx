@@ -61,7 +61,12 @@ const TabComponent = (props: TabProps) => {
   const memoryChartRef = useRef<Chart>(null);
   const loadChartRef = useRef<Chart>(null);
   const [time, setTime] = useState(ONE_HOUR);
-  const chartRefs = [cpuChartRef, networkChartRef, memoryChartRef, loadChartRef];
+  const chartRefs = useMemo(() => [cpuChartRef, networkChartRef, memoryChartRef, loadChartRef], [
+    cpuChartRef,
+    networkChartRef,
+    memoryChartRef,
+    loadChartRef,
+  ]);
   const { sourceId, createDerivedIndexPattern } = useSourceContext();
   const { nodeType, accountId, region } = useWaffleOptionsContext();
   const { currentTime, options, node } = props;
@@ -76,13 +81,15 @@ const TabComponent = (props: TabProps) => {
     filter = convertKueryToElasticSearchQuery(filter, derivedIndexPattern);
   }
 
-  const buildCustomMetric = useCallback((field: string, id: string) =>
-    ({
+  const buildCustomMetric = useCallback(
+    (field: string, id: string) => ({
       type: 'custom' as SnapshotMetricType,
       aggregation: 'avg',
       field,
       id,
-    }), []);
+    }),
+    []
+  );
 
   const updateTime = useCallback(
     (e: React.ChangeEvent<HTMLSelectElement>) => {
