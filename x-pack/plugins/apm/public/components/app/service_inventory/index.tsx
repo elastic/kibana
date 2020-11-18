@@ -47,7 +47,7 @@ export function ServiceInventory() {
     (callApmApi) => {
       if (start && end) {
         return callApmApi({
-          pathname: '/api/apm/services',
+          endpoint: 'GET /api/apm/services',
           params: {
             query: { start, end, uiFilters: JSON.stringify(uiFilters) },
           },

@@ -116,14 +116,14 @@ export interface DataFrameAnalyticsListRow {
 }
 
 // Used to pass on attribute names to table columns
-export enum DataFrameAnalyticsListColumn {
-  configDestIndex = 'config.dest.index',
-  configSourceIndex = 'config.source.index',
-  configCreateTime = 'config.create_time',
-  description = 'config.description',
-  id = 'id',
-  memoryStatus = 'stats.memory_usage.status',
-}
+export const DataFrameAnalyticsListColumn = {
+  configDestIndex: 'config.dest.index',
+  configSourceIndex: 'config.source.index',
+  configCreateTime: 'config.create_time',
+  description: 'config.description',
+  id: 'id',
+  memoryStatus: 'stats.memory_usage.status',
+} as const;
 
 export type ItemIdToExpandedRowMap = Record<string, JSX.Element>;
 
