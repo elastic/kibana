@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo, useCallback, useEffect } from 'react';
 import { noop } from 'lodash';
-import useMount from 'react-use/lib/useMount';
 import { euiStyled } from '../../../../observability/public';
 
 import { LogEntriesCursor } from '../../../common/http_api';
@@ -100,10 +99,13 @@ Read more at https://github.com/elastic/kibana/blob/master/src/plugins/kibana_re
   const parsedHeight = typeof height === 'number' ? `${height}px` : height;
 
   // Component lifetime
-  useMount(() => {
+  useEffect(() => {
     loadSourceConfiguration();
+  }, [loadSourceConfiguration]);
+
+  useEffect(() => {
     fetchEntries();
-  });
+  }, [fetchEntries]);
 
   // Pagination handler
   const handlePagination = useCallback(
