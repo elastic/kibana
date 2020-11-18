@@ -328,6 +328,29 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     [areExceptionsAllowed, canUserCRUD, handleAddExceptionClick, hasIndexWrite]
   );
 
+  const addToCasePanel = {
+    id: 1,
+    title: i18n.ACTION_ADD_CASE,
+    items: [
+      {
+        key: 'add-new-case-menu-item',
+        'aria-label': 'Add to new case',
+        'data-test-subj': 'add-new-case-item',
+        onClick: () => {},
+        disabled: !canUserCRUD,
+        name: <EuiText size="m">{i18n.ACTION_ADD_NEW_CASE}</EuiText>,
+      },
+      {
+        key: 'add-existing-case-menu-item',
+        'aria-label': 'Add to existing case',
+        'data-test-subj': 'add-existing-case-menu-item',
+        onClick: () => {},
+        disabled: !canUserCRUD,
+        name: <EuiText size="m">{i18n.ACTION_ADD_EXISTING_CASE}</EuiText>,
+      },
+    ],
+  };
+
   const statusFilters = useMemo(() => {
     if (!alertStatus) {
       return [];
@@ -354,10 +377,16 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     () => [
       {
         id: 0,
-        items: [...statusFilters, addEndpointExceptionPanelItem, addExceptionPanelItem],
+        items: [
+          ...statusFilters,
+          addEndpointExceptionPanelItem,
+          addExceptionPanelItem,
+          { name: <EuiText size="m">{i18n.ACTION_ADD_CASE}</EuiText>, panel: 1 },
+        ],
       },
+      addToCasePanel,
     ],
-    [addEndpointExceptionPanelItem, addExceptionPanelItem, statusFilters]
+    [addEndpointExceptionPanelItem, addExceptionPanelItem, statusFilters, addToCasePanel]
   );
 
   return (

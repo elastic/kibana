@@ -136,6 +136,27 @@ export const ACTION_ADD_ENDPOINT_EXCEPTION = i18n.translate(
   }
 );
 
+export const ACTION_ADD_CASE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.actions.addCase',
+  {
+    defaultMessage: 'Add to case',
+  }
+);
+
+export const ACTION_ADD_NEW_CASE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.actions.addNewCase',
+  {
+    defaultMessage: 'Add to new case',
+  }
+);
+
+export const ACTION_ADD_EXISTING_CASE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.actions.addExistingCase',
+  {
+    defaultMessage: 'Add to existing case',
+  }
+);
+
 export const CLOSED_ALERT_SUCCESS_TOAST = (totalAlerts: number) =>
   i18n.translate('xpack.securitySolution.detectionEngine.alerts.closedAlertSuccessToastMessage', {
     values: { totalAlerts },
