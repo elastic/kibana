@@ -16,7 +16,6 @@ import { uiFiltersRt, rangeRt } from './default_api_types';
 import { getTransactionSampleForGroup } from '../lib/transaction_groups/get_transaction_sample_for_group';
 import { getSearchAggregatedTransactions } from '../lib/helpers/aggregated_transactions';
 import { getErrorRate } from '../lib/transaction_groups/get_error_rate';
-import { getThroughput } from '../lib/transaction_groups/get_throughput';
 
 export const transactionGroupsRoute = createRoute({
   endpoint: 'GET /api/apm/services/{serviceName}/transaction_groups',

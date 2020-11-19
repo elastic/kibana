@@ -67,6 +67,7 @@ describe('ServiceOverview', () => {
           sort: { direction: 'desc', field: 'test field' },
         },
         totalItemCount: 0,
+        throughput: [],
       },
       refetch: () => {},
       status: FETCH_STATUS.SUCCESS,

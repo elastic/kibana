@@ -14,20 +14,16 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import {
   TRANSACTION_PAGE_LOAD,
   TRANSACTION_REQUEST,
   TRANSACTION_ROUTE_CHANGE,
 } from '../../../../../common/transaction_types';
-import { asDecimal, tpmUnit } from '../../../../../common/utils/formatters';
-import { Coordinate } from '../../../../../typings/timeseries';
 import { ChartsSyncContextProvider } from '../../../../context/charts_sync_context';
 import { LicenseContext } from '../../../../context/LicenseContext';
 import { IUrlParams } from '../../../../context/UrlParamsContext/types';
 import { FETCH_STATUS } from '../../../../hooks/useFetcher';
 import { ITransactionChartData } from '../../../../selectors/chartSelectors';
-import { isValidCoordinateValue } from '../../../../utils/isValidCoordinateValue';
 import { TransactionBreakdown } from '../../TransactionBreakdown';
 import { getTPMTooltipFormatter } from '../helper/helper';
 import { LineChart } from '../line_chart';
