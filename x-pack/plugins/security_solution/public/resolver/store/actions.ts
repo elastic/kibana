@@ -94,6 +94,10 @@ interface AppReceivedNewExternalProperties {
      * A flag to tell resolver to refetch data, if a refresh button outside of resolver is clicked for example.
      */
     shouldUpdate: boolean;
+    /**
+     * Filters passed from an external source, kql/eql/dates etc.
+     */
+    filters?: object;
   };
 }
 

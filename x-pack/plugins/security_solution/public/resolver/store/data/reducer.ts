@@ -42,6 +42,7 @@ export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialS
       },
       resolverComponentInstanceID: action.payload.resolverComponentInstanceID,
       locationSearch: action.payload.locationSearch,
+      filters: action.payload.filters,
     };
     const panelViewAndParameters = selectors.panelViewAndParameters(nextState);
     return {

@@ -32,7 +32,13 @@ import { NewCase, ExistingCase } from '../timeline/properties/helpers';
 import { updateTimelineGraphEventId } from '../../../timelines/store/timeline/actions';
 import { Resolver } from '../../../resolver/view';
 import { useAllCasesModal } from '../../../cases/components/use_all_cases_modal';
-import { isLoadingSelector } from '../../../common/components/super_date_picker/selectors';
+import {
+  isLoadingSelector,
+  startSelector,
+  endSelector,
+  fromStrSelector,
+  toStrSelector,
+} from '../../../common/components/super_date_picker/selectors';
 import * as i18n from './translations';
 import { useUiSetting$ } from '../../../common/lib/kibana';
 import { useSignalIndex } from '../../../detections/containers/detection_engine/alerts/use_signal_index';
@@ -110,6 +116,8 @@ const GraphOverlayComponent = ({
   title,
   timelineType,
   shouldResolverUpdate,
+  start,
+  end,
 }: OwnProps & PropsFromRedux) => {
   const dispatch = useDispatch();
   const onCloseOverlay = useCallback(() => {
@@ -121,7 +129,6 @@ const GraphOverlayComponent = ({
   );
 
   const { Modal: AllCasesModal, onOpenModal: onOpenCaseModal } = useAllCasesModal({ timelineId });
-
   const {
     timelineFullScreen,
     setTimelineFullScreen,
@@ -206,6 +213,7 @@ const GraphOverlayComponent = ({
           resolverComponentInstanceID={currentTimeline.id}
           indices={indices}
           shouldUpdate={shouldResolverUpdate}
+          filters={{ start, end }}
         />
       )}
       <AllCasesModal />
@@ -218,11 +226,27 @@ const makeMapStateToProps = () => {
   const mapStateToProps = (state: State, { timelineId }: OwnProps) => {
     const timeline: TimelineModel = getTimeline(state, timelineId) ?? timelineDefaults;
     const { status, title = '' } = timeline;
-    const shouldResolverUpdate = isLoadingSelector()(state.inputs.global);
+    const getIsLoadingSelector = isLoadingSelector();
+    const getStartSelector = startSelector();
+    const getEndSelector = endSelector();
+    let shouldResolverUpdate: boolean;
+    let start: string;
+    let end: string;
+    shouldResolverUpdate = getIsLoadingSelector(state.inputs.global);
+    if (timelineId === 'host-page-events') {
+      start = getStartSelector(state.inputs.global);
+      end = getEndSelector(state.inputs.global);
+    } else {
+      start = getStartSelector(state.inputs.timeline);
+      end = getEndSelector(state.inputs.timeline);
+      // shouldResolverUpdate = getIsLoadingSelector(state.inputs.timeline);
+    }
     return {
       status,
       title,
       shouldResolverUpdate,
+      start,
+      end,
     };
   };
   return mapStateToProps;

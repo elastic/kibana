@@ -30,6 +30,7 @@ export function ResolverTreeFetcher(
     const state = api.getState();
     let databaseParameters;
     const shouldRefetch = selectors.resolverDataIsStale(state);
+    console.log('should refetch', shouldRefetch);
     if (shouldRefetch) {
       databaseParameters = selectors.lastResponseParameters(state);
     } else {

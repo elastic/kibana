@@ -25,7 +25,6 @@ export function useResolverQueryParamCleaner() {
 
   const history = useHistory();
   const resolverComponentInstanceID = useSelector(selectors.resolverComponentInstanceID);
-
   const resolverKey = parameterName(resolverComponentInstanceID);
 
   useEffect(() => {

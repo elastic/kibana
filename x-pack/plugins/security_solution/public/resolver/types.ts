@@ -275,6 +275,8 @@ export interface DataState {
     data: SafeResolverEvent | null;
   };
 
+  filters?: object;
+
   readonly tree?: {
     /**
      * The parameters passed from the resolver properties
@@ -636,6 +638,15 @@ export interface ResolverProps {
    * A flag to update data from an external source
    */
   shouldUpdate: boolean;
+
+  /**
+   * A filters object containing any optional filters to use with resolver
+   */
+
+  filters?: {
+    start?: string;
+    end?: string;
+  };
 }
 
 /**
