@@ -94,7 +94,7 @@ export abstract class BaseLogFormat extends Stream.Transform {
     const data: Record<string, any> = {
       type: event.event,
       '@timestamp': event.timestamp,
-      tags: [...(event.tags ?? [])],
+      tags: [...(event.tags || [])],
       pid: event.pid,
     };
 
