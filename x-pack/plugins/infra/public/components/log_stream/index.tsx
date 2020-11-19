@@ -18,6 +18,11 @@ import { ScrollableLogTextStreamView } from '../logging/log_text_stream';
 
 const PAGE_THRESHOLD = 2;
 
+type LogColumnDefinition =
+  | { type: 'timestamp' }
+  | { type: 'message' }
+  | { type: 'field'; field: string };
+
 export interface LogStreamProps {
   sourceId?: string;
   startTimestamp: number;
@@ -26,6 +31,7 @@ export interface LogStreamProps {
   center?: LogEntriesCursor;
   highlight?: string;
   height?: string | number;
+  columns?: LogColumnDefinition[];
 }
 
 export const LogStream: React.FC<LogStreamProps> = ({
