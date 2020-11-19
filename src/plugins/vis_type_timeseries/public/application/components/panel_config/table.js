@@ -47,6 +47,7 @@ import { QueryBarWrapper } from '../query_bar_wrapper';
 import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
 import { VisDataContext } from './../../contexts/vis_data_context';
 export class TablePanelConfig extends Component {
+  static contextType = VisDataContext;
   constructor(props) {
     super(props);
     this.state = { selectedTab: 'data' };
@@ -116,19 +117,15 @@ export class TablePanelConfig extends Component {
                       />
                     }
                   >
-                    <VisDataContext.Consumer>
-                      {(visData) => (
-                        <FieldSelect
-                          fields={this.props.fields}
-                          value={model.pivot_id}
-                          indexPattern={model.index_pattern}
-                          onChange={this.handlePivotChange}
-                          uiRestrictions={visData.uiRestrictions}
-                          type={'terms'}
-                          fullWidth
-                        />
-                      )}
-                    </VisDataContext.Consumer>
+                    <FieldSelect
+                      fields={this.props.fields}
+                      value={model.pivot_id}
+                      indexPattern={model.index_pattern}
+                      onChange={this.handlePivotChange}
+                      uiRestrictions={this.context.uiRestrictions}
+                      type={'terms'}
+                      fullWidth
+                    />
                   </EuiFormRow>
                 </EuiFlexItem>
                 <EuiFlexItem>
