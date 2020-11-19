@@ -53,61 +53,54 @@ export type LogEntryColumnWidth = Pick<
 
 export const iconColumnId = Symbol('iconColumnId');
 
-export interface LogEntryColumnWidths {
-  [columnId: string]: LogEntryColumnWidth;
-  [iconColumnId]: LogEntryColumnWidth;
-}
+export type LogEntryColumnWidths = LogEntryColumnWidth[];
+
+// export interface LogEntryColumnWidths {
+//   [columnId: string]: LogEntryColumnWidth;
+//   [iconColumnId]: LogEntryColumnWidth;
+// }
 
 export const getColumnWidths = (
   columns: LogColumnConfiguration[],
   characterWidth: number,
   formattedDateWidth: number
-): LogEntryColumnWidths =>
-  columns.reduce<LogEntryColumnWidths>(
-    (columnWidths, column) => {
-      if (isTimestampLogColumnConfiguration(column)) {
-        return {
-          ...columnWidths,
-          [column.timestampColumn.id]: {
-            growWeight: 0,
-            shrinkWeight: 0,
-            baseWidth: `${
-              Math.ceil(characterWidth * formattedDateWidth * DATE_COLUMN_SLACK_FACTOR) +
-              2 * COLUMN_PADDING
-            }px`,
-          },
-        };
-      } else if (isMessageLogColumnConfiguration(column)) {
-        return {
-          ...columnWidths,
-          [column.messageColumn.id]: {
-            growWeight: 5,
-            shrinkWeight: 0,
-            baseWidth: '0%',
-          },
-        };
-      } else {
-        return {
-          ...columnWidths,
-          [column.fieldColumn.id]: {
-            growWeight: 1,
-            shrinkWeight: 0,
-            baseWidth: `${
-              Math.ceil(characterWidth * FIELD_COLUMN_MIN_WIDTH_CHARACTERS) + 2 * COLUMN_PADDING
-            }px`,
-          },
-        };
-      }
-    },
-    {
-      // the detail flyout icon column
-      [iconColumnId]: {
+): LogEntryColumnWidths => {
+  const columnWidths: LogEntryColumnWidths = columns.map((column) => {
+    if (isTimestampLogColumnConfiguration(column)) {
+      return {
         growWeight: 0,
         shrinkWeight: 0,
-        baseWidth: `${DETAIL_FLYOUT_ICON_MIN_WIDTH + 2 * COLUMN_PADDING}px`,
-      },
+        baseWidth: `${
+          Math.ceil(characterWidth * formattedDateWidth * DATE_COLUMN_SLACK_FACTOR) +
+          2 * COLUMN_PADDING
+        }px`,
+      };
+    } else if (isMessageLogColumnConfiguration(column)) {
+      return {
+        growWeight: 5,
+        shrinkWeight: 0,
+        baseWidth: '0%',
+      };
+    } else {
+      return {
+        growWeight: 1,
+        shrinkWeight: 0,
+        baseWidth: `${
+          Math.ceil(characterWidth * FIELD_COLUMN_MIN_WIDTH_CHARACTERS) + 2 * COLUMN_PADDING
+        }px`,
+      };
     }
-  );
+  });
+
+  // Actions menu column
+  columnWidths.push({
+    growWeight: 0,
+    shrinkWeight: 0,
+    baseWidth: `${DETAIL_FLYOUT_ICON_MIN_WIDTH + 2 * COLUMN_PADDING}px`,
+  });
+
+  return columnWidths;
+};
 
 /**
  * This hook calculates the column widths based on the given configuration. It

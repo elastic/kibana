@@ -131,11 +131,10 @@ export const LogEntryRow = memo(
       >
         {columnConfigurations.map((columnConfiguration, columnPosition) => {
           const column = logEntry.columns[columnPosition];
+          const columnWidth = columnWidths[columnPosition];
           const columnHighlights = highlights.flatMap((h) => h.columns[columnPosition]);
 
           if (isTimestampLogColumnConfiguration(columnConfiguration)) {
-            const columnWidth = columnWidths[columnConfiguration.timestampColumn.id];
-
             return (
               <LogEntryColumn
                 data-test-subj="logColumn timestampLogColumn"
@@ -148,8 +147,6 @@ export const LogEntryRow = memo(
               </LogEntryColumn>
             );
           } else if (isMessageLogColumnConfiguration(columnConfiguration)) {
-            const columnWidth = columnWidths[columnConfiguration.messageColumn.id];
-
             return (
               <LogEntryColumn
                 data-test-subj="logColumn messageLogColumn"
@@ -167,8 +164,6 @@ export const LogEntryRow = memo(
               </LogEntryColumn>
             );
           } else if (isFieldLogColumnConfiguration(columnConfiguration)) {
-            const columnWidth = columnWidths[columnConfiguration.fieldColumn.id];
-
             return (
               <LogEntryColumn
                 data-test-subj={`logColumn fieldLogColumn fieldLogColumn:${columnConfiguration.fieldColumn.field}`}
@@ -190,7 +185,7 @@ export const LogEntryRow = memo(
         {hasActionsMenu ? (
           <LogEntryColumn
             key="logColumn iconLogColumn iconLogColumn:details"
-            {...columnWidths[iconColumnId]}
+            {...columnWidths[columnWidths.length - 1]}
           >
             {isHovered || isMenuOpen ? (
               <LogEntryContextMenu

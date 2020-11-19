@@ -31,12 +31,12 @@ export const LogColumnHeaders: React.FunctionComponent<{
   const { firstVisiblePosition } = useContext(LogPositionState.Context);
   return (
     <LogColumnHeadersWrapper>
-      {columnConfigurations.map((columnConfiguration) => {
+      {columnConfigurations.map((columnConfiguration, columnPosition) => {
         if (isTimestampLogColumnConfiguration(columnConfiguration)) {
           return (
             <LogColumnHeader
-              key={columnConfiguration.timestampColumn.id}
-              columnWidth={columnWidths[columnConfiguration.timestampColumn.id]}
+              key={columnPosition}
+              columnWidth={columnWidths[columnPosition]}
               data-test-subj="logColumnHeader timestampLogColumnHeader"
             >
               {firstVisiblePosition ? localizedDate(firstVisiblePosition.time) : 'Timestamp'}
@@ -45,9 +45,9 @@ export const LogColumnHeaders: React.FunctionComponent<{
         } else if (isMessageLogColumnConfiguration(columnConfiguration)) {
           return (
             <LogColumnHeader
-              columnWidth={columnWidths[columnConfiguration.messageColumn.id]}
+              columnWidth={columnWidths[columnPosition]}
               data-test-subj="logColumnHeader messageLogColumnHeader"
-              key={columnConfiguration.messageColumn.id}
+              key={columnPosition}
             >
               Message
             </LogColumnHeader>
@@ -55,9 +55,9 @@ export const LogColumnHeaders: React.FunctionComponent<{
         } else if (isFieldLogColumnConfiguration(columnConfiguration)) {
           return (
             <LogColumnHeader
-              columnWidth={columnWidths[columnConfiguration.fieldColumn.id]}
+              columnWidth={columnWidths[columnPosition]}
               data-test-subj="logColumnHeader fieldLogColumnHeader"
-              key={columnConfiguration.fieldColumn.id}
+              key={columnPosition}
             >
               {columnConfiguration.fieldColumn.field}
             </LogColumnHeader>
