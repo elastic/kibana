@@ -63,7 +63,7 @@ export function getFallbackIndexPatternId(
   if (defaultIndex && findIndexPatternById(indexPatterns, defaultIndex)) {
     return defaultIndex;
   }
-  return indexPatterns[0]?.id ? indexPatterns[0].id : '';
+  return indexPatterns && indexPatterns[0]?.id ? indexPatterns[0].id : '';
 }
 
 /**
