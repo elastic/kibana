@@ -20,7 +20,7 @@ export const JobMapLegend: FC = () => (
           <EuiText size="xs" color="subdued">
             <FormattedMessage
               id="xpack.ml.dataframe.analyticsMap.legend.indexLabel"
-              defaultMessage={JOB_MAP_NODE_TYPES.INDEX}
+              defaultMessage="index"
             />
           </EuiText>
         </EuiFlexItem>
@@ -47,7 +47,7 @@ export const JobMapLegend: FC = () => (
           <EuiText size="xs" color="subdued">
             <FormattedMessage
               id="xpack.ml.dataframe.analyticsMap.legend.analyticsJobLabel"
-              defaultMessage={`${JOB_MAP_NODE_TYPES.ANALYTICS} job`}
+              defaultMessage="analytics job"
             />
           </EuiText>
         </EuiFlexItem>
