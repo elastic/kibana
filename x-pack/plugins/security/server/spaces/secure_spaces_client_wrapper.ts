@@ -41,8 +41,7 @@ export class SecureSpacesClientWrapper implements ISpacesClient {
     private readonly request: KibanaRequest,
     private readonly authorization: AuthorizationServiceSetup,
     private readonly legacyAuditLogger: LegacySpacesAuditLogger
-  ) {
-  }
+  ) {}
 
   public async getAll({
     purpose = 'any',
