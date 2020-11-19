@@ -5,7 +5,6 @@
  */
 
 import expect from '@kbn/expect';
-import { expectSnapshot } from '../../../common/match_snapshot';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 export default function rumHasDataApiTests({ getService }: FtrProviderContext) {

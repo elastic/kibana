@@ -34,6 +34,7 @@ const trapErrors = (fn: () => void) => {
 
 export interface ITagInternalClient extends ITagsClient {
   find(options: FindTagsOptions): Promise<FindTagsResponse>;
+  bulkDelete(ids: string[]): Promise<void>;
 }
 
 export class TagsClient implements ITagInternalClient {
@@ -112,6 +113,22 @@ export class TagsClient implements ITagInternalClient {
         perPage,
         search,
       },
+    });
+  }
+
+  public async bulkDelete(tagIds: string[]) {
+    await this.http.post<{}>('/internal/saved_objects_tagging/tags/_bulk_delete', {
+      body: JSON.stringify({
+        ids: tagIds,
+      }),
+    });
+
+    trapErrors(() => {
+      if (this.changeListener) {
+        tagIds.forEach((tagId) => {
+          this.changeListener!.onDelete(tagId);
+        });
+      }
     });
   }
 }
