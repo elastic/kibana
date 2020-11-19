@@ -7,34 +7,95 @@
 import _ from 'lodash';
 import React, { Component, Fragment } from 'react';
 
+import { i18n } from '@kbn/i18n';
+import { EuiSpacer, EuiButtonGroup, EuiFormRow, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
 import { VectorStyleColorEditor } from './color/vector_style_color_editor';
 import { VectorStyleSizeEditor } from './size/vector_style_size_editor';
+// @ts-expect-error
 import { VectorStyleSymbolizeAsEditor } from './symbol/vector_style_symbolize_as_editor';
 import { VectorStyleIconEditor } from './symbol/vector_style_icon_editor';
 import { VectorStyleLabelEditor } from './label/vector_style_label_editor';
+// @ts-expect-error
 import { VectorStyleLabelBorderSizeEditor } from './label/vector_style_label_border_size_editor';
+// @ts-expect-error
 import { OrientationEditor } from './orientation/orientation_editor';
 import { getDefaultDynamicProperties, getDefaultStaticProperties } from '../vector_style_defaults';
 import { DEFAULT_FILL_COLORS, DEFAULT_LINE_COLORS } from '../../color_palettes';
-import { i18n } from '@kbn/i18n';
 
-import { EuiSpacer, EuiButtonGroup, EuiFormRow, EuiSwitch } from '@elastic/eui';
 import {
   LABEL_BORDER_SIZES,
   VECTOR_STYLES,
   STYLE_TYPE,
   VECTOR_SHAPE_TYPE,
 } from '../../../../../common/constants';
-import { createStyleFieldsHelper } from '../style_fields_helper';
+import { createStyleFieldsHelper, StyleField, StyleFieldsHelper } from '../style_fields_helper';
+import {
+  ColorDynamicOptions,
+  ColorStaticOptions,
+  DynamicStylePropertyOptions,
+  IconDynamicOptions,
+  IconStaticOptions,
+  LabelDynamicOptions,
+  LabelStaticOptions,
+  SizeDynamicOptions,
+  SizeStaticOptions,
+  StaticStylePropertyOptions,
+  StylePropertyOptions,
+  VectorStylePropertiesDescriptor,
+} from '../../../../../common/descriptor_types';
+import { IStyleProperty } from '../properties/style_property';
+import { SymbolizeAsProperty } from '../properties/symbolize_as_property';
+import { LabelBorderSizeProperty } from '../properties/label_border_size_property';
+import { StaticTextProperty } from '../properties/static_text_property';
+import { StaticSizeProperty } from '../properties/static_size_property';
+import { IVectorLayer } from '../../../layers/vector_layer/vector_layer';
 
-export class VectorStyleEditor extends Component {
-  state = {
-    styleFields: [],
-    defaultDynamicProperties: getDefaultDynamicProperties(),
-    defaultStaticProperties: getDefaultStaticProperties(),
-    supportedFeatures: undefined,
-    selectedFeature: null,
-  };
+export interface StyleProperties {
+  [key: string]: IStyleProperty<StylePropertyOptions>;
+}
+
+interface Props {
+  layer: IVectorLayer;
+  isPointsOnly: boolean;
+  isLinesOnly: boolean;
+  onIsTimeAwareChange: (isTimeAware: boolean) => void;
+  handlePropertyChange: (propertyName: VECTOR_STYLES, stylePropertyDescriptor: unknown) => void;
+  hasBorder: boolean;
+  styleProperties: StyleProperties;
+  isTimeAware: boolean;
+  showIsTimeAware: boolean;
+}
+
+interface State {
+  styleFields: StyleField[];
+  defaultDynamicProperties: VectorStylePropertiesDescriptor;
+  defaultStaticProperties: VectorStylePropertiesDescriptor;
+  supportedFeatures: VECTOR_SHAPE_TYPE[];
+  selectedFeature: VECTOR_SHAPE_TYPE;
+  styleFieldsHelper?: StyleFieldsHelper;
+}
+
+export class VectorStyleEditor extends Component<Props, State> {
+  private _isMounted: boolean = false;
+
+  constructor(props: Props) {
+    super(props);
+
+    let selectedFeature = VECTOR_SHAPE_TYPE.POLYGON;
+    if (props.isPointsOnly) {
+      selectedFeature = VECTOR_SHAPE_TYPE.POINT;
+    } else if (props.isLinesOnly) {
+      selectedFeature = VECTOR_SHAPE_TYPE.LINE;
+    }
+
+    this.state = {
+      styleFields: [],
+      defaultDynamicProperties: getDefaultDynamicProperties(),
+      defaultStaticProperties: getDefaultStaticProperties(),
+      supportedFeatures: [],
+      selectedFeature,
+    };
+  }
 
   componentWillUnmount() {
     this._isMounted = false;
@@ -68,36 +129,20 @@ export class VectorStyleEditor extends Component {
 
   async _loadSupportedFeatures() {
     const supportedFeatures = await this.props.layer.getSource().getSupportedShapeTypes();
-    if (!this._isMounted) {
-      return;
-    }
-
-    if (!_.isEqual(supportedFeatures, this.state.supportedFeatures)) {
+    if (this._isMounted && !_.isEqual(supportedFeatures, this.state.supportedFeatures)) {
       this.setState({ supportedFeatures });
-    }
-
-    if (this.state.selectedFeature === null) {
-      let selectedFeature = VECTOR_SHAPE_TYPE.POLYGON;
-      if (this.props.isPointsOnly) {
-        selectedFeature = VECTOR_SHAPE_TYPE.POINT;
-      } else if (this.props.isLinesOnly) {
-        selectedFeature = VECTOR_SHAPE_TYPE.LINE;
-      }
-      this.setState({
-        selectedFeature: selectedFeature,
-      });
     }
   }
 
-  _handleSelectedFeatureChange = (selectedFeature) => {
-    this.setState({ selectedFeature });
+  _handleSelectedFeatureChange = (selectedFeature: string) => {
+    this.setState({ selectedFeature: selectedFeature as VECTOR_SHAPE_TYPE });
   };
 
-  _onIsTimeAwareChange = (event) => {
+  _onIsTimeAwareChange = (event: EuiSwitchEvent) => {
     this.props.onIsTimeAwareChange(event.target.checked);
   };
 
-  _onStaticStyleChange = (propertyName, options) => {
+  _onStaticStyleChange = (propertyName: VECTOR_STYLES, options: StaticStylePropertyOptions) => {
     const styleDescriptor = {
       type: STYLE_TYPE.STATIC,
       options,
@@ -105,7 +150,7 @@ export class VectorStyleEditor extends Component {
     this.props.handlePropertyChange(propertyName, styleDescriptor);
   };
 
-  _onDynamicStyleChange = (propertyName, options) => {
+  _onDynamicStyleChange = (propertyName: VECTOR_STYLES, options: DynamicStylePropertyOptions) => {
     const styleDescriptor = {
       type: STYLE_TYPE.DYNAMIC,
       options,
@@ -115,18 +160,21 @@ export class VectorStyleEditor extends Component {
 
   _hasMarkerOrIcon() {
     const iconSize = this.props.styleProperties[VECTOR_STYLES.ICON_SIZE];
-    return iconSize.isDynamic() || iconSize.getOptions().size > 0;
+    return iconSize.isDynamic() || (iconSize as StaticSizeProperty).getOptions().size > 0;
   }
 
   _hasLabel() {
     const label = this.props.styleProperties[VECTOR_STYLES.LABEL_TEXT];
     return label.isDynamic()
       ? label.isComplete()
-      : label.getOptions().value != null && label.getOptions().value.length;
+      : (label as StaticTextProperty).getOptions().value != null &&
+          (label as StaticTextProperty).getOptions().value.length;
   }
 
   _hasLabelBorder() {
-    const labelBorderSize = this.props.styleProperties[VECTOR_STYLES.LABEL_BORDER_SIZE];
+    const labelBorderSize = this.props.styleProperties[
+      VECTOR_STYLES.LABEL_BORDER_SIZE
+    ] as LabelBorderSizeProperty;
     return labelBorderSize.getOptions().size !== LABEL_BORDER_SIZES.NONE;
   }
 
@@ -138,13 +186,18 @@ export class VectorStyleEditor extends Component {
         swatches={DEFAULT_FILL_COLORS}
         onStaticStyleChange={this._onStaticStyleChange}
         onDynamicStyleChange={this._onDynamicStyleChange}
-        styleProperty={this.props.styleProperties[VECTOR_STYLES.FILL_COLOR]}
-        fields={this.state.styleFieldsHelper.getFieldsForStyle(VECTOR_STYLES.FILL_COLOR)}
+        styleProperty={
+          this.props.styleProperties[VECTOR_STYLES.FILL_COLOR] as IStyleProperty<
+            ColorDynamicOptions | ColorStaticOptions
+          >
+        }
+        fields={this.state.styleFieldsHelper!.getFieldsForStyle(VECTOR_STYLES.FILL_COLOR)}
         defaultStaticStyleOptions={
-          this.state.defaultStaticProperties[VECTOR_STYLES.FILL_COLOR].options
+          this.state.defaultStaticProperties[VECTOR_STYLES.FILL_COLOR].options as ColorStaticOptions
         }
         defaultDynamicStyleOptions={
-          this.state.defaultDynamicProperties[VECTOR_STYLES.FILL_COLOR].options
+          this.state.defaultDynamicProperties[VECTOR_STYLES.FILL_COLOR]
+            .options as ColorDynamicOptions
         }
       />
     );
@@ -159,13 +212,18 @@ export class VectorStyleEditor extends Component {
         swatches={DEFAULT_LINE_COLORS}
         onStaticStyleChange={this._onStaticStyleChange}
         onDynamicStyleChange={this._onDynamicStyleChange}
-        styleProperty={this.props.styleProperties[VECTOR_STYLES.LINE_COLOR]}
-        fields={this.state.styleFieldsHelper.getFieldsForStyle(VECTOR_STYLES.LINE_COLOR)}
+        styleProperty={
+          this.props.styleProperties[VECTOR_STYLES.LINE_COLOR] as IStyleProperty<
+            ColorDynamicOptions | ColorStaticOptions
+          >
+        }
+        fields={this.state.styleFieldsHelper!.getFieldsForStyle(VECTOR_STYLES.LINE_COLOR)}
         defaultStaticStyleOptions={
-          this.state.defaultStaticProperties[VECTOR_STYLES.LINE_COLOR].options
+          this.state.defaultStaticProperties[VECTOR_STYLES.LINE_COLOR].options as ColorStaticOptions
         }
         defaultDynamicStyleOptions={
-          this.state.defaultDynamicProperties[VECTOR_STYLES.LINE_COLOR].options
+          this.state.defaultDynamicProperties[VECTOR_STYLES.LINE_COLOR]
+            .options as ColorDynamicOptions
         }
       />
     );
@@ -178,13 +236,18 @@ export class VectorStyleEditor extends Component {
         disabledBy={VECTOR_STYLES.ICON_SIZE}
         onStaticStyleChange={this._onStaticStyleChange}
         onDynamicStyleChange={this._onDynamicStyleChange}
-        styleProperty={this.props.styleProperties[VECTOR_STYLES.LINE_WIDTH]}
-        fields={this.state.styleFieldsHelper.getFieldsForStyle(VECTOR_STYLES.LINE_WIDTH)}
+        styleProperty={
+          this.props.styleProperties[VECTOR_STYLES.LINE_WIDTH] as IStyleProperty<
+            SizeDynamicOptions | SizeStaticOptions
+          >
+        }
+        fields={this.state.styleFieldsHelper!.getFieldsForStyle(VECTOR_STYLES.LINE_WIDTH)}
         defaultStaticStyleOptions={
-          this.state.defaultStaticProperties[VECTOR_STYLES.LINE_WIDTH].options
+          this.state.defaultStaticProperties[VECTOR_STYLES.LINE_WIDTH].options as SizeStaticOptions
         }
         defaultDynamicStyleOptions={
-          this.state.defaultDynamicProperties[VECTOR_STYLES.LINE_WIDTH].options
+          this.state.defaultDynamicProperties[VECTOR_STYLES.LINE_WIDTH]
+            .options as SizeDynamicOptions
         }
       />
     );
@@ -198,13 +261,19 @@ export class VectorStyleEditor extends Component {
         <VectorStyleLabelEditor
           onStaticStyleChange={this._onStaticStyleChange}
           onDynamicStyleChange={this._onDynamicStyleChange}
-          styleProperty={this.props.styleProperties[VECTOR_STYLES.LABEL_TEXT]}
-          fields={this.state.styleFieldsHelper.getFieldsForStyle(VECTOR_STYLES.LABEL_TEXT)}
+          styleProperty={
+            this.props.styleProperties[VECTOR_STYLES.LABEL_TEXT] as IStyleProperty<
+              LabelDynamicOptions | LabelStaticOptions
+            >
+          }
+          fields={this.state.styleFieldsHelper!.getFieldsForStyle(VECTOR_STYLES.LABEL_TEXT)}
           defaultStaticStyleOptions={
-            this.state.defaultStaticProperties[VECTOR_STYLES.LABEL_TEXT].options
+            this.state.defaultStaticProperties[VECTOR_STYLES.LABEL_TEXT]
+              .options as LabelStaticOptions
           }
           defaultDynamicStyleOptions={
-            this.state.defaultDynamicProperties[VECTOR_STYLES.LABEL_TEXT].options
+            this.state.defaultDynamicProperties[VECTOR_STYLES.LABEL_TEXT]
+              .options as LabelDynamicOptions
           }
         />
         <EuiSpacer size="m" />
@@ -215,13 +284,19 @@ export class VectorStyleEditor extends Component {
           swatches={DEFAULT_LINE_COLORS}
           onStaticStyleChange={this._onStaticStyleChange}
           onDynamicStyleChange={this._onDynamicStyleChange}
-          styleProperty={this.props.styleProperties[VECTOR_STYLES.LABEL_COLOR]}
-          fields={this.state.styleFieldsHelper.getFieldsForStyle(VECTOR_STYLES.LABEL_COLOR)}
+          styleProperty={
+            this.props.styleProperties[VECTOR_STYLES.LABEL_COLOR] as IStyleProperty<
+              ColorDynamicOptions | ColorStaticOptions
+            >
+          }
+          fields={this.state.styleFieldsHelper!.getFieldsForStyle(VECTOR_STYLES.LABEL_COLOR)}
           defaultStaticStyleOptions={
-            this.state.defaultStaticProperties[VECTOR_STYLES.LABEL_COLOR].options
+            this.state.defaultStaticProperties[VECTOR_STYLES.LABEL_COLOR]
+              .options as ColorStaticOptions
           }
           defaultDynamicStyleOptions={
-            this.state.defaultDynamicProperties[VECTOR_STYLES.LABEL_COLOR].options
+            this.state.defaultDynamicProperties[VECTOR_STYLES.LABEL_COLOR]
+              .options as ColorDynamicOptions
           }
         />
         <EuiSpacer size="m" />
@@ -231,13 +306,19 @@ export class VectorStyleEditor extends Component {
           disabledBy={VECTOR_STYLES.LABEL_TEXT}
           onStaticStyleChange={this._onStaticStyleChange}
           onDynamicStyleChange={this._onDynamicStyleChange}
-          styleProperty={this.props.styleProperties[VECTOR_STYLES.LABEL_SIZE]}
-          fields={this.state.styleFieldsHelper.getFieldsForStyle(VECTOR_STYLES.LABEL_SIZE)}
+          styleProperty={
+            this.props.styleProperties[VECTOR_STYLES.LABEL_SIZE] as IStyleProperty<
+              SizeDynamicOptions | SizeStaticOptions
+            >
+          }
+          fields={this.state.styleFieldsHelper!.getFieldsForStyle(VECTOR_STYLES.LABEL_SIZE)}
           defaultStaticStyleOptions={
-            this.state.defaultStaticProperties[VECTOR_STYLES.LABEL_SIZE].options
+            this.state.defaultStaticProperties[VECTOR_STYLES.LABEL_SIZE]
+              .options as SizeStaticOptions
           }
           defaultDynamicStyleOptions={
-            this.state.defaultDynamicProperties[VECTOR_STYLES.LABEL_SIZE].options
+            this.state.defaultDynamicProperties[VECTOR_STYLES.LABEL_SIZE]
+              .options as SizeDynamicOptions
           }
         />
         <EuiSpacer size="m" />
@@ -248,13 +329,19 @@ export class VectorStyleEditor extends Component {
           swatches={DEFAULT_LINE_COLORS}
           onStaticStyleChange={this._onStaticStyleChange}
           onDynamicStyleChange={this._onDynamicStyleChange}
-          styleProperty={this.props.styleProperties[VECTOR_STYLES.LABEL_BORDER_COLOR]}
-          fields={this.state.styleFieldsHelper.getFieldsForStyle(VECTOR_STYLES.LABEL_BORDER_COLOR)}
+          styleProperty={
+            this.props.styleProperties[VECTOR_STYLES.LABEL_BORDER_COLOR] as IStyleProperty<
+              ColorDynamicOptions | ColorStaticOptions
+            >
+          }
+          fields={this.state.styleFieldsHelper!.getFieldsForStyle(VECTOR_STYLES.LABEL_BORDER_COLOR)}
           defaultStaticStyleOptions={
-            this.state.defaultStaticProperties[VECTOR_STYLES.LABEL_BORDER_COLOR].options
+            this.state.defaultStaticProperties[VECTOR_STYLES.LABEL_BORDER_COLOR]
+              .options as ColorStaticOptions
           }
           defaultDynamicStyleOptions={
-            this.state.defaultDynamicProperties[VECTOR_STYLES.LABEL_BORDER_COLOR].options
+            this.state.defaultDynamicProperties[VECTOR_STYLES.LABEL_BORDER_COLOR]
+              .options as ColorDynamicOptions
           }
         />
         <EuiSpacer size="m" />
@@ -274,7 +361,11 @@ export class VectorStyleEditor extends Component {
     const hasMarkerOrIcon = this._hasMarkerOrIcon();
     let iconOrientationEditor;
     let iconEditor;
-    if (this.props.styleProperties[VECTOR_STYLES.SYMBOLIZE_AS].isSymbolizedAsIcon()) {
+    if (
+      (this.props.styleProperties[
+        VECTOR_STYLES.SYMBOLIZE_AS
+      ] as SymbolizeAsProperty).isSymbolizedAsIcon()
+    ) {
       iconOrientationEditor = (
         <Fragment>
           <OrientationEditor
@@ -283,7 +374,7 @@ export class VectorStyleEditor extends Component {
             onStaticStyleChange={this._onStaticStyleChange}
             onDynamicStyleChange={this._onDynamicStyleChange}
             styleProperty={this.props.styleProperties[VECTOR_STYLES.ICON_ORIENTATION]}
-            fields={this.state.styleFieldsHelper.getFieldsForStyle(VECTOR_STYLES.ICON_ORIENTATION)}
+            fields={this.state.styleFieldsHelper!.getFieldsForStyle(VECTOR_STYLES.ICON_ORIENTATION)}
             defaultStaticStyleOptions={
               this.state.defaultStaticProperties[VECTOR_STYLES.ICON_ORIENTATION].options
             }
@@ -301,13 +392,17 @@ export class VectorStyleEditor extends Component {
             disabledBy={VECTOR_STYLES.ICON_SIZE}
             onStaticStyleChange={this._onStaticStyleChange}
             onDynamicStyleChange={this._onDynamicStyleChange}
-            styleProperty={this.props.styleProperties[VECTOR_STYLES.ICON]}
-            fields={this.state.styleFieldsHelper.getFieldsForStyle(VECTOR_STYLES.ICON)}
+            styleProperty={
+              this.props.styleProperties[VECTOR_STYLES.ICON] as IStyleProperty<
+                IconDynamicOptions | IconStaticOptions
+              >
+            }
+            fields={this.state.styleFieldsHelper!.getFieldsForStyle(VECTOR_STYLES.ICON)}
             defaultStaticStyleOptions={
-              this.state.defaultStaticProperties[VECTOR_STYLES.ICON].options
+              this.state.defaultStaticProperties[VECTOR_STYLES.ICON].options as IconStaticOptions
             }
             defaultDynamicStyleOptions={
-              this.state.defaultDynamicProperties[VECTOR_STYLES.ICON].options
+              this.state.defaultDynamicProperties[VECTOR_STYLES.ICON].options as IconDynamicOptions
             }
           />
           <EuiSpacer size="m" />
@@ -341,13 +436,18 @@ export class VectorStyleEditor extends Component {
         <VectorStyleSizeEditor
           onStaticStyleChange={this._onStaticStyleChange}
           onDynamicStyleChange={this._onDynamicStyleChange}
-          styleProperty={this.props.styleProperties[VECTOR_STYLES.ICON_SIZE]}
-          fields={this.state.styleFieldsHelper.getFieldsForStyle(VECTOR_STYLES.ICON_SIZE)}
+          styleProperty={
+            this.props.styleProperties[VECTOR_STYLES.ICON_SIZE] as IStyleProperty<
+              SizeDynamicOptions | SizeStaticOptions
+            >
+          }
+          fields={this.state.styleFieldsHelper!.getFieldsForStyle(VECTOR_STYLES.ICON_SIZE)}
           defaultStaticStyleOptions={
-            this.state.defaultStaticProperties[VECTOR_STYLES.ICON_SIZE].options
+            this.state.defaultStaticProperties[VECTOR_STYLES.ICON_SIZE].options as SizeStaticOptions
           }
           defaultDynamicStyleOptions={
-            this.state.defaultDynamicProperties[VECTOR_STYLES.ICON_SIZE].options
+            this.state.defaultDynamicProperties[VECTOR_STYLES.ICON_SIZE]
+              .options as SizeDynamicOptions
           }
         />
         <EuiSpacer size="m" />
@@ -385,7 +485,7 @@ export class VectorStyleEditor extends Component {
   _renderProperties() {
     const { supportedFeatures, selectedFeature, styleFieldsHelper } = this.state;
 
-    if (!supportedFeatures || !styleFieldsHelper) {
+    if (supportedFeatures.length === 0 || !styleFieldsHelper) {
       return null;
     }
 

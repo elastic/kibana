@@ -22,6 +22,7 @@ import {
 import { ChartsPluginStart } from '../../../../src/plugins/charts/public';
 import { PluginStartContract as AlertingStart } from '../../alerts/public';
 import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
+import { Storage } from '../../../../src/plugins/kibana_utils/public';
 
 export interface TriggersAndActionsUIPublicPluginSetup {
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
@@ -102,16 +103,17 @@ export class Plugin
         const { boot } = await import('./application/boot');
         const kibanaFeatures = await pluginsStart.features.getFeatures();
         return boot({
-          dataPlugin: pluginsStart.data,
+          data: pluginsStart.data,
           charts: pluginsStart.charts,
           alerts: pluginsStart.alerts,
           element: params.element,
           toastNotifications: coreStart.notifications.toasts,
+          storage: new Storage(window.localStorage),
           http: coreStart.http,
           uiSettings: coreStart.uiSettings,
           docLinks: coreStart.docLinks,
           chrome: coreStart.chrome,
-          savedObjects: coreStart.savedObjects.client,
+          savedObjects: coreStart.savedObjects,
           I18nContext: coreStart.i18n.Context,
           capabilities: coreStart.application.capabilities,
           navigateToApp: coreStart.application.navigateToApp,

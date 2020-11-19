@@ -71,7 +71,7 @@ export function TransactionActionMenu({ transaction }: Props) {
   const { data: customLinks = [], status, refetch } = useFetcher(
     (callApmApi) =>
       callApmApi({
-        pathname: '/api/apm/settings/custom_links',
+        endpoint: 'GET /api/apm/settings/custom_links',
         params: { query: convertFiltersToQuery(filters) },
       }),
     [filters]
