@@ -11,7 +11,7 @@ import { euiStyled } from '../../../../observability/public';
 import { LogEntriesCursor } from '../../../common/http_api';
 
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
-import { useLogSource } from '../../containers/logs/log_source';
+import { LogSourceConfigurationProperties, useLogSource } from '../../containers/logs/log_source';
 import { useLogStream } from '../../containers/logs/log_stream';
 
 import { ScrollableLogTextStreamView } from '../logging/log_text_stream';
@@ -42,7 +42,13 @@ export const LogStream: React.FC<LogStreamProps> = ({
   center,
   highlight,
   height = '400px',
+  columns,
 }) => {
+  const customColumns = useMemo(
+    () => (columns ? convertLogColumnDefinitiontoLogSourceColumnDefinition(columns) : undefined),
+    [columns]
+  );
+
   // source boilerplate
   const { services } = useKibana();
   if (!services?.http?.fetch) {
@@ -80,6 +86,7 @@ Read more at https://github.com/elastic/kibana/blob/master/src/plugins/kibana_re
     endTimestamp,
     query,
     center,
+    columns: customColumns,
   });
 
   // Derived state
@@ -168,6 +175,21 @@ const LogStreamContent = euiStyled.div<{ height: string }>`
   background-color: ${(props) => props.theme.eui.euiColorEmptyShade};
   height: ${(props) => props.height};
 `;
+
+function convertLogColumnDefinitiontoLogSourceColumnDefinition(
+  columns: LogColumnDefinition[]
+): LogSourceConfigurationProperties['logColumns'] {
+  return columns.map((column) => {
+    switch (column.type) {
+      case 'timestamp':
+        return { timestampColumn: { id: '___#timestamp' } };
+      case 'message':
+        return { messageColumn: { id: '___#message' } };
+      case 'field':
+        return { fieldColumn: { id: `___#${column.field}`, field: column.field } };
+    }
+  });
+}
 
 // Allow for lazy loading
 // eslint-disable-next-line import/no-default-export
