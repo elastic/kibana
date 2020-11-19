@@ -22,9 +22,11 @@ export {
   AlertTypeModel,
   ActionType,
   ActionTypeRegistryContract,
+  AlertTypeRegistryContract,
   AlertTypeParamsExpressionProps,
   ValidationResult,
   ActionVariable,
+  ActionVariables,
   ActionConnector,
   IErrorObject,
 } from './types';
