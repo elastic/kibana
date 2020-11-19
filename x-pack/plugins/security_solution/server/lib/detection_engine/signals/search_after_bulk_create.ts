@@ -6,6 +6,7 @@
 /* eslint-disable complexity */
 
 import { AlertServices } from '../../../../../alerts/server';
+import { Logger } from '../../../../../../../src/core/server';
 
 import { singleSearchAfter } from './single_search_after';
 import { singleBulkCreate } from './single_bulk_create';
@@ -23,6 +24,7 @@ import {
   SearchAfterAndBulkCreateParams,
   SearchAfterAndBulkCreateReturnType,
 } from './types';
+import { BuildRuleMessage } from './rule_messages';
 
 interface ReturnType {
   [timestampString: string]: string[]; // maps timestampString like @timestamp or 'event.ingested' to the indices that contain that timestamp mapping
@@ -31,26 +33,40 @@ interface ReturnType {
 export const checkMappingForTimestampFields = async (
   indices: string[],
   timestamps: string[],
-  services: AlertServices
+  services: AlertServices,
+  logger: Logger,
+  buildRuleMessage: BuildRuleMessage
 ): Promise<ReturnType> => {
-  const foundMappings: GetFieldMappingType = await services.callCluster('indices.getFieldMapping', {
-    index: indices,
-    fields: timestamps,
-  });
+  try {
+    const foundMappings: GetFieldMappingType = await services.callCluster(
+      'indices.getFieldMapping',
+      {
+        index: indices,
+        fields: timestamps,
+      }
+    );
 
-  // get the full names of the indices found to contain the given field mapping
-  const matchedIndices = Object.keys(foundMappings);
+    // get the full names of the indices found to contain the given field mapping
+    const matchedIndices = Object.keys(foundMappings);
 
-  // map the timestamp fields like '@timestamp', 'event.ingested' etc.. to the indices that contain mappings for these fields
-  const toReturn = timestamps.reduce((acc, timestamp) => {
-    return {
-      [timestamp]: matchedIndices.filter(
-        (index) => foundMappings[index]?.mappings[timestamp] != null
-      ),
-      ...acc,
-    };
-  }, {} as ReturnType);
-  return toReturn;
+    // map the timestamp fields like '@timestamp', 'event.ingested' etc.. to the indices that contain mappings for these fields
+    const toReturn = timestamps.reduce((acc, timestamp) => {
+      return {
+        [timestamp]: matchedIndices.filter(
+          (index) => foundMappings[index]?.mappings[timestamp] != null
+        ),
+        ...acc,
+      };
+    }, {} as ReturnType);
+    return toReturn;
+  } catch (exc) {
+    logger.error(
+      buildRuleMessage(
+        `An error occurred while getting the field mapping type for this rule ${exc}`
+      )
+    );
+    return {};
+  }
 };
 
 // search_after through documents and re-index using bulk endpoint.
@@ -96,7 +112,9 @@ export const searchAfterAndBulkCreate = async ({
   const timestampsAndIndices = await checkMappingForTimestampFields(
     inputIndexPattern,
     timestampsToSort,
-    services
+    services,
+    logger,
+    buildRuleMessage
   );
 
   if (Object.keys(timestampsAndIndices).length === 0) {
