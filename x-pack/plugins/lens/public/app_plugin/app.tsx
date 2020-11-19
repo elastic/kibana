@@ -146,7 +146,7 @@ export function App({
     // Clear app-specific filters when navigating to Lens. Necessary because Lens
     // can be loaded without a full page refresh. If the user navigates to Lens from Discover
     // we keep the filters
-    if (!initialContext) {
+    if (!initialContext && !Boolean(incomingState?.originatingApp)) {
       data.query.filterManager.setAppFilters([]);
     }
 
@@ -193,6 +193,7 @@ export function App({
     data.query,
     history,
     initialContext,
+    incomingState?.originatingApp,
   ]);
 
   useEffect(() => {
