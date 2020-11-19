@@ -17,7 +17,8 @@ import { DETECTIONS_URL } from '../urls/navigation';
 
 const EXPECTED_EXPORTED_RULE_FILE_PATH = 'cypress/test_files/expected_rules_export.ndjson';
 
-describe('Export rules', () => {
+// SKIP: https://github.com/elastic/kibana/issues/83769
+describe.skip('Export rules', () => {
   before(() => {
     esArchiverLoad('export_rule');
     cy.server();

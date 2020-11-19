@@ -7,7 +7,6 @@
 import expect from '@kbn/expect';
 import qs from 'querystring';
 import { pick, uniqBy } from 'lodash';
-import { expectSnapshot } from '../../../common/match_snapshot';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import archives from '../../../common/archives_metadata';
 
