@@ -21,6 +21,7 @@ export {
   AlertTypeParamsExpressionProps,
   ValidationResult,
   ActionVariable,
+  ActionVariables,
   ActionConnector,
   IErrorObject,
 } from './types';
