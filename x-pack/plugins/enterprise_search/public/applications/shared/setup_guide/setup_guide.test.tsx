@@ -10,9 +10,9 @@ import { EuiSteps, EuiIcon, EuiLink } from '@elastic/eui';
 
 import { mountWithIntl } from '../../__mocks__';
 
-import { SetupGuide } from './';
+import { SetupGuideLayout } from './';
 
-describe('SetupGuide', () => {
+describe('SetupGuideLayout', () => {
   it('renders', () => {
     const wrapper = shallow(
       <SetupGuide productName="Enterprise Search" productEuiIcon="logoEnterpriseSearch">

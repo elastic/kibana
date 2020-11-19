@@ -4,5 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { SetupGuide } from './setup_guide';
+export { SetupGuideLayout } from './setup_guide';
 export { SETUP_GUIDE_TITLE } from './constants';

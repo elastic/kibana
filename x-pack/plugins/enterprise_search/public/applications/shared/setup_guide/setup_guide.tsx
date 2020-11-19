@@ -32,7 +32,7 @@ import './setup_guide.scss';
  * customizable, but the basic layout and instruction steps are DRYed out
  */
 
-interface SetupGuideProps {
+interface Props {
   children: React.ReactNode;
   productName: string;
   productEuiIcon: 'logoAppSearch' | 'logoWorkplaceSearch' | 'logoEnterpriseSearch';
@@ -40,7 +40,7 @@ interface SetupGuideProps {
   elasticsearchNativeAuthLink?: string;
 }
 
-export const SetupGuide: React.FC<SetupGuideProps> = ({
+export const SetupGuideLayout: React.FC<Props> = ({
   children,
   productName,
   productEuiIcon,
