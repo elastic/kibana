@@ -10,6 +10,8 @@ auditing. For more information, see
 {ref}/secure-cluster.html[Secure a cluster] and
 <<using-kibana-with-security,Configuring Security in {kib}>>.
 
+NOTE: There are security limitations that affect {kib}. For more information, refer to {ref}/security-limitations.html[Security].
+
 [float]
 === Users
 
