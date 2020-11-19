@@ -150,6 +150,15 @@ export class SearchSource {
   }
 
   /**
+   * remove field
+   * @param field: field name
+   */
+  removeField<K extends keyof SearchSourceFields>(field: K) {
+    delete this.fields[field];
+    return this;
+  }
+
+  /**
    * Internal, do not use. Overrides all search source fields with the new field array.
    *
    * @private

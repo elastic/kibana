@@ -68,10 +68,10 @@ export async function getSharingData(
     'sort',
     getSortForSearchSource(state.sort as SortOrder[], index, config.get(SORT_DEFAULT_ORDER_SETTING))
   );
-  searchSource.setField('highlight', null);
-  searchSource.setField('highlightAll', undefined);
-  searchSource.setField('aggs', null);
-  searchSource.setField('size', undefined);
+  searchSource.removeField('highlight');
+  searchSource.removeField('highlightAll');
+  searchSource.removeField('aggs');
+  searchSource.removeField('size');
 
   const body = await searchSource.getSearchRequestBody();
 
