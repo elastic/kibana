@@ -41,3 +41,12 @@ export async function setupLogging(
     options: getLoggingConfiguration(config, opsInterval),
   });
 }
+
+export function reconfigureLogging(
+  server: Server,
+  config: LegacyLoggingConfig,
+  opsInterval: number
+) {
+  const loggingOptions = getLoggingConfiguration(config, opsInterval);
+  (server.plugins as any)['@elastic/good'].reconfigure(loggingOptions);
+}

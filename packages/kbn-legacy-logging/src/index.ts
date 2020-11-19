@@ -20,6 +20,6 @@
 export { LegacyLoggingConfig, legacyLoggingConfigSchema } from './schema';
 export { attachMetaData } from './metadata';
 export { setupLoggingRotate } from './rotate';
-export { setupLogging } from './setup_logging';
+export { setupLogging, reconfigureLogging } from './setup_logging';
 export { getLoggingConfiguration } from './get_logging_config';
 export { LegacyLoggingServer } from './legacy_logging_server';
