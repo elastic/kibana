@@ -124,9 +124,7 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
      */
     public async onDashboardLandingPage() {
       log.debug(`onDashboardLandingPage`);
-      return await testSubjects.exists('dashboardLandingPage', {
-        timeout: 5000,
-      });
+      return await listingTable.onListingPage('dashboard');
     }
 
     public async expectExistsDashboardLandingPage() {

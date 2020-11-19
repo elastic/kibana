@@ -10,6 +10,7 @@ import { ExpressionsSetup } from '../../../../../src/plugins/expressions/public'
 import { UI_SETTINGS } from '../../../../../src/plugins/data/public';
 import { EditorFrameSetup, FormatFactory } from '../types';
 import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
+import { LensPluginStartDependencies } from '../plugin';
 
 export interface XyVisualizationPluginSetupPlugins {
   expressions: ExpressionsSetup;
@@ -31,7 +32,7 @@ export class XyVisualization {
   constructor() {}
 
   setup(
-    core: CoreSetup,
+    core: CoreSetup<LensPluginStartDependencies, void>,
     { expressions, formatFactory, editorFrame, charts }: XyVisualizationPluginSetupPlugins
   ) {
     editorFrame.registerVisualization(async () => {
@@ -46,6 +47,7 @@ export class XyVisualization {
         getXyChartRenderer,
         getXyVisualization,
       } = await import('../async_services');
+      const [, { data }] = await core.getStartServices();
       const palettes = await charts.palettes.getPalettes();
       expressions.registerFunction(() => legendConfig);
       expressions.registerFunction(() => yAxisConfig);
@@ -64,7 +66,7 @@ export class XyVisualization {
           histogramBarTarget: core.uiSettings.get<number>(UI_SETTINGS.HISTOGRAM_BAR_TARGET),
         })
       );
-      return getXyVisualization({ paletteService: palettes });
+      return getXyVisualization({ paletteService: palettes, data });
     });
   }
 }

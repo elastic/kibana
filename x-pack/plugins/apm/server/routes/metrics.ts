@@ -10,9 +10,9 @@ import { getMetricsChartDataByAgent } from '../lib/metrics/get_metrics_chart_dat
 import { createRoute } from './create_route';
 import { uiFiltersRt, rangeRt } from './default_api_types';
 
-export const metricsChartsRoute = createRoute(() => ({
-  path: `/api/apm/services/{serviceName}/metrics/charts`,
-  params: {
+export const metricsChartsRoute = createRoute({
+  endpoint: `GET /api/apm/services/{serviceName}/metrics/charts`,
+  params: t.type({
     path: t.type({
       serviceName: t.string,
     }),
@@ -26,7 +26,7 @@ export const metricsChartsRoute = createRoute(() => ({
       uiFiltersRt,
       rangeRt,
     ]),
-  },
+  }),
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     const { params } = context;
@@ -39,4 +39,4 @@ export const metricsChartsRoute = createRoute(() => ({
       serviceNodeName,
     });
   },
-}));
+});
