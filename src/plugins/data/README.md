@@ -55,6 +55,7 @@ Index patterns provide Rest-like HTTP CRUD+ API with the following endpoints:
 - `POST /api/index_patterns/index_pattern` &mdash; create an index pattern
 - `GET /api/index_patterns/index_pattern/{id}` &mdash; fetch an index pattern by `{id}`
 - `DELETE /api/index_patterns/index_pattern/{id}` &mdash; delete an index pattern by `{id}`
+- `POST /api/index_patterns/index_pattern/{id}` &mdash; partialy update index pattern by `{id}`
 
 #### Create an index pattern
 
@@ -158,6 +159,63 @@ DELETE /api/index_patterns/index_pattern/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 ```
 
 Returns an '200 OK` response with empty body on success.
+
+
+### Partialy update index pattern
+
+Update part of an index pattern. Only provided fields will be updated on the
+index pattern, missing fields will stay as they are persisted.
+
+Update a title of an index pattern.
+
+```
+POST /api/index_patterns/index_pattern/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+{
+    "index_pattern": {
+        "title": "new_title"
+    }
+}
+```
+
+All update fields are optional, you can specify the following fields.
+
+```
+POST /api/index_patterns/index_pattern
+{
+    "index_pattern": {
+        "title": "...",
+        "timeFieldName": "...",
+        "intervalName": "...",
+        "sourceFilters": [],
+        "fieldFormats": {},
+        "type": "...",
+        "typeMeta": {},
+        "fields": {}
+    }
+}
+```
+
+When you are updating fields, you can skip field refresh using `skip_field_refresh` flag.
+
+```
+POST /api/index_patterns/index_pattern
+{
+    "skip_field_refresh": true,
+    "index_pattern": {
+        "fields": {}
+    }
+}
+```
+
+This endpoint returns the updated index pattern object.
+
+```json
+{
+    "index_pattern": {
+        
+    }
+}
+```
 
 
 ## Query
