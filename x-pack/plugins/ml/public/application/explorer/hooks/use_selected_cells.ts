@@ -18,8 +18,8 @@ export const useSelectedCells = (
     return appState?.mlExplorerSwimlane?.selectedType !== undefined
       ? {
           type: appState.mlExplorerSwimlane.selectedType,
-          lanes: appState.mlExplorerSwimlane.selectedLanes,
-          times: appState.mlExplorerSwimlane.selectedTimes,
+          lanes: appState.mlExplorerSwimlane.selectedLanes!,
+          times: appState.mlExplorerSwimlane.selectedTimes!,
           showTopFieldValues: appState.mlExplorerSwimlane.showTopFieldValues,
           viewByFieldName: appState.mlExplorerSwimlane.viewByFieldName,
         }
