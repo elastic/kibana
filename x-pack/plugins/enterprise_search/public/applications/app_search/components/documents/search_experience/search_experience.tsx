@@ -7,8 +7,9 @@ import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { useValues } from 'kea';
+import { EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 // @ts-expect-error types are not available for this package yet
-import { SearchProvider, SearchBox, Results } from '@elastic/react-search-ui';
+import { SearchProvider, SearchBox, Results, Sorting } from '@elastic/react-search-ui';
 // @ts-expect-error types are not available for this package yet
 import AppSearchAPIConnector from '@elastic/search-ui-app-search-connector';
 
@@ -17,11 +18,27 @@ import './search_experience.scss';
 import { EngineLogic } from '../../engine';
 import { externalUrl } from '../../../../shared/enterprise_search_url';
 
-import { SearchBoxView } from './views';
+import { SearchBoxView, SortingView } from './views';
+
+const DEFAULT_SORT_OPTIONS = [
+  {
+    name: 'Recently Uploaded (desc)',
+    value: 'id',
+    direction: 'desc',
+  },
+  {
+    name: 'Recently Uploaded (asc)',
+    value: 'id',
+    direction: 'asc',
+  },
+];
 
 export const SearchExperience: React.FC = () => {
   const { engine } = useValues(EngineLogic);
   const endpointBase = externalUrl.enterpriseSearchUrl;
+
+  // TODO const sortFieldsOptions = _flatten(fields.sortFields.map(fieldNameToSortOptions)) // we need to flatten this array since fieldNameToSortOptions returns an array of two sorting options
+  const sortingOptions = [...DEFAULT_SORT_OPTIONS /* TODO ...sortFieldsOptions*/];
 
   const connector = new AppSearchAPIConnector({
     cacheResponses: false,
@@ -62,6 +79,16 @@ export const SearchExperience: React.FC = () => {
           }}
           view={SearchBoxView}
         />
+        <EuiSpacer size="xl" />
+        <EuiFlexGroup direction="row">
+          <EuiFlexItem className="documents-search-experience__sidebar">
+            <Sorting
+              className="documents-search-experience__sorting"
+              sortOptions={sortingOptions}
+              view={SortingView}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
         <Results />
       </SearchProvider>
     </div>

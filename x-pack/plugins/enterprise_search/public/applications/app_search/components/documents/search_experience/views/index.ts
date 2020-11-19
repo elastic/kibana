@@ -5,3 +5,4 @@
  */
 
 export { SearchBoxView } from './search_box_view';
+export { SortingView } from './sorting_view';
