@@ -6,11 +6,16 @@
 
 import React from 'react';
 
-import { StylePropEditor } from '../style_prop_editor';
+import { Props, StylePropEditor } from '../style_prop_editor';
+// @ts-expect-error
 import { DynamicSizeForm } from './dynamic_size_form';
+// @ts-expect-error
 import { StaticSizeForm } from './static_size_form';
+import { SizeDynamicOptions, SizeStaticOptions } from '../../../../../../common/descriptor_types';
 
-export function VectorStyleSizeEditor(props) {
+type SizeEditorProps = Omit<Props<SizeStaticOptions, SizeDynamicOptions>, 'children'>;
+
+export function VectorStyleSizeEditor(props: SizeEditorProps) {
   const sizeForm = props.styleProperty.isDynamic() ? (
     <DynamicSizeForm {...props} />
   ) : (
