@@ -261,48 +261,8 @@ describe('7.10.0 migrates with failure', () => {
   });
 });
 
-describe('7.11.0', () => {
-  beforeEach(() => {
-    jest.resetAllMocks();
-    encryptedSavedObjectsSetup.createMigration.mockImplementation(
-      (shouldMigrateWhenPredicate, migration) => migration
-    );
-  });
-
-  test('add updatedAt field to alert - set to SavedObject updated_at attribute', () => {
-    const migration711 = getMigrations(encryptedSavedObjectsSetup)['7.11.0'];
-    const alert = getMockData({}, true);
-    expect(migration711(alert, { log })).toEqual({
-      ...alert,
-      attributes: {
-        ...alert.attributes,
-        updatedAt: alert.updated_at,
-      },
-    });
-  });
-
-  test('add updatedAt field to alert - set to createdAt when SavedObject updated_at is not defined', () => {
-    const migration711 = getMigrations(encryptedSavedObjectsSetup)['7.11.0'];
-    const alert = getMockData({});
-    expect(migration711(alert, { log })).toEqual({
-      ...alert,
-      attributes: {
-        ...alert.attributes,
-        updatedAt: alert.attributes.createdAt,
-      },
-    });
-  });
-});
-
-function getUpdatedAt(): string {
-  const updatedAt = new Date();
-  updatedAt.setHours(updatedAt.getHours() + 2);
-  return updatedAt.toISOString();
-}
-
 function getMockData(
-  overwrites: Record<string, unknown> = {},
-  withSavedObjectUpdatedAt: boolean = false
+  overwrites: Record<string, unknown> = {}
 ): SavedObjectUnsanitizedDoc<Partial<RawAlert>> {
   return {
     attributes: {
@@ -335,7 +295,6 @@ function getMockData(
       ],
       ...overwrites,
     },
-    updated_at: withSavedObjectUpdatedAt ? getUpdatedAt() : undefined,
     id: uuid.v4(),
     type: 'alert',
   };

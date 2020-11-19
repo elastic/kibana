@@ -12,7 +12,7 @@ import { encryptedSavedObjectsMock } from '../../../../encrypted_saved_objects/s
 import { actionsAuthorizationMock } from '../../../../actions/server/mocks';
 import { AlertsAuthorization } from '../../authorization/alerts_authorization';
 import { ActionsAuthorization } from '../../../../actions/server';
-import { getBeforeSetup, setGlobalDate } from './lib';
+import { getBeforeSetup } from './lib';
 
 const taskManager = taskManagerMock.createStart();
 const alertTypeRegistry = alertTypeRegistryMock.create();
@@ -43,8 +43,6 @@ const alertsClientParams: jest.Mocked<ConstructorOptions> = {
 beforeEach(() => {
   getBeforeSetup(alertsClientParams, taskManager, alertTypeRegistry);
 });
-
-setGlobalDate();
 
 describe('unmuteAll()', () => {
   test('unmutes an alert', async () => {
@@ -77,7 +75,6 @@ describe('unmuteAll()', () => {
       {
         muteAll: false,
         mutedInstanceIds: [],
-        updatedAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
       },
       {
