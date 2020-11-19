@@ -50,7 +50,7 @@ describe('test endpoint route v1', () => {
   let routeHandler: RequestHandler<any, any, any>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let routeConfig: RouteConfig<any, any, any, any>;
-  // tests assume that ingestManager is enabled, and thus agentService is available
+  // tests assume that fleet is enabled, and thus agentService is available
   let mockAgentService: Required<
     ReturnType<typeof createMockEndpointAppContextServiceStartContract>
   >['agentService'];
