@@ -17,5 +17,40 @@
  * under the License.
  */
 
-export * from './status';
-export * from './types';
+import { SavedObjectsType } from 'kibana/server';
+
+export const BACKGROUND_SESSION_TYPE = 'background-session';
+
+export const backgroundSessionMapping: SavedObjectsType = {
+  name: BACKGROUND_SESSION_TYPE,
+  namespaceType: 'single',
+  hidden: true,
+  mappings: {
+    properties: {
+      name: {
+        type: 'keyword',
+      },
+      created: {
+        type: 'date',
+      },
+      expires: {
+        type: 'date',
+      },
+      status: {
+        type: 'keyword',
+      },
+      initialState: {
+        type: 'object',
+        enabled: false,
+      },
+      restoreState: {
+        type: 'object',
+        enabled: false,
+      },
+      idMapping: {
+        type: 'object',
+        enabled: false,
+      },
+    },
+  },
+};

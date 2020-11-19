@@ -17,5 +17,14 @@
  * under the License.
  */
 
-export * from './status';
-export * from './types';
+import { of } from 'rxjs';
+import { tapFirst } from './tap_first';
+
+describe('tapFirst', () => {
+  it('should tap the first and only the first', () => {
+    const fn = jest.fn();
+    of(1, 2, 3).pipe(tapFirst(fn)).subscribe();
+    expect(fn).toBeCalledTimes(1);
+    expect(fn).lastCalledWith(1);
+  });
+});
