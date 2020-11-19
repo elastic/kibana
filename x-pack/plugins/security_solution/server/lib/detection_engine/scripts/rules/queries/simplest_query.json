@@ -4,5 +4,6 @@
   "risk_score": 1,
   "severity": "high",
   "type": "query",
-  "query": "user.name: root or user.name: admin"
+  "query": "user.name: root or user.name: admin",
+  "timestamp_override": "event.created"
 }

@@ -4,45 +4,52 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, useMemo, useEffect } from 'react';
-import { BrowserField, BrowserFields } from '../../../../common/containers/source';
+import React, { useCallback, useMemo, useState } from 'react';
+import { EuiFormRow, EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
+import styled from 'styled-components';
+
+import * as i18n from './translations';
+import { BrowserFields } from '../../../../common/containers/source';
 import { FieldHook } from '../../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
-import { FieldComponent } from '../../../../common/components/autocomplete/field';
+import { FieldCategorizedComponent } from '../../../../common/components/autocomplete/field_categorized';
+import { OptionalFieldLabel } from '../optional_field_label';
+
+const MyLabelButton = styled(EuiButtonEmpty)`
+  height: 18px;
+  font-size: 12px;
+
+  .euiIcon {
+    width: 14px;
+    height: 14px;
+  }
+`;
+
+MyLabelButton.defaultProps = {
+  flush: 'right',
+};
 
 interface AutocompleteFieldProps {
   dataTestSubj: string;
   field: FieldHook;
-  idAria: string;
   browserFields: BrowserFields;
   isDisabled: boolean;
   showOptional: boolean;
   placeholder?: string;
-  filterCallback: (arg: Partial<BrowserField>) => boolean;
 }
 
 export const AutocompleteField = ({
   dataTestSubj,
   field,
-  idAria,
   browserFields,
   isDisabled,
   showOptional,
-  filterCallback,
   placeholder,
 }: AutocompleteFieldProps) => {
-  const { setErrors, validate } = field;
+  const [fieldError, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    validate();
-  }, [validate]);
-
-  const handleErrors = useCallback(
-    (error: string | null): void => {
-      const errors = error == null ? [] : [{ message: error }];
-      setErrors(errors);
-    },
-    [setErrors]
-  );
+  const handleErrors = useCallback((error: string | null): void => {
+    setError(error);
+  }, []);
 
   const handleFieldChange = useCallback(
     (newField: string | undefined): void => {
@@ -51,27 +58,57 @@ export const AutocompleteField = ({
     [field]
   );
 
+  const handleClearSelection = useCallback((): void => {
+    field.setValue('');
+  }, [field]);
+
   const selectedField = useMemo((): string => (field.value as string) ?? '', [field.value]);
 
+  const labelAppend = useMemo((): JSX.Element | null => {
+    return (
+      <EuiFlexGroup justifyContent="flexEnd">
+        {fieldError != null && (
+          <EuiFlexItem grow={false}>
+            <MyLabelButton
+              iconType="refresh"
+              onClick={handleClearSelection}
+              data-test-subj="fieldAutocompleteResetButton"
+            >
+              {i18n.RESET}
+            </MyLabelButton>
+          </EuiFlexItem>
+        )}
+        {showOptional && (
+          <EuiFlexItem grow={false} data-test-subj="fieldAutocompleteOptionalLabel">
+            {OptionalFieldLabel}
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
+    );
+  }, [showOptional, fieldError, handleClearSelection]);
+
   return (
-    <FieldComponent
-      placeholder={placeholder ?? ''}
-      browserFields={browserFields}
-      selectedField={selectedField}
-      filterCallback={filterCallback}
-      isLoading={false}
-      isDisabled={isDisabled}
-      isClearable={false}
-      onError={handleErrors}
-      onChange={handleFieldChange}
+    <EuiFormRow
       data-test-subj={dataTestSubj}
-      aria-label={idAria}
-      fieldInputWidth={500}
-      dataTestSubj={dataTestSubj}
-      idAria={idAria}
-      rowLabel={field.label}
-      rowHelpText={field.helpText}
-      showOptional={showOptional}
-    />
+      helpText={field.helpText}
+      label={field.label}
+      labelAppend={labelAppend}
+      error={fieldError}
+      isInvalid={fieldError != null}
+      fullWidth
+    >
+      <FieldCategorizedComponent
+        placeholder={placeholder ?? ''}
+        browserFields={browserFields}
+        selectedField={selectedField}
+        isLoading={false}
+        isDisabled={isDisabled}
+        isClearable={false}
+        onError={handleErrors}
+        onChange={handleFieldChange}
+        data-test-subj={dataTestSubj}
+        fieldInputWidth={500}
+      />
+    </EuiFormRow>
   );
 };

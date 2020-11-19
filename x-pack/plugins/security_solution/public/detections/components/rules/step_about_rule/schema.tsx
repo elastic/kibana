@@ -6,6 +6,8 @@
 
 import { i18n } from '@kbn/i18n';
 
+import { getSelectedFieldToBrowserField } from '../../../../common/components/autocomplete/helpers';
+import { BrowserFields } from '../../../../common/containers/source';
 import {
   FIELD_TYPES,
   fieldValidators,
@@ -21,7 +23,11 @@ import * as I18n from './translations';
 
 const { emptyField } = fieldValidators;
 
-export const schema: FormSchema<AboutStepRule> = {
+export const getSchema = ({
+  timestampOverrideFields,
+}: {
+  timestampOverrideFields: BrowserFields | undefined;
+}): FormSchema<AboutStepRule> => ({
   author: {
     type: FIELD_TYPES.COMBO_BOX,
     label: i18n.translate(
@@ -227,9 +233,30 @@ export const schema: FormSchema<AboutStepRule> = {
       'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldTimestampOverrideHelpText',
       {
         defaultMessage:
-          'Choose timestamp field used when executing rule. Pick field with timestamp closest to ingest time (e.g. event.ingested).',
+          'Choose timestamp field used when executing rule. Pick field with timestamp closest to ingest time (e.g. event.ingested). Only fields available in all selected rule indices will show as options.',
       }
     ),
+    validations: [
+      {
+        validator: (
+          ...args: Parameters<ValidationFunc>
+        ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
+          const [{ value, path }] = args;
+          if (typeof value === 'string' && value.trim() !== '' && timestampOverrideFields != null) {
+            const field = getSelectedFieldToBrowserField(value, timestampOverrideFields);
+
+            return field == null
+              ? {
+                  code: 'ERR_FIELD_FORMAT',
+                  path,
+                  message: I18n.TIMESTAMP_OVERRIDE_ERROR,
+                }
+              : undefined;
+          }
+          return undefined;
+        },
+      },
+    ],
   },
   tags: {
     type: FIELD_TYPES.COMBO_BOX,
@@ -265,4 +292,4 @@ export const schema: FormSchema<AboutStepRule> = {
     ),
     labelAppend: OptionalFieldLabel,
   },
-};
+});

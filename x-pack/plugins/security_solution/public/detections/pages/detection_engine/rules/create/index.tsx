@@ -120,10 +120,10 @@ const CreateRulePageComponent: React.FC = () => {
     []
   );
   const stepsData = useRef<RuleStepsFormData>({
-    [RuleStep.defineRule]: { isValid: false, data: undefined },
-    [RuleStep.aboutRule]: { isValid: false, data: undefined },
-    [RuleStep.scheduleRule]: { isValid: false, data: undefined },
-    [RuleStep.ruleActions]: { isValid: false, data: undefined },
+    [RuleStep.defineRule]: { isValid: false, data: undefined, errors: [] },
+    [RuleStep.aboutRule]: { isValid: false, data: undefined, errors: [] },
+    [RuleStep.scheduleRule]: { isValid: false, data: undefined, errors: [] },
+    [RuleStep.ruleActions]: { isValid: false, data: undefined, errors: [] },
   });
   const setStepData = <K extends keyof RuleStepsFormData>(
     step: K,

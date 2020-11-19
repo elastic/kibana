@@ -67,6 +67,7 @@ export type RuleStepsFormData = {
   [K in keyof RuleStepsData]: {
     data: RuleStepsData[K] | undefined;
     isValid: boolean;
+    errors: string[];
   };
 };
 

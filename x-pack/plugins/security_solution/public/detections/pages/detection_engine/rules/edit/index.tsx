@@ -84,10 +84,10 @@ const EditRulePageComponent: FC = () => {
     [RuleStep.ruleActions]: formHookNoop,
   });
   const stepsData = useRef<RuleStepsFormData>({
-    [RuleStep.defineRule]: { isValid: false, data: undefined },
-    [RuleStep.aboutRule]: { isValid: false, data: undefined },
-    [RuleStep.scheduleRule]: { isValid: false, data: undefined },
-    [RuleStep.ruleActions]: { isValid: false, data: undefined },
+    [RuleStep.defineRule]: { isValid: false, data: undefined, errors: [] },
+    [RuleStep.aboutRule]: { isValid: false, data: undefined, errors: [] },
+    [RuleStep.scheduleRule]: { isValid: false, data: undefined, errors: [] },
+    [RuleStep.ruleActions]: { isValid: false, data: undefined, errors: [] },
   });
   const defineStep = stepsData.current[RuleStep.defineRule];
   const aboutStep = stepsData.current[RuleStep.aboutRule];
@@ -98,6 +98,11 @@ const EditRulePageComponent: FC = () => {
     const stepData = stepsData.current[step];
     return stepData.data != null && !stepIsValid(stepData);
   });
+  const invalidStepErrors = ruleStepsOrder.flatMap((step) => {
+    const stepData = stepsData.current[step];
+    return stepData.errors ?? [];
+  });
+
   const [{ isLoading, isSaved }, setRule] = useUpdateRule();
   const actionMessageParams = useMemo(() => getActionMessageParams(rule?.type), [rule?.type]);
   const setFormHook = useCallback(
@@ -110,8 +115,13 @@ const EditRulePageComponent: FC = () => {
     [activeStep]
   );
   const setStepData = useCallback(
-    <K extends keyof RuleStepsData>(step: K, data: RuleStepsData[K], isValid: boolean) => {
-      stepsData.current[step] = { ...stepsData.current[step], data, isValid };
+    <K extends keyof RuleStepsData>(
+      step: K,
+      data: RuleStepsData[K],
+      isValid: boolean,
+      errors: string[]
+    ) => {
+      stepsData.current[step] = { ...stepsData.current[step], data, isValid, errors };
     },
     []
   );
@@ -228,7 +238,7 @@ const EditRulePageComponent: FC = () => {
   const onSubmit = useCallback(async () => {
     const activeStepData = await formHooks.current[activeStep]();
     if (activeStepData?.data != null) {
-      setStepData(activeStep, activeStepData.data, activeStepData.isValid);
+      setStepData(activeStep, activeStepData.data, activeStepData.isValid, activeStepData.errors);
     }
     const define = isDefineStep(activeStepData) ? activeStepData : defineStep;
     const about = isAboutStep(activeStepData) ? activeStepData : aboutStep;
@@ -269,10 +279,10 @@ const EditRulePageComponent: FC = () => {
       const { aboutRuleData, defineRuleData, scheduleRuleData, ruleActionsData } = getStepsData({
         rule,
       });
-      setStepData(RuleStep.defineRule, defineRuleData, true);
-      setStepData(RuleStep.aboutRule, aboutRuleData, true);
-      setStepData(RuleStep.scheduleRule, scheduleRuleData, true);
-      setStepData(RuleStep.ruleActions, ruleActionsData, true);
+      setStepData(RuleStep.defineRule, defineRuleData, true, []);
+      setStepData(RuleStep.aboutRule, aboutRuleData, true, []);
+      setStepData(RuleStep.scheduleRule, scheduleRuleData, true, []);
+      setStepData(RuleStep.ruleActions, ruleActionsData, true, []);
     }
   }, [rule, setStepData]);
 
@@ -287,7 +297,7 @@ const EditRulePageComponent: FC = () => {
       const activeStepData = await formHooks.current[activeStep]();
 
       if (activeStepData?.data != null) {
-        setStepData(activeStep, activeStepData.data, activeStepData.isValid);
+        setStepData(activeStep, activeStepData.data, activeStepData.isValid, activeStepData.errors);
         goToStep(targetStep);
       }
     },
@@ -349,7 +359,7 @@ const EditRulePageComponent: FC = () => {
               <EuiCallOut title={i18n.SORRY_ERRORS} color="danger" iconType="alert">
                 <FormattedMessage
                   id="xpack.securitySolution.detectionEngine.rule.editRule.errorMsgDescription"
-                  defaultMessage="You have an invalid input in {countError, plural, one {this tab} other {these tabs}}: {tabHasError}"
+                  defaultMessage="You have an invalid input in {countError, plural, one {this tab} other {these tabs}}: {tabHasError}."
                   values={{
                     countError: invalidSteps.length,
                     tabHasError: invalidSteps
@@ -368,6 +378,13 @@ const EditRulePageComponent: FC = () => {
                       .join(', '),
                   }}
                 />
+                {invalidStepErrors.length > 0 && (
+                  <ul>
+                    {invalidStepErrors.map((errMessage) => (
+                      <li>{errMessage}</li>
+                    ))}
+                  </ul>
+                )}
               </EuiCallOut>
             )}
 

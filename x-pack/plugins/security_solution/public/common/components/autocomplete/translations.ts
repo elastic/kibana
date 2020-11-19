@@ -31,3 +31,14 @@ export const NUMBER_ERR = i18n.translate('xpack.securitySolution.autocomplete.in
 export const DATE_ERR = i18n.translate('xpack.securitySolution.autocomplete.invalidDateError', {
   defaultMessage: 'Not a valid date',
 });
+
+export const RESET = i18n.translate('xpack.securitySolution.autocomplete.resetLabel', {
+  defaultMessage: 'Reset',
+});
+
+export const TIMESTAMP_OVERRIDE_ERROR = (field: string) =>
+  i18n.translate('xpack.securitySolution.autocomplete.invalidDateError', {
+    values: { field },
+    defaultMessage:
+      'Previously selected field of "{field}" does not exist in all selected rule indices. Select new field or hit "Reset" to clear.',
+  });

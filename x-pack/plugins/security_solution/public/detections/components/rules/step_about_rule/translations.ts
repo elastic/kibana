@@ -89,3 +89,10 @@ export const ADD_RULE_NOTE_HELP_TEXT = i18n.translate(
     defaultMessage: 'Add rule investigation guide...',
   }
 );
+
+export const TIMESTAMP_OVERRIDE_ERROR = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepAboutrule.timestampOverrideError',
+  {
+    defaultMessage: 'Invalid timestamp override field',
+  }
+);

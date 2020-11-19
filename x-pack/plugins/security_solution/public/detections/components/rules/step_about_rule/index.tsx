@@ -8,6 +8,7 @@ import { EuiAccordion, EuiFlexItem, EuiSpacer, EuiFormRow } from '@elastic/eui';
 import React, { FC, memo, useCallback, useEffect, useState, useMemo } from 'react';
 import styled from 'styled-components';
 
+import { useFilteredBrowserFields } from '../../../../common/containers/source/use_filtered_fetch_index';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
 import { isThresholdRule } from '../../../../../common/detection_engine/utils';
 import {
@@ -32,7 +33,7 @@ import {
 import { defaultRiskScoreBySeverity, severityOptions } from './data';
 import { stepAboutDefaultValue } from './default_value';
 import { isUrlInvalid } from '../../../../common/utils/validators';
-import { schema } from './schema';
+import { getSchema } from './schema';
 import * as I18n from './translations';
 import { StepContentWrapper } from '../step_content_wrapper';
 import { NextStep } from '../next_step';
@@ -40,7 +41,7 @@ import { MarkdownEditorForm } from '../../../../common/components/markdown_edito
 import { SeverityField } from '../severity_mapping';
 import { RiskScoreField } from '../risk_score_mapping';
 import { AutocompleteField } from '../autocomplete_field';
-import { BrowserField, useFetchIndex } from '../../../../common/containers/source';
+import { useFetchIndex } from '../../../../common/containers/source';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -73,11 +74,24 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
   setForm,
 }) => {
   const initialState = defaultValues ?? stepAboutDefaultValue;
-  const indexes = useMemo(() => (defineRuleData != null ? defineRuleData.index : []), [
-    defineRuleData,
-  ]);
+  const indexes = useMemo(() => defineRuleData?.index ?? [], [defineRuleData?.index]);
   const [severityValue, setSeverityValue] = useState<string>(initialState.severity.value);
   const [indexPatternLoading, { indexPatterns, browserFields }] = useFetchIndex(indexes);
+  const [filteredTimestampOverrideFields] = useFilteredBrowserFields(browserFields, indexes, [
+    'date',
+  ]);
+  const [filteredNameOverrideFields] = useFilteredBrowserFields(browserFields, undefined, [
+    'keyword',
+    'text',
+  ]);
+  const schema = useMemo(
+    () =>
+      getSchema({
+        timestampOverrideFields: filteredTimestampOverrideFields,
+      }),
+    [filteredTimestampOverrideFields]
+  );
+
   const canUseExceptions =
     defineRuleData?.ruleType &&
     !isMlRule(defineRuleData.ruleType) &&
@@ -88,7 +102,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
     options: { stripEmptyFields: false },
     schema,
   });
-  const { getFields, getFormData, submit } = form;
+  const { getFields, getFormData, submit, getErrors } = form;
   const [{ severity: formSeverity }] = useFormData<AboutStepRule>({
     form,
     watch: ['severity'],
@@ -110,32 +124,19 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
   const getData = useCallback(async () => {
     const result = await submit();
     return result?.isValid
-      ? result
+      ? { ...result, errors: getErrors() }
       : {
           isValid: false,
           data: getFormData(),
+          errors: getErrors(),
         };
-  }, [getFormData, submit]);
+  }, [getFormData, getErrors, submit]);
 
   const handleSubmit = useCallback(() => {
     if (onSubmit) {
       onSubmit();
     }
   }, [onSubmit]);
-
-  const filterTimestampOverrideCallback = useCallback(
-    (browserField: Partial<BrowserField>) => {
-      const sortedFieldIndices = indexes.every((ind) => (browserField.indexes ?? []).includes(ind));
-      const isRightType = (browserField.esTypes ?? []).includes('date');
-      return isRightType && sortedFieldIndices;
-    },
-    [indexes]
-  );
-
-  const filterBrowserFieldTypeCallback = useCallback(
-    (type: string) => (browserField: Partial<BrowserField>) => browserField.type === type,
-    []
-  );
 
   useEffect(() => {
     let didCancel = false;
@@ -326,11 +327,10 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
               componentProps={{
                 dataTestSubj: 'detectionEngineStepAboutRuleRuleNameOverride',
                 idAria: 'detectionEngineStepAboutRuleRuleNameOverride',
-                browserFields,
+                browserFields: filteredNameOverrideFields,
                 isDisabled: isLoading || indexPatternLoading,
                 showOptional: true,
                 placeholder: '',
-                filterCallback: filterBrowserFieldTypeCallback('string'),
               }}
             />
             <EuiSpacer size="l" />
@@ -340,11 +340,10 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
               componentProps={{
                 dataTestSubj: 'detectionEngineStepAboutRuleTimestampOverride',
                 idAria: 'detectionEngineStepAboutRuleTimestampOverride',
-                browserFields,
+                browserFields: filteredTimestampOverrideFields,
                 isDisabled: isLoading || indexPatternLoading,
                 showOptional: true,
                 placeholder: '',
-                filterCallback: filterTimestampOverrideCallback,
               }}
             />
           </EuiAccordion>
