@@ -21,7 +21,7 @@ Drag and drop your data onto the visualization builder pane.
 
 . Select the *kibana_sample_data_ecommerce* index pattern.
 
-. Click image:../../discover/images/time-filter-calendar.png[], then click *Last 7 days*. 
+. Click image:images/time-filter-calendar.png[], then click *Last 7 days*. 
 +
 The *Available fields* automatically update.
 
@@ -88,7 +88,7 @@ In this tutorial, you will build a stacked area chart from one of the {kib} samp
 sets.
 
 [role="screenshot"]
-image::../../visualize/images/vega_lite_tutorial_1.png[]
+image::visualize/images/vega_lite_tutorial_1.png[]
 
 Before beginning this tutorial, install the <<add-sample-data, eCommerce sample data>>
 set.
@@ -98,7 +98,7 @@ line chart which shows the total number of documents across all your indices
 within the time range.
 
 [role="screenshot"]
-image::../../visualize/images/vega_lite_default.png[]
+image::visualize/images/vega_lite_default.png[]
 
 The text editor contains a Vega-Lite spec written in https://hjson.github.io/[HJSON],
 which is similar to JSON but optimized for human editing. HJSON supports:
@@ -134,7 +134,7 @@ Click "Update". The result is probably not what you expect. You should see a fla
 line with 0 results.
 
 You've only changed the index, so the difference must be the query is returning
-no results. You can try the https://www.elastic.co/guide/en/kibana/7.x/vega-reference.html#vega-debugging[Vega debugging process],
+no results. You can try the <<vega-debugging, Vega debugging process>>,
 but intuition may be faster for this particular problem.
 
 In this case, the problem is that you are querying the field `@timestamp`,
@@ -332,7 +332,7 @@ your spec:
 
 If you copy and paste that into your Vega-Lite spec, and click "Update",
 you will see a warning saying `Infinite extent for field "key": [Infinity, -Infinity]`.
-Let's use our https://www.elastic.co/guide/en/kibana/7.x/vega-reference.html#vega-inspector[Vega debugging skills] to understand why.
+Let's use our <<vega-inspector, Vega debugging skills>> to understand why.
 
 Vega-Lite generates data using the names `source_0` and `data_0`. `source_0` contains
 the results from the {es} query, and `data_0` contains the visually encoded results
@@ -341,17 +341,17 @@ which are shown in the chart. To debug this problem, you need to compare both.
 To inspect data sets, go to *Inspect* and select *View: Vega debug*. You will see:
 
 [role="screenshot"]
-image::../../visualize/images/vega_lite_tutorial_3.png[]
+image::visualize/images/vega_lite_tutorial_3.png[]
 
 To look closer at the source, select the matching option in the dropdown. It looks like:
 
 [role="screenshot"]
-image::../../visualize/images/vega_lite_tutorial_4.png[]
+image::visualize/images/vega_lite_tutorial_4.png[]
 
 To compare to the visually encoded data, change dropdown selection to `data_0`. You will see:
 
 [role="screenshot"]
-image::../../visualize/images/vega_lite_tutorial_5.png[]
+image::visualize/images/vega_lite_tutorial_5.png[]
 
 The issue seems to be that the `key` property is not being converted the right way,
 which makes sense because the `key` is now category (`Men's Clothing`, `Women's Clothing`, etc.) instead of a timestamp.
@@ -377,7 +377,7 @@ This will show more errors, and you can inspect `data_0` to
 understand why. This now shows:
 
 [role="screenshot"]
-image::../../visualize/images/vega_lite_tutorial_6.png[]
+image::visualize/images/vega_lite_tutorial_6.png[]
 
 It looks like the problem is that the `time_buckets` inner array is not being
 extracted by Vega. The solution is to use a Vega-lite
@@ -397,7 +397,7 @@ This does not yet produce the results you expect. Inspect the transformed data
 by selecting `data_0` in *Data sets* again:
 
 [role="screenshot"]
-image::../../visualize/images/vega_lite_tutorial_7.png[]
+image::visualize/images/vega_lite_tutorial_7.png[]
 
 The debug view shows `undefined` values where you would expect to see numbers, and
 the cause is that there are duplicate names which are confusing Vega-Lite. This can
@@ -534,7 +534,7 @@ Now that you've enabled a selection, try moving the mouse around the visualizati
 and seeing the points respond to the nearest position:
 
 [role="screenshot"]
-image::../../visualize/images/vega_lite_tutorial_2.png[]
+image::visualize/images/vega_lite_tutorial_2.png[]
 
 The final result of this tutorial is this spec:
 
@@ -799,7 +799,7 @@ Next, encode the fields `key` and `doc_count` as the X and Y values:
 Click "Update" and you will get a basic area chart:
 
 [role="screenshot"]
-image::../../visualize/images/vega_tutorial_3.png[]
+image::visualize/images/vega_tutorial_3.png[]
 
 Next, add a new block to the `marks` section. This will show clickable points to filter for a specific
 date:
@@ -882,7 +882,7 @@ a specific time range in the visualization. This will require adding more signal
 adding a rectangle overlay:
 
 [role="screenshot"]
-image::../../visualize/images/vega_tutorial_4.png[]
+image::visualize/images/vega_tutorial_4.png[]
 
 The first step is to add a new `signal` to track the X position of the cursor:
 
@@ -1263,7 +1263,7 @@ To start tracking the real-time percentage of CPU, enter the following in the *T
 ----------------------------------
 
 [role="screenshot"]
-image::../../visualize/images/timelion-create01.png[]
+image::images/timelion-create01.png[]
 {nbsp}
 
 [float]
@@ -1286,7 +1286,7 @@ To compare the two data sets, add another series with data from the previous hou
 <1> `offset` offsets the data retrieval by a date expression. In this example, `-1h` offsets the data back by one hour.
 
 [role="screenshot"]
-image::../../visualize/images/timelion-create02.png[]
+image::images/timelion-create02.png[]
 {nbsp}
 
 [float]
@@ -1308,7 +1308,7 @@ To easily distinguish between the two data sets, add the label names:
 <1> `.label()` adds custom labels to the visualization.
 
 [role="screenshot"]
-image::../../visualize/images/timelion-create03.png[]
+image::images/timelion-create03.png[]
 {nbsp}
 
 [float]
@@ -1334,7 +1334,7 @@ Add a meaningful title:
 <1> `.title()` adds a title with a meaningful name. Titles make is easier for unfamiliar users to understand the purpose of the visualization.
 
 [role="screenshot"]
-image::../../visualize/images/timelion-customize01.png[]
+image::images/timelion-customize01.png[]
 {nbsp}
 
 [float]
@@ -1361,7 +1361,7 @@ To differentiate between the current hour data and the last hour data, change th
 <1> `.lines()` changes the appearance of the chart lines. In this example, `.lines(fill=1,width=0.5)` sets the fill level to `1`, and the border width to `0.5`.
 
 [role="screenshot"]
-image::../../visualize/images/timelion-customize02.png[]
+image::images/timelion-customize02.png[]
 {nbsp}
 
 [float]
@@ -1390,7 +1390,7 @@ To make the current hour data stand out, change the line colors:
 <1> `.color()` changes the color of the data. Supported color types include standard color names, hexadecimal values, or a color schema for grouped data. In this example, `.color(gray)` represents the last hour, and `.color(#1E90FF)` represents the current hour.
 
 [role="screenshot"]
-image::../../visualize/images/timelion-customize03.png[]
+image::images/timelion-customize03.png[]
 {nbsp}
 
 [float]
@@ -1420,7 +1420,7 @@ Change the position and style of the legend:
 <1> `.legend()` sets the position and style of the legend. In this example, `.legend(columns=2, position=nw)` places the legend in the north west position of the visualization with two columns.
 
 [role="screenshot"]
-image::../../visualize/images/timelion-customize04.png[]
+image::images/timelion-customize04.png[]
 {nbsp}
 
 [[timelion-tutorial-create-visualizations-with-mathematical-functions]]
@@ -1442,7 +1442,7 @@ To start tracking the inbound and outbound network traffic, enter the following 
 ----------------------------------
 
 [role="screenshot"]
-image::../../visualize/images/timelion-math01.png[]
+image::images/timelion-math01.png[]
 {nbsp}
 
 [float]
@@ -1462,7 +1462,7 @@ Change how the data is displayed so that you can easily monitor the inbound traf
 <1> `.derivative` plots the change in values over time.
 
 [role="screenshot"]
-image::../../visualize/images/timelion-math02.png[]
+image::images/timelion-math02.png[]
 {nbsp}
 
 Add a similar calculation for outbound traffic:
@@ -1483,7 +1483,7 @@ Add a similar calculation for outbound traffic:
 <1> `.multiply()` multiplies the data series by a number, the result of a data series, or a list of data series. For this example, `.multiply(-1)` converts the outbound network traffic to a negative value since the outbound network traffic is leaving your machine.
 
 [role="screenshot"]
-image::../../visualize/images/timelion-math03.png[]
+image::images/timelion-math03.png[]
 {nbsp}
 
 [float]
@@ -1510,7 +1510,7 @@ To make the visualization easier to analyze, change the data metric from bytes t
 <1> `.divide()` accepts the same input as `.multiply()`, then divides the data series by the defined divisor.
 
 [role="screenshot"]
-image::../../visualize/images/timelion-math04.png[]
+image::images/timelion-math04.png[]
 {nbsp}
 
 [float]
@@ -1549,7 +1549,7 @@ Customize and format the visualization using functions:
 <5> `.legend()` sets the position and style of the legend. For this example, `legend(columns=2, position=nw)` places the legend in the north west position of the visualization with two columns.
 
 [role="screenshot"]
-image::../../visualize/images/timelion-math05.png[]
+image::images/timelion-math05.png[]
 {nbsp}
 
 [[timelion-tutorial-create-visualizations-withconditional-logic-and-tracking-trends]]
@@ -1581,7 +1581,7 @@ To chart the maximum value of `system.memory.actual.used.bytes`, enter the follo
 ----------------------------------
 
 [role="screenshot"]
-image::../../visualize/images/timelion-conditional01.png[]
+image::images/timelion-conditional01.png[]
 {nbsp}
 
 [float]
@@ -1623,7 +1623,7 @@ To track the amount of memory used, create two thresholds:
 <2> `if()` compares each point to a number. If the condition evaluates to `true`, adjust the styling. If the condition evaluates to `false`, use the default styling.
 
 [role="screenshot"]
-image::../../visualize/images/timelion-conditional02.png[]
+image::images/timelion-conditional02.png[]
 {nbsp}
 
 [float]
@@ -1666,7 +1666,7 @@ To determine the trend, create a new data series:
 <1> `mvavg()` calculates the moving average over a specified period of time. In this example, `.mvavg(10)` creates a moving average with a window of 10 data points.
 
 [role="screenshot"]
-image::../../visualize/images/timelion-conditional03.png[]
+image::images/timelion-conditional03.png[]
 {nbsp}
 
 [float]
@@ -1723,7 +1723,7 @@ Customize and format the visualization using functions:
 <5> `.legend()` sets the position and style of the legend. For this example, `(columns=4, position=nw)` places the legend in the north west position of the visualization with four columns.
 
 [role="screenshot"]
-image::../../visualize/images/timelion-conditional04.png[]
+image::images/timelion-conditional04.png[]
 {nbsp}
 
 For additional information on Timelion conditional capabilities, go to https://www.elastic.co/blog/timeseries-if-then-else-with-timelion[I have but one .condition()].
