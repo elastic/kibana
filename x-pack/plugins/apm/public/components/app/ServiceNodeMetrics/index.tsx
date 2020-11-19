@@ -58,8 +58,8 @@ export function ServiceNodeMetrics({ match }: ServiceNodeMetricsProps) {
     (callApmApi) => {
       if (start && end) {
         return callApmApi({
-          pathname:
-            '/api/apm/services/{serviceName}/node/{serviceNodeName}/metadata',
+          endpoint:
+            'GET /api/apm/services/{serviceName}/node/{serviceNodeName}/metadata',
           params: {
             path: { serviceName, serviceNodeName },
             query: {
