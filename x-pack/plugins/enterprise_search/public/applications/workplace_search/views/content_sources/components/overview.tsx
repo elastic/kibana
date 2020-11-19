@@ -31,6 +31,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
+import FlashMessages from 'shared/components/FlashMessages';
 import {
   CUSTOM_SOURCE_DOCS_URL,
   DOCUMENT_PERMISSIONS_DOCS_URL,
@@ -39,22 +40,18 @@ import {
   SOURCE_CONTENT_PATH,
   getContentSourcePath,
   getGroupPath,
-} from 'workplace_search/utils/routePaths';
+} from '../../../routes';
 
-import { AppLogic } from 'workplace_search/App/AppLogic';
+import { AppLogic } from '../../../app_logic';
 
-import FlashMessages from 'shared/components/FlashMessages';
-import {
-  Loading,
-  ViewContentHeader,
-  ComponentLoader,
-  LicenseBadge,
-} from 'workplace_search/components';
+import { ComponentLoader } from '../../../components/shared/component_loader';
+import { CredentialItem } from '../../../components/shared/credential_item';
+import { ViewContentHeader } from '../../../components/shared/view_content_header';
+import { LicenseBadge } from '../../../components/shared/license_badge';
+import { Loading } from '../../../../../applications/shared/loading';
 
-import { CredentialItem } from 'workplace_search/components/CredentialItem';
-
-import aclImage from 'workplace_search/components/assets/supportsAcl.svg';
-import { SourceLogic } from '../SourceLogic';
+import aclImage from '../../../components/assets/supports_acl.svg';
+import { SourceLogic } from '../source_logic';
 
 export const Overview: React.FC = () => {
   const { contentSource, flashMessages, dataLoading } = useValues(SourceLogic);

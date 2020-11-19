@@ -16,7 +16,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import SourceIcon from 'workplace_search/components/SourceIcon';
+import { SourceIcon } from '../../../components/shared/source_icon';
 
 interface SourceInfoCardProps {
   sourceName: string;

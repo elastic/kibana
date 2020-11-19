@@ -28,21 +28,20 @@ import {
   EuiLink,
 } from '@elastic/eui';
 
-import { CUSTOM_SOURCE_DOCS_URL } from 'workplace_search/utils/routePaths';
+import { CUSTOM_SOURCE_DOCS_URL } from '../../../routes';
 
-import TruncatedContent from 'shared/components/TruncatedContent';
+import { TruncatedContent } from '../../../../shared/truncate';
 
 const MAX_LENGTH = 28;
 
-import {
-  ViewContentHeader,
-  TablePaginationBar,
-  Loading,
-  ComponentLoader,
-} from 'workplace_search/components';
-import { CUSTOM_SERVICE_TYPE } from 'workplace_search/constants';
+import { ComponentLoader } from '../../../components/shared/component_loader';
+import { Loading } from '../../../../../applications/shared/loading';
+import { TablePaginationBar } from '../../../components/shared/table_pagination_bar';
+import { ViewContentHeader } from '../../../components/shared/view_content_header';
 
-import { SourceLogic } from '../SourceLogic';
+import { CUSTOM_SERVICE_TYPE } from '../../../constants';
+
+import { SourceLogic } from '../source_logic';
 
 export const SourceContent: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');

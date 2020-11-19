@@ -21,17 +21,19 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { SOURCES_PATH, getSourcesPath } from 'workplace_search/utils/routePaths';
-
 import ConfirmModal from 'shared/components/ConfirmModal';
 import FlashMessages from 'shared/components/FlashMessages';
-import { ViewContentHeader, ContentSection, SourceConfigFields } from 'workplace_search/components';
+import { SOURCES_PATH, getSourcesPath } from '../../../routes';
 
-import { SourceDataItem } from 'workplace_search/types';
-import { AppLogic } from 'workplace_search/App/AppLogic';
-import { staticSourceData } from '../sourceData';
+import { ContentSection } from '../../../components/shared/content_section';
+import { SourceConfigFields } from '../../../components/shared/source_config_fields';
+import { ViewContentHeader } from '../../../components/shared/view_content_header';
 
-import { SourceLogic } from '../SourceLogic';
+import { SourceDataItem } from '../../../types';
+import { AppLogic } from '../../../app_logic';
+import { staticSourceData } from '../source_data';
+
+import { SourceLogic } from '../source_logic';
 
 export const SourceSettings: React.FC = () => {
   const history = useHistory() as History;

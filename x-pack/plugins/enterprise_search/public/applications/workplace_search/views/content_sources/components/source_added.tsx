@@ -10,12 +10,12 @@ import { Location } from 'history';
 import { useActions, useValues } from 'kea';
 import { Redirect, useLocation } from 'react-router-dom';
 
-import { parseQueryParams } from 'app_search/utils/queryParams';
+import { parseQueryParams } from '../../../../../applications/shared/query_params';
 
-import { SOURCES_PATH, getSourcesPath } from 'workplace_search/utils/routePaths';
+import { SOURCES_PATH, getSourcesPath } from '../../../routes';
 
-import { AppLogic } from 'workplace_search/App/AppLogic';
-import { SourcesLogic } from '../SourcesLogic';
+import { AppLogic } from '../../../app_logic';
+import { SourcesLogic } from '../sources_logic';
 
 interface SourceQueryParams {
   name: string;
