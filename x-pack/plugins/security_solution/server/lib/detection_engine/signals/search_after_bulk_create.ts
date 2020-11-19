@@ -38,10 +38,15 @@ export const checkMappingForTimestampFields = async (
     fields: timestamps,
   });
 
+  // get the full names of the indices found to contain the given field mapping
+  const matchedIndices = Object.keys(foundMappings);
+
   // map the timestamp fields like '@timestamp', 'event.ingested' etc.. to the indices that contain mappings for these fields
   const toReturn = timestamps.reduce((acc, timestamp) => {
     return {
-      [timestamp]: indices.filter((index) => foundMappings[index].mappings[timestamp] != null),
+      [timestamp]: matchedIndices.filter(
+        (index) => foundMappings[index]?.mappings[timestamp] != null
+      ),
       ...acc,
     };
   }, {} as ReturnType);
@@ -152,10 +157,22 @@ export const searchAfterAndBulkCreate = async ({
             );
             break;
           } else if (inputIndexPattern.length !== timestampsAndIndices[timestamp].length) {
+            const indexPatternRegEx = inputIndexPattern.reduce(
+              (acc, indexPattern) => ({ [indexPattern]: new RegExp(indexPattern), ...acc }),
+              {} as Record<string, RegExp>
+            );
+
+            // find the full name indices which match one of the index patterns
+            const indexPatternsMissing = Object.keys(indexPatternRegEx).filter(
+              (regEx) =>
+                !timestampsAndIndices[timestamp].some((index) =>
+                  indexPatternRegEx[regEx].test(index)
+                )
+            );
             logger.error(
               buildRuleMessage(
-                `one or more indices from index pattern ${JSON.stringify(
-                  inputIndexPattern,
+                `indices matching index pattern ${JSON.stringify(
+                  indexPatternsMissing,
                   null,
                   2
                 )} are missing required field ${timestamp}. ${timestamp} was found in ${JSON.stringify(
@@ -165,7 +182,6 @@ export const searchAfterAndBulkCreate = async ({
                 )}`
               )
             );
-            break;
           }
           // perform search_after with optionally undefined sortId
           const { searchResult, searchDuration, searchErrors } = await singleSearchAfter({
