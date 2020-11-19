@@ -85,7 +85,6 @@ export const CategoryExampleMessage: React.FunctionComponent<{
       <LogEntryColumn {...columnWidths[messageColumnId]}>
         <LogEntryMessageColumn
           columnValue={{
-            columnId: messageColumnId,
             message: [{ field: 'message', value: [message], highlights: [] }],
           }}
           highlights={noHighlights}
@@ -96,7 +95,6 @@ export const CategoryExampleMessage: React.FunctionComponent<{
       <LogEntryColumn {...columnWidths[datasetColumnId]}>
         <LogEntryFieldColumn
           columnValue={{
-            columnId: datasetColumnId,
             field: 'event.dataset',
             value: [humanFriendlyDataset],
             highlights: [],

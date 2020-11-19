@@ -13,7 +13,6 @@ import { LogEntryFieldColumn } from './log_entry_field_column';
 describe('LogEntryFieldColumn', () => {
   it('renders a single value without a wrapping list', () => {
     const column: LogFieldColumn = {
-      columnId: 'TEST_COLUMN',
       field: 'TEST_FIELD',
       value: ['a'],
       highlights: [],
@@ -35,7 +34,6 @@ describe('LogEntryFieldColumn', () => {
 
   it('renders an array of values as a list', () => {
     const column: LogFieldColumn = {
-      columnId: 'TEST_COLUMN',
       field: 'TEST_FIELD',
       value: ['a', 'b', 'c'],
       highlights: [],
@@ -59,7 +57,6 @@ describe('LogEntryFieldColumn', () => {
 
   it('renders a text representation of a single complex object', () => {
     const column: LogFieldColumn = {
-      columnId: 'TEST_COLUMN',
       field: 'TEST_FIELD',
       value: [
         {
@@ -87,7 +84,6 @@ describe('LogEntryFieldColumn', () => {
 
   it('renders text representations of a multiple complex objects', () => {
     const column: LogFieldColumn = {
-      columnId: 'TEST_COLUMN',
       field: 'TEST_FIELD',
       value: [
         {

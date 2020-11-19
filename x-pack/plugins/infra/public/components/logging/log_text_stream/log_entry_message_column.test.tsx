@@ -13,7 +13,6 @@ import { LogEntryMessageColumn } from './log_entry_message_column';
 describe('LogEntryMessageColumn', () => {
   it('renders a single scalar field value without a wrapping list', () => {
     const column: LogMessageColumn = {
-      columnId: 'TEST_COLUMN',
       message: [{ field: 'TEST_FIELD', value: ['VALUE'], highlights: [] }],
     };
 
@@ -33,7 +32,6 @@ describe('LogEntryMessageColumn', () => {
 
   it('renders a single array of scalar field values as a list', () => {
     const column: LogMessageColumn = {
-      columnId: 'TEST_COLUMN',
       message: [{ field: 'TEST_FIELD', value: ['VALUE_1', 'VALUE_2'], highlights: [] }],
     };
 
@@ -54,7 +52,6 @@ describe('LogEntryMessageColumn', () => {
 
   it('renders a complex message with an array of complex field values', () => {
     const column: LogMessageColumn = {
-      columnId: 'TEST_COLUMN',
       message: [
         { constant: 'CONSTANT_1' },
         { field: 'TEST_FIELD', value: [{ lat: 1, lon: 2 }, 'VALUE_2'], highlights: [] },
