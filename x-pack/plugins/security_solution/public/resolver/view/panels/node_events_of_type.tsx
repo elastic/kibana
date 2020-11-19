@@ -31,6 +31,7 @@ import { DescriptiveName } from './descriptive_name';
 import { useLinkProps } from '../use_link_props';
 import { useResolverDispatch } from '../use_resolver_dispatch';
 import { useFormattedDate } from './use_formatted_date';
+import * as nodeDataModel from '../../models/node_data';
 
 /**
  * Render a list of events that are related to `nodeID` and that have a category of `eventType`.
@@ -42,9 +43,12 @@ export const NodeEventsInCategory = memo(function ({
   nodeID: string;
   eventCategory: string;
 }) {
-  const processEvent = useSelector((state: ResolverState) =>
+  /* const processEvent = useSelector((state: ResolverState) =>
     selectors.processEventForID(state)(nodeID)
-  );
+  ); */
+  // TODO:
+  const nodeData = useSelector(selectors.nodeDataForID)(nodeID);
+  const processEvent = nodeDataModel.firstEvent(nodeData);
   const eventCount = useSelector((state: ResolverState) =>
     selectors.totalRelatedEventCountForNode(state)(nodeID)
   );
@@ -53,17 +57,18 @@ export const NodeEventsInCategory = memo(function ({
   );
   const events = useSelector((state: ResolverState) => selectors.nodeEventsInCategory(state));
 
-  const isLoading = useSelector(selectors.isLoadingNodeEventsInCategory);
+  const isLoading =
+    useSelector(selectors.isLoadingNodeEventsInCategory) || nodeDataModel.isLoading(nodeData);
   const hasError = useSelector(selectors.hadErrorLoadingNodeEventsInCategory);
   return (
     <>
-      {isLoading || processEvent === null ? (
+      {isLoading ? (
         <StyledPanel>
           <PanelLoading />
         </StyledPanel>
       ) : (
         <StyledPanel data-test-subj="resolver:panel:events-in-category">
-          {hasError ? (
+          {hasError || processEvent === undefined ? (
             <EuiCallOut
               title={i18n.translate(
                 'xpack.securitySolution.endpoint.resolver.panel.nodeEventsByType.errorPrimary',

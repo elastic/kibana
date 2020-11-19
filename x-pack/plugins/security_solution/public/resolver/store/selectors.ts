@@ -70,6 +70,8 @@ export const eventByID = composeSelectors(dataStateSelector, dataSelectors.event
  * Given a nodeID (aka entity_id) get the indexed process event.
  * Legacy functions take process events instead of nodeID, use this to get
  * process events for them.
+ *
+ * @deprecated use the nodeData selector instead
  */
 export const processEventForID: (
   state: ResolverState
@@ -396,12 +398,9 @@ export const isLoadingMoreNodeEventsInCategory = composeSelectors(
 );
 
 /**
- * Returns an array of events for a specific node ID.
+ * TODO:
  */
-export const nodeDataEventsForID = composeSelectors(
-  dataStateSelector,
-  dataSelectors.nodeDataEventsForID
-);
+export const isNodeTerminated = composeSelectors(dataStateSelector, dataSelectors.isNodeTerminated);
 
 /**
  * Returns an the node data object for a specific node ID.

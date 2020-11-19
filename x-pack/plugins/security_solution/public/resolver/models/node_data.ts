@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SafeResolverEvent } from '../../../common/endpoint/types';
 import { FetchedNodeData, IDToNodeInfo, NodeData } from '../types';
 
 /**
@@ -118,4 +117,17 @@ export function idsNotInBase(
   }
 
   return result;
+}
+
+/**
+ * TODO: should these be selectors?
+ */
+export function isLoading(data: NodeData | undefined) {
+  return !data || data.status === 'requested';
+}
+
+export function firstEvent(data: NodeData | undefined) {
+  return !data || data.status !== 'received' || data.events.length <= 0
+    ? undefined
+    : data.events[0];
 }

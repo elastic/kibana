@@ -134,6 +134,15 @@ export const nodeDataForID: (
   };
 });
 
+export const isNodeTerminated: (
+  state: DataState
+) => (id: string) => boolean | undefined = createSelector(nodeDataForID, (nodeInfo) => {
+  return (id: string) => {
+    const info = nodeInfo(id);
+    return !info ? undefined : info.terminated;
+  };
+});
+
 // TODO: show an error when this is true
 export const nodeDataUnableToLoad: (state: DataState) => (id: string) => boolean = createSelector(
   nodeDataForID,
@@ -144,22 +153,6 @@ export const nodeDataUnableToLoad: (state: DataState) => (id: string) => boolean
     };
   }
 );
-
-/**
- * Returns a function that can be called to determine if the middleware has received a specific node ID's lifecycle
- * events. If the node is still loading or had an error while loading this will return an empty array.
- */
-export const nodeDataEventsForID: (
-  state: DataState
-) => (id: string) => SafeResolverEvent[] = createSelector(nodeDataForID, (nodeInfo) => {
-  return (id: string) => {
-    const info = nodeInfo(id);
-    if (!info || info.status !== 'received') {
-      return [];
-    }
-    return info.events;
-  };
-});
 
 /**
  * Process events that will be graphed.

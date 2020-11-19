@@ -141,9 +141,11 @@ function NodeDetailLink({ name, nodeID }: { name?: string; nodeID: string }) {
   const isOrigin = useSelector((state: ResolverState) => {
     return selectors.originID(state) === nodeID;
   });
-  const isTerminated = useSelector((state: ResolverState) =>
+  /* const isTerminated = useSelector((state: ResolverState) =>
     nodeID === undefined ? false : selectors.isProcessTerminated(state)(nodeID)
-  );
+  );*/
+  // TODO:
+  const isTerminated = useSelector(selectors.isNodeTerminated)(nodeID);
   const { descriptionText } = useColors();
   const linkProps = useLinkProps({ panelView: 'nodeDetail', panelParameters: { nodeID } });
   const dispatch: (action: ResolverAction) => void = useDispatch();

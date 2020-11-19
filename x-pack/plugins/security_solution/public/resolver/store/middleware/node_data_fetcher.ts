@@ -102,6 +102,10 @@ export function NodeDataFetcher(
             newData.set(id, { events: [result], terminated });
           } else {
             info.events.push(result);
+            /**
+             * Track whether we have seen a termination event. It is useful to do this here rather than in a selector
+             * because the selector would have to loop over all events each time a new node's data is received.
+             */
             info.terminated = info.terminated || terminated;
           }
         }

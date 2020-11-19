@@ -17,6 +17,7 @@ import { useSelector } from 'react-redux';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { NodeSubMenu } from './styles';
 import { applyMatrix3 } from '../models/vector2';
+import { isLoading } from '../models/node_data';
 import { Vector2, Matrix3, ResolverState } from '../types';
 import { SafeResolverEvent } from '../../../common/endpoint/types';
 import { useResolverDispatch } from './use_resolver_dispatch';
@@ -298,9 +299,9 @@ const UnstyledProcessEventDot = React.memo(
         id={nodeHTMLID(nodeID)}
         tabIndex={-1}
       >
-        {nodeData?.status === 'requested' ? (
+        {isLoading(nodeData) ? (
           <div data-test-subj="resolver:graph:node:loading" className="loading-container">
-            <EuiLoadingSpinner size="s" />
+            <EuiLoadingSpinner size="l" />
           </div>
         ) : (
           // TODO: is this the right way to do this?
