@@ -4,11 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-jest.mock('queryString', () => ({
-  ...(jest.requireActual('queryString') as object),
-  parse: jest.fn(),
-}));
-
 import queryString from 'query-string';
 
 import { parseQueryParams } from './';
