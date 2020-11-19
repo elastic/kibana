@@ -4,41 +4,46 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import { shallow } from 'enzyme';
-import { EuiSteps, EuiIcon, EuiLink } from '@elastic/eui';
+import { setMockValues } from '../../__mocks__/kea.mock';
+import { rerender } from '../../__mocks__';
 
-import { mountWithIntl } from '../../__mocks__';
+import React from 'react';
+import { shallow, ShallowWrapper } from 'enzyme';
+import { EuiIcon } from '@elastic/eui';
+
+import { SetupInstructions } from './instructions';
+import { CloudSetupInstructions } from './cloud/instructions';
 
 import { SetupGuideLayout } from './';
 
 describe('SetupGuideLayout', () => {
-  it('renders', () => {
-    const wrapper = shallow(
-      <SetupGuide productName="Enterprise Search" productEuiIcon="logoEnterpriseSearch">
-        <p data-test-subj="test">Wow!</p>
-      </SetupGuide>
-    );
+  let wrapper: ShallowWrapper;
 
+  beforeAll(() => {
+    setMockValues({ isCloudEnabled: false });
+    wrapper = shallow(
+      <SetupGuideLayout productName="Enterprise Search" productEuiIcon="logoEnterpriseSearch">
+        <p data-test-subj="test">Wow!</p>
+      </SetupGuideLayout>
+    );
+  });
+
+  it('renders', () => {
     expect(wrapper.find('h1').text()).toEqual('Enterprise Search');
     expect(wrapper.find(EuiIcon).prop('type')).toEqual('logoEnterpriseSearch');
     expect(wrapper.find('[data-test-subj="test"]').text()).toEqual('Wow!');
-    expect(wrapper.find(EuiSteps)).toHaveLength(1);
   });
 
-  it('renders with optional auth links', () => {
-    const wrapper = mountWithIntl(
-      <SetupGuide
-        productName="Foo"
-        productEuiIcon="logoAppSearch"
-        standardAuthLink="http://foo.com"
-        elasticsearchNativeAuthLink="http://bar.com"
-      >
-        Baz
-      </SetupGuide>
-    );
+  it('renders with default self-managed instructions', () => {
+    expect(wrapper.find(SetupInstructions)).toHaveLength(1);
+    expect(wrapper.find(CloudSetupInstructions)).toHaveLength(0);
+  });
 
-    expect(wrapper.find(EuiLink).first().prop('href')).toEqual('http://bar.com');
-    expect(wrapper.find(EuiLink).last().prop('href')).toEqual('http://foo.com');
+  it('renders with cloud instructions', () => {
+    setMockValues({ cloud: { isCloudEnabled: true } });
+    rerender(wrapper);
+
+    expect(wrapper.find(SetupInstructions)).toHaveLength(0);
+    expect(wrapper.find(CloudSetupInstructions)).toHaveLength(1);
   });
 });
