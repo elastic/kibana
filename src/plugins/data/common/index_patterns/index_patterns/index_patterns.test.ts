@@ -239,13 +239,6 @@ describe('IndexPatterns', () => {
     const id = '1';
 
     // failed request!
-    /*
-    try {
-      await indexPatterns.get(id);
-    } catch (e) {
-      expect(e).toBeDefined();
-    }
-    */
     expect(indexPatterns.get(id)).rejects.toBeDefined();
 
     // successful subsequent request
