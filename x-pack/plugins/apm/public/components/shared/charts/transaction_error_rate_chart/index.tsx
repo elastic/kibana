@@ -27,10 +27,14 @@ function yTickFormat(y?: number | null) {
 }
 
 interface Props {
+  height?: number;
   showAnnotations?: boolean;
 }
 
-export function TransactionErrorRateChart({ showAnnotations = true }: Props) {
+export function TransactionErrorRateChart({
+  height,
+  showAnnotations = true,
+}: Props) {
   const theme = useTheme();
   const { serviceName } = useParams<{ serviceName?: string }>();
   const { urlParams, uiFilters } = useUrlParams();
@@ -40,8 +44,8 @@ export function TransactionErrorRateChart({ showAnnotations = true }: Props) {
   const { data, status } = useFetcher(() => {
     if (serviceName && start && end) {
       return callApmApi({
-        pathname:
-          '/api/apm/services/{serviceName}/transaction_groups/error_rate',
+        endpoint:
+          'GET /api/apm/services/{serviceName}/transaction_groups/error_rate',
         params: {
           path: {
             serviceName,
@@ -71,6 +75,7 @@ export function TransactionErrorRateChart({ showAnnotations = true }: Props) {
       </EuiTitle>
       <LineChart
         id="errorRate"
+        height={height}
         showAnnotations={showAnnotations}
         fetchStatus={status}
         timeseries={[

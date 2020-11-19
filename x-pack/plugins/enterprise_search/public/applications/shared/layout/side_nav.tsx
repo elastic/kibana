@@ -9,8 +9,8 @@ import { useLocation } from 'react-router-dom';
 import classNames from 'classnames';
 
 import { i18n } from '@kbn/i18n';
-import { EuiIcon, EuiTitle, EuiText, EuiLink as EuiLinkExternal } from '@elastic/eui'; // TODO: Remove EuiLinkExternal after full Kibana transition
-import { EuiLink } from '../react_router_helpers';
+import { EuiIcon, EuiTitle, EuiText, EuiLink } from '@elastic/eui'; // TODO: Remove EuiLink after full Kibana transition
+import { EuiLinkTo } from '../react_router_helpers';
 
 import { ENTERPRISE_SEARCH_PLUGIN } from '../../../../common/constants';
 import { stripTrailingSlash } from '../../../../common/strip_slashes';
@@ -23,7 +23,7 @@ import './side_nav.scss';
  * Side navigation - product & icon + links wrapper
  */
 
-interface ISideNavProps {
+interface SideNavProps {
   // Expects product plugin constants (@see common/constants.ts)
   product: {
     NAME: string;
@@ -31,7 +31,7 @@ interface ISideNavProps {
   };
 }
 
-export const SideNav: React.FC<ISideNavProps> = ({ product, children }) => {
+export const SideNav: React.FC<SideNavProps> = ({ product, children }) => {
   return (
     <nav
       id="enterpriseSearchNav"
@@ -61,17 +61,19 @@ export const SideNav: React.FC<ISideNavProps> = ({ product, children }) => {
  * Side navigation link item
  */
 
-interface ISideNavLinkProps {
+interface SideNavLinkProps {
   to: string;
+  shouldShowActiveForSubroutes?: boolean;
   isExternal?: boolean;
   className?: string;
   isRoot?: boolean;
   subNav?: React.ReactNode;
 }
 
-export const SideNavLink: React.FC<ISideNavLinkProps> = ({
-  isExternal,
+export const SideNavLink: React.FC<SideNavLinkProps> = ({
   to,
+  shouldShowActiveForSubroutes = false,
+  isExternal,
   children,
   className,
   isRoot,
@@ -82,7 +84,10 @@ export const SideNavLink: React.FC<ISideNavLinkProps> = ({
 
   const { pathname } = useLocation();
   const currentPath = stripTrailingSlash(pathname);
-  const isActive = currentPath === to || (isRoot && currentPath === '');
+  const isActive =
+    currentPath === to ||
+    (shouldShowActiveForSubroutes && currentPath.startsWith(to)) ||
+    (isRoot && currentPath === '');
 
   const classes = classNames('enterpriseSearchNavLinks__item', className, {
     'enterpriseSearchNavLinks__item--isActive': !isExternal && isActive, // eslint-disable-line @typescript-eslint/naming-convention
@@ -91,19 +96,14 @@ export const SideNavLink: React.FC<ISideNavLinkProps> = ({
   return (
     <li>
       {isExternal ? (
-        <EuiLinkExternal
-          {...rest}
-          className={classes}
-          href={to}
-          target="_blank"
-          onClick={closeNavigation}
-        >
-          {children}
-        </EuiLinkExternal>
-      ) : (
-        <EuiLink {...rest} className={classes} to={to} onClick={closeNavigation}>
+        // eslint-disable-next-line @elastic/eui/href-or-on-click
+        <EuiLink {...rest} className={classes} href={to} target="_blank" onClick={closeNavigation}>
           {children}
         </EuiLink>
+      ) : (
+        <EuiLinkTo {...rest} className={classes} to={to} onClick={closeNavigation}>
+          {children}
+        </EuiLinkTo>
       )}
       {subNav && <ul className="enterpriseSearchNavLinks__subNav">{subNav}</ul>}
     </li>
@@ -114,11 +114,11 @@ export const SideNavLink: React.FC<ISideNavLinkProps> = ({
  * Side navigation non-link item
  */
 
-interface ISideNavItemProps {
+interface SideNavItemProps {
   className?: string;
 }
 
-export const SideNavItem: React.FC<ISideNavItemProps> = ({ children, className, ...rest }) => {
+export const SideNavItem: React.FC<SideNavItemProps> = ({ children, className, ...rest }) => {
   const classes = classNames('enterpriseSearchNavLinks__item', className);
   return (
     <li {...rest} className={classes}>

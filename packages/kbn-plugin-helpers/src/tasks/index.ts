@@ -20,5 +20,6 @@
 export * from './clean';
 export * from './create_archive';
 export * from './optimize';
+export * from './write_public_assets';
 export * from './write_server_files';
 export * from './yarn_install';

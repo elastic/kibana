@@ -10,7 +10,7 @@ import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
 import { canRedirectRequest } from '../can_redirect_request';
 import { HTTPAuthorizationHeader } from '../http_authentication';
-import { Tokens, TokenPair } from '../tokens';
+import { Tokens, TokenPair, RefreshTokenResult } from '../tokens';
 import { BaseAuthenticationProvider } from './base';
 
 /**
@@ -63,23 +63,21 @@ export class TokenAuthenticationProvider extends BaseAuthenticationProvider {
       const {
         access_token: accessToken,
         refresh_token: refreshToken,
+        authentication: authenticationInfo,
       } = await this.options.client.callAsInternalUser('shield.getAccessToken', {
         body: { grant_type: 'password', username, password },
       });
 
       this.logger.debug('Get token API request to Elasticsearch successful');
-
-      // Then attempt to query for the user details using the new token
-      const authHeaders = {
-        authorization: new HTTPAuthorizationHeader('Bearer', accessToken).toString(),
-      };
-      const user = await this.getUser(request, authHeaders);
-
-      this.logger.debug('Login has been successfully performed.');
-      return AuthenticationResult.succeeded(user, {
-        authHeaders,
-        state: { accessToken, refreshToken },
-      });
+      return AuthenticationResult.succeeded(
+        this.authenticationInfoToAuthenticatedUser(authenticationInfo),
+        {
+          authHeaders: {
+            authorization: new HTTPAuthorizationHeader('Bearer', accessToken).toString(),
+          },
+          state: { accessToken, refreshToken },
+        }
+      );
     } catch (err) {
       this.logger.debug(`Failed to perform a login: ${err.message}`);
       return AuthenticationResult.failed(err);
@@ -191,22 +189,19 @@ export class TokenAuthenticationProvider extends BaseAuthenticationProvider {
    * @param request Request instance.
    * @param state State value previously stored by the provider.
    */
-  private async authenticateViaRefreshToken(
-    request: KibanaRequest,
-    { refreshToken }: ProviderState
-  ) {
+  private async authenticateViaRefreshToken(request: KibanaRequest, state: ProviderState) {
     this.logger.debug('Trying to refresh access token.');
 
-    let refreshedTokenPair: TokenPair | null;
+    let refreshTokenResult: RefreshTokenResult | null;
     try {
-      refreshedTokenPair = await this.options.tokens.refresh(refreshToken);
+      refreshTokenResult = await this.options.tokens.refresh(state.refreshToken);
     } catch (err) {
       return AuthenticationResult.failed(err);
     }
 
     // If refresh token is no longer valid, then we should clear session and redirect user to the
     // login page to re-authenticate, or fail if redirect isn't possible.
-    if (refreshedTokenPair === null) {
+    if (refreshTokenResult === null) {
       if (canStartNewSession(request)) {
         this.logger.debug('Clearing session since both access and refresh tokens are expired.');
 
@@ -219,23 +214,17 @@ export class TokenAuthenticationProvider extends BaseAuthenticationProvider {
       );
     }
 
-    try {
-      const authHeaders = {
-        authorization: new HTTPAuthorizationHeader(
-          'Bearer',
-          refreshedTokenPair.accessToken
-        ).toString(),
-      };
-      const user = await this.getUser(request, authHeaders);
-
-      this.logger.debug('Request has been authenticated via refreshed token.');
-      return AuthenticationResult.succeeded(user, { authHeaders, state: refreshedTokenPair });
-    } catch (err) {
-      this.logger.debug(
-        `Failed to authenticate user using newly refreshed access token: ${err.message}`
-      );
-      return AuthenticationResult.failed(err);
-    }
+    this.logger.debug('Request has been authenticated via refreshed token.');
+    const { accessToken, refreshToken, authenticationInfo } = refreshTokenResult;
+    return AuthenticationResult.succeeded(
+      this.authenticationInfoToAuthenticatedUser(authenticationInfo),
+      {
+        authHeaders: {
+          authorization: new HTTPAuthorizationHeader('Bearer', accessToken).toString(),
+        },
+        state: { accessToken, refreshToken },
+      }
+    );
   }
 
   /**

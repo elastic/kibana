@@ -5,9 +5,5 @@
  */
 
 export { letBrowserHandleEvent } from './link_events';
-export { createHref, ICreateHrefOptions } from './create_href';
-export {
-  EuiReactRouterLink as EuiLink,
-  EuiReactRouterButton as EuiButton,
-  EuiReactRouterPanel as EuiPanel,
-} from './eui_link';
+export { createHref, CreateHrefOptions } from './create_href';
+export { EuiLinkTo, EuiButtonTo, EuiPanelTo } from './eui_components';
