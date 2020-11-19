@@ -49,7 +49,7 @@ export function LatencyCorrelations() {
   const { data, status } = useFetcher(() => {
     if (start && end) {
       return callApmApi({
-        pathname: '/api/apm/correlations/slow_transactions',
+        endpoint: 'GET /api/apm/correlations/slow_transactions',
         params: {
           query: {
             serviceName,

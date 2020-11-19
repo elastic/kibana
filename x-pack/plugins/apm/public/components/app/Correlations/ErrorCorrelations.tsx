@@ -48,7 +48,7 @@ export function ErrorCorrelations() {
   const { data, status } = useFetcher(() => {
     if (start && end) {
       return callApmApi({
-        pathname: '/api/apm/correlations/failed_transactions',
+        endpoint: 'GET /api/apm/correlations/failed_transactions',
         params: {
           query: {
             serviceName,
