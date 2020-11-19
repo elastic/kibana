@@ -126,6 +126,55 @@ export default function ({ getService }: FtrProviderContext) {
           expect(messageColumn.message.length).to.be.greaterThan(0);
         });
 
+        it('Returns custom column configurations', async () => {
+          const customColumns = [
+            { timestampColumn: { id: uuidv4() } },
+            { fieldColumn: { id: uuidv4(), field: 'host.name' } },
+            { fieldColumn: { id: uuidv4(), field: 'event.dataset' } },
+            { messageColumn: { id: uuidv4() } },
+          ];
+
+          const { body } = await supertest
+            .post(LOG_ENTRIES_PATH)
+            .set(COMMON_HEADERS)
+            .send(
+              logEntriesRequestRT.encode({
+                sourceId: 'default',
+                startTimestamp: EARLIEST_KEY_WITH_DATA.time,
+                endTimestamp: LATEST_KEY_WITH_DATA.time,
+                center: KEY_WITHIN_DATA_RANGE,
+                columns: customColumns,
+              })
+            )
+            .expect(200);
+
+          const logEntriesResponse = pipe(
+            logEntriesResponseRT.decode(body),
+            fold(throwErrors(createPlainError), identity)
+          );
+
+          const entries = logEntriesResponse.data.entries;
+          const entry = entries[0];
+          expect(entry.columns).to.have.length(4);
+
+          const timestampColumn = entry.columns[0] as LogTimestampColumn;
+          expect(timestampColumn).to.have.property('timestamp');
+
+          const hostNameColumn = entry.columns[1] as LogFieldColumn;
+          expect(hostNameColumn).to.have.property('field');
+          expect(hostNameColumn.field).to.be('host.name');
+          expect(hostNameColumn).to.have.property('value');
+
+          const eventDatasetColumn = entry.columns[2] as LogFieldColumn;
+          expect(eventDatasetColumn).to.have.property('field');
+          expect(eventDatasetColumn.field).to.be('event.dataset');
+          expect(eventDatasetColumn).to.have.property('value');
+
+          const messageColumn = entry.columns[3] as LogMessageColumn;
+          expect(messageColumn).to.have.property('message');
+          expect(messageColumn.message.length).to.be.greaterThan(0);
+        });
+
         it('Does not build context if entry does not have all fields', async () => {
           const { body } = await supertest
             .post(LOG_ENTRIES_PATH)
