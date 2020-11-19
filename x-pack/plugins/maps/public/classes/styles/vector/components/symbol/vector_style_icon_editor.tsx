@@ -6,11 +6,16 @@
 
 import React from 'react';
 
-import { StylePropEditor } from '../style_prop_editor';
+import { Props, StylePropEditor } from '../style_prop_editor';
+// @ts-expect-error
 import { DynamicIconForm } from './dynamic_icon_form';
+// @ts-expect-error
 import { StaticIconForm } from './static_icon_form';
+import { IconDynamicOptions, IconStaticOptions } from '../../../../../../common/descriptor_types';
 
-export function VectorStyleIconEditor(props) {
+type IconEditorProps = Omit<Props<IconStaticOptions, IconDynamicOptions>, 'children'>;
+
+export function VectorStyleIconEditor(props: IconEditorProps) {
   const iconForm = props.styleProperty.isDynamic() ? (
     <DynamicIconForm {...props} />
   ) : (
