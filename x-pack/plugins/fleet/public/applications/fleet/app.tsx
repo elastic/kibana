@@ -204,9 +204,11 @@ export const FleetAppContext: React.FC<{
                     <UIExtensionsContext.Provider value={extensions}>
                       <FleetStatusProvider>
                         <IntraAppStateProvider kibanaScopedHistory={history}>
-                          <PackageInstallProvider notifications={coreStart.notifications}>
-                            <Router>{children}</Router>
-                          </PackageInstallProvider>
+                          <Router>
+                            <PackageInstallProvider notifications={coreStart.notifications}>
+                              {children}
+                            </PackageInstallProvider>
+                          </Router>
                         </IntraAppStateProvider>
                       </FleetStatusProvider>
                     </UIExtensionsContext.Provider>
