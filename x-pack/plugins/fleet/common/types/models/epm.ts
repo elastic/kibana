@@ -252,12 +252,19 @@ export type PackageList = PackageListItem[];
 
 export type PackageListItem = Installable<RegistrySearchResult>;
 export type PackagesGroupedByStatus = Record<ValueOf<InstallationStatus>, PackageList>;
-export type PackageInfo = Installable<
-  // remove the properties we'll be altering/replacing from the base type
-  Omit<RegistryPackage | ArchivePackage, keyof PackageAdditions> &
-    // now add our replacement definitions
-    PackageAdditions
->;
+export type PackageInfo =
+  | Installable<
+      // remove the properties we'll be altering/replacing from the base type
+      Omit<RegistryPackage, keyof PackageAdditions> &
+        // now add our replacement definitions
+        PackageAdditions
+    >
+  | Installable<
+      // remove the properties we'll be altering/replacing from the base type
+      Omit<ArchivePackage, keyof PackageAdditions> &
+        // now add our replacement definitions
+        PackageAdditions
+    >;
 
 export interface Installation extends SavedObjectAttributes {
   installed_kibana: KibanaAssetReference[];
