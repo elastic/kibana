@@ -2667,6 +2667,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/legacy-logging@link:packages/kbn-legacy-logging":
+  version "0.0.0"
+  uid ""
+
 "@kbn/logging@link:packages/kbn-logging":
   version "0.0.0"
   uid ""

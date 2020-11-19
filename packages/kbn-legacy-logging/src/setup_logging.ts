@@ -19,7 +19,7 @@
 
 // @ts-expect-error missing typedef
 import good from '@elastic/good';
-import { Server } from 'hapi';
+import { Server } from '@hapi/hapi';
 import { LegacyLoggingConfig } from './schema';
 import { getLoggingConfiguration } from './get_logging_config';
 

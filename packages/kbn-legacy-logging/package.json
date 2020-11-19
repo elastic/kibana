@@ -10,23 +10,6 @@
     "kbn:watch": "yarn build --watch"
   },
   "dependencies": {
-    "@kbn/std": "1.0.0",
-    "hapi": "^17.5.3",
-    "@hapi/good-squeeze": "5.2.1",
-    "joi": "^13.5.2",
-    "@elastic/good": "8.1.1-kibana2",
-    "chokidar": "3.2.1",
-    "lodash": "^4.17.20",
-    "rxjs": "^6.5.5",
-    "json-stringify-safe": "5.0.1",
-    "chalk": "^2.4.2",
-    "query-string": "5.1.1",
-    "moment": "^2.24.0",
-    "moment-timezone": "^0.5.27"
-  },
-  "devDependencies": {
-    "typescript": "4.0.2",
-    "@types/hapi": "^17.0.18",
-    "@types/podium": "^1.0.0"
+    "@kbn/std": "link:../kbn-std"
   }
 }
