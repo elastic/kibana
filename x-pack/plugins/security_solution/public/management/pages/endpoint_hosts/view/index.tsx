@@ -16,7 +16,6 @@ import {
   EuiSelectableProps,
   EuiSuperDatePicker,
   EuiSpacer,
-  EuiIcon,
   EuiPopover,
   EuiContextMenuItem,
   EuiContextMenuPanel,
@@ -36,6 +35,7 @@ import { NavigateToAppOptions } from 'kibana/public';
 import { EndpointDetailsFlyout } from './details';
 import * as selectors from '../store/selectors';
 import { useEndpointSelector } from './hooks';
+import { isPolicyOutOfDate } from '../utils';
 import {
   HOST_STATUS_TO_HEALTH_COLOR,
   POLICY_STATUS_TO_HEALTH_COLOR,
@@ -58,6 +58,7 @@ import { getEndpointListPath, getEndpointDetailsPath } from '../../../common/rou
 import { useFormatUrl } from '../../../../common/components/link_to';
 import { EndpointAction } from '../store/action';
 import { EndpointPolicyLink } from './components/endpoint_policy_link';
+import { OutOfDate } from './components/out_of_date';
 import { AdminSearchBar } from './components/search_bar';
 import { AdministrationListPage } from '../../../components/administration_list_page';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
@@ -323,17 +324,22 @@ export const EndpointList = () => {
         }),
         truncateText: true,
         // eslint-disable-next-line react/display-name
-        render: (policy: HostInfo['metadata']['Endpoint']['policy']['applied']) => {
+        render: (policy: HostInfo['metadata']['Endpoint']['policy']['applied'], item: HostInfo) => {
           return (
-            <EuiToolTip content={policy.name} anchorClassName="eui-textTruncate">
-              <EndpointPolicyLink
-                policyId={policy.id}
-                className="eui-textTruncate"
-                data-test-subj="policyNameCellLink"
-              >
-                {policy.name}
-              </EndpointPolicyLink>
-            </EuiToolTip>
+            <>
+              <EuiToolTip content={policy.name} anchorClassName="eui-textTruncate">
+                <EndpointPolicyLink
+                  policyId={policy.id}
+                  className="eui-textTruncate"
+                  data-test-subj="policyNameCellLink"
+                >
+                  {policy.name}
+                </EndpointPolicyLink>
+              </EuiToolTip>
+              {isPolicyOutOfDate(policy, item.policy_info) && (
+                <OutOfDate style={{ paddingLeft: '6px' }} data-test-subj="rowPolicyOutOfDate" />
+              )}
+            </>
           );
         },
       },
@@ -351,40 +357,18 @@ export const EndpointList = () => {
           });
           const toRouteUrl = formatUrl(toRoutePath);
           return (
-            <>
-              <EuiHealth
-                color={POLICY_STATUS_TO_HEALTH_COLOR[policy.status]}
-                className="eui-textTruncate"
-                data-test-subj="rowPolicyStatus"
-              >
-                <EndpointListNavLink
-                  name={POLICY_STATUS_TO_TEXT[policy.status]}
-                  href={toRouteUrl}
-                  route={toRoutePath}
-                  dataTestSubj="policyStatusCellLink"
-                />
-              </EuiHealth>
-              {item.policy_info &&
-                ((policy.id === item.policy_info.endpoint.id && // package policy wasn't changed
-                  item.policy_info.agent.configured.id === item.policy_info.agent.applied.id && // agent policy wasn't changed
-                  // all revisions match up
-                  policy.version >= item.policy_info.agent.applied.revision &&
-                  policy.version >= item.policy_info.agent.configured.revision &&
-                  policy.endpoint_policy_version >= item.policy_info.endpoint.revision) || (
-                  <EuiText
-                    color="subdued"
-                    size="xs"
-                    className="eui-textNoWrap"
-                    data-test-subj="rowPolicyOutOfDate"
-                  >
-                    <EuiIcon size="m" type="alert" color="warning" />
-                    <FormattedMessage
-                      id="xpack.securitySolution.endpoint.list.outOfDateLabel"
-                      defaultMessage="Out-of-date"
-                    />
-                  </EuiText>
-                ))}
-            </>
+            <EuiHealth
+              color={POLICY_STATUS_TO_HEALTH_COLOR[policy.status]}
+              className="eui-textTruncate"
+              data-test-subj="rowPolicyStatus"
+            >
+              <EndpointListNavLink
+                name={POLICY_STATUS_TO_TEXT[policy.status]}
+                href={toRouteUrl}
+                route={toRoutePath}
+                dataTestSubj="policyStatusCellLink"
+              />
+            </EuiHealth>
           );
         },
       },

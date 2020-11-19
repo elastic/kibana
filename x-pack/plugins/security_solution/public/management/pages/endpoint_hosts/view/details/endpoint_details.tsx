@@ -18,6 +18,7 @@ import {
 import React, { memo, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { isPolicyOutOfDate } from '../../utils';
 import { HostInfo, HostMetadata } from '../../../../../../common/endpoint/types';
 import { useEndpointSelector, useAgentDetailsIngestUrl } from '../hooks';
 import { useNavigateToAppEventHandler } from '../../../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
@@ -31,6 +32,7 @@ import { SecurityPageName } from '../../../../../app/types';
 import { useFormatUrl } from '../../../../../common/components/link_to';
 import { AgentDetailsReassignPolicyAction } from '../../../../../../../fleet/public';
 import { EndpointPolicyLink } from '../components/endpoint_policy_link';
+import { OutOfDate } from '../components/out_of_date';
 
 const HostIds = styled(EuiListGroupItem)`
   margin-top: 0;
@@ -136,6 +138,7 @@ export const EndpointDetails = memo(
               >
                 {details.Endpoint.policy.applied.name}
               </EndpointPolicyLink>
+              {isPolicyOutOfDate(details.Endpoint.policy.applied, policyInfo) && <OutOfDate />}
             </>
           ),
         },
@@ -144,43 +147,25 @@ export const EndpointDetails = memo(
             defaultMessage: 'Policy Response',
           }),
           description: (
-            <>
-              <EuiHealth
-                color={POLICY_STATUS_TO_HEALTH_COLOR[policyStatus] || 'subdued'}
-                data-test-subj="policyStatusHealth"
+            <EuiHealth
+              color={POLICY_STATUS_TO_HEALTH_COLOR[policyStatus] || 'subdued'}
+              data-test-subj="policyStatusHealth"
+            >
+              {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
+              <EuiLink
+                data-test-subj="policyStatusValue"
+                href={policyResponseUri}
+                onClick={policyStatusClickHandler}
               >
-                {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
-                <EuiLink
-                  data-test-subj="policyStatusValue"
-                  href={policyResponseUri}
-                  onClick={policyStatusClickHandler}
-                >
-                  <EuiText size="m">
-                    <FormattedMessage
-                      id="xpack.securitySolution.endpoint.details.policyStatusValue"
-                      defaultMessage="{policyStatus, select, success {Success} warning {Warning} failure {Failed} other {Unknown}}"
-                      values={{ policyStatus }}
-                    />
-                  </EuiText>
-                </EuiLink>
-              </EuiHealth>
-              {policyInfo &&
-                ((details.Endpoint.policy.applied.id === policyInfo.endpoint.id && // package policy wasn't changed
-                  policyInfo.agent.configured.id === policyInfo.agent.applied.id && // agent policy wasn't changed
-                  // all revisions match up
-                  details.Endpoint.policy.applied.version >= policyInfo.agent.applied.revision &&
-                  details.Endpoint.policy.applied.version >= policyInfo.agent.configured.revision &&
-                  details.Endpoint.policy.applied.endpoint_policy_version >=
-                    policyInfo.endpoint.revision) || (
-                  <EuiText color="subdued" size="xs" className="eui-textNoWrap">
-                    <EuiIcon size="m" type="alert" color="warning" />
-                    <FormattedMessage
-                      id="xpack.securitySolution.endpoint.details.outOfDateLabel"
-                      defaultMessage="Out-of-date"
-                    />
-                  </EuiText>
-                ))}
-            </>
+                <EuiText size="m">
+                  <FormattedMessage
+                    id="xpack.securitySolution.endpoint.details.policyStatusValue"
+                    defaultMessage="{policyStatus, select, success {Success} warning {Warning} failure {Failed} other {Unknown}}"
+                    values={{ policyStatus }}
+                  />
+                </EuiText>
+              </EuiLink>
+            </EuiHealth>
           ),
         },
       ];
