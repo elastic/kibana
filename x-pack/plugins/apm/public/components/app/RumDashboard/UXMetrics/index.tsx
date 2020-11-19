@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useContext } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -14,63 +14,65 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { I18LABELS } from '../translations';
-import { CoreVitals } from '../CoreVitals';
 import { KeyUXMetrics } from './KeyUXMetrics';
-import { useUrlParams } from '../../../../hooks/useUrlParams';
 import { useFetcher } from '../../../../hooks/useFetcher';
-
-export interface UXMetrics {
-  cls: string;
-  fid: string;
-  lcp: string;
-  tbt: number;
-  fcp: number;
-  lcpRanks: number[];
-  fidRanks: number[];
-  clsRanks: number[];
-}
+import { useUxQuery } from '../hooks/useUxQuery';
+import { CoreVitals } from '../../../../../../observability/public';
+import { CsmSharedContext } from '../CsmSharedContext';
+import { useUrlParams } from '../../../../hooks/useUrlParams';
+import { getPercentileLabel } from './translations';
 
 export function UXMetrics() {
-  const { urlParams, uiFilters } = useUrlParams();
+  const {
+    urlParams: { percentile },
+  } = useUrlParams();
 
-  const { start, end } = urlParams;
+  const uxQuery = useUxQuery();
 
   const { data, status } = useFetcher(
     (callApmApi) => {
-      const { serviceName } = uiFilters;
-      if (start && end && serviceName) {
+      if (uxQuery) {
         return callApmApi({
-          pathname: '/api/apm/rum-client/web-core-vitals',
+          endpoint: 'GET /api/apm/rum-client/web-core-vitals',
           params: {
-            query: { start, end, uiFilters: JSON.stringify(uiFilters) },
+            query: uxQuery,
           },
         });
       }
       return Promise.resolve(null);
     },
-    [start, end, uiFilters]
+    [uxQuery]
   );
+
+  const {
+    sharedData: { totalPageViews },
+  } = useContext(CsmSharedContext);
 
   return (
     <EuiPanel>
-      <EuiFlexGroup justifyContent="spaceBetween">
+      <EuiFlexGroup justifyContent="spaceBetween" wrap>
         <EuiFlexItem grow={1} data-cy={`client-metrics`}>
-          <EuiTitle size="s">
-            <h2>{I18LABELS.userExperienceMetrics}</h2>
+          <EuiTitle size="xs">
+            <h3>
+              {I18LABELS.metrics} ({getPercentileLabel(percentile!)})
+            </h3>
           </EuiTitle>
           <EuiSpacer size="s" />
           <KeyUXMetrics data={data} loading={status !== 'success'} />
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiHorizontalRule />
+      <EuiSpacer size="xs" />
+      <EuiHorizontalRule margin="xs" />
 
-      <EuiFlexGroup justifyContent="spaceBetween">
+      <EuiFlexGroup justifyContent="spaceBetween" wrap>
         <EuiFlexItem grow={1} data-cy={`client-metrics`}>
-          <EuiTitle size="xs">
-            <h3>{I18LABELS.coreWebVitals}</h3>
-          </EuiTitle>
           <EuiSpacer size="s" />
-          <CoreVitals data={data} loading={status !== 'success'} />
+          <CoreVitals
+            data={data}
+            totalPageViews={totalPageViews}
+            loading={status !== 'success'}
+            displayTrafficMetric={true}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>

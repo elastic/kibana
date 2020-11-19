@@ -72,7 +72,7 @@ export function openOnHoverTooltip(tooltipState: TooltipState) {
   };
 }
 
-export function cleanTooltipStateForLayer(layerId: string | null, layerFeatures: Feature[] = []) {
+export function cleanTooltipStateForLayer(layerId: string, layerFeatures: Feature[] = []) {
   return (dispatch: Dispatch, getState: () => MapStoreState) => {
     let featuresRemoved = false;
     const openTooltips = getOpenTooltips(getState())

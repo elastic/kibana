@@ -6,15 +6,14 @@
 
 import { noop } from 'lodash/fp';
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { shallowEqual, useSelector } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 
 import { ESTermQuery } from '../../../../common/typed_json';
-import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
-import { inputsModel, State } from '../../../common/store';
+import { inputsModel } from '../../../common/store';
+import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { useKibana } from '../../../common/lib/kibana';
 import { createFilter } from '../../../common/containers/helpers';
-import { TlsEdges, PageInfoPaginated, FlowTargetSourceDest } from '../../../graphql/types';
+import { PageInfoPaginated, FlowTargetSourceDest } from '../../../graphql/types';
 import { generateTablePaginationOptions } from '../../../common/components/paginated_table/helpers';
 import { networkModel, networkSelectors } from '../../store';
 import {
@@ -22,7 +21,8 @@ import {
   NetworkTlsRequestOptions,
   NetworkTlsStrategyResponse,
 } from '../../../../common/search_strategy/security_solution/network';
-import { AbortError } from '../../../../../../../src/plugins/data/common';
+import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/plugins/data/common';
+import { AbortError } from '../../../../../../../src/plugins/kibana_utils/common';
 
 import * as i18n from './translations';
 import { getInspectResponse } from '../../../helpers';
@@ -36,12 +36,13 @@ export interface NetworkTlsArgs {
   loadPage: (newActivePage: number) => void;
   pageInfo: PageInfoPaginated;
   refetch: inputsModel.Refetch;
-  tls: TlsEdges[];
+  tls: NetworkTlsStrategyResponse['edges'];
   totalCount: number;
 }
 
 interface UseNetworkTls {
   flowTarget: FlowTargetSourceDest;
+  indexNames: string[];
   ip: string;
   type: networkModel.NetworkType;
   filterQuery?: ESTermQuery | string;
@@ -56,43 +57,52 @@ export const useNetworkTls = ({
   filterQuery,
   flowTarget,
   id = ID,
+  indexNames,
   ip,
   skip,
   startDate,
   type,
 }: UseNetworkTls): [boolean, NetworkTlsArgs] => {
   const getTlsSelector = networkSelectors.tlsSelector();
-  const { activePage, limit, sort } = useSelector(
-    (state: State) => getTlsSelector(state, type, flowTarget),
-    shallowEqual
+  const { activePage, limit, sort } = useShallowEqualSelector((state) =>
+    getTlsSelector(state, type, flowTarget)
   );
-  const { data, notifications, uiSettings } = useKibana().services;
+  const { data, notifications } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
-  const defaultIndex = uiSettings.get<string[]>(DEFAULT_INDEX_KEY);
   const [loading, setLoading] = useState(false);
 
-  const [networkTlsRequest, setHostRequest] = useState<NetworkTlsRequestOptions>({
-    defaultIndex,
-    factoryQueryType: NetworkQueries.tls,
-    filterQuery: createFilter(filterQuery),
-    flowTarget,
-    ip,
-    pagination: generateTablePaginationOptions(activePage, limit),
-    sort,
-    timerange: {
-      interval: '12h',
-      from: startDate ? startDate : '',
-      to: endDate ? endDate : new Date(Date.now()).toISOString(),
-    },
-  });
+  const [networkTlsRequest, setHostRequest] = useState<NetworkTlsRequestOptions | null>(
+    !skip
+      ? {
+          defaultIndex: indexNames,
+          factoryQueryType: NetworkQueries.tls,
+          filterQuery: createFilter(filterQuery),
+          flowTarget,
+          ip,
+          pagination: generateTablePaginationOptions(activePage, limit),
+          sort,
+          timerange: {
+            interval: '12h',
+            from: startDate ? startDate : '',
+            to: endDate ? endDate : new Date(Date.now()).toISOString(),
+          },
+        }
+      : null
+  );
 
   const wrappedLoadMore = useCallback(
     (newActivePage: number) => {
-      setHostRequest((prevRequest) => ({
-        ...prevRequest,
-        pagination: generateTablePaginationOptions(newActivePage, limit),
-      }));
+      setHostRequest((prevRequest) => {
+        if (!prevRequest) {
+          return prevRequest;
+        }
+
+        return {
+          ...prevRequest,
+          pagination: generateTablePaginationOptions(newActivePage, limit),
+        };
+      });
     },
     [limit]
   );
@@ -116,7 +126,11 @@ export const useNetworkTls = ({
   });
 
   const networkTlsSearch = useCallback(
-    (request: NetworkTlsRequestOptions) => {
+    (request: NetworkTlsRequestOptions | null) => {
+      if (request == null) {
+        return;
+      }
+
       let didCancel = false;
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
@@ -129,7 +143,7 @@ export const useNetworkTls = ({
           })
           .subscribe({
             next: (response) => {
-              if (!response.isPartial && !response.isRunning) {
+              if (isCompleteResponse(response)) {
                 if (!didCancel) {
                   setLoading(false);
                   setNetworkTlsResponse((prevResponse) => ({
@@ -142,7 +156,7 @@ export const useNetworkTls = ({
                   }));
                 }
                 searchSubscription$.unsubscribe();
-              } else if (response.isPartial && !response.isRunning) {
+              } else if (isErrorResponse(response)) {
                 if (!didCancel) {
                   setLoading(false);
                 }
@@ -172,9 +186,12 @@ export const useNetworkTls = ({
   useEffect(() => {
     setHostRequest((prevRequest) => {
       const myRequest = {
-        ...prevRequest,
-        defaultIndex,
+        ...(prevRequest ?? {}),
+        defaultIndex: indexNames,
+        factoryQueryType: NetworkQueries.tls,
         filterQuery: createFilter(filterQuery),
+        flowTarget,
+        ip,
         pagination: generateTablePaginationOptions(activePage, limit),
         timerange: {
           interval: '12h',
@@ -188,7 +205,19 @@ export const useNetworkTls = ({
       }
       return prevRequest;
     });
-  }, [activePage, defaultIndex, endDate, filterQuery, limit, startDate, sort, skip]);
+  }, [
+    activePage,
+    indexNames,
+    endDate,
+    filterQuery,
+    limit,
+    startDate,
+    sort,
+    skip,
+    flowTarget,
+    ip,
+    id,
+  ]);
 
   useEffect(() => {
     networkTlsSearch(networkTlsRequest);

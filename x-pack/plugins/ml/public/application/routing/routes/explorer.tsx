@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, useEffect, useState, useCallback } from 'react';
+import React, { FC, useEffect, useState, useCallback, useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 
 import { i18n } from '@kbn/i18n';
@@ -34,6 +34,8 @@ import { getBreadcrumbWithUrlForApp } from '../breadcrumbs';
 import { useTimefilter } from '../../contexts/kibana';
 import { isViewBySwimLaneData } from '../../explorer/swimlane_container';
 import { JOB_ID } from '../../../../common/constants/anomalies';
+import { MlAnnotationUpdatesContext } from '../../contexts/ml/ml_annotation_updates_context';
+import { AnnotationUpdatesService } from '../../services/annotations_service';
 
 export const explorerRouteFactory = (
   navigateToPath: NavigateToPath,
@@ -59,10 +61,13 @@ const PageWrapper: FC<PageProps> = ({ deps }) => {
     jobs: mlJobService.loadJobsWrapper,
     jobsWithTimeRange: () => ml.jobs.jobsWithTimerange(getDateFormatTz()),
   });
+  const annotationUpdatesService = useMemo(() => new AnnotationUpdatesService(), []);
 
   return (
     <PageLoader context={context}>
-      <ExplorerUrlStateManager jobsWithTimeRange={results.jobsWithTimeRange.jobs} />
+      <MlAnnotationUpdatesContext.Provider value={annotationUpdatesService}>
+        <ExplorerUrlStateManager jobsWithTimeRange={results.jobsWithTimeRange.jobs} />
+      </MlAnnotationUpdatesContext.Provider>
     </PageLoader>
   );
 };
@@ -82,8 +87,9 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
   const { jobIds } = useJobSelection(jobsWithTimeRange);
 
   const refresh = useRefresh();
+
   useEffect(() => {
-    if (refresh !== undefined) {
+    if (refresh !== undefined && lastRefresh !== refresh.lastRefresh) {
       setLastRefresh(refresh?.lastRefresh);
 
       if (refresh.timeRange !== undefined) {
@@ -94,7 +100,7 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
         });
       }
     }
-  }, [refresh?.lastRefresh]);
+  }, [refresh?.lastRefresh, lastRefresh, setLastRefresh, setGlobalState]);
 
   // We cannot simply infer bounds from the globalState's `time` attribute
   // with `moment` since it can contain custom strings such as `now-15m`.
@@ -194,6 +200,7 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
   const [tableSeverity] = useTableSeverity();
 
   const [selectedCells, setSelectedCells] = useSelectedCells(appState, setAppState);
+
   useEffect(() => {
     explorerService.setSelectedCells(selectedCells);
   }, [JSON.stringify(selectedCells)]);
@@ -220,9 +227,9 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
     if (explorerState && explorerState.swimlaneContainerWidth > 0) {
       loadExplorerData({
         ...loadExplorerDataConfig,
-        swimlaneLimit:
-          isViewBySwimLaneData(explorerState?.viewBySwimlaneData) &&
-          explorerState?.viewBySwimlaneData.cardinality,
+        swimlaneLimit: isViewBySwimLaneData(explorerState?.viewBySwimlaneData)
+          ? explorerState?.viewBySwimlaneData.cardinality
+          : undefined,
       });
     }
   }, [JSON.stringify(loadExplorerDataConfig)]);

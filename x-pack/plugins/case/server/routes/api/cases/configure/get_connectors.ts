@@ -4,17 +4,46 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { RouteDeps } from '../../types';
 import { wrapError } from '../../utils';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { FindActionResult } from '../../../../../../actions/server/types';
 
 import {
   CASE_CONFIGURE_CONNECTORS_URL,
-  SUPPORTED_CONNECTORS,
   SERVICENOW_ACTION_TYPE_ID,
   JIRA_ACTION_TYPE_ID,
   RESILIENT_ACTION_TYPE_ID,
 } from '../../../../../common/constants';
+
+/**
+ * We need to take into account connectors that have been created within cases and
+ * they do not have the isCaseOwned field. Checking for the existence of
+ * the mapping attribute ensures that the connector is indeed a case connector.
+ * Cases connector should always have a mapping.
+ */
+
+interface CaseAction extends FindActionResult {
+  config?: {
+    isCaseOwned?: boolean;
+    incidentConfiguration?: Record<string, unknown>;
+  };
+}
+
+const isCaseOwned = (action: CaseAction): boolean => {
+  if (
+    [SERVICENOW_ACTION_TYPE_ID, JIRA_ACTION_TYPE_ID, RESILIENT_ACTION_TYPE_ID].includes(
+      action.actionTypeId
+    )
+  ) {
+    if (action.config?.isCaseOwned === true || action.config?.incidentConfiguration?.mapping) {
+      return true;
+    }
+  }
+
+  return false;
+};
 
 /*
  * Be aware that this api will only return 20 connectors
@@ -34,18 +63,7 @@ export function initCaseConfigureGetActionConnector({ caseService, router }: Rou
           throw Boom.notFound('Action client have not been found');
         }
 
-        const results = (await actionsClient.getAll()).filter(
-          (action) =>
-            SUPPORTED_CONNECTORS.includes(action.actionTypeId) &&
-            // Need this filtering temporary to display only Case owned ServiceNow connectors
-            (![SERVICENOW_ACTION_TYPE_ID, JIRA_ACTION_TYPE_ID, RESILIENT_ACTION_TYPE_ID].includes(
-              action.actionTypeId
-            ) ||
-              ([SERVICENOW_ACTION_TYPE_ID, JIRA_ACTION_TYPE_ID, RESILIENT_ACTION_TYPE_ID].includes(
-                action.actionTypeId
-              ) &&
-                action.config?.isCaseOwned === true))
-        );
+        const results = (await actionsClient.getAll()).filter(isCaseOwned);
         return response.ok({ body: results });
       } catch (error) {
         return response.customError(wrapError(error));

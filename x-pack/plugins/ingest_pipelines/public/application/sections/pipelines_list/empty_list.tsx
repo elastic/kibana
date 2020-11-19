@@ -11,6 +11,7 @@ import { useHistory } from 'react-router-dom';
 import { ScopedHistory } from 'kibana/public';
 import { reactRouterNavigate } from '../../../../../../../src/plugins/kibana_react/public';
 import { useKibana } from '../../../shared_imports';
+import { getCreatePath } from '../../services/navigation';
 
 export const EmptyList: FunctionComponent = () => {
   const { services } = useKibana();
@@ -44,7 +45,11 @@ export const EmptyList: FunctionComponent = () => {
             </p>
           }
           actions={
-            <EuiButton {...reactRouterNavigate(history, '/create')} iconType="plusInCircle" fill>
+            <EuiButton
+              {...reactRouterNavigate(history, getCreatePath())}
+              iconType="plusInCircle"
+              fill
+            >
               {i18n.translate('xpack.ingestPipelines.list.table.emptyPrompt.createButtonLabel', {
                 defaultMessage: 'Create a pipeline',
               })}

@@ -18,7 +18,7 @@
  */
 
 import Path from 'path';
-import { Observable } from 'rxjs';
+import { Observable, EMPTY } from 'rxjs';
 import { filter, first, map, mergeMap, tap, toArray } from 'rxjs/operators';
 import { pick } from '@kbn/std';
 
@@ -86,9 +86,11 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
   private readonly config$: Observable<PluginsConfig>;
   private readonly pluginConfigDescriptors = new Map<PluginName, PluginConfigDescriptor>();
   private readonly uiPluginInternalInfo = new Map<PluginName, InternalPluginInfo>();
+  private readonly discoveryDisabled: boolean;
 
   constructor(private readonly coreContext: CoreContext) {
     this.log = coreContext.logger.get('plugins-service');
+    this.discoveryDisabled = coreContext.env.isDevClusterMaster;
     this.pluginsSystem = new PluginsSystem(coreContext);
     this.configService = coreContext.configService;
     this.config$ = coreContext.configService
@@ -97,13 +99,17 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
   }
 
   public async discover({ environment }: PluginsServiceDiscoverDeps) {
-    this.log.debug('Discovering plugins');
-
     const config = await this.config$.pipe(first()).toPromise();
 
-    const { error$, plugin$ } = discover(config, this.coreContext, {
-      uuid: environment.instanceUuid,
-    });
+    const { error$, plugin$ } = this.discoveryDisabled
+      ? {
+          error$: EMPTY,
+          plugin$: EMPTY,
+        }
+      : discover(config, this.coreContext, {
+          uuid: environment.instanceUuid,
+        });
+
     await this.handleDiscoveryErrors(error$);
     await this.handleDiscoveredPlugins(plugin$);
 
@@ -112,6 +118,7 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
     return {
       // Return dependency tree
       pluginTree: this.pluginsSystem.getPluginDependencies(),
+      pluginPaths: this.pluginsSystem.getPlugins().map((plugin) => plugin.path),
       uiPlugins: {
         internal: this.uiPluginInternalInfo,
         public: uiPlugins,

@@ -18,7 +18,7 @@
  */
 
 import { ParseResult } from './grammar';
-import { monaco } from '../monaco';
+import { monaco } from '../monaco_imports';
 import { XJsonWorker } from './worker';
 import { ID } from './constants';
 

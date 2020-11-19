@@ -121,6 +121,9 @@ function LayerPanels(
         <EuiFlexItem grow={true}>
           <EuiToolTip
             className="eui-fullWidth"
+            title={i18n.translate('xpack.lens.xyChart.addLayer', {
+              defaultMessage: 'Add a layer',
+            })}
             content={i18n.translate('xpack.lens.xyChart.addLayerTooltip', {
               defaultMessage:
                 'Use multiple layers to combine chart types or visualize different index patterns.',
@@ -133,9 +136,6 @@ function LayerPanels(
               size="s"
               data-test-subj="lnsLayerAddButton"
               aria-label={i18n.translate('xpack.lens.xyChart.addLayerButton', {
-                defaultMessage: 'Add layer',
-              })}
-              title={i18n.translate('xpack.lens.xyChart.addLayerButton', {
                 defaultMessage: 'Add layer',
               })}
               onClick={() => {

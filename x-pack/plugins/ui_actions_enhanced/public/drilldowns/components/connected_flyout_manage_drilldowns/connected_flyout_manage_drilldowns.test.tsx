@@ -5,21 +5,21 @@
  */
 
 import React from 'react';
-import { cleanup, fireEvent, render, wait } from '@testing-library/react/pure';
+import { fireEvent, render, wait, cleanup } from '@testing-library/react';
 import { createFlyoutManageDrilldowns } from './connected_flyout_manage_drilldowns';
 import {
   mockGetTriggerInfo,
   mockSupportedTriggers,
   mockActionFactories,
 } from '../../../components/action_wizard/test_data';
-import { StubBrowserStorage } from '../../../../../../../src/test_utils/public/stub_browser_storage';
+import { StubBrowserStorage } from '@kbn/test/jest';
 import { Storage } from '../../../../../../../src/plugins/kibana_utils/public';
 import { mockDynamicActionManager } from './test_data';
 import { TEST_SUBJ_DRILLDOWN_ITEM } from '../list_manage_drilldowns';
 import { WELCOME_MESSAGE_TEST_SUBJ } from '../drilldown_hello_bar';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { NotificationsStart } from 'kibana/public';
-import { toastDrilldownsCRUDError } from './i18n';
+import { toastDrilldownsCRUDError } from '../../hooks/i18n';
 
 const storage = new Storage(new StubBrowserStorage());
 const toasts = coreMock.createStart().notifications.toasts;
@@ -29,9 +29,6 @@ const FlyoutManageDrilldowns = createFlyoutManageDrilldowns({
   toastService: toasts,
   getTrigger: mockGetTriggerInfo,
 });
-
-// https://github.com/elastic/kibana/issues/59469
-afterEach(cleanup);
 
 beforeEach(() => {
   storage.clear();
@@ -44,7 +41,7 @@ test('Allows to manage drilldowns', async () => {
   const screen = render(
     <FlyoutManageDrilldowns
       dynamicActionManager={mockDynamicActionManager}
-      supportedTriggers={mockSupportedTriggers}
+      triggers={mockSupportedTriggers}
     />
   );
 
@@ -56,7 +53,8 @@ test('Allows to manage drilldowns', async () => {
 
   fireEvent.click(screen.getByText(/Create new/i));
 
-  let [createHeading, createButton] = screen.getAllByText(/Create Drilldown/i);
+  let [createHeading] = screen.getAllByText(/Create Drilldown/i);
+  let createButton = screen.getByRole('button', { name: /Create Drilldown/i });
   expect(createHeading).toBeVisible();
   expect(screen.getByLabelText(/Back/i)).toBeVisible();
 
@@ -77,7 +75,8 @@ test('Allows to manage drilldowns', async () => {
     target: { value: URL },
   });
 
-  [createHeading, createButton] = screen.getAllByText(/Create Drilldown/i);
+  [createHeading] = screen.getAllByText(/Create Drilldown/i);
+  createButton = screen.getByRole('button', { name: /Create Drilldown/i });
 
   expect(createButton).toBeEnabled();
   fireEvent.click(createButton);
@@ -116,7 +115,7 @@ test('Can delete multiple drilldowns', async () => {
   const screen = render(
     <FlyoutManageDrilldowns
       dynamicActionManager={mockDynamicActionManager}
-      supportedTriggers={mockSupportedTriggers}
+      triggers={mockSupportedTriggers}
     />
   );
   // wait for initial render. It is async because resolving compatible action factories is async
@@ -158,7 +157,7 @@ test('Create only mode', async () => {
       dynamicActionManager={mockDynamicActionManager}
       viewMode={'create'}
       onClose={onClose}
-      supportedTriggers={mockSupportedTriggers}
+      triggers={mockSupportedTriggers}
     />
   );
   // wait for initial render. It is async because resolving compatible action factories is async
@@ -182,7 +181,7 @@ test('After switching between action factories state is restored', async () => {
     <FlyoutManageDrilldowns
       dynamicActionManager={mockDynamicActionManager}
       viewMode={'create'}
-      supportedTriggers={mockSupportedTriggers}
+      triggers={mockSupportedTriggers}
     />
   );
   // wait for initial render. It is async because resolving compatible action factories is async
@@ -223,7 +222,7 @@ test("Error when can't save drilldown changes", async () => {
   const screen = render(
     <FlyoutManageDrilldowns
       dynamicActionManager={mockDynamicActionManager}
-      supportedTriggers={mockSupportedTriggers}
+      triggers={mockSupportedTriggers}
     />
   );
   // wait for initial render. It is async because resolving compatible action factories is async
@@ -246,7 +245,7 @@ test('Should show drilldown welcome message. Should be able to dismiss it', asyn
   let screen = render(
     <FlyoutManageDrilldowns
       dynamicActionManager={mockDynamicActionManager}
-      supportedTriggers={mockSupportedTriggers}
+      triggers={mockSupportedTriggers}
     />
   );
 
@@ -261,7 +260,7 @@ test('Should show drilldown welcome message. Should be able to dismiss it', asyn
   screen = render(
     <FlyoutManageDrilldowns
       dynamicActionManager={mockDynamicActionManager}
-      supportedTriggers={mockSupportedTriggers}
+      triggers={mockSupportedTriggers}
     />
   );
   // wait for initial render. It is async because resolving compatible action factories is async
@@ -273,7 +272,7 @@ test('Drilldown type is not shown if no supported trigger', async () => {
   const screen = render(
     <FlyoutManageDrilldowns
       dynamicActionManager={mockDynamicActionManager}
-      supportedTriggers={['VALUE_CLICK_TRIGGER']}
+      triggers={['VALUE_CLICK_TRIGGER']}
       viewMode={'create'}
     />
   );
@@ -287,7 +286,7 @@ test('Can pick a trigger', async () => {
   const screen = render(
     <FlyoutManageDrilldowns
       dynamicActionManager={mockDynamicActionManager}
-      supportedTriggers={mockSupportedTriggers}
+      triggers={mockSupportedTriggers}
       viewMode={'create'}
     />
   );

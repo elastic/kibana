@@ -25,13 +25,10 @@ import { IUiSettingsClient, MountPoint } from 'kibana/public';
 import { HitsCounter } from './hits_counter';
 import { TimechartHeader } from './timechart_header';
 import { DiscoverSidebar } from './sidebar';
-import { getServices, IIndexPattern } from '../../kibana_services';
-// @ts-ignore
-import { DiscoverNoResults } from '../angular/directives/no_results';
-import { DiscoverUninitialized } from '../angular/directives/uninitialized';
-import { DiscoverHistogram } from '../angular/directives/histogram';
+import { getServices, IndexPattern } from '../../kibana_services';
+import { DiscoverUninitialized, DiscoverHistogram } from '../angular/directives';
+import { DiscoverNoResults } from './no_results';
 import { LoadingSpinner } from './loading_spinner/loading_spinner';
-import { DiscoverFetchError, FetchError } from './fetch_error/fetch_error';
 import { DocTableLegacy } from '../angular/doc_table/create_doc_table_react';
 import { SkipBottomButton } from './skip_bottom_button';
 import {
@@ -41,24 +38,25 @@ import {
   TimeRange,
   Query,
   IndexPatternAttributes,
+  DataPublicPluginStart,
+  AggConfigs,
 } from '../../../../data/public';
 import { Chart } from '../angular/helpers/point_series';
 import { AppState } from '../angular/discover_state';
 import { SavedSearch } from '../../saved_searches';
 
 import { SavedObject } from '../../../../../core/types';
-import { Vis } from '../../../../visualizations/public';
 import { TopNavMenuData } from '../../../../navigation/public';
 
 export interface DiscoverLegacyProps {
   addColumn: (column: string) => void;
   fetch: () => void;
   fetchCounter: number;
-  fetchError: FetchError;
+  fetchError: Error;
   fieldCounts: Record<string, number>;
   histogramData: Chart;
   hits: number;
-  indexPattern: IIndexPattern;
+  indexPattern: IndexPattern;
   minimumVisibleRows: number;
   onAddFilter: (field: IndexPatternField | string, value: string, type: '+' | '-') => void;
   onChangeInterval: (interval: string) => void;
@@ -68,13 +66,15 @@ export interface DiscoverLegacyProps {
   onSkipBottomButtonClick: () => void;
   onSort: (sort: string[][]) => void;
   opts: {
-    savedSearch: SavedSearch;
+    chartAggConfigs?: AggConfigs;
     config: IUiSettingsClient;
-    indexPatternList: Array<SavedObject<IndexPatternAttributes>>;
-    timefield: string;
-    sampleSize: number;
+    data: DataPublicPluginStart;
     fixedScroll: (el: HTMLElement) => void;
+    indexPatternList: Array<SavedObject<IndexPatternAttributes>>;
+    sampleSize: number;
+    savedSearch: SavedSearch;
     setHeaderActionMenu: (menuMount: MountPoint | undefined) => void;
+    timefield: string;
   };
   resetQuery: () => void;
   resultState: string;
@@ -88,15 +88,14 @@ export interface DiscoverLegacyProps {
   topNavMenu: TopNavMenuData[];
   updateQuery: (payload: { dateRange: TimeRange; query?: Query }, isUpdate?: boolean) => void;
   updateSavedQueryId: (savedQueryId?: string) => void;
-  vis?: Vis;
 }
 
 export function DiscoverLegacy({
   addColumn,
   fetch,
   fetchCounter,
-  fetchError,
   fieldCounts,
+  fetchError,
   histogramData,
   hits,
   indexPattern,
@@ -120,12 +119,12 @@ export function DiscoverLegacy({
   topNavMenu,
   updateQuery,
   updateSavedQueryId,
-  vis,
 }: DiscoverLegacyProps) {
   const [isSidebarClosed, setIsSidebarClosed] = useState(false);
   const { TopNavMenu } = getServices().navigation.ui;
+  const { trackUiMetric } = getServices();
   const { savedSearch, indexPatternList } = opts;
-  const bucketAggConfig = vis?.data?.aggs?.aggs[1];
+  const bucketAggConfig = opts.chartAggConfigs?.aggs[1];
   const bucketInterval =
     bucketAggConfig && search.aggs.isDateHistogramBucketAggConfig(bucketAggConfig)
       ? bucketAggConfig.buckets?.getInterval()
@@ -191,6 +190,7 @@ export function DiscoverLegacy({
                     onRemoveField={onRemoveColumn}
                     selectedIndexPattern={searchSource && searchSource.getField('index')}
                     setIndexPattern={setIndexPattern}
+                    trackUiMetric={trackUiMetric}
                   />
                 </div>
               )}
@@ -211,16 +211,12 @@ export function DiscoverLegacy({
                 <DiscoverNoResults
                   timeFieldName={opts.timefield}
                   queryLanguage={state.query ? state.query.language : ''}
+                  data={opts.data}
+                  error={fetchError}
                 />
               )}
               {resultState === 'uninitialized' && <DiscoverUninitialized onRefresh={fetch} />}
-              {/* @TODO: Solved in the Angular way to satisfy functional test - should be improved*/}
-              <span style={{ display: resultState !== 'loading' ? 'none' : '' }}>
-                {fetchError && <DiscoverFetchError fetchError={fetchError} />}
-                <div className="dscOverlay" style={{ display: fetchError ? 'none' : '' }}>
-                  <LoadingSpinner />
-                </div>
-              </span>
+              {resultState === 'loading' && <LoadingSpinner />}
               {resultState === 'ready' && (
                 <div className="dscWrapper__content">
                   <SkipBottomButton onClick={onSkipBottomButtonClick} />
@@ -247,7 +243,7 @@ export function DiscoverLegacy({
                       })}
                       className="dscTimechart"
                     >
-                      {vis && rows.length !== 0 && (
+                      {opts.chartAggConfigs && rows.length !== 0 && (
                         <div className="dscHistogram" data-test-subj="discoverChart">
                           <DiscoverHistogram
                             chartData={histogramData}

@@ -6,24 +6,25 @@
 
 import { noop } from 'lodash/fp';
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { shallowEqual, useSelector } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 
 import { ESTermQuery } from '../../../../common/typed_json';
-import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
-import { inputsModel, State } from '../../../common/store';
+import { inputsModel } from '../../../common/store';
+import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { useKibana } from '../../../common/lib/kibana';
 import { createFilter } from '../../../common/containers/helpers';
-import { NetworkHttpEdges, PageInfoPaginated } from '../../../graphql/types';
 import { generateTablePaginationOptions } from '../../../common/components/paginated_table/helpers';
 import { networkModel, networkSelectors } from '../../store';
 import {
   NetworkQueries,
+  NetworkHttpEdges,
+  PageInfoPaginated,
   NetworkHttpRequestOptions,
   NetworkHttpStrategyResponse,
   SortField,
 } from '../../../../common/search_strategy';
-import { AbortError } from '../../../../../../../src/plugins/data/common';
+import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/plugins/data/common';
+import { AbortError } from '../../../../../../../src/plugins/kibana_utils/common';
 import * as i18n from './translations';
 import { InspectResponse } from '../../../types';
 import { getInspectResponse } from '../../../helpers';
@@ -45,6 +46,7 @@ export interface NetworkHttpArgs {
 interface UseNetworkHttp {
   id?: string;
   ip?: string;
+  indexNames: string[];
   type: networkModel.NetworkType;
   filterQuery?: ESTermQuery | string;
   endDate: string;
@@ -56,39 +58,46 @@ export const useNetworkHttp = ({
   endDate,
   filterQuery,
   id = ID,
+  indexNames,
   ip,
   skip,
   startDate,
   type,
 }: UseNetworkHttp): [boolean, NetworkHttpArgs] => {
   const getHttpSelector = networkSelectors.httpSelector();
-  const { activePage, limit, sort } = useSelector(
-    (state: State) => getHttpSelector(state, type),
-    shallowEqual
+  const { activePage, limit, sort } = useShallowEqualSelector((state) =>
+    getHttpSelector(state, type)
   );
-  const { data, notifications, uiSettings } = useKibana().services;
+  const { data, notifications } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
-  const defaultIndex = uiSettings.get<string[]>(DEFAULT_INDEX_KEY);
   const [loading, setLoading] = useState(false);
 
-  const [networkHttpRequest, setHostRequest] = useState<NetworkHttpRequestOptions>({
-    defaultIndex,
-    factoryQueryType: NetworkQueries.http,
-    filterQuery: createFilter(filterQuery),
-    ip,
-    pagination: generateTablePaginationOptions(activePage, limit),
-    sort: sort as SortField,
-    timerange: {
-      interval: '12h',
-      from: startDate ? startDate : '',
-      to: endDate ? endDate : new Date(Date.now()).toISOString(),
-    },
-  });
+  const [networkHttpRequest, setHostRequest] = useState<NetworkHttpRequestOptions | null>(
+    !skip
+      ? {
+          defaultIndex: indexNames,
+          factoryQueryType: NetworkQueries.http,
+          filterQuery: createFilter(filterQuery),
+          ip,
+          pagination: generateTablePaginationOptions(activePage, limit),
+          sort: sort as SortField,
+          timerange: {
+            interval: '12h',
+            from: startDate ? startDate : '',
+            to: endDate ? endDate : new Date(Date.now()).toISOString(),
+          },
+        }
+      : null
+  );
 
   const wrappedLoadMore = useCallback(
     (newActivePage: number) => {
       setHostRequest((prevRequest) => {
+        if (!prevRequest) {
+          return prevRequest;
+        }
+
         return {
           ...prevRequest,
           pagination: generateTablePaginationOptions(newActivePage, limit),
@@ -117,7 +126,11 @@ export const useNetworkHttp = ({
   });
 
   const networkHttpSearch = useCallback(
-    (request: NetworkHttpRequestOptions) => {
+    (request: NetworkHttpRequestOptions | null) => {
+      if (request == null) {
+        return;
+      }
+
       let didCancel = false;
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
@@ -130,7 +143,7 @@ export const useNetworkHttp = ({
           })
           .subscribe({
             next: (response) => {
-              if (!response.isPartial && !response.isRunning) {
+              if (isCompleteResponse(response)) {
                 if (!didCancel) {
                   setLoading(false);
                   setNetworkHttpResponse((prevResponse) => ({
@@ -143,7 +156,7 @@ export const useNetworkHttp = ({
                   }));
                 }
                 searchSubscription$.unsubscribe();
-              } else if (response.isPartial && !response.isRunning) {
+              } else if (isErrorResponse(response)) {
                 if (!didCancel) {
                   setLoading(false);
                 }
@@ -176,9 +189,11 @@ export const useNetworkHttp = ({
   useEffect(() => {
     setHostRequest((prevRequest) => {
       const myRequest = {
-        ...prevRequest,
-        defaultIndex,
+        ...(prevRequest ?? {}),
+        defaultIndex: indexNames,
+        factoryQueryType: NetworkQueries.http,
         filterQuery: createFilter(filterQuery),
+        ip,
         pagination: generateTablePaginationOptions(activePage, limit),
         sort: sort as SortField,
         timerange: {
@@ -192,7 +207,7 @@ export const useNetworkHttp = ({
       }
       return prevRequest;
     });
-  }, [activePage, defaultIndex, endDate, filterQuery, limit, startDate, sort, skip]);
+  }, [activePage, indexNames, endDate, filterQuery, ip, limit, startDate, sort, skip]);
 
   useEffect(() => {
     networkHttpSearch(networkHttpRequest);

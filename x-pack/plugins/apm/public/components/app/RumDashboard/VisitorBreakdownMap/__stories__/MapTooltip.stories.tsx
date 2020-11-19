@@ -8,7 +8,7 @@ import { storiesOf } from '@storybook/react';
 import React from 'react';
 import { EuiThemeProvider } from '../../../../../../../observability/public';
 import { MapToolTip } from '../MapToolTip';
-import { COUNTRY_NAME, TRANSACTION_DURATION_COUNTRY } from '../LayerList';
+import { COUNTRY_NAME, TRANSACTION_DURATION_COUNTRY } from '../useLayerList';
 
 storiesOf('app/RumDashboard/VisitorsRegionMap', module)
   .addDecorator((storyFn) => <EuiThemeProvider>{storyFn()}</EuiThemeProvider>)

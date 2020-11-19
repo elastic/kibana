@@ -4,5 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { HttpLogic, IHttpValues, IHttpActions } from './http_logic';
-export { HttpProvider } from './http_provider';
+export { HttpLogic, mountHttpLogic } from './http_logic';

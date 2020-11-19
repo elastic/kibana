@@ -24,8 +24,9 @@ import {
   sendGetEndpointSpecificPackagePolicies,
   sendGetEndpointSecurityPackage,
   sendGetAgentPolicyList,
+  sendGetFleetAgentsWithEndpoint,
 } from '../../policy/store/policy_list/services/ingest';
-import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../../../../../ingest_manager/common';
+import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../../../../../fleet/common';
 import { metadataCurrentIndexPattern } from '../../../../../common/endpoint/constants';
 import { IIndexPattern, Query } from '../../../../../../../../src/plugins/data/public';
 
@@ -86,6 +87,32 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
           type: 'serverReturnedEndpointList',
           payload: endpointResponse,
         });
+
+        try {
+          const endpointsTotalCount = await endpointsTotal(coreStart.http);
+          dispatch({
+            type: 'serverReturnedEndpointsTotal',
+            payload: endpointsTotalCount,
+          });
+        } catch (error) {
+          dispatch({
+            type: 'serverFailedToReturnEndpointsTotal',
+            payload: error,
+          });
+        }
+
+        try {
+          const agentsWithEndpoint = await sendGetFleetAgentsWithEndpoint(coreStart.http);
+          dispatch({
+            type: 'serverReturnedAgenstWithEndpointsTotal',
+            payload: agentsWithEndpoint.total,
+          });
+        } catch (error) {
+          dispatch({
+            type: 'serverFailedToReturnAgenstWithEndpointsTotal',
+            payload: error,
+          });
+        }
 
         try {
           const ingestPolicies = await getAgentAndPoliciesForEndpointsList(
@@ -287,7 +314,7 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
       // call the policy response api
       try {
         const policyResponse = await coreStart.http.get(`/api/endpoint/policy_response`, {
-          query: { hostId: selectedEndpoint },
+          query: { agentId: selectedEndpoint },
         });
         dispatch({
           type: 'serverReturnedEndpointPolicyResponse',
@@ -371,17 +398,27 @@ const getAgentAndPoliciesForEndpointsList = async (
   return nonExistingPackagePoliciesAndExistingAgentPolicies;
 };
 
-const doEndpointsExist = async (http: HttpStart): Promise<boolean> => {
+const endpointsTotal = async (http: HttpStart): Promise<number> => {
   try {
     return (
-      (
-        await http.post<HostResultList>('/api/endpoint/metadata', {
-          body: JSON.stringify({
-            paging_properties: [{ page_index: 0 }, { page_size: 1 }],
-          }),
-        })
-      ).hosts.length !== 0
-    );
+      await http.post<HostResultList>('/api/endpoint/metadata', {
+        body: JSON.stringify({
+          paging_properties: [{ page_index: 0 }, { page_size: 1 }],
+        }),
+      })
+    ).total;
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error(`error while trying to check for total endpoints`);
+    // eslint-disable-next-line no-console
+    console.error(error);
+  }
+  return 0;
+};
+
+const doEndpointsExist = async (http: HttpStart): Promise<boolean> => {
+  try {
+    return (await endpointsTotal(http)) > 0;
   } catch (error) {
     // eslint-disable-next-line no-console
     console.error(`error while trying to check if endpoints exist`);

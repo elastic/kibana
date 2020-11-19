@@ -40,19 +40,20 @@ export const SiemNavigationComponent: React.FC<
     if (pathName || pageName) {
       setBreadcrumbs(
         {
-          query: urlState.query,
           detailName,
           filters: urlState.filters,
+          flowTarget,
           navTabs,
           pageName,
           pathName,
+          query: urlState.query,
           savedQuery: urlState.savedQuery,
           search,
-          tabName,
-          flowTarget,
-          timerange: urlState.timerange,
-          timeline: urlState.timeline,
+          sourcerer: urlState.sourcerer,
           state,
+          tabName,
+          timeline: urlState.timeline,
+          timerange: urlState.timerange,
         },
         chrome,
         getUrlForApp
@@ -69,6 +70,7 @@ export const SiemNavigationComponent: React.FC<
       navTabs={navTabs}
       pageName={pageName}
       pathName={pathName}
+      sourcerer={urlState.sourcerer}
       savedQuery={urlState.savedQuery}
       tabName={tabName}
       timeline={urlState.timeline}

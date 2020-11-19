@@ -19,12 +19,13 @@ export interface DataTypeDefinition {
   };
   subTypes?: { label: string; types: SubType[] };
   description?: () => ReactNode;
+  isBeta?: boolean;
 }
 
 export interface ParameterDefinition {
   title?: string;
   description?: JSX.Element | string;
-  fieldConfig: FieldConfig<any, any>;
+  fieldConfig: FieldConfig<any>;
   schema?: any;
   props?: { [key: string]: ParameterDefinition };
   documentation?: {
@@ -35,6 +36,7 @@ export interface ParameterDefinition {
 }
 
 export type MainType =
+  | 'runtime'
   | 'text'
   | 'keyword'
   | 'numeric'
@@ -62,6 +64,7 @@ export type MainType =
   | 'point'
   | 'histogram'
   | 'constant_keyword'
+  | 'version'
   | 'wildcard'
   /**
    * 'other' is a special type that only exists inside of MappingsEditor as a placeholder
@@ -151,6 +154,8 @@ export type ParameterName =
   | 'depth_limit'
   | 'relations'
   | 'max_shingle_size'
+  | 'runtime_type'
+  | 'script'
   | 'value'
   | 'meta';
 
@@ -168,6 +173,7 @@ export interface Fields {
 interface FieldBasic {
   name: string;
   type: DataType;
+  runtime_type?: DataType;
   subType?: SubType;
   properties?: { [key: string]: Omit<Field, 'name'> };
   fields?: { [key: string]: Omit<Field, 'name'> };

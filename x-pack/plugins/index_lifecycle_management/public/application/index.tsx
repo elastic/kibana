@@ -8,19 +8,32 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { I18nStart, ScopedHistory, ApplicationStart } from 'kibana/public';
 import { UnmountCallback } from 'src/core/public';
+import { CloudSetup } from '../../../cloud/public';
 
-import { App } from './app';
+import { KibanaContextProvider } from '../shared_imports';
+
+import { AppWithRouter } from './app';
+
+import { BreadcrumbService } from './services/breadcrumbs';
 
 export const renderApp = (
   element: Element,
   I18nContext: I18nStart['Context'],
   history: ScopedHistory,
   navigateToApp: ApplicationStart['navigateToApp'],
-  getUrlForApp: ApplicationStart['getUrlForApp']
+  getUrlForApp: ApplicationStart['getUrlForApp'],
+  breadcrumbService: BreadcrumbService,
+  cloud?: CloudSetup
 ): UnmountCallback => {
   render(
     <I18nContext>
-      <App history={history} navigateToApp={navigateToApp} getUrlForApp={getUrlForApp} />
+      <KibanaContextProvider services={{ cloud, breadcrumbService }}>
+        <AppWithRouter
+          history={history}
+          navigateToApp={navigateToApp}
+          getUrlForApp={getUrlForApp}
+        />
+      </KibanaContextProvider>
     </I18nContext>,
     element
   );

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { findInventoryFields } from '../../../../common/inventory_models';
+import { findInventoryFields, findInventoryModel } from '../../../../common/inventory_models';
 import { MetricsAPIRequest, SnapshotRequest } from '../../../../common/http_api';
 import { ESSearchClient } from '../../../lib/metrics/types';
 import { InfraSource } from '../../../lib/sources';
@@ -34,7 +34,7 @@ export const transformRequestToMetricsAPIRequest = async (
       interval: timeRangeWithIntervalApplied.interval,
     },
     metrics: transformSnapshotMetricsToMetricsAPIMetrics(snapshotRequest),
-    limit: snapshotRequest.overrideCompositeSize ? snapshotRequest.overrideCompositeSize : 10,
+    limit: snapshotRequest.overrideCompositeSize ? snapshotRequest.overrideCompositeSize : 5,
     alignDataToEnd: true,
   };
 
@@ -52,12 +52,19 @@ export const transformRequestToMetricsAPIRequest = async (
     filters.push({ term: { 'cloud.region': snapshotRequest.region } });
   }
 
+  const inventoryModel = findInventoryModel(snapshotRequest.nodeType);
+  if (inventoryModel && inventoryModel.nodeFilter) {
+    inventoryModel.nodeFilter?.forEach((f) => filters.push(f));
+  }
+
   const inventoryFields = findInventoryFields(
     snapshotRequest.nodeType,
     source.configuration.fields
   );
-  const groupBy = snapshotRequest.groupBy.map((g) => g.field).filter(Boolean) as string[];
-  metricsApiRequest.groupBy = [...groupBy, inventoryFields.id];
+  if (snapshotRequest.groupBy) {
+    const groupBy = snapshotRequest.groupBy.map((g) => g.field).filter(Boolean) as string[];
+    metricsApiRequest.groupBy = [...groupBy, inventoryFields.id];
+  }
 
   const metaAggregation = {
     id: META_KEY,

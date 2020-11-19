@@ -14,6 +14,7 @@ import {
   PluginInitializerContext,
   LegacyAPICaller,
 } from 'src/core/server';
+import { handleEsError } from './shared_imports';
 
 import { Index as IndexWithoutIlm } from '../../index_management/common/types';
 import { PLUGIN } from '../common/constants';
@@ -22,10 +23,10 @@ import { Dependencies } from './types';
 import { registerApiRoutes } from './routes';
 import { License } from './services';
 import { IndexLifecycleManagementConfig } from './config';
-import { isEsError } from './shared_imports';
 
 const indexLifecycleDataEnricher = async (
   indicesList: IndexWithoutIlm[],
+  // TODO replace deprecated ES client after Index Management is updated
   callAsCurrentUser: LegacyAPICaller
 ): Promise<Index[]> => {
   if (!indicesList || !indicesList.length) {
@@ -100,7 +101,7 @@ export class IndexLifecycleManagementServerPlugin implements Plugin<void, void, 
       config,
       license: this.license,
       lib: {
-        isEsError,
+        handleEsError,
       },
     });
 

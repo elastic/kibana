@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { Fragment, lazy } from 'react';
-import { mountWithIntl, nextTick } from 'test_utils/enzyme_helpers';
+import { mountWithIntl, nextTick } from '@kbn/test/jest';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
-import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import { ValidationResult, Alert, AlertAction } from '../../../types';
 import ActionForm from './action_form';
+import { ResolvedActionGroup } from '../../../../../alerts/common';
 jest.mock('../../lib/action_connector_api', () => ({
   loadAllActions: jest.fn(),
   loadActionTypes: jest.fn(),
@@ -112,9 +112,7 @@ describe('action_form', () => {
   };
 
   describe('action_form in alert', () => {
-    let wrapper: ReactWrapper<any>;
-
-    async function setup() {
+    async function setup(customActions?: AlertAction[]) {
       const { loadAllActions } = jest.requireMock('../../lib/action_connector_api');
       loadAllActions.mockResolvedValueOnce([
         {
@@ -177,7 +175,8 @@ describe('action_form', () => {
             show: true,
           },
         },
-        actionTypeRegistry: actionTypeRegistry as any,
+        setHasActionsWithBrokenConnector: jest.fn(),
+        actionTypeRegistry,
         docLinks: { ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' },
       };
       actionTypeRegistry.list.mockReturnValue([
@@ -198,37 +197,51 @@ describe('action_form', () => {
         schedule: {
           interval: '1m',
         },
-        actions: [
-          {
-            group: 'default',
-            id: 'test',
-            actionTypeId: actionType.id,
-            params: {
-              message: '',
-            },
-          },
-        ],
+        actions: customActions
+          ? customActions
+          : [
+              {
+                group: 'default',
+                id: 'test',
+                actionTypeId: actionType.id,
+                params: {
+                  message: '',
+                },
+              },
+            ],
         tags: [],
         muteAll: false,
         enabled: false,
         mutedInstanceIds: [],
       } as unknown) as Alert;
 
-      wrapper = mountWithIntl(
+      const wrapper = mountWithIntl(
         <ActionForm
           actions={initialAlert.actions}
-          messageVariables={[
-            { name: 'testVar1', description: 'test var1' },
-            { name: 'testVar2', description: 'test var2' },
-          ]}
+          messageVariables={{
+            params: [
+              { name: 'testVar1', description: 'test var1' },
+              { name: 'testVar2', description: 'test var2' },
+            ],
+            state: [],
+            context: [{ name: 'contextVar', description: 'context var1' }],
+          }}
           defaultActionGroupId={'default'}
           setActionIdByIndex={(id: string, index: number) => {
             initialAlert.actions[index].id = id;
+          }}
+          actionGroups={[
+            { id: 'default', name: 'Default' },
+            { id: 'resolved', name: 'Resolved' },
+          ]}
+          setActionGroupIdByIndex={(group: string, index: number) => {
+            initialAlert.actions[index].group = group;
           }}
           setAlertProperty={(_updatedActions: AlertAction[]) => {}}
           setActionParamsProperty={(key: string, value: any, index: number) =>
             (initialAlert.actions[index] = { ...initialAlert.actions[index], [key]: value })
           }
+          setHasActionsWithBrokenConnector={deps!.setHasActionsWithBrokenConnector}
           http={deps!.http}
           actionTypeRegistry={deps!.actionTypeRegistry}
           defaultActionMessage={'Alert [{{ctx.metadata.name}}] has exceeded the threshold'}
@@ -293,10 +306,12 @@ describe('action_form', () => {
         await nextTick();
         wrapper.update();
       });
+
+      return wrapper;
     }
 
     it('renders available action cards', async () => {
-      await setup();
+      const wrapper = await setup();
       const actionOption = wrapper.find(
         `[data-test-subj="${actionType.id}-ActionTypeSelectOption"]`
       );
@@ -306,10 +321,11 @@ describe('action_form', () => {
           .find(`EuiToolTip [data-test-subj="${actionType.id}-ActionTypeSelectOption"]`)
           .exists()
       ).toBeFalsy();
+      expect(deps.setHasActionsWithBrokenConnector).toHaveBeenLastCalledWith(false);
     });
 
     it('does not render action types disabled by config', async () => {
-      await setup();
+      const wrapper = await setup();
       const actionOption = wrapper.find(
         '[data-test-subj="disabled-by-config-ActionTypeSelectOption"]'
       );
@@ -317,52 +333,114 @@ describe('action_form', () => {
     });
 
     it('render action types which is preconfigured only (disabled by config and with preconfigured connectors)', async () => {
-      await setup();
+      const wrapper = await setup();
       const actionOption = wrapper.find('[data-test-subj="preconfigured-ActionTypeSelectOption"]');
       expect(actionOption.exists()).toBeTruthy();
     });
 
+    it('renders available action groups for the selected action type', async () => {
+      const wrapper = await setup();
+      const actionOption = wrapper.find(
+        `[data-test-subj="${actionType.id}-ActionTypeSelectOption"]`
+      );
+      actionOption.first().simulate('click');
+      const actionGroupsSelect = wrapper.find(
+        `[data-test-subj="addNewActionConnectorActionGroup-0"]`
+      );
+      expect((actionGroupsSelect.first().props() as any).options).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "data-test-subj": "addNewActionConnectorActionGroup-0-option-default",
+            "inputDisplay": "Default",
+            "value": "default",
+          },
+          Object {
+            "data-test-subj": "addNewActionConnectorActionGroup-0-option-resolved",
+            "inputDisplay": "Resolved",
+            "value": "resolved",
+          },
+        ]
+      `);
+    });
+
+    it('renders selected Resolved action group', async () => {
+      const wrapper = await setup([
+        {
+          group: ResolvedActionGroup.id,
+          id: 'test',
+          actionTypeId: actionType.id,
+          params: {
+            message: '',
+          },
+        },
+      ]);
+      const actionOption = wrapper.find(
+        `[data-test-subj="${actionType.id}-ActionTypeSelectOption"]`
+      );
+      actionOption.first().simulate('click');
+      const actionGroupsSelect = wrapper.find(
+        `[data-test-subj="addNewActionConnectorActionGroup-0"]`
+      );
+      expect((actionGroupsSelect.first().props() as any).options).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "data-test-subj": "addNewActionConnectorActionGroup-0-option-default",
+            "inputDisplay": "Default",
+            "value": "default",
+          },
+          Object {
+            "data-test-subj": "addNewActionConnectorActionGroup-0-option-resolved",
+            "inputDisplay": "Resolved",
+            "value": "resolved",
+          },
+        ]
+      `);
+      expect(actionGroupsSelect.first().text()).toEqual(
+        'Select an option: Resolved, is selectedResolved'
+      );
+    });
+
     it('renders available connectors for the selected action type', async () => {
-      await setup();
+      const wrapper = await setup();
       const actionOption = wrapper.find(
         `[data-test-subj="${actionType.id}-ActionTypeSelectOption"]`
       );
       actionOption.first().simulate('click');
       const combobox = wrapper.find(`[data-test-subj="selectActionConnector-${actionType.id}"]`);
       expect((combobox.first().props() as any).options).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "id": "test",
-          "key": "test",
-          "label": "Test connector ",
-        },
-        Object {
-          "id": "test2",
-          "key": "test2",
-          "label": "Test connector 2 (preconfigured)",
-        },
-      ]
-      `);
+              Array [
+                Object {
+                  "id": "test",
+                  "key": "test",
+                  "label": "Test connector ",
+                },
+                Object {
+                  "id": "test2",
+                  "key": "test2",
+                  "label": "Test connector 2 (preconfigured)",
+                },
+              ]
+            `);
     });
 
     it('renders only preconfigured connectors for the selected preconfigured action type', async () => {
-      await setup();
+      const wrapper = await setup();
       const actionOption = wrapper.find('[data-test-subj="preconfigured-ActionTypeSelectOption"]');
       actionOption.first().simulate('click');
       const combobox = wrapper.find('[data-test-subj="selectActionConnector-preconfigured"]');
       expect((combobox.first().props() as any).options).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "id": "test3",
-          "key": "test3",
-          "label": "Preconfigured Only (preconfigured)",
-        },
-      ]
-      `);
+              Array [
+                Object {
+                  "id": "test3",
+                  "key": "test3",
+                  "label": "Preconfigured Only (preconfigured)",
+                },
+              ]
+            `);
     });
 
-    it('does not render "Add new" button for preconfigured only action type', async () => {
-      await setup();
+    it('does not render "Add connector" button for preconfigured only action type', async () => {
+      const wrapper = await setup();
       const actionOption = wrapper.find('[data-test-subj="preconfigured-ActionTypeSelectOption"]');
       actionOption.first().simulate('click');
       const preconfigPannel = wrapper.find('[data-test-subj="alertActionAccordion-default"]');
@@ -373,7 +451,7 @@ describe('action_form', () => {
     });
 
     it('renders action types disabled by license', async () => {
-      await setup();
+      const wrapper = await setup();
       const actionOption = wrapper.find(
         '[data-test-subj="disabled-by-license-ActionTypeSelectOption"]'
       );
@@ -386,11 +464,33 @@ describe('action_form', () => {
     });
 
     it(`shouldn't render action types without params component`, async () => {
-      await setup();
+      const wrapper = await setup();
       const actionOption = wrapper.find(
         `[data-test-subj="${actionTypeWithoutParams.id}-ActionTypeSelectOption"]`
       );
       expect(actionOption.exists()).toBeFalsy();
+    });
+
+    it('recognizes actions with broken connectors', async () => {
+      await setup([
+        {
+          group: 'default',
+          id: 'test',
+          actionTypeId: actionType.id,
+          params: {
+            message: '',
+          },
+        },
+        {
+          group: 'default',
+          id: 'connector-doesnt-exist',
+          actionTypeId: actionType.id,
+          params: {
+            message: 'broken',
+          },
+        },
+      ]);
+      expect(deps.setHasActionsWithBrokenConnector).toHaveBeenLastCalledWith(true);
     });
   });
 });

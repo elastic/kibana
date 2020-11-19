@@ -9,9 +9,9 @@ import React, { MouseEventHandler, useState } from 'react';
 import { omit } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiLink, htmlIdGenerator } from '@elastic/eui';
-import { updateColumnParam } from '../../../state_helpers';
+import { updateColumnParam } from '../../layer_helpers';
 import { OperationDefinition } from '../index';
-import { FieldBasedIndexPatternColumn } from '../column_types';
+import { BaseIndexPatternColumn } from '../column_types';
 import { FilterPopover } from './filter_popover';
 import { IndexPattern } from '../../../types';
 import { Query, esKuery, esQuery } from '../../../../../../../../src/plugins/data/public';
@@ -61,31 +61,21 @@ export const isQueryValid = (input: Query, indexPattern: IndexPattern) => {
   }
 };
 
-export interface FiltersIndexPatternColumn extends FieldBasedIndexPatternColumn {
+export interface FiltersIndexPatternColumn extends BaseIndexPatternColumn {
   operationType: 'filters';
   params: {
     filters: Filter[];
   };
 }
 
-export const filtersOperation: OperationDefinition<FiltersIndexPatternColumn> = {
+export const filtersOperation: OperationDefinition<FiltersIndexPatternColumn, 'none'> = {
   type: 'filters',
   displayName: filtersLabel,
   priority: 3, // Higher than any metric
-  getPossibleOperationForField: ({ type }) => {
-    if (type === 'document') {
-      return {
-        dataType: 'string',
-        isBucketed: true,
-        scale: 'ordinal',
-      };
-    }
-  },
-  isTransferable: () => false,
+  input: 'none',
+  isTransferable: () => true,
 
-  onFieldChange: (oldColumn, indexPattern, field) => oldColumn,
-
-  buildColumn({ suggestedPriority, field, previousColumn }) {
+  buildColumn({ previousColumn }) {
     let params = { filters: [defaultFilter] };
     if (previousColumn?.operationType === 'terms') {
       params = {
@@ -106,10 +96,16 @@ export const filtersOperation: OperationDefinition<FiltersIndexPatternColumn> = 
       dataType: 'string',
       operationType: 'filters',
       scale: 'ordinal',
-      suggestedPriority,
       isBucketed: true,
-      sourceField: field.name,
       params,
+    };
+  },
+
+  getPossibleOperation() {
+    return {
+      dataType: 'string',
+      isBucketed: true,
+      scale: 'ordinal',
     };
   },
 
@@ -226,6 +222,7 @@ export const FilterList = ({
               removeTitle={i18n.translate('xpack.lens.indexPattern.filters.removeFilter', {
                 defaultMessage: 'Remove a filter',
               })}
+              isNotRemovable={localFilters.length === 1}
             >
               <FilterPopover
                 data-test-subj="indexPattern-filters-existingFilterContainer"

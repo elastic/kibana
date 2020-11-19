@@ -4,19 +4,26 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiPanel, EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import React, { useEffect, useState } from 'react';
 import { INVALID_LICENSE } from '../../../../../../common/custom_link';
 import { CustomLink } from '../../../../../../common/custom_link/custom_link_types';
+import { FETCH_STATUS, useFetcher } from '../../../../../hooks/useFetcher';
 import { useLicense } from '../../../../../hooks/useLicense';
-import { useFetcher, FETCH_STATUS } from '../../../../../hooks/useFetcher';
+import { LicensePrompt } from '../../../../shared/LicensePrompt';
+import { CreateCustomLinkButton } from './CreateCustomLinkButton';
 import { CustomLinkFlyout } from './CustomLinkFlyout';
 import { CustomLinkTable } from './CustomLinkTable';
 import { EmptyPrompt } from './EmptyPrompt';
 import { Title } from './Title';
-import { CreateCustomLinkButton } from './CreateCustomLinkButton';
-import { LicensePrompt } from '../../../../shared/LicensePrompt';
 
 export function CustomLinkOverview() {
   const license = useLicense();
@@ -27,8 +34,9 @@ export function CustomLinkOverview() {
     CustomLink | undefined
   >();
 
-  const { data: customLinks, status, refetch } = useFetcher(
-    (callApmApi) => callApmApi({ pathname: '/api/apm/settings/custom_links' }),
+  const { data: customLinks = [], status, refetch } = useFetcher(
+    (callApmApi) =>
+      callApmApi({ endpoint: 'GET /api/apm/settings/custom_links' }),
     []
   );
 
@@ -82,8 +90,13 @@ export function CustomLinkOverview() {
             </EuiFlexItem>
           )}
         </EuiFlexGroup>
-
-        <EuiSpacer size="m" />
+        <EuiSpacer size="l" />
+        <EuiText>
+          {i18n.translate('xpack.apm.settings.customizeUI.customLink.info', {
+            defaultMessage:
+              'These links will be shown in the Actions context menu for transactions.',
+          })}
+        </EuiText>
         {hasValidLicense ? (
           showEmptyPrompt ? (
             <EmptyPrompt onCreateCustomLinkClick={onCreateCustomLinkClick} />

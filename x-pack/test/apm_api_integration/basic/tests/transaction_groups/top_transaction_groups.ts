@@ -6,7 +6,6 @@
 import expect from '@kbn/expect';
 import { sortBy } from 'lodash';
 import archives_metadata from '../../../common/archives_metadata';
-import { expectSnapshot } from '../../../common/match_snapshot';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 function sortTransactionGroups(items: any[]) {
@@ -57,7 +56,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       it('returns the correct number of buckets', () => {
-        expectSnapshot(response.body.items.length).toMatchInline(`14`);
+        expectSnapshot(response.body.items.length).toMatchInline(`12`);
       });
 
       it('returns the correct buckets (when ignoring samples)', async () => {

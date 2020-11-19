@@ -11,6 +11,7 @@ export {
   multiColumnSortFactory,
   showDataGridColumnChartErrorMessageToast,
   useRenderCellValue,
+  getProcessedFields,
 } from './common';
 export { getFieldType, ChartData } from './use_column_chart';
 export { useDataGrid } from './use_data_grid';

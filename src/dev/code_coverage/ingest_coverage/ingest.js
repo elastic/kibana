@@ -19,7 +19,7 @@
 
 const { Client } = require('@elastic/elasticsearch');
 import { createFailError } from '@kbn/dev-utils';
-import { RESEARCH_CI_JOB_NAME, TEAM_ASSIGNMENT_PIPELINE_NAME } from './constants';
+import { RESEARCH_CI_JOB_NAME } from './constants';
 import { errMsg, redact, whichIndex } from './ingest_helpers';
 import { pretty, green } from './utils';
 import { right, left } from './either';
@@ -34,14 +34,10 @@ const isResearchJob = process.env.COVERAGE_JOB_NAME === RESEARCH_CI_JOB_NAME ? t
 export const ingest = (log) => async (body) => {
   const isTotal = !!body.isTotal;
   const index = whichIndex(isResearchJob)(isTotal);
-  const isACoverageIndex = isTotal ? false : true;
 
   const stringified = pretty(body);
-  const pipeline = TEAM_ASSIGNMENT_PIPELINE_NAME;
 
-  const finalPayload = isACoverageIndex
-    ? { index, body: stringified, pipeline }
-    : { index, body: stringified };
+  const finalPayload = { index, body: stringified };
 
   const justLog = dontSendButLog(log);
   const doSendToIndex = doSend(index);
@@ -77,11 +73,11 @@ async function send(logF, idx, redactedEsHostUrl, client, requestBody) {
 const sendMsg = (actuallySent, redactedEsHostUrl, payload) => {
   const { index, body } = payload;
   return `### ${actuallySent ? 'Sent' : 'Fake Sent'}:
-${payload.pipeline ? `\t### Team Assignment Pipeline: ${green(payload.pipeline)}` : ''}
 ${redactedEsHostUrl ? `\t### ES Host: ${redactedEsHostUrl}` : ''}
+
 \t### Index: ${green(index)}
+
 \t### payload.body: ${body}
-${process.env.NODE_ENV === 'integration_test' ? `ingest-pipe=>${payload.pipeline}` : ''}
 `;
 };
 

@@ -12,7 +12,7 @@ import { sourceFieldsMap, hostFieldsMap } from '../../../../../../../common/ecs/
 import { createQueryFilterClauses } from '../../../../../../utils/build_query';
 import { reduceFields } from '../../../../../../utils/build_query/reduce_fields';
 
-import { authenticationFields } from '../helpers';
+import { authenticationsFields } from '../helpers';
 import { extendMap } from '../../../../../../../common/ecs/ecs_fields/extend_map';
 
 export const auditdFieldsMap: Readonly<Record<string, string>> = {
@@ -32,7 +32,7 @@ export const buildQuery = ({
   defaultIndex,
   docValueFields,
 }: HostAuthenticationsRequestOptions) => {
-  const esFields = reduceFields(authenticationFields, { ...hostFieldsMap, ...sourceFieldsMap });
+  const esFields = reduceFields(authenticationsFields, { ...hostFieldsMap, ...sourceFieldsMap });
 
   const filter = [
     ...createQueryFilterClauses(filterQuery),

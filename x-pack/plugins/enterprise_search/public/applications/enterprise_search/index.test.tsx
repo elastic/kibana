@@ -7,44 +7,43 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 
-import { EuiPage } from '@elastic/eui';
+import { setMockValues } from '../__mocks__/kea.mock';
+import { rerender } from '../__mocks__';
 
 import { EnterpriseSearch } from './';
-import { ProductCard } from './components/product_card';
+import { SetupGuide } from './components/setup_guide';
+import { ErrorConnecting } from './components/error_connecting';
+import { ProductSelector } from './components/product_selector';
 
 describe('EnterpriseSearch', () => {
-  it('renders the overview page and product cards', () => {
-    const wrapper = shallow(
-      <EnterpriseSearch access={{ hasAppSearchAccess: true, hasWorkplaceSearchAccess: true }} />
-    );
+  it('renders the Setup Guide and Product Selector', () => {
+    setMockValues({
+      errorConnecting: false,
+      config: { host: 'localhost' },
+    });
+    const wrapper = shallow(<EnterpriseSearch />);
 
-    expect(wrapper.find(EuiPage).hasClass('enterpriseSearchOverview')).toBe(true);
-    expect(wrapper.find(ProductCard)).toHaveLength(2);
+    expect(wrapper.find(SetupGuide)).toHaveLength(1);
+    expect(wrapper.find(ProductSelector)).toHaveLength(1);
   });
 
-  describe('access checks', () => {
-    it('does not render the App Search card if the user does not have access to AS', () => {
-      const wrapper = shallow(
-        <EnterpriseSearch access={{ hasAppSearchAccess: false, hasWorkplaceSearchAccess: true }} />
-      );
-
-      expect(wrapper.find(ProductCard)).toHaveLength(1);
-      expect(wrapper.find(ProductCard).prop('product').ID).toEqual('workplaceSearch');
+  it('renders the error connecting prompt only if host is configured', () => {
+    setMockValues({
+      errorConnecting: true,
+      config: { host: 'localhost' },
     });
+    const wrapper = shallow(<EnterpriseSearch />);
 
-    it('does not render the Workplace Search card if the user does not have access to WS', () => {
-      const wrapper = shallow(
-        <EnterpriseSearch access={{ hasAppSearchAccess: true, hasWorkplaceSearchAccess: false }} />
-      );
+    expect(wrapper.find(ErrorConnecting)).toHaveLength(1);
+    expect(wrapper.find(ProductSelector)).toHaveLength(0);
 
-      expect(wrapper.find(ProductCard)).toHaveLength(1);
-      expect(wrapper.find(ProductCard).prop('product').ID).toEqual('appSearch');
+    setMockValues({
+      errorConnecting: true,
+      config: { host: '' },
     });
+    rerender(wrapper);
 
-    it('does not render any cards if the user does not have access', () => {
-      const wrapper = shallow(<EnterpriseSearch />);
-
-      expect(wrapper.find(ProductCard)).toHaveLength(0);
-    });
+    expect(wrapper.find(ErrorConnecting)).toHaveLength(0);
+    expect(wrapper.find(ProductSelector)).toHaveLength(1);
   });
 });

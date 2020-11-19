@@ -5,9 +5,19 @@
  */
 
 import { sampleDocNoSortId } from './__mocks__/es_results';
-import { buildSignal, buildParent, buildAncestors, additionalSignalFields } from './build_signal';
-import { Signal, Ancestor } from './types';
-import { getPartialRulesSchemaMock } from '../../../../common/detection_engine/schemas/response/rules_schema.mocks';
+import {
+  buildSignal,
+  buildParent,
+  buildAncestors,
+  additionalSignalFields,
+  removeClashes,
+} from './build_signal';
+import { Signal, Ancestor, BaseSignalHit } from './types';
+import {
+  getRulesSchemaMock,
+  ANCHOR_DATE,
+} from '../../../../common/detection_engine/schemas/response/rules_schema.mocks';
+import { getListArrayMock } from '../../../../common/detection_engine/schemas/types/lists.mock';
 
 describe('buildSignal', () => {
   beforeEach(() => {
@@ -17,7 +27,7 @@ describe('buildSignal', () => {
   test('it builds a signal as expected without original_event if event does not exist', () => {
     const doc = sampleDocNoSortId('d5e8eb51-a6a0-456d-8a15-4b79bfec3d71');
     delete doc._source.event;
-    const rule = getPartialRulesSchemaMock();
+    const rule = getRulesSchemaMock();
     const signal = {
       ...buildSignal([doc], rule),
       ...additionalSignalFields(doc),
@@ -48,31 +58,39 @@ describe('buildSignal', () => {
       original_time: '2020-04-20T21:27:45+0000',
       status: 'open',
       rule: {
+        author: [],
+        id: '7a7065d7-6e8b-4aae-8d20-c93613dec9f9',
+        created_at: new Date(ANCHOR_DATE).toISOString(),
+        updated_at: new Date(ANCHOR_DATE).toISOString(),
         created_by: 'elastic',
-        description: 'Detecting root and admin users',
+        description: 'some description',
         enabled: true,
-        false_positives: [],
+        false_positives: ['false positive 1', 'false positive 2'],
         from: 'now-6m',
-        id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
         immutable: false,
-        index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
-        interval: '5m',
-        risk_score: 50,
-        rule_id: 'rule-1',
-        language: 'kuery',
-        max_signals: 100,
-        name: 'Detect Root/Admin Users',
-        output_index: '.siem-signals',
+        name: 'Query with a rule id',
         query: 'user.name: root or user.name: admin',
-        references: ['http://www.example.com', 'https://ww.example.com'],
+        references: ['test 1', 'test 2'],
         severity: 'high',
-        updated_by: 'elastic',
+        severity_mapping: [],
+        updated_by: 'elastic_kibana',
         tags: ['some fake tag 1', 'some fake tag 2'],
         to: 'now',
         type: 'query',
-        note: '',
-        updated_at: signal.rule.updated_at,
-        created_at: signal.rule.created_at,
+        threat: [],
+        version: 1,
+        status: 'succeeded',
+        status_date: '2020-02-22T16:47:50.047Z',
+        last_success_at: '2020-02-22T16:47:50.047Z',
+        last_success_message: 'succeeded',
+        output_index: '.siem-signals-default',
+        max_signals: 100,
+        risk_score: 55,
+        risk_score_mapping: [],
+        language: 'kuery',
+        rule_id: 'query-rule-id',
+        interval: '5m',
+        exceptions_list: getListArrayMock(),
       },
       depth: 1,
     };
@@ -87,7 +105,7 @@ describe('buildSignal', () => {
       kind: 'event',
       module: 'system',
     };
-    const rule = getPartialRulesSchemaMock();
+    const rule = getRulesSchemaMock();
     const signal = {
       ...buildSignal([doc], rule),
       ...additionalSignalFields(doc),
@@ -124,31 +142,39 @@ describe('buildSignal', () => {
       },
       status: 'open',
       rule: {
+        author: [],
+        id: '7a7065d7-6e8b-4aae-8d20-c93613dec9f9',
+        created_at: new Date(ANCHOR_DATE).toISOString(),
+        updated_at: new Date(ANCHOR_DATE).toISOString(),
         created_by: 'elastic',
-        description: 'Detecting root and admin users',
+        description: 'some description',
         enabled: true,
-        false_positives: [],
+        false_positives: ['false positive 1', 'false positive 2'],
         from: 'now-6m',
-        id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
         immutable: false,
-        index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
-        interval: '5m',
-        risk_score: 50,
-        rule_id: 'rule-1',
-        language: 'kuery',
-        max_signals: 100,
-        name: 'Detect Root/Admin Users',
-        output_index: '.siem-signals',
+        name: 'Query with a rule id',
         query: 'user.name: root or user.name: admin',
-        references: ['http://www.example.com', 'https://ww.example.com'],
+        references: ['test 1', 'test 2'],
         severity: 'high',
-        updated_by: 'elastic',
+        severity_mapping: [],
+        updated_by: 'elastic_kibana',
         tags: ['some fake tag 1', 'some fake tag 2'],
         to: 'now',
         type: 'query',
-        note: '',
-        updated_at: signal.rule.updated_at,
-        created_at: signal.rule.created_at,
+        threat: [],
+        version: 1,
+        status: 'succeeded',
+        status_date: '2020-02-22T16:47:50.047Z',
+        last_success_at: '2020-02-22T16:47:50.047Z',
+        last_success_message: 'succeeded',
+        output_index: '.siem-signals-default',
+        max_signals: 100,
+        risk_score: 55,
+        risk_score_mapping: [],
+        language: 'kuery',
+        rule_id: 'query-rule-id',
+        interval: '5m',
+        exceptions_list: getListArrayMock(),
       },
       depth: 1,
     };
@@ -281,5 +307,65 @@ describe('buildSignal', () => {
       },
     ];
     expect(signal).toEqual(expected);
+  });
+
+  describe('removeClashes', () => {
+    test('it will call renameClashes with a regular doc and not mutate it if it does not have a signal clash', () => {
+      const doc = sampleDocNoSortId('d5e8eb51-a6a0-456d-8a15-4b79bfec3d71');
+      const output = removeClashes(doc);
+      expect(output).toBe(doc); // reference check
+    });
+
+    test('it will call renameClashes with a regular doc and not change anything', () => {
+      const doc = sampleDocNoSortId('d5e8eb51-a6a0-456d-8a15-4b79bfec3d71');
+      const output = removeClashes(doc);
+      expect(output).toEqual(doc); // deep equal check
+    });
+
+    test('it will remove a "signal" numeric clash', () => {
+      const sampleDoc = sampleDocNoSortId('d5e8eb51-a6a0-456d-8a15-4b79bfec3d71');
+      const doc = ({
+        ...sampleDoc,
+        _source: {
+          ...sampleDoc._source,
+          signal: 127,
+        },
+      } as unknown) as BaseSignalHit;
+      const output = removeClashes(doc);
+      expect(output).toEqual(sampleDocNoSortId('d5e8eb51-a6a0-456d-8a15-4b79bfec3d71'));
+    });
+
+    test('it will remove a "signal" object clash', () => {
+      const sampleDoc = sampleDocNoSortId('d5e8eb51-a6a0-456d-8a15-4b79bfec3d71');
+      const doc = ({
+        ...sampleDoc,
+        _source: {
+          ...sampleDoc._source,
+          signal: { child_1: { child_2: 'Test nesting' } },
+        },
+      } as unknown) as BaseSignalHit;
+      const output = removeClashes(doc);
+      expect(output).toEqual(sampleDocNoSortId('d5e8eb51-a6a0-456d-8a15-4b79bfec3d71'));
+    });
+
+    test('it will not remove a "signal" if that is signal is one of our signals', () => {
+      const sampleDoc = sampleDocNoSortId('d5e8eb51-a6a0-456d-8a15-4b79bfec3d71');
+      const doc = ({
+        ...sampleDoc,
+        _source: {
+          ...sampleDoc._source,
+          signal: { rule: { id: '123' } },
+        },
+      } as unknown) as BaseSignalHit;
+      const output = removeClashes(doc);
+      const expected = {
+        ...sampleDocNoSortId('d5e8eb51-a6a0-456d-8a15-4b79bfec3d71'),
+        _source: {
+          ...sampleDocNoSortId('d5e8eb51-a6a0-456d-8a15-4b79bfec3d71')._source,
+          signal: { rule: { id: '123' } },
+        },
+      };
+      expect(output).toEqual(expected);
+    });
   });
 });

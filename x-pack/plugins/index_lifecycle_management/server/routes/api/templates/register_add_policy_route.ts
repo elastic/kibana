@@ -6,7 +6,7 @@
 
 import { merge } from 'lodash';
 import { schema, TypeOf } from '@kbn/config-schema';
-import { LegacyAPICaller } from 'src/core/server';
+import { ElasticsearchClient } from 'kibana/server';
 import { i18n } from '@kbn/i18n';
 
 import { TemplateFromEs, TemplateSerialized } from '../../../../../index_management/common/types';
@@ -15,32 +15,37 @@ import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../../../services';
 
 async function getLegacyIndexTemplate(
-  callAsCurrentUser: LegacyAPICaller,
+  client: ElasticsearchClient,
   templateName: string
 ): Promise<LegacyTemplateSerialized | undefined> {
-  const response = await callAsCurrentUser('indices.getTemplate', { name: templateName });
-  return response[templateName];
+  const response = await client.indices.getTemplate({ name: templateName });
+  return response.body[templateName];
 }
 
 async function getIndexTemplate(
-  callAsCurrentUser: LegacyAPICaller,
+  client: ElasticsearchClient,
   templateName: string
 ): Promise<TemplateSerialized | undefined> {
-  const params = {
-    method: 'GET',
-    path: `/_index_template/${encodeURIComponent(templateName)}`,
+  const options = {
     // we allow 404 incase the user shutdown security in-between the check and now
     ignore: [404],
   };
 
-  const { index_templates: templates } = await callAsCurrentUser<{
+  const response = await client.indices.getIndexTemplate<{
     index_templates: TemplateFromEs[];
-  }>('transport.request', params);
+  }>(
+    {
+      name: templateName,
+    },
+    options
+  );
+
+  const { index_templates: templates } = response.body;
   return templates?.find((template) => template.name === templateName)?.index_template;
 }
 
 async function updateIndexTemplate(
-  callAsCurrentUser: LegacyAPICaller,
+  client: ElasticsearchClient,
   isLegacy: boolean,
   templateName: string,
   policyName: string,
@@ -56,8 +61,8 @@ async function updateIndexTemplate(
   };
 
   const indexTemplate = isLegacy
-    ? await getLegacyIndexTemplate(callAsCurrentUser, templateName)
-    : await getIndexTemplate(callAsCurrentUser, templateName);
+    ? await getLegacyIndexTemplate(client, templateName)
+    : await getIndexTemplate(client, templateName);
   if (!indexTemplate) {
     return false;
   }
@@ -71,15 +76,10 @@ async function updateIndexTemplate(
     });
   }
 
-  const pathPrefix = isLegacy ? '/_template/' : '/_index_template/';
-  const params = {
-    method: 'PUT',
-    path: `${pathPrefix}${encodeURIComponent(templateName)}`,
-    ignore: [404],
-    body: indexTemplate,
-  };
-
-  return await callAsCurrentUser('transport.request', params);
+  if (isLegacy) {
+    return client.indices.putTemplate({ name: templateName, body: indexTemplate });
+  }
+  return client.indices.putIndexTemplate({ name: templateName, body: indexTemplate });
 }
 
 const bodySchema = schema.object({
@@ -92,7 +92,11 @@ const querySchema = schema.object({
   legacy: schema.maybe(schema.oneOf([schema.literal('true'), schema.literal('false')])),
 });
 
-export function registerAddPolicyRoute({ router, license, lib }: RouteDependencies) {
+export function registerAddPolicyRoute({
+  router,
+  license,
+  lib: { handleEsError },
+}: RouteDependencies) {
   router.post(
     { path: addBasePath('/template'), validate: { body: bodySchema, query: querySchema } },
     license.guardApiRoute(async (context, request, response) => {
@@ -101,7 +105,7 @@ export function registerAddPolicyRoute({ router, license, lib }: RouteDependenci
       const isLegacy = (request.query as TypeOf<typeof querySchema>).legacy === 'true';
       try {
         const updatedTemplate = await updateIndexTemplate(
-          context.core.elasticsearch.legacy.client.callAsCurrentUser,
+          context.core.elasticsearch.client.asCurrentUser,
           isLegacy,
           templateName,
           policyName,
@@ -118,15 +122,8 @@ export function registerAddPolicyRoute({ router, license, lib }: RouteDependenci
           });
         }
         return response.ok();
-      } catch (e) {
-        if (lib.isEsError(e)) {
-          return response.customError({
-            statusCode: e.statusCode,
-            body: e,
-          });
-        }
-        // Case: default
-        return response.internalError({ body: e });
+      } catch (error) {
+        return handleEsError({ error, response });
       }
     })
   );

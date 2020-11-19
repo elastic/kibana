@@ -4,13 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { updateRulesSchema } from '../../../../../common/detection_engine/schemas/request';
 import { updateRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/update_rules_type_dependents';
-import { RuleAlertAction } from '../../../../../common/detection_engine/types';
-import {
-  updateRulesSchema,
-  UpdateRulesSchemaDecoded,
-} from '../../../../../common/detection_engine/schemas/request/update_rules_schema';
-import { isMlRule } from '../../../../../common/machine_learning/helpers';
 import { IRouter } from '../../../../../../../../src/core/server';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { SetupPlugins } from '../../../../plugin';
@@ -23,16 +18,13 @@ import { updateRules } from '../../rules/update_rules';
 import { updateRulesNotifications } from '../../rules/update_rules_notifications';
 import { ruleStatusSavedObjectsClientFactory } from '../../signals/rule_status_saved_objects_client';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
-import { PartialFilter } from '../../types';
 
 export const updateRulesRoute = (router: IRouter, ml: SetupPlugins['ml']) => {
   router.put(
     {
       path: DETECTION_ENGINE_RULES_URL,
       validate: {
-        body: buildRouteValidation<typeof updateRulesSchema, UpdateRulesSchemaDecoded>(
-          updateRulesSchema
-        ),
+        body: buildRouteValidation(updateRulesSchema),
       },
       options: {
         tags: ['access:securitySolution'],
@@ -44,59 +36,7 @@ export const updateRulesRoute = (router: IRouter, ml: SetupPlugins['ml']) => {
       if (validationErrors.length) {
         return siemResponse.error({ statusCode: 400, body: validationErrors });
       }
-
-      const {
-        actions: actionsRest,
-        anomaly_threshold: anomalyThreshold,
-        author,
-        building_block_type: buildingBlockType,
-        description,
-        enabled,
-        false_positives: falsePositives,
-        from,
-        query: queryOrUndefined,
-        language: languageOrUndefined,
-        license,
-        machine_learning_job_id: machineLearningJobId,
-        output_index: outputIndex,
-        saved_id: savedId,
-        timeline_id: timelineId,
-        timeline_title: timelineTitle,
-        meta,
-        filters: filtersRest,
-        rule_id: ruleId,
-        id,
-        index,
-        interval,
-        max_signals: maxSignals,
-        risk_score: riskScore,
-        risk_score_mapping: riskScoreMapping,
-        rule_name_override: ruleNameOverride,
-        name,
-        severity,
-        severity_mapping: severityMapping,
-        tags,
-        to,
-        type,
-        threat,
-        threshold,
-        throttle,
-        timestamp_override: timestampOverride,
-        references,
-        note,
-        version,
-        exceptions_list: exceptionsList,
-      } = request.body;
       try {
-        const query = !isMlRule(type) && queryOrUndefined == null ? '' : queryOrUndefined;
-
-        const language =
-          !isMlRule(type) && languageOrUndefined == null ? 'kuery' : languageOrUndefined;
-
-        // TODO: Fix these either with an is conversion or by better typing them within io-ts
-        const actions: RuleAlertAction[] = actionsRest as RuleAlertAction[];
-        const filters: PartialFilter[] | undefined = filtersRest as PartialFilter[];
-
         const alertsClient = context.alerting?.getAlertsClient();
         const savedObjectsClient = context.core.savedObjects.client;
         const siemClient = context.securitySolution?.getAppClient();
@@ -106,52 +46,19 @@ export const updateRulesRoute = (router: IRouter, ml: SetupPlugins['ml']) => {
           return siemResponse.error({ statusCode: 404 });
         }
 
-        const mlAuthz = buildMlAuthz({ license: context.licensing.license, ml, request });
-        throwHttpError(await mlAuthz.validateRuleType(type));
+        const mlAuthz = buildMlAuthz({
+          license: context.licensing.license,
+          ml,
+          request,
+          savedObjectsClient,
+        });
+        throwHttpError(await mlAuthz.validateRuleType(request.body.type));
 
-        const finalIndex = outputIndex ?? siemClient.getSignalsIndex();
         const rule = await updateRules({
           alertsClient,
-          anomalyThreshold,
-          author,
-          buildingBlockType,
-          description,
-          enabled,
-          falsePositives,
-          from,
-          query,
-          language,
-          license,
-          machineLearningJobId,
-          outputIndex: finalIndex,
-          savedId,
           savedObjectsClient,
-          timelineId,
-          timelineTitle,
-          meta,
-          filters,
-          id,
-          ruleId,
-          index,
-          interval,
-          maxSignals,
-          riskScore,
-          riskScoreMapping,
-          ruleNameOverride,
-          name,
-          severity,
-          severityMapping,
-          tags,
-          to,
-          type,
-          threat,
-          threshold,
-          timestampOverride,
-          references,
-          note,
-          version,
-          exceptionsList,
-          actions: throttle === 'rule' ? actions : [], // Only enable actions if throttle is rule, otherwise we are a notification and should not enable it
+          defaultOutputIndex: siemClient.getSignalsIndex(),
+          ruleUpdate: request.body,
         });
 
         if (rule != null) {
@@ -159,10 +66,10 @@ export const updateRulesRoute = (router: IRouter, ml: SetupPlugins['ml']) => {
             ruleAlertId: rule.id,
             alertsClient,
             savedObjectsClient,
-            enabled,
-            actions,
-            throttle,
-            name,
+            enabled: request.body.enabled ?? true,
+            actions: request.body.actions,
+            throttle: request.body.throttle,
+            name: request.body.name,
           });
           const ruleStatuses = await ruleStatusClient.find({
             perPage: 1,
@@ -182,7 +89,7 @@ export const updateRulesRoute = (router: IRouter, ml: SetupPlugins['ml']) => {
             return response.ok({ body: validated ?? {} });
           }
         } else {
-          const error = getIdError({ id, ruleId });
+          const error = getIdError({ id: request.body.id, ruleId: request.body.rule_id });
           return siemResponse.error({
             body: error.message,
             statusCode: error.statusCode,

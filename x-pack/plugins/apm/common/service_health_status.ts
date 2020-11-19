@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import { ANOMALY_SEVERITY } from '../../ml/common';
 
-import { EuiTheme } from '../../../legacy/common/eui_styled_components';
+import { EuiTheme } from '../../xpack_legacy/common';
 
 export enum ServiceHealthStatus {
   healthy = 'healthy',
@@ -49,6 +49,22 @@ export function getServiceHealthStatusColor(
       return theme.eui.euiColorVis5;
     case ServiceHealthStatus.critical:
       return theme.eui.euiColorVis9;
+    case ServiceHealthStatus.unknown:
+      return theme.eui.euiColorMediumShade;
+  }
+}
+
+export function getServiceHealthStatusBadgeColor(
+  theme: EuiTheme,
+  status: ServiceHealthStatus
+) {
+  switch (status) {
+    case ServiceHealthStatus.healthy:
+      return theme.eui.euiColorVis0_behindText;
+    case ServiceHealthStatus.warning:
+      return theme.eui.euiColorVis5_behindText;
+    case ServiceHealthStatus.critical:
+      return theme.eui.euiColorVis9_behindText;
     case ServiceHealthStatus.unknown:
       return theme.eui.euiColorMediumShade;
   }

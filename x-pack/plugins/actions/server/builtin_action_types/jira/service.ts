@@ -8,18 +8,20 @@ import axios from 'axios';
 
 import { Logger } from '../../../../../../src/core/server';
 import {
-  ExternalServiceCredentials,
-  ExternalService,
+  CreateCommentParams,
   CreateIncidentParams,
-  UpdateIncidentParams,
+  ExternalService,
+  ExternalServiceCommentResponse,
+  ExternalServiceCredentials,
+  ExternalServiceIncidentResponse,
+  Fields,
+  FieldSchema,
+  GetCommonFieldsResponse,
+  Incident,
   JiraPublicConfigurationType,
   JiraSecretConfigurationType,
-  Fields,
-  CreateCommentParams,
-  Incident,
   ResponseError,
-  ExternalServiceCommentResponse,
-  ExternalServiceIncidentResponse,
+  UpdateIncidentParams,
 } from './types';
 
 import * as i18n from './translations';
@@ -53,6 +55,8 @@ export const createExternalService = (
   const getIssueTypeFieldsOldAPIURL = `${url}/${BASE_URL}/issue/createmeta?projectKeys=${projectKey}&issuetypeIds={issueTypeId}&expand=projects.issuetypes.fields`;
   const getIssueTypesUrl = `${url}/${BASE_URL}/issue/createmeta/${projectKey}/issuetypes`;
   const getIssueTypeFieldsUrl = `${url}/${BASE_URL}/issue/createmeta/${projectKey}/issuetypes/{issueTypeId}`;
+  const searchUrl = `${url}/${BASE_URL}/search`;
+
   const axiosInstance = axios.create({
     auth: { username: email, password: apiToken },
   });
@@ -90,10 +94,28 @@ export const createExternalService = (
       fields = { ...fields, priority: { name: incident.priority } };
     }
 
+    if (incident.parent) {
+      fields = { ...fields, parent: { key: incident.parent } };
+    }
+
     return fields;
   };
 
-  const createErrorMessage = (errors: ResponseError) => {
+  const createErrorMessage = (errorResponse: ResponseError | null | undefined): string => {
+    if (errorResponse == null) {
+      return '';
+    }
+
+    const { errorMessages, errors } = errorResponse;
+
+    if (errors == null) {
+      return '';
+    }
+
+    if (Array.isArray(errorMessages) && errorMessages.length > 0) {
+      return `${errorMessages.join(', ')}`;
+    }
+
     return Object.entries(errors).reduce((errorMessage, [, value]) => {
       const msg = errorMessage.length > 0 ? `${errorMessage} ${value}` : value;
       return msg;
@@ -107,17 +129,35 @@ export const createExternalService = (
     issueTypes.map((type) => ({ id: type.id, name: type.name }));
 
   const normalizeFields = (fields: {
-    [key: string]: { allowedValues?: Array<{}>; defaultValue?: {} };
+    [key: string]: {
+      allowedValues?: Array<{}>;
+      defaultValue?: {};
+      required: boolean;
+      schema: FieldSchema;
+    };
   }) =>
     Object.keys(fields ?? {}).reduce((fieldsAcc, fieldKey) => {
       return {
         ...fieldsAcc,
         [fieldKey]: {
+          required: fields[fieldKey]?.required,
           allowedValues: fields[fieldKey]?.allowedValues ?? [],
           defaultValue: fields[fieldKey]?.defaultValue ?? {},
+          schema: fields[fieldKey]?.schema,
         },
       };
     }, {});
+
+  const normalizeSearchResults = (
+    issues: Array<{ id: string; key: string; fields: { summary: string } }>
+  ) =>
+    issues.map((issue) => ({ id: issue.id, key: issue.key, title: issue.fields?.summary ?? null }));
+
+  const normalizeIssue = (issue: { id: string; key: string; fields: { summary: string } }) => ({
+    id: issue.id,
+    key: issue.key,
+    title: issue.fields?.summary ?? null,
+  });
 
   const getIncident = async (id: string) => {
     try {
@@ -137,7 +177,7 @@ export const createExternalService = (
           i18n.NAME,
           `Unable to get incident with id ${id}. Error: ${
             error.message
-          } Reason: ${createErrorMessage(error.response?.data?.errors ?? {})}`
+          } Reason: ${createErrorMessage(error.response?.data)}`
         )
       );
     }
@@ -190,7 +230,7 @@ export const createExternalService = (
         getErrorMessage(
           i18n.NAME,
           `Unable to create incident. Error: ${error.message}. Reason: ${createErrorMessage(
-            error.response?.data?.errors ?? {}
+            error.response?.data
           )}`
         )
       );
@@ -232,7 +272,7 @@ export const createExternalService = (
           i18n.NAME,
           `Unable to update incident with id ${incidentId}. Error: ${
             error.message
-          }. Reason: ${createErrorMessage(error.response?.data?.errors ?? {})}`
+          }. Reason: ${createErrorMessage(error.response?.data)}`
         )
       );
     }
@@ -263,7 +303,7 @@ export const createExternalService = (
           i18n.NAME,
           `Unable to create comment at incident with id ${incidentId}. Error: ${
             error.message
-          }. Reason: ${createErrorMessage(error.response?.data?.errors ?? {})}`
+          }. Reason: ${createErrorMessage(error.response?.data)}`
         )
       );
     }
@@ -285,7 +325,7 @@ export const createExternalService = (
         getErrorMessage(
           i18n.NAME,
           `Unable to get capabilities. Error: ${error.message}. Reason: ${createErrorMessage(
-            error.response?.data?.errors ?? {}
+            error.response?.data
           )}`
         )
       );
@@ -295,7 +335,6 @@ export const createExternalService = (
   const getIssueTypes = async () => {
     const capabilitiesResponse = await getCapabilities();
     const supportsNewAPI = hasSupportForNewAPI(capabilitiesResponse);
-
     try {
       if (!supportsNewAPI) {
         const res = await request({
@@ -325,7 +364,7 @@ export const createExternalService = (
         getErrorMessage(
           i18n.NAME,
           `Unable to get issue types. Error: ${error.message}. Reason: ${createErrorMessage(
-            error.response?.data?.errors ?? {}
+            error.response?.data
           )}`
         )
       );
@@ -335,7 +374,6 @@ export const createExternalService = (
   const getFieldsByIssueType = async (issueTypeId: string) => {
     const capabilitiesResponse = await getCapabilities();
     const supportsNewAPI = hasSupportForNewAPI(capabilitiesResponse);
-
     try {
       if (!supportsNewAPI) {
         const res = await request({
@@ -347,6 +385,7 @@ export const createExternalService = (
         });
 
         const fields = res.data.projects[0]?.issuetypes[0]?.fields || {};
+
         return normalizeFields(fields);
       } else {
         const res = await request({
@@ -371,7 +410,82 @@ export const createExternalService = (
         getErrorMessage(
           i18n.NAME,
           `Unable to get fields. Error: ${error.message}. Reason: ${createErrorMessage(
-            error.response?.data?.errors ?? {}
+            error.response?.data
+          )}`
+        )
+      );
+    }
+  };
+
+  const getFields = async () => {
+    try {
+      const issueTypes = await getIssueTypes();
+      const fieldsPerIssueType = await Promise.all(
+        issueTypes.map((issueType) => getFieldsByIssueType(issueType.id))
+      );
+      return fieldsPerIssueType.reduce((acc: GetCommonFieldsResponse, fieldTypesByIssue) => {
+        const currentListOfFields = Object.keys(acc);
+        return currentListOfFields.length === 0
+          ? fieldTypesByIssue
+          : currentListOfFields.reduce(
+              (add: GetCommonFieldsResponse, field) =>
+                Object.keys(fieldTypesByIssue).includes(field)
+                  ? { ...add, [field]: acc[field] }
+                  : add,
+              {}
+            );
+      }, {});
+    } catch (error) {
+      // errors that happen here would be thrown in the contained async calls
+      throw error;
+    }
+  };
+
+  const getIssues = async (title: string) => {
+    const query = `${searchUrl}?jql=${encodeURIComponent(
+      `project="${projectKey}" and summary ~"${title}"`
+    )}`;
+
+    try {
+      const res = await request({
+        axios: axiosInstance,
+        method: 'get',
+        url: query,
+        logger,
+        proxySettings,
+      });
+
+      return normalizeSearchResults(res.data?.issues ?? []);
+    } catch (error) {
+      throw new Error(
+        getErrorMessage(
+          i18n.NAME,
+          `Unable to get issues. Error: ${error.message}. Reason: ${createErrorMessage(
+            error.response?.data
+          )}`
+        )
+      );
+    }
+  };
+
+  const getIssue = async (id: string) => {
+    const getIssueUrl = `${incidentUrl}/${id}`;
+    try {
+      const res = await request({
+        axios: axiosInstance,
+        method: 'get',
+        url: getIssueUrl,
+        logger,
+        proxySettings,
+      });
+
+      return normalizeIssue(res.data ?? {});
+    } catch (error) {
+      throw new Error(
+        getErrorMessage(
+          i18n.NAME,
+          `Unable to get issue with id ${id}. Error: ${error.message}. Reason: ${createErrorMessage(
+            error.response?.data
           )}`
         )
       );
@@ -379,6 +493,7 @@ export const createExternalService = (
   };
 
   return {
+    getFields,
     getIncident,
     createIncident,
     updateIncident,
@@ -386,5 +501,7 @@ export const createExternalService = (
     getCapabilities,
     getIssueTypes,
     getFieldsByIssueType,
+    getIssues,
+    getIssue,
   };
 };

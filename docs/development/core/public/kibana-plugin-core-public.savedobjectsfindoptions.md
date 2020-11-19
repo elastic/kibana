@@ -15,10 +15,11 @@ export interface SavedObjectsFindOptions
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [defaultSearchOperator](./kibana-plugin-core-public.savedobjectsfindoptions.defaultsearchoperator.md) | <code>'AND' &#124; 'OR'</code> |  |
+|  [defaultSearchOperator](./kibana-plugin-core-public.savedobjectsfindoptions.defaultsearchoperator.md) | <code>'AND' &#124; 'OR'</code> | The search operator to use with the provided filter. Defaults to <code>OR</code> |
 |  [fields](./kibana-plugin-core-public.savedobjectsfindoptions.fields.md) | <code>string[]</code> | An array of fields to include in the results |
 |  [filter](./kibana-plugin-core-public.savedobjectsfindoptions.filter.md) | <code>string &#124; KueryNode</code> |  |
-|  [hasReference](./kibana-plugin-core-public.savedobjectsfindoptions.hasreference.md) | <code>{</code><br/><code>        type: string;</code><br/><code>        id: string;</code><br/><code>    }</code> |  |
+|  [hasReference](./kibana-plugin-core-public.savedobjectsfindoptions.hasreference.md) | <code>SavedObjectsFindOptionsReference &#124; SavedObjectsFindOptionsReference[]</code> | Search for documents having a reference to the specified objects. Use <code>hasReferenceOperator</code> to specify the operator to use when searching for multiple references. |
+|  [hasReferenceOperator](./kibana-plugin-core-public.savedobjectsfindoptions.hasreferenceoperator.md) | <code>'AND' &#124; 'OR'</code> | The operator to use when searching by multiple references using the <code>hasReference</code> option. Defaults to <code>OR</code> |
 |  [namespaces](./kibana-plugin-core-public.savedobjectsfindoptions.namespaces.md) | <code>string[]</code> |  |
 |  [page](./kibana-plugin-core-public.savedobjectsfindoptions.page.md) | <code>number</code> |  |
 |  [perPage](./kibana-plugin-core-public.savedobjectsfindoptions.perpage.md) | <code>number</code> |  |
@@ -29,4 +30,5 @@ export interface SavedObjectsFindOptions
 |  [sortField](./kibana-plugin-core-public.savedobjectsfindoptions.sortfield.md) | <code>string</code> |  |
 |  [sortOrder](./kibana-plugin-core-public.savedobjectsfindoptions.sortorder.md) | <code>string</code> |  |
 |  [type](./kibana-plugin-core-public.savedobjectsfindoptions.type.md) | <code>string &#124; string[]</code> |  |
+|  [typeToNamespacesMap](./kibana-plugin-core-public.savedobjectsfindoptions.typetonamespacesmap.md) | <code>Map&lt;string, string[] &#124; undefined&gt;</code> | This map defines each type to search for, and the namespace(s) to search for the type in; this is only intended to be used by a saved object client wrapper. If this is defined, it supersedes the <code>type</code> and <code>namespaces</code> fields when building the Elasticsearch query. Any types that are not included in this map will be excluded entirely. If a type is included but its value is undefined, the operation will search for that type in the Default namespace. |
 

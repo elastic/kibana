@@ -18,7 +18,7 @@
     "influencers": [
       "kubernetes.namespace",
       "kubernetes.pod.uid"
-      ],
+    ],
     "summary_count_field_name": "doc_count"
   },
   "data_description": {

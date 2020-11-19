@@ -27,14 +27,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await ml.securityUI.logout();
         });
 
-        it('should not allow to access the ML app', async () => {
+        it('should not allow access to the ML app', async () => {
           await ml.testExecution.logTestStep('should not load the ML overview page');
           await PageObjects.common.navigateToUrl('ml', '', {
             shouldLoginIfPrompted: false,
             ensureCurrentUrl: false,
           });
 
-          await PageObjects.error.expectNotFound();
+          await PageObjects.error.expectForbidden();
         });
 
         it('should not display the ML file data vis link on the Kibana home page', async () => {
@@ -53,7 +53,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await ml.navigation.assertKibanaNavMLEntryNotExists();
         });
 
-        it('should not allow to access the Stack Management ML page', async () => {
+        it('should not allow access to the Stack Management ML page', async () => {
           await ml.testExecution.logTestStep(
             'should load the stack management with the ML menu item being absent'
           );

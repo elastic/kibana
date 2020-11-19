@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HttpSetup } from 'src/core/public';
+import type { HttpHandler } from 'src/core/public';
 import {
   INFRA_ALERT_PREVIEW_PATH,
   METRIC_THRESHOLD_ALERT_TYPE_ID,
@@ -22,7 +22,7 @@ export async function getAlertPreview({
   params,
   alertType,
 }: {
-  fetch: HttpSetup['fetch'];
+  fetch: HttpHandler;
   params: AlertPreviewRequestParams;
   alertType: PreviewableAlertTypes;
 }): Promise<AlertPreviewSuccessResponsePayload> {

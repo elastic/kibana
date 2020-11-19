@@ -6,6 +6,7 @@
 
 import { shallow, mount } from 'enzyme';
 import React from 'react';
+import { render, waitFor } from '@testing-library/react';
 import { JobsTableComponent } from './jobs_table';
 import { mockSecurityJobs } from '../api.mock';
 import { cloneDeep } from 'lodash/fp';
@@ -13,9 +14,19 @@ import { SecurityJob } from '../types';
 
 jest.mock('../../../lib/kibana');
 
+export async function getRenderedHref(Component: React.FC, selector: string) {
+  const el = render(<Component />);
+
+  await waitFor(() => el.container.querySelector(selector));
+
+  const a = el.container.querySelector(selector);
+  return a?.getAttribute('href') ?? '';
+}
+
 describe('JobsTableComponent', () => {
   let securityJobs: SecurityJob[];
   let onJobStateChangeMock = jest.fn();
+
   beforeEach(() => {
     securityJobs = cloneDeep(mockSecurityJobs);
     onJobStateChangeMock = jest.fn();
@@ -32,34 +43,42 @@ describe('JobsTableComponent', () => {
     expect(wrapper).toMatchSnapshot();
   });
 
-  test('should render the hyperlink which points specifically to the job id', () => {
-    const wrapper = mount(
-      <JobsTableComponent
-        isLoading={true}
-        jobs={securityJobs}
-        onJobStateChange={onJobStateChangeMock}
-      />
+  test('should render the hyperlink which points specifically to the job id', async () => {
+    const href = await getRenderedHref(
+      () => (
+        <JobsTableComponent
+          isLoading={true}
+          jobs={securityJobs}
+          onJobStateChange={onJobStateChangeMock}
+        />
+      ),
+      '[data-test-subj="jobs-table-link"]'
     );
-    expect(wrapper.find('[data-test-subj="jobs-table-link"]').first().props().href).toEqual(
-      '/test/base/path/app/ml#/jobs?mlManagement=(jobId:linux_anomalous_network_activity_ecs)'
+    await waitFor(() =>
+      expect(href).toEqual(
+        "/app/ml/jobs?_a=(jobs:(queryText:'id:linux_anomalous_network_activity_ecs'))"
+      )
     );
   });
 
-  test('should render the hyperlink with URI encodings which points specifically to the job id', () => {
+  test('should render the hyperlink with URI encodings which points specifically to the job id', async () => {
     securityJobs[0].id = 'job id with spaces';
-    const wrapper = mount(
-      <JobsTableComponent
-        isLoading={true}
-        jobs={securityJobs}
-        onJobStateChange={onJobStateChangeMock}
-      />
+    const href = await getRenderedHref(
+      () => (
+        <JobsTableComponent
+          isLoading={true}
+          jobs={securityJobs}
+          onJobStateChange={onJobStateChangeMock}
+        />
+      ),
+      '[data-test-subj="jobs-table-link"]'
     );
-    expect(wrapper.find('[data-test-subj="jobs-table-link"]').first().props().href).toEqual(
-      '/test/base/path/app/ml#/jobs?mlManagement=(jobId:job%20id%20with%20spaces)'
+    await waitFor(() =>
+      expect(href).toEqual("/app/ml/jobs?_a=(jobs:(queryText:'id:job%20id%20with%20spaces'))")
     );
   });
 
-  test('should call onJobStateChange when the switch is clicked to be true/open', () => {
+  test('should call onJobStateChange when the switch is clicked to be true/open', async () => {
     const wrapper = mount(
       <JobsTableComponent
         isLoading={false}
@@ -67,16 +86,19 @@ describe('JobsTableComponent', () => {
         onJobStateChange={onJobStateChangeMock}
       />
     );
+
     wrapper
       .find('button[data-test-subj="job-switch"]')
       .first()
       .simulate('click', {
         target: { checked: true },
       });
-    expect(onJobStateChangeMock.mock.calls[0]).toEqual([securityJobs[0], 1571022859393, true]);
+    await waitFor(() => {
+      expect(onJobStateChangeMock.mock.calls[0]).toEqual([securityJobs[0], 1571022859393, true]);
+    });
   });
 
-  test('should have a switch when it is not in the loading state', () => {
+  test('should have a switch when it is not in the loading state', async () => {
     const wrapper = mount(
       <JobsTableComponent
         isLoading={false}
@@ -84,10 +106,12 @@ describe('JobsTableComponent', () => {
         onJobStateChange={onJobStateChangeMock}
       />
     );
-    expect(wrapper.find('[data-test-subj="job-switch"]').exists()).toBe(true);
+    await waitFor(() => {
+      expect(wrapper.find('[data-test-subj="job-switch"]').exists()).toBe(true);
+    });
   });
 
-  test('should not have a switch when it is in the loading state', () => {
+  test('should not have a switch when it is in the loading state', async () => {
     const wrapper = mount(
       <JobsTableComponent
         isLoading={true}
@@ -95,6 +119,8 @@ describe('JobsTableComponent', () => {
         onJobStateChange={onJobStateChangeMock}
       />
     );
-    expect(wrapper.find('[data-test-subj="job-switch"]').exists()).toBe(false);
+    await waitFor(() => {
+      expect(wrapper.find('[data-test-subj="job-switch"]').exists()).toBe(false);
+    });
   });
 });

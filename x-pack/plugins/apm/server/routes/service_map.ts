@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import * as t from 'io-ts';
 import {
   invalidLicenseMessage,
@@ -17,11 +17,10 @@ import { createRoute } from './create_route';
 import { rangeRt, uiFiltersRt } from './default_api_types';
 import { notifyFeatureUsage } from '../feature';
 import { getSearchAggregatedTransactions } from '../lib/helpers/aggregated_transactions';
-import { getParsedUiFilters } from '../lib/helpers/convert_ui_filters/get_parsed_ui_filters';
 
-export const serviceMapRoute = createRoute(() => ({
-  path: '/api/apm/service-map',
-  params: {
+export const serviceMapRoute = createRoute({
+  endpoint: 'GET /api/apm/service-map',
+  params: t.type({
     query: t.intersection([
       t.partial({
         environment: t.string,
@@ -29,7 +28,7 @@ export const serviceMapRoute = createRoute(() => ({
       }),
       rangeRt,
     ]),
-  },
+  }),
   handler: async ({ context, request }) => {
     if (!context.config['xpack.apm.serviceMapEnabled']) {
       throw Boom.notFound();
@@ -60,16 +59,16 @@ export const serviceMapRoute = createRoute(() => ({
       logger,
     });
   },
-}));
+});
 
-export const serviceMapServiceNodeRoute = createRoute(() => ({
-  path: `/api/apm/service-map/service/{serviceName}`,
-  params: {
+export const serviceMapServiceNodeRoute = createRoute({
+  endpoint: `GET /api/apm/service-map/service/{serviceName}`,
+  params: t.type({
     path: t.type({
       serviceName: t.string,
     }),
     query: t.intersection([rangeRt, uiFiltersRt]),
-  },
+  }),
   handler: async ({ context, request }) => {
     if (!context.config['xpack.apm.serviceMapEnabled']) {
       throw Boom.notFound();
@@ -77,24 +76,20 @@ export const serviceMapServiceNodeRoute = createRoute(() => ({
     if (!isActivePlatinumLicense(context.licensing.license)) {
       throw Boom.forbidden(invalidLicenseMessage);
     }
-    const logger = context.logger;
     const setup = await setupRequest(context, request);
 
     const {
-      query: { uiFilters: uiFiltersJson },
       path: { serviceName },
     } = context.params;
 
     const searchAggregatedTransactions = await getSearchAggregatedTransactions(
       setup
     );
-    const uiFilters = getParsedUiFilters({ uiFilters: uiFiltersJson, logger });
 
     return getServiceMapServiceNodeInfo({
       setup,
       serviceName,
       searchAggregatedTransactions,
-      uiFilters,
     });
   },
-}));
+});

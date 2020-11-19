@@ -200,7 +200,15 @@ export function resolveCopyToSpaceConflictsSuite(
     expect(visualization.attributes.title).to.eql(`CTS vis 3 from ${destination} space`);
   };
 
-  const expectNotFoundResponse = async (resp: TestResponse) => {
+  const expectRouteForbiddenResponse = async (resp: TestResponse) => {
+    expect(resp.body).to.eql({
+      statusCode: 403,
+      error: 'Forbidden',
+      message: 'Forbidden',
+    });
+  };
+
+  const expectRouteNotFoundResponse = async (resp: TestResponse) => {
     expect(resp.body).to.eql({
       statusCode: 404,
       error: 'Not Found',
@@ -308,15 +316,15 @@ export function resolveCopyToSpaceConflictsSuite(
   ) => (): ResolveCopyToSpaceMultiNamespaceTest[] => {
     // the status code of the HTTP response differs depending on the error type
     // a 403 error actually comes back as an HTTP 200 response
-    const statusCode = outcome === 'noAccess' ? 404 : 200;
+    const statusCode = outcome === 'noAccess' ? 403 : 200;
     const type = 'sharedtype';
-    const exactMatchId = 'all_spaces';
+    const exactMatchId = 'each_space';
     const inexactMatchId = `conflict_1_${spaceId}`;
     const ambiguousConflictId = `conflict_2_${spaceId}`;
 
     const createRetries = (overwriteRetry: Record<string, any>) => ({ space_2: [overwriteRetry] });
     const getResult = (response: TestResponse) => (response.body as CopyResponse).space_2;
-    const expectForbiddenResponse = (response: TestResponse) => {
+    const expectSavedObjectForbiddenResponse = (response: TestResponse) => {
       expect(response.body).to.eql({
         space_2: {
           success: false,
@@ -327,7 +335,11 @@ export function resolveCopyToSpaceConflictsSuite(
         },
       });
     };
-    const expectSuccessResponse = (response: TestResponse, id: string, destinationId?: string) => {
+    const expectSavedObjectSuccessResponse = (
+      response: TestResponse,
+      id: string,
+      destinationId?: string
+    ) => {
       const { success, successCount, successResults, errors } = getResult(response);
       expect(success).to.eql(true);
       expect(successCount).to.eql(1);
@@ -350,12 +362,12 @@ export function resolveCopyToSpaceConflictsSuite(
         statusCode,
         response: async (response: TestResponse) => {
           if (outcome === 'authorized') {
-            expectSuccessResponse(response, exactMatchId);
+            expectSavedObjectSuccessResponse(response, exactMatchId);
           } else if (outcome === 'noAccess') {
-            expectNotFoundResponse(response);
+            expectRouteForbiddenResponse(response);
           } else {
             // unauthorized read/write
-            expectForbiddenResponse(response);
+            expectSavedObjectForbiddenResponse(response);
           }
         },
       },
@@ -371,12 +383,12 @@ export function resolveCopyToSpaceConflictsSuite(
         statusCode,
         response: async (response: TestResponse) => {
           if (outcome === 'authorized') {
-            expectSuccessResponse(response, inexactMatchId, 'conflict_1_space_2');
+            expectSavedObjectSuccessResponse(response, inexactMatchId, 'conflict_1_space_2');
           } else if (outcome === 'noAccess') {
-            expectNotFoundResponse(response);
+            expectRouteForbiddenResponse(response);
           } else {
             // unauthorized read/write
-            expectForbiddenResponse(response);
+            expectSavedObjectForbiddenResponse(response);
           }
         },
       },
@@ -392,12 +404,12 @@ export function resolveCopyToSpaceConflictsSuite(
         statusCode,
         response: async (response: TestResponse) => {
           if (outcome === 'authorized') {
-            expectSuccessResponse(response, ambiguousConflictId, 'conflict_2_space_2');
+            expectSavedObjectSuccessResponse(response, ambiguousConflictId, 'conflict_2_space_2');
           } else if (outcome === 'noAccess') {
-            expectNotFoundResponse(response);
+            expectRouteForbiddenResponse(response);
           } else {
             // unauthorized read/write
-            expectForbiddenResponse(response);
+            expectSavedObjectForbiddenResponse(response);
           }
         },
       },
@@ -523,7 +535,8 @@ export function resolveCopyToSpaceConflictsSuite(
 
   return {
     resolveCopyToSpaceConflictsTest,
-    expectNotFoundResponse,
+    expectRouteForbiddenResponse,
+    expectRouteNotFoundResponse,
     createExpectOverriddenResponseWithReferences,
     createExpectOverriddenResponseWithoutReferences,
     createExpectNonOverriddenResponseWithReferences,

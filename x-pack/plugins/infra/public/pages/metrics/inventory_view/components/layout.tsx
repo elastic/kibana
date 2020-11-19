@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, useEffect } from 'react';
-import { useInterval } from 'react-use';
+import React, { useCallback, useEffect, useState } from 'react';
+import useInterval from 'react-use/lib/useInterval';
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { AutoSizer } from '../../../../components/auto_sizer';
 import { convertIntervalToString } from '../../../../utils/convert_interval_to_string';
 import { NodesOverview } from './nodes_overview';
@@ -16,21 +16,23 @@ import { PageContent } from '../../../../components/page';
 import { useSnapshot } from '../hooks/use_snaphot';
 import { useWaffleTimeContext } from '../hooks/use_waffle_time';
 import { useWaffleFiltersContext } from '../hooks/use_waffle_filters';
-import { useWaffleOptionsContext } from '../hooks/use_waffle_options';
+import { DEFAULT_LEGEND, useWaffleOptionsContext } from '../hooks/use_waffle_options';
 import { useSourceContext } from '../../../../containers/source';
 import { InfraFormatterType } from '../../../../lib/lib';
 import { euiStyled } from '../../../../../../observability/public';
 import { Toolbar } from './toolbars/toolbar';
 import { ViewSwitcher } from './waffle/view_switcher';
 import { IntervalLabel } from './waffle/interval_label';
-import { Legend } from './waffle/legend';
 import { createInventoryMetricFormatter } from '../lib/create_inventory_metric_formatter';
 import { createLegend } from '../lib/create_legend';
 import { useSavedViewContext } from '../../../../containers/saved_view/saved_view';
 import { useWaffleViewState } from '../hooks/use_waffle_view_state';
 import { SavedViewsToolbarControls } from '../../../../components/saved_views/toolbar_control';
+import { BottomDrawer } from './bottom_drawer';
+import { Legend } from './waffle/legend';
 
 export const Layout = () => {
+  const [showLoading, setShowLoading] = useState(true);
   const { sourceId, source } = useSourceContext();
   const { currentView, shouldLoadDefault } = useSavedViewContext();
   const {
@@ -60,10 +62,14 @@ export const Layout = () => {
     false
   );
 
+  const legendPalette = legend?.palette ?? DEFAULT_LEGEND.palette;
+  const legendSteps = legend?.steps ?? DEFAULT_LEGEND.steps;
+  const legendReverseColors = legend?.reverseColors ?? DEFAULT_LEGEND.reverseColors;
+
   const options = {
     formatter: InfraFormatterType.percent,
     formatTemplate: '{{value}}',
-    legend: createLegend(legend.palette, legend.steps, legend.reverseColors),
+    legend: createLegend(legendPalette, legendSteps, legendReverseColors),
     metric,
     sort,
     fields: source?.configuration?.fields,
@@ -99,53 +105,72 @@ export const Layout = () => {
     }
   }, [reload, currentView, shouldLoadDefault]);
 
+  useEffect(() => {
+    setShowLoading(true);
+  }, [options.metric, nodeType]);
+
+  useEffect(() => {
+    const hasNodes = nodes && nodes.length;
+    // Don't show loading screen when we're auto-reloading
+    setShowLoading(!hasNodes);
+  }, [nodes]);
+
   return (
     <>
       <PageContent>
         <MainContainer>
-          <TopActionContainer>
-            <EuiFlexGroup justifyContent="spaceBetween" gutterSize="m">
-              <Toolbar nodeType={nodeType} />
-              <EuiFlexItem grow={false}>
-                <ViewSwitcher view={view} onChange={changeView} />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </TopActionContainer>
           <AutoSizer bounds>
-            {({ measureRef, bounds: { height = 0 } }) => (
+            {({ measureRef: topActionMeasureRef, bounds: { height: topActionHeight = 0 } }) => (
               <>
-                <NodesOverview
-                  nodes={nodes}
-                  options={options}
-                  nodeType={nodeType}
-                  loading={loading}
-                  reload={reload}
-                  onDrilldown={applyFilterQuery}
-                  currentTime={currentTime}
-                  view={view}
-                  autoBounds={autoBounds}
-                  boundsOverride={boundsOverride}
-                  formatter={formatter}
-                  bottomMargin={height}
-                />
-                <BottomActionContainer ref={measureRef}>
-                  <EuiFlexGroup justifyContent="spaceBetween">
-                    <EuiFlexItem grow={false}>
-                      <SavedViewsToolbarControls viewState={viewState} />
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false} style={{ position: 'relative', minWidth: 400 }}>
-                      <Legend
-                        formatter={formatter}
-                        bounds={bounds}
-                        dataBounds={dataBounds}
-                        legend={options.legend}
-                      />
-                    </EuiFlexItem>
+                <TopActionContainer ref={topActionMeasureRef}>
+                  <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="m">
+                    <Toolbar nodeType={nodeType} currentTime={currentTime} />
                     <EuiFlexItem grow={false}>
                       <IntervalLabel intervalAsString={intervalAsString} />
                     </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <ViewSwitcher view={view} onChange={changeView} />
+                    </EuiFlexItem>
                   </EuiFlexGroup>
-                </BottomActionContainer>
+                  <EuiSpacer />
+                  <SavedViewContainer>
+                    <SavedViewsToolbarControls viewState={viewState} />
+                  </SavedViewContainer>
+                </TopActionContainer>
+                <AutoSizer bounds>
+                  {({ measureRef, bounds: { height = 0 } }) => (
+                    <>
+                      <NodesOverview
+                        nodes={nodes}
+                        options={options}
+                        nodeType={nodeType}
+                        loading={loading}
+                        showLoading={showLoading}
+                        reload={reload}
+                        onDrilldown={applyFilterQuery}
+                        currentTime={currentTime}
+                        view={view}
+                        autoBounds={autoBounds}
+                        boundsOverride={boundsOverride}
+                        formatter={formatter}
+                        bottomMargin={height}
+                        topMargin={topActionHeight}
+                      />
+                      <BottomDrawer
+                        measureRef={measureRef}
+                        interval={interval}
+                        formatter={formatter}
+                      >
+                        <Legend
+                          formatter={formatter}
+                          bounds={bounds}
+                          dataBounds={dataBounds}
+                          legend={options.legend}
+                        />
+                      </BottomDrawer>
+                    </>
+                  )}
+                </AutoSizer>
               </>
             )}
           </AutoSizer>
@@ -164,12 +189,8 @@ const TopActionContainer = euiStyled.div`
   padding: ${(props) => `12px ${props.theme.eui.paddingSizes.m}`};
 `;
 
-const BottomActionContainer = euiStyled.div`
-  background-color: ${(props) => props.theme.eui.euiPageBackgroundColor};
-  padding: ${(props) => props.theme.eui.paddingSizes.m} ${(props) =>
-  props.theme.eui.paddingSizes.m};
-  position: fixed;
-  left: 0;
-  bottom: 0;
-  right: 0;
+const SavedViewContainer = euiStyled.div`
+  position: relative;
+  z-index: 1;
+  padding-left: ${(props) => props.theme.eui.paddingSizes.m};
 `;

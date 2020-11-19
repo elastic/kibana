@@ -8,86 +8,16 @@ import { KibanaRequest, RequestHandlerContext } from 'src/core/server';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { DataPluginStart } from 'src/plugins/data/server/plugin';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { SpacesPluginSetup } from '../../spaces/server';
-import { CancellationToken } from '../../../plugins/reporting/common';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 import { LicensingPluginSetup } from '../../licensing/server';
 import { AuthenticatedUser, SecurityPluginSetup } from '../../security/server';
-import { JobStatus } from '../common/types';
+import { SpacesPluginSetup } from '../../spaces/server';
+import { CancellationToken } from '../common';
+import { BaseParams } from '../common/types';
 import { ReportingConfigType } from './config';
 import { ReportingCore } from './core';
 import { LevelLogger } from './lib';
-import { LayoutInstance } from './lib/layouts';
-
-/*
- * Routing types
- */
-
-export interface ReportingRequestPre {
-  management: {
-    jobTypes: string[];
-  };
-  user: string;
-}
-
-// generate a report with unparsed jobParams
-export interface GenerateExportTypePayload {
-  jobParams: string;
-}
-
-export type ReportingRequestPayload = GenerateExportTypePayload | JobParamPostPayload;
-
-export interface TimeRangeParams {
-  timezone: string;
-  min?: Date | string | number | null;
-  max?: Date | string | number | null;
-}
-
-// the "raw" data coming from the client, unencrypted
-export interface JobParamPostPayload {
-  timerange?: TimeRangeParams;
-}
-
-// the pre-processed, encrypted data ready for storage
-export interface BasePayload<JobParamsType> {
-  headers: string; // serialized encrypted headers
-  jobParams: JobParamsType;
-  title: string;
-  type: string;
-  spaceId?: string;
-}
-
-export interface JobSource<JobParamsType> {
-  _id: string;
-  _index: string;
-  _source: {
-    jobtype: string;
-    output: TaskRunResult;
-    payload: BasePayload<JobParamsType>;
-    status: JobStatus;
-  };
-}
-
-export interface TaskRunResult {
-  content_type: string | null;
-  content: string | null;
-  csv_contains_formulas?: boolean;
-  size: number;
-  max_size_reached?: boolean;
-  warnings?: string[];
-}
-
-interface ConditionalHeadersConditions {
-  protocol: string;
-  hostname: string;
-  port: number;
-  basePath: string;
-}
-
-export interface ConditionalHeaders {
-  headers: Record<string, string>;
-  conditions: ConditionalHeadersConditions;
-}
+import { ReportTaskParams, TaskRunResult } from './lib/tasks';
 
 /*
  * Plugin Contract
@@ -117,25 +47,25 @@ export type ReportingUser = { username: AuthenticatedUser['username'] } | false;
 export type CaptureConfig = ReportingConfigType['capture'];
 export type ScrollConfig = ReportingConfigType['csv']['scroll'];
 
-export interface BaseParams {
-  browserTimezone: string;
-  layout?: LayoutInstance; // for screenshot type reports
-  objectType: string;
+export { BaseParams };
+
+// base params decorated with encrypted headers that come into runJob functions
+export interface BasePayload extends BaseParams {
+  headers: string;
+  spaceId?: string;
 }
 
-export interface BaseParamsEncryptedFields extends BaseParams {
-  headers: string; // encrypted headers
-}
-
-export type CreateJobFn<JobParamsType extends BaseParams> = (
+// default fn type for CreateJobFnFactory
+export type CreateJobFn<JobParamsType = BaseParams, JobPayloadType = BasePayload> = (
   jobParams: JobParamsType,
   context: RequestHandlerContext,
-  request: KibanaRequest
-) => Promise<JobParamsType & BaseParamsEncryptedFields>;
+  request: KibanaRequest<any, any, any, any>
+) => Promise<JobPayloadType>;
 
-export type RunTaskFn<TaskPayloadType> = (
+// default fn type for RunTaskFnFactory
+export type RunTaskFn<TaskPayloadType = BasePayload> = (
   jobId: string,
-  job: TaskPayloadType,
+  payload: ReportTaskParams<TaskPayloadType>['payload'],
   cancellationToken: CancellationToken
 ) => Promise<TaskRunResult>;
 
@@ -149,12 +79,7 @@ export type RunTaskFnFactory<RunTaskFnType> = (
   logger: LevelLogger
 ) => RunTaskFnType;
 
-export interface ExportTypeDefinition<
-  JobParamsType,
-  CreateJobFnType,
-  JobPayloadType,
-  RunTaskFnType
-> {
+export interface ExportTypeDefinition<CreateJobFnType = CreateJobFn, RunTaskFnType = RunTaskFn> {
   id: string;
   name: string;
   jobType: string;
@@ -163,10 +88,4 @@ export interface ExportTypeDefinition<
   createJobFnFactory: CreateJobFnFactory<CreateJobFnType>;
   runTaskFnFactory: RunTaskFnFactory<RunTaskFnType>;
   validLicenses: string[];
-}
-
-export interface DiagnosticResponse {
-  help: string[];
-  success: boolean;
-  logs: string;
 }

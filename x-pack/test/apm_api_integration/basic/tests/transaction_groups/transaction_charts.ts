@@ -5,8 +5,7 @@
  */
 import expect from '@kbn/expect';
 import archives_metadata from '../../../common/archives_metadata';
-import { PromiseReturnType } from '../../../../../plugins/apm/typings/common';
-import { expectSnapshot } from '../../../common/match_snapshot';
+import { PromiseReturnType } from '../../../../../plugins/observability/typings/common';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
@@ -19,7 +18,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   // url parameters
   const start = encodeURIComponent(metadata.start);
   const end = encodeURIComponent(metadata.end);
-  const uiFilters = encodeURIComponent(JSON.stringify({}));
+  const uiFilters = encodeURIComponent(JSON.stringify({ environment: 'testing' }));
 
   describe('Transaction charts', () => {
     describe('when data is not loaded ', () => {
@@ -62,7 +61,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       it('returns the correct data', () => {
         expectSnapshot(response.body.apmTimeseries.overallAvgDuration).toMatchInline(
-          `600255.7079646018`
+          `600888.274678112`
         );
         expectSnapshot(response.body.apmTimeseries.responseTimes.avg.length).toMatchInline(`61`);
         expectSnapshot(response.body.apmTimeseries.tpmBuckets.length).toMatchInline(`3`);

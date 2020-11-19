@@ -6,20 +6,21 @@
 import React from 'react';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { AlertTypeModel } from '../../../../triggers_actions_ui/public/types';
-import { validate } from './validation';
-import { ALERT_CPU_USAGE } from '../../../common/constants';
-import { Expression } from './expression';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { CpuUsageAlert } from '../../../server/alerts';
+import { ALERT_CPU_USAGE, ALERT_DETAILS } from '../../../common/constants';
+import { validate } from '../components/duration/validation';
+import { Expression, Props } from '../components/duration/expression';
 
 export function createCpuUsageAlertType(): AlertTypeModel {
-  const alert = new CpuUsageAlert();
   return {
     id: ALERT_CPU_USAGE,
-    name: alert.label,
+    name: ALERT_DETAILS[ALERT_CPU_USAGE].label,
+    description: ALERT_DETAILS[ALERT_CPU_USAGE].description,
     iconClass: 'bell',
-    alertParamsExpression: (props: any) => (
-      <Expression {...props} paramDetails={CpuUsageAlert.paramDetails} />
+    documentationUrl(docLinks) {
+      return `${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/kibana-alerts.html#kibana-alerts-cpu-threshold`;
+    },
+    alertParamsExpression: (props: Props) => (
+      <Expression {...props} paramDetails={ALERT_DETAILS[ALERT_CPU_USAGE].paramDetails} />
     ),
     validate,
     defaultActionMessage: '{{context.internalFullMessage}}',

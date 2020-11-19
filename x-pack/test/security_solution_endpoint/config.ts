@@ -30,7 +30,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ['securitySolutionManagement']: {
         pathname: '/app/security/administration',
       },
-      ...xpackFunctionalConfig.get('apps'),
       ['security']: {
         pathname: '/app/security',
       },
@@ -39,10 +38,13 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ...xpackFunctionalConfig.get('kbnTestServer'),
       serverArgs: [
         ...xpackFunctionalConfig.get('kbnTestServer.serverArgs'),
-        '--xpack.ingestManager.enabled=true',
+        '--xpack.fleet.enabled=true',
         // if you return an empty string here the kibana server will not start properly but an empty array works
         ...getRegistryUrlAsArray(),
       ],
+    },
+    layout: {
+      fixedHeaderHeight: 200,
     },
   };
 }

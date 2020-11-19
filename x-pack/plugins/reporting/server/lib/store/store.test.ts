@@ -48,28 +48,25 @@ describe('ReportingStore', () => {
   describe('addReport', () => {
     it('returns Report object', async () => {
       const store = new ReportingStore(mockCore, mockLogger);
-      const reportType = 'unknowntype';
-      const reportPayload = {
-        browserTimezone: 'UTC',
-        headers: 'rp_headers_1',
-        objectType: 'testOt',
-      };
-      await expect(
-        store.addReport(reportType, { username: 'username1' }, reportPayload)
-      ).resolves.toMatchObject({
+      const mockReport = new Report({
+        _index: '.reporting-mock',
+        attempts: 0,
+        created_by: 'username1',
+        jobtype: 'unknowntype',
+        status: 'pending',
+        payload: {},
+        meta: {},
+      } as any);
+      await expect(store.addReport(mockReport)).resolves.toMatchObject({
         _primary_term: undefined,
         _seq_no: undefined,
         attempts: 0,
-        browser_type: undefined,
         completed_at: undefined,
         created_by: 'username1',
         jobtype: 'unknowntype',
-        max_attempts: undefined,
         payload: {},
-        priority: 10,
-        started_at: undefined,
+        meta: {},
         status: 'pending',
-        timeout: 120000,
       });
     });
 
@@ -83,15 +80,15 @@ describe('ReportingStore', () => {
       mockCore = await createMockReportingCore(mockConfig);
 
       const store = new ReportingStore(mockCore, mockLogger);
-      const reportType = 'unknowntype';
-      const reportPayload = {
-        browserTimezone: 'UTC',
-        headers: 'rp_headers_2',
-        objectType: 'testOt',
-      };
-      expect(
-        store.addReport(reportType, { username: 'user1' }, reportPayload)
-      ).rejects.toMatchInlineSnapshot(`[Error: Invalid index interval: centurially]`);
+      const mockReport = new Report({
+        _index: '.reporting-errortest',
+        jobtype: 'unknowntype',
+        payload: {},
+        meta: {},
+      } as any);
+      expect(store.addReport(mockReport)).rejects.toMatchInlineSnapshot(
+        `[TypeError: this.client.callAsInternalUser is not a function]`
+      );
     });
 
     it('handles error creating the index', async () => {
@@ -100,15 +97,15 @@ describe('ReportingStore', () => {
       callClusterStub.withArgs('indices.create').rejects(new Error('horrible error'));
 
       const store = new ReportingStore(mockCore, mockLogger);
-      const reportType = 'unknowntype';
-      const reportPayload = {
-        browserTimezone: 'UTC',
-        headers: 'rp_headers_3',
-        objectType: 'testOt',
-      };
-      await expect(
-        store.addReport(reportType, { username: 'user1' }, reportPayload)
-      ).rejects.toMatchInlineSnapshot(`[Error: horrible error]`);
+      const mockReport = new Report({
+        _index: '.reporting-errortest',
+        jobtype: 'unknowntype',
+        payload: {},
+        meta: {},
+      } as any);
+      await expect(store.addReport(mockReport)).rejects.toMatchInlineSnapshot(
+        `[Error: horrible error]`
+      );
     });
 
     /* Creating the index will fail, if there were multiple jobs staged in
@@ -123,15 +120,15 @@ describe('ReportingStore', () => {
       callClusterStub.withArgs('indices.create').rejects(new Error('devastating error'));
 
       const store = new ReportingStore(mockCore, mockLogger);
-      const reportType = 'unknowntype';
-      const reportPayload = {
-        browserTimezone: 'UTC',
-        headers: 'rp_headers_4',
-        objectType: 'testOt',
-      };
-      await expect(
-        store.addReport(reportType, { username: 'user1' }, reportPayload)
-      ).rejects.toMatchInlineSnapshot(`[Error: devastating error]`);
+      const mockReport = new Report({
+        _index: '.reporting-mock',
+        jobtype: 'unknowntype',
+        payload: {},
+        meta: {},
+      } as any);
+      await expect(store.addReport(mockReport)).rejects.toMatchInlineSnapshot(
+        `[Error: devastating error]`
+      );
     });
 
     it('skips creating the index if already exists', async () => {
@@ -142,28 +139,20 @@ describe('ReportingStore', () => {
         .rejects(new Error('resource_already_exists_exception')); // will be triggered but ignored
 
       const store = new ReportingStore(mockCore, mockLogger);
-      const reportType = 'unknowntype';
-      const reportPayload = {
-        browserTimezone: 'UTC',
-        headers: 'rp_headers_5',
-        objectType: 'testOt',
-      };
-      await expect(
-        store.addReport(reportType, { username: 'user1' }, reportPayload)
-      ).resolves.toMatchObject({
+      const mockReport = new Report({
+        created_by: 'user1',
+        jobtype: 'unknowntype',
+        payload: {},
+        meta: {},
+      } as any);
+      await expect(store.addReport(mockReport)).resolves.toMatchObject({
         _primary_term: undefined,
         _seq_no: undefined,
         attempts: 0,
-        browser_type: undefined,
-        completed_at: undefined,
         created_by: 'user1',
         jobtype: 'unknowntype',
-        max_attempts: undefined,
         payload: {},
-        priority: 10,
-        started_at: undefined,
         status: 'pending',
-        timeout: 120000,
       });
     });
 
@@ -175,26 +164,24 @@ describe('ReportingStore', () => {
         .rejects(new Error('resource_already_exists_exception')); // will be triggered but ignored
 
       const store = new ReportingStore(mockCore, mockLogger);
-      const reportType = 'unknowntype';
-      const reportPayload = {
-        browserTimezone: 'UTC',
-        headers: 'rp_test_headers',
-        objectType: 'testOt',
-      };
-      await expect(store.addReport(reportType, false, reportPayload)).resolves.toMatchObject({
+      const mockReport = new Report({
+        _index: '.reporting-unsecured',
+        attempts: 0,
+        created_by: false,
+        jobtype: 'unknowntype',
+        payload: {},
+        meta: {},
+        status: 'pending',
+      } as any);
+      await expect(store.addReport(mockReport)).resolves.toMatchObject({
         _primary_term: undefined,
         _seq_no: undefined,
         attempts: 0,
-        browser_type: undefined,
-        completed_at: undefined,
         created_by: false,
         jobtype: 'unknowntype',
-        max_attempts: undefined,
+        meta: {},
         payload: {},
-        priority: 10,
-        started_at: undefined,
         status: 'pending',
-        timeout: 120000,
       });
     });
   });
@@ -209,8 +196,10 @@ describe('ReportingStore', () => {
       browser_type: 'browser_type_test_string',
       max_attempts: 50,
       payload: {
+        title: 'test report',
         headers: 'rp_test_headers',
         objectType: 'testOt',
+        browserTimezone: 'ABC',
       },
       timeout: 30000,
       priority: 1,
@@ -248,8 +237,10 @@ describe('ReportingStore', () => {
       browser_type: 'browser_type_test_string',
       max_attempts: 50,
       payload: {
+        title: 'test report',
         headers: 'rp_test_headers',
         objectType: 'testOt',
+        browserTimezone: 'BCD',
       },
       timeout: 30000,
       priority: 1,
@@ -287,8 +278,10 @@ describe('ReportingStore', () => {
       browser_type: 'browser_type_test_string',
       max_attempts: 50,
       payload: {
+        title: 'test report',
         headers: 'rp_test_headers',
         objectType: 'testOt',
+        browserTimezone: 'CDE',
       },
       timeout: 30000,
       priority: 1,
@@ -326,8 +319,10 @@ describe('ReportingStore', () => {
       browser_type: 'browser_type_test_string',
       max_attempts: 50,
       payload: {
+        title: 'test report',
         headers: 'rp_test_headers',
         objectType: 'testOt',
+        browserTimezone: 'utc',
       },
       timeout: 30000,
       priority: 1,

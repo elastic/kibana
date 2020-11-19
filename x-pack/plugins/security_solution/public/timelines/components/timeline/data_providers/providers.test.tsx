@@ -12,6 +12,7 @@ import { TestProviders } from '../../../../common/mock/test_providers';
 import { DroppableWrapper } from '../../../../common/components/drag_and_drop/droppable_wrapper';
 import { FilterManager } from '../../../../../../../../src/plugins/data/public';
 
+import { timelineActions } from '../../../store/timeline';
 import { mockDataProviders } from './mock/mock_data_providers';
 import { Providers } from './providers';
 import { DELETE_CLASS_NAME, ENABLE_CLASS_NAME, EXCLUDE_CLASS_NAME } from './provider_item_actions';
@@ -24,27 +25,24 @@ describe('Providers', () => {
   const isLoading: boolean = true;
   const mount = useMountAppended();
   const filterManager = new FilterManager(mockUiSettingsForFilterManager);
+  const mockOnDataProviderRemoved = jest.spyOn(timelineActions, 'removeProvider');
 
   const manageTimelineForTesting = {
-    foo: {
-      ...getTimelineDefaults('foo'),
+    test: {
+      ...getTimelineDefaults('test'),
       filterManager,
       isLoading,
     },
   };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   describe('rendering', () => {
     test('renders correctly against snapshot', () => {
       const wrapper = shallow(
-        <Providers
-          browserFields={{}}
-          dataProviders={mockDataProviders}
-          timelineId="foo"
-          onDataProviderEdited={jest.fn()}
-          onDataProviderRemoved={jest.fn()}
-          onToggleDataProviderEnabled={jest.fn()}
-          onToggleDataProviderExcluded={jest.fn()}
-          onToggleDataProviderType={jest.fn()}
-        />
+        <Providers browserFields={{}} dataProviders={mockDataProviders} timelineId="test" />
       );
       expect(wrapper).toMatchSnapshot();
     });
@@ -53,16 +51,7 @@ describe('Providers', () => {
       const wrapper = mount(
         <TestProviders>
           <DroppableWrapper droppableId="unitTest">
-            <Providers
-              browserFields={{}}
-              dataProviders={mockDataProviders}
-              timelineId="foo"
-              onDataProviderEdited={jest.fn()}
-              onDataProviderRemoved={jest.fn()}
-              onToggleDataProviderEnabled={jest.fn()}
-              onToggleDataProviderExcluded={jest.fn()}
-              onToggleDataProviderType={jest.fn()}
-            />
+            <Providers browserFields={{}} dataProviders={mockDataProviders} timelineId="test" />
           </DroppableWrapper>
         </TestProviders>
       );
@@ -77,20 +66,10 @@ describe('Providers', () => {
 
   describe('#onDataProviderRemoved', () => {
     test('it invokes the onDataProviderRemoved callback when the close button is clicked', () => {
-      const mockOnDataProviderRemoved = jest.fn();
       const wrapper = mount(
         <TestProviders>
           <DroppableWrapper droppableId="unitTest">
-            <Providers
-              browserFields={{}}
-              dataProviders={mockDataProviders}
-              timelineId="foo"
-              onDataProviderEdited={jest.fn()}
-              onDataProviderRemoved={mockOnDataProviderRemoved}
-              onToggleDataProviderEnabled={jest.fn()}
-              onToggleDataProviderExcluded={jest.fn()}
-              onToggleDataProviderType={jest.fn()}
-            />
+            <Providers browserFields={{}} dataProviders={mockDataProviders} timelineId="test" />
           </DroppableWrapper>
         </TestProviders>
       );
@@ -98,25 +77,15 @@ describe('Providers', () => {
         .find('[data-test-subj="providerBadge"] [data-euiicon-type]')
         .first()
         .simulate('click');
-      expect(mockOnDataProviderRemoved.mock.calls[0][0]).toEqual('id-Provider 1');
+      expect(mockOnDataProviderRemoved.mock.calls[0][0].providerId).toEqual('id-Provider 1');
     });
 
     test('while loading data, it does NOT invoke the onDataProviderRemoved callback when the close button is clicked', () => {
-      const mockOnDataProviderRemoved = jest.fn();
       const wrapper = mount(
         <TestProviders>
           <ManageGlobalTimeline manageTimelineForTesting={manageTimelineForTesting}>
             <DroppableWrapper droppableId="unitTest">
-              <Providers
-                browserFields={{}}
-                dataProviders={mockDataProviders}
-                timelineId="foo"
-                onDataProviderEdited={jest.fn()}
-                onDataProviderRemoved={mockOnDataProviderRemoved}
-                onToggleDataProviderEnabled={jest.fn()}
-                onToggleDataProviderExcluded={jest.fn()}
-                onToggleDataProviderType={jest.fn()}
-              />
+              <Providers browserFields={{}} dataProviders={mockDataProviders} timelineId="test" />
             </DroppableWrapper>
           </ManageGlobalTimeline>
         </TestProviders>
@@ -131,20 +100,10 @@ describe('Providers', () => {
     });
 
     test('it invokes the onDataProviderRemoved callback when you click on the option "Delete" in the provider menu', () => {
-      const mockOnDataProviderRemoved = jest.fn();
       const wrapper = mount(
         <TestProviders>
           <DroppableWrapper droppableId="unitTest">
-            <Providers
-              browserFields={{}}
-              dataProviders={mockDataProviders}
-              timelineId="foo"
-              onDataProviderEdited={jest.fn()}
-              onDataProviderRemoved={mockOnDataProviderRemoved}
-              onToggleDataProviderEnabled={jest.fn()}
-              onToggleDataProviderExcluded={jest.fn()}
-              onToggleDataProviderType={jest.fn()}
-            />
+            <Providers browserFields={{}} dataProviders={mockDataProviders} timelineId="test" />
           </DroppableWrapper>
         </TestProviders>
       );
@@ -156,25 +115,15 @@ describe('Providers', () => {
         .find(`[data-test-subj="providerActions"] .${DELETE_CLASS_NAME}`)
         .first()
         .simulate('click');
-      expect(mockOnDataProviderRemoved.mock.calls[0][0]).toEqual('id-Provider 1');
+      expect(mockOnDataProviderRemoved.mock.calls[0][0].providerId).toEqual('id-Provider 1');
     });
 
     test('while loading data, it does NOT invoke the onDataProviderRemoved callback when you click on the option "Delete" in the provider menu', () => {
-      const mockOnDataProviderRemoved = jest.fn();
       const wrapper = mount(
         <TestProviders>
           <ManageGlobalTimeline manageTimelineForTesting={manageTimelineForTesting}>
             <DroppableWrapper droppableId="unitTest">
-              <Providers
-                browserFields={{}}
-                dataProviders={mockDataProviders}
-                timelineId="foo"
-                onDataProviderEdited={jest.fn()}
-                onDataProviderRemoved={mockOnDataProviderRemoved}
-                onToggleDataProviderEnabled={jest.fn()}
-                onToggleDataProviderExcluded={jest.fn()}
-                onToggleDataProviderType={jest.fn()}
-              />
+              <Providers browserFields={{}} dataProviders={mockDataProviders} timelineId="test" />
             </DroppableWrapper>
           </ManageGlobalTimeline>
         </TestProviders>
@@ -194,20 +143,14 @@ describe('Providers', () => {
 
   describe('#onToggleDataProviderEnabled', () => {
     test('it invokes the onToggleDataProviderEnabled callback when you click on the option "Temporary disable" in the provider menu', () => {
-      const mockOnToggleDataProviderEnabled = jest.fn();
+      const mockOnToggleDataProviderEnabled = jest.spyOn(
+        timelineActions,
+        'updateDataProviderEnabled'
+      );
       const wrapper = mount(
         <TestProviders>
           <DroppableWrapper droppableId="unitTest">
-            <Providers
-              browserFields={{}}
-              dataProviders={mockDataProviders}
-              timelineId="foo"
-              onDataProviderEdited={jest.fn()}
-              onDataProviderRemoved={jest.fn()}
-              onToggleDataProviderEnabled={mockOnToggleDataProviderEnabled}
-              onToggleDataProviderExcluded={jest.fn()}
-              onToggleDataProviderType={jest.fn()}
-            />
+            <Providers browserFields={{}} dataProviders={mockDataProviders} timelineId="test" />
           </DroppableWrapper>
         </TestProviders>
       );
@@ -220,27 +163,23 @@ describe('Providers', () => {
         .first()
         .simulate('click');
       expect(mockOnToggleDataProviderEnabled.mock.calls[0][0]).toEqual({
+        andProviderId: undefined,
         enabled: false,
+        id: 'test',
         providerId: 'id-Provider 1',
       });
     });
 
     test('while loading data, it does NOT invoke the onToggleDataProviderEnabled callback when you click on the option "Temporary disable" in the provider menu', () => {
-      const mockOnToggleDataProviderEnabled = jest.fn();
+      const mockOnToggleDataProviderEnabled = jest.spyOn(
+        timelineActions,
+        'updateDataProviderEnabled'
+      );
       const wrapper = mount(
         <TestProviders>
           <ManageGlobalTimeline manageTimelineForTesting={manageTimelineForTesting}>
             <DroppableWrapper droppableId="unitTest">
-              <Providers
-                browserFields={{}}
-                dataProviders={mockDataProviders}
-                timelineId="foo"
-                onDataProviderEdited={jest.fn()}
-                onDataProviderRemoved={jest.fn()}
-                onToggleDataProviderEnabled={mockOnToggleDataProviderEnabled}
-                onToggleDataProviderExcluded={jest.fn()}
-                onToggleDataProviderType={jest.fn()}
-              />
+              <Providers browserFields={{}} dataProviders={mockDataProviders} timelineId="test" />
             </DroppableWrapper>
           </ManageGlobalTimeline>
         </TestProviders>
@@ -260,21 +199,15 @@ describe('Providers', () => {
 
   describe('#onToggleDataProviderExcluded', () => {
     test('it invokes the onToggleDataProviderExcluded callback when you click on the option "Exclude results" in the provider menu', () => {
-      const onToggleDataProviderExcluded = jest.fn();
+      const mockOnToggleDataProviderExcluded = jest.spyOn(
+        timelineActions,
+        'updateDataProviderExcluded'
+      );
 
       const wrapper = mount(
         <TestProviders>
           <DroppableWrapper droppableId="unitTest">
-            <Providers
-              browserFields={{}}
-              dataProviders={mockDataProviders}
-              timelineId="foo"
-              onDataProviderEdited={jest.fn()}
-              onDataProviderRemoved={jest.fn()}
-              onToggleDataProviderEnabled={jest.fn()}
-              onToggleDataProviderExcluded={onToggleDataProviderExcluded}
-              onToggleDataProviderType={jest.fn()}
-            />
+            <Providers browserFields={{}} dataProviders={mockDataProviders} timelineId="test" />
           </DroppableWrapper>
         </TestProviders>
       );
@@ -288,29 +221,25 @@ describe('Providers', () => {
         .first()
         .simulate('click');
 
-      expect(onToggleDataProviderExcluded.mock.calls[0][0]).toEqual({
+      expect(mockOnToggleDataProviderExcluded.mock.calls[0][0]).toEqual({
+        andProviderId: undefined,
         excluded: true,
+        id: 'test',
         providerId: 'id-Provider 1',
       });
     });
 
     test('while loading data, it does NOT invoke the onToggleDataProviderExcluded callback when you click on the option "Exclude results" in the provider menu', () => {
-      const onToggleDataProviderExcluded = jest.fn();
+      const mockOnToggleDataProviderExcluded = jest.spyOn(
+        timelineActions,
+        'updateDataProviderExcluded'
+      );
 
       const wrapper = mount(
         <TestProviders>
           <ManageGlobalTimeline manageTimelineForTesting={manageTimelineForTesting}>
             <DroppableWrapper droppableId="unitTest">
-              <Providers
-                browserFields={{}}
-                dataProviders={mockDataProviders}
-                timelineId="foo"
-                onDataProviderEdited={jest.fn()}
-                onDataProviderRemoved={jest.fn()}
-                onToggleDataProviderEnabled={jest.fn()}
-                onToggleDataProviderExcluded={onToggleDataProviderExcluded}
-                onToggleDataProviderType={jest.fn()}
-              />
+              <Providers browserFields={{}} dataProviders={mockDataProviders} timelineId="test" />
             </DroppableWrapper>
           </ManageGlobalTimeline>
         </TestProviders>
@@ -325,7 +254,7 @@ describe('Providers', () => {
         .first()
         .simulate('click');
 
-      expect(onToggleDataProviderExcluded).not.toBeCalled();
+      expect(mockOnToggleDataProviderExcluded).not.toBeCalled();
     });
   });
 
@@ -337,16 +266,7 @@ describe('Providers', () => {
       const wrapper = mount(
         <TestProviders>
           <DroppableWrapper droppableId="unitTest">
-            <Providers
-              browserFields={{}}
-              dataProviders={dataProviders}
-              timelineId="foo"
-              onDataProviderEdited={jest.fn()}
-              onDataProviderRemoved={jest.fn()}
-              onToggleDataProviderEnabled={jest.fn()}
-              onToggleDataProviderExcluded={jest.fn()}
-              onToggleDataProviderType={jest.fn()}
-            />
+            <Providers browserFields={{}} dataProviders={dataProviders} timelineId="test" />
           </DroppableWrapper>
         </TestProviders>
       );
@@ -364,21 +284,11 @@ describe('Providers', () => {
     test('it invokes the onDataProviderRemoved callback when you click on the close button is clicked', () => {
       const dataProviders = mockDataProviders.slice(0, 1);
       dataProviders[0].and = mockDataProviders.slice(1, 3);
-      const mockOnDataProviderRemoved = jest.fn();
 
       const wrapper = mount(
         <TestProviders>
           <DroppableWrapper droppableId="unitTest">
-            <Providers
-              browserFields={{}}
-              dataProviders={mockDataProviders}
-              timelineId="foo"
-              onDataProviderEdited={jest.fn()}
-              onDataProviderRemoved={mockOnDataProviderRemoved}
-              onToggleDataProviderEnabled={jest.fn()}
-              onToggleDataProviderExcluded={jest.fn()}
-              onToggleDataProviderType={jest.fn()}
-            />
+            <Providers browserFields={{}} dataProviders={mockDataProviders} timelineId="test" />
           </DroppableWrapper>
         </TestProviders>
       );
@@ -392,28 +302,22 @@ describe('Providers', () => {
 
       wrapper.update();
 
-      expect(mockOnDataProviderRemoved.mock.calls[0]).toEqual(['id-Provider 1', 'id-Provider 2']);
+      expect(mockOnDataProviderRemoved.mock.calls[0][0]).toEqual({
+        andProviderId: 'id-Provider 2',
+        id: 'test',
+        providerId: 'id-Provider 1',
+      });
     });
 
     test('while loading data, it does NOT invoke the onDataProviderRemoved callback when you click on the close button is clicked', () => {
       const dataProviders = mockDataProviders.slice(0, 1);
       dataProviders[0].and = mockDataProviders.slice(1, 3);
-      const mockOnDataProviderRemoved = jest.fn();
 
       const wrapper = mount(
         <TestProviders>
           <ManageGlobalTimeline manageTimelineForTesting={manageTimelineForTesting}>
             <DroppableWrapper droppableId="unitTest">
-              <Providers
-                browserFields={{}}
-                dataProviders={mockDataProviders}
-                timelineId="foo"
-                onDataProviderEdited={jest.fn()}
-                onDataProviderRemoved={mockOnDataProviderRemoved}
-                onToggleDataProviderEnabled={jest.fn()}
-                onToggleDataProviderExcluded={jest.fn()}
-                onToggleDataProviderType={jest.fn()}
-              />
+              <Providers browserFields={{}} dataProviders={mockDataProviders} timelineId="test" />
             </DroppableWrapper>
           </ManageGlobalTimeline>
         </TestProviders>
@@ -434,21 +338,15 @@ describe('Providers', () => {
     test('it invokes the onToggleDataProviderEnabled callback when you click on the option "Temporary disable" in the provider menu', () => {
       const dataProviders = mockDataProviders.slice(0, 1);
       dataProviders[0].and = mockDataProviders.slice(1, 3);
-      const mockOnToggleDataProviderEnabled = jest.fn();
+      const mockOnToggleDataProviderEnabled = jest.spyOn(
+        timelineActions,
+        'updateDataProviderEnabled'
+      );
 
       const wrapper = mount(
         <TestProviders>
           <DroppableWrapper droppableId="unitTest">
-            <Providers
-              browserFields={{}}
-              dataProviders={dataProviders}
-              timelineId="foo"
-              onDataProviderEdited={jest.fn()}
-              onDataProviderRemoved={jest.fn()}
-              onToggleDataProviderEnabled={mockOnToggleDataProviderEnabled}
-              onToggleDataProviderExcluded={jest.fn()}
-              onToggleDataProviderType={jest.fn()}
-            />
+            <Providers browserFields={{}} dataProviders={dataProviders} timelineId="test" />
           </DroppableWrapper>
         </TestProviders>
       );
@@ -470,6 +368,7 @@ describe('Providers', () => {
       expect(mockOnToggleDataProviderEnabled.mock.calls[0][0]).toEqual({
         andProviderId: 'id-Provider 2',
         enabled: false,
+        id: 'test',
         providerId: 'id-Provider 1',
       });
     });
@@ -477,22 +376,16 @@ describe('Providers', () => {
     test('while loading data, it does NOT invoke the onToggleDataProviderEnabled callback when you click on the option "Temporary disable" in the provider menu', () => {
       const dataProviders = mockDataProviders.slice(0, 1);
       dataProviders[0].and = mockDataProviders.slice(1, 3);
-      const mockOnToggleDataProviderEnabled = jest.fn();
+      const mockOnToggleDataProviderEnabled = jest.spyOn(
+        timelineActions,
+        'updateDataProviderEnabled'
+      );
 
       const wrapper = mount(
         <TestProviders>
           <ManageGlobalTimeline manageTimelineForTesting={manageTimelineForTesting}>
             <DroppableWrapper droppableId="unitTest">
-              <Providers
-                browserFields={{}}
-                dataProviders={dataProviders}
-                timelineId="foo"
-                onDataProviderEdited={jest.fn()}
-                onDataProviderRemoved={jest.fn()}
-                onToggleDataProviderEnabled={mockOnToggleDataProviderEnabled}
-                onToggleDataProviderExcluded={jest.fn()}
-                onToggleDataProviderType={jest.fn()}
-              />
+              <Providers browserFields={{}} dataProviders={dataProviders} timelineId="test" />
             </DroppableWrapper>
           </ManageGlobalTimeline>
         </TestProviders>
@@ -518,21 +411,15 @@ describe('Providers', () => {
     test('it invokes the onToggleDataProviderExcluded callback when you click on the option "Exclude results" in the provider menu', () => {
       const dataProviders = mockDataProviders.slice(0, 1);
       dataProviders[0].and = mockDataProviders.slice(1, 3);
-      const mockOnToggleDataProviderExcluded = jest.fn();
+      const mockOnToggleDataProviderExcluded = jest.spyOn(
+        timelineActions,
+        'updateDataProviderExcluded'
+      );
 
       const wrapper = mount(
         <TestProviders>
           <DroppableWrapper droppableId="unitTest">
-            <Providers
-              browserFields={{}}
-              dataProviders={dataProviders}
-              timelineId="foo"
-              onDataProviderEdited={jest.fn()}
-              onDataProviderRemoved={jest.fn()}
-              onToggleDataProviderEnabled={jest.fn()}
-              onToggleDataProviderExcluded={mockOnToggleDataProviderExcluded}
-              onToggleDataProviderType={jest.fn()}
-            />
+            <Providers browserFields={{}} dataProviders={dataProviders} timelineId="test" />
           </DroppableWrapper>
         </TestProviders>
       );
@@ -554,6 +441,7 @@ describe('Providers', () => {
       expect(mockOnToggleDataProviderExcluded.mock.calls[0][0]).toEqual({
         andProviderId: 'id-Provider 2',
         excluded: true,
+        id: 'test',
         providerId: 'id-Provider 1',
       });
     });
@@ -561,22 +449,16 @@ describe('Providers', () => {
     test('while loading data, it does NOT invoke the onToggleDataProviderExcluded callback when you click on the option "Exclude results" in the provider menu', () => {
       const dataProviders = mockDataProviders.slice(0, 1);
       dataProviders[0].and = mockDataProviders.slice(1, 3);
-      const mockOnToggleDataProviderExcluded = jest.fn();
+      const mockOnToggleDataProviderExcluded = jest.spyOn(
+        timelineActions,
+        'updateDataProviderExcluded'
+      );
 
       const wrapper = mount(
         <TestProviders>
           <ManageGlobalTimeline manageTimelineForTesting={manageTimelineForTesting}>
             <DroppableWrapper droppableId="unitTest">
-              <Providers
-                browserFields={{}}
-                dataProviders={dataProviders}
-                timelineId="foo"
-                onDataProviderEdited={jest.fn()}
-                onDataProviderRemoved={jest.fn()}
-                onToggleDataProviderEnabled={jest.fn()}
-                onToggleDataProviderExcluded={mockOnToggleDataProviderExcluded}
-                onToggleDataProviderType={jest.fn()}
-              />
+              <Providers browserFields={{}} dataProviders={dataProviders} timelineId="test" />
             </DroppableWrapper>
           </ManageGlobalTimeline>
         </TestProviders>

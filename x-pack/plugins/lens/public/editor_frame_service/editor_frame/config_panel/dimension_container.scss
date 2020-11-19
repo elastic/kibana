@@ -13,17 +13,7 @@
   animation: euiFlyout $euiAnimSpeedNormal $euiAnimSlightResistance;
 }
 
-.lnsDimensionContainer--noAnimation {
-  animation: none;
-}
-
 .lnsDimensionContainer__footer,
 .lnsDimensionContainer__header {
   padding: $euiSizeS;
-}
-
-.lnsDimensionContainer__trigger {
-  width: 100%;
-  display: block;
-  word-break: break-word;
 }

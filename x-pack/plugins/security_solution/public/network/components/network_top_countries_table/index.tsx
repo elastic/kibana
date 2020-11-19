@@ -6,7 +6,7 @@
 
 import { last } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
-import { useDispatch, useSelector, shallowEqual } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 import { IIndexPattern } from 'src/plugins/data/public';
 
@@ -18,7 +18,7 @@ import {
   NetworkTopTablesFields,
   SortField,
 } from '../../../../common/search_strategy';
-import { State } from '../../../common/store';
+import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
 
 import { Criteria, ItemsPerRow, PaginatedTable } from '../../../common/components/paginated_table';
 
@@ -67,9 +67,8 @@ const NetworkTopCountriesTableComponent: React.FC<NetworkTopCountriesTableProps>
 }) => {
   const dispatch = useDispatch();
   const getTopCountriesSelector = networkSelectors.topCountriesSelector();
-  const { activePage, limit, sort } = useSelector(
-    (state: State) => getTopCountriesSelector(state, type, flowTargeted),
-    shallowEqual
+  const { activePage, limit, sort } = useShallowEqualSelector((state) =>
+    getTopCountriesSelector(state, type, flowTargeted)
   );
 
   const headerTitle: string = useMemo(

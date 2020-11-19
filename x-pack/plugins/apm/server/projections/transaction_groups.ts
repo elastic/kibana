@@ -4,11 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { omit } from 'lodash';
-import {
-  Setup,
-  SetupTimeRange,
-  SetupUIFilters,
-} from '../../server/lib/helpers/setup_request';
+import { Setup, SetupTimeRange } from '../../server/lib/helpers/setup_request';
 import {
   TRANSACTION_NAME,
   PARENT_ID,
@@ -22,7 +18,7 @@ export function getTransactionGroupsProjection({
   setup,
   options,
 }: {
-  setup: Setup & SetupTimeRange & SetupUIFilters;
+  setup: Setup & SetupTimeRange;
   options: Options;
 }) {
   const transactionsProjection = getTransactionsProjection({

@@ -8,7 +8,7 @@ import Axios from 'axios';
 import { createHash } from 'crypto';
 import { closeSync, mkdirSync, openSync, writeSync } from 'fs';
 import { dirname } from 'path';
-import { LevelLogger } from '../../lib';
+import { GenericLevelLogger } from '../../lib/level_logger';
 
 /**
  * Download a url and calculate it's checksum
@@ -16,7 +16,7 @@ import { LevelLogger } from '../../lib';
  * @param  {String} path
  * @return {Promise<String>} checksum of the downloaded file
  */
-export async function download(url: string, path: string, logger: LevelLogger) {
+export async function download(url: string, path: string, logger: GenericLevelLogger) {
   logger.info(`Downloading ${url} to ${path}`);
 
   const hash = createHash('md5');

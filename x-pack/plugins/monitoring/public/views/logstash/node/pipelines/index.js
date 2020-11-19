@@ -81,6 +81,7 @@ uiRoutes.when('/logstash/node/:uuid/pipelines', {
         $scope,
         $injector,
         fetchDataImmediately: false, // We want to apply pagination before sending the first request
+        telemetryPageViewTitle: 'logstash_node_pipelines',
       });
 
       $scope.$watch(
@@ -93,6 +94,15 @@ uiRoutes.when('/logstash/node/:uuid/pipelines', {
           this.setTitle(
             i18n.translate('xpack.monitoring.logstash.node.pipelines.routeTitle', {
               defaultMessage: 'Logstash - {nodeName} - Pipelines',
+              values: {
+                nodeName: data.nodeSummary.name,
+              },
+            })
+          );
+
+          this.setPageTitle(
+            i18n.translate('xpack.monitoring.logstash.node.pipelines.pageTitle', {
+              defaultMessage: 'Logstash node pipelines: {nodeName}',
               values: {
                 nodeName: data.nodeSummary.name,
               },

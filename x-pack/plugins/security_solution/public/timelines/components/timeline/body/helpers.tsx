@@ -11,12 +11,15 @@ import { useDispatch } from 'react-redux';
 import { Ecs } from '../../../../../common/ecs';
 import { TimelineItem, TimelineNonEcsData } from '../../../../../common/search_strategy';
 import { updateTimelineGraphEventId } from '../../../store/timeline/actions';
-import { EventType } from '../../../store/timeline/model';
+import {
+  TimelineEventsType,
+  TimelineTypeLiteral,
+  TimelineType,
+} from '../../../../../common/types/timeline';
 import { OnPinEvent, OnUnPinEvent } from '../events';
 import { ActionIconItem } from './actions/action_icon_item';
 
 import * as i18n from './translations';
-import { TimelineTypeLiteral, TimelineType } from '../../../../../common/types/timeline';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const omitTypenameAndEmpty = (k: string, v: any): any | undefined =>
@@ -28,7 +31,7 @@ export const eventHasNotes = (noteIds: string[]): boolean => !isEmpty(noteIds);
 
 export const getPinTooltip = ({
   isPinned,
-  // eslint-disable-next-line no-shadow
+  // eslint-disable-next-line @typescript-eslint/no-shadow
   eventHasNotes,
   timelineType,
 }: {
@@ -100,8 +103,11 @@ export const getEventIdToDataMapping = (
     };
   }, {});
 
+export const isEventBuildingBlockType = (event: Ecs): boolean =>
+  !isEmpty(event.signal?.rule?.building_block_type);
+
 /** Return eventType raw or signal */
-export const getEventType = (event: Ecs): Omit<EventType, 'all'> => {
+export const getEventType = (event: Ecs): Omit<TimelineEventsType, 'all'> => {
   if (!isEmpty(event.signal?.rule?.id)) {
     return 'signal';
   }

@@ -12,11 +12,7 @@ import {
   METRIC_JAVA_NON_HEAP_MEMORY_USED,
   AGENT_NAME,
 } from '../../../../../../common/elasticsearch_fieldnames';
-import {
-  Setup,
-  SetupTimeRange,
-  SetupUIFilters,
-} from '../../../../helpers/setup_request';
+import { Setup, SetupTimeRange } from '../../../../helpers/setup_request';
 import { ChartBase } from '../../../types';
 import { fetchAndTransformMetrics } from '../../../fetch_and_transform_metrics';
 
@@ -52,7 +48,7 @@ const chartBase: ChartBase = {
 };
 
 export async function getNonHeapMemoryChart(
-  setup: Setup & SetupUIFilters & SetupTimeRange,
+  setup: Setup & SetupTimeRange,
   serviceName: string,
   serviceNodeName?: string
 ) {

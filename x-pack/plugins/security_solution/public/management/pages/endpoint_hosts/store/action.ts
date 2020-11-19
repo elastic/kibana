@@ -11,7 +11,7 @@ import {
 } from '../../../../../common/endpoint/types';
 import { ServerApiError } from '../../../../common/types';
 import { GetPolicyListResponse } from '../../policy/types';
-import { GetPackagesResponse } from '../../../../../../ingest_manager/common';
+import { GetPackagesResponse } from '../../../../../../fleet/common';
 import { EndpointState } from '../types';
 import { IIndexPattern } from '../../../../../../../../src/plugins/data/public';
 
@@ -113,6 +113,26 @@ interface AppRequestedEndpointList {
   type: 'appRequestedEndpointList';
 }
 
+interface ServerReturnedAgenstWithEndpointsTotal {
+  type: 'serverReturnedAgenstWithEndpointsTotal';
+  payload: number;
+}
+
+interface ServerFailedToReturnAgenstWithEndpointsTotal {
+  type: 'serverFailedToReturnAgenstWithEndpointsTotal';
+  payload: ServerApiError;
+}
+
+interface ServerReturnedEndpointsTotal {
+  type: 'serverReturnedEndpointsTotal';
+  payload: number;
+}
+
+interface ServerFailedToReturnEndpointsTotal {
+  type: 'serverFailedToReturnEndpointsTotal';
+  payload: ServerApiError;
+}
+
 export type EndpointAction =
   | ServerReturnedEndpointList
   | ServerFailedToReturnEndpointList
@@ -131,5 +151,9 @@ export type EndpointAction =
   | ServerFailedToReturnMetadataPatterns
   | AppRequestedEndpointList
   | ServerReturnedEndpointNonExistingPolicies
+  | ServerReturnedAgenstWithEndpointsTotal
   | ServerReturnedEndpointAgentPolicies
-  | UserUpdatedEndpointListRefreshOptions;
+  | UserUpdatedEndpointListRefreshOptions
+  | ServerReturnedEndpointsTotal
+  | ServerFailedToReturnAgenstWithEndpointsTotal
+  | ServerFailedToReturnEndpointsTotal;

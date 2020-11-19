@@ -7,8 +7,8 @@
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { EuiComboBox, EuiFormRow } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import debounce from 'lodash/debounce';
-import { useUpdateEffect } from 'react-use';
+import { debounce } from 'lodash';
+import useUpdateEffect from 'react-use/lib/useUpdateEffect';
 import { i18n } from '@kbn/i18n';
 import { isEsSearchResponse } from '../../../../../../../../../common/api_schemas/type_guards';
 import { useApi } from '../../../../../../../hooks';

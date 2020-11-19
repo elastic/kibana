@@ -10,8 +10,8 @@ import { EuiDualRange, EuiFormRow } from '@elastic/eui';
 import { FieldHook } from '../../../shared_imports';
 
 interface Props {
-  min: FieldHook;
-  max: FieldHook;
+  min: FieldHook<number>;
+  max: FieldHook<number>;
 }
 
 export const FielddataFrequencyFilterPercentage = ({ min, max }: Props) => {

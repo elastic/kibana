@@ -55,6 +55,7 @@ describe('config validation', () => {
     const config: Record<string, unknown> = {
       service: 'gmail',
       from: 'bob@example.com',
+      hasAuth: true,
     };
     expect(validateConfig(actionType, config)).toEqual({
       ...config,
@@ -66,6 +67,7 @@ describe('config validation', () => {
     delete config.service;
     config.host = 'elastic.co';
     config.port = 8080;
+    config.hasAuth = true;
     expect(validateConfig(actionType, config)).toEqual({
       ...config,
       service: null,
@@ -233,6 +235,7 @@ describe('execute()', () => {
       port: 42,
       secure: true,
       from: 'bob@example.com',
+      hasAuth: true,
     };
     const secrets: ActionTypeSecretsType = {
       user: 'bob',
@@ -269,6 +272,7 @@ describe('execute()', () => {
               "message": "a message to you",
               "subject": "the subject",
             },
+            "hasAuth": true,
             "proxySettings": undefined,
             "routing": Object {
               "bcc": Array [
@@ -298,6 +302,7 @@ describe('execute()', () => {
       port: 42,
       secure: true,
       from: 'bob@example.com',
+      hasAuth: false,
     };
     const secrets: ActionTypeSecretsType = {
       user: null,
@@ -327,6 +332,7 @@ describe('execute()', () => {
           "message": "a message to you",
           "subject": "the subject",
         },
+        "hasAuth": false,
         "proxySettings": undefined,
         "routing": Object {
           "bcc": Array [
@@ -356,6 +362,7 @@ describe('execute()', () => {
       port: 42,
       secure: true,
       from: 'bob@example.com',
+      hasAuth: false,
     };
     const secrets: ActionTypeSecretsType = {
       user: null,

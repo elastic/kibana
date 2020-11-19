@@ -254,7 +254,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
         >
           <EuiText>
             <FormattedMessage
-              defaultMessage="Elastic Endpoint Security"
+              defaultMessage="Endpoint Security"
               id="xpack.securitySolution.overview.hostStatGroupElasticEndpointSecurity"
               values={Object {}}
             />

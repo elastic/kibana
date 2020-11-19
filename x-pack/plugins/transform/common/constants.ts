@@ -6,7 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { LICENSE_TYPE_BASIC, LicenseType } from '../../../legacy/common/constants';
+import { LicenseType } from '../../licensing/common/types';
 
 export const DEFAULT_REFRESH_INTERVAL_MS = 30000;
 export const MINIMUM_REFRESH_INTERVAL_MS = 1000;
@@ -14,7 +14,7 @@ export const PROGRESS_REFRESH_INTERVAL_MS = 2000;
 
 export const PLUGIN = {
   ID: 'transform',
-  MINIMUM_LICENSE_REQUIRED: LICENSE_TYPE_BASIC as LicenseType,
+  MINIMUM_LICENSE_REQUIRED: 'basic' as LicenseType,
   getI18nName: (): string => {
     return i18n.translate('xpack.transform.appName', {
       defaultMessage: 'Transforms',

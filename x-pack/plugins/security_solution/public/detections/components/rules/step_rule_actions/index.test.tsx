@@ -14,18 +14,36 @@ jest.mock('../../../../common/lib/kibana', () => ({
     services: {
       application: {
         getUrlForApp: jest.fn(),
+        capabilities: {
+          siem: {
+            crud: true,
+          },
+          actions: {
+            read: true,
+          },
+        },
       },
-      triggers_actions_ui: {
+      triggersActionsUi: {
         actionTypeRegistry: jest.fn(),
       },
     },
   }),
 }));
 
+const actionMessageParams = {
+  context: [],
+  state: [],
+  params: [],
+};
+
 describe('StepRuleActions', () => {
   it('renders correctly', () => {
     const wrapper = shallow(
-      <StepRuleActions actionMessageParams={[]} isReadOnlyView={false} isLoading={false} />
+      <StepRuleActions
+        actionMessageParams={actionMessageParams}
+        isReadOnlyView={false}
+        isLoading={false}
+      />
     );
 
     expect(wrapper.find('[data-test-subj="stepRuleActions"]')).toHaveLength(1);

@@ -76,17 +76,11 @@ import { normalizeSortRequest } from './normalize_sort_request';
 import { filterDocvalueFields } from './filter_docvalue_fields';
 import { fieldWildcardFilter } from '../../../../kibana_utils/common';
 import { IIndexPattern } from '../../index_patterns';
-import { ISearchGeneric } from '../..';
-import { SearchSourceOptions, SearchSourceFields } from './types';
+import { ISearchGeneric, ISearchOptions } from '../..';
+import type { ISearchSource, SearchSourceOptions, SearchSourceFields } from './types';
 import { FetchHandlers, RequestFailure, getSearchParamsFromRequest, SearchRequest } from './fetch';
 
-import {
-  getEsQueryConfig,
-  buildEsQuery,
-  Filter,
-  UI_SETTINGS,
-  ISearchOptions,
-} from '../../../common';
+import { getEsQueryConfig, buildEsQuery, Filter, UI_SETTINGS } from '../../../common';
 import { getHighlightRequest } from '../../../common/field_formats';
 import { fetchSoon } from './legacy';
 import { extractReferences } from './extract_references';
@@ -142,7 +136,7 @@ export class SearchSource {
   }
 
   /**
-   * sets value to a single search source feild
+   * sets value to a single search source field
    * @param field: field name
    * @param value: value for the field
    */
@@ -264,7 +258,7 @@ export class SearchSource {
     if (getConfig(UI_SETTINGS.COURIER_BATCH_SEARCHES)) {
       response = await this.legacyFetch(searchRequest, options);
     } else {
-      response = await this.fetch$(searchRequest, options).toPromise();
+      response = await this.fetchSearch(searchRequest, options);
     }
 
     // TODO: Remove casting when https://github.com/elastic/elasticsearch-js/issues/1287 is resolved
@@ -308,18 +302,18 @@ export class SearchSource {
 
   /**
    * Run a search using the search service
-   * @return {Observable<SearchResponse<unknown>>}
+   * @return {Promise<SearchResponse<unknown>>}
    */
-  private fetch$(searchRequest: SearchRequest, options: ISearchOptions) {
+  private fetchSearch(searchRequest: SearchRequest, options: ISearchOptions) {
     const { search, getConfig, onResponse } = this.dependencies;
 
     const params = getSearchParamsFromRequest(searchRequest, {
       getConfig,
     });
 
-    return search({ params, indexType: searchRequest.indexType }, options).pipe(
-      map(({ rawResponse }) => onResponse(searchRequest, rawResponse))
-    );
+    return search({ params, indexType: searchRequest.indexType }, options)
+      .pipe(map(({ rawResponse }) => onResponse(searchRequest, rawResponse)))
+      .toPromise();
   }
 
   /**
@@ -558,9 +552,3 @@ export class SearchSource {
     return [filterField];
   }
 }
-
-/**
- * search source interface
- * @public
- */
-export type ISearchSource = Pick<SearchSource, keyof SearchSource>;

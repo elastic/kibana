@@ -20,8 +20,8 @@
 export { DATA_TELEMETRY_ID } from './constants';
 
 export {
-  DataTelemetryIndex,
-  DataTelemetryPayload,
   getDataTelemetry,
   buildDataTelemetryPayload,
+  DataTelemetryPayload,
+  DataTelemetryIndex,
 } from './get_data_telemetry';

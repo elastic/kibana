@@ -70,7 +70,7 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.jobSelection.assertJobSelection([JOB_CONFIG.job_id]);
 
       await ml.testExecution.logTestStep('pre-fills the detector input');
-      await ml.singleMetricViewer.assertDetectorInputExsist();
+      await ml.singleMetricViewer.assertDetectorInputExist();
       await ml.singleMetricViewer.assertDetectorInputValue('0');
 
       await ml.testExecution.logTestStep('should display the annotations section showing an error');

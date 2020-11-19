@@ -9,7 +9,7 @@
 ```typescript
 toSpec(options?: {
         getFormatterForField?: IndexPattern['getFormatterForField'];
-    }): FieldSpec[];
+    }): IndexPatternFieldMap;
 ```
 
 ## Parameters
@@ -20,5 +20,5 @@ toSpec(options?: {
 
 <b>Returns:</b>
 
-`FieldSpec[]`
+`IndexPatternFieldMap`
 

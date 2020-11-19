@@ -5,17 +5,11 @@
  */
 
 import _ from 'lodash';
-import React from 'react';
+import React, { ReactElement } from 'react';
 import { Map as MbMap, FeatureIdentifier } from 'mapbox-gl';
 import { FeatureCollection } from 'geojson';
-// @ts-expect-error
-import { VectorStyleEditor } from './components/vector_style_editor';
-import {
-  getDefaultProperties,
-  getDefaultStaticProperties,
-  LINE_STYLES,
-  POLYGON_STYLES,
-} from './vector_style_defaults';
+import { StyleProperties, VectorStyleEditor } from './components/vector_style_editor';
+import { getDefaultStaticProperties, LINE_STYLES, POLYGON_STYLES } from './vector_style_defaults';
 import {
   GEO_JSON_TYPE,
   FIELD_ORIGIN,
@@ -76,7 +70,7 @@ import { IDynamicStyleProperty } from './properties/dynamic_style_property';
 import { IField } from '../../fields/field';
 import { IVectorLayer } from '../../layers/vector_layer/vector_layer';
 import { IVectorSource } from '../../sources/vector_source';
-import { ILayer } from '../../layers/layer';
+import { createStyleFieldsHelper } from './style_fields_helper';
 
 const POINTS = [GEO_JSON_TYPE.POINT, GEO_JSON_TYPE.MULTI_POINT];
 const LINES = [GEO_JSON_TYPE.LINE_STRING, GEO_JSON_TYPE.MULTI_LINE_STRING];
@@ -90,8 +84,57 @@ export interface IVectorStyle extends IStyle {
   getDescriptorWithMissingStylePropsRemoved(
     nextFields: IField[],
     mapColors: string[]
-  ): { hasChanges: boolean; nextStyleDescriptor?: VectorStyleDescriptor };
+  ): Promise<{ hasChanges: boolean; nextStyleDescriptor?: VectorStyleDescriptor }>;
   pluckStyleMetaFromSourceDataRequest(sourceDataRequest: DataRequest): Promise<StyleMetaDescriptor>;
+  isTimeAware: () => boolean;
+  getIcon: () => ReactElement<any>;
+  hasLegendDetails: () => Promise<boolean>;
+  renderLegendDetails: () => ReactElement<any>;
+  clearFeatureState: (featureCollection: FeatureCollection, mbMap: MbMap, sourceId: string) => void;
+  setFeatureStateAndStyleProps: (
+    featureCollection: FeatureCollection,
+    mbMap: MbMap,
+    mbSourceId: string
+  ) => boolean;
+  arePointsSymbolizedAsCircles: () => boolean;
+  setMBPaintProperties: ({
+    alpha,
+    mbMap,
+    fillLayerId,
+    lineLayerId,
+  }: {
+    alpha: number;
+    mbMap: MbMap;
+    fillLayerId: string;
+    lineLayerId: string;
+  }) => void;
+  setMBPaintPropertiesForPoints: ({
+    alpha,
+    mbMap,
+    pointLayerId,
+  }: {
+    alpha: number;
+    mbMap: MbMap;
+    pointLayerId: string;
+  }) => void;
+  setMBPropertiesForLabelText: ({
+    alpha,
+    mbMap,
+    textLayerId,
+  }: {
+    alpha: number;
+    mbMap: MbMap;
+    textLayerId: string;
+  }) => void;
+  setMBSymbolPropertiesForPoints: ({
+    mbMap,
+    symbolLayerId,
+    alpha,
+  }: {
+    alpha: number;
+    mbMap: MbMap;
+    symbolLayerId: string;
+  }) => void;
 }
 
 export class VectorStyle implements IVectorStyle {
@@ -113,16 +156,19 @@ export class VectorStyle implements IVectorStyle {
   private readonly _labelBorderColorStyleProperty: StaticColorProperty | DynamicColorProperty;
   private readonly _labelBorderSizeStyleProperty: LabelBorderSizeProperty;
 
-  static createDescriptor(properties = {}, isTimeAware = true) {
+  static createDescriptor(
+    properties: Partial<VectorStylePropertiesDescriptor> = {},
+    isTimeAware = true
+  ) {
     return {
       type: LAYER_STYLE_TYPE.VECTOR,
-      properties: { ...getDefaultProperties(), ...properties },
+      properties: { ...getDefaultStaticProperties(), ...properties },
       isTimeAware,
     };
   }
 
   static createDefaultStyleProperties(mapColors: string[]) {
-    return getDefaultProperties(mapColors);
+    return getDefaultStaticProperties(mapColors);
   }
 
   constructor(
@@ -142,7 +188,7 @@ export class VectorStyle implements IVectorStyle {
     this._styleMeta = new StyleMeta(this._descriptor.__styleMeta);
 
     this._symbolizeAsStyleProperty = new SymbolizeAsProperty(
-      this._descriptor.properties[VECTOR_STYLES.SYMBOLIZE_AS]!.options,
+      this._descriptor.properties[VECTOR_STYLES.SYMBOLIZE_AS].options,
       VECTOR_STYLES.SYMBOLIZE_AS
     );
     this._lineColorStyleProperty = this._makeColorProperty(
@@ -187,7 +233,7 @@ export class VectorStyle implements IVectorStyle {
       VECTOR_STYLES.LABEL_BORDER_COLOR
     );
     this._labelBorderSizeStyleProperty = new LabelBorderSizeProperty(
-      this._descriptor.properties[VECTOR_STYLES.LABEL_BORDER_SIZE]!.options,
+      this._descriptor.properties[VECTOR_STYLES.LABEL_BORDER_SIZE].options,
       VECTOR_STYLES.LABEL_BORDER_SIZE,
       this._labelSizeStyleProperty
     );
@@ -220,16 +266,10 @@ export class VectorStyle implements IVectorStyle {
       : (this._lineWidthStyleProperty as StaticSizeProperty).getOptions().size !== 0;
   }
 
-  renderEditor({
-    layer,
-    onStyleDescriptorChange,
-  }: {
-    layer: ILayer;
-    onStyleDescriptorChange: (styleDescriptor: StyleDescriptor) => void;
-  }) {
+  renderEditor(onStyleDescriptorChange: (styleDescriptor: StyleDescriptor) => void) {
     const rawProperties = this.getRawProperties();
-    const handlePropertyChange = (propertyName: VECTOR_STYLES, settings: any) => {
-      rawProperties[propertyName] = settings; // override single property, but preserve the rest
+    const handlePropertyChange = (propertyName: VECTOR_STYLES, stylePropertyDescriptor: any) => {
+      rawProperties[propertyName] = stylePropertyDescriptor; // override single property, but preserve the rest
       const vectorStyleDescriptor = VectorStyle.createDescriptor(rawProperties, this.isTimeAware());
       onStyleDescriptorChange(vectorStyleDescriptor);
     };
@@ -243,9 +283,8 @@ export class VectorStyle implements IVectorStyle {
       return dynamicStyleProp.isFieldMetaEnabled();
     });
 
-    const styleProperties: VectorStylePropertiesDescriptor = {};
+    const styleProperties: StyleProperties = {};
     this.getAllStyleProperties().forEach((styleProperty) => {
-      // @ts-expect-error
       styleProperties[styleProperty.getStyleName()] = styleProperty;
     });
 
@@ -253,7 +292,7 @@ export class VectorStyle implements IVectorStyle {
       <VectorStyleEditor
         handlePropertyChange={handlePropertyChange}
         styleProperties={styleProperties}
-        layer={layer}
+        layer={this._layer}
         isPointsOnly={this._getIsPointsOnly()}
         isLinesOnly={this._getIsLinesOnly()}
         onIsTimeAwareChange={onIsTimeAwareChange}
@@ -275,7 +314,8 @@ export class VectorStyle implements IVectorStyle {
    * This method does not update its descriptor. It just returns a new descriptor that the caller
    * can then use to update store state via dispatch.
    */
-  getDescriptorWithMissingStylePropsRemoved(nextFields: IField[], mapColors: string[]) {
+  async getDescriptorWithMissingStylePropsRemoved(nextFields: IField[], mapColors: string[]) {
+    const styleFieldsHelper = await createStyleFieldsHelper(nextFields);
     const originalProperties = this.getRawProperties();
     const updatedProperties = {} as VectorStylePropertiesDescriptor;
 
@@ -297,8 +337,9 @@ export class VectorStyle implements IVectorStyle {
     });
 
     dynamicProperties.forEach((key: VECTOR_STYLES) => {
-      // Convert dynamic styling to static stying when there are no nextFields
-      if (nextFields.length === 0) {
+      // Convert dynamic styling to static stying when there are no style fields
+      const styleFields = styleFieldsHelper.getFieldsForStyle(key);
+      if (styleFields.length === 0) {
         const staticProperties = getDefaultStaticProperties(mapColors);
         updatedProperties[key] = staticProperties[key] as any;
         return;
@@ -324,7 +365,7 @@ export class VectorStyle implements IVectorStyle {
       updatedProperties[key] = {
         type: DynamicStyleProperty.type,
         options: {
-          ...originalProperties[key]!.options,
+          ...originalProperties[key].options,
         },
       } as any;
       // @ts-expect-error
@@ -592,50 +633,34 @@ export class VectorStyle implements IVectorStyle {
     featureCollection: FeatureCollection,
     mbMap: MbMap,
     mbSourceId: string
-  ) {
+  ): boolean {
     if (!featureCollection) {
-      return;
+      return false;
     }
 
     const dynamicStyleProps = this.getDynamicPropertiesArray();
     if (dynamicStyleProps.length === 0) {
-      return;
+      return false;
     }
 
-    const tmpFeatureIdentifier: FeatureIdentifier = {
-      source: '',
-      id: undefined,
-    };
-    const tmpFeatureState: any = {};
-
-    for (let i = 0; i < featureCollection.features.length; i++) {
-      const feature = featureCollection.features[i];
-
-      for (let j = 0; j < dynamicStyleProps.length; j++) {
-        const dynamicStyleProp = dynamicStyleProps[j];
-        const targetMbName = dynamicStyleProp.getMbPropertyName();
-        const rawValue = feature.properties
-          ? feature.properties[dynamicStyleProp.getFieldName()]
-          : undefined;
-        const targetMbValue = dynamicStyleProp.getMbPropertyValue(rawValue);
-        if (dynamicStyleProp.supportsMbFeatureState()) {
-          tmpFeatureState[targetMbName] = targetMbValue; // the same value will be potentially overridden multiple times, if the name remains identical
-        } else {
-          if (feature.properties) {
-            feature.properties[targetMbName] = targetMbValue;
-          }
-        }
+    let shouldResetAllData = false;
+    for (let j = 0; j < dynamicStyleProps.length; j++) {
+      const dynamicStyleProp = dynamicStyleProps[j];
+      const usedFeatureState = dynamicStyleProp.enrichGeoJsonAndMbFeatureState(
+        featureCollection,
+        mbMap,
+        mbSourceId
+      );
+      if (!usedFeatureState) {
+        shouldResetAllData = true;
       }
-      tmpFeatureIdentifier.source = mbSourceId;
-      tmpFeatureIdentifier.id = feature.id;
-      mbMap.setFeatureState(tmpFeatureIdentifier, tmpFeatureState);
     }
 
     // returns boolean indicating if styles do not support feature-state and some values are stored in geojson properties
     // this return-value is used in an optimization for style-updates with mapbox-gl.
     // `true` indicates the entire data needs to reset on the source (otherwise the style-rules will not be reapplied)
     // `false` indicates the data does not need to be reset on the store, because styles are re-evaluated if they use featureState
-    return dynamicStyleProps.some((dynamicStyleProp) => !dynamicStyleProp.supportsMbFeatureState());
+    return shouldResetAllData;
   }
 
   arePointsSymbolizedAsCircles() {

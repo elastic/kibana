@@ -18,13 +18,15 @@
  */
 
 import { i18n } from '@kbn/i18n';
-
+import { VisGroups, BaseVisTypeOptions } from '../../visualizations/public';
 import { createInputControlVisController } from './vis_controller';
 import { getControlsTab } from './components/editor/controls_tab';
 import { OptionsTab } from './components/editor/options_tab';
 import { InputControlVisDependencies } from './plugin';
 
-export function createInputControlVisTypeDefinition(deps: InputControlVisDependencies) {
+export function createInputControlVisTypeDefinition(
+  deps: InputControlVisDependencies
+): BaseVisTypeOptions {
   const InputControlVisController = createInputControlVisController(deps);
   const ControlsTab = getControlsTab(deps);
 
@@ -34,8 +36,9 @@ export function createInputControlVisTypeDefinition(deps: InputControlVisDepende
       defaultMessage: 'Controls',
     }),
     icon: 'controlsHorizontal',
+    group: VisGroups.TOOLS,
     description: i18n.translate('inputControl.register.controlsDescription', {
-      defaultMessage: 'Create interactive controls for easy dashboard manipulation.',
+      defaultMessage: 'Add dropdown menus and range sliders to your dashboard.',
     }),
     stage: 'experimental',
     visualization: InputControlVisController,

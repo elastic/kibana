@@ -3,31 +3,36 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { pick, difference } from 'lodash';
-import Boom from 'boom';
+import { merge as mergeLodash, pickBy, isEmpty, isPlainObject } from 'lodash';
+import Boom from '@hapi/boom';
 import { schema } from '@kbn/config-schema';
 import * as t from 'io-ts';
 import { PathReporter } from 'io-ts/lib/PathReporter';
 import { isLeft } from 'fp-ts/lib/Either';
 import { KibanaResponseFactory, RouteRegistrar } from 'src/core/server';
+import { merge } from '../../../common/runtime_types/merge';
+import { strictKeysRt } from '../../../common/runtime_types/strict_keys_rt';
 import { APMConfig } from '../..';
-import {
-  ServerAPI,
-  RouteFactoryFn,
-  HttpMethod,
-  Route,
-  Params,
-} from '../typings';
+import { ServerAPI } from '../typings';
 import { jsonRt } from '../../../common/runtime_types/json_rt';
 
-const debugRt = t.partial({ _debug: jsonRt.pipe(t.boolean) });
+const debugRt = t.exact(
+  t.partial({
+    query: t.exact(t.partial({ _debug: jsonRt.pipe(t.boolean) })),
+  })
+);
+
+type RouteOrRouteFactoryFn = Parameters<ServerAPI<{}>['add']>[0];
+
+const isNotEmpty = (val: any) =>
+  val !== undefined && val !== null && !(isPlainObject(val) && isEmpty(val));
 
 export function createApi() {
-  const factoryFns: Array<RouteFactoryFn<any, any, any, any>> = [];
+  const routes: RouteOrRouteFactoryFn[] = [];
   const api: ServerAPI<{}> = {
     _S: {},
-    add(fn) {
-      factoryFns.push(fn);
+    add(route) {
+      routes.push((route as unknown) as RouteOrRouteFactoryFn);
       return this as any;
     },
     init(core, { config$, logger, plugins }) {
@@ -39,41 +44,41 @@ export function createApi() {
         config = val;
       });
 
-      factoryFns.forEach((fn) => {
-        const {
-          params = {},
-          path,
-          options = { tags: ['access:apm'] },
-          method,
-          handler,
-        } = fn(core) as Route<string, HttpMethod, Params, any>;
+      routes.forEach((routeOrFactoryFn) => {
+        const route =
+          typeof routeOrFactoryFn === 'function'
+            ? routeOrFactoryFn(core)
+            : routeOrFactoryFn;
 
-        const routerMethod = (method || 'GET').toLowerCase() as
+        const {
+          params,
+          endpoint,
+          options = { tags: ['access:apm'] },
+          handler,
+        } = route;
+
+        const [method, path] = endpoint.split(' ');
+
+        const typedRouterMethod = method.trim().toLowerCase() as
+          | 'get'
           | 'post'
           | 'put'
-          | 'get'
           | 'delete';
+
+        if (!['get', 'post', 'put', 'delete'].includes(typedRouterMethod)) {
+          throw new Error(
+            "Couldn't register route, as endpoint was not prefixed with a valid HTTP method"
+          );
+        }
 
         // For all runtime types with props, we create an exact
         // version that will strip all keys that are unvalidated.
 
-        const bodyRt =
-          params.body && 'props' in params.body
-            ? t.exact(params.body)
-            : params.body;
-
-        const rts = {
-          // Add _debug query parameter to all routes
-          query: params.query
-            ? t.exact(t.intersection([params.query, debugRt]))
-            : t.exact(debugRt),
-          path: params.path ? t.exact(params.path) : t.strict({}),
-          body: bodyRt || t.null,
-        };
+        const paramsRt = params ? merge([params, debugRt]) : debugRt;
 
         const anyObject = schema.object({}, { unknowns: 'allow' });
 
-        (router[routerMethod] as RouteRegistrar<typeof routerMethod>)(
+        (router[typedRouterMethod] as RouteRegistrar<typeof typedRouterMethod>)(
           {
             path,
             options,
@@ -89,49 +94,23 @@ export function createApi() {
           },
           async (context, request, response) => {
             try {
-              const paramMap = {
-                path: request.params,
-                body: request.body,
-                query: {
-                  _debug: 'false',
-                  ...request.query,
+              const paramMap = pickBy(
+                {
+                  path: request.params,
+                  body: request.body,
+                  query: {
+                    _debug: 'false',
+                    ...request.query,
+                  },
                 },
-              };
+                isNotEmpty
+              );
 
-              const parsedParams = (Object.keys(rts) as Array<
-                keyof typeof rts
-              >).reduce((acc, key) => {
-                const codec = rts[key];
-                const value = paramMap[key];
+              const result = strictKeysRt(paramsRt).decode(paramMap);
 
-                const result = codec.decode(value);
-
-                if (isLeft(result)) {
-                  throw Boom.badRequest(PathReporter.report(result)[0]);
-                }
-
-                // `io-ts` has stripped unvalidated keys, so we can compare
-                // the output with the input to see if all object keys are
-                // known and validated.
-                const strippedKeys = difference(
-                  Object.keys(value || {}),
-                  Object.keys(result.right || {})
-                );
-
-                if (strippedKeys.length) {
-                  throw Boom.badRequest(
-                    `Unknown keys specified: ${strippedKeys}`
-                  );
-                }
-
-                const parsedValue = result.right;
-
-                return {
-                  ...acc,
-                  [key]: parsedValue,
-                };
-              }, {} as Record<keyof typeof params, any>);
-
+              if (isLeft(result)) {
+                throw Boom.badRequest(PathReporter.report(result)[0]);
+              }
               const data = await handler({
                 request,
                 context: {
@@ -140,14 +119,16 @@ export function createApi() {
                   // Only return values for parameters that have runtime types,
                   // but always include query as _debug is always set even if
                   // it's not defined in the route.
-                  // @ts-expect-error
-                  params: pick(parsedParams, ...Object.keys(params), 'query'),
+                  params: mergeLodash(
+                    { query: { _debug: false } },
+                    pickBy(result.right, isNotEmpty)
+                  ),
                   config,
                   logger,
                 },
               });
 
-              return response.ok({ body: data });
+              return response.ok({ body: data as any });
             } catch (error) {
               if (Boom.isBoom(error)) {
                 return convertBoomToKibanaResponse(error, response);

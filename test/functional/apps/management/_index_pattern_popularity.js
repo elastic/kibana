@@ -60,7 +60,7 @@ export default function ({ getService, getPageObjects }) {
       // check that it is 0 (previous increase was cancelled
       const popularity = await PageObjects.settings.getPopularity();
       log.debug('popularity = ' + popularity);
-      expect(popularity).to.be('');
+      expect(popularity).to.be('0');
     });
 
     it('can be saved', async function () {

@@ -8,7 +8,7 @@ import React from 'react';
 
 import { StatItems } from '../../../../common/components/stat_items';
 import { useNetworkKpiDns } from '../../../containers/kpi_network/dns';
-import { KpiNetworkBaseComponentManage } from '../common';
+import { NetworkKpiBaseComponentManage } from '../common';
 import { NetworkKpiProps } from '../types';
 import * as i18n from './translations';
 
@@ -28,6 +28,7 @@ export const fieldsMapping: Readonly<StatItems[]> = [
 const NetworkKpiDnsComponent: React.FC<NetworkKpiProps> = ({
   filterQuery,
   from,
+  indexNames,
   to,
   narrowDateRange,
   setQuery,
@@ -36,12 +37,13 @@ const NetworkKpiDnsComponent: React.FC<NetworkKpiProps> = ({
   const [loading, { refetch, id, inspect, ...data }] = useNetworkKpiDns({
     filterQuery,
     endDate: to,
+    indexNames,
     startDate: from,
     skip,
   });
 
   return (
-    <KpiNetworkBaseComponentManage
+    <NetworkKpiBaseComponentManage
       data={data}
       id={id}
       inspect={inspect}

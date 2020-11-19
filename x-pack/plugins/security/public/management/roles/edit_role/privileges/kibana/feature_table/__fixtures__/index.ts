@@ -6,30 +6,37 @@
 
 import { ReactWrapper } from 'enzyme';
 
-import {
-  EuiTableRow,
-  EuiCheckbox,
-  EuiCheckboxProps,
-  EuiButtonGroup,
-  EuiButtonGroupProps,
-} from '@elastic/eui';
+import { EuiCheckbox, EuiCheckboxProps, EuiButtonGroup, EuiButtonGroupProps } from '@elastic/eui';
 
-import { findTestSubject } from 'test_utils/find_test_subject';
+import { findTestSubject } from '@kbn/test/jest';
+import { EuiAccordion } from '@elastic/eui';
 import { SubFeatureForm } from '../sub_feature_form';
 
 export function getDisplayedFeaturePrivileges(wrapper: ReactWrapper<any>) {
-  const allExpanderButtons = findTestSubject(wrapper, 'expandFeaturePrivilegeRow');
+  const categoryExpander = findTestSubject(wrapper, 'featureCategoryButton_foo');
+  categoryExpander.simulate('click');
+
+  const allExpanderButtons = findTestSubject(wrapper, 'featureTableCell');
   allExpanderButtons.forEach((button) => button.simulate('click'));
 
-  // each expanded row renders its own `EuiTableRow`, so there are 2 rows
-  // for each feature: one for the primary feature privilege, and one for the sub privilege form
-  const rows = wrapper.find(EuiTableRow);
+  const featurePrivilegeControls = wrapper
+    .find(EuiAccordion)
+    .filter('[data-test-subj="featurePrivilegeControls"]');
 
-  return rows.reduce((acc, row) => {
+  return featurePrivilegeControls.reduce((acc, featureControls) => {
+    const buttonGroup = featureControls
+      .find(EuiButtonGroup)
+      .filter('[data-test-subj="primaryFeaturePrivilegeControl"]');
+    const { name, idSelected } = buttonGroup.props();
+    expect(name).toBeDefined();
+    expect(idSelected).toBeDefined();
+
+    const featureId = name!.substr(`featurePrivilege_`.length);
+    const primaryFeaturePrivilege = idSelected!.substr(`${featureId}_`.length);
     const subFeaturePrivileges = [];
-    const subFeatureForm = row.find(SubFeatureForm);
+
+    const subFeatureForm = featureControls.find(SubFeatureForm);
     if (subFeatureForm.length > 0) {
-      const { featureId } = subFeatureForm.props();
       const independentPrivileges = (subFeatureForm.find(EuiCheckbox) as ReactWrapper<
         EuiCheckboxProps
       >).reduce((acc2, checkbox) => {
@@ -47,30 +54,15 @@ export function getDisplayedFeaturePrivileges(wrapper: ReactWrapper<any>) {
       }, [] as string[]);
 
       subFeaturePrivileges.push(...independentPrivileges, ...mutuallyExclusivePrivileges);
-
-      return {
-        ...acc,
-        [featureId]: {
-          ...acc[featureId],
-          subFeaturePrivileges,
-        },
-      };
-    } else {
-      const buttonGroup = row.find(EuiButtonGroup);
-      const { name, idSelected } = buttonGroup.props();
-      expect(name).toBeDefined();
-      expect(idSelected).toBeDefined();
-
-      const featureId = name!.substr(`featurePrivilege_`.length);
-      const primaryFeaturePrivilege = idSelected!.substr(`${featureId}_`.length);
-
-      return {
-        ...acc,
-        [featureId]: {
-          ...acc[featureId],
-          primaryFeaturePrivilege,
-        },
-      };
     }
+
+    return {
+      ...acc,
+      [featureId]: {
+        ...acc[featureId],
+        primaryFeaturePrivilege,
+        subFeaturePrivileges,
+      },
+    };
   }, {} as Record<string, { primaryFeaturePrivilege: string; subFeaturePrivileges: string[] }>);
 }

@@ -4,10 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { MapExtent, VectorSourceRequestMeta } from '../../../../common/descriptor_types';
-
-jest.mock('../../../kibana_services');
-
-import { getIndexPatternService, getSearchService } from '../../../kibana_services';
+import { getHttp, getIndexPatternService, getSearchService } from '../../../kibana_services';
 import { ESGeoGridSource } from './es_geo_grid_source';
 import {
   ES_GEO_FIELD_TYPE,
@@ -16,14 +13,22 @@ import {
   SOURCE_TYPES,
 } from '../../../../common/constants';
 import { SearchSource } from 'src/plugins/data/public';
+import { LICENSED_FEATURES } from '../../../licensed_features';
+
+jest.mock('../../../kibana_services');
 
 export class MockSearchSource {
   setField = jest.fn();
   setParent() {}
+  getSearchRequestBody() {
+    return { foobar: 'ES_DSL_PLACEHOLDER', params: this.setField.mock.calls };
+  }
 }
 
 describe('ESGeoGridSource', () => {
   const geoFieldName = 'bar';
+
+  let esGeoFieldType = ES_GEO_FIELD_TYPE.GEO_POINT;
   const mockIndexPatternService = {
     get() {
       return {
@@ -31,7 +36,7 @@ describe('ESGeoGridSource', () => {
           getByName() {
             return {
               name: geoFieldName,
-              type: ES_GEO_FIELD_TYPE.GEO_POINT,
+              type: esGeoFieldType,
             };
           },
         },
@@ -96,60 +101,75 @@ describe('ESGeoGridSource', () => {
     };
   };
 
-  describe('getGeoJsonWithMeta', () => {
-    let mockSearchSource: unknown;
-    beforeEach(async () => {
-      mockSearchSource = new MockSearchSource();
-      const mockSearchService = {
-        searchSource: {
-          async create() {
-            return mockSearchSource as SearchSource;
-          },
-          createEmpty() {
-            return mockSearchSource as SearchSource;
-          },
+  let mockSearchSource: unknown;
+  beforeEach(async () => {
+    mockSearchSource = new MockSearchSource();
+    const mockSearchService = {
+      searchSource: {
+        async create() {
+          return mockSearchSource as SearchSource;
         },
-      };
+        createEmpty() {
+          return mockSearchSource as SearchSource;
+        },
+      },
+    };
 
-      // @ts-expect-error
-      getIndexPatternService.mockReturnValue(mockIndexPatternService);
-      // @ts-expect-error
-      getSearchService.mockReturnValue(mockSearchService);
+    // @ts-expect-error
+    getIndexPatternService.mockReturnValue(mockIndexPatternService);
+    // @ts-expect-error
+    getSearchService.mockReturnValue(mockSearchService);
+    // @ts-expect-error
+    getHttp.mockReturnValue({
+      basePath: {
+        prepend(path: string) {
+          return `rootdir${path};`;
+        },
+      },
     });
+  });
 
-    const extent: MapExtent = {
-      minLon: -160,
-      minLat: -80,
-      maxLon: 160,
-      maxLat: 80,
-    };
+  afterEach(() => {
+    esGeoFieldType = ES_GEO_FIELD_TYPE.GEO_POINT;
+    jest.resetAllMocks();
+  });
 
-    const mapFilters: VectorSourceRequestMeta = {
-      geogridPrecision: 4,
-      filters: [],
-      timeFilters: {
-        from: 'now',
-        to: '15m',
-        mode: 'relative',
-      },
-      extent,
-      applyGlobalQuery: true,
-      fieldNames: [],
-      buffer: extent,
-      sourceQuery: {
-        query: '',
-        language: 'KQL',
-        queryLastTriggeredAt: '2019-04-25T20:53:22.331Z',
-      },
-      sourceMeta: null,
-      zoom: 0,
-    };
+  const extent: MapExtent = {
+    minLon: -160,
+    minLat: -80,
+    maxLon: 160,
+    maxLat: 80,
+  };
 
+  const vectorSourceRequestMeta: VectorSourceRequestMeta = {
+    geogridPrecision: 4,
+    filters: [],
+    timeFilters: {
+      from: 'now',
+      to: '15m',
+      mode: 'relative',
+    },
+    extent,
+    applyGlobalQuery: true,
+    applyGlobalTime: true,
+    fieldNames: [],
+    buffer: extent,
+    sourceQuery: {
+      query: '',
+      language: 'KQL',
+      queryLastTriggeredAt: '2019-04-25T20:53:22.331Z',
+    },
+    sourceMeta: null,
+    zoom: 0,
+  };
+
+  describe('getGeoJsonWithMeta', () => {
     it('Should configure the SearchSource correctly', async () => {
       const { data, meta } = await geogridSource.getGeoJsonWithMeta(
         'foobarLayer',
-        mapFilters,
-        () => {}
+        vectorSourceRequestMeta,
+        () => {},
+        () => true
       );
 
       expect(meta && meta.areResultsTrimmed).toEqual(false);
@@ -214,6 +234,62 @@ describe('ESGeoGridSource', () => {
 
     it('should use heuristic to derive precision', () => {
       expect(geogridSource.getGeoGridPrecision(10)).toBe(12);
+    });
+
+    it('Should not return valid precision for super-fine resolution', () => {
+      const superFineSource = new ESGeoGridSource(
+        {
+          id: 'foobar',
+          indexPatternId: 'fooIp',
+          geoField: geoFieldName,
+          metrics: [],
+          resolution: GRID_RESOLUTION.SUPER_FINE,
+          type: SOURCE_TYPES.ES_GEO_GRID,
+          requestType: RENDER_AS.HEATMAP,
+        },
+        {}
+      );
+      expect(superFineSource.getGeoGridPrecision(10)).toBe(NaN);
+    });
+  });
+
+  describe('ITiledSingleLayerVectorSource', () => {
+    it('getLayerName', () => {
+      expect(geogridSource.getLayerName()).toBe('source_layer');
+    });
+
+    it('getMinZoom', () => {
+      expect(geogridSource.getMinZoom()).toBe(0);
+    });
+
+    it('getMaxZoom', () => {
+      expect(geogridSource.getMaxZoom()).toBe(24);
+    });
+
+    it('getUrlTemplateWithMeta', async () => {
+      const urlTemplateWithMeta = await geogridSource.getUrlTemplateWithMeta(
+        vectorSourceRequestMeta
+      );
+
+      expect(urlTemplateWithMeta.layerName).toBe('source_layer');
+      expect(urlTemplateWithMeta.minSourceZoom).toBe(0);
+      expect(urlTemplateWithMeta.maxSourceZoom).toBe(24);
+      expect(urlTemplateWithMeta.urlTemplate).toBe(
+        "rootdir/api/maps/mvt/getGridTile;?x={x}&y={y}&z={z}&geometryFieldName=bar&index=undefined&requestBody=(foobar:ES_DSL_PLACEHOLDER,params:('0':('0':index,'1':(fields:())),'1':('0':size,'1':0),'2':('0':filter,'1':!((geo_bounding_box:(bar:(bottom_right:!(180,-82.67628),top_left:!(-180,82.67628)))))),'3':('0':query),'4':('0':index,'1':(fields:())),'5':('0':query,'1':(language:KQL,query:'',queryLastTriggeredAt:'2019-04-25T20:53:22.331Z')),'6':('0':aggs,'1':(gridSplit:(aggs:(gridCentroid:(geo_centroid:(field:bar))),geotile_grid:(bounds:!n,field:bar,precision:!n,shard_size:65535,size:65535))))))&requestType=heatmap&geoFieldType=geo_point"
+      );
+    });
+  });
+
+  describe('Gold+ usage', () => {
+    it('Should have none for points', async () => {
+      expect(await geogridSource.getLicensedFeatures()).toEqual([]);
+    });
+
+    it('Should have shape-aggs for geo_shape', async () => {
+      esGeoFieldType = ES_GEO_FIELD_TYPE.GEO_SHAPE;
+      expect(await geogridSource.getLicensedFeatures()).toEqual([
+        LICENSED_FEATURES.GEO_SHAPE_AGGS_GEO_TILE,
+      ]);
     });
   });
 });

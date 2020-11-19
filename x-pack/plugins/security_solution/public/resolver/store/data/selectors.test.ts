@@ -16,7 +16,7 @@ import {
   mockTreeWithAllProcessesTerminated,
   mockTreeWithNoProcessEvents,
 } from '../../mocks/resolver_tree';
-import { uniquePidForProcess } from '../../models/process_event';
+import * as eventModel from '../../../../common/endpoint/models/event';
 import { EndpointEvent } from '../../../../common/endpoint/types';
 import { mockTreeFetcherParameters } from '../../mocks/tree_fetcher_parameters';
 
@@ -411,7 +411,7 @@ describe('data state', () => {
       expect(graphables.length).toBe(3);
       for (const event of graphables) {
         expect(() => {
-          selectors.ariaFlowtoCandidate(state())(uniquePidForProcess(event));
+          selectors.ariaFlowtoCandidate(state())(eventModel.entityIDSafeVersion(event)!);
         }).not.toThrow();
       }
     });

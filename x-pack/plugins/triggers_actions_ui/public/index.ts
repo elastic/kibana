@@ -4,10 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PluginInitializerContext } from 'src/core/public';
 import { Plugin } from './plugin';
 
-export { AlertsContextProvider } from './application/context/alerts_context';
+export { AlertsContextProvider, AlertsContextValue } from './application/context/alerts_context';
 export { ActionsConnectorsContextProvider } from './application/context/actions_connectors_context';
 export { AlertAdd } from './application/sections/alert_form';
 export { AlertEdit } from './application/sections';
@@ -18,19 +17,23 @@ export {
   AlertTypeModel,
   ActionType,
   ActionTypeRegistryContract,
+  AlertTypeRegistryContract,
   AlertTypeParamsExpressionProps,
   ValidationResult,
   ActionVariable,
+  ActionVariables,
   ActionConnector,
+  IErrorObject,
 } from './types';
 export {
   ConnectorAddFlyout,
   ConnectorEditFlyout,
 } from './application/sections/action_connector_form';
 export { loadActionTypes } from './application/lib/action_connector_api';
+export * from './common';
 
-export function plugin(ctx: PluginInitializerContext) {
-  return new Plugin(ctx);
+export function plugin() {
+  return new Plugin();
 }
 
 export { Plugin };

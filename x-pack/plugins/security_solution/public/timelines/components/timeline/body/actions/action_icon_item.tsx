@@ -28,7 +28,7 @@ const ActionIconItemComponent: React.FC<ActionIconItemProps> = ({
   dataTestSubj,
   content,
   ariaLabel,
-  iconType,
+  iconType = '',
   isDisabled = false,
   onClick,
   children,

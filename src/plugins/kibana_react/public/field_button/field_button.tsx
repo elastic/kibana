@@ -54,11 +54,15 @@ export interface FieldButtonProps extends HTMLAttributes<HTMLDivElement> {
   size?: ButtonSize;
   className?: string;
   /**
-   * The component always renders a `<button>` and therefore will always need an `onClick`
+   * The component will render a `<button>` when provided an `onClick`
    */
-  onClick: () => void;
+  onClick?: () => void;
   /**
-   * Pass more button props to the actual `<button>` element
+   * Applies to the inner `<button>`  or `<div>`
+   */
+  dataTestSubj?: string;
+  /**
+   * Pass more button props to the `<button>` element
    */
   buttonProps?: ButtonHTMLAttributes<HTMLButtonElement> & CommonProps;
 }
@@ -82,6 +86,7 @@ export function FieldButton({
   className,
   isDraggable = false,
   onClick,
+  dataTestSubj,
   buttonProps,
   ...rest
 }: FieldButtonProps) {
@@ -93,27 +98,38 @@ export function FieldButton({
     className
   );
 
-  const buttonClasses = classNames(
-    'kbn-resetFocusState kbnFieldButton__button',
-    buttonProps && buttonProps.className
+  const contentClasses = classNames('kbn-resetFocusState', 'kbnFieldButton__button');
+
+  const innerContent = (
+    <>
+      {fieldIcon && <span className="kbnFieldButton__fieldIcon">{fieldIcon}</span>}
+      {fieldName && <span className="kbnFieldButton__name">{fieldName}</span>}
+      {fieldInfoIcon && <div className="kbnFieldButton__infoIcon">{fieldInfoIcon}</div>}
+    </>
   );
 
   return (
     <div className={classes} {...rest}>
-      <button
-        onClick={(e) => {
-          if (e.type === 'click') {
-            e.currentTarget.focus();
-          }
-          onClick();
-        }}
-        {...buttonProps}
-        className={buttonClasses}
-      >
-        {fieldIcon && <span className="kbnFieldButton__fieldIcon">{fieldIcon}</span>}
-        {fieldName && <span className="kbnFieldButton__name">{fieldName}</span>}
-        {fieldInfoIcon && <div className="kbnFieldButton__infoIcon">{fieldInfoIcon}</div>}
-      </button>
+      {onClick ? (
+        <button
+          onClick={(e) => {
+            if (e.type === 'click') {
+              e.currentTarget.focus();
+            }
+            onClick();
+          }}
+          data-test-subj={dataTestSubj}
+          className={contentClasses}
+          {...buttonProps}
+        >
+          {innerContent}
+        </button>
+      ) : (
+        <div className={contentClasses} data-test-subj={dataTestSubj}>
+          {innerContent}
+        </div>
+      )}
+
       {fieldAction && <div className="kbnFieldButton__fieldAction">{fieldAction}</div>}
     </div>
   );

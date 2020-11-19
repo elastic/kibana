@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import type { MockedKeys } from '@kbn/utility-types/jest';
 import { coreMock } from '../../../../core/public/mocks';
 import { CoreSetup, CoreStart } from '../../../../core/public';
 
@@ -26,11 +26,15 @@ describe('Search service', () => {
   let searchService: SearchService;
   let mockCoreSetup: MockedKeys<CoreSetup>;
   let mockCoreStart: MockedKeys<CoreStart>;
+  const initializerContext = coreMock.createPluginInitializerContext();
+  initializerContext.config.get = jest.fn().mockReturnValue({
+    search: { aggs: { shardDelay: { enabled: false } } },
+  });
 
   beforeEach(() => {
-    searchService = new SearchService();
     mockCoreSetup = coreMock.createSetup();
     mockCoreStart = coreMock.createStart();
+    searchService = new SearchService(initializerContext);
   });
 
   describe('setup()', () => {
@@ -48,6 +52,7 @@ describe('Search service', () => {
   describe('start()', () => {
     it('exposes proper contract', async () => {
       const start = searchService.start(mockCoreStart, {
+        fieldFormats: {},
         indexPatterns: {},
       } as any);
       expect(start).toHaveProperty('aggs');

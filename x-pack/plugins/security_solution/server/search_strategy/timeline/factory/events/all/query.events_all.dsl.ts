@@ -12,11 +12,11 @@ import {
   TimelineEventsAllRequestOptions,
 } from '../../../../../../common/search_strategy';
 import { createQueryFilterClauses } from '../../../../../utils/build_query';
-import { TIMELINE_EVENTS_FIELDS } from './constants';
 
 export const buildTimelineEventsAllQuery = ({
   defaultIndex,
   docValueFields,
+  fields,
   filterQuery,
   pagination: { activePage, querySize },
   sort,
@@ -68,7 +68,7 @@ export const buildTimelineEventsAllQuery = ({
       size: querySize,
       track_total_hits: true,
       sort: getSortField(sort),
-      _source: TIMELINE_EVENTS_FIELDS,
+      _source: fields,
     },
   };
 

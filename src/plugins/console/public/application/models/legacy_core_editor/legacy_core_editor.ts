@@ -408,4 +408,8 @@ export class LegacyCoreEditor implements CoreEditor {
       },
     ]);
   }
+
+  destroy() {
+    this.editor.destroy();
+  }
 }

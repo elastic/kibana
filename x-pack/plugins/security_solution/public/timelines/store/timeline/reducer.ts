@@ -44,6 +44,7 @@ import {
   updateDescription,
   updateEventType,
   updateHighlightedDropAndProviderId,
+  updateIndexNames,
   updateIsFavorite,
   updateIsLive,
   updateIsLoading,
@@ -135,6 +136,7 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
         show,
         columns,
         itemsPerPage,
+        indexNames,
         kqlQuery,
         sort,
         showCheckboxes,
@@ -152,6 +154,7 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
           filters,
           id,
           itemsPerPage,
+          indexNames,
           kqlQuery,
           sort,
           show,
@@ -386,7 +389,7 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
     ...state,
     timelineById: updateTimelineKqlMode({ id, kqlMode, timelineById: state.timelineById }),
   }))
-  .case(updateTitle, (state, { id, title }) => ({
+  .case(updateTitle, (state, { id, title, disableAutoSave }) => ({
     ...state,
     timelineById: updateTimelineTitle({ id, title, timelineById: state.timelineById }),
   }))
@@ -520,5 +523,15 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
   .case(setInsertTimeline, (state, insertTimeline) => ({
     ...state,
     insertTimeline,
+  }))
+  .case(updateIndexNames, (state, { id, indexNames }) => ({
+    ...state,
+    timelineById: {
+      ...state.timelineById,
+      [id]: {
+        ...state.timelineById[id],
+        indexNames,
+      },
+    },
   }))
   .build();

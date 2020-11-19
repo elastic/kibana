@@ -27,10 +27,10 @@ import { PartialAlert } from '../../../../../../alerts/server';
 import { SanitizedAlert } from '../../../../../../alerts/server/types';
 import { createRulesStreamFromNdJson } from '../../rules/create_rules_stream_from_ndjson';
 import { RuleAlertType } from '../../rules/types';
-import { CreateRulesBulkSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/create_rules_bulk_schema';
 import { ImportRulesSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/import_rules_schema';
-import { getCreateRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/create_rules_schema.mock';
+import { getCreateRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/rule_schemas.mock';
 import { ThreatMapping } from '../../../../../common/detection_engine/schemas/types/threat_mapping';
+import { CreateRulesBulkSchema } from '../../../../../common/detection_engine/schemas/request';
 
 type PromiseFromStreams = ImportRulesSchemaDecoded | Error;
 
@@ -156,7 +156,7 @@ describe('utils', () => {
           ],
         },
       ];
-      threatRule.params.threatIndex = 'index-123';
+      threatRule.params.threatIndex = ['index-123'];
       threatRule.params.threatFilters = threatFilters;
       threatRule.params.threatMapping = threatMapping;
       threatRule.params.threatQuery = '*:*';
@@ -164,7 +164,7 @@ describe('utils', () => {
       const rule = transformAlertToRule(threatRule);
       expect(rule).toEqual(
         expect.objectContaining({
-          threat_index: 'index-123',
+          threat_index: ['index-123'],
           threat_filters: threatFilters,
           threat_mapping: threatMapping,
           threat_query: '*:*',
@@ -548,7 +548,7 @@ describe('utils', () => {
           { rule_id: 'value3' },
           {},
           {},
-        ] as CreateRulesBulkSchemaDecoded,
+        ] as CreateRulesBulkSchema,
         'rule_id'
       );
       const expected = ['value2', 'value3'];
@@ -562,7 +562,7 @@ describe('utils', () => {
           { rule_id: 'value3' },
           {},
           {},
-        ] as CreateRulesBulkSchemaDecoded,
+        ] as CreateRulesBulkSchema,
         'rule_id'
       );
       const expected: string[] = [];

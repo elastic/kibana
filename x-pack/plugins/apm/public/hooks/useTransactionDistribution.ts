@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { flatten, omit } from 'lodash';
+import { flatten, omit, isEmpty } from 'lodash';
 import { useHistory, useParams } from 'react-router-dom';
 import { IUrlParams } from '../context/UrlParamsContext/types';
 import { useFetcher } from './useFetcher';
 import { useUiFilters } from '../context/UrlParamsContext';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { TransactionDistributionAPIResponse } from '../../server/lib/transactions/distribution';
+import type { TransactionDistributionAPIResponse } from '../../server/lib/transactions/distribution';
 import { toQuery, fromQuery } from '../components/shared/Links/url_helpers';
 import { maybe } from '../../common/utils/maybe';
 
@@ -38,8 +38,8 @@ export function useTransactionDistribution(urlParams: IUrlParams) {
     async (callApmApi) => {
       if (serviceName && start && end && transactionType && transactionName) {
         const response = await callApmApi({
-          pathname:
-            '/api/apm/services/{serviceName}/transaction_groups/distribution',
+          endpoint:
+            'GET /api/apm/services/{serviceName}/transaction_groups/distribution',
           params: {
             path: {
               serviceName,
@@ -69,13 +69,13 @@ export function useTransactionDistribution(urlParams: IUrlParams) {
           // selected sample was not found. select a new one:
           // sorted by total number of requests, but only pick
           // from buckets that have samples
-          const preferredSample = maybe(
-            response.buckets
-              .filter((bucket) => bucket.samples.length > 0)
-              .sort((bucket) => bucket.count)[0]?.samples[0]
-          );
+          const bucketsSortedByCount = response.buckets
+            .filter((bucket) => !isEmpty(bucket.samples))
+            .sort((bucket) => bucket.count);
 
-          history.push({
+          const preferredSample = maybe(bucketsSortedByCount[0]?.samples[0]);
+
+          history.replace({
             ...history.location,
             search: fromQuery({
               ...omit(toQuery(history.location.search), [

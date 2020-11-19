@@ -49,15 +49,14 @@ export const IGNORE_FILE_GLOBS = [
   'Dockerfile*',
   'vars/*',
   '.ci/pipeline-library/**/*',
-
-  // Files in this directory must match a pre-determined name in some cases.
-  'x-pack/plugins/canvas/storybook/*',
+  'packages/kbn-test/jest-preset.js',
 
   // filename must match language code which requires capital letters
   '**/translations/*.json',
 
-  // filename is required by storybook
-  'packages/kbn-storybook/storybook_config/preview-head.html',
+  // Storybook has predetermined filesnames
+  '**/preview-body.html',
+  '**/preview-head.html',
 
   // filename required by api-extractor
   'api-documenter.json',
@@ -72,7 +71,7 @@ export const IGNORE_FILE_GLOBS = [
 
   'x-pack/plugins/maps/server/fonts/**/*',
   // packages for the ingest manager's api integration tests could be valid semver which has dashes
-  'x-pack/test/ingest_manager_api_integration/apis/fixtures/test_packages/**/*',
+  'x-pack/test/fleet_api_integration/apis/fixtures/test_packages/**/*',
 ];
 
 /**

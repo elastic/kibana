@@ -19,6 +19,7 @@
 
 jest.mock('getos', () => (cb: Function) => cb(null, { dist: 'distrib', release: 'release' }));
 
+import { loggerMock } from '@kbn/logging/target/mocks';
 import os from 'os';
 import { cgroupCollectorMock } from './os.test.mocks';
 import { OsMetricsCollector } from './os';
@@ -27,7 +28,7 @@ describe('OsMetricsCollector', () => {
   let collector: OsMetricsCollector;
 
   beforeEach(() => {
-    collector = new OsMetricsCollector();
+    collector = new OsMetricsCollector({ logger: loggerMock.create() });
     cgroupCollectorMock.collect.mockReset();
     cgroupCollectorMock.reset.mockReset();
   });

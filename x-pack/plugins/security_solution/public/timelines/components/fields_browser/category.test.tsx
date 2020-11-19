@@ -16,7 +16,6 @@ import { TestProviders } from '../../../common/mock';
 import { useMountAppended } from '../../../common/utils/use_mount_appended';
 
 import * as i18n from './translations';
-
 describe('Category', () => {
   const timelineId = 'test';
   const selectedCategoryId = 'client';

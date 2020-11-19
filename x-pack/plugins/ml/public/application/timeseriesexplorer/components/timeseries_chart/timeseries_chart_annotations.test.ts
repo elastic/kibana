@@ -10,6 +10,7 @@ import { getAnnotationLevels } from './timeseries_chart_annotations';
 
 describe('Timeseries Chart Annotations: getAnnotationLevels()', () => {
   test('getAnnotationLevels()', () => {
+    // @ts-expect-error mock data is too loosely typed
     const levels = getAnnotationLevels(mockAnnotationsOverlap);
     expect(levels).toEqual({ A: 0, B: 1, C: 2, D: 2 });
   });

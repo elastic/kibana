@@ -17,6 +17,7 @@ export interface State {
   addNested: boolean;
   exceptions: ExceptionsBuilderExceptionItem[];
   exceptionsToDelete: ExceptionListItemSchema[];
+  errorExists: number;
 }
 
 export type Action =
@@ -44,6 +45,10 @@ export type Action =
   | {
       type: 'setAddNested';
       addNested: boolean;
+    }
+  | {
+      type: 'setErrorsExist';
+      errorExists: boolean;
     };
 
 export const exceptionsBuilderReducer = () => (state: State, action: Action): State => {
@@ -103,6 +108,15 @@ export const exceptionsBuilderReducer = () => (state: State, action: Action): St
       return {
         ...state,
         addNested: action.addNested,
+      };
+    }
+    case 'setErrorsExist': {
+      const { errorExists } = state;
+      const errTotal = action.errorExists ? errorExists + 1 : errorExists - 1;
+
+      return {
+        ...state,
+        errorExists: errTotal < 0 ? 0 : errTotal,
       };
     }
     default:

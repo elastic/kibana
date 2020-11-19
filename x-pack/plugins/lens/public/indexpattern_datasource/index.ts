@@ -6,8 +6,6 @@
 
 import { CoreSetup } from 'kibana/public';
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
-import { getIndexPatternDatasource } from './indexpattern';
-import { renameColumns } from './rename_columns';
 import { ExpressionsSetup } from '../../../../../src/plugins/expressions/public';
 import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
 import {
@@ -34,17 +32,26 @@ export class IndexPatternDatasource {
     core: CoreSetup<IndexPatternDatasourceStartPlugins>,
     { expressions, editorFrame, charts }: IndexPatternDatasourceSetupPlugins
   ) {
-    expressions.registerFunction(renameColumns);
-
-    editorFrame.registerDatasource(
-      core.getStartServices().then(([coreStart, { data }]) =>
-        getIndexPatternDatasource({
+    editorFrame.registerDatasource(async () => {
+      const {
+        getIndexPatternDatasource,
+        renameColumns,
+        formatColumn,
+        getTimeScaleFunction,
+        getSuffixFormatter,
+      } = await import('../async_services');
+      return core.getStartServices().then(([coreStart, { data }]) => {
+        data.fieldFormats.register([getSuffixFormatter(data.fieldFormats.deserialize)]);
+        expressions.registerFunction(getTimeScaleFunction(data));
+        expressions.registerFunction(renameColumns);
+        expressions.registerFunction(formatColumn);
+        return getIndexPatternDatasource({
           core: coreStart,
           storage: new Storage(localStorage),
           data,
           charts,
-        })
-      ) as Promise<Datasource>
-    );
+        });
+      }) as Promise<Datasource>;
+    });
   }
 }

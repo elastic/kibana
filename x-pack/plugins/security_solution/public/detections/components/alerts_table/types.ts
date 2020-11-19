@@ -6,6 +6,7 @@
 
 import ApolloClient from 'apollo-client';
 
+import { ISearchStart } from '../../../../../../../src/plugins/data/public';
 import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
 import { Ecs } from '../../../../common/ecs';
 import { TimelineNonEcsData } from '../../../../common/search_strategy/timeline';
@@ -56,6 +57,7 @@ export interface SendAlertToTimelineActionProps {
   ecsData: Ecs;
   nonEcsData: TimelineNonEcsData[];
   updateTimelineIsLoading: UpdateTimelineLoading;
+  searchStrategyClient: ISearchStart;
 }
 
 export type UpdateTimelineLoading = ({ id, isLoading }: { id: string; isLoading: boolean }) => void;

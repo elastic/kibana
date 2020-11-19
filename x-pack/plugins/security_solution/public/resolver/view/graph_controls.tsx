@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/* eslint-disable react/display-name */
+
 /* eslint-disable react/button-has-type */
 
 import React, { useCallback, useMemo, useContext } from 'react';
@@ -54,7 +56,7 @@ const StyledGraphControls = styled.div<StyledGraphControls>`
 /**
  * Controls for zooming, panning, and centering in Resolver
  */
-const GraphControlsComponent = React.memo(
+export const GraphControls = React.memo(
   ({
     className,
   }: {
@@ -204,7 +206,3 @@ const GraphControlsComponent = React.memo(
     );
   }
 );
-
-GraphControlsComponent.displayName = 'GraphControlsComponent';
-
-export const GraphControls = GraphControlsComponent;

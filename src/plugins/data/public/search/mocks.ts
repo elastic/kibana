@@ -18,15 +18,15 @@
  */
 
 import { searchAggsSetupMock, searchAggsStartMock } from './aggs/mocks';
+import { searchSourceMock } from './search_source/mocks';
 import { ISearchSetup, ISearchStart } from './types';
-import { searchSourceMock, createSearchSourceMock } from '../../common/search/search_source/mocks';
-
-export * from '../../common/search/search_source/mocks';
+import { getSessionServiceMock } from '../../common/mocks';
 
 function createSetupContract(): jest.Mocked<ISearchSetup> {
   return {
     aggs: searchAggsSetupMock(),
     __enhance: jest.fn(),
+    session: getSessionServiceMock(),
   };
 }
 
@@ -34,7 +34,9 @@ function createStartContract(): jest.Mocked<ISearchStart> {
   return {
     aggs: searchAggsStartMock(),
     search: jest.fn(),
-    searchSource: searchSourceMock,
+    showError: jest.fn(),
+    session: getSessionServiceMock(),
+    searchSource: searchSourceMock.createStartContract(),
   };
 }
 
@@ -42,5 +44,3 @@ export const searchServiceMock = {
   createSetupContract,
   createStartContract,
 };
-
-export { createSearchSourceMock };

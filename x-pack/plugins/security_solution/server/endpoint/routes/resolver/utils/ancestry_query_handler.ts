@@ -9,7 +9,7 @@ import { ILegacyScopedClusterClient } from 'kibana/server';
 import {
   parentEntityIDSafeVersion,
   entityIDSafeVersion,
-  getAncestryAsArray,
+  ancestry,
 } from '../../../../../common/endpoint/models/event';
 import {
   SafeResolverAncestry,
@@ -35,7 +35,8 @@ export class AncestryQueryHandler implements QueryHandler<SafeResolverAncestry> 
     legacyEndpointID: string | undefined,
     originNode: SafeResolverLifecycleNode | undefined
   ) {
-    this.ancestorsToFind = getAncestryAsArray(originNode?.lifecycle[0]).slice(0, levels);
+    const event = originNode?.lifecycle[0];
+    this.ancestorsToFind = (event ? ancestry(event) : []).slice(0, levels);
     this.query = new LifecycleQuery(indexPattern, legacyEndpointID);
 
     // add the origin node to the response if it exists
@@ -108,7 +109,7 @@ export class AncestryQueryHandler implements QueryHandler<SafeResolverAncestry> 
     this.levels = this.levels - ancestryNodes.size;
     // the results come back in ascending order on timestamp so the first entry in the
     // results should be the further ancestor (most distant grandparent)
-    this.ancestorsToFind = getAncestryAsArray(results[0]).slice(0, this.levels);
+    this.ancestorsToFind = ancestry(results[0]).slice(0, this.levels);
   };
 
   /**

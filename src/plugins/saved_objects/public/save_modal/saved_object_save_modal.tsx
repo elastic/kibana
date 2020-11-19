@@ -110,10 +110,13 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
 
               <EuiForm>
                 {!this.props.showDescription && this.props.description && (
-                  <EuiFormRow>
-                    <EuiText color="subdued">{this.props.description}</EuiText>
-                  </EuiFormRow>
+                  <EuiText size="s" color="subdued">
+                    {this.props.description}
+                  </EuiText>
                 )}
+
+                <EuiSpacer />
+
                 {this.renderCopyOnSave()}
 
                 <EuiFormRow

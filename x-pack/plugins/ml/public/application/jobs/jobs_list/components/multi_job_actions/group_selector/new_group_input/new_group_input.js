@@ -82,7 +82,7 @@ export class NewGroupInput extends Component {
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem>
             <EuiFormRow
-              compressed
+              display="rowCompressed"
               isInvalid={groupsValidationError !== ''}
               error={groupsValidationError}
               className="new-group-input"

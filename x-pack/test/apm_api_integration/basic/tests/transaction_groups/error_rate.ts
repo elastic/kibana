@@ -6,7 +6,6 @@
 import expect from '@kbn/expect';
 import { first, last } from 'lodash';
 import archives_metadata from '../../../common/archives_metadata';
-import { expectSnapshot } from '../../../common/match_snapshot';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
@@ -31,7 +30,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expect(response.body.noHits).to.be(true);
 
-        expect(response.body.erroneousTransactionsRate.length).to.be(0);
+        expect(response.body.transactionErrorRate.length).to.be(0);
         expect(response.body.average).to.be(null);
       });
     });
@@ -41,7 +40,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       describe('returns the transaction error rate', () => {
         let errorRateResponse: {
-          erroneousTransactionsRate: Array<{ x: number; y: number | null }>;
+          transactionErrorRate: Array<{ x: number; y: number | null }>;
           average: number;
         };
         before(async () => {
@@ -54,9 +53,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         it('returns some data', () => {
           expect(errorRateResponse.average).to.be.greaterThan(0);
 
-          expect(errorRateResponse.erroneousTransactionsRate.length).to.be.greaterThan(0);
+          expect(errorRateResponse.transactionErrorRate.length).to.be.greaterThan(0);
 
-          const nonNullDataPoints = errorRateResponse.erroneousTransactionsRate.filter(
+          const nonNullDataPoints = errorRateResponse.transactionErrorRate.filter(
             ({ y }) => y !== null
           );
 
@@ -65,26 +64,26 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         it('has the correct start date', () => {
           expectSnapshot(
-            new Date(first(errorRateResponse.erroneousTransactionsRate)?.x ?? NaN).toISOString()
-          ).toMatchInline(`"2020-09-15T08:53:00.000Z"`);
+            new Date(first(errorRateResponse.transactionErrorRate)?.x ?? NaN).toISOString()
+          ).toMatchInline(`"2020-09-29T14:30:00.000Z"`);
         });
 
         it('has the correct end date', () => {
           expectSnapshot(
-            new Date(last(errorRateResponse.erroneousTransactionsRate)?.x ?? NaN).toISOString()
-          ).toMatchInline(`"2020-09-15T09:23:00.000Z"`);
+            new Date(last(errorRateResponse.transactionErrorRate)?.x ?? NaN).toISOString()
+          ).toMatchInline(`"2020-09-29T15:00:00.000Z"`);
         });
 
         it('has the correct number of buckets', () => {
-          expectSnapshot(errorRateResponse.erroneousTransactionsRate.length).toMatchInline(`61`);
+          expectSnapshot(errorRateResponse.transactionErrorRate.length).toMatchInline(`61`);
         });
 
         it('has the correct calculation for average', () => {
-          expectSnapshot(errorRateResponse.average).toMatchInline(`0.14086309523809523`);
+          expectSnapshot(errorRateResponse.average).toMatchInline(`0.152173913043478`);
         });
 
         it('has the correct error rate', () => {
-          expectSnapshot(errorRateResponse.erroneousTransactionsRate).toMatch();
+          expectSnapshot(errorRateResponse.transactionErrorRate).toMatch();
         });
       });
     });

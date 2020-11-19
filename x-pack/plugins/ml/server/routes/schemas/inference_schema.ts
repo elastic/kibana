@@ -23,4 +23,5 @@ export const optionalModelIdSchema = schema.object({
 export const getInferenceQuerySchema = schema.object({
   size: schema.maybe(schema.string()),
   with_pipelines: schema.maybe(schema.string()),
+  include: schema.maybe(schema.string()),
 });

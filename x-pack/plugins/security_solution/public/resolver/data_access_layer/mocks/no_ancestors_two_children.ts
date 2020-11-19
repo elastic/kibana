@@ -6,10 +6,10 @@
 
 import {
   ResolverRelatedEvents,
+  SafeResolverEvent,
   ResolverTree,
   ResolverEntityIndex,
 } from '../../../../common/endpoint/types';
-import { mockEndpointEvent } from '../../mocks/endpoint_event';
 import { mockTreeWithNoAncestorsAnd2Children } from '../../mocks/resolver_tree';
 import { DataAccessLayer } from '../../types';
 
@@ -54,15 +54,32 @@ export function noAncestorsTwoChildren(): { dataAccessLayer: DataAccessLayer; me
       relatedEvents(entityID: string): Promise<ResolverRelatedEvents> {
         return Promise.resolve({
           entityID,
-          events: [
-            mockEndpointEvent({
-              entityID,
-              name: 'event',
-              timestamp: 0,
-            }),
-          ],
+          events: [],
           nextEvent: null,
         });
+      },
+
+      /**
+       * Return events that have `process.entity_id` that includes `entityID` and that have
+       * a `event.category` that includes `category`.
+       */
+      async eventsWithEntityIDAndCategory(
+        entityID: string,
+        category: string,
+        after?: string
+      ): Promise<{
+        events: SafeResolverEvent[];
+        nextEvent: string | null;
+      }> {
+        const events: SafeResolverEvent[] = [];
+        return {
+          events,
+          nextEvent: null,
+        };
+      },
+
+      async event(_eventID: string): Promise<SafeResolverEvent | null> {
+        return null;
       },
 
       /**

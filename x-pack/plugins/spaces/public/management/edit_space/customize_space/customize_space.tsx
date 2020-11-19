@@ -58,7 +58,7 @@ export class CustomizeSpace extends Component<Props, State> {
     };
 
     return (
-      <SectionPanel collapsible={false} title={panelTitle} description={panelTitle}>
+      <SectionPanel title={panelTitle} description={panelTitle}>
         <EuiDescribedFormGroup
           title={
             <EuiTitle size="xs">

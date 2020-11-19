@@ -27,7 +27,7 @@ export const FlexGroup = styled(EuiFlexGroup)`
 
 FlexGroup.displayName = 'FlexGroup';
 
-export const KpiNetworkBaseComponent = React.memo<{
+export const NetworkKpiBaseComponent = React.memo<{
   fieldsMapping: Readonly<StatItems[]>;
   data: NetworkKpiStrategyResponse;
   loading?: boolean;
@@ -64,6 +64,6 @@ export const KpiNetworkBaseComponent = React.memo<{
   );
 });
 
-KpiNetworkBaseComponent.displayName = 'KpiNetworkBaseComponent';
+NetworkKpiBaseComponent.displayName = 'NetworkKpiBaseComponent';
 
-export const KpiNetworkBaseComponentManage = manageQuery(KpiNetworkBaseComponent);
+export const NetworkKpiBaseComponentManage = manageQuery(NetworkKpiBaseComponent);

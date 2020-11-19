@@ -13,6 +13,7 @@ import { UiActionsServiceEnhancements } from '../services';
 import { ActionFactoryDefinition } from './action_factory_definition';
 import { SerializedAction, SerializedEvent } from './types';
 import { licensingMock } from '../../../licensing/public/mocks';
+import { dynamicActionGrouping } from './dynamic_action_grouping';
 
 const actionFactoryDefinition1: ActionFactoryDefinition = {
   id: 'ACTION_FACTORY_1',
@@ -294,6 +295,27 @@ describe('DynamicActionManager', () => {
         expect(manager.state.get().events.length).toBe(1);
       });
 
+      test('adds revived actiosn to "dynamic action" grouping', async () => {
+        const { manager, uiActions, actions } = setup([]);
+        const action: SerializedAction = {
+          factoryId: actionFactoryDefinition1.id,
+          name: 'foo',
+          config: {},
+        };
+
+        uiActions.registerActionFactory(actionFactoryDefinition1);
+
+        await manager.start();
+
+        expect(manager.state.get().events.length).toBe(0);
+
+        await manager.createEvent(action, ['VALUE_CLICK_TRIGGER']);
+
+        const createdAction = actions.values().next().value;
+
+        expect(createdAction.grouping).toBe(dynamicActionGrouping);
+      });
+
       test('optimistically adds event to UI state', async () => {
         const { manager, uiActions } = setup([]);
         const action: SerializedAction = {
@@ -437,8 +459,7 @@ describe('DynamicActionManager', () => {
           name: 'foo',
           config: {},
         };
-
-        await expect(manager.createEvent(action, ['SELECT_RANGE_TRIGGER'])).rejects;
+        await expect(manager.createEvent(action, ['SELECT_RANGE_TRIGGER'])).rejects.toThrow();
       });
     });
   });
@@ -703,5 +724,19 @@ describe('DynamicActionManager', () => {
     );
 
     expect(basicAndGoldActions).toHaveLength(2);
+  });
+
+  test("failing to revive/kill an action doesn't fail action manager", async () => {
+    const { manager, uiActions, storage } = setup([event1, event3, event2]);
+
+    uiActions.registerActionFactory(actionFactoryDefinition1);
+
+    await manager.start();
+
+    expect(uiActions.getTriggerActions('VALUE_CLICK_TRIGGER')).toHaveLength(2);
+    expect(await storage.list()).toEqual([event1, event3, event2]);
+
+    await manager.stop();
+    expect(uiActions.getTriggerActions('VALUE_CLICK_TRIGGER')).toHaveLength(0);
   });
 });

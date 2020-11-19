@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import { formatBytesUsage, formatPercentageUsage, formatNumber } from '../../../lib/format_number';
 import {
@@ -17,7 +18,28 @@ import {
   EuiText,
   EuiLink,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+
+export function HealthLabel(props) {
+  if (props.status === 'green') {
+    return i18n.translate('xpack.monitoring.cluster.health.healthy', {
+      defaultMessage: 'Healthy',
+    });
+  }
+
+  if (props.status === 'yellow') {
+    return i18n.translate('xpack.monitoring.cluster.health.replicaShards', {
+      defaultMessage: 'Missing replica shards',
+    });
+  }
+
+  if (props.status === 'red') {
+    return i18n.translate('xpack.monitoring.cluster.health.primaryShards', {
+      defaultMessage: 'Missing primary shards',
+    });
+  }
+
+  return 'N/A';
+}
 
 export function HealthStatusIndicator(props) {
   const statusColorMap = {
@@ -32,11 +54,7 @@ export function HealthStatusIndicator(props) {
     <EuiFlexGroup alignItems="center" gutterSize="s">
       <EuiFlexItem grow={false}>
         <EuiHealth color={statusColor} data-test-subj="statusIcon">
-          <FormattedMessage
-            id="xpack.monitoring.cluster.overview.healthStatusDescription"
-            defaultMessage="Health is {status}"
-            values={{ status: props.status || 'n/a' }}
-          />
+          <HealthLabel status={props.status} />
         </EuiHealth>
       </EuiFlexItem>
     </EuiFlexGroup>

@@ -31,9 +31,10 @@ import {
   SPATIAL_FILTERS_LAYER_ID,
 } from '../../common/constants';
 // @ts-ignore
-import { extractFeaturesFromFilters } from '../../common/elasticsearch_geo_utils';
+import { extractFeaturesFromFilters } from '../../common/elasticsearch_util';
 import { MapStoreState } from '../reducers/store';
 import {
+  AbstractSourceDescriptor,
   DataRequestDescriptor,
   DrawState,
   Goto,
@@ -52,9 +53,9 @@ import { ITMSSource } from '../classes/sources/tms_source';
 import { IVectorSource } from '../classes/sources/vector_source';
 import { ILayer } from '../classes/layers/layer';
 
-function createLayerInstance(
+export function createLayerInstance(
   layerDescriptor: LayerDescriptor,
-  inspectorAdapters: Adapters
+  inspectorAdapters?: Adapters
 ): ILayer {
   const source: ISource = createSourceInstance(layerDescriptor.sourceDescriptor, inspectorAdapters);
 
@@ -94,7 +95,13 @@ function createLayerInstance(
   }
 }
 
-function createSourceInstance(sourceDescriptor: any, inspectorAdapters: Adapters): ISource {
+function createSourceInstance(
+  sourceDescriptor: AbstractSourceDescriptor | null,
+  inspectorAdapters?: Adapters
+): ISource {
+  if (sourceDescriptor === null) {
+    throw new Error('Source-descriptor should be initialized');
+  }
   const source = getSourceByType(sourceDescriptor.type);
   if (!source) {
     throw new Error(`Unrecognized sourceType ${sourceDescriptor.type}`);
@@ -365,13 +372,25 @@ export const getUniqueIndexPatternIds = createSelector(getLayerList, (layerList)
 });
 
 // Get list of unique index patterns, excluding index patterns from layers that disable applyGlobalQuery
-export const getQueryableUniqueIndexPatternIds = createSelector(getLayerList, (layerList) => {
-  const indexPatternIds: string[] = [];
-  layerList.forEach((layer) => {
-    indexPatternIds.push(...layer.getQueryableIndexPatternIds());
-  });
-  return _.uniq(indexPatternIds);
-});
+export const getQueryableUniqueIndexPatternIds = createSelector(
+  getLayerList,
+  getWaitingForMapReadyLayerListRaw,
+  (layerList, waitingForMapReadyLayerList) => {
+    const indexPatternIds: string[] = [];
+
+    if (waitingForMapReadyLayerList.length) {
+      waitingForMapReadyLayerList.forEach((layerDescriptor) => {
+        const layer = createLayerInstance(layerDescriptor);
+        indexPatternIds.push(...layer.getQueryableIndexPatternIds());
+      });
+    } else {
+      layerList.forEach((layer) => {
+        indexPatternIds.push(...layer.getQueryableIndexPatternIds());
+      });
+    }
+    return _.uniq(indexPatternIds);
+  }
+);
 
 export const hasDirtyState = createSelector(getLayerListRaw, (layerListRaw) => {
   return layerListRaw.some((layerDescriptor) => {

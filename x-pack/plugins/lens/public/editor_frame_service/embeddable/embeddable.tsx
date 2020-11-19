@@ -8,15 +8,18 @@ import _ from 'lodash';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import {
+  ExecutionContextSearch,
   Filter,
   IIndexPattern,
   Query,
   TimefilterContract,
   TimeRange,
+  IndexPattern,
 } from 'src/plugins/data/public';
-import { ExecutionContextSearch } from 'src/plugins/expressions';
+import { PaletteOutput } from 'src/plugins/charts/public';
 
 import { Subscription } from 'rxjs';
+import { toExpression, Ast } from '@kbn/interpreter/common';
 import {
   ExpressionRendererEvent,
   ReactExpressionRendererType,
@@ -28,41 +31,57 @@ import {
   EmbeddableInput,
   EmbeddableOutput,
   IContainer,
+  SavedObjectEmbeddableInput,
+  ReferenceOrValueEmbeddable,
 } from '../../../../../../src/plugins/embeddable/public';
-import { DOC_TYPE, Document, injectFilterReferences } from '../../persistence';
+import { Document, injectFilterReferences } from '../../persistence';
 import { ExpressionWrapper } from './expression_wrapper';
 import { UiActionsStart } from '../../../../../../src/plugins/ui_actions/public';
 import { isLensBrushEvent, isLensFilterEvent } from '../../types';
 
-export interface LensEmbeddableConfiguration {
-  expression: string | null;
-  savedVis: Document;
-  editUrl: string;
-  editPath: string;
-  editable: boolean;
-  indexPatterns?: IIndexPattern[];
-}
+import { IndexPatternsContract } from '../../../../../../src/plugins/data/public';
+import { getEditPath, DOC_TYPE } from '../../../common';
+import { IBasePath } from '../../../../../../src/core/public';
+import { LensAttributeService } from '../../lens_attribute_service';
 
-export interface LensEmbeddableInput extends EmbeddableInput {
-  timeRange?: TimeRange;
-  query?: Query;
-  filters?: Filter[];
-}
+export type LensSavedObjectAttributes = Omit<Document, 'savedObjectId' | 'type'>;
+
+export type LensByValueInput = {
+  attributes: LensSavedObjectAttributes;
+} & EmbeddableInput;
+
+export type LensByReferenceInput = SavedObjectEmbeddableInput & EmbeddableInput;
+export type LensEmbeddableInput = (LensByValueInput | LensByReferenceInput) & {
+  palette?: PaletteOutput;
+};
 
 export interface LensEmbeddableOutput extends EmbeddableOutput {
   indexPatterns?: IIndexPattern[];
 }
 
-export class Embeddable extends AbstractEmbeddable<LensEmbeddableInput, LensEmbeddableOutput> {
+export interface LensEmbeddableDeps {
+  attributeService: LensAttributeService;
+  documentToExpression: (doc: Document) => Promise<Ast | null>;
+  editable: boolean;
+  indexPatternService: IndexPatternsContract;
+  expressionRenderer: ReactExpressionRendererType;
+  timefilter: TimefilterContract;
+  basePath: IBasePath;
+  getTrigger?: UiActionsStart['getTrigger'] | undefined;
+}
+
+export class Embeddable
+  extends AbstractEmbeddable<LensEmbeddableInput, LensEmbeddableOutput>
+  implements ReferenceOrValueEmbeddable<LensByValueInput, LensByReferenceInput> {
   type = DOC_TYPE;
 
   private expressionRenderer: ReactExpressionRendererType;
-  private getTrigger: UiActionsStart['getTrigger'] | undefined;
-  private expression: string | null;
-  private savedVis: Document;
+  private savedVis: Document | undefined;
+  private expression: string | undefined | null;
   private domNode: HTMLElement | Element | undefined;
   private subscription: Subscription;
   private autoRefreshFetchSubscription: Subscription;
+  private isInitialized = false;
 
   private externalSearchContext: {
     timeRange?: TimeRange;
@@ -72,50 +91,32 @@ export class Embeddable extends AbstractEmbeddable<LensEmbeddableInput, LensEmbe
   } = {};
 
   constructor(
-    timefilter: TimefilterContract,
-    expressionRenderer: ReactExpressionRendererType,
-    getTrigger: UiActionsStart['getTrigger'] | undefined,
-    {
-      expression,
-      savedVis,
-      editPath,
-      editUrl,
-      editable,
-      indexPatterns,
-    }: LensEmbeddableConfiguration,
+    private deps: LensEmbeddableDeps,
     initialInput: LensEmbeddableInput,
     parent?: IContainer
   ) {
     super(
       initialInput,
       {
-        defaultTitle: savedVis.title,
-        savedObjectId: savedVis.id,
-        editable,
-        // passing edit url and index patterns to the output of this embeddable for
-        // the container to pick them up and use them to configure filter bar and
-        // config dropdown correctly.
         editApp: 'lens',
-        editPath,
-        editUrl,
-        indexPatterns,
+        editable: deps.editable,
       },
       parent
     );
 
-    this.getTrigger = getTrigger;
-    this.expressionRenderer = expressionRenderer;
-    this.expression = expression;
-    this.savedVis = savedVis;
+    this.expressionRenderer = deps.expressionRenderer;
+    this.initializeSavedVis(initialInput).then(() => this.onContainerStateChanged(initialInput));
     this.subscription = this.getInput$().subscribe((input) => this.onContainerStateChanged(input));
-    this.onContainerStateChanged(initialInput);
 
-    this.autoRefreshFetchSubscription = timefilter
+    this.autoRefreshFetchSubscription = deps.timefilter
       .getAutoRefreshFetch$()
       .subscribe(this.reload.bind(this));
   }
 
   public supportedTriggers() {
+    if (!this.savedVis) {
+      return [];
+    }
     switch (this.savedVis.visualizationType) {
       case 'lnsXY':
         return [VIS_EVENT_TO_TRIGGER.filter, VIS_EVENT_TO_TRIGGER.brush];
@@ -125,6 +126,30 @@ export class Embeddable extends AbstractEmbeddable<LensEmbeddableInput, LensEmbe
       case 'lnsMetric':
       default:
         return [];
+    }
+  }
+
+  async initializeSavedVis(input: LensEmbeddableInput) {
+    const attributes:
+      | LensSavedObjectAttributes
+      | false = await this.deps.attributeService.unwrapAttributes(input).catch((e: Error) => {
+      this.onFatalError(e);
+      return false;
+    });
+    if (!attributes) {
+      return;
+    }
+    this.savedVis = {
+      ...attributes,
+      type: this.type,
+      savedObjectId: (input as LensByReferenceInput)?.savedObjectId,
+    };
+    const expression = await this.deps.documentToExpression(this.savedVis);
+    this.expression = expression ? toExpression(expression) : null;
+    await this.initializeOutput();
+    this.isInitialized = true;
+    if (this.domNode) {
+      this.render(this.domNode);
     }
   }
 
@@ -144,9 +169,7 @@ export class Embeddable extends AbstractEmbeddable<LensEmbeddableInput, LensEmbe
         filters: cleanedFilters,
       };
 
-      if (this.domNode) {
-        this.render(this.domNode);
-      }
+      this.reload();
     }
   }
 
@@ -157,11 +180,17 @@ export class Embeddable extends AbstractEmbeddable<LensEmbeddableInput, LensEmbe
    */
   render(domNode: HTMLElement | Element) {
     this.domNode = domNode;
+    if (!this.savedVis || !this.isInitialized) {
+      return;
+    }
+    const input = this.getInput();
     render(
       <ExpressionWrapper
         ExpressionRenderer={this.expressionRenderer}
-        expression={this.expression}
+        expression={this.expression || null}
         searchContext={this.getMergedSearchContext()}
+        variables={input.palette ? { theme: { palette: input.palette } } : {}}
+        searchSessionId={this.input.searchSessionId}
         handleEvent={this.handleEvent}
       />,
       domNode
@@ -173,6 +202,9 @@ export class Embeddable extends AbstractEmbeddable<LensEmbeddableInput, LensEmbe
    * any references to index patterns
    */
   private getMergedSearchContext(): ExecutionContextSearch {
+    if (!this.savedVis) {
+      throw new Error('savedVis is required for getMergedSearchContext');
+    }
     const output: ExecutionContextSearch = {
       timeRange: this.externalSearchContext.timeRange,
     };
@@ -192,35 +224,24 @@ export class Embeddable extends AbstractEmbeddable<LensEmbeddableInput, LensEmbe
   }
 
   handleEvent = (event: ExpressionRendererEvent) => {
-    if (!this.getTrigger || this.input.disableTriggers) {
+    if (!this.deps.getTrigger || this.input.disableTriggers) {
       return;
     }
     if (isLensBrushEvent(event)) {
-      this.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec({
+      this.deps.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec({
         data: event.data,
         embeddable: this,
       });
     }
     if (isLensFilterEvent(event)) {
-      this.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec({
+      this.deps.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec({
         data: event.data,
         embeddable: this,
       });
     }
   };
 
-  destroy() {
-    super.destroy();
-    if (this.domNode) {
-      unmountComponentAtNode(this.domNode);
-    }
-    if (this.subscription) {
-      this.subscription.unsubscribe();
-    }
-    this.autoRefreshFetchSubscription.unsubscribe();
-  }
-
-  reload() {
+  async reload() {
     const currentTime = Date.now();
     if (this.externalSearchContext.lastReloadRequestTime !== currentTime) {
       this.externalSearchContext = {
@@ -232,5 +253,77 @@ export class Embeddable extends AbstractEmbeddable<LensEmbeddableInput, LensEmbe
         this.render(this.domNode);
       }
     }
+  }
+
+  async initializeOutput() {
+    if (!this.savedVis) {
+      return;
+    }
+    const promises = _.uniqBy(
+      this.savedVis.references.filter(({ type }) => type === 'index-pattern'),
+      'id'
+    )
+      .map(async ({ id }) => {
+        try {
+          return await this.deps.indexPatternService.get(id);
+        } catch (error) {
+          // Unable to load index pattern, ignore error as the index patterns are only used to
+          // configure the filter and query bar - there is still a good chance to get the visualization
+          // to show.
+          return null;
+        }
+      })
+      .filter((promise): promise is Promise<IndexPattern> => Boolean(promise));
+    const indexPatterns = await Promise.all(promises);
+    // passing edit url and index patterns to the output of this embeddable for
+    // the container to pick them up and use them to configure filter bar and
+    // config dropdown correctly.
+    const input = this.getInput();
+    const title = input.hidePanelTitles ? '' : input.title || this.savedVis.title;
+    const savedObjectId = (input as LensByReferenceInput).savedObjectId;
+    this.updateOutput({
+      ...this.getOutput(),
+      defaultTitle: this.savedVis.title,
+      title,
+      editPath: getEditPath(savedObjectId),
+      editUrl: this.deps.basePath.prepend(`/app/lens${getEditPath(savedObjectId)}`),
+      indexPatterns,
+    });
+  }
+
+  public inputIsRefType = (
+    input: LensByValueInput | LensByReferenceInput
+  ): input is LensByReferenceInput => {
+    return this.deps.attributeService.inputIsRefType(input);
+  };
+
+  public getInputAsRefType = async (): Promise<LensByReferenceInput> => {
+    const input = this.deps.attributeService.getExplicitInputFromEmbeddable(this);
+    return this.deps.attributeService.getInputAsRefType(input, {
+      showSaveModal: true,
+      saveModalTitle: this.getTitle(),
+    });
+  };
+
+  public getInputAsValueType = async (): Promise<LensByValueInput> => {
+    const input = this.deps.attributeService.getExplicitInputFromEmbeddable(this);
+    return this.deps.attributeService.getInputAsValueType(input);
+  };
+
+  // same API as Visualize
+  public getDescription() {
+    // mind that savedViz is loaded in async way here
+    return this.savedVis && this.savedVis.description;
+  }
+
+  destroy() {
+    super.destroy();
+    if (this.domNode) {
+      unmountComponentAtNode(this.domNode);
+    }
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+    this.autoRefreshFetchSubscription.unsubscribe();
   }
 }

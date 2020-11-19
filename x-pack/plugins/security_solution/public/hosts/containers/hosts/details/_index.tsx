@@ -10,7 +10,6 @@ import deepEqual from 'fast-deep-equal';
 import { noop } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { DEFAULT_INDEX_KEY } from '../../../../../common/constants';
 import { inputsModel } from '../../../../common/store';
 import { useKibana } from '../../../../common/lib/kibana';
 import {
@@ -21,11 +20,15 @@ import {
 } from '../../../../../common/search_strategy/security_solution/hosts';
 
 import * as i18n from './translations';
-import { AbortError } from '../../../../../../../../src/plugins/data/common';
+import {
+  isCompleteResponse,
+  isErrorResponse,
+} from '../../../../../../../../src/plugins/data/common';
+import { AbortError } from '../../../../../../../../src/plugins/kibana_utils/common';
 import { getInspectResponse } from '../../../../helpers';
 import { InspectResponse } from '../../../../types';
 
-const ID = 'hostDetailsQuery';
+const ID = 'hostsDetailsQuery';
 
 export interface HostDetailsArgs {
   id: string;
@@ -37,9 +40,10 @@ export interface HostDetailsArgs {
 }
 
 interface UseHostDetails {
-  id?: string;
-  hostName: string;
   endDate: string;
+  hostName: string;
+  id?: string;
+  indexNames: string[];
   skip?: boolean;
   startDate: string;
 }
@@ -47,30 +51,34 @@ interface UseHostDetails {
 export const useHostDetails = ({
   endDate,
   hostName,
+  indexNames,
+  id = ID,
   skip = false,
   startDate,
-  id = ID,
 }: UseHostDetails): [boolean, HostDetailsArgs] => {
-  const { data, notifications, uiSettings } = useKibana().services;
+  const { data, notifications } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
-  const defaultIndex = uiSettings.get<string[]>(DEFAULT_INDEX_KEY);
   const [loading, setLoading] = useState(false);
-  const [hostDetailsRequest, setHostDetailsRequest] = useState<HostDetailsRequestOptions>({
-    defaultIndex,
-    hostName,
-    factoryQueryType: HostsQueries.details,
-    timerange: {
-      interval: '12h',
-      from: startDate,
-      to: endDate,
-    },
-  });
+  const [hostDetailsRequest, setHostDetailsRequest] = useState<HostDetailsRequestOptions | null>(
+    !skip
+      ? {
+          defaultIndex: indexNames,
+          hostName,
+          factoryQueryType: HostsQueries.details,
+          timerange: {
+            interval: '12h',
+            from: startDate,
+            to: endDate,
+          },
+        }
+      : null
+  );
 
   const [hostDetailsResponse, setHostDetailsResponse] = useState<HostDetailsArgs>({
     endDate,
     hostDetails: {},
-    id: ID,
+    id,
     inspect: {
       dsl: [],
       response: [],
@@ -80,7 +88,11 @@ export const useHostDetails = ({
   });
 
   const hostDetailsSearch = useCallback(
-    (request: HostDetailsRequestOptions) => {
+    (request: HostDetailsRequestOptions | null) => {
+      if (request == null) {
+        return;
+      }
+
       let didCancel = false;
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
@@ -93,7 +105,7 @@ export const useHostDetails = ({
           })
           .subscribe({
             next: (response) => {
-              if (!response.isPartial && !response.isRunning) {
+              if (isCompleteResponse(response)) {
                 if (!didCancel) {
                   setLoading(false);
                   setHostDetailsResponse((prevResponse) => ({
@@ -104,7 +116,7 @@ export const useHostDetails = ({
                   }));
                 }
                 searchSubscription$.unsubscribe();
-              } else if (response.isPartial && !response.isRunning) {
+              } else if (isErrorResponse(response)) {
                 if (!didCancel) {
                   setLoading(false);
                 }
@@ -137,8 +149,9 @@ export const useHostDetails = ({
   useEffect(() => {
     setHostDetailsRequest((prevRequest) => {
       const myRequest = {
-        ...prevRequest,
-        defaultIndex,
+        ...(prevRequest ?? {}),
+        defaultIndex: indexNames,
+        factoryQueryType: HostsQueries.details,
         hostName,
         timerange: {
           interval: '12h',
@@ -151,7 +164,7 @@ export const useHostDetails = ({
       }
       return prevRequest;
     });
-  }, [defaultIndex, endDate, hostName, startDate, skip]);
+  }, [endDate, hostName, indexNames, startDate, skip]);
 
   useEffect(() => {
     hostDetailsSearch(hostDetailsRequest);

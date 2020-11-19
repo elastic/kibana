@@ -23,13 +23,14 @@ import { NUMERICAL_COLOR_PALETTES } from '../../styles/color_palettes';
 import { CreateSourceEditor } from './create_source_editor';
 import { LayerWizard, RenderWizardArguments } from '../../layers/layer_wizard_registry';
 import { ColorDynamicOptions, SizeDynamicOptions } from '../../../../common/descriptor_types';
+import { Point2PointLayerIcon } from '../../layers/icons/point_2_point_layer_icon';
 
 export const point2PointLayerWizardConfig: LayerWizard = {
   categories: [LAYER_WIZARD_CATEGORY.ELASTICSEARCH],
   description: i18n.translate('xpack.maps.source.pewPewDescription', {
     defaultMessage: 'Aggregated data paths between the source and destination',
   }),
-  icon: 'logoElasticsearch',
+  icon: Point2PointLayerIcon,
   renderWizard: ({ previewLayers }: RenderWizardArguments) => {
     const onSourceConfigChange = (sourceConfig: unknown) => {
       if (!sourceConfig) {

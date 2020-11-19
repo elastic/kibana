@@ -43,8 +43,8 @@ export function useSnapshot(
   const timerange: InfraTimerangeInput = {
     interval: '1m',
     to: currentTime,
-    from: currentTime - 360 * 1000,
-    lookbackSize: 20,
+    from: currentTime - 1200 * 1000,
+    lookbackSize: 5,
   };
 
   const { error, loading, response, makeRequest } = useHTTPRequest<SnapshotNodeResponse>(

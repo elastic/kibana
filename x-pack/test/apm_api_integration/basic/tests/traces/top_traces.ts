@@ -6,7 +6,6 @@
 import expect from '@kbn/expect';
 import { sortBy } from 'lodash';
 import archives_metadata from '../../../common/archives_metadata';
-import { expectSnapshot } from '../../../common/match_snapshot';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
@@ -49,7 +48,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       it('returns the correct number of buckets', async () => {
-        expectSnapshot(response.body.items.length).toMatchInline(`59`);
+        expectSnapshot(response.body.items.length).toMatchInline(`64`);
       });
 
       it('returns the correct buckets', async () => {
@@ -64,22 +63,22 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expectSnapshot(firstItem).toMatchInline(`
           Object {
-            "averageResponseTime": 1137,
+            "averageResponseTime": 1756,
             "impact": 0,
             "key": Object {
-              "service.name": "opbeans-node",
-              "transaction.name": "POST /api/orders",
+              "service.name": "opbeans-java",
+              "transaction.name": "DispatcherServlet#doPost",
             },
-            "serviceName": "opbeans-node",
-            "transactionName": "POST /api/orders",
+            "serviceName": "opbeans-java",
+            "transactionName": "DispatcherServlet#doPost",
             "transactionType": "request",
-            "transactionsPerMinute": 0.03333333333333333,
+            "transactionsPerMinute": 0.0333333333333333,
           }
         `);
 
         expectSnapshot(lastItem).toMatchInline(`
           Object {
-            "averageResponseTime": 1724883.75,
+            "averageResponseTime": 1803347.81081081,
             "impact": 100,
             "key": Object {
               "service.name": "opbeans-python",
@@ -88,31 +87,31 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             "serviceName": "opbeans-python",
             "transactionName": "opbeans.tasks.sync_customers",
             "transactionType": "celery",
-            "transactionsPerMinute": 1.2,
+            "transactionsPerMinute": 1.23333333333333,
           }
         `);
 
         expectSnapshot(groups).toMatchInline(`
           Array [
             Object {
-              "service.name": "opbeans-node",
-              "transaction.name": "POST /api/orders",
-            },
-            Object {
-              "service.name": "opbeans-python",
-              "transaction.name": "GET opbeans.views.stats",
+              "service.name": "opbeans-java",
+              "transaction.name": "DispatcherServlet#doPost",
             },
             Object {
               "service.name": "opbeans-node",
-              "transaction.name": "GET /api/customers/:id",
+              "transaction.name": "GET /api/types",
+            },
+            Object {
+              "service.name": "opbeans-java",
+              "transaction.name": "ResourceHttpRequestHandler",
             },
             Object {
               "service.name": "opbeans-node",
               "transaction.name": "GET /api/products/top",
             },
             Object {
-              "service.name": "opbeans-ruby",
-              "transaction.name": "Api::OrdersController#show",
+              "service.name": "opbeans-go",
+              "transaction.name": "POST /api/orders",
             },
           ]
         `);

@@ -42,7 +42,7 @@ describe('LensStore', () => {
       });
 
       expect(doc).toEqual({
-        id: 'FOO',
+        savedObjectId: 'FOO',
         title: 'Hello',
         description: 'My doc',
         visualizationType: 'bar',
@@ -82,7 +82,7 @@ describe('LensStore', () => {
     test('updates and returns a visualization document', async () => {
       const { client, store } = testStore();
       const doc = await store.save({
-        id: 'Gandalf',
+        savedObjectId: 'Gandalf',
         title: 'Even the very wise cannot see all ends.',
         visualizationType: 'line',
         references: [],
@@ -95,7 +95,7 @@ describe('LensStore', () => {
       });
 
       expect(doc).toEqual({
-        id: 'Gandalf',
+        savedObjectId: 'Gandalf',
         title: 'Even the very wise cannot see all ends.',
         visualizationType: 'line',
         references: [],

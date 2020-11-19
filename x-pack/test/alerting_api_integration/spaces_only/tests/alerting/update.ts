@@ -57,6 +57,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
         scheduledTaskId: createdAlert.scheduledTaskId,
         createdAt: response.body.createdAt,
         updatedAt: response.body.updatedAt,
+        executionStatus: response.body.executionStatus,
       });
       expect(Date.parse(response.body.createdAt)).to.be.greaterThan(0);
       expect(Date.parse(response.body.updatedAt)).to.be.greaterThan(0);

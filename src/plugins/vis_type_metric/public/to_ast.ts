@@ -39,7 +39,7 @@ export const toExpressionAst = (vis: Vis, params: any) => {
   const esaggs = buildExpressionFunction<EsaggsExpressionFunctionDefinition>('esaggs', {
     index: vis.data.indexPattern!.id!,
     metricsAtAllLevels: vis.isHierarchical(),
-    partialRows: vis.type.requiresPartialRows || vis.params.showPartialRows || false,
+    partialRows: vis.params.showPartialRows || false,
     aggConfigs: JSON.stringify(vis.data.aggs!.aggs),
     includeFormatHints: false,
   });

@@ -50,6 +50,13 @@ export interface SavedObjectsCreateOptions extends SavedObjectsBaseOptions {
   refresh?: MutatingOperationRefreshSetting;
   /** Optional ID of the original saved object, if this object's `id` was regenerated */
   originId?: string;
+  /**
+   * Optional initial namespaces for the object to be created in. If this is defined, it will supersede the namespace ID that is in
+   * {@link SavedObjectsCreateOptions}.
+   *
+   * Note: this can only be used for multi-namespace object types.
+   */
+  initialNamespaces?: string[];
 }
 
 /**
@@ -66,6 +73,13 @@ export interface SavedObjectsBulkCreateObject<T = unknown> {
   migrationVersion?: SavedObjectsMigrationVersion;
   /** Optional ID of the original saved object, if this object's `id` was regenerated */
   originId?: string;
+  /**
+   * Optional initial namespaces for the object to be created in. If this is defined, it will supersede the namespace ID that is in
+   * {@link SavedObjectsCreateOptions}.
+   *
+   * Note: this can only be used for multi-namespace object types.
+   */
+  initialNamespaces?: string[];
 }
 
 /**
@@ -199,6 +213,24 @@ export interface SavedObjectsDeleteFromNamespacesResponse {
  *
  * @public
  */
+export interface SavedObjectsRemoveReferencesToOptions extends SavedObjectsBaseOptions {
+  /** The Elasticsearch Refresh setting for this operation. Defaults to `true` */
+  refresh?: boolean;
+}
+
+/**
+ *
+ * @public
+ */
+export interface SavedObjectsRemoveReferencesToResponse extends SavedObjectsBaseOptions {
+  /** The number of objects that have been updated by this operation */
+  updated: number;
+}
+
+/**
+ *
+ * @public
+ */
 export interface SavedObjectsBulkUpdateOptions extends SavedObjectsBaseOptions {
   /** The Elasticsearch Refresh setting for this operation */
   refresh?: MutatingOperationRefreshSetting;
@@ -211,6 +243,8 @@ export interface SavedObjectsBulkUpdateOptions extends SavedObjectsBaseOptions {
 export interface SavedObjectsDeleteOptions extends SavedObjectsBaseOptions {
   /** The Elasticsearch Refresh setting for this operation */
   refresh?: MutatingOperationRefreshSetting;
+  /** Force deletion of an object that exists in multiple namespaces */
+  force?: boolean;
 }
 
 /**
@@ -416,5 +450,16 @@ export class SavedObjectsClient {
     options?: SavedObjectsBulkUpdateOptions
   ): Promise<SavedObjectsBulkUpdateResponse<T>> {
     return await this._repository.bulkUpdate(objects, options);
+  }
+
+  /**
+   * Updates all objects containing a reference to the given {type, id} tuple to remove the said reference.
+   */
+  async removeReferencesTo(
+    type: string,
+    id: string,
+    options?: SavedObjectsRemoveReferencesToOptions
+  ) {
+    return await this._repository.removeReferencesTo(type, id, options);
   }
 }

@@ -35,7 +35,7 @@ export interface UninitialisedResourceState {
  * @param Data - type of the data that is referenced by resource state
  * @param Error - type of the error that can happen during attempt to update data
  */
-export interface LoadingResourceState<Data, Error = ServerApiError> {
+export interface LoadingResourceState<Data = null, Error = ServerApiError> {
   type: 'LoadingResourceState';
   previousState: StaleResourceState<Data, Error>;
 }
@@ -46,7 +46,7 @@ export interface LoadingResourceState<Data, Error = ServerApiError> {
  *
  * @param Data - type of the data that is referenced by resource state
  */
-export interface LoadedResourceState<Data> {
+export interface LoadedResourceState<Data = null> {
   type: 'LoadedResourceState';
   data: Data;
 }
@@ -59,7 +59,7 @@ export interface LoadedResourceState<Data> {
  * @param Data - type of the data that is referenced by resource state
  * @param Error - type of the error that can happen during attempt to update data
  */
-export interface FailedResourceState<Data, Error = ServerApiError> {
+export interface FailedResourceState<Data = null, Error = ServerApiError> {
   type: 'FailedResourceState';
   error: Error;
   lastLoadedState?: LoadedResourceState<Data>;
@@ -71,7 +71,7 @@ export interface FailedResourceState<Data, Error = ServerApiError> {
  * @param Data - type of the data that is referenced by resource state
  * @param Error - type of the error that can happen during attempt to update data
  */
-export type StaleResourceState<Data, Error = ServerApiError> =
+export type StaleResourceState<Data = null, Error = ServerApiError> =
   | UninitialisedResourceState
   | LoadedResourceState<Data>
   | FailedResourceState<Data, Error>;
@@ -82,7 +82,7 @@ export type StaleResourceState<Data, Error = ServerApiError> =
  * @param Data - type of the data that is referenced by resource state
  * @param Error - type of the error that can happen during attempt to update data
  */
-export type AsyncResourceState<Data, Error = ServerApiError> =
+export type AsyncResourceState<Data = null, Error = ServerApiError> =
   | UninitialisedResourceState
   | LoadingResourceState<Data, Error>
   | LoadedResourceState<Data>
@@ -105,6 +105,13 @@ export const isLoadedResourceState = <Data, Error>(
 export const isFailedResourceState = <Data, Error>(
   state: Immutable<AsyncResourceState<Data, Error>>
 ): state is Immutable<FailedResourceState<Data, Error>> => state.type === 'FailedResourceState';
+
+export const isStaleResourceState = <Data, Error>(
+  state: Immutable<AsyncResourceState<Data, Error>>
+): state is Immutable<StaleResourceState<Data, Error>> =>
+  isUninitialisedResourceState(state) ||
+  isLoadedResourceState(state) ||
+  isFailedResourceState(state);
 
 // Set of functions to work with AsyncResourceState
 

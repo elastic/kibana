@@ -16,62 +16,46 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { first } from 'rxjs/operators';
-import { SharedGlobalConfig, Logger } from 'kibana/server';
-import { SearchResponse } from 'elasticsearch';
 import { Observable } from 'rxjs';
-import { ApiResponse } from '@elastic/elasticsearch';
-import { SearchUsage } from '../collectors/usage';
-import { toSnakeCase } from './to_snake_case';
-import { ISearchStrategy, getDefaultSearchParams, getTotalLoaded, getShardTimeout } from '..';
+import { first } from 'rxjs/operators';
+
+import type { Logger } from 'kibana/server';
+import type { ApiResponse } from '@elastic/elasticsearch';
+import type { SharedGlobalConfig } from 'kibana/server';
+
+import { doSearch, includeTotalLoaded, toKibanaSearchResponse, toSnakeCase } from '../../../common';
+import { trackSearchStatus } from './es_search_rxjs_utils';
+import { getDefaultSearchParams, getShardTimeout } from '../es_search';
+
+import type { ISearchStrategy } from '../types';
+import type { SearchUsage } from '../collectors/usage';
+import type { IEsRawSearchResponse } from '../../../common';
 
 export const esSearchStrategyProvider = (
   config$: Observable<SharedGlobalConfig>,
   logger: Logger,
   usage?: SearchUsage
-): ISearchStrategy => {
-  return {
-    search: async (context, request, options) => {
-      logger.debug(`search ${request.params?.index}`);
+): ISearchStrategy => ({
+  search: (request, { abortSignal }, { esClient, uiSettingsClient }) => {
+    // Only default index pattern type is supported here.
+    // See data_enhanced for other type support.
+    if (request.indexType) {
+      throw new Error(`Unsupported index pattern type ${request.indexType}`);
+    }
+
+    return doSearch<ApiResponse<IEsRawSearchResponse>>(async () => {
       const config = await config$.pipe(first()).toPromise();
-      const uiSettingsClient = await context.core.uiSettings.client;
-
-      // Only default index pattern type is supported here.
-      // See data_enhanced for other type support.
-      if (!!request.indexType) {
-        throw new Error(`Unsupported index pattern type ${request.indexType}`);
-      }
-
-      // ignoreThrottled is not supported in OSS
-      const { ignoreThrottled, ...defaultParams } = await getDefaultSearchParams(uiSettingsClient);
-
       const params = toSnakeCase({
-        ...defaultParams,
+        ...(await getDefaultSearchParams(uiSettingsClient)),
         ...getShardTimeout(config),
         ...request.params,
       });
 
-      try {
-        // Temporary workaround until https://github.com/elastic/elasticsearch-js/issues/1297
-        const promise = context.core.elasticsearch.client.asCurrentUser.search(params);
-        if (options?.abortSignal)
-          options.abortSignal.addEventListener('abort', () => promise.abort());
-        const { body: rawResponse } = (await promise) as ApiResponse<SearchResponse<any>>;
-
-        if (usage) usage.trackSuccess(rawResponse.took);
-
-        // The above query will either complete or timeout and throw an error.
-        // There is no progress indication on this api.
-        return {
-          isPartial: false,
-          isRunning: false,
-          rawResponse,
-          ...getTotalLoaded(rawResponse._shards),
-        };
-      } catch (e) {
-        if (usage) usage.trackError();
-        throw e;
-      }
-    },
-  };
-};
+      return esClient.asCurrentUser.search(params);
+    }, abortSignal).pipe(
+      toKibanaSearchResponse(),
+      trackSearchStatus(logger, usage),
+      includeTotalLoaded()
+    );
+  },
+});

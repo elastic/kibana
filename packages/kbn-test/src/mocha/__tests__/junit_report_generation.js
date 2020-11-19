@@ -25,13 +25,14 @@ import { parseString } from 'xml2js';
 import del from 'del';
 import Mocha from 'mocha';
 import expect from '@kbn/expect';
-import { makeJunitReportPath } from '@kbn/test';
+import { getUniqueJunitReportPath } from '../../report_path';
 
 import { setupJUnitReportGeneration } from '../junit_report_generation';
 
 const PROJECT_DIR = resolve(__dirname, 'fixtures/project');
 const DURATION_REGEX = /^\d+\.\d{3}$/;
 const ISO_DATE_SEC_REGEX = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}$/;
+const XML_PATH = getUniqueJunitReportPath(PROJECT_DIR, 'test');
 
 describe('dev/mocha/junit report generation', () => {
   afterEach(() => {
@@ -50,9 +51,7 @@ describe('dev/mocha/junit report generation', () => {
 
     mocha.addFile(resolve(PROJECT_DIR, 'test.js'));
     await new Promise((resolve) => mocha.run(resolve));
-    const report = await fcb((cb) =>
-      parseString(readFileSync(makeJunitReportPath(PROJECT_DIR, 'test')), cb)
-    );
+    const report = await fcb((cb) => parseString(readFileSync(XML_PATH), cb));
 
     // test case results are wrapped in <testsuites></testsuites>
     expect(report).to.eql({

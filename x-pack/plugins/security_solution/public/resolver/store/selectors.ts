@@ -9,7 +9,7 @@ import * as cameraSelectors from './camera/selectors';
 import * as dataSelectors from './data/selectors';
 import * as uiSelectors from './ui/selectors';
 import { ResolverState, IsometricTaxiLayout } from '../types';
-import { ResolverEvent, ResolverNodeStats } from '../../../common/endpoint/types';
+import { ResolverNodeStats, SafeResolverEvent } from '../../../common/endpoint/types';
 import { entityIDSafeVersion } from '../../../common/endpoint/models/event';
 
 /**
@@ -62,13 +62,18 @@ export const isProcessTerminated = composeSelectors(
 );
 
 /**
+ * Retrieve an event from memory using the event's ID.
+ */
+export const eventByID = composeSelectors(dataStateSelector, dataSelectors.eventByID);
+
+/**
  * Given a nodeID (aka entity_id) get the indexed process event.
  * Legacy functions take process events instead of nodeID, use this to get
  * process events for them.
  */
 export const processEventForID: (
   state: ResolverState
-) => (nodeID: string) => ResolverEvent | null = composeSelectors(
+) => (nodeID: string) => SafeResolverEvent | null = composeSelectors(
   dataStateSelector,
   dataSelectors.processEventForID
 );
@@ -119,11 +124,34 @@ export const relatedEventsStats: (
  * of their individual `event.category`s. E.g. a [DNS, Network] would count as two
  * towards the aggregate total.
  */
-export const relatedEventAggregateTotalByEntityId: (
+export const relatedEventTotalCount: (
   state: ResolverState
-) => (nodeID: string) => number = composeSelectors(
+) => (nodeID: string) => number | undefined = composeSelectors(
   dataStateSelector,
-  dataSelectors.relatedEventAggregateTotalByEntityId
+  dataSelectors.relatedEventTotalCount
+);
+
+export const relatedEventCountByCategory: (
+  state: ResolverState
+) => (nodeID: string, eventCategory: string) => number | undefined = composeSelectors(
+  dataStateSelector,
+  dataSelectors.relatedEventCountByCategory
+);
+
+/**
+ * the loading state of the current related event data for the `event_detail` view
+ */
+export const isCurrentRelatedEventLoading = composeSelectors(
+  dataStateSelector,
+  dataSelectors.isCurrentRelatedEventLoading
+);
+
+/**
+ * the current related event data for the `event_detail` view
+ */
+export const currentRelatedEventData = composeSelectors(
+  dataStateSelector,
+  dataSelectors.currentRelatedEventData
 );
 
 /**
@@ -136,16 +164,6 @@ export const relatedEventsByEntityId = composeSelectors(
 );
 
 /**
- * Returns a function that returns the information needed to display related event details based on
- * the related event's entityID and its own ID.
- * @deprecated
- */
-export const relatedEventDisplayInfoByEntityAndSelfId = composeSelectors(
-  dataStateSelector,
-  dataSelectors.relatedEventDisplayInfoByEntityAndSelfID
-);
-
-/**
  * Returns a function that returns a function (when supplied with an entity id for a node)
  * that returns related events for a node that match an event.category (when supplied with the category)
  * @deprecated
@@ -153,26 +171,6 @@ export const relatedEventDisplayInfoByEntityAndSelfId = composeSelectors(
 export const relatedEventsByCategory = composeSelectors(
   dataStateSelector,
   dataSelectors.relatedEventsByCategory
-);
-
-/**
- * Entity ids to booleans for waiting status
- * @deprecated
- */
-export const relatedEventsReady = composeSelectors(
-  dataStateSelector,
-  dataSelectors.relatedEventsReady
-);
-
-/**
- * Business logic lookup functions by ECS category by entity id.
- * Example usage:
- * const numberOfFileEvents = infoByEntityId.get(`someEntityId`)?.getAggregateTotalForCategory(`file`);
- * @deprecated
- */
-export const relatedEventInfoByEntityId = composeSelectors(
-  dataStateSelector,
-  dataSelectors.relatedEventInfoByEntityId
 );
 
 /**
@@ -259,10 +257,10 @@ export const relatedEventTotalForProcess = composeSelectors(
  * animated. So in order to get the currently visible entities, we need to pass in time.
  */
 export const visibleNodesAndEdgeLines = createSelector(nodesAndEdgelines, boundingBox, function (
-  /* eslint-disable no-shadow */
+  /* eslint-disable @typescript-eslint/no-shadow */
   nodesAndEdgelines,
   boundingBox
-  /* eslint-enable no-shadow */
+  /* eslint-enable @typescript-eslint/no-shadow */
 ) {
   // `boundingBox` and `nodesAndEdgelines` are each memoized.
   return (time: number) => nodesAndEdgelines(boundingBox(time));
@@ -330,7 +328,7 @@ export const panelViewAndParameters = composeSelectors(
 export const relativeHref = composeSelectors(uiStateSelector, uiSelectors.relativeHref);
 
 /**
- * @deprecated
+ * @deprecated use `useLinkProps`
  */
 export const relatedEventsRelativeHrefs = composeSelectors(
   uiStateSelector,
@@ -338,11 +336,63 @@ export const relatedEventsRelativeHrefs = composeSelectors(
 );
 
 /**
- * @deprecated
+ * Total count of events related to `nodeID`.
+ * Based on `ResolverNodeStats`
  */
-export const relatedEventDetailHrefs = composeSelectors(
-  uiStateSelector,
-  uiSelectors.relatedEventDetailHrefs
+export const totalRelatedEventCountForNode = composeSelectors(
+  dataStateSelector,
+  dataSelectors.totalRelatedEventCountForNode
+);
+
+/**
+ * Count of events with `category` related to `nodeID`.
+ * Based on `ResolverNodeStats`
+ * Used to populate the breadcrumbs in the `nodeEventsInCategory` panel.
+ */
+export const relatedEventCountOfTypeForNode = composeSelectors(
+  dataStateSelector,
+  dataSelectors.relatedEventCountOfTypeForNode
+);
+
+/**
+ * Events related to the panel node that are in the panel category.
+ * Used to populate the breadcrumbs in the `nodeEventsInCategory` panel.
+ * NB: This cannot tell the view loading information. For example, this does not tell the view if data has been request or if data failed to load.
+ */
+export const nodeEventsInCategory = composeSelectors(
+  dataStateSelector,
+  dataSelectors.nodeEventsInCategory
+);
+
+/**
+ * Flag used to show a Load More Data button in the nodeEventsOfType panel view.
+ */
+export const lastRelatedEventResponseContainsCursor = composeSelectors(
+  dataStateSelector,
+  dataSelectors.lastRelatedEventResponseContainsCursor
+);
+
+/**
+ * Flag to show an error message when loading more related events.
+ */
+export const hadErrorLoadingNodeEventsInCategory = composeSelectors(
+  dataStateSelector,
+  dataSelectors.hadErrorLoadingNodeEventsInCategory
+);
+/**
+ * Flag used to show a loading view for the initial loading of related events.
+ */
+export const isLoadingNodeEventsInCategory = composeSelectors(
+  dataStateSelector,
+  dataSelectors.isLoadingNodeEventsInCategory
+);
+
+/**
+ * Flag used to show a loading state for any additional related events.
+ */
+export const isLoadingMoreNodeEventsInCategory = composeSelectors(
+  dataStateSelector,
+  dataSelectors.isLoadingMoreNodeEventsInCategory
 );
 
 /**

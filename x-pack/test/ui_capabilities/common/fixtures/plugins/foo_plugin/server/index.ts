@@ -17,9 +17,7 @@ class FooPlugin implements Plugin {
     plugins.features.registerKibanaFeature({
       id: 'foo',
       name: 'Foo',
-      icon: 'upArrow',
       category: { id: 'foo', label: 'foo' },
-      navLinkId: 'foo_plugin',
       app: ['foo_plugin', 'kibana'],
       catalogue: ['foo'],
       privileges: {

@@ -11,6 +11,7 @@ import { HashRouter, Route, RouteComponentProps, Switch } from 'react-router-dom
 import { render, unmountComponentAtNode } from 'react-dom';
 import { i18n } from '@kbn/i18n';
 
+import { DashboardFeatureFlagConfig } from 'src/plugins/dashboard/public';
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 
 import { LensReportManager, setReportManager, trackUiEvent } from '../lens_ui_telemetry';
@@ -18,79 +19,130 @@ import { LensReportManager, setReportManager, trackUiEvent } from '../lens_ui_te
 import { App } from './app';
 import { EditorFrameStart } from '../types';
 import { addHelpMenuToAppChrome } from '../help_menu_util';
-import { SavedObjectIndexStore } from '../persistence';
 import { LensPluginStartDependencies } from '../plugin';
-import { LENS_EMBEDDABLE_TYPE } from '../../common';
+import { LENS_EMBEDDABLE_TYPE, LENS_EDIT_BY_VALUE } from '../../common';
+import {
+  LensEmbeddableInput,
+  LensByReferenceInput,
+  LensByValueInput,
+} from '../editor_frame_service/embeddable/embeddable';
+import { ACTION_VISUALIZE_LENS_FIELD } from '../../../../../src/plugins/ui_actions/public';
+import { LensAttributeService } from '../lens_attribute_service';
+import { LensAppServices, RedirectToOriginProps, HistoryLocationState } from './types';
+import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 
 export async function mountApp(
   core: CoreSetup<LensPluginStartDependencies, void>,
   params: AppMountParameters,
-  createEditorFrame: EditorFrameStart['createInstance']
+  mountProps: {
+    createEditorFrame: EditorFrameStart['createInstance'];
+    getByValueFeatureFlag: () => Promise<DashboardFeatureFlagConfig>;
+    attributeService: () => Promise<LensAttributeService>;
+  }
 ) {
+  const { createEditorFrame, getByValueFeatureFlag, attributeService } = mountProps;
   const [coreStart, startDependencies] = await core.getStartServices();
-  const { data: dataStart, navigation, embeddable } = startDependencies;
-  const savedObjectsClient = coreStart.savedObjects.client;
-  addHelpMenuToAppChrome(coreStart.chrome, coreStart.docLinks);
+  const { data, navigation, embeddable, savedObjectsTagging } = startDependencies;
 
+  const instance = await createEditorFrame();
+  const storage = new Storage(localStorage);
+  const stateTransfer = embeddable?.getStateTransfer(params.history);
+  const historyLocationState = params.history.location.state as HistoryLocationState;
+  const embeddableEditorIncomingState = stateTransfer?.getIncomingEditorState();
+
+  const lensServices: LensAppServices = {
+    data,
+    storage,
+    navigation,
+    savedObjectsTagging,
+    attributeService: await attributeService(),
+    http: coreStart.http,
+    chrome: coreStart.chrome,
+    overlays: coreStart.overlays,
+    uiSettings: coreStart.uiSettings,
+    application: coreStart.application,
+    notifications: coreStart.notifications,
+    savedObjectsClient: coreStart.savedObjects.client,
+    getOriginatingAppName: () => {
+      return embeddableEditorIncomingState?.originatingApp
+        ? stateTransfer?.getAppNameFromId(embeddableEditorIncomingState.originatingApp)
+        : undefined;
+    },
+
+    // Temporarily required until the 'by value' paradigm is default.
+    dashboardFeatureFlag: await getByValueFeatureFlag(),
+  };
+
+  addHelpMenuToAppChrome(coreStart.chrome, coreStart.docLinks);
   coreStart.chrome.docTitle.change(
     i18n.translate('xpack.lens.pageTitle', { defaultMessage: 'Lens' })
   );
 
-  const stateTransfer = embeddable?.getStateTransfer(params.history);
-  const { originatingApp } =
-    stateTransfer?.getIncomingEditorState({ keysToRemoveAfterFetch: ['originatingApp'] }) || {};
-
-  const instance = await createEditorFrame();
-
   setReportManager(
     new LensReportManager({
-      storage: new Storage(localStorage),
       http: core.http,
+      storage,
     })
   );
-  const redirectTo = (
-    routeProps: RouteComponentProps<{ id?: string }>,
-    id?: string,
-    returnToOrigin?: boolean,
-    newlyCreated?: boolean
-  ) => {
-    if (!id) {
-      routeProps.history.push('/');
-    } else if (!originatingApp) {
-      routeProps.history.push(`/edit/${id}`);
-    } else if (!!originatingApp && id && returnToOrigin) {
-      routeProps.history.push(`/edit/${id}`);
 
-      if (newlyCreated && stateTransfer) {
-        stateTransfer.navigateToWithEmbeddablePackage(originatingApp, {
-          state: { id, type: LENS_EMBEDDABLE_TYPE },
-        });
-      } else {
-        coreStart.application.navigateToApp(originatingApp);
-      }
+  const getInitialInput = (
+    routeProps: RouteComponentProps<{ id?: string }>
+  ): LensEmbeddableInput | undefined => {
+    if (routeProps.match.params.id) {
+      return { savedObjectId: routeProps.match.params.id } as LensByReferenceInput;
+    }
+    if (embeddableEditorIncomingState?.valueInput) {
+      return embeddableEditorIncomingState?.valueInput as LensByValueInput;
     }
   };
 
+  const redirectTo = (routeProps: RouteComponentProps<{ id?: string }>, savedObjectId?: string) => {
+    if (!savedObjectId) {
+      routeProps.history.push({ pathname: '/', search: routeProps.history.location.search });
+    } else {
+      routeProps.history.push({
+        pathname: `/edit/${savedObjectId}`,
+        search: routeProps.history.location.search,
+      });
+    }
+  };
+
+  const redirectToOrigin = (props?: RedirectToOriginProps) => {
+    if (!embeddableEditorIncomingState?.originatingApp) {
+      throw new Error('redirectToOrigin called without an originating app');
+    }
+    if (stateTransfer && props?.input) {
+      const { input, isCopied } = props;
+      stateTransfer.navigateToWithEmbeddablePackage(embeddableEditorIncomingState?.originatingApp, {
+        state: {
+          embeddableId: isCopied ? undefined : embeddableEditorIncomingState.embeddableId,
+          type: LENS_EMBEDDABLE_TYPE,
+          input,
+        },
+      });
+    } else {
+      coreStart.application.navigateToApp(embeddableEditorIncomingState?.originatingApp);
+    }
+  };
+
+  // const featureFlagConfig = await getByValueFeatureFlag();
   const renderEditor = (routeProps: RouteComponentProps<{ id?: string }>) => {
     trackUiEvent('loaded');
-
     return (
       <App
-        core={coreStart}
-        data={dataStart}
-        navigation={navigation}
+        incomingState={embeddableEditorIncomingState}
         editorFrame={instance}
-        storage={new Storage(localStorage)}
-        docId={routeProps.match.params.id}
-        docStorage={new SavedObjectIndexStore(savedObjectsClient)}
-        redirectTo={(id, returnToOrigin, newlyCreated) =>
-          redirectTo(routeProps, id, returnToOrigin, newlyCreated)
-        }
-        originatingApp={originatingApp}
-        getAppNameFromId={stateTransfer.getAppNameFromId}
+        initialInput={getInitialInput(routeProps)}
+        redirectTo={(savedObjectId?: string) => redirectTo(routeProps, savedObjectId)}
+        redirectToOrigin={redirectToOrigin}
         onAppLeave={params.onAppLeave}
         setHeaderActionMenu={params.setHeaderActionMenu}
         history={routeProps.history}
+        initialContext={
+          historyLocationState && historyLocationState.type === ACTION_VISUALIZE_LENS_FIELD
+            ? historyLocationState.payload
+            : undefined
+        }
       />
     );
   };
@@ -99,22 +151,31 @@ export async function mountApp(
     trackUiEvent('loaded_404');
     return <FormattedMessage id="xpack.lens.app404" defaultMessage="404 Not Found" />;
   }
+  // dispatch synthetic hash change event to update hash history objects
+  // this is necessary because hash updates triggered by using popState won't trigger this event naturally.
+  const unlistenParentHistory = params.history.listen(() => {
+    window.dispatchEvent(new HashChangeEvent('hashchange'));
+  });
 
   params.element.classList.add('lnsAppWrapper');
   render(
     <I18nProvider>
-      <HashRouter>
-        <Switch>
-          <Route exact path="/edit/:id" render={renderEditor} />
-          <Route exact path="/" render={renderEditor} />
-          <Route path="/" component={NotFound} />
-        </Switch>
-      </HashRouter>
+      <KibanaContextProvider services={lensServices}>
+        <HashRouter>
+          <Switch>
+            <Route exact path="/edit/:id" render={renderEditor} />
+            <Route exact path={`/${LENS_EDIT_BY_VALUE}`} render={renderEditor} />
+            <Route exact path="/" render={renderEditor} />
+            <Route path="/" component={NotFound} />
+          </Switch>
+        </HashRouter>
+      </KibanaContextProvider>
     </I18nProvider>,
     params.element
   );
   return () => {
     instance.unmount();
     unmountComponentAtNode(params.element);
+    unlistenParentHistory();
   };
 }

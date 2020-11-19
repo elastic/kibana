@@ -16,6 +16,8 @@ import {
   ValidationFuncArg,
   fieldFormatters,
   FieldConfig,
+  RUNTIME_FIELD_OPTIONS,
+  RuntimeType,
 } from '../shared_imports';
 import {
   AliasOption,
@@ -166,7 +168,7 @@ export const PARAMETERS_DEFINITION: { [key in ParameterName]: ParameterDefinitio
             },
           ];
         }
-        return [];
+        return [{ value: '' }];
       },
       serializer: (fieldType: ComboBoxOption[] | undefined) =>
         fieldType && fieldType.length ? fieldType[0].value : fieldType,
@@ -177,6 +179,52 @@ export const PARAMETERS_DEFINITION: { [key in ParameterName]: ParameterDefinitio
               'xpack.idxMgmt.mappingsEditor.parameters.validations.typeIsRequiredErrorMessage',
               {
                 defaultMessage: 'Specify a field type.',
+              }
+            )
+          ),
+        },
+      ],
+    },
+    schema: t.string,
+  },
+  runtime_type: {
+    fieldConfig: {
+      type: FIELD_TYPES.COMBO_BOX,
+      label: i18n.translate('xpack.idxMgmt.mappingsEditor.parameters.runtimeTypeLabel', {
+        defaultMessage: 'Type',
+      }),
+      defaultValue: 'keyword',
+      deserializer: (fieldType: RuntimeType | undefined) => {
+        if (typeof fieldType === 'string' && Boolean(fieldType)) {
+          const label =
+            RUNTIME_FIELD_OPTIONS.find(({ value }) => value === fieldType)?.label ?? fieldType;
+          return [
+            {
+              label,
+              value: fieldType,
+            },
+          ];
+        }
+        return [];
+      },
+      serializer: (value: ComboBoxOption[]) => (value.length === 0 ? '' : value[0].value),
+    },
+    schema: t.string,
+  },
+  script: {
+    fieldConfig: {
+      defaultValue: '',
+      type: FIELD_TYPES.TEXT,
+      label: i18n.translate('xpack.idxMgmt.mappingsEditor.parameters.painlessScriptLabel', {
+        defaultMessage: 'Script',
+      }),
+      validations: [
+        {
+          validator: emptyField(
+            i18n.translate(
+              'xpack.idxMgmt.mappingsEditor.parameters.validations.scriptIsRequiredErrorMessage',
+              {
+                defaultMessage: 'Script must emit() a value.',
               }
             )
           ),
@@ -225,15 +273,15 @@ export const PARAMETERS_DEFINITION: { [key in ParameterName]: ParameterDefinitio
       min: {
         fieldConfig: {
           defaultValue: 0.01,
-          serializer: (value) => (value === '' ? '' : toInt(value) / 100),
-          deserializer: (value) => Math.round(value * 100),
+          serializer: (value: string) => (value === '' ? '' : toInt(value) / 100),
+          deserializer: (value: number) => Math.round(value * 100),
         } as FieldConfig,
       },
       max: {
         fieldConfig: {
           defaultValue: 1,
-          serializer: (value) => (value === '' ? '' : toInt(value) / 100),
-          deserializer: (value) => Math.round(value * 100),
+          serializer: (value: string) => (value === '' ? '' : toInt(value) / 100),
+          deserializer: (value: number) => Math.round(value * 100),
         } as FieldConfig,
       },
     },
@@ -901,8 +949,8 @@ export const PARAMETERS_DEFINITION: { [key in ParameterName]: ParameterDefinitio
           ),
         },
       ],
-      serializer: (value: AliasOption[]) => (value.length === 0 ? '' : value[0].id),
-    } as FieldConfig<any, string>,
+      serializer: (value) => (value.length === 0 ? '' : value[0].id),
+    } as FieldConfig<string, {}, AliasOption[]>,
     targetTypesNotAllowed: ['object', 'nested', 'alias'] as DataType[],
     schema: t.string,
   },
@@ -943,14 +991,14 @@ export const PARAMETERS_DEFINITION: { [key in ParameterName]: ParameterDefinitio
         fieldConfig: {
           type: FIELD_TYPES.NUMBER,
           defaultValue: 2,
-          serializer: (value) => (value === '' ? '' : toInt(value)),
+          serializer: (value: string) => (value === '' ? '' : toInt(value)),
         } as FieldConfig,
       },
       max_chars: {
         fieldConfig: {
           type: FIELD_TYPES.NUMBER,
           defaultValue: 5,
-          serializer: (value) => (value === '' ? '' : toInt(value)),
+          serializer: (value: string) => (value === '' ? '' : toInt(value)),
         } as FieldConfig,
       },
     },

@@ -25,6 +25,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
           config: {
             service: '__json',
             from: 'bob@example.com',
+            hasAuth: true,
           },
           secrets: {
             user: 'bob',
@@ -41,6 +42,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
         actionTypeId: '.email',
         config: {
           service: '__json',
+          hasAuth: true,
           host: null,
           port: null,
           secure: null,
@@ -62,6 +64,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
         config: {
           from: 'bob@example.com',
           service: '__json',
+          hasAuth: true,
           host: null,
           port: null,
           secure: null,

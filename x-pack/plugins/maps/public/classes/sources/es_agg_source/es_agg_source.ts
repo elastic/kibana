@@ -9,9 +9,8 @@ import { Adapters } from 'src/plugins/inspector/public';
 import { GeoJsonProperties } from 'geojson';
 import { IESSource } from '../es_source';
 import { AbstractESSource } from '../es_source';
-import { esAggFieldsFactory } from '../../fields/es_agg_field';
+import { esAggFieldsFactory, IESAggField } from '../../fields/agg';
 import { AGG_TYPE, COUNT_PROP_LABEL, FIELD_ORIGIN } from '../../../../common/constants';
-import { IESAggField } from '../../fields/es_agg_field';
 import { getSourceAggKey } from '../../../../common/get_agg_key';
 import { AbstractESAggSourceDescriptor, AggDescriptor } from '../../../../common/descriptor_types';
 import { IndexPattern } from '../../../../../../../src/plugins/data/public';
@@ -29,22 +28,45 @@ export interface IESAggSource extends IESSource {
   getValueAggsDsl(indexPattern: IndexPattern): { [key: string]: unknown };
 }
 
-export class AbstractESAggSource extends AbstractESSource {
+export abstract class AbstractESAggSource extends AbstractESSource {
   private readonly _metricFields: IESAggField[];
+  private readonly _canReadFromGeoJson: boolean;
 
-  constructor(descriptor: AbstractESAggSourceDescriptor, inspectorAdapters: Adapters) {
+  static createDescriptor(
+    descriptor: Partial<AbstractESAggSourceDescriptor>
+  ): AbstractESAggSourceDescriptor {
+    const normalizedDescriptor = AbstractESSource.createDescriptor(descriptor);
+    return {
+      ...normalizedDescriptor,
+      type: descriptor.type ? descriptor.type : '',
+      metrics:
+        descriptor.metrics && descriptor.metrics.length > 0 ? descriptor.metrics : [DEFAULT_METRIC],
+    };
+  }
+
+  constructor(
+    descriptor: AbstractESAggSourceDescriptor,
+    inspectorAdapters?: Adapters,
+    canReadFromGeoJson = true
+  ) {
     super(descriptor, inspectorAdapters);
     this._metricFields = [];
+    this._canReadFromGeoJson = canReadFromGeoJson;
     if (descriptor.metrics) {
       descriptor.metrics.forEach((aggDescriptor: AggDescriptor) => {
         this._metricFields.push(
-          ...esAggFieldsFactory(aggDescriptor, this, this.getOriginForField())
+          ...esAggFieldsFactory(
+            aggDescriptor,
+            this,
+            this.getOriginForField(),
+            this._canReadFromGeoJson
+          )
         );
       });
     }
   }
 
-  getFieldByName(fieldName: string) {
+  getFieldByName(fieldName: string): IField | null {
     return this.getMetricFieldForName(fieldName);
   }
 
@@ -72,7 +94,12 @@ export class AbstractESAggSource extends AbstractESSource {
     const metrics = this._metricFields.filter((esAggField) => esAggField.isValid());
     // Handle case where metrics is empty because older saved object state is empty array or there are no valid aggs.
     return metrics.length === 0
-      ? esAggFieldsFactory({ type: AGG_TYPE.COUNT }, this, this.getOriginForField())
+      ? esAggFieldsFactory(
+          { type: AGG_TYPE.COUNT },
+          this,
+          this.getOriginForField(),
+          this._canReadFromGeoJson
+        )
       : metrics;
   }
 
@@ -97,7 +124,7 @@ export class AbstractESAggSource extends AbstractESSource {
     }
   }
 
-  async getFields() {
+  async getFields(): Promise<IField[]> {
     return this.getMetricFields();
   }
 
@@ -112,7 +139,7 @@ export class AbstractESAggSource extends AbstractESSource {
     return valueAggsDsl;
   }
 
-  async getTooltipProperties(properties: GeoJsonProperties) {
+  async getTooltipProperties(properties: GeoJsonProperties): Promise<ITooltipProperty[]> {
     const metricFields = await this.getFields();
     const promises: Array<Promise<ITooltipProperty>> = [];
     metricFields.forEach((metricField) => {

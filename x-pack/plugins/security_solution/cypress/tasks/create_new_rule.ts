@@ -11,6 +11,7 @@ import {
   OverrideRule,
   ThresholdRule,
 } from '../objects/rule';
+import { NUMBER_OF_ALERTS } from '../screens/alerts';
 import {
   ABOUT_CONTINUE_BTN,
   ABOUT_EDIT_TAB,
@@ -28,6 +29,8 @@ import {
   IMPORT_QUERY_FROM_SAVED_TIMELINE_LINK,
   INPUT,
   INVESTIGATION_NOTES_TEXTAREA,
+  LOOK_BACK_INTERVAL,
+  LOOK_BACK_TIME_TYPE,
   MACHINE_LEARNING_DROPDOWN,
   MACHINE_LEARNING_LIST,
   MACHINE_LEARNING_TYPE,
@@ -36,13 +39,17 @@ import {
   MITRE_TACTIC_DROPDOWN,
   MITRE_TECHNIQUES_INPUT,
   REFERENCE_URLS_INPUT,
+  REFRESH_BUTTON,
   RISK_INPUT,
   RISK_MAPPING_OVERRIDE_OPTION,
   RISK_OVERRIDE,
   RULE_DESCRIPTION_INPUT,
   RULE_NAME_INPUT,
   RULE_NAME_OVERRIDE,
+  RULE_STATUS,
   RULE_TIMESTAMP_OVERRIDE,
+  RUNS_EVERY_INTERVAL,
+  RUNS_EVERY_TIME_TYPE,
   SCHEDULE_CONTINUE_BUTTON,
   SCHEDULE_EDIT_TAB,
   SEVERITY_DROPDOWN,
@@ -54,8 +61,13 @@ import {
   THRESHOLD_TYPE,
   EQL_TYPE,
   EQL_QUERY_INPUT,
+  QUERY_PREVIEW_BUTTON,
+  EQL_QUERY_PREVIEW_HISTOGRAM,
+  EQL_QUERY_VALIDATION_SPINNER,
 } from '../screens/create_new_rule';
+import { NOTIFICATION_TOASTS, TOAST_ERROR_CLASS } from '../screens/shared';
 import { TIMELINE } from '../screens/timelines';
+import { refreshPage } from './security_header';
 
 export const createAndActivateRule = () => {
   cy.get(SCHEDULE_CONTINUE_BUTTON).click({ force: true });
@@ -184,10 +196,17 @@ export const fillDefineCustomRuleWithImportedQueryAndContinue = (
 ) => {
   cy.get(IMPORT_QUERY_FROM_SAVED_TIMELINE_LINK).click();
   cy.get(TIMELINE(rule.timelineId)).click();
-  cy.get(CUSTOM_QUERY_INPUT).invoke('text').should('eq', rule.customQuery);
+  cy.get(CUSTOM_QUERY_INPUT).should('have.value', rule.customQuery);
   cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click({ force: true });
 
   cy.get(CUSTOM_QUERY_INPUT).should('not.exist');
+};
+
+export const fillScheduleRuleAndContinue = (rule: CustomRule | MachineLearningRule) => {
+  cy.get(RUNS_EVERY_INTERVAL).type('{selectall}').type(rule.runsEvery.interval);
+  cy.get(RUNS_EVERY_TIME_TYPE).select(rule.runsEvery.timeType);
+  cy.get(LOOK_BACK_INTERVAL).type('{selectAll}').type(rule.lookBack.interval);
+  cy.get(LOOK_BACK_TIME_TYPE).select(rule.lookBack.timeType);
 };
 
 export const fillDefineThresholdRuleAndContinue = (rule: ThresholdRule) => {
@@ -195,7 +214,7 @@ export const fillDefineThresholdRuleAndContinue = (rule: ThresholdRule) => {
   const threshold = 1;
 
   cy.get(CUSTOM_QUERY_INPUT).type(rule.customQuery);
-  cy.get(CUSTOM_QUERY_INPUT).invoke('text').should('eq', rule.customQuery);
+  cy.get(CUSTOM_QUERY_INPUT).should('have.value', rule.customQuery);
   cy.get(THRESHOLD_INPUT_AREA)
     .find(INPUT)
     .then((inputs) => {
@@ -210,9 +229,12 @@ export const fillDefineThresholdRuleAndContinue = (rule: ThresholdRule) => {
 
 export const fillDefineEqlRuleAndContinue = (rule: CustomRule) => {
   cy.get(EQL_QUERY_INPUT).type(rule.customQuery);
-  cy.get(EQL_QUERY_INPUT).invoke('text').should('eq', rule.customQuery);
-  cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click({ force: true });
+  cy.get(EQL_QUERY_VALIDATION_SPINNER).should('not.exist');
+  cy.get(QUERY_PREVIEW_BUTTON).should('not.be.disabled').click({ force: true });
+  cy.get(EQL_QUERY_PREVIEW_HISTOGRAM).should('contain.text', 'Hits');
+  cy.get(NOTIFICATION_TOASTS).children().should('not.have.class', TOAST_ERROR_CLASS); // asserts no error toast on page
 
+  cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click({ force: true });
   cy.get(EQL_QUERY_INPUT).should('not.exist');
 };
 
@@ -249,6 +271,29 @@ export const selectMachineLearningRuleType = () => {
 
 export const selectThresholdRuleType = () => {
   cy.get(THRESHOLD_TYPE).click({ force: true });
+};
+
+export const waitForTheRuleToBeExecuted = () => {
+  cy.waitUntil(() => {
+    cy.get(REFRESH_BUTTON).click();
+    return cy
+      .get(RULE_STATUS)
+      .invoke('text')
+      .then((ruleStatus) => ruleStatus === 'succeeded');
+  });
+};
+
+export const waitForAlertsToPopulate = async () => {
+  cy.waitUntil(() => {
+    refreshPage();
+    return cy
+      .get(NUMBER_OF_ALERTS)
+      .invoke('text')
+      .then((countText) => {
+        const alertCount = parseInt(countText, 10) || 0;
+        return alertCount > 0;
+      });
+  });
 };
 
 export const selectEqlRuleType = () => {

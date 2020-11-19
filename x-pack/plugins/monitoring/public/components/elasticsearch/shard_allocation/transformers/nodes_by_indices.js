@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
+import { find, some, reduce, values, sortBy } from 'lodash';
 import { hasPrimaryChildren } from '../lib/has_primary_children';
 import { decorateShards } from '../lib/decorate_shards';
 
@@ -32,7 +32,7 @@ export function nodesByIndices() {
       if (!obj[node]) {
         createNode(obj, nodes[node], node);
       }
-      let indexObj = _.find(obj[node].children, { id: index });
+      let indexObj = find(obj[node].children, { id: index });
       if (!indexObj) {
         indexObj = {
           id: index,
@@ -51,7 +51,7 @@ export function nodesByIndices() {
     }
 
     let data = {};
-    if (_.some(shards, isUnassigned)) {
+    if (some(shards, isUnassigned)) {
       data.unassigned = {
         name: 'Unassigned',
         master: false,
@@ -60,19 +60,15 @@ export function nodesByIndices() {
       };
     }
 
-    data = _.reduce(decorateShards(shards, nodes), createIndexAddShard, data);
-
-    return _(data)
-      .values()
-      .sortBy(function (node) {
-        return [node.name !== 'Unassigned', !node.master, node.name];
-      })
-      .map(function (node) {
-        if (node.name === 'Unassigned') {
-          node.unassignedPrimaries = node.children.some(hasPrimaryChildren);
-        }
-        return node;
-      })
-      .value();
+    data = reduce(decorateShards(shards, nodes), createIndexAddShard, data);
+    const dataValues = values(data);
+    return sortBy(dataValues, function (node) {
+      return [node.name !== 'Unassigned', !node.master, node.name];
+    }).map(function (node) {
+      if (node.name === 'Unassigned') {
+        node.unassignedPrimaries = node.children.some(hasPrimaryChildren);
+      }
+      return node;
+    });
   };
 }

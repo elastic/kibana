@@ -9,29 +9,30 @@ import { noop } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 
-import { AbortError } from '../../../../../../../src/plugins/data/common';
+import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/plugins/data/common';
+import { AbortError } from '../../../../../../../src/plugins/kibana_utils/common';
 
-import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
-import { PageInfoPaginated, UncommonProcessesEdges } from '../../../graphql/types';
 import { inputsModel, State } from '../../../common/store';
 import { useKibana } from '../../../common/lib/kibana';
 import { generateTablePaginationOptions } from '../../../common/components/paginated_table/helpers';
 import { createFilter } from '../../../common/containers/helpers';
-
 import { hostsModel, hostsSelectors } from '../../store';
 import {
-  HostUncommonProcessesRequestOptions,
-  HostUncommonProcessesStrategyResponse,
-} from '../../../../common/search_strategy/security_solution/hosts/uncommon_processes';
-import { HostsQueries } from '../../../../common/search_strategy/security_solution/hosts';
-import { DocValueFields, SortField } from '../../../../common/search_strategy';
+  DocValueFields,
+  SortField,
+  PageInfoPaginated,
+  HostsUncommonProcessesEdges,
+  HostsQueries,
+  HostsUncommonProcessesRequestOptions,
+  HostsUncommonProcessesStrategyResponse,
+} from '../../../../common/search_strategy';
 
 import * as i18n from './translations';
 import { ESTermQuery } from '../../../../common/typed_json';
 import { getInspectResponse } from '../../../helpers';
 import { InspectResponse } from '../../../types';
 
-const ID = 'uncommonProcessesQuery';
+const ID = 'hostsUncommonProcessesQuery';
 
 export interface UncommonProcessesArgs {
   id: string;
@@ -41,13 +42,14 @@ export interface UncommonProcessesArgs {
   pageInfo: PageInfoPaginated;
   refetch: inputsModel.Refetch;
   totalCount: number;
-  uncommonProcesses: UncommonProcessesEdges[];
+  uncommonProcesses: HostsUncommonProcessesEdges[];
 }
 
 interface UseUncommonProcesses {
   docValueFields?: DocValueFields[];
   filterQuery?: ESTermQuery | string;
   endDate: string;
+  indexNames: string[];
   skip?: boolean;
   startDate: string;
   type: hostsModel.HostsType;
@@ -57,6 +59,7 @@ export const useUncommonProcesses = ({
   docValueFields,
   filterQuery,
   endDate,
+  indexNames,
   skip = false,
   startDate,
   type,
@@ -65,30 +68,38 @@ export const useUncommonProcesses = ({
   const { activePage, limit } = useSelector((state: State) =>
     getUncommonProcessesSelector(state, type)
   );
-  const { data, notifications, uiSettings } = useKibana().services;
+  const { data, notifications } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
-  const defaultIndex = uiSettings.get<string[]>(DEFAULT_INDEX_KEY);
   const [loading, setLoading] = useState(false);
-  const [uncommonProcessesRequest, setUncommonProcessesRequest] = useState<
-    HostUncommonProcessesRequestOptions
-  >({
-    defaultIndex,
-    docValueFields: docValueFields ?? [],
-    factoryQueryType: HostsQueries.uncommonProcesses,
-    filterQuery: createFilter(filterQuery),
-    pagination: generateTablePaginationOptions(activePage, limit),
-    timerange: {
-      interval: '12h',
-      from: startDate!,
-      to: endDate!,
-    },
-    sort: {} as SortField,
-  });
+  const [
+    uncommonProcessesRequest,
+    setUncommonProcessesRequest,
+  ] = useState<HostsUncommonProcessesRequestOptions | null>(
+    !skip
+      ? {
+          defaultIndex: indexNames,
+          docValueFields: docValueFields ?? [],
+          factoryQueryType: HostsQueries.uncommonProcesses,
+          filterQuery: createFilter(filterQuery),
+          pagination: generateTablePaginationOptions(activePage, limit),
+          timerange: {
+            interval: '12h',
+            from: startDate!,
+            to: endDate!,
+          },
+          sort: {} as SortField,
+        }
+      : null
+  );
 
   const wrappedLoadMore = useCallback(
     (newActivePage: number) => {
       setUncommonProcessesRequest((prevRequest) => {
+        if (!prevRequest) {
+          return prevRequest;
+        }
+
         return {
           ...prevRequest,
           pagination: generateTablePaginationOptions(newActivePage, limit),
@@ -119,14 +130,18 @@ export const useUncommonProcesses = ({
   );
 
   const uncommonProcessesSearch = useCallback(
-    (request: HostUncommonProcessesRequestOptions) => {
+    (request: HostsUncommonProcessesRequestOptions | null) => {
+      if (request == null) {
+        return;
+      }
+
       let didCancel = false;
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
         setLoading(true);
 
         const searchSubscription$ = data.search
-          .search<HostUncommonProcessesRequestOptions, HostUncommonProcessesStrategyResponse>(
+          .search<HostsUncommonProcessesRequestOptions, HostsUncommonProcessesStrategyResponse>(
             request,
             {
               strategy: 'securitySolutionSearchStrategy',
@@ -135,7 +150,7 @@ export const useUncommonProcesses = ({
           )
           .subscribe({
             next: (response) => {
-              if (!response.isPartial && !response.isRunning) {
+              if (isCompleteResponse(response)) {
                 if (!didCancel) {
                   setLoading(false);
                   setUncommonProcessesResponse((prevResponse) => ({
@@ -148,7 +163,7 @@ export const useUncommonProcesses = ({
                   }));
                 }
                 searchSubscription$.unsubscribe();
-              } else if (response.isPartial && !response.isRunning) {
+              } else if (isErrorResponse(response)) {
                 if (!didCancel) {
                   setLoading(false);
                 }
@@ -180,9 +195,10 @@ export const useUncommonProcesses = ({
   useEffect(() => {
     setUncommonProcessesRequest((prevRequest) => {
       const myRequest = {
-        ...prevRequest,
-        defaultIndex,
+        ...(prevRequest ?? {}),
+        defaultIndex: indexNames,
         docValueFields: docValueFields ?? [],
+        factoryQueryType: HostsQueries.uncommonProcesses,
         filterQuery: createFilter(filterQuery),
         pagination: generateTablePaginationOptions(activePage, limit),
         timerange: {
@@ -197,7 +213,7 @@ export const useUncommonProcesses = ({
       }
       return prevRequest;
     });
-  }, [activePage, defaultIndex, docValueFields, endDate, filterQuery, limit, skip, startDate]);
+  }, [activePage, indexNames, docValueFields, endDate, filterQuery, limit, skip, startDate]);
 
   useEffect(() => {
     uncommonProcessesSearch(uncommonProcessesRequest);

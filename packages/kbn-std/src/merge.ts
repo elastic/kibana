@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import isPlainObject from 'lodash/isPlainObject';
+import { isPlainObject } from 'lodash';
 /**
  * Deeply merges two objects, omitting undefined values, and not deeply merging Arrays.
  *

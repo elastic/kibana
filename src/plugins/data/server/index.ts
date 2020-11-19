@@ -133,16 +133,20 @@ export {
   IndexPatternsFetcher,
   FieldDescriptor as IndexPatternFieldDescriptor,
   shouldReadFieldFromDocValues, // used only in logstash_fields fixture
+  FieldDescriptor,
+  mergeCapabilitiesWithFields,
+  getCapabilitiesForRollupIndices,
 } from './index_patterns';
 
 export {
-  IIndexPattern,
   IFieldType,
   IFieldSubType,
   ES_FIELD_TYPES,
   KBN_FIELD_TYPES,
   IndexPatternAttributes,
   UI_SETTINGS,
+  IndexPattern,
+  IEsRawSearchResponse,
 } from '../common';
 
 /**
@@ -175,6 +179,13 @@ import {
   // tabify
   tabifyAggResponse,
   tabifyGetColumns,
+  // search
+  toSnakeCase,
+  shimAbortSignal,
+  doSearch,
+  includeTotalLoaded,
+  toKibanaSearchResponse,
+  getTotalLoaded,
 } from '../common';
 
 export {
@@ -197,6 +208,12 @@ export {
   OptionedParamType,
   OptionedValueProp,
   ParsedInterval,
+  // expressions
+  ExecutionContextSearch,
+  ExpressionFunctionKibana,
+  ExpressionFunctionKibanaContext,
+  ExpressionValueSearchContext,
+  KibanaContext,
   // search
   ISearchOptions,
   IEsSearchRequest,
@@ -212,17 +229,30 @@ export {
   ISearchStrategy,
   ISearchSetup,
   ISearchStart,
-  toSnakeCase,
+  SearchStrategyDependencies,
   getDefaultSearchParams,
   getShardTimeout,
-  getTotalLoaded,
   shimHitsTotal,
   usageProvider,
   SearchUsage,
 } from './search';
 
+import { trackSearchStatus } from './search';
+
 // Search namespace
 export const search = {
+  esSearch: {
+    utils: {
+      doSearch,
+      shimAbortSignal,
+      trackSearchStatus,
+      includeTotalLoaded,
+      toKibanaSearchResponse,
+      // utils:
+      getTotalLoaded,
+      toSnakeCase,
+    },
+  },
   aggs: {
     CidrMask,
     dateHistogramInterval,
@@ -286,6 +316,9 @@ export {
 export const config: PluginConfigDescriptor<ConfigSchema> = {
   exposeToBrowser: {
     autocomplete: true,
+    search: true,
   },
   schema: configSchema,
 };
+
+export type { IndexPatternsService } from './index_patterns';

@@ -8,7 +8,6 @@ import { noop } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import deepEqual from 'fast-deep-equal';
 
-import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
 import {
   NetworkQueries,
   NetworkOverviewRequestOptions,
@@ -18,7 +17,8 @@ import { useKibana } from '../../../common/lib/kibana';
 import { inputsModel } from '../../../common/store/inputs';
 import { createFilter } from '../../../common/containers/helpers';
 import { ESQuery } from '../../../../common/typed_json';
-import { AbortError } from '../../../../../../../src/plugins/data/common';
+import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/plugins/data/common';
+import { AbortError } from '../../../../../../../src/plugins/kibana_utils/common';
 import { getInspectResponse } from '../../../helpers';
 import { InspectResponse } from '../../../types';
 import * as i18n from './translations';
@@ -36,6 +36,7 @@ export interface NetworkOverviewArgs {
 interface UseNetworkOverview {
   filterQuery?: ESQuery | string;
   endDate: string;
+  indexNames: string[];
   skip?: boolean;
   startDate: string;
 }
@@ -43,24 +44,31 @@ interface UseNetworkOverview {
 export const useNetworkOverview = ({
   filterQuery,
   endDate,
+  indexNames,
   skip = false,
   startDate,
 }: UseNetworkOverview): [boolean, NetworkOverviewArgs] => {
-  const { data, notifications, uiSettings } = useKibana().services;
-  const defaultIndex = uiSettings.get<string[]>(DEFAULT_INDEX_KEY);
+  const { data, notifications } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
   const [loading, setLoading] = useState(false);
-  const [overviewNetworkRequest, setNetworkRequest] = useState<NetworkOverviewRequestOptions>({
-    defaultIndex,
-    factoryQueryType: NetworkQueries.overview,
-    filterQuery: createFilter(filterQuery),
-    timerange: {
-      interval: '12h',
-      from: startDate,
-      to: endDate,
-    },
-  });
+  const [
+    overviewNetworkRequest,
+    setNetworkRequest,
+  ] = useState<NetworkOverviewRequestOptions | null>(
+    !skip
+      ? {
+          defaultIndex: indexNames,
+          factoryQueryType: NetworkQueries.overview,
+          filterQuery: createFilter(filterQuery),
+          timerange: {
+            interval: '12h',
+            from: startDate,
+            to: endDate,
+          },
+        }
+      : null
+  );
 
   const [overviewNetworkResponse, setNetworkOverviewResponse] = useState<NetworkOverviewArgs>({
     overviewNetwork: {},
@@ -74,7 +82,11 @@ export const useNetworkOverview = ({
   });
 
   const overviewNetworkSearch = useCallback(
-    (request: NetworkOverviewRequestOptions) => {
+    (request: NetworkOverviewRequestOptions | null) => {
+      if (request == null) {
+        return;
+      }
+
       let didCancel = false;
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
@@ -87,7 +99,7 @@ export const useNetworkOverview = ({
           })
           .subscribe({
             next: (response) => {
-              if (!response.isPartial && !response.isRunning) {
+              if (isCompleteResponse(response)) {
                 if (!didCancel) {
                   setLoading(false);
                   setNetworkOverviewResponse((prevResponse) => ({
@@ -98,7 +110,7 @@ export const useNetworkOverview = ({
                   }));
                 }
                 searchSubscription$.unsubscribe();
-              } else if (response.isPartial && !response.isRunning) {
+              } else if (isErrorResponse(response)) {
                 if (!didCancel) {
                   setLoading(false);
                 }
@@ -131,8 +143,9 @@ export const useNetworkOverview = ({
   useEffect(() => {
     setNetworkRequest((prevRequest) => {
       const myRequest = {
-        ...prevRequest,
-        defaultIndex,
+        ...(prevRequest ?? {}),
+        defaultIndex: indexNames,
+        factoryQueryType: NetworkQueries.overview,
         filterQuery: createFilter(filterQuery),
         timerange: {
           interval: '12h',
@@ -145,7 +158,7 @@ export const useNetworkOverview = ({
       }
       return prevRequest;
     });
-  }, [defaultIndex, endDate, filterQuery, skip, startDate]);
+  }, [indexNames, endDate, filterQuery, skip, startDate]);
 
   useEffect(() => {
     overviewNetworkSearch(overviewNetworkRequest);

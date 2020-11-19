@@ -18,8 +18,12 @@
  */
 
 import * as Either from './either';
-import { fromNullable } from './maybe';
-import { always, id, noop } from './utils';
+import * as Maybe from './maybe';
+import { always, id, noop, pink } from './utils';
+import execa from 'execa';
+import { resolve } from 'path';
+
+const ROOT_DIR = resolve(__dirname, '../../../..');
 
 const maybeTotal = (x) => (x === 'total' ? Either.left(x) : Either.right(x));
 
@@ -83,19 +87,59 @@ export const staticSite = (urlBase) => (obj) => {
   return { ...obj, staticSiteUrl: prokForBoth() };
 };
 
+const leadingSlashRe = /^\//;
+export const maybeDropLeadingSlash = (x) =>
+  leadingSlashRe.test(x) ? Either.right(x) : Either.left(x);
+export const dropLeadingSlash = (x) => x.replace(leadingSlashRe, '');
+export const stripLeading = (x) => maybeDropLeadingSlash(x).fold(id, dropLeadingSlash);
+
 export const coveredFilePath = (obj) => {
   const { staticSiteUrl, COVERAGE_INGESTION_KIBANA_ROOT } = obj;
 
   const withoutCoveredFilePath = always(obj);
-  const leadingSlashRe = /^\//;
-  const maybeDropLeadingSlash = (x) => (leadingSlashRe.test(x) ? Either.right(x) : Either.left(x));
-  const dropLeadingSlash = (x) => x.replace(leadingSlashRe, '');
-  const dropRoot = (root) => (x) =>
-    maybeDropLeadingSlash(x.replace(root, '')).fold(id, dropLeadingSlash);
+  const dropRoot = (root) => (x) => stripLeading(x.replace(root, ''));
   return maybeTotal(staticSiteUrl)
     .map(dropRoot(COVERAGE_INGESTION_KIBANA_ROOT))
     .fold(withoutCoveredFilePath, (coveredFilePath) => ({ ...obj, coveredFilePath }));
 };
+
+const findTeam = (x) => x.match(/.+\s{1,3}(.+)$/, 'gm');
+export const pluckIndex = (idx) => (xs) => xs[idx];
+const pluckTeam = pluckIndex(1);
+
+export const teamAssignment = (teamAssignmentsPath) => (log) => async (obj) => {
+  const { coveredFilePath } = obj;
+  const isTotal = Either.fromNullable(obj.isTotal);
+
+  return isTotal.isRight() ? obj : await assignTeam(teamAssignmentsPath, coveredFilePath, log, obj);
+};
+export const last = (x) => {
+  const xs = x.split('\n');
+  const len = xs.length;
+
+  return len === 1 ? xs[0] : xs[len - 1];
+};
+async function assignTeam(teamAssignmentsPath, coveredFilePath, log, obj) {
+  const params = [coveredFilePath, teamAssignmentsPath];
+
+  let grepResponse;
+
+  try {
+    const { stdout } = await execa('grep', params, { cwd: ROOT_DIR });
+    grepResponse = stdout;
+  } catch (e) {
+    log.error(`\n!!! Unknown Team for path: \n\t\t${pink(coveredFilePath)}\n`);
+  }
+
+  return Either.fromNullable(grepResponse)
+    .map(last)
+    .map(findTeam)
+    .map(pluckTeam)
+    .fold(
+      () => ({ team: 'unknown', ...obj }),
+      (team) => ({ team, ...obj })
+    );
+}
 
 export const ciRunUrl = (obj) =>
   Either.fromNullable(process.env.CI_RUN_URL).fold(always(obj), (ciRunUrl) => ({
@@ -126,13 +170,12 @@ export const itemizeVcs = (vcsInfo) => (obj) => {
   };
 
   const mutateVcs = (x) => (vcs.commitMsg = truncateMsg(x));
-  fromNullable(commitMsg).map(mutateVcs);
+  Maybe.fromNullable(commitMsg).map(mutateVcs);
 
   const vcsCompareUrl = process.env.FETCHED_PREVIOUS
     ? `${comparePrefix()}/${process.env.FETCHED_PREVIOUS}...${sha}`
     : 'PREVIOUS SHA NOT PROVIDED';
 
-  // const withoutPreviousL = always({ ...obj, vcs });
   const withPreviousR = () => ({
     ...obj,
     vcs: {

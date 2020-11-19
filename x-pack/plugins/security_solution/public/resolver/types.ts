@@ -5,7 +5,7 @@
  */
 
 /* eslint-disable no-duplicate-imports */
-
+import type React from 'react';
 import { Store } from 'redux';
 import { Middleware, Dispatch } from 'redux';
 import { BBox } from 'rbush';
@@ -16,6 +16,7 @@ import {
   ResolverTree,
   ResolverEntityIndex,
   SafeResolverEvent,
+  ResolverPaginatedEvents,
 } from '../../common/endpoint/types';
 
 /**
@@ -207,13 +208,64 @@ export interface TreeFetcherParameters {
 }
 
 /**
+ * Used by the `data` concern to keep track of related events when showing the 'nodeEventsInCategory' panel.
+ */
+export interface NodeEventsInCategoryState {
+  /**
+   * The nodeID that `events` are related to.
+   */
+  nodeID: string;
+  /**
+   * The category that `events` have in common.
+   */
+  eventCategory: string;
+  /**
+   * Events with `event.category` that include `eventCategory` and that are related to `nodeID`.
+   */
+  events: SafeResolverEvent[];
+  /**
+   * The cursor, if any, that can be used to retrieve more events.
+   */
+  cursor: null | string;
+
+  /**
+   * The cursor, if any, that was last used to fetch additional related events.
+   */
+
+  lastCursorRequested?: null | string;
+
+  /**
+   * Flag for showing an error message when fetching additional related events.
+   */
+  error?: boolean;
+}
+
+/**
  * State for `data` reducer which handles receiving Resolver data from the back-end.
  */
 export interface DataState {
+  /**
+   * @deprecated Use the API
+   */
   readonly relatedEvents: Map<string, ResolverRelatedEvents>;
-  readonly relatedEventsReady: Map<string, boolean>;
 
-  readonly tree: {
+  /**
+   * Used when the panelView is `nodeEventsInCategory`.
+   * Store the `nodeEventsInCategory` data for the current panel view. If the panel view or parameters change, the reducer may delete this.
+   * If new data is returned for the panel view, this may be updated.
+   */
+  readonly nodeEventsInCategory?: NodeEventsInCategoryState;
+
+  /**
+   * Used when the panelView is `eventDetail`.
+   *
+   */
+  readonly currentRelatedEvent: {
+    loading: boolean;
+    data: SafeResolverEvent | null;
+  };
+
+  readonly tree?: {
     /**
      * The parameters passed from the resolver properties
      */
@@ -256,6 +308,11 @@ export interface DataState {
    * Used to prevent collisions in things like query parameters.
    */
   readonly resolverComponentInstanceID?: string;
+
+  /**
+   * The `search` part of the URL.
+   */
+  readonly locationSearch?: string;
 }
 
 /**
@@ -372,20 +429,22 @@ export interface DurationDetails {
  * Values shared between two vertices joined by an edge line.
  */
 export interface EdgeLineMetadata {
+  /**
+   * Represents a time duration for this edge line segment. Used to show a time duration in the UI.
+   * This is only ever present on one of the segments in an edge.
+   */
   elapsedTime?: DurationDetails;
-  // A string of the two joined process nodes concatenated together.
-  uniqueId: string;
+  /**
+   * Used to represent a react key value for the edge line.
+   */
+  reactKey: string;
 }
-/**
- * A tuple of 2 vector2 points forming a poly-line. Used to connect process nodes in the graph.
- */
-export type EdgeLinePoints = Vector2[];
 
 /**
  * Edge line components including the points joining the edge-line and any optional associated metadata
  */
 export interface EdgeLineSegment {
-  points: EdgeLinePoints;
+  points: [Vector2, Vector2];
   metadata: EdgeLineMetadata;
 }
 
@@ -431,9 +490,26 @@ export interface SideEffectors {
    * A function which returns the time since epoch in milliseconds. Injected because mocking Date is tedious.
    */
   timestamp: () => number;
+  /**
+   * Use instead of `window.requestAnimationFrame`
+   **/
   requestAnimationFrame: typeof window.requestAnimationFrame;
+  /**
+   * Use instead of `window.cancelAnimationFrame`
+   **/
   cancelAnimationFrame: typeof window.cancelAnimationFrame;
+  /**
+   * Use instead of the `ResizeObserver` global.
+   */
   ResizeObserver: ResizeObserverConstructor;
+  /**
+   * Use this instead of the Clipboard API's `writeText` method.
+   */
+  writeTextToClipboard(text: string): Promise<void>;
+  /**
+   * Use this instead of `Element.prototype.getBoundingClientRect` .
+   */
+  getBoundingClientRect(element: Element): DOMRect;
 }
 
 export interface SideEffectSimulator {
@@ -453,6 +529,16 @@ export interface SideEffectSimulator {
      * Trigger `ResizeObserver` callbacks for `element` and update the mocked value for `getBoundingClientRect`.
      */
     simulateElementResize: (element: Element, contentRect: DOMRect) => void;
+
+    /**
+     * Get the most recently written clipboard text. This is only updated when `confirmTextWrittenToClipboard` is called.
+     */
+    clipboardText: string;
+
+    /**
+     * Call this to resolve the promise returned by `writeText`.
+     */
+    confirmTextWrittenToClipboard: () => void;
   };
   /**
    * Mocked `SideEffectors`.
@@ -481,6 +567,7 @@ export interface IsometricTaxiLayout {
    * A map of events to position. Each event represents its own node.
    */
   processNodePositions: Map<SafeResolverEvent, Vector2>;
+
   /**
    * A map of edge-line segments, which graphically connect nodes.
    */
@@ -503,6 +590,21 @@ export interface DataAccessLayer {
    * Fetch related events for an entity ID
    */
   relatedEvents: (entityID: string) => Promise<ResolverRelatedEvents>;
+
+  /**
+   * Return events that have `process.entity_id` that includes `entityID` and that have
+   * a `event.category` that includes `category`.
+   */
+  eventsWithEntityIDAndCategory: (
+    entityID: string,
+    category: string,
+    after?: string
+  ) => Promise<ResolverPaginatedEvents>;
+
+  /**
+   * Return up to one event that has an `event.id` that includes `eventID`.
+   */
+  event: (eventID: string) => Promise<SafeResolverEvent | null>;
 
   /**
    * Fetch a ResolverTree for a entityID
@@ -614,8 +716,9 @@ export interface ResolverPluginSetup {
     dataAccessLayer: {
       /**
        * A mock `DataAccessLayer` that returns a tree that has no ancestor nodes but which has 2 children nodes.
+       * The origin has 2 related registry events
        */
-      noAncestorsTwoChildren: () => { dataAccessLayer: DataAccessLayer };
+      noAncestorsTwoChildrenWithRelatedEventsOnOrigin: () => { dataAccessLayer: DataAccessLayer };
     };
   };
 }
@@ -658,23 +761,23 @@ export type PanelViewAndParameters =
     }
   | {
       /**
-       * The panel will show an index view of the events related to a specific node. Only events with a specific type will be shown.
+       * The panel will show an index view of the events related to a specific node. Only events in a specific category will be shown.
        */
-      panelView: 'nodeEventsOfType';
+      panelView: 'nodeEventsInCategory';
       panelParameters: {
         /**
          * The nodeID (e.g. `process.entity_id`) for the node whose events will be shown.
          */
         nodeID: string;
         /**
-         * A parameter used to filter the events. For example, events that don't contain `eventType` in their `event.category` field may be hidden.
+         * A parameter used to filter the events. For example, events that don't contain `eventCategory` in their `event.category` field may be hidden.
          */
-        eventType: string;
+        eventCategory: string;
       };
     }
   | {
       /**
-       * The panel will show details about a particular event. This is meant as a subview of 'nodeEventsOfType'.
+       * The panel will show details about a particular event. This is meant as a subview of 'nodeEventsInCategory'.
        */
       panelView: 'eventDetail';
       panelParameters: {
@@ -683,13 +786,13 @@ export type PanelViewAndParameters =
          */
         nodeID: string;
         /**
-         * A value used for the `nodeEventsOfType` view. Used to associate this view with a parent `nodeEventsOfType` view.
-         * e.g. The user views the `nodeEventsOfType` and follows a link to the `eventDetail` view. The `eventDetail` view can
-         * use `eventType` to populate breadcrumbs and allow the user to return to the previous filter.
+         * Used to associate this view (via breadcrumbs) with a parent `nodeEventsInCategory` view.
+         * e.g. The user views the `nodeEventsInCategory` panel and follows a link to the `eventDetail` view. The `eventDetail` view can
+         * use `eventCategory` to populate breadcrumbs and allow the user to return to the previous view.
          *
-         * This cannot be inferred from the event itself, as an event may have any number of 'eventType's.
+         * This cannot be inferred from the event itself, as an event may have any number of eventCategories.
          */
-        eventType: string;
+        eventCategory: string;
 
         /**
          * `event.id` that uniquely identifies the event to show.

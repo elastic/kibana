@@ -14,7 +14,7 @@ describe('buildRiskScoreFromMapping', () => {
 
   test('risk score defaults to provided if mapping is incomplete', () => {
     const riskScore = buildRiskScoreFromMapping({
-      doc: sampleDocNoSortId(),
+      eventSource: sampleDocNoSortId()._source,
       riskScore: 57,
       riskScoreMapping: undefined,
     });

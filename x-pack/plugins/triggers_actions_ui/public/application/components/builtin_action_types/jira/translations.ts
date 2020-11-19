@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 export const JIRA_DESC = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.jira.selectMessageText',
   {
-    defaultMessage: 'Push or update data to a new issue in Jira',
+    defaultMessage: 'Create an incident in Jira.',
   }
 );
 
@@ -41,6 +41,13 @@ export const API_URL_INVALID = i18n.translate(
   }
 );
 
+export const API_URL_REQUIRE_HTTPS = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.jira.requireHttpsApiUrlTextField',
+  {
+    defaultMessage: 'URL must start with https://.',
+  }
+);
+
 export const JIRA_PROJECT_KEY_LABEL = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.jira.projectKey',
   {
@@ -55,31 +62,54 @@ export const JIRA_PROJECT_KEY_REQUIRED = i18n.translate(
   }
 );
 
+export const JIRA_AUTHENTICATION_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.jira.authenticationLabel',
+  {
+    defaultMessage: 'Authentication',
+  }
+);
+
+export const JIRA_REMEMBER_VALUES_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.jira.rememberValuesLabel',
+  {
+    defaultMessage:
+      'Remember these values. You must reenter them each time you edit the connector.',
+  }
+);
+
+export const JIRA_REENTER_VALUES_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.jira.reenterValuesLabel',
+  {
+    defaultMessage:
+      'Authentication credentials are encrypted. Please reenter values for these fields.',
+  }
+);
+
 export const JIRA_EMAIL_LABEL = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.jira.emailTextFieldLabel',
   {
-    defaultMessage: 'Email or Username',
+    defaultMessage: 'Username or email address',
   }
 );
 
 export const JIRA_EMAIL_REQUIRED = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.jira.requiredEmailTextField',
   {
-    defaultMessage: 'Email or Username is required',
+    defaultMessage: 'Username or email address is required',
   }
 );
 
 export const JIRA_API_TOKEN_LABEL = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.jira.apiTokenTextFieldLabel',
   {
-    defaultMessage: 'API token or Password',
+    defaultMessage: 'API token or password',
   }
 );
 
 export const JIRA_API_TOKEN_REQUIRED = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.jira.requiredApiTokenTextField',
   {
-    defaultMessage: 'API token or Password is required',
+    defaultMessage: 'API token or password is required',
   }
 );
 
@@ -129,5 +159,42 @@ export const FIELDS_API_ERROR = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.jira.unableToGetFieldsMessage',
   {
     defaultMessage: 'Unable to get fields',
+  }
+);
+
+export const ISSUES_API_ERROR = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.jira.unableToGetIssuesMessage',
+  {
+    defaultMessage: 'Unable to get issues',
+  }
+);
+
+export const GET_ISSUE_API_ERROR = (id: string) =>
+  i18n.translate(
+    'xpack.triggersActionsUI.components.builtinActionTypes.jira.unableToGetIssueMessage',
+    {
+      defaultMessage: 'Unable to get issue with id {id}',
+      values: { id },
+    }
+  );
+
+export const SEARCH_ISSUES_COMBO_BOX_ARIA_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.jira.searchIssuesComboBoxAriaLabel',
+  {
+    defaultMessage: 'Type to search',
+  }
+);
+
+export const SEARCH_ISSUES_PLACEHOLDER = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.jira.searchIssuesComboBoxPlaceholder',
+  {
+    defaultMessage: 'Type to search',
+  }
+);
+
+export const SEARCH_ISSUES_LOADING = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.jira.searchIssuesLoading',
+  {
+    defaultMessage: 'Loading...',
   }
 );

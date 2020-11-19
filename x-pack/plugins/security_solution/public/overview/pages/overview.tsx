@@ -15,7 +15,7 @@ import { FiltersGlobal } from '../../common/components/filters_global';
 import { SiemSearchBar } from '../../common/components/search_bar';
 import { WrapperPage } from '../../common/components/wrapper_page';
 import { useGlobalTime } from '../../common/containers/use_global_time';
-import { useWithSource } from '../../common/containers/source';
+import { useFetchIndex } from '../../common/containers/source';
 
 import { EventsByDataset } from '../components/events_by_dataset';
 import { EventCounts } from '../components/event_counts';
@@ -30,6 +30,9 @@ import { EndpointNotice } from '../components/endpoint_notice';
 import { useMessagesStorage } from '../../common/containers/local_storage/use_messages_storage';
 import { ENDPOINT_METADATA_INDEX } from '../../../common/constants';
 import { useIngestEnabledCheck } from '../../common/hooks/endpoint/ingest_enabled';
+import { useSourcererScope } from '../../common/containers/sourcerer';
+import { Sourcerer } from '../../common/components/sourcerer';
+import { SourcererScopeName } from '../../common/store/sourcerer/model';
 
 const DEFAULT_QUERY: Query = { query: '', language: 'kuery' };
 const NO_FILTERS: Filter[] = [];
@@ -43,17 +46,13 @@ const OverviewComponent: React.FC<PropsFromRedux> = ({
   query = DEFAULT_QUERY,
   setAbsoluteRangeDatePicker,
 }) => {
+  const { from, deleteQuery, setQuery, to } = useGlobalTime();
+  const { indicesExist, indexPattern, selectedPatterns } = useSourcererScope();
+
   const endpointMetadataIndex = useMemo<string[]>(() => {
     return [ENDPOINT_METADATA_INDEX];
   }, []);
-
-  const { from, deleteQuery, setQuery, to } = useGlobalTime();
-  const { indicesExist, indexPattern } = useWithSource();
-  const { indicesExist: metadataIndexExists } = useWithSource(
-    'default',
-    endpointMetadataIndex,
-    true
-  );
+  const [, { indexExists: metadataIndexExists }] = useFetchIndex(endpointMetadataIndex, true);
   const { addMessage, hasMessage } = useMessagesStorage();
   const hasDismissEndpointNoticeMessage: boolean = useMemo(
     () => hasMessage('management', 'dismissEndpointNotice'),
@@ -81,6 +80,7 @@ const OverviewComponent: React.FC<PropsFromRedux> = ({
                 <EuiSpacer size="l" />
               </>
             )}
+            <Sourcerer scope={SourcererScopeName.default} />
             <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween">
               <SidebarFlexItem grow={false}>
                 <StatefulSidebar />
@@ -107,6 +107,7 @@ const OverviewComponent: React.FC<PropsFromRedux> = ({
                       filters={filters}
                       from={from}
                       indexPattern={indexPattern}
+                      indexNames={selectedPatterns}
                       query={query}
                       setQuery={setQuery}
                       to={to}
@@ -119,6 +120,7 @@ const OverviewComponent: React.FC<PropsFromRedux> = ({
                       filters={filters}
                       from={from}
                       indexPattern={indexPattern}
+                      indexNames={selectedPatterns}
                       query={query}
                       setQuery={setQuery}
                       to={to}
@@ -129,6 +131,7 @@ const OverviewComponent: React.FC<PropsFromRedux> = ({
                     <EventCounts
                       filters={filters}
                       from={from}
+                      indexNames={selectedPatterns}
                       indexPattern={indexPattern}
                       query={query}
                       setQuery={setQuery}

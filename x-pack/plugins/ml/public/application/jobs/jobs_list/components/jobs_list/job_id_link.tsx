@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { EuiLink } from '@elastic/eui';
-import { useMlKibana, useMlUrlGenerator } from '../../../../contexts/kibana';
+import { useMlUrlGenerator } from '../../../../contexts/kibana';
 import { ML_PAGES } from '../../../../../../common/constants/ml_url_generator';
 import { AnomalyDetectionQueryState } from '../../../../../../common/types/ml_url_generator';
 // @ts-ignore
@@ -28,34 +28,40 @@ function isGroupIdLink(props: JobIdLink | GroupIdLink): props is GroupIdLink {
 }
 export const AnomalyDetectionJobIdLink = (props: AnomalyDetectionJobIdLinkProps) => {
   const mlUrlGenerator = useMlUrlGenerator();
-  const {
-    services: {
-      application: { navigateToUrl },
-    },
-  } = useMlKibana();
+  const [href, setHref] = useState<string>('');
 
-  const redirectToJobsManagementPage = async () => {
-    const pageState: AnomalyDetectionQueryState = {};
-    if (isGroupIdLink(props)) {
-      pageState.groupIds = [props.groupId];
-    } else {
-      pageState.jobId = props.id;
-    }
-    const url = await mlUrlGenerator.createUrl({
-      page: ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE,
-      pageState,
-    });
-    await navigateToUrl(url);
-  };
+  useEffect(() => {
+    let isCancelled = false;
+    const generateLink = async () => {
+      const pageState: AnomalyDetectionQueryState = {};
+      if (isGroupIdLink(props)) {
+        pageState.groupIds = [props.groupId];
+      } else {
+        pageState.jobId = props.id;
+      }
+      const url = await mlUrlGenerator.createUrl({
+        page: ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE,
+        pageState,
+      });
+      if (!isCancelled) {
+        setHref(url);
+      }
+    };
+    generateLink();
+    return () => {
+      isCancelled = true;
+    };
+  }, [props, mlUrlGenerator]);
+
   if (isGroupIdLink(props)) {
     return (
-      <EuiLink key={props.groupId} onClick={() => redirectToJobsManagementPage()}>
+      <EuiLink key={props.groupId} href={href}>
         <JobGroup name={props.groupId} />
       </EuiLink>
     );
   } else {
     return (
-      <EuiLink key={props.id} onClick={() => redirectToJobsManagementPage()}>
+      <EuiLink key={props.id} href={href}>
         {props.id}
       </EuiLink>
     );

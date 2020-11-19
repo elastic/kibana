@@ -60,6 +60,16 @@
               }
             }
           },
+          "group": {
+            "properties": {
+              "id": {
+                "type": "keyword"
+              },
+              "index": {
+                "type": "integer"
+              }
+            }
+          },
           "rule": {
             "properties": {
               "id": {
@@ -246,6 +256,11 @@
           },
           "original_time": {
             "type": "date"
+          },
+          "original_signal": {
+            "type": "object",
+            "dynamic": false,
+            "enabled": false
           },
           "original_event": {
             "properties": {

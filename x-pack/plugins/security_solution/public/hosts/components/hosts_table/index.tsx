@@ -6,7 +6,6 @@
 
 import React, { useMemo, useCallback } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
-import { IIndexPattern } from 'src/plugins/data/public';
 
 import { assertUnreachable } from '../../../../common/utility_types';
 import {
@@ -36,7 +35,6 @@ interface OwnProps {
   data: HostsEdges[];
   fakeTotalCount: number;
   id: string;
-  indexPattern: IIndexPattern;
   isInspect: boolean;
   loading: boolean;
   loadPage: (newActivePage: number) => void;
@@ -77,7 +75,6 @@ const HostsTableComponent = React.memo<HostsTableProps>(
     direction,
     fakeTotalCount,
     id,
-    indexPattern,
     isInspect,
     limit,
     loading,

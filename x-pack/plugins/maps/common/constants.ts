@@ -5,6 +5,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import { FeatureCollection } from 'geojson';
+
 export const EMS_APP_NAME = 'kibana';
 export const EMS_CATALOGUE_PATH = 'ems/catalogue';
 
@@ -37,6 +38,7 @@ export const FONTS_API_PATH = `${GIS_API_PATH}/fonts`;
 export const API_ROOT_PATH = `/${GIS_API_PATH}`;
 
 export const MVT_GETTILE_API_PATH = 'mvt/getTile';
+export const MVT_GETGRIDTILE_API_PATH = 'mvt/getGridTile';
 export const MVT_SOURCE_LAYER_NAME = 'source_layer';
 export const KBN_TOO_MANY_FEATURES_PROPERTY = '__kbn_too_many_features__';
 export const KBN_TOO_MANY_FEATURES_IMAGE_ID = '__kbn_too_many_features_image_id__';
@@ -56,11 +58,6 @@ export enum LAYER_TYPE {
   HEATMAP = 'HEATMAP',
   BLENDED_VECTOR = 'BLENDED_VECTOR',
   TILED_VECTOR = 'TILED_VECTOR', // similar to a regular vector-layer, but it consumes the data as .mvt tilea iso GeoJson. It supports similar ad-hoc configurations like a regular vector layer (E.g. using IVectorStyle), although there is some loss of functionality  e.g. does not support term joining
-}
-
-export enum SORT_ORDER {
-  ASC = 'asc',
-  DESC = 'desc',
 }
 
 export enum SOURCE_TYPES {
@@ -165,7 +162,12 @@ export enum GRID_RESOLUTION {
   COARSE = 'COARSE',
   FINE = 'FINE',
   MOST_FINE = 'MOST_FINE',
+  SUPER_FINE = 'SUPER_FINE',
 }
+
+export const SUPER_FINE_ZOOM_DELTA = 7; // (2 ^ SUPER_FINE_ZOOM_DELTA) ^ 2 =  number of cells in a given tile
+export const GEOTILE_GRID_AGG_NAME = 'gridSplit';
+export const GEOCENTROID_AGG_NAME = 'gridCentroid';
 
 export const TOP_TERM_PERCENTAGE_SUFFIX = '__percentage';
 
@@ -230,7 +232,10 @@ export enum SCALING_TYPES {
   MVT = 'MVT',
 }
 
-export const RGBA_0000 = 'rgba(0,0,0,0)';
+export enum FORMAT_TYPE {
+  GEOJSON = 'geojson',
+  TOPOJSON = 'topojson',
+}
 
 export enum MVT_FIELD_TYPE {
   STRING = 'String',

@@ -9,7 +9,7 @@ import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
 import { WithCopyToClipboard } from '../../../../common/lib/clipboard/with_copy_to_clipboard';
-import { Markdown } from '../../../../common/components/markdown';
+import { MarkdownRenderer } from '../../../../common/components/markdown_editor';
 import { WithHoverActions } from '../../../../common/components/with_hover_actions';
 import * as i18n from '../translations';
 
@@ -29,7 +29,7 @@ export const NoteCardBody = React.memo<{ rawNote: string }>(({ rawNote }) => {
     [rawNote]
   );
 
-  const render = useCallback(() => <Markdown raw={rawNote} />, [rawNote]);
+  const render = useCallback(() => <MarkdownRenderer>{rawNote}</MarkdownRenderer>, [rawNote]);
 
   return (
     <BodyContainer data-test-subj="note-card-body" hasShadow={false} paddingSize="s">

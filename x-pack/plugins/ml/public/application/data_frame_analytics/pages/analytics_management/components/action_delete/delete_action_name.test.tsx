@@ -51,6 +51,7 @@ describe('DeleteAction', () => {
 
   it('should display a tooltip when isDisabled prop is true.', () => {
     const { container } = render(
+      // @ts-expect-error mock data is incorrectly typed
       <DeleteActionName isDisabled={true} item={mockAnalyticsListItem} />
     );
 
@@ -59,6 +60,7 @@ describe('DeleteAction', () => {
 
   it('should not display a tooltip when isDisabled prop is false.', () => {
     const { container } = render(
+      // @ts-expect-error mock data is incorrectly typed
       <DeleteActionName isDisabled={false} item={mockAnalyticsListItem} />
     );
 
@@ -78,8 +80,12 @@ describe('DeleteAction', () => {
             {deleteAction.isModalVisible && <DeleteActionModal {...deleteAction} />}
             <button
               data-test-subj="mlAnalyticsJobDeleteButton"
-              onClick={() => deleteAction.openModal(mockAnalyticsListItem)}
+              onClick={() => {
+                // @ts-expect-error mock data is incorrectly typed
+                deleteAction.openModal(mockAnalyticsListItem);
+              }}
             >
+              {/* @ts-expect-error mock data is incorrectly typed */}
               <DeleteActionName isDisabled={false} item={mockAnalyticsListItem} />
             </button>
           </>

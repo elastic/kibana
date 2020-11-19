@@ -7,19 +7,19 @@
 import { esTestConfig, kbnTestConfig } from '@kbn/test';
 import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
 import { format as formatUrl } from 'url';
-import { ReportingAPIProvider } from './services';
+import { pageObjects } from '../functional/page_objects'; // Reporting APIs depend on UI functionality
+import { services } from './services';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const apiConfig = await readConfigFile(require.resolve('../api_integration/config'));
 
   return {
+    apps: { reporting: { pathname: '/app/management/insightsAndAlerting/reporting' } },
     servers: apiConfig.get('servers'),
     junit: { reportName: 'X-Pack Reporting Without Security API Integration Tests' },
     testFiles: [require.resolve('./reporting_without_security')],
-    services: {
-      ...apiConfig.get('services'),
-      reportingAPI: ReportingAPIProvider,
-    },
+    services,
+    pageObjects,
     esArchiver: apiConfig.get('esArchiver'),
     esTestCluster: {
       ...apiConfig.get('esTestCluster'),

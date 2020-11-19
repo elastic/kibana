@@ -40,7 +40,7 @@ export default function ({ getService }: FtrProviderContext) {
         filter(({ statusCode }) => statusCode === 500),
         map(({ message }) => message),
         first(),
-        timeout(15000)
+        timeout(120000)
       );
 
       const reportFailed = await fails$.toPromise();

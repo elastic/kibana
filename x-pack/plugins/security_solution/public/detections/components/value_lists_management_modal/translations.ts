@@ -76,6 +76,13 @@ export const COLUMN_FILE_NAME = i18n.translate(
   }
 );
 
+export const COLUMN_TYPE = i18n.translate(
+  'xpack.securitySolution.lists.valueListsTable.typeColumn',
+  {
+    defaultMessage: 'Type',
+  }
+);
+
 export const COLUMN_UPLOAD_DATE = i18n.translate(
   'xpack.securitySolution.lists.valueListsTable.uploadDateColumn',
   {

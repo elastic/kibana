@@ -6,24 +6,26 @@
 
 import { i18n } from '@kbn/i18n';
 import { OperationDefinition } from './index';
-import { FormattedIndexPatternColumn } from './column_types';
+import { FormattedIndexPatternColumn, FieldBasedIndexPatternColumn } from './column_types';
 import { IndexPatternField } from '../../types';
 
 const countLabel = i18n.translate('xpack.lens.indexPattern.countOf', {
   defaultMessage: 'Count of records',
 });
 
-export type CountIndexPatternColumn = FormattedIndexPatternColumn & {
-  operationType: 'count';
-};
+export type CountIndexPatternColumn = FormattedIndexPatternColumn &
+  FieldBasedIndexPatternColumn & {
+    operationType: 'count';
+  };
 
-export const countOperation: OperationDefinition<CountIndexPatternColumn> = {
+export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field'> = {
   type: 'count',
   priority: 2,
   displayName: i18n.translate('xpack.lens.indexPattern.count', {
     defaultMessage: 'Count',
   }),
-  onFieldChange: (oldColumn, indexPattern, field) => {
+  input: 'field',
+  onFieldChange: (oldColumn, field) => {
     return {
       ...oldColumn,
       label: field.displayName,
@@ -39,20 +41,20 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn> = {
       };
     }
   },
-  buildColumn({ suggestedPriority, field, previousColumn }) {
+  buildColumn({ field, previousColumn }) {
     return {
       label: countLabel,
       dataType: 'number',
       operationType: 'count',
-      suggestedPriority,
       isBucketed: false,
       scale: 'ratio',
       sourceField: field.name,
       params:
         previousColumn?.dataType === 'number' &&
         previousColumn.params &&
-        'format' in previousColumn.params
-          ? previousColumn.params
+        'format' in previousColumn.params &&
+        previousColumn.params.format
+          ? { format: previousColumn.params.format }
           : undefined,
     };
   },

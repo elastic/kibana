@@ -5,22 +5,21 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { isEmpty } from 'lodash';
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
-import { ProcessorEvent } from '../../../common/processor_event';
-import { getEnvironmentUiFilterES } from '../helpers/convert_ui_filters/get_environment_ui_filter_es';
+import { APMConfig } from '../..';
+import { ESSearchResponse } from '../../../../../typings/elasticsearch';
+import { AlertingPlugin } from '../../../../alerts/server';
 import { AlertType, ALERT_TYPES_CONFIG } from '../../../common/alert_types';
 import {
-  ESSearchResponse,
-  ESSearchRequest,
-} from '../../../typings/elasticsearch';
-import {
   PROCESSOR_EVENT,
+  SERVICE_ENVIRONMENT,
   SERVICE_NAME,
 } from '../../../common/elasticsearch_fieldnames';
-import { AlertingPlugin } from '../../../../alerts/server';
+import { ProcessorEvent } from '../../../common/processor_event';
+import { getEnvironmentUiFilterES } from '../helpers/convert_ui_filters/get_environment_ui_filter_es';
 import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
-import { APMConfig } from '../..';
 import { apmActionVariables } from './action_variables';
 
 interface RegisterAlertParams {
@@ -32,7 +31,7 @@ const paramsSchema = schema.object({
   windowSize: schema.number(),
   windowUnit: schema.string(),
   threshold: schema.number(),
-  serviceName: schema.string(),
+  serviceName: schema.maybe(schema.string()),
   environment: schema.string(),
 });
 
@@ -56,6 +55,7 @@ export function registerErrorCountAlertType({
         apmActionVariables.environment,
         apmActionVariables.threshold,
         apmActionVariables.triggerValue,
+        apmActionVariables.interval,
       ],
     },
     producer: 'apm',
@@ -66,6 +66,7 @@ export function registerErrorCountAlertType({
         config,
         savedObjectsClient: services.savedObjectsClient,
       });
+      const maxServiceEnvironments = config['xpack.apm.maxServiceEnvironments'];
 
       const searchParams = {
         index: indices['apm_oss.errorIndices'],
@@ -83,9 +84,27 @@ export function registerErrorCountAlertType({
                   },
                 },
                 { term: { [PROCESSOR_EVENT]: ProcessorEvent.error } },
-                { term: { [SERVICE_NAME]: alertParams.serviceName } },
+                ...(alertParams.serviceName
+                  ? [{ term: { [SERVICE_NAME]: alertParams.serviceName } }]
+                  : []),
                 ...getEnvironmentUiFilterES(alertParams.environment),
               ],
+            },
+          },
+          aggs: {
+            services: {
+              terms: {
+                field: SERVICE_NAME,
+                size: 50,
+              },
+              aggs: {
+                environments: {
+                  terms: {
+                    field: SERVICE_ENVIRONMENT,
+                    size: maxServiceEnvironments,
+                  },
+                },
+              },
             },
           },
         },
@@ -93,20 +112,48 @@ export function registerErrorCountAlertType({
 
       const response: ESSearchResponse<
         unknown,
-        ESSearchRequest
+        typeof searchParams
       > = await services.callCluster('search', searchParams);
 
       const errorCount = response.hits.total.value;
 
       if (errorCount > alertParams.threshold) {
-        const alertInstance = services.alertInstanceFactory(
-          AlertType.ErrorCount
-        );
-        alertInstance.scheduleActions(alertTypeConfig.defaultActionGroupId, {
-          serviceName: alertParams.serviceName,
-          environment: alertParams.environment,
-          threshold: alertParams.threshold,
-          triggerValue: errorCount,
+        function scheduleAction({
+          serviceName,
+          environment,
+        }: {
+          serviceName: string;
+          environment?: string;
+        }) {
+          const alertInstanceName = [
+            AlertType.ErrorCount,
+            serviceName,
+            environment,
+          ]
+            .filter((name) => name)
+            .join('_');
+
+          const alertInstance = services.alertInstanceFactory(
+            alertInstanceName
+          );
+          alertInstance.scheduleActions(alertTypeConfig.defaultActionGroupId, {
+            serviceName,
+            environment,
+            threshold: alertParams.threshold,
+            triggerValue: errorCount,
+            interval: `${alertParams.windowSize}${alertParams.windowUnit}`,
+          });
+        }
+        response.aggregations?.services.buckets.forEach((serviceBucket) => {
+          const serviceName = serviceBucket.key as string;
+          if (isEmpty(serviceBucket.environments?.buckets)) {
+            scheduleAction({ serviceName });
+          } else {
+            serviceBucket.environments.buckets.forEach((envBucket) => {
+              const environment = envBucket.key as string;
+              scheduleAction({ serviceName, environment });
+            });
+          }
         });
       }
     },

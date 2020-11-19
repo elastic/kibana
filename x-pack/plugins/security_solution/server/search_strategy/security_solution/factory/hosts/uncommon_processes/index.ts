@@ -12,8 +12,8 @@ import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants
 import { HostsQueries } from '../../../../../../common/search_strategy/security_solution';
 import { processFieldsMap, userFieldsMap } from '../../../../../../common/ecs/ecs_fields';
 import {
-  HostUncommonProcessesRequestOptions,
-  HostUncommonProcessesStrategyResponse,
+  HostsUncommonProcessesRequestOptions,
+  HostsUncommonProcessesStrategyResponse,
 } from '../../../../../../common/search_strategy/security_solution/hosts/uncommon_processes';
 
 import { inspectStringifyObject } from '../../../../../utils/build_query';
@@ -23,16 +23,16 @@ import { buildQuery } from './dsl/query.dsl';
 import { formatUncommonProcessesData, getHits, uncommonProcessesFields } from './helpers';
 
 export const uncommonProcesses: SecuritySolutionFactory<HostsQueries.uncommonProcesses> = {
-  buildDsl: (options: HostUncommonProcessesRequestOptions) => {
+  buildDsl: (options: HostsUncommonProcessesRequestOptions) => {
     if (options.pagination && options.pagination.querySize >= DEFAULT_MAX_TABLE_QUERY_SIZE) {
       throw new Error(`No query size above ${DEFAULT_MAX_TABLE_QUERY_SIZE}`);
     }
     return buildQuery(options);
   },
   parse: async (
-    options: HostUncommonProcessesRequestOptions,
+    options: HostsUncommonProcessesRequestOptions,
     response: IEsSearchResponse<unknown>
-  ): Promise<HostUncommonProcessesStrategyResponse> => {
+  ): Promise<HostsUncommonProcessesStrategyResponse> => {
     const { activePage, cursorStart, fakePossibleCount, querySize } = options.pagination;
     const totalCount = getOr(0, 'aggregations.process_count.value', response.rawResponse);
     const buckets = getOr([], 'aggregations.group_by_process.buckets', response.rawResponse);

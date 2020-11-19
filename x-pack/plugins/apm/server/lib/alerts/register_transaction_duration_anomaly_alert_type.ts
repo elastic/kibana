@@ -6,6 +6,8 @@
 
 import { schema } from '@kbn/config-schema';
 import { Observable } from 'rxjs';
+import { isEmpty } from 'lodash';
+import { getSeverity } from '../../../common/anomaly_detection';
 import { ANOMALY_SEVERITY } from '../../../../ml/common';
 import { KibanaRequest } from '../../../../../../src/core/server';
 import {
@@ -16,7 +18,7 @@ import {
 import { AlertingPlugin } from '../../../../alerts/server';
 import { APMConfig } from '../..';
 import { MlPluginSetup } from '../../../../ml/server';
-import { getMLJobIds } from '../service_map/get_service_anomalies';
+import { getMLJobs } from '../service_map/get_service_anomalies';
 import { apmActionVariables } from './action_variables';
 
 interface RegisterAlertParams {
@@ -26,8 +28,8 @@ interface RegisterAlertParams {
 }
 
 const paramsSchema = schema.object({
-  serviceName: schema.string(),
-  transactionType: schema.string(),
+  serviceName: schema.maybe(schema.string()),
+  transactionType: schema.maybe(schema.string()),
   windowSize: schema.number(),
   windowUnit: schema.string(),
   environment: schema.string(),
@@ -60,6 +62,8 @@ export function registerTransactionDurationAnomalyAlertType({
         apmActionVariables.serviceName,
         apmActionVariables.transactionType,
         apmActionVariables.environment,
+        apmActionVariables.threshold,
+        apmActionVariables.triggerValue,
       ],
     },
     producer: 'apm',
@@ -69,13 +73,16 @@ export function registerTransactionDurationAnomalyAlertType({
       }
       const alertParams = params;
       const request = {} as KibanaRequest;
-      const { mlAnomalySearch } = ml.mlSystemProvider(request);
-      const anomalyDetectors = ml.anomalyDetectorsProvider(request);
-
-      const mlJobIds = await getMLJobIds(
-        anomalyDetectors,
-        alertParams.environment
+      const { mlAnomalySearch } = ml.mlSystemProvider(
+        request,
+        services.savedObjectsClient
       );
+      const anomalyDetectors = ml.anomalyDetectorsProvider(
+        request,
+        services.savedObjectsClient
+      );
+
+      const mlJobs = await getMLJobs(anomalyDetectors, alertParams.environment);
 
       const selectedOption = ANOMALY_ALERT_SEVERITY_TYPES.find(
         (option) => option.type === alertParams.anomalySeverityType
@@ -89,19 +96,20 @@ export function registerTransactionDurationAnomalyAlertType({
 
       const threshold = selectedOption.threshold;
 
-      if (mlJobIds.length === 0) {
+      if (mlJobs.length === 0) {
         return {};
       }
 
+      const jobIds = mlJobs.map((job) => job.job_id);
       const anomalySearchParams = {
+        terminateAfter: 1,
         body: {
-          terminateAfter: 1,
           size: 0,
           query: {
             bool: {
               filter: [
                 { term: { result_type: 'record' } },
-                { terms: { job_id: mlJobIds } },
+                { terms: { job_id: jobIds } },
                 {
                   range: {
                     timestamp: {
@@ -110,11 +118,24 @@ export function registerTransactionDurationAnomalyAlertType({
                     },
                   },
                 },
-                {
-                  term: {
-                    partition_field_value: alertParams.serviceName,
-                  },
-                },
+                ...(alertParams.serviceName
+                  ? [
+                      {
+                        term: {
+                          partition_field_value: alertParams.serviceName,
+                        },
+                      },
+                    ]
+                  : []),
+                ...(alertParams.transactionType
+                  ? [
+                      {
+                        term: {
+                          by_field_value: alertParams.transactionType,
+                        },
+                      },
+                    ]
+                  : []),
                 {
                   range: {
                     record_score: {
@@ -125,22 +146,99 @@ export function registerTransactionDurationAnomalyAlertType({
               ],
             },
           },
+          aggs: {
+            services: {
+              terms: {
+                field: 'partition_field_value',
+                size: 50,
+              },
+              aggs: {
+                transaction_types: {
+                  terms: {
+                    field: 'by_field_value',
+                  },
+                },
+                record_avg: {
+                  avg: {
+                    field: 'record_score',
+                  },
+                },
+              },
+            },
+          },
         },
       };
 
       const response = ((await mlAnomalySearch(
-        anomalySearchParams
-      )) as unknown) as { hits: { total: { value: number } } };
+        anomalySearchParams,
+        jobIds
+      )) as unknown) as {
+        hits: { total: { value: number } };
+        aggregations?: {
+          services: {
+            buckets: Array<{
+              key: string;
+              record_avg: { value: number };
+              transaction_types: { buckets: Array<{ key: string }> };
+            }>;
+          };
+        };
+      };
+
       const hitCount = response.hits.total.value;
 
       if (hitCount > 0) {
-        const alertInstance = services.alertInstanceFactory(
-          AlertType.TransactionDurationAnomaly
-        );
-        alertInstance.scheduleActions(alertTypeConfig.defaultActionGroupId, {
-          serviceName: alertParams.serviceName,
-          transactionType: alertParams.transactionType,
-          environment: alertParams.environment,
+        function scheduleAction({
+          serviceName,
+          severity,
+          environment,
+          transactionType,
+        }: {
+          serviceName: string;
+          severity: string;
+          environment?: string;
+          transactionType?: string;
+        }) {
+          const alertInstanceName = [
+            AlertType.TransactionDurationAnomaly,
+            serviceName,
+            environment,
+            transactionType,
+          ]
+            .filter((name) => name)
+            .join('_');
+
+          const alertInstance = services.alertInstanceFactory(
+            alertInstanceName
+          );
+
+          alertInstance.scheduleActions(alertTypeConfig.defaultActionGroupId, {
+            serviceName,
+            environment,
+            transactionType,
+            threshold: selectedOption?.label,
+            thresholdValue: severity,
+          });
+        }
+        mlJobs.map((job) => {
+          const environment = job.custom_settings?.job_tags?.environment;
+          response.aggregations?.services.buckets.forEach((serviceBucket) => {
+            const serviceName = serviceBucket.key as string;
+            const severity = getSeverity(serviceBucket.record_avg.value);
+            if (isEmpty(serviceBucket.transaction_types?.buckets)) {
+              scheduleAction({ serviceName, severity, environment });
+            } else {
+              serviceBucket.transaction_types?.buckets.forEach((typeBucket) => {
+                const transactionType = typeBucket.key as string;
+                scheduleAction({
+                  serviceName,
+                  severity,
+                  environment,
+                  transactionType,
+                });
+              });
+            }
+          });
         });
       }
     },

@@ -5,7 +5,7 @@
  */
 
 import { useMemo, useState, useCallback, useEffect, useReducer } from 'react';
-import { useMount } from 'react-use';
+import useMount from 'react-use/lib/useMount';
 import { useTrackedPromise, CanceledPromiseError } from '../../../utils/use_tracked_promise';
 import { callGetLogEntryAnomaliesAPI } from './service_calls/get_log_entry_anomalies';
 import { callGetLogEntryAnomaliesDatasetsAPI } from './service_calls/get_log_entry_anomalies_datasets';
@@ -16,6 +16,7 @@ import {
   GetLogEntryAnomaliesDatasetsSuccessResponsePayload,
   LogEntryAnomaly,
 } from '../../../../common/http_api/log_analysis';
+import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 
 export type SortOptions = Sort;
 export type PaginationOptions = Pick<Pagination, 'pageSize'>;
@@ -161,6 +162,8 @@ export const useLogEntryAnomaliesResults = ({
     };
   };
 
+  const { services } = useKibanaContextForPlugin();
+
   const [reducerState, dispatch] = useReducer(stateReducer, STATE_DEFAULTS, initStateReducer);
 
   const [logEntryAnomalies, setLogEntryAnomalies] = useState<LogEntryAnomalies>([]);
@@ -177,15 +180,18 @@ export const useLogEntryAnomaliesResults = ({
           filteredDatasets: queryFilteredDatasets,
         } = reducerState;
         return await callGetLogEntryAnomaliesAPI(
-          sourceId,
-          queryStartTime,
-          queryEndTime,
-          sortOptions,
           {
-            ...paginationOptions,
-            cursor: paginationCursor,
+            sourceId,
+            startTime: queryStartTime,
+            endTime: queryEndTime,
+            sort: sortOptions,
+            pagination: {
+              ...paginationOptions,
+              cursor: paginationCursor,
+            },
+            datasets: queryFilteredDatasets,
           },
-          queryFilteredDatasets
+          services.http.fetch
         );
       },
       onResolve: ({ data: { anomalies, paginationCursors: requestCursors, hasMoreEntries } }) => {
@@ -286,7 +292,10 @@ export const useLogEntryAnomaliesResults = ({
     {
       cancelPreviousOn: 'creation',
       createPromise: async () => {
-        return await callGetLogEntryAnomaliesDatasetsAPI(sourceId, startTime, endTime);
+        return await callGetLogEntryAnomaliesDatasetsAPI(
+          { sourceId, startTime, endTime },
+          services.http.fetch
+        );
       },
       onResolve: ({ data: { datasets } }) => {
         setLogEntryAnomaliesDatasets(datasets);

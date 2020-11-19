@@ -16,7 +16,7 @@ addDecorator((storyFn) => (
   <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>{storyFn()}</ThemeProvider>
 ));
 
-storiesOf('Exceptions|BuilderLogicButtons', module)
+storiesOf('Exceptions/BuilderLogicButtons', module)
   .add('and/or buttons', () => {
     return (
       <BuilderLogicButtons

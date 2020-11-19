@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, Fragment, useEffect } from 'react';
+import React, { useState, Fragment, useEffect, useReducer } from 'react';
 import { keyBy } from 'lodash';
 import { useHistory } from 'react-router-dom';
 import {
@@ -22,11 +22,10 @@ import {
   EuiSwitch,
   EuiCallOut,
   EuiSpacer,
-  EuiBetaBadge,
   EuiButtonEmpty,
+  EuiButton,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { i18n } from '@kbn/i18n';
 import { useAppDependencies } from '../../../app_context';
 import { hasAllPrivilege, hasExecuteActionsCapability } from '../../../lib/capabilities';
 import { getAlertingSectionBreadcrumb, getAlertDetailsBreadcrumb } from '../../../lib/breadcrumb';
@@ -38,10 +37,11 @@ import {
 } from '../../common/components/with_bulk_alert_api_operations';
 import { AlertInstancesRouteWithApi } from './alert_instances_route';
 import { ViewInApp } from './view_in_app';
-import { PLUGIN } from '../../../constants/plugin';
 import { AlertEdit } from '../../alert_form';
 import { AlertsContextProvider } from '../../../context/alerts_context';
 import { routeToAlertDetails } from '../../../constants';
+import { alertsErrorReasonTranslationsMapping } from '../../alerts_list/translations';
+import { alertReducer } from '../../alert_form/alert_reducer';
 
 type AlertDetailsProps = {
   alert: Alert;
@@ -70,10 +70,14 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
     uiSettings,
     docLinks,
     charts,
-    dataPlugin,
+    data,
     setBreadcrumbs,
     chrome,
   } = useAppDependencies();
+  const [{}, dispatch] = useReducer(alertReducer, { alert });
+  const setInitialAlert = (key: string, value: any) => {
+    dispatch({ command: { type: 'setAlert' }, payload: { key, value } });
+  };
 
   // Set breadcrumb and page title
   useEffect(() => {
@@ -105,9 +109,18 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
   const [isEnabled, setIsEnabled] = useState<boolean>(alert.enabled);
   const [isMuted, setIsMuted] = useState<boolean>(alert.muteAll);
   const [editFlyoutVisible, setEditFlyoutVisibility] = useState<boolean>(false);
+  const [dissmissAlertErrors, setDissmissAlertErrors] = useState<boolean>(false);
 
   const setAlert = async () => {
     history.push(routeToAlertDetails.replace(`:alertId`, alert.id));
+  };
+
+  const getAlertStatusErrorReasonText = () => {
+    if (alert.executionStatus.error && alert.executionStatus.error.reason) {
+      return alertsErrorReasonTranslationsMapping[alert.executionStatus.error.reason];
+    } else {
+      return alertsErrorReasonTranslationsMapping.unknown;
+    }
   };
 
   return (
@@ -119,20 +132,6 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
               <EuiTitle size="m">
                 <h1>
                   <span data-test-subj="alertDetailsTitle">{alert.name}</span>
-                  &emsp;
-                  <EuiBetaBadge
-                    label="Beta"
-                    tooltipContent={i18n.translate(
-                      'xpack.triggersActionsUI.sections.alertDetails.betaBadgeTooltipContent',
-                      {
-                        defaultMessage:
-                          '{pluginName} is in beta and is subject to change. The design and code is less mature than official GA features and is being provided as-is with no warranties. Beta features are not subject to the support SLA of official GA features.',
-                        values: {
-                          pluginName: PLUGIN.getI18nName(i18n),
-                        },
-                      }
-                    )}
-                  />
                 </h1>
               </EuiTitle>
             </EuiPageContentHeaderSection>
@@ -163,14 +162,19 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
                             uiSettings,
                             docLinks,
                             charts,
-                            dataFieldsFormats: dataPlugin.fieldFormats,
+                            dataFieldsFormats: data.fieldFormats,
                             reloadAlerts: setAlert,
                             capabilities,
+                            dataUi: data.ui,
+                            dataIndexPatterns: data.indexPatterns,
                           }}
                         >
                           <AlertEdit
                             initialAlert={alert}
-                            onClose={() => setEditFlyoutVisibility(false)}
+                            onClose={() => {
+                              setInitialAlert('alert', alert);
+                              setEditFlyoutVisibility(false);
+                            }}
                           />
                         </AlertsContextProvider>
                       )}
@@ -275,12 +279,37 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
                 </EuiFlexGroup>
               </EuiFlexItem>
             </EuiFlexGroup>
+            {!dissmissAlertErrors && alert.executionStatus.status === 'error' ? (
+              <EuiFlexGroup>
+                <EuiFlexItem>
+                  <EuiCallOut
+                    color="danger"
+                    data-test-subj="alertErrorBanner"
+                    size="s"
+                    title={getAlertStatusErrorReasonText()}
+                    iconType="alert"
+                  >
+                    <EuiText size="s" color="danger" data-test-subj="alertErrorMessageText">
+                      {alert.executionStatus.error?.message}
+                    </EuiText>
+                    <EuiSpacer size="s" />
+                    <EuiButton color="danger" onClick={() => setDissmissAlertErrors(true)}>
+                      <FormattedMessage
+                        id="xpack.triggersActionsUI.sections.alertDetails.dismissButtonTitle"
+                        defaultMessage="Dismiss"
+                      />
+                    </EuiButton>
+                  </EuiCallOut>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            ) : null}
             <EuiFlexGroup>
               <EuiFlexItem>
                 {alert.enabled ? (
                   <AlertInstancesRouteWithApi
                     requestRefresh={requestRefresh}
                     alert={alert}
+                    alertType={alertType}
                     readOnly={!canSaveAlert}
                   />
                 ) : (

@@ -31,7 +31,6 @@ export {
   IKibanaSearchRequest,
   IKibanaSearchResponse,
   injectReferences as injectSearchSourceReferences,
-  ISearch,
   ISearchGeneric,
   ISearchSource,
   parseSearchSourceJSON,
@@ -41,9 +40,10 @@ export {
   SearchSourceDependencies,
   SearchSourceFields,
   SortDirection,
+  ISessionService,
 } from '../../common/search';
 
 export { getEsPreference } from './es_search';
 
 export { SearchInterceptor, SearchInterceptorDeps } from './search_interceptor';
-export { RequestTimeoutError } from './request_timeout_error';
+export * from './errors';

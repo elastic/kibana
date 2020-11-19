@@ -9,7 +9,9 @@ import { useLogEntryCategoriesModuleContext } from './use_log_entry_categories_m
 
 export const useLogEntryCategoriesSetup = () => {
   const {
+    categoryQualityWarnings,
     cleanUpAndSetUpModule,
+    fetchJobStatus,
     lastSetupErrorMessages,
     moduleDescriptor,
     setUpModule,
@@ -37,8 +39,10 @@ export const useLogEntryCategoriesSetup = () => {
   });
 
   return {
+    categoryQualityWarnings,
     cleanUpAndSetUp,
     endTime,
+    fetchJobStatus,
     isValidating,
     lastSetupErrorMessages,
     moduleDescriptor,

@@ -32,10 +32,7 @@ jest.mock('chokidar', () => ({
   })),
 }));
 
-jest.mock('lodash', () => ({
-  ...require.requireActual('lodash'),
-  throttle: (fn: any) => fn,
-}));
+lodash.throttle = (fn: any) => fn;
 
 const tempDir = join(tmpdir(), 'kbn_log_rotator_test');
 const testFilePath = join(tempDir, 'log_rotator_test_log_file.log');

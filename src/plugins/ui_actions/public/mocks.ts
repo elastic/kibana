@@ -48,6 +48,7 @@ const createStartContract = (): Start => {
     executeTriggerActions: jest.fn(),
     fork: jest.fn(),
     getAction: jest.fn(),
+    hasAction: jest.fn(),
     getTrigger: jest.fn(),
     getTriggerActions: jest.fn((id: TriggerId) => []),
     getTriggerCompatibleActions: jest.fn(),

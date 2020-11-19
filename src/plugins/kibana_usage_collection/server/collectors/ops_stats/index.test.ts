@@ -19,24 +19,28 @@
 
 import { Subject } from 'rxjs';
 import {
-  CollectorOptions,
+  Collector,
   createUsageCollectionSetupMock,
+  createCollectorFetchContextMock,
 } from '../../../../usage_collection/server/usage_collection.mock';
 
 import { registerOpsStatsCollector } from './';
 import { OpsMetrics } from '../../../../../core/server';
+import { loggingSystemMock } from '../../../../../core/server/mocks';
+
+const logger = loggingSystemMock.createLogger();
 
 describe('telemetry_ops_stats', () => {
-  let collector: CollectorOptions;
+  let collector: Collector<unknown, unknown>;
 
   const usageCollectionMock = createUsageCollectionSetupMock();
   usageCollectionMock.makeStatsCollector.mockImplementation((config) => {
-    collector = config;
+    collector = new Collector(logger, config);
     return createUsageCollectionSetupMock().makeStatsCollector(config);
   });
 
   const metrics$ = new Subject<OpsMetrics>();
-  const callCluster = jest.fn();
+  const mockedFetchContext = createCollectorFetchContextMock();
 
   const metric: OpsMetrics = {
     collected_at: new Date('2020-01-01 01:00:00'),
@@ -92,7 +96,7 @@ describe('telemetry_ops_stats', () => {
   test('should return something when there is a metric', async () => {
     metrics$.next(metric);
     expect(collector.isReady()).toBe(true);
-    expect(await collector.fetch(callCluster)).toMatchSnapshot({
+    expect(await collector.fetch(mockedFetchContext)).toMatchSnapshot({
       concurrent_connections: 20,
       os: {
         load: {

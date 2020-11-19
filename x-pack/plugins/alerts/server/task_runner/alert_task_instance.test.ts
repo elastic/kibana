@@ -29,6 +29,10 @@ const alert: SanitizedAlert = {
   throttle: null,
   muteAll: false,
   mutedInstanceIds: [],
+  executionStatus: {
+    status: 'unknown',
+    lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
+  },
 };
 
 describe('Alert Task Instance', () => {

@@ -50,7 +50,7 @@ import {
   COMPARE_ALL_OPTIONS,
 } from '../common';
 
-import { FilterLabel } from './ui/filter_bar';
+import { FilterLabel } from './ui';
 
 import {
   generateFilters,
@@ -230,6 +230,8 @@ import {
   formatHitProvider,
 } from './index_patterns';
 
+export type { IndexPatternsService } from './index_patterns';
+
 // Index patterns namespace:
 export const indexPatterns = {
   ILLEGAL_CHARACTERS_KEY,
@@ -262,8 +264,11 @@ export {
   UI_SETTINGS,
   TypeMeta as IndexPatternTypeMeta,
   AggregationRestrictions as IndexPatternAggRestrictions,
+  IndexPatternSpec,
   fieldList,
 } from '../common';
+
+export { DuplicateIndexPatternError } from '../common/index_patterns/errors';
 
 /*
  * Autocomplete query suggestions:
@@ -333,6 +338,12 @@ export {
   OptionedParamType,
   OptionedValueProp,
   ParsedInterval,
+  // expressions
+  ExecutionContextSearch,
+  ExpressionFunctionKibana,
+  ExpressionFunctionKibanaContext,
+  ExpressionValueSearchContext,
+  KibanaContext,
   // tabify
   TabbedAggColumn,
   TabbedAggRow,
@@ -353,15 +364,12 @@ export {
   IKibanaSearchRequest,
   IKibanaSearchResponse,
   injectSearchSourceReferences,
-  ISearch,
   ISearchSetup,
   ISearchStart,
   ISearchStartSearchSource,
   ISearchGeneric,
   ISearchSource,
   parseSearchSourceJSON,
-  RequestTimeoutError,
-  SearchError,
   SearchInterceptor,
   SearchInterceptorDeps,
   SearchRequest,
@@ -370,11 +378,16 @@ export {
   // expression functions and types
   EsdslExpressionFunctionDefinition,
   EsRawResponseExpressionTypeDefinition,
+  // errors
+  SearchError,
+  SearchTimeoutError,
+  TimeoutErrorMode,
+  PainlessError,
 } from './search';
 
-export type { SearchSource } from './search';
+export type { SearchSource, ISessionService } from './search';
 
-export { ISearchOptions } from '../common';
+export { ISearchOptions, isErrorResponse, isCompleteResponse, isPartialResponse } from '../common';
 
 // Search namespace
 export const search = {
@@ -413,9 +426,9 @@ export {
   SearchBar,
   SearchBarProps,
   StatefulSearchBarProps,
-  FilterBar,
+  IndexPatternSelectProps,
   QueryStringInput,
-  IndexPatternSelect,
+  QueryStringInputProps,
 } from './ui';
 
 /**
@@ -454,8 +467,6 @@ export {
 export { isTimeRange, isQuery, isFilter, isFilters } from '../common';
 
 export { ACTION_GLOBAL_APPLY_FILTER, ApplyGlobalFilterActionContext } from './actions';
-
-export * from '../common/field_mapping';
 
 /*
  * Plugin setup

@@ -11,8 +11,8 @@ import { omitBlockedHeaders } from '../../export_types/common';
 import { getAbsoluteUrlFactory } from '../../export_types/common/get_absolute_url';
 import { generatePngObservableFactory } from '../../export_types/png/lib/generate_png';
 import { LevelLogger as Logger } from '../../lib';
-import { DiagnosticResponse } from '../../types';
 import { authorizedUserPreRoutingFactory } from '../lib/authorized_user_pre_routing';
+import { DiagnosticResponse } from './';
 
 export const registerDiagnoseScreenshot = (reporting: ReportingCore, logger: Logger) => {
   const setupDeps = reporting.getPluginSetupDeps();
@@ -54,10 +54,7 @@ export const registerDiagnoseScreenshot = (reporting: ReportingCore, logger: Log
       };
 
       const headers = {
-        headers: omitBlockedHeaders({
-          job: null,
-          decryptedHeaders,
-        }),
+        headers: omitBlockedHeaders(decryptedHeaders),
         conditions: {
           hostname,
           port: +port,

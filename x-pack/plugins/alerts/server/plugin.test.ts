@@ -5,7 +5,7 @@
  */
 
 import { AlertingPlugin, AlertingPluginsSetup, AlertingPluginsStart } from './plugin';
-import { coreMock } from '../../../../src/core/server/mocks';
+import { coreMock, statusServiceMock } from '../../../../src/core/server/mocks';
 import { licensingMock } from '../../licensing/server/mocks';
 import { encryptedSavedObjectsMock } from '../../encrypted_saved_objects/server/mocks';
 import { taskManagerMock } from '../../task_manager/server/mocks';
@@ -13,15 +13,25 @@ import { eventLogServiceMock } from '../../event_log/server/event_log_service.mo
 import { KibanaRequest, CoreSetup } from 'kibana/server';
 import { featuresPluginMock } from '../../features/server/mocks';
 import { KibanaFeature } from '../../features/server';
+import { AlertsConfig } from './config';
 
 describe('Alerting Plugin', () => {
   describe('setup()', () => {
     it('should log warning when Encrypted Saved Objects plugin is using an ephemeral encryption key', async () => {
-      const context = coreMock.createPluginInitializerContext();
+      const context = coreMock.createPluginInitializerContext<AlertsConfig>({
+        healthCheck: {
+          interval: '5m',
+        },
+        invalidateApiKeysTask: {
+          interval: '5m',
+          removalDelay: '5m',
+        },
+      });
       const plugin = new AlertingPlugin(context);
 
       const coreSetup = coreMock.createSetup();
       const encryptedSavedObjectsSetup = encryptedSavedObjectsMock.createSetup();
+      const statusMock = statusServiceMock.createSetupContract();
       await plugin.setup(
         ({
           ...coreSetup,
@@ -29,6 +39,7 @@ describe('Alerting Plugin', () => {
             ...coreSetup.http,
             route: jest.fn(),
           },
+          status: statusMock,
         } as unknown) as CoreSetup<AlertingPluginsStart, unknown>,
         ({
           licensing: licensingMock.createSetup(),
@@ -38,6 +49,7 @@ describe('Alerting Plugin', () => {
         } as unknown) as AlertingPluginsSetup
       );
 
+      expect(statusMock.set).toHaveBeenCalledTimes(1);
       expect(encryptedSavedObjectsSetup.usingEphemeralEncryptionKey).toEqual(true);
       expect(context.logger.get().warn).toHaveBeenCalledWith(
         'APIs are disabled due to the Encrypted Saved Objects plugin using an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in kibana.yml.'
@@ -55,7 +67,15 @@ describe('Alerting Plugin', () => {
      */
     describe('getAlertsClientWithRequest()', () => {
       it('throws error when encryptedSavedObjects plugin has usingEphemeralEncryptionKey set to true', async () => {
-        const context = coreMock.createPluginInitializerContext();
+        const context = coreMock.createPluginInitializerContext<AlertsConfig>({
+          healthCheck: {
+            interval: '5m',
+          },
+          invalidateApiKeysTask: {
+            interval: '5m',
+            removalDelay: '5m',
+          },
+        });
         const plugin = new AlertingPlugin(context);
 
         const coreSetup = coreMock.createSetup();
@@ -98,7 +118,15 @@ describe('Alerting Plugin', () => {
       });
 
       it(`doesn't throw error when encryptedSavedObjects plugin has usingEphemeralEncryptionKey set to false`, async () => {
-        const context = coreMock.createPluginInitializerContext();
+        const context = coreMock.createPluginInitializerContext<AlertsConfig>({
+          healthCheck: {
+            interval: '5m',
+          },
+          invalidateApiKeysTask: {
+            interval: '5m',
+            removalDelay: '5m',
+          },
+        });
         const plugin = new AlertingPlugin(context);
 
         const coreSetup = coreMock.createSetup();

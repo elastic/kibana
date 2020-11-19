@@ -2,8 +2,13 @@
 [[services]]
 === Services overview
 
-The *Services* overview gives you quick insights into the health and general performance of all of your instrumented services.
-Services are sorted by the `service.name` configured in each of the {apm-agents-ref}[APM agents] you’ve installed.
+The *Services* overview page provides a quick, high-level overview of the health and general
+performance of all instrumented services.
+
+To help surface potential issues, services are sorted by their health status:
+**critical** > **warning** > **healthy** > **unknown**.
+Health status is powered by machine learning and requires anomaly detection to be enabled.
+Learn more in <<machine-learning-integration,machine learning>>.
 
 [role="screenshot"]
 image::apm/images/apm-services-overview.png[Example view of services table the APM app in Kibana]

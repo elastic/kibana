@@ -226,6 +226,7 @@ export default function createGetAlertInstanceSummaryTests({ getService }: FtrPr
         instanceA: {
           status: 'Active',
           muted: false,
+          actionGroupId: 'default',
           activeStartDate: actualInstances.instanceA.activeStartDate,
         },
         instanceB: {
@@ -235,6 +236,7 @@ export default function createGetAlertInstanceSummaryTests({ getService }: FtrPr
         instanceC: {
           status: 'Active',
           muted: true,
+          actionGroupId: 'default',
           activeStartDate: actualInstances.instanceC.activeStartDate,
         },
         instanceD: {

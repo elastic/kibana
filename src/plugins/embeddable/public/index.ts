@@ -24,7 +24,6 @@ import { EmbeddablePublicPlugin } from './plugin';
 
 export {
   ACTION_ADD_PANEL,
-  ACTION_APPLY_FILTER,
   ACTION_EDIT_PANEL,
   Adapters,
   AddPanelAction,
@@ -71,12 +70,15 @@ export {
   isSavedObjectEmbeddableInput,
   isRangeSelectTriggerContext,
   isValueClickTriggerContext,
+  isContextMenuTriggerContext,
   EmbeddableStateTransfer,
   EmbeddableEditorState,
   EmbeddablePackageState,
   EmbeddableRenderer,
   EmbeddableRendererProps,
 } from './lib';
+
+export { AttributeService, ATTRIBUTE_SERVICE_KEY } from './lib/attribute_service';
 
 export { EnhancementRegistryDefinition } from './types';
 

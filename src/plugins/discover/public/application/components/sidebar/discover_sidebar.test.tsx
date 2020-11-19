@@ -21,16 +21,15 @@ import _ from 'lodash';
 import { ReactWrapper } from 'enzyme';
 import { findTestSubject } from '@elastic/eui/lib/test';
 // @ts-ignore
-import StubIndexPattern from 'test_utils/stub_index_pattern';
-// @ts-ignore
 import realHits from 'fixtures/real_hits.js';
 // @ts-ignore
 import stubbedLogstashFields from 'fixtures/logstash_fields';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 import React from 'react';
 import { DiscoverSidebar, DiscoverSidebarProps } from './discover_sidebar';
 import { coreMock } from '../../../../../../core/public/mocks';
 import { IndexPatternAttributes } from '../../../../../data/common';
+import { getStubIndexPattern } from '../../../../../data/public/test_utils';
 import { SavedObject } from '../../../../../../core/types';
 
 jest.mock('../../../kibana_services', () => ({
@@ -52,8 +51,6 @@ jest.mock('../../../kibana_services', () => ({
       get: (key: string) => {
         if (key === 'fields:popularLimit') {
           return 5;
-        } else if (key === 'shortDots:enable') {
-          return false;
         }
       },
     },
@@ -65,14 +62,15 @@ jest.mock('./lib/get_index_pattern_field_list', () => ({
 }));
 
 function getCompProps() {
-  const indexPattern = new StubIndexPattern(
+  const indexPattern = getStubIndexPattern(
     'logstash-*',
     (cfg: any) => cfg,
     'time',
     stubbedLogstashFields(),
-    coreMock.createStart()
+    coreMock.createSetup()
   );
 
+  // @ts-expect-error _.each() is passing additional args to flattenHit
   const hits = _.each(_.cloneDeep(realHits), indexPattern.flattenHit) as Array<
     Record<string, unknown>
   >;
@@ -101,6 +99,7 @@ function getCompProps() {
     selectedIndexPattern: indexPattern,
     setIndexPattern: jest.fn(),
     state: {},
+    trackUiMetric: jest.fn(),
   };
 }
 

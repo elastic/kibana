@@ -14,7 +14,7 @@ import {
 } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
-import { connect, ConnectedProps, useDispatch, useSelector } from 'react-redux';
+import { connect, ConnectedProps, useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
 import { FULL_SCREEN } from '../timeline/body/column_headers/translations';
@@ -22,6 +22,7 @@ import { EXIT_FULL_SCREEN } from '../../../common/components/exit_full_screen/tr
 import { DEFAULT_INDEX_KEY, FULL_SCREEN_TOGGLED_CLASS_NAME } from '../../../../common/constants';
 import { useFullScreen } from '../../../common/containers/use_full_screen';
 import { State } from '../../../common/store';
+import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { TimelineId, TimelineType } from '../../../../common/types/timeline';
 import { timelineSelectors } from '../../store/timeline';
 import { timelineDefaults } from '../../store/timeline/defaults';
@@ -37,10 +38,13 @@ import { useUiSetting$ } from '../../../common/lib/kibana';
 import { useSignalIndex } from '../../../detections/containers/detection_engine/alerts/use_signal_index';
 
 const OverlayContainer = styled.div`
-  height: 100%;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
+  ${({ $restrictWidth }: { $restrictWidth: boolean }) =>
+    `
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: ${$restrictWidth ? 'calc(100% - 36px)' : '100%'};
+    `}
 `;
 
 const StyledResolver = styled(Resolver)`
@@ -53,6 +57,7 @@ const FullScreenButtonIcon = styled(EuiButtonIcon)`
 
 interface OwnProps {
   graphEventId?: string;
+  isEventViewer: boolean;
   timelineId: string;
   timelineType: TimelineType;
 }
@@ -74,8 +79,8 @@ const Navigation = ({
 }) => (
   <EuiFlexGroup alignItems="center" gutterSize="none">
     <EuiFlexItem grow={false}>
-      <EuiButtonEmpty onClick={onCloseOverlay} size="xs">
-        {i18n.BACK_TO_EVENTS}
+      <EuiButtonEmpty iconType="cross" onClick={onCloseOverlay} size="xs">
+        {i18n.CLOSE_ANALYZER}
       </EuiButtonEmpty>
     </EuiFlexItem>
     <EuiFlexItem grow={false}>
@@ -99,6 +104,7 @@ const Navigation = ({
 
 const GraphOverlayComponent = ({
   graphEventId,
+  isEventViewer,
   status,
   timelineId,
   title,
@@ -109,7 +115,7 @@ const GraphOverlayComponent = ({
     dispatch(updateTimelineGraphEventId({ id: timelineId, graphEventId: '' }));
   }, [dispatch, timelineId]);
 
-  const currentTimeline = useSelector((state: State) =>
+  const currentTimeline = useShallowEqualSelector((state) =>
     timelineSelectors.selectTimeline(state, timelineId)
   );
 
@@ -150,7 +156,10 @@ const GraphOverlayComponent = ({
   }, [signalIndexName, siemDefaultIndices]);
 
   return (
-    <OverlayContainer>
+    <OverlayContainer
+      data-test-subj="overlayContainer"
+      $restrictWidth={isEventViewer && fullScreen}
+    >
       <EuiHorizontalRule margin="none" />
       <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>

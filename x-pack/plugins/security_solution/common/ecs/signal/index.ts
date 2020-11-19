@@ -10,4 +10,7 @@ export interface SignalEcs {
   rule?: RuleEcs;
   original_time?: string[];
   status?: string[];
+  group?: {
+    id?: string[];
+  };
 }

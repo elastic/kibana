@@ -6,7 +6,7 @@
 
 import { EuiToolTip } from '@elastic/eui';
 import React, { FC } from 'react';
-import { isEqual, cloneDeep } from 'lodash';
+import { cloneDeep, isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { IIndexPattern } from 'src/plugins/data/common';
 import { DeepReadonly } from '../../../../../../../common/types/common';
@@ -345,7 +345,7 @@ export const useNavigateToWizardWithClonedJob = () => {
 
   return async (item: DataFrameAnalyticsListRow) => {
     const sourceIndex = Array.isArray(item.config.source.index)
-      ? item.config.source.index[0]
+      ? item.config.source.index.join(',')
       : item.config.source.index;
     let sourceIndexId;
 
@@ -363,6 +363,14 @@ export const useNavigateToWizardWithClonedJob = () => {
       );
       if (ip !== undefined) {
         sourceIndexId = ip.id;
+      } else {
+        toasts.addDanger(
+          i18n.translate('xpack.ml.dataframe.analyticsList.noSourceIndexPatternForClone', {
+            defaultMessage:
+              'Unable to clone the analytics job. No index pattern exists for index {indexPattern}.',
+            values: { indexPattern: sourceIndex },
+          })
+        );
       }
     } catch (e) {
       const error = extractErrorMessage(e);

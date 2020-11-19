@@ -4,33 +4,58 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { newOverrideRule } from '../objects/rule';
+import { indexPatterns, newOverrideRule, severitiesOverride } from '../objects/rule';
+import {
+  NUMBER_OF_ALERTS,
+  ALERT_RULE_NAME,
+  ALERT_RULE_METHOD,
+  ALERT_RULE_RISK_SCORE,
+  ALERT_RULE_SEVERITY,
+  ALERT_RULE_VERSION,
+} from '../screens/alerts';
 
 import {
   CUSTOM_RULES_BTN,
   RISK_SCORE,
   RULE_NAME,
+  RULE_SWITCH,
   RULES_ROW,
   RULES_TABLE,
   SEVERITY,
 } from '../screens/alerts_detection_rules';
 import {
   ABOUT_INVESTIGATION_NOTES,
+  ABOUT_DETAILS,
   ABOUT_RULE_DESCRIPTION,
+  ADDITIONAL_LOOK_BACK_DETAILS,
+  CUSTOM_QUERY_DETAILS,
+  DEFINITION_DETAILS,
+  DETAILS_DESCRIPTION,
+  DETAILS_TITLE,
+  FALSE_POSITIVES_DETAILS,
+  getDetails,
+  removeExternalLinkText,
+  INDEX_PATTERNS_DETAILS,
   INVESTIGATION_NOTES_MARKDOWN,
   INVESTIGATION_NOTES_TOGGLE,
-  RULE_ABOUT_DETAILS_HEADER_TOGGLE,
+  MITRE_ATTACK_DETAILS,
+  REFERENCE_URLS_DETAILS,
+  RISK_SCORE_DETAILS,
+  RISK_SCORE_OVERRIDE_DETAILS,
   RULE_NAME_HEADER,
-  ABOUT_DETAILS,
-  getDescriptionForTitle,
-  DEFINITION_DETAILS,
+  RULE_NAME_OVERRIDE_DETAILS,
+  RULE_TYPE_DETAILS,
+  RUNS_EVERY_DETAILS,
   SCHEDULE_DETAILS,
-  DETAILS_TITLE,
-  DETAILS_DESCRIPTION,
+  SEVERITY_DETAILS,
+  TAGS_DETAILS,
+  TIMELINE_TEMPLATE_DETAILS,
+  TIMESTAMP_OVERRIDE_DETAILS,
 } from '../screens/rule_details';
 
 import {
   goToManageAlertsDetectionRules,
+  sortRiskScore,
   waitForAlertsIndexToBeCreated,
   waitForAlertsPanelToBeLoaded,
 } from '../tasks/alerts';
@@ -46,11 +71,23 @@ import {
   createAndActivateRule,
   fillAboutRuleWithOverrideAndContinue,
   fillDefineCustomRuleWithImportedQueryAndContinue,
+  fillScheduleRuleAndContinue,
+  waitForAlertsToPopulate,
+  waitForTheRuleToBeExecuted,
 } from '../tasks/create_new_rule';
 import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
 import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 
 import { DETECTIONS_URL } from '../urls/navigation';
+
+const expectedUrls = newOverrideRule.referenceUrls.join('');
+const expectedFalsePositives = newOverrideRule.falsePositivesExamples.join('');
+const expectedTags = newOverrideRule.tags.join('');
+const expectedMitre = newOverrideRule.mitre
+  .map(function (mitre) {
+    return mitre.tactic + mitre.techniques.join('');
+  })
+  .join('');
 
 describe('Detection rules, override', () => {
   before(() => {
@@ -70,9 +107,10 @@ describe('Detection rules, override', () => {
     goToCreateNewRule();
     fillDefineCustomRuleWithImportedQueryAndContinue(newOverrideRule);
     fillAboutRuleWithOverrideAndContinue(newOverrideRule);
+    fillScheduleRuleAndContinue(newOverrideRule);
     createAndActivateRule();
 
-    cy.get(CUSTOM_RULES_BTN).invoke('text').should('eql', 'Custom rules (1)');
+    cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
 
     changeToThreeHundredRowsPerPage();
     waitForRulesToBeLoaded();
@@ -87,98 +125,75 @@ describe('Detection rules, override', () => {
     cy.get(RULES_TABLE).then(($table) => {
       cy.wrap($table.find(RULES_ROW).length).should('eql', 1);
     });
-    cy.get(RULE_NAME).invoke('text').should('eql', newOverrideRule.name);
-    cy.get(RISK_SCORE).invoke('text').should('eql', newOverrideRule.riskScore);
-    cy.get(SEVERITY).invoke('text').should('eql', newOverrideRule.severity);
-    cy.get('[data-test-subj="rule-switch"]').should('have.attr', 'aria-checked', 'true');
+    cy.get(RULE_NAME).should('have.text', newOverrideRule.name);
+    cy.get(RISK_SCORE).should('have.text', newOverrideRule.riskScore);
+    cy.get(SEVERITY).should('have.text', newOverrideRule.severity);
+    cy.get(RULE_SWITCH).should('have.attr', 'aria-checked', 'true');
 
     goToRuleDetails();
 
-    let expectedUrls = '';
-    newOverrideRule.referenceUrls.forEach((url) => {
-      expectedUrls = expectedUrls + url;
-    });
-    let expectedFalsePositives = '';
-    newOverrideRule.falsePositivesExamples.forEach((falsePositive) => {
-      expectedFalsePositives = expectedFalsePositives + falsePositive;
-    });
-    let expectedTags = '';
-    newOverrideRule.tags.forEach((tag) => {
-      expectedTags = expectedTags + tag;
-    });
-    let expectedMitre = '';
-    newOverrideRule.mitre.forEach((mitre) => {
-      expectedMitre = expectedMitre + mitre.tactic;
-      mitre.techniques.forEach((technique) => {
-        expectedMitre = expectedMitre + technique;
-      });
-    });
-    const expectedIndexPatterns = [
-      'apm-*-transaction*',
-      'auditbeat-*',
-      'endgame-*',
-      'filebeat-*',
-      'logs-*',
-      'packetbeat-*',
-      'winlogbeat-*',
-    ];
-
-    cy.get(RULE_NAME_HEADER).invoke('text').should('eql', `${newOverrideRule.name} Beta`);
-
-    cy.get(ABOUT_RULE_DESCRIPTION).invoke('text').should('eql', newOverrideRule.description);
-
-    const expectedOverrideSeverities = ['Low', 'Medium', 'High', 'Critical'];
-
+    cy.get(RULE_NAME_HEADER).should('have.text', `${newOverrideRule.name}`);
+    cy.get(ABOUT_RULE_DESCRIPTION).should('have.text', newOverrideRule.description);
     cy.get(ABOUT_DETAILS).within(() => {
-      getDescriptionForTitle('Severity').invoke('text').should('eql', newOverrideRule.severity);
-      getDescriptionForTitle('Risk score').invoke('text').should('eql', newOverrideRule.riskScore);
-      getDescriptionForTitle('Risk score override')
-        .invoke('text')
-        .should('eql', `${newOverrideRule.riskOverride}signal.rule.risk_score`);
-      getDescriptionForTitle('Rule name override')
-        .invoke('text')
-        .should('eql', newOverrideRule.nameOverride);
-      getDescriptionForTitle('Reference URLs').invoke('text').should('eql', expectedUrls);
-      getDescriptionForTitle('False positive examples')
-        .invoke('text')
-        .should('eql', expectedFalsePositives);
-      getDescriptionForTitle('MITRE ATT&CK').invoke('text').should('eql', expectedMitre);
-      getDescriptionForTitle('Tags').invoke('text').should('eql', expectedTags);
-      getDescriptionForTitle('Timestamp override')
-        .invoke('text')
-        .should('eql', newOverrideRule.timestampOverride);
+      getDetails(SEVERITY_DETAILS).should('have.text', newOverrideRule.severity);
+      getDetails(RISK_SCORE_DETAILS).should('have.text', newOverrideRule.riskScore);
+      getDetails(RISK_SCORE_OVERRIDE_DETAILS).should(
+        'have.text',
+        `${newOverrideRule.riskOverride}signal.rule.risk_score`
+      );
+      getDetails(RULE_NAME_OVERRIDE_DETAILS).should('have.text', newOverrideRule.nameOverride);
+      getDetails(REFERENCE_URLS_DETAILS).should((details) => {
+        expect(removeExternalLinkText(details.text())).equal(expectedUrls);
+      });
+      getDetails(FALSE_POSITIVES_DETAILS).should('have.text', expectedFalsePositives);
+      getDetails(MITRE_ATTACK_DETAILS).should((mitre) => {
+        expect(removeExternalLinkText(mitre.text())).equal(expectedMitre);
+      });
+      getDetails(TAGS_DETAILS).should('have.text', expectedTags);
+      getDetails(TIMESTAMP_OVERRIDE_DETAILS).should('have.text', newOverrideRule.timestampOverride);
       cy.contains(DETAILS_TITLE, 'Severity override')
         .invoke('index', DETAILS_TITLE) // get index relative to other titles, not all siblings
         .then((severityOverrideIndex) => {
           newOverrideRule.severityOverride.forEach((severity, i) => {
             cy.get(DETAILS_DESCRIPTION)
               .eq(severityOverrideIndex + i)
-              .invoke('text')
               .should(
-                'eql',
-                `${severity.sourceField}:${severity.sourceValue}${expectedOverrideSeverities[i]}`
+                'have.text',
+                `${severity.sourceField}:${severity.sourceValue}${severitiesOverride[i]}`
               );
           });
         });
     });
-
-    cy.get(RULE_ABOUT_DETAILS_HEADER_TOGGLE).eq(INVESTIGATION_NOTES_TOGGLE).click({ force: true });
-    cy.get(ABOUT_INVESTIGATION_NOTES).invoke('text').should('eql', INVESTIGATION_NOTES_MARKDOWN);
-
+    cy.get(INVESTIGATION_NOTES_TOGGLE).click({ force: true });
+    cy.get(ABOUT_INVESTIGATION_NOTES).should('have.text', INVESTIGATION_NOTES_MARKDOWN);
     cy.get(DEFINITION_DETAILS).within(() => {
-      getDescriptionForTitle('Index patterns')
-        .invoke('text')
-        .should('eql', expectedIndexPatterns.join(''));
-      getDescriptionForTitle('Custom query')
-        .invoke('text')
-        .should('eql', `${newOverrideRule.customQuery} `);
-      getDescriptionForTitle('Rule type').invoke('text').should('eql', 'Query');
-      getDescriptionForTitle('Timeline template').invoke('text').should('eql', 'None');
+      getDetails(INDEX_PATTERNS_DETAILS).should('have.text', indexPatterns.join(''));
+      getDetails(CUSTOM_QUERY_DETAILS).should('have.text', newOverrideRule.customQuery);
+      getDetails(RULE_TYPE_DETAILS).should('have.text', 'Query');
+      getDetails(TIMELINE_TEMPLATE_DETAILS).should('have.text', 'None');
+    });
+    cy.get(SCHEDULE_DETAILS).within(() => {
+      getDetails(RUNS_EVERY_DETAILS).should(
+        'have.text',
+        `${newOverrideRule.runsEvery.interval}${newOverrideRule.runsEvery.type}`
+      );
+      getDetails(ADDITIONAL_LOOK_BACK_DETAILS).should(
+        'have.text',
+        `${newOverrideRule.lookBack.interval}${newOverrideRule.lookBack.type}`
+      );
     });
 
-    cy.get(SCHEDULE_DETAILS).within(() => {
-      getDescriptionForTitle('Runs every').invoke('text').should('eql', '5m');
-      getDescriptionForTitle('Additional look-back time').invoke('text').should('eql', '1m');
-    });
+    waitForTheRuleToBeExecuted();
+    waitForAlertsToPopulate();
+
+    cy.get(NUMBER_OF_ALERTS).invoke('text').then(parseFloat).should('be.above', 0);
+    cy.get(ALERT_RULE_NAME).first().should('have.text', 'auditbeat');
+    cy.get(ALERT_RULE_VERSION).first().should('have.text', '1');
+    cy.get(ALERT_RULE_METHOD).first().should('have.text', 'query');
+    cy.get(ALERT_RULE_SEVERITY).first().should('have.text', 'critical');
+
+    sortRiskScore();
+
+    cy.get(ALERT_RULE_RISK_SCORE).first().should('have.text', '80');
   });
 });

@@ -12,26 +12,14 @@ import {
   isEsSearchResponse,
   isFieldHistogramsResponseSchema,
 } from '../../../common/api_schemas/type_guards';
+import type { EsSorting, UseIndexDataReturnType } from '../../shared_imports';
 
-import {
-  getFieldType,
-  getDataGridSchemaFromKibanaFieldType,
-  getFieldsFromKibanaIndexPattern,
-  showDataGridColumnChartErrorMessageToast,
-  useDataGrid,
-  useRenderCellValue,
-  EsSorting,
-  UseIndexDataReturnType,
-  INDEX_STATUS,
-} from '../../shared_imports';
 import { getErrorMessage } from '../../../common/utils/errors';
-
 import { isDefaultQuery, matchAllQuery, PivotQuery } from '../common';
-
 import { SearchItems } from './use_search_items';
 import { useApi } from './use_api';
 
-import { useToastNotifications } from '../app_dependencies';
+import { useAppDependencies, useToastNotifications } from '../app_dependencies';
 
 export const useIndexData = (
   indexPattern: SearchItems['indexPattern'],
@@ -39,6 +27,18 @@ export const useIndexData = (
 ): UseIndexDataReturnType => {
   const api = useApi();
   const toastNotifications = useToastNotifications();
+  const {
+    ml: {
+      getFieldType,
+      getDataGridSchemaFromKibanaFieldType,
+      getFieldsFromKibanaIndexPattern,
+      showDataGridColumnChartErrorMessageToast,
+      useDataGrid,
+      useRenderCellValue,
+      getProcessedFields,
+      INDEX_STATUS,
+    },
+  } = useAppDependencies();
 
   const indexPatternFields = getFieldsFromKibanaIndexPattern(indexPattern);
 
@@ -84,6 +84,8 @@ export const useIndexData = (
     const esSearchRequest = {
       index: indexPattern.title,
       body: {
+        fields: ['*'],
+        _source: false,
         // Instead of using the default query (`*`), fall back to a more efficient `match_all` query.
         query: isDefaultQuery(query) ? matchAllQuery : query,
         from: pagination.pageIndex * pagination.pageSize,
@@ -100,7 +102,7 @@ export const useIndexData = (
       return;
     }
 
-    const docs = resp.hits.hits.map((d) => d._source);
+    const docs = resp.hits.hits.map((d) => getProcessedFields(d.fields));
 
     setRowCount(resp.hits.total.value);
     setTableItems(docs);

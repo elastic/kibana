@@ -22,9 +22,9 @@ import { Component, default as React, Fragment } from 'react';
 import { Subscription } from 'rxjs';
 import { ApplicationStart, ToastsSetup } from 'src/core/public';
 import { ILicense, LicensingPluginSetup } from '../../../licensing/public';
+import { JOB_STATUSES as JobStatuses } from '../../common/constants';
 import { Poller } from '../../common/poller';
 import { durationToNumber } from '../../common/schema_utils';
-import { JobStatuses } from '../../constants';
 import { checkLicense } from '../lib/license_check';
 import { JobQueueEntry, ReportingAPIClient } from '../lib/reporting_api_client';
 import { ClientConfigType } from '../plugin';
@@ -41,17 +41,17 @@ export interface Job {
   type: string;
   object_type: string;
   object_title: string;
-  created_by?: string;
+  created_by?: string | false;
   created_at: string;
   started_at?: string;
   completed_at?: string;
   status: string;
   statusLabel: string;
-  max_size_reached: boolean;
+  max_size_reached?: boolean;
   attempts: number;
   max_attempts: number;
   csv_contains_formulas: boolean;
-  warnings: string[];
+  warnings?: string[];
 }
 
 export interface Props {
@@ -154,7 +154,7 @@ class ReportListingUi extends Component<Props, State> {
                 <p>
                   <FormattedMessage
                     id="xpack.reporting.listing.reports.subtitle"
-                    defaultMessage="Find reports generated in Kibana applications here"
+                    defaultMessage="Get reports generated in Kibana applications."
                   />
                 </p>
               </EuiText>

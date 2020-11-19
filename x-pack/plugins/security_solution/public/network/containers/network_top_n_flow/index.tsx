@@ -6,12 +6,11 @@
 
 import { noop } from 'lodash/fp';
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { shallowEqual, useSelector } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 
 import { ESTermQuery } from '../../../../common/typed_json';
-import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
-import { inputsModel, State } from '../../../common/store';
+import { inputsModel } from '../../../common/store';
+import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { useKibana } from '../../../common/lib/kibana';
 import { createFilter } from '../../../common/containers/helpers';
 import { generateTablePaginationOptions } from '../../../common/components/paginated_table/helpers';
@@ -24,7 +23,8 @@ import {
   NetworkTopNFlowStrategyResponse,
   PageInfoPaginated,
 } from '../../../../common/search_strategy';
-import { AbortError } from '../../../../../../../src/plugins/data/common';
+import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/plugins/data/common';
+import { AbortError } from '../../../../../../../src/plugins/kibana_utils/common';
 import { getInspectResponse } from '../../../helpers';
 import { InspectResponse } from '../../../types';
 import * as i18n from './translations';
@@ -45,6 +45,7 @@ export interface NetworkTopNFlowArgs {
 interface UseNetworkTopNFlow {
   flowTarget: FlowTargetSourceDest;
   ip?: string;
+  indexNames: string[];
   type: networkModel.NetworkType;
   filterQuery?: ESTermQuery | string;
   endDate: string;
@@ -56,41 +57,55 @@ export const useNetworkTopNFlow = ({
   endDate,
   filterQuery,
   flowTarget,
+  indexNames,
+  ip,
   skip,
   startDate,
   type,
 }: UseNetworkTopNFlow): [boolean, NetworkTopNFlowArgs] => {
   const getTopNFlowSelector = networkSelectors.topNFlowSelector();
-  const { activePage, limit, sort } = useSelector(
-    (state: State) => getTopNFlowSelector(state, type, flowTarget),
-    shallowEqual
+  const { activePage, limit, sort } = useShallowEqualSelector((state) =>
+    getTopNFlowSelector(state, type, flowTarget)
   );
-  const { data, notifications, uiSettings } = useKibana().services;
+  const { data, notifications } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
-  const defaultIndex = uiSettings.get<string[]>(DEFAULT_INDEX_KEY);
   const [loading, setLoading] = useState(false);
 
-  const [networkTopNFlowRequest, setTopNFlowRequest] = useState<NetworkTopNFlowRequestOptions>({
-    defaultIndex,
-    factoryQueryType: NetworkQueries.topNFlow,
-    filterQuery: createFilter(filterQuery),
-    flowTarget,
-    pagination: generateTablePaginationOptions(activePage, limit),
-    sort,
-    timerange: {
-      interval: '12h',
-      from: startDate ? startDate : '',
-      to: endDate ? endDate : new Date(Date.now()).toISOString(),
-    },
-  });
+  const [
+    networkTopNFlowRequest,
+    setTopNFlowRequest,
+  ] = useState<NetworkTopNFlowRequestOptions | null>(
+    !skip
+      ? {
+          defaultIndex: indexNames,
+          factoryQueryType: NetworkQueries.topNFlow,
+          filterQuery: createFilter(filterQuery),
+          flowTarget,
+          ip,
+          pagination: generateTablePaginationOptions(activePage, limit),
+          sort,
+          timerange: {
+            interval: '12h',
+            from: startDate ? startDate : '',
+            to: endDate ? endDate : new Date(Date.now()).toISOString(),
+          },
+        }
+      : null
+  );
 
   const wrappedLoadMore = useCallback(
     (newActivePage: number) => {
-      setTopNFlowRequest((prevRequest) => ({
-        ...prevRequest,
-        pagination: generateTablePaginationOptions(newActivePage, limit),
-      }));
+      setTopNFlowRequest((prevRequest) => {
+        if (!prevRequest) {
+          return prevRequest;
+        }
+
+        return {
+          ...prevRequest,
+          pagination: generateTablePaginationOptions(newActivePage, limit),
+        };
+      });
     },
     [limit]
   );
@@ -114,7 +129,11 @@ export const useNetworkTopNFlow = ({
   });
 
   const networkTopNFlowSearch = useCallback(
-    (request: NetworkTopNFlowRequestOptions) => {
+    (request: NetworkTopNFlowRequestOptions | null) => {
+      if (request == null) {
+        return;
+      }
+
       let didCancel = false;
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
@@ -127,7 +146,7 @@ export const useNetworkTopNFlow = ({
           })
           .subscribe({
             next: (response) => {
-              if (!response.isPartial && !response.isRunning) {
+              if (isCompleteResponse(response)) {
                 if (!didCancel) {
                   setLoading(false);
                   setNetworkTopNFlowResponse((prevResponse) => ({
@@ -140,7 +159,7 @@ export const useNetworkTopNFlow = ({
                   }));
                 }
                 searchSubscription$.unsubscribe();
-              } else if (response.isPartial && !response.isRunning) {
+              } else if (isErrorResponse(response)) {
                 if (!didCancel) {
                   setLoading(false);
                 }
@@ -173,9 +192,12 @@ export const useNetworkTopNFlow = ({
   useEffect(() => {
     setTopNFlowRequest((prevRequest) => {
       const myRequest = {
-        ...prevRequest,
-        defaultIndex,
+        ...(prevRequest ?? {}),
+        defaultIndex: indexNames,
+        factoryQueryType: NetworkQueries.topNFlow,
         filterQuery: createFilter(filterQuery),
+        flowTarget,
+        ip,
         pagination: generateTablePaginationOptions(activePage, limit),
         timerange: {
           interval: '12h',
@@ -189,7 +211,7 @@ export const useNetworkTopNFlow = ({
       }
       return prevRequest;
     });
-  }, [activePage, defaultIndex, endDate, filterQuery, limit, startDate, sort, skip]);
+  }, [activePage, endDate, filterQuery, indexNames, ip, limit, startDate, sort, skip, flowTarget]);
 
   useEffect(() => {
     networkTopNFlowSearch(networkTopNFlowRequest);

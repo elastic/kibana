@@ -8,11 +8,10 @@ import { EuiButton, EuiLoadingSpinner } from '@elastic/eui';
 import React, { useCallback, forwardRef, useImperativeHandle } from 'react';
 import styled from 'styled-components';
 
-import { CommentRequest } from '../../../../../case/common/api';
+import { CommentRequest, CommentType } from '../../../../../case/common/api';
 import { usePostComment } from '../../containers/use_post_comment';
 import { Case } from '../../containers/types';
 import { MarkdownEditorForm } from '../../../common/components/markdown_editor/eui_form';
-import { InsertTimelinePopover } from '../../../timelines/components/timeline/insert_timeline_popover';
 import { useInsertTimeline } from '../../../timelines/components/timeline/insert_timeline_popover/use_insert_timeline';
 import { Form, useForm, UseField, useFormData } from '../../../shared_imports';
 
@@ -28,6 +27,7 @@ const MySpinner = styled(EuiLoadingSpinner)`
 
 const initialCommentValue: CommentRequest = {
   comment: '',
+  type: CommentType.user,
 };
 
 export interface AddCommentRefObject {
@@ -55,16 +55,13 @@ export const AddComment = React.memo(
 
       const fieldName = 'comment';
       const { setFieldValue, reset, submit } = form;
-      const [{ comment }] = useFormData({ form, watch: [fieldName] });
+      const [{ comment }] = useFormData<{ comment: string }>({ form, watch: [fieldName] });
 
       const onCommentChange = useCallback((newValue) => setFieldValue(fieldName, newValue), [
         setFieldValue,
       ]);
 
-      const { handleCursorChange, handleOnTimelineChange } = useInsertTimeline(
-        comment,
-        onCommentChange
-      );
+      const { handleCursorChange } = useInsertTimeline(comment, onCommentChange);
 
       const addQuote = useCallback(
         (quote) => {
@@ -85,7 +82,7 @@ export const AddComment = React.memo(
           if (onCommentSaving != null) {
             onCommentSaving();
           }
-          postComment(data, onCommentPosted);
+          postComment({ ...data, type: CommentType.user }, onCommentPosted);
           reset();
         }
       }, [onCommentPosted, onCommentSaving, postComment, reset, submit]);
@@ -115,13 +112,6 @@ export const AddComment = React.memo(
                   >
                     {i18n.ADD_COMMENT}
                   </EuiButton>
-                ),
-                topRightContent: (
-                  <InsertTimelinePopover
-                    hideUntitled={true}
-                    isDisabled={isLoading}
-                    onTimelineChange={handleOnTimelineChange}
-                  />
                 ),
               }}
             />

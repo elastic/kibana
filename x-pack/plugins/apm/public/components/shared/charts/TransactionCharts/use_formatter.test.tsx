@@ -3,38 +3,17 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React from 'react';
+import { SeriesIdentifier } from '@elastic/charts';
+import { renderHook } from '@testing-library/react-hooks';
+import { act } from 'react-test-renderer';
+import { toMicroseconds } from '../../../../../common/utils/formatters';
 import { TimeSeries } from '../../../../../typings/timeseries';
-import { toMicroseconds } from '../../../../utils/formatters';
 import { useFormatter } from './use_formatter';
-import { render, fireEvent, act } from '@testing-library/react';
-
-function MockComponent({
-  timeSeries,
-  disabledSeries,
-  value,
-}: {
-  timeSeries: TimeSeries[];
-  disabledSeries: boolean[];
-  value: number;
-}) {
-  const { formatter, setDisabledSeriesState } = useFormatter(timeSeries);
-
-  const onDisableSeries = () => {
-    setDisabledSeriesState(disabledSeries);
-  };
-
-  return (
-    <div>
-      <button onClick={onDisableSeries}>disable series</button>
-      {formatter(value).formatted}
-    </div>
-  );
-}
 
 describe('useFormatter', () => {
   const timeSeries = ([
     {
+      title: 'avg',
       data: [
         { x: 1, y: toMicroseconds(11, 'minutes') },
         { x: 2, y: toMicroseconds(1, 'minutes') },
@@ -42,6 +21,7 @@ describe('useFormatter', () => {
       ],
     },
     {
+      title: '95th percentile',
       data: [
         { x: 1, y: toMicroseconds(120, 'seconds') },
         { x: 2, y: toMicroseconds(1, 'minutes') },
@@ -49,6 +29,7 @@ describe('useFormatter', () => {
       ],
     },
     {
+      title: '99th percentile',
       data: [
         { x: 1, y: toMicroseconds(60, 'seconds') },
         { x: 2, y: toMicroseconds(5, 'minutes') },
@@ -56,54 +37,47 @@ describe('useFormatter', () => {
       ],
     },
   ] as unknown) as TimeSeries[];
+
   it('returns new formatter when disabled series state changes', () => {
-    const { getByText } = render(
-      <MockComponent
-        timeSeries={timeSeries}
-        value={toMicroseconds(120, 'seconds')}
-        disabledSeries={[true, true, false]}
-      />
-    );
-    expect(getByText('2.0 min')).toBeInTheDocument();
+    const { result } = renderHook(() => useFormatter(timeSeries));
+    expect(
+      result.current.formatter(toMicroseconds(120, 'seconds')).formatted
+    ).toEqual('2.0 min');
+
     act(() => {
-      fireEvent.click(getByText('disable series'));
+      result.current.toggleSerie({
+        specId: 'avg',
+      } as SeriesIdentifier);
     });
-    expect(getByText('120 s')).toBeInTheDocument();
+
+    expect(
+      result.current.formatter(toMicroseconds(120, 'seconds')).formatted
+    ).toEqual('120 s');
   });
+
   it('falls back to the first formatter when disabled series is empty', () => {
-    const { getByText } = render(
-      <MockComponent
-        timeSeries={timeSeries}
-        value={toMicroseconds(120, 'seconds')}
-        disabledSeries={[]}
-      />
-    );
-    expect(getByText('2.0 min')).toBeInTheDocument();
+    const { result } = renderHook(() => useFormatter(timeSeries));
+    expect(
+      result.current.formatter(toMicroseconds(120, 'seconds')).formatted
+    ).toEqual('2.0 min');
+
     act(() => {
-      fireEvent.click(getByText('disable series'));
+      result.current.toggleSerie({
+        specId: 'avg',
+      } as SeriesIdentifier);
     });
-    expect(getByText('2.0 min')).toBeInTheDocument();
-    // const { formatter, setDisabledSeriesState } = useFormatter(timeSeries);
-    // expect(formatter(toMicroseconds(120, 'seconds'))).toEqual('2.0 min');
-    // setDisabledSeriesState([true, true, false]);
-    // expect(formatter(toMicroseconds(120, 'seconds'))).toEqual('2.0 min');
-  });
-  it('falls back to the first formatter when disabled series is all true', () => {
-    const { getByText } = render(
-      <MockComponent
-        timeSeries={timeSeries}
-        value={toMicroseconds(120, 'seconds')}
-        disabledSeries={[true, true, true]}
-      />
-    );
-    expect(getByText('2.0 min')).toBeInTheDocument();
+
+    expect(
+      result.current.formatter(toMicroseconds(120, 'seconds')).formatted
+    ).toEqual('120 s');
+
     act(() => {
-      fireEvent.click(getByText('disable series'));
+      result.current.toggleSerie({
+        specId: 'avg',
+      } as SeriesIdentifier);
     });
-    expect(getByText('2.0 min')).toBeInTheDocument();
-    // const { formatter, setDisabledSeriesState } = useFormatter(timeSeries);
-    // expect(formatter(toMicroseconds(120, 'seconds'))).toEqual('2.0 min');
-    // setDisabledSeriesState([true, true, false]);
-    // expect(formatter(toMicroseconds(120, 'seconds'))).toEqual('2.0 min');
+    expect(
+      result.current.formatter(toMicroseconds(120, 'seconds')).formatted
+    ).toEqual('2.0 min');
   });
 });

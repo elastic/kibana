@@ -18,7 +18,7 @@ export const simpleAlertEnabled = (defaultActions: ActionConnector[]) => {
     text: toMountPoint(
       <FormattedMessage
         id="xpack.uptime.overview.alerts.enabled.success.description"
-        defaultMessage="Message will be send to {actionConnectors} when monitor is down."
+        defaultMessage="A message will be sent to {actionConnectors} when this monitor is down."
         values={{
           actionConnectors: <strong>{defaultActions.map(({ name }) => name).join(', ')}</strong>,
         }}

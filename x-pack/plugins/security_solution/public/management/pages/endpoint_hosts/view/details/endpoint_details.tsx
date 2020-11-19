@@ -29,7 +29,7 @@ import { LinkToApp } from '../../../../../common/components/endpoint/link_to_app
 import { getEndpointDetailsPath } from '../../../../common/routing';
 import { SecurityPageName } from '../../../../../app/types';
 import { useFormatUrl } from '../../../../../common/components/link_to';
-import { AgentDetailsReassignPolicyAction } from '../../../../../../../ingest_manager/public';
+import { AgentDetailsReassignPolicyAction } from '../../../../../../../fleet/public';
 import { EndpointPolicyLink } from '../components/endpoint_policy_link';
 
 const HostIds = styled(EuiListGroupItem)`
@@ -89,16 +89,16 @@ export const EndpointDetails = memo(({ details }: { details: HostMetadata }) => 
         getEndpointDetailsPath({
           name: 'endpointPolicyResponse',
           ...currentUrlParams,
-          selected_endpoint: details.host.id,
+          selected_endpoint: details.agent.id,
         })
       ),
       getEndpointDetailsPath({
         name: 'endpointPolicyResponse',
         ...currentUrlParams,
-        selected_endpoint: details.host.id,
+        selected_endpoint: details.agent.id,
       }),
     ];
-  }, [details.host.id, formatUrl, queryParams]);
+  }, [details.agent.id, formatUrl, queryParams]);
 
   const agentDetailsWithFlyoutPath = `${agentDetailsAppPath}${openReassignFlyoutSearch}`;
   const agentDetailsWithFlyoutUrl = `${agentDetailsUrl}${openReassignFlyoutSearch}`;
@@ -112,7 +112,7 @@ export const EndpointDetails = memo(({ details }: { details: HostMetadata }) => 
         {
           path: getEndpointDetailsPath({
             name: 'endpointDetails',
-            selected_endpoint: details.host.id,
+            selected_endpoint: details.agent.id,
           }),
         },
       ],

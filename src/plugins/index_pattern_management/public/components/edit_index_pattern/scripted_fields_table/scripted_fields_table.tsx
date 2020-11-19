@@ -39,7 +39,7 @@ interface ScriptedFieldsTableProps {
   };
   onRemoveField?: () => void;
   painlessDocLink: string;
-  saveIndexPattern: DataPublicPluginStart['indexPatterns']['save'];
+  saveIndexPattern: DataPublicPluginStart['indexPatterns']['updateSavedObject'];
 }
 
 interface ScriptedFieldsTableState {

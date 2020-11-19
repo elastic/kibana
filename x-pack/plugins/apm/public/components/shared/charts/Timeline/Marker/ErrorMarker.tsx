@@ -7,6 +7,7 @@
 import React, { useState } from 'react';
 import { EuiPopover, EuiText } from '@elastic/eui';
 import styled from 'styled-components';
+import { asDuration } from '../../../../../../common/utils/formatters';
 import { useTheme } from '../../../../../hooks/useTheme';
 import {
   TRACE_ID,
@@ -14,7 +15,6 @@ import {
 } from '../../../../../../common/elasticsearch_fieldnames';
 import { useUrlParams } from '../../../../../hooks/useUrlParams';
 import { px, unit, units } from '../../../../../style/variables';
-import { asDuration } from '../../../../../utils/formatters';
 import { ErrorMark } from '../../../../app/TransactionDetails/WaterfallWithSummmary/WaterfallContainer/Marks/get_error_marks';
 import { ErrorDetailLink } from '../../../Links/apm/ErrorDetailLink';
 import { Legend, Shape } from '../../Legend';

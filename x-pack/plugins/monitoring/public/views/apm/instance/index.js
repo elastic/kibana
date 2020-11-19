@@ -18,7 +18,11 @@ import { routeInitProvider } from '../../../lib/route_init';
 import template from './index.html';
 import { MonitoringViewBaseController } from '../../base_controller';
 import { ApmServerInstance } from '../../../components/apm/instance';
-import { CODE_PATH_APM } from '../../../../common/constants';
+import {
+  CODE_PATH_APM,
+  ALERT_MISSING_MONITORING_DATA,
+  APM_SYSTEM_ID,
+} from '../../../../common/constants';
 
 uiRoutes.when('/apm/instances/:uuid', {
   template,
@@ -37,40 +41,55 @@ uiRoutes.when('/apm/instances/:uuid', {
       $scope.cluster = find($route.current.locals.clusters, {
         cluster_uuid: globalState.cluster_uuid,
       });
-
       super({
         title: i18n.translate('xpack.monitoring.apm.instance.routeTitle', {
           defaultMessage: '{apm} - Instance',
           values: {
-            apm: 'APM',
+            apm: 'APM server',
           },
         }),
+        telemetryPageViewTitle: 'apm_server_instance',
         api: `../api/monitoring/v1/clusters/${globalState.cluster_uuid}/apm/${$route.current.params.uuid}`,
         defaultData: {},
         reactNodeId: 'apmInstanceReact',
         $scope,
         $injector,
+        alerts: {
+          shouldFetch: true,
+          options: {
+            alertTypeIds: [ALERT_MISSING_MONITORING_DATA],
+            filters: [
+              {
+                stackProduct: APM_SYSTEM_ID,
+              },
+            ],
+          },
+        },
       });
 
       $scope.$watch(
         () => this.data,
         (data) => {
-          title($scope.cluster, `APM - ${get(data, 'apmSummary.name')}`);
-          this.renderReact(data);
+          this.setPageTitle(
+            i18n.translate('xpack.monitoring.apm.instance.pageTitle', {
+              defaultMessage: 'APM server instance: {instanceName}',
+              values: {
+                instanceName: get(data, 'apmSummary.name'),
+              },
+            })
+          );
+          title($scope.cluster, `APM server - ${get(data, 'apmSummary.name')}`);
+          this.renderReact(
+            <ApmServerInstance
+              summary={data.apmSummary || {}}
+              metrics={data.metrics || {}}
+              onBrush={this.onBrush}
+              alerts={this.alerts}
+              zoomInfo={this.zoomInfo}
+            />
+          );
         }
       );
-    }
-
-    renderReact(data) {
-      const component = (
-        <ApmServerInstance
-          summary={data.apmSummary || {}}
-          metrics={data.metrics || {}}
-          onBrush={this.onBrush}
-          zoomInfo={this.zoomInfo}
-        />
-      );
-      super.renderReact(component);
     }
   },
 });

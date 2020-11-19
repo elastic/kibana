@@ -5,13 +5,13 @@
  */
 
 import { getTemplateStrings } from './template_strings';
-import { templates } from '../../server/templates'; // eslint-disable-line
+import { loadTemplates } from '../../server/templates'; // eslint-disable-line
 
 import { TagStrings } from '../tags';
 
 describe('TemplateStrings', () => {
   const templateStrings = getTemplateStrings();
-  const templateNames = templates.map((template) => template.name);
+  const templateNames = loadTemplates().map((template) => template.name);
   const stringKeys = Object.keys(templateStrings);
 
   test('All template names should exist in the strings definition', () => {
@@ -39,7 +39,7 @@ describe('TemplateStrings', () => {
   test('All templates should have tags that are defined', () => {
     const tagNames = Object.keys(TagStrings);
 
-    templates.forEach((template) => {
+    loadTemplates().forEach((template) => {
       template.tags.forEach((tagName: string) => expect(tagNames).toContain(tagName));
     });
   });

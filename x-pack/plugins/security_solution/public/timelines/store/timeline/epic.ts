@@ -66,6 +66,7 @@ import {
   updateRange,
   updateSort,
   upsertColumn,
+  updateIndexNames,
   updateTimeline,
   updateTitle,
   updateAutoSaveMsg,
@@ -77,6 +78,7 @@ import {
   createTimeline,
   addTimeline,
   showCallOutUnauthorizedMsg,
+  saveTimeline,
 } from './actions';
 import { ColumnHeaderOptions, TimelineModel } from './model';
 import { epicPersistNote, timelineNoteActionsType } from './epic_note';
@@ -94,6 +96,7 @@ const timelineActionsType = [
   dataProviderEdited.type,
   removeColumn.type,
   removeProvider.type,
+  saveTimeline.type,
   setExcludedRowRendererIds.type,
   setFilters.type,
   setSavedQueryId.type,
@@ -105,6 +108,7 @@ const timelineActionsType = [
   updateDescription.type,
   updateEventType.type,
   updateKqlMode.type,
+  updateIndexNames.type,
   updateProviders.type,
   updateSort.type,
   updateTitle.type,
@@ -177,11 +181,11 @@ export const createTimelineEpic = <State>(): Epic<
         } else if (
           timelineActionsType.includes(action.type) &&
           !timelineObj.isLoading &&
-          isItAtimelineAction(timelineId)
+          isItAtimelineAction(timelineId) &&
+          !get('payload.disableAutoSave', action)
         ) {
           return true;
         }
-        return false;
       }),
       debounceTime(500),
       mergeMap(([action]) => {
@@ -339,6 +343,7 @@ const timelineInput: TimelineInput = {
   filters: null,
   kqlMode: null,
   kqlQuery: null,
+  indexNames: null,
   title: null,
   timelineType: TimelineType.default,
   templateTimelineVersion: null,

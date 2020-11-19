@@ -8,14 +8,15 @@
   ],
   "from": "now-60m",
   "index": [
-    "filebeat-*"
+    "filebeat-*",
+    "logs-aws*"
   ],
   "interval": "10m",
   "language": "kuery",
   "license": "Elastic License",
   "name": "AWS IAM Assume Role Policy Update",
   "note": "The AWS Filebeat module must be enabled to use this rule.",
-  "query": "event.module:aws and event.dataset:aws.cloudtrail and event.provider:iam.amazonaws.com and event.action:UpdateAssumeRolePolicy and event.outcome:success",
+  "query": "event.dataset:aws.cloudtrail and event.provider:iam.amazonaws.com and event.action:UpdateAssumeRolePolicy and event.outcome:success",
   "references": [
     "https://labs.bishopfox.com/tech-blog/5-privesc-attack-vectors-in-aws"
   ],
@@ -23,11 +24,12 @@
   "rule_id": "a60326d7-dca7-4fb7-93eb-1ca03a1febbd",
   "severity": "low",
   "tags": [
-    "AWS",
     "Elastic",
+    "Cloud",
+    "AWS",
+    "Continuous Monitoring",
     "SecOps",
-    "Identity and Access",
-    "Continuous Monitoring"
+    "Identity and Access"
   ],
   "threat": [
     {
@@ -47,5 +49,5 @@
     }
   ],
   "type": "query",
-  "version": 1
+  "version": 2
 }

@@ -15,7 +15,7 @@ import React, { MouseEvent } from 'react';
 import { Buttons } from './Buttons';
 import { Info } from './Info';
 import { ServiceStatsFetcher } from './ServiceStatsFetcher';
-import { popoverWidth } from '../cytoscapeOptions';
+import { popoverWidth } from '../cytoscape_options';
 
 interface ContentsProps {
   isService: boolean;

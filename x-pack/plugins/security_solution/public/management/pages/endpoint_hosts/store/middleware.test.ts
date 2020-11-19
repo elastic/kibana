@@ -24,8 +24,9 @@ import { endpointMiddlewareFactory } from './middleware';
 import { getEndpointListPath } from '../../../common/routing';
 
 jest.mock('../../policy/store/policy_list/services/ingest', () => ({
-  sendGetEndpointSecurityPackage: () => Promise.resolve({}),
   sendGetAgentConfigList: () => Promise.resolve({ items: [] }),
+  sendGetAgentPolicyList: () => Promise.resolve({ items: [] }),
+  sendGetEndpointSecurityPackage: () => Promise.resolve({}),
 }));
 
 describe('endpoint list middleware', () => {

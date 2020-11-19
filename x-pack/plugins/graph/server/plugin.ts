@@ -49,11 +49,9 @@ export class GraphPlugin implements Plugin {
         }),
         order: 600,
         category: DEFAULT_APP_CATEGORIES.kibana,
-        icon: 'graphApp',
-        navLinkId: 'graph',
         app: ['graph', 'kibana'],
         catalogue: ['graph'],
-        validLicenses: ['platinum', 'enterprise', 'trial'],
+        minimumLicense: 'platinum',
         privileges: {
           all: {
             app: ['graph', 'kibana'],

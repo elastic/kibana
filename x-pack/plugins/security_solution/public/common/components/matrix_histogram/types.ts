@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import type React from 'react';
 import { EuiTitleSize } from '@elastic/eui';
 import { ScaleType, Position, TickFormatter } from '@elastic/charts';
 import { ActionCreator } from 'redux';
@@ -59,6 +59,7 @@ interface MatrixHistogramBasicProps {
 export interface MatrixHistogramQueryProps {
   endDate: string;
   errorMessage: string;
+  indexNames: string[];
   filterQuery?: ESQuery | string | undefined;
   setAbsoluteRangeDatePicker?: ActionCreator<{
     id: InputsModelId;
@@ -68,8 +69,9 @@ export interface MatrixHistogramQueryProps {
   setAbsoluteRangeDatePickerTarget?: InputsModelId;
   stackByField: string;
   startDate: string;
-  indexToAdd?: string[] | null;
   histogramType: MatrixHistogramType;
+  threshold?: { field: string | undefined; value: number } | undefined;
+  skip?: boolean;
 }
 
 export interface MatrixHistogramProps extends MatrixHistogramBasicProps {

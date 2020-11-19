@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { combineLatest } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
@@ -27,6 +27,7 @@ import {
   KIBANA_MONITORING_LOGGING_TAG,
   KIBANA_STATS_TYPE_MONITORING,
   ALERTS,
+  SAVED_OBJECT_TELEMETRY,
 } from '../common/constants';
 import { MonitoringConfig, createConfig, configSchema } from './config';
 // @ts-ignore
@@ -38,7 +39,7 @@ import { initInfraSource } from './lib/logs/init_infra_source';
 import { mbSafeQuery } from './lib/mb_safe_query';
 import { instantiateClient } from './es_client/instantiate_client';
 import { registerCollectors } from './kibana_monitoring/collectors';
-import { registerMonitoringCollection } from './telemetry_collection';
+import { registerMonitoringTelemetryCollection } from './telemetry_collection';
 import { LicenseService } from './license_service';
 import { AlertsFactory } from './alerts';
 import {
@@ -116,7 +117,6 @@ export class Plugin {
       config,
       log: this.log,
     });
-    await this.licenseService.refresh();
 
     const serverInfo = core.http.getServerInfo();
     let kibanaUrl = `${serverInfo.protocol}://${serverInfo.hostname}:${serverInfo.port}`;
@@ -138,19 +138,30 @@ export class Plugin {
         kibanaUrl,
         isCloud
       );
-      plugins.alerts.registerType(alert.getAlertType());
-    }
-
-    // Initialize telemetry
-    if (plugins.telemetryCollectionManager) {
-      registerMonitoringCollection(plugins.telemetryCollectionManager, this.cluster, {
-        maxBucketSize: config.ui.max_bucket_size,
-      });
+      plugins.alerts?.registerType(alert.getAlertType());
     }
 
     // Register collector objects for stats to show up in the APIs
     if (plugins.usageCollection) {
-      registerCollectors(plugins.usageCollection, config);
+      core.savedObjects.registerType({
+        name: SAVED_OBJECT_TELEMETRY,
+        hidden: true,
+        namespaceType: 'agnostic',
+        mappings: {
+          properties: {
+            reportedClusterUuids: {
+              type: 'keyword',
+            },
+          },
+        },
+      });
+
+      registerCollectors(plugins.usageCollection, config, cluster);
+      registerMonitoringTelemetryCollection(
+        plugins.usageCollection,
+        cluster,
+        config.ui.max_bucket_size
+      );
     }
 
     // Always create the bulk uploader
@@ -210,7 +221,8 @@ export class Plugin {
         legacyConfig,
         core.getStartServices as () => Promise<[CoreStart, PluginsStart, {}]>,
         this.licenseService,
-        this.cluster
+        this.cluster,
+        plugins
       );
 
       this.registerPluginInUI(plugins);
@@ -247,8 +259,6 @@ export class Plugin {
         defaultMessage: 'Stack Monitoring',
       }),
       category: DEFAULT_APP_CATEGORIES.management,
-      icon: 'monitoringApp',
-      navLinkId: 'monitoring',
       app: ['monitoring', 'kibana'],
       catalogue: ['monitoring'],
       privileges: null,
@@ -283,7 +293,8 @@ export class Plugin {
     legacyConfig: any,
     getCoreServices: () => Promise<[CoreStart, PluginsStart, {}]>,
     licenseService: MonitoringLicenseService,
-    cluster: ILegacyCustomClusterClient
+    cluster: ILegacyCustomClusterClient,
+    setupPlugins: PluginsSetup
   ): MonitoringCore {
     const router = this.legacyShimDependencies.router;
     const legacyConfigWrapper = () => ({
@@ -342,7 +353,7 @@ export class Plugin {
               config: legacyConfigWrapper,
               newPlatform: {
                 setup: {
-                  plugins,
+                  plugins: setupPlugins,
                 },
               },
               plugins: {

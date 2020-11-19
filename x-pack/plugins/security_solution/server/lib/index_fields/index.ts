@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IndexField } from '../../graphql/types';
-
 import { FieldsAdapter } from './types';
 import { FrameworkRequest } from '../framework';
 export { ElasticsearchIndexFieldAdapter } from './elasticsearch_adapter';
@@ -13,7 +11,8 @@ export { ElasticsearchIndexFieldAdapter } from './elasticsearch_adapter';
 export class IndexFields {
   constructor(private readonly adapter: FieldsAdapter) {}
 
-  public async getFields(request: FrameworkRequest, defaultIndex: string[]): Promise<IndexField[]> {
+  // Deprecated until we delete all the code
+  public async getFields(request: FrameworkRequest, defaultIndex: string[]): Promise<string[]> {
     return this.adapter.getIndexFields(request, defaultIndex);
   }
 }

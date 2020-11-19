@@ -22,11 +22,15 @@ import {
   DEFAULT_TO,
   DEFAULT_INTERVAL_TYPE,
   DEFAULT_INTERVAL_VALUE,
+  DEFAULT_INDEX_PATTERN,
 } from '../../../common/constants';
 import { networkModel } from '../../network/store';
 import { TimelineType, TimelineStatus } from '../../../common/types/timeline';
 import { mockManagementState } from '../../management/store/reducer';
 import { ManagementState } from '../../management/types';
+import { initialSourcererState, SourcererScopeName } from '../store/sourcerer/model';
+import { mockBrowserFields, mockDocValueFields } from '../containers/source/mock';
+import { mockIndexPattern } from './index_pattern';
 
 export const mockGlobalState: State = {
   app: {
@@ -203,6 +207,7 @@ export const mockGlobalState: State = {
         id: 'test',
         savedObjectId: null,
         columns: defaultHeaders,
+        indexNames: DEFAULT_INDEX_PATTERN,
         itemsPerPage: 5,
         dataProviders: [],
         description: '',
@@ -240,6 +245,28 @@ export const mockGlobalState: State = {
       },
     },
     insertTimeline: null,
+  },
+  sourcerer: {
+    ...initialSourcererState,
+    sourcererScopes: {
+      ...initialSourcererState.sourcererScopes,
+      [SourcererScopeName.default]: {
+        ...initialSourcererState.sourcererScopes[SourcererScopeName.default],
+        selectedPatterns: DEFAULT_INDEX_PATTERN,
+        browserFields: mockBrowserFields,
+        indexPattern: mockIndexPattern,
+        docValueFields: mockDocValueFields,
+        loading: false,
+      },
+      [SourcererScopeName.timeline]: {
+        ...initialSourcererState.sourcererScopes[SourcererScopeName.timeline],
+        selectedPatterns: DEFAULT_INDEX_PATTERN,
+        browserFields: mockBrowserFields,
+        indexPattern: mockIndexPattern,
+        docValueFields: mockDocValueFields,
+        loading: false,
+      },
+    },
   },
   /**
    * These state's are wrapped in `Immutable`, but for compatibility with the overall app architecture,

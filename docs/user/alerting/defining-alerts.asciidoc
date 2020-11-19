@@ -2,7 +2,7 @@
 [[defining-alerts]]
 == Defining alerts
 
-{kib} alerts can be created in a variety of apps including <<xpack-apm,*APM*>>, <<xpack-infra,*Metrics*>>, <<xpack-siem,*SIEM*>>, <<xpack-uptime,*Uptime*>> and from <<management,*Management*>> UI. While alerting details may differ from app to app, they share a common interface for defining and configuring alerts that this section describes in more detail.
+{kib} alerts can be created in a variety of apps including <<xpack-apm,*APM*>>, <<metrics-app,*Metrics*>>, <<xpack-siem,*Security*>>, <<uptime-app,*Uptime*>> and from <<management,*Management*>> UI. While alerting details may differ from app to app, they share a common interface for defining and configuring alerts that this section describes in more detail.
 
 [float]
 === Alert flyout
@@ -73,6 +73,21 @@ image::images/alert-flyout-add-action.png[You can add multiple actions on an ale
 ==============================================
 Actions are not required on alerts. In some cases you may want to run an alert without actions first to understand its behavior, and configure actions later.
 ==============================================
+
+[float]
+=== Global actions configuration
+Some actions configuration options apply to all actions.
+If you are using an *on-prem* Elastic Stack deployment, you can set these in the kibana.yml file.
+If you are using a cloud deployment, you can set these via the console.
+
+Here's a list of the available global configuration options and an explanation of what each one does:
+
+* `xpack.actions.allowedHosts`: Specifies an array of host names which actions such as email, Slack, PagerDuty, and webhook can connect to. An element of * indicates any host can be connected to. An empty array indicates no hosts can be connected to. Default: [ {asterisk} ]
+* `xpack.actions.enabledActionTypes`: Specifies to an array of action types that are enabled. An {asterisk} indicates all action types registered are enabled. The action types that {kib} provides are: .server-log, .slack, .email, .index, .pagerduty, .webhook. Default: [ {asterisk} ]
+* `xpack.actions.proxyUrl`: Specifies the proxy URL to use, if using a proxy for actions.
+* `xpack.actions.proxyHeader`: Specifies HTTP headers for proxy, if using a proxy for actions.
+* `xpack.actions.proxyRejectUnauthorizedCertificates`: Set to `false` to bypass certificate validation for proxy, if using a proxy for actions.
+* `xpack.actions.rejectUnauthorized`: Set to `false` to bypass certificate validation for actions.
 
 [float]
 === Managing alerts

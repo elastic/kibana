@@ -1,0 +1,49 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Detects a Roshal Archive (RAR) file or PowerShell script downloaded from the internet by an internal host. Gaining initial access to a system and then downloading encoded or encrypted tools to move laterally is a common practice for adversaries as a way to protect their more valuable tools and TTPs. This may be atypical behavior for a managed network and can be indicative of malware, exfiltration, or command and control.",
+  "false_positives": [
+    "Downloading RAR or PowerShell files from the Internet may be expected for certain systems. This rule should be tailored to either exclude systems as sources or destinations in which this behavior is expected."
+  ],
+  "index": [
+    "packetbeat-*"
+  ],
+  "language": "lucene",
+  "license": "Elastic License",
+  "name": "Roshal Archive (RAR) or PowerShell File Downloaded from the Internet",
+  "note": "This activity has been observed in FIN7 campaigns.",
+  "query": "event.category:(network OR network_traffic) AND network.protocol:http AND url.path:/.*(rar|ps1)/ AND source.ip:(10.0.0.0\\/8 OR 172.16.0.0\\/12 OR 192.168.0.0\\/16)",
+  "references": [
+    "https://www.fireeye.com/blog/threat-research/2017/04/fin7-phishing-lnk.html",
+    "https://www.justice.gov/opa/press-release/file/1084361/download"
+  ],
+  "risk_score": 47,
+  "rule_id": "ff013cb4-274d-434a-96bb-fe15ddd3ae92",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Network",
+    "Threat Detection",
+    "Command and Control"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0011",
+        "name": "Command and Control",
+        "reference": "https://attack.mitre.org/tactics/TA0011/"
+      },
+      "technique": [
+        {
+          "id": "T1105",
+          "name": "Ingress Tool Transfer",
+          "reference": "https://attack.mitre.org/techniques/T1105/"
+        }
+      ]
+    }
+  ],
+  "type": "query",
+  "version": 1
+}

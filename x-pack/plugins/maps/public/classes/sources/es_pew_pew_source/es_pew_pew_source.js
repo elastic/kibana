@@ -5,7 +5,6 @@
  */
 
 import React from 'react';
-import uuid from 'uuid/v4';
 import turfBbox from '@turf/bbox';
 import { multiPoint } from '@turf/helpers';
 
@@ -14,9 +13,9 @@ import { i18n } from '@kbn/i18n';
 import { SOURCE_TYPES, VECTOR_SHAPE_TYPE } from '../../../../common/constants';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import { convertToLines } from './convert_to_lines';
-import { AbstractESAggSource, DEFAULT_METRIC } from '../es_agg_source';
+import { AbstractESAggSource } from '../es_agg_source';
 import { registerSource } from '../source_registry';
-import { turfBboxToBounds } from '../../../../common/elasticsearch_geo_utils';
+import { turfBboxToBounds } from '../../../../common/elasticsearch_util';
 import { DataRequestAbortError } from '../../util/data_request';
 
 const MAX_GEOTILE_LEVEL = 29;
@@ -28,14 +27,14 @@ export const sourceTitle = i18n.translate('xpack.maps.source.pewPewTitle', {
 export class ESPewPewSource extends AbstractESAggSource {
   static type = SOURCE_TYPES.ES_PEW_PEW;
 
-  static createDescriptor({ indexPatternId, sourceGeoField, destGeoField, metrics }) {
+  static createDescriptor(descriptor) {
+    const normalizedDescriptor = AbstractESAggSource.createDescriptor(descriptor);
     return {
+      ...normalizedDescriptor,
       type: ESPewPewSource.type,
-      id: uuid(),
-      indexPatternId: indexPatternId,
-      sourceGeoField,
-      destGeoField,
-      metrics: metrics ? metrics : [DEFAULT_METRIC],
+      indexPatternId: descriptor.indexPatternId,
+      sourceGeoField: descriptor.sourceGeoField,
+      destGeoField: descriptor.destGeoField,
     };
   }
 

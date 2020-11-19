@@ -17,8 +17,18 @@
  * under the License.
  */
 
-import { LegacyAPICaller, Logger, KibanaRequest, ILegacyClusterClient } from 'kibana/server';
+import {
+  LegacyAPICaller,
+  Logger,
+  KibanaRequest,
+  ILegacyClusterClient,
+  IClusterClient,
+  SavedObjectsServiceStart,
+  SavedObjectsClientContract,
+  ISavedObjectsRepository,
+} from 'kibana/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { ElasticsearchClient } from '../../../../src/core/server';
 import { TelemetryCollectionManagerPlugin } from './plugin';
 
 export interface TelemetryCollectionManagerPluginSetup {
@@ -27,6 +37,7 @@ export interface TelemetryCollectionManagerPluginSetup {
   ) => void;
   getOptInStats: TelemetryCollectionManagerPlugin['getOptInStats'];
   getStats: TelemetryCollectionManagerPlugin['getStats'];
+  areAllCollectorsReady: TelemetryCollectionManagerPlugin['areAllCollectorsReady'];
 }
 
 export interface TelemetryCollectionManagerPluginStart {
@@ -35,6 +46,7 @@ export interface TelemetryCollectionManagerPluginStart {
   ) => void;
   getOptInStats: TelemetryCollectionManagerPlugin['getOptInStats'];
   getStats: TelemetryCollectionManagerPlugin['getStats'];
+  areAllCollectorsReady: TelemetryCollectionManagerPlugin['areAllCollectorsReady'];
 }
 
 export interface TelemetryOptInStats {
@@ -44,8 +56,7 @@ export interface TelemetryOptInStats {
 
 export interface BaseStatsGetterConfig {
   unencrypted: boolean;
-  start: string;
-  end: string;
+  timestamp: number;
   request?: KibanaRequest;
 }
 
@@ -65,8 +76,10 @@ export interface ClusterDetails {
 export interface StatsCollectionConfig {
   usageCollection: UsageCollectionSetup;
   callCluster: LegacyAPICaller;
-  start: string | number;
-  end: string | number;
+  timestamp: number;
+  esClient: ElasticsearchClient;
+  soClient: SavedObjectsClientContract | ISavedObjectsRepository;
+  kibanaRequest: KibanaRequest | undefined; // intentionally `| undefined` to enforce providing the parameter
 }
 
 export interface BasicStatsPayload {
@@ -100,7 +113,7 @@ export interface ESLicense {
 }
 
 export interface StatsCollectionContext {
-  logger: Logger;
+  logger: Logger | Console;
   version: string;
 }
 
@@ -130,6 +143,8 @@ export interface CollectionConfig<
   title: string;
   priority: number;
   esCluster: ILegacyClusterClient;
+  esClientGetter: () => IClusterClient | undefined; // --> by now we know that the client getter will return the IClusterClient but we assure that through a code check
+  soServiceGetter: () => SavedObjectsServiceStart | undefined; // --> by now we know that the service getter will return the SavedObjectsServiceStart but we assure that through a code check
   statsGetter: StatsGetter<CustomContext, T>;
   clusterDetailsGetter: ClusterDetailsGetter<CustomContext>;
   licenseGetter: LicenseGetter<CustomContext>;
@@ -145,5 +160,7 @@ export interface Collection<
   licenseGetter: LicenseGetter<CustomContext>;
   clusterDetailsGetter: ClusterDetailsGetter<CustomContext>;
   esCluster: ILegacyClusterClient;
+  esClientGetter: () => IClusterClient | undefined; // the collection could still return undefined for the es client getter.
+  soServiceGetter: () => SavedObjectsServiceStart | undefined; // the collection could still return undefined for the Saved Objects Service getter.
   title: string;
 }

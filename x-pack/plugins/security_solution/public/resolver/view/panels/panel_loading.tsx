@@ -5,19 +5,21 @@
  */
 
 import React, { useMemo } from 'react';
-import { useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
-import { EuiSpacer, EuiTitle } from '@elastic/eui';
-import * as selectors from '../../store/selectors';
-import { StyledBreadcrumbs } from './panel_content_utilities';
-import { useNavigateOrReplace } from '../use_navigate_or_replace';
-import { ResolverState } from '../../types';
+import styled from 'styled-components';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiText, EuiSpacer } from '@elastic/eui';
+import { Breadcrumbs } from './breadcrumbs';
+import { useLinkProps } from '../use_link_props';
+
+const StyledSpinnerFlexItem = styled.span`
+  margin-right: 5px;
+`;
 
 export function PanelLoading() {
   const waitingString = i18n.translate(
     'xpack.securitySolution.endpoint.resolver.panel.relatedDetail.wait',
     {
-      defaultMessage: 'Waiting For Events...',
+      defaultMessage: 'Loading Events...',
     }
   );
   const eventsString = i18n.translate(
@@ -26,11 +28,8 @@ export function PanelLoading() {
       defaultMessage: 'Events',
     }
   );
-  const nodesHref = useSelector((state: ResolverState) =>
-    selectors.relativeHref(state)({ panelView: 'nodes' })
-  );
-  const nodesLinkNavProps = useNavigateOrReplace({
-    search: nodesHref,
+  const nodesLinkNavProps = useLinkProps({
+    panelView: 'nodes',
   });
   const waitCrumbs = useMemo(() => {
     return [
@@ -42,11 +41,16 @@ export function PanelLoading() {
   }, [nodesLinkNavProps, eventsString]);
   return (
     <>
-      <StyledBreadcrumbs breadcrumbs={waitCrumbs} />
+      <Breadcrumbs breadcrumbs={waitCrumbs} />
       <EuiSpacer size="l" />
-      <EuiTitle>
-        <h4>{waitingString}</h4>
-      </EuiTitle>
+      <EuiFlexGroup alignItems="center" direction="row" gutterSize="none">
+        <StyledSpinnerFlexItem>
+          <EuiLoadingSpinner size="m" />
+        </StyledSpinnerFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiText data-test-subj="resolver:panel:loading">{waitingString}</EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </>
   );
 }

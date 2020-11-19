@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { SortOptions } from '../../../../../typings/elasticsearch/aggregations';
+import { PromiseReturnType } from '../../../../observability/typings/common';
 import {
   ERROR_CULPRIT,
   ERROR_EXC_HANDLED,
@@ -12,15 +14,10 @@ import {
   ERROR_GROUP_ID,
   ERROR_LOG_MESSAGE,
 } from '../../../common/elasticsearch_fieldnames';
-import { PromiseReturnType } from '../../../typings/common';
-import {
-  Setup,
-  SetupTimeRange,
-  SetupUIFilters,
-} from '../helpers/setup_request';
 import { getErrorGroupsProjection } from '../../projections/errors';
 import { mergeProjection } from '../../projections/util/merge_projection';
-import { SortOptions } from '../../../typings/elasticsearch/aggregations';
+import { getErrorName } from '../helpers/get_error_name';
+import { Setup, SetupTimeRange } from '../helpers/setup_request';
 
 export type ErrorGroupListAPIResponse = PromiseReturnType<
   typeof getErrorGroups
@@ -35,7 +32,7 @@ export async function getErrorGroups({
   serviceName: string;
   sortField?: string;
   sortDirection?: 'asc' | 'desc';
-  setup: Setup & SetupTimeRange & SetupUIFilters;
+  setup: Setup & SetupTimeRange;
 }) {
   const { apmEventClient } = setup;
 
@@ -97,8 +94,7 @@ export async function getErrorGroups({
   // this is an exception rather than the rule so the ES type does not account for this.
   const hits = (resp.aggregations?.error_groups.buckets || []).map((bucket) => {
     const source = bucket.sample.hits.hits[0]._source;
-    const message =
-      source.error.log?.message || source.error.exception?.[0]?.message;
+    const message = getErrorName(source);
 
     return {
       message,

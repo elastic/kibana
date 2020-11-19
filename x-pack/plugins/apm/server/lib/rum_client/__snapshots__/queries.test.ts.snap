@@ -9,9 +9,167 @@ Object {
   },
   "body": Object {
     "aggs": Object {
-      "backEnd": Object {
+      "hasFetchStartField": Object {
+        "aggs": Object {
+          "backEnd": Object {
+            "percentiles": Object {
+              "field": "transaction.marks.agent.timeToFirstByte",
+              "hdr": Object {
+                "number_of_significant_value_digits": 3,
+              },
+              "percents": Array [
+                50,
+              ],
+            },
+          },
+          "totalPageLoadDuration": Object {
+            "percentiles": Object {
+              "field": "transaction.duration.us",
+              "hdr": Object {
+                "number_of_significant_value_digits": 3,
+              },
+              "percents": Array [
+                50,
+              ],
+            },
+          },
+        },
+        "filter": Object {
+          "exists": Object {
+            "field": "transaction.marks.navigationTiming.fetchStart",
+          },
+        },
+      },
+    },
+    "query": Object {
+      "bool": Object {
+        "filter": Array [
+          Object {
+            "range": Object {
+              "@timestamp": Object {
+                "format": "epoch_millis",
+                "gte": 1528113600000,
+                "lte": 1528977600000,
+              },
+            },
+          },
+          Object {
+            "term": Object {
+              "transaction.type": "page-load",
+            },
+          },
+          Object {
+            "term": Object {
+              "service.environment": "test",
+            },
+          },
+        ],
+      },
+    },
+    "size": 0,
+    "track_total_hits": true,
+  },
+}
+`;
+
+exports[`rum client dashboard queries fetches js errors 1`] = `
+Object {
+  "apm": Object {
+    "events": Array [
+      "error",
+    ],
+  },
+  "body": Object {
+    "aggs": Object {
+      "errors": Object {
+        "aggs": Object {
+          "bucket_truncate": Object {
+            "bucket_sort": Object {
+              "from": 0,
+              "size": 5,
+            },
+          },
+          "sample": Object {
+            "top_hits": Object {
+              "_source": Array [
+                "error.exception.message",
+                "error.exception.type",
+                "error.grouping_key",
+                "@timestamp",
+              ],
+              "size": 1,
+              "sort": Array [
+                Object {
+                  "@timestamp": "desc",
+                },
+              ],
+            },
+          },
+        },
+        "terms": Object {
+          "field": "error.grouping_key",
+          "size": 500,
+        },
+      },
+      "totalErrorGroups": Object {
+        "cardinality": Object {
+          "field": "error.grouping_key",
+        },
+      },
+      "totalErrorPages": Object {
+        "cardinality": Object {
+          "field": "transaction.id",
+        },
+      },
+    },
+    "query": Object {
+      "bool": Object {
+        "filter": Array [
+          Object {
+            "range": Object {
+              "@timestamp": Object {
+                "format": "epoch_millis",
+                "gte": 1528113600000,
+                "lte": 1528977600000,
+              },
+            },
+          },
+          Object {
+            "term": Object {
+              "agent.name": "rum-js",
+            },
+          },
+          Object {
+            "term": Object {
+              "service.language.name": "javascript",
+            },
+          },
+          Object {
+            "term": Object {
+              "service.environment": "test",
+            },
+          },
+        ],
+      },
+    },
+    "size": 0,
+    "track_total_hits": true,
+  },
+}
+`;
+
+exports[`rum client dashboard queries fetches long task metrics 1`] = `
+Object {
+  "apm": Object {
+    "events": Array [
+      "transaction",
+    ],
+  },
+  "body": Object {
+    "aggs": Object {
+      "longTaskCount": Object {
         "percentiles": Object {
-          "field": "transaction.marks.agent.timeToFirstByte",
+          "field": "transaction.experience.longtask.count",
           "hdr": Object {
             "number_of_significant_value_digits": 3,
           },
@@ -20,9 +178,9 @@ Object {
           ],
         },
       },
-      "domInteractive": Object {
+      "longTaskMax": Object {
         "percentiles": Object {
-          "field": "transaction.marks.agent.domInteractive",
+          "field": "transaction.experience.longtask.max",
           "hdr": Object {
             "number_of_significant_value_digits": 3,
           },
@@ -31,9 +189,15 @@ Object {
           ],
         },
       },
-      "pageViews": Object {
-        "value_count": Object {
-          "field": "transaction.duration.us",
+      "longTaskSum": Object {
+        "percentiles": Object {
+          "field": "transaction.experience.longtask.sum",
+          "hdr": Object {
+            "number_of_significant_value_digits": 3,
+          },
+          "percents": Array [
+            50,
+          ],
         },
       },
     },
@@ -61,65 +225,7 @@ Object {
           },
           Object {
             "term": Object {
-              "my.custom.ui.filter": "foo-bar",
-            },
-          },
-        ],
-      },
-    },
-    "size": 0,
-  },
-}
-`;
-
-exports[`rum client dashboard queries fetches long task metrics 1`] = `
-Object {
-  "apm": Object {
-    "events": Array [
-      "span",
-    ],
-  },
-  "body": Object {
-    "aggs": Object {
-      "transIds": Object {
-        "aggs": Object {
-          "longestLongTask": Object {
-            "max": Object {
-              "field": "span.duration.us",
-            },
-          },
-          "sumLongTask": Object {
-            "sum": Object {
-              "field": "span.duration.us",
-            },
-          },
-        },
-        "terms": Object {
-          "field": "transaction.id",
-          "size": 1000,
-        },
-      },
-    },
-    "query": Object {
-      "bool": Object {
-        "filter": Array [
-          Object {
-            "range": Object {
-              "@timestamp": Object {
-                "format": "epoch_millis",
-                "gte": 1528113600000,
-                "lte": 1528977600000,
-              },
-            },
-          },
-          Object {
-            "term": Object {
-              "span.type": "longtask",
-            },
-          },
-          Object {
-            "term": Object {
-              "my.custom.ui.filter": "foo-bar",
+              "service.environment": "test",
             },
           },
         ],
@@ -154,10 +260,214 @@ Object {
           ],
         },
       },
-      "minDuration": Object {
-        "min": Object {
+      "loadDistribution": Object {
+        "percentile_ranks": Object {
           "field": "transaction.duration.us",
-          "missing": 0,
+          "hdr": Object {
+            "number_of_significant_value_digits": 3,
+          },
+          "keyed": false,
+          "values": Array [
+            0,
+            500000,
+            1000000,
+            1500000,
+            2000000,
+            2500000,
+            3000000,
+            3500000,
+            4000000,
+            4500000,
+            5000000,
+            5500000,
+            6000000,
+            6500000,
+            7000000,
+            7500000,
+            8000000,
+            8500000,
+            9000000,
+            9500000,
+            10000000,
+            10500000,
+            11000000,
+            11500000,
+            12000000,
+            12500000,
+            13000000,
+            13500000,
+            14000000,
+            14500000,
+            15000000,
+            15500000,
+            16000000,
+            16500000,
+            17000000,
+            17500000,
+            18000000,
+            18500000,
+            19000000,
+            19500000,
+            20000000,
+            20500000,
+            21000000,
+            21500000,
+            22000000,
+            22500000,
+            23000000,
+            23500000,
+            24000000,
+            24500000,
+            25000000,
+            25500000,
+            26000000,
+            26500000,
+            27000000,
+            27500000,
+            28000000,
+            28500000,
+            29000000,
+            29500000,
+            30000000,
+            30500000,
+            31000000,
+            31500000,
+            32000000,
+            32500000,
+            33000000,
+            33500000,
+            34000000,
+            34500000,
+            35000000,
+            35500000,
+            36000000,
+            36500000,
+            37000000,
+            37500000,
+            38000000,
+            38500000,
+            39000000,
+            39500000,
+            40000000,
+            40500000,
+            41000000,
+            41500000,
+            42000000,
+            42500000,
+            43000000,
+            43500000,
+            44000000,
+            44500000,
+            45000000,
+            45500000,
+            46000000,
+            46500000,
+            47000000,
+            47500000,
+            48000000,
+            48500000,
+            49000000,
+            49500000,
+            50000000,
+            50500000,
+            51000000,
+            51500000,
+            52000000,
+            52500000,
+            53000000,
+            53500000,
+            54000000,
+            54500000,
+            55000000,
+            55500000,
+            56000000,
+            56500000,
+            57000000,
+            57500000,
+            58000000,
+            58500000,
+            59000000,
+            59500000,
+            60000000,
+            60500000,
+            61000000,
+            61500000,
+            62000000,
+            62500000,
+            63000000,
+            63500000,
+            64000000,
+            64500000,
+            65000000,
+            65500000,
+            66000000,
+            66500000,
+            67000000,
+            67500000,
+            68000000,
+            68500000,
+            69000000,
+            69500000,
+            70000000,
+            70500000,
+            71000000,
+            71500000,
+            72000000,
+            72500000,
+            73000000,
+            73500000,
+            74000000,
+            74500000,
+            75000000,
+            75500000,
+            76000000,
+            76500000,
+            77000000,
+            77500000,
+            78000000,
+            78500000,
+            79000000,
+            79500000,
+            80000000,
+            80500000,
+            81000000,
+            81500000,
+            82000000,
+            82500000,
+            83000000,
+            83500000,
+            84000000,
+            84500000,
+            85000000,
+            85500000,
+            86000000,
+            86500000,
+            87000000,
+            87500000,
+            88000000,
+            88500000,
+            89000000,
+            89500000,
+            90000000,
+            90500000,
+            91000000,
+            91500000,
+            92000000,
+            92500000,
+            93000000,
+            93500000,
+            94000000,
+            94500000,
+            95000000,
+            95500000,
+            96000000,
+            96500000,
+            97000000,
+            97500000,
+            98000000,
+            98500000,
+            99000000,
+          ],
         },
       },
     },
@@ -185,7 +495,7 @@ Object {
           },
           Object {
             "term": Object {
-              "my.custom.ui.filter": "foo-bar",
+              "service.environment": "test",
             },
           },
         ],
@@ -231,13 +541,8 @@ Object {
             },
           },
           Object {
-            "exists": Object {
-              "field": "transaction.marks.navigationTiming.fetchStart",
-            },
-          },
-          Object {
             "term": Object {
-              "my.custom.ui.filter": "foo-bar",
+              "service.environment": "test",
             },
           },
         ],
@@ -273,6 +578,13 @@ Object {
             0.1,
             0.25,
           ],
+        },
+      },
+      "coreVitalPages": Object {
+        "filter": Object {
+          "exists": Object {
+            "field": "transaction.experience",
+          },
         },
       },
       "fcp": Object {
@@ -352,12 +664,7 @@ Object {
           },
           Object {
             "term": Object {
-              "my.custom.ui.filter": "foo-bar",
-            },
-          },
-          Object {
-            "term": Object {
-              "user_agent.name": "Chrome",
+              "service.environment": "test",
             },
           },
         ],
@@ -408,7 +715,7 @@ Object {
           },
           Object {
             "term": Object {
-              "my.custom.ui.filter": "foo-bar",
+              "service.environment": "test",
             },
           },
         ],

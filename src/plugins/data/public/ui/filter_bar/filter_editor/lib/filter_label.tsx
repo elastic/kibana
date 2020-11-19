@@ -22,13 +22,18 @@ import { EuiTextColor } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { existsOperator, isOneOfOperator } from './filter_operators';
 import { Filter, FILTERS } from '../../../../../common';
+import type { FilterLabelStatus } from '../../filter_item';
 
-interface Props {
+// @internal
+export interface FilterLabelProps {
   filter: Filter;
   valueLabel?: string;
+  filterLabelStatus?: FilterLabelStatus;
 }
 
-export function FilterLabel({ filter, valueLabel }: Props) {
+// Needed for React.lazy
+// eslint-disable-next-line import/no-default-export
+export default function FilterLabel({ filter, valueLabel, filterLabelStatus }: FilterLabelProps) {
   const prefixText = filter.meta.negate
     ? ` ${i18n.translate('data.filter.filterBar.negatedFilterPrefix', {
         defaultMessage: 'NOT ',
@@ -50,6 +55,7 @@ export function FilterLabel({ filter, valueLabel }: Props) {
       <Fragment>
         {prefix}
         {filter.meta.alias}
+        {filterLabelStatus && <>: {getValue(valueLabel)}</>}
       </Fragment>
     );
   }

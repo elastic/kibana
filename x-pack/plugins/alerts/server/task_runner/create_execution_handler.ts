@@ -86,7 +86,9 @@ export function createExecutionHandler({
     const alertLabel = `${alertType.id}:${alertId}: '${alertName}'`;
 
     for (const action of actions) {
-      if (!actionsPlugin.isActionExecutable(action.id, action.actionTypeId)) {
+      if (
+        !actionsPlugin.isActionExecutable(action.id, action.actionTypeId, { notifyUsage: true })
+      ) {
         logger.warn(
           `Alert "${alertId}" skipped scheduling action "${action.id}" because it is disabled`
         );
@@ -114,6 +116,7 @@ export function createExecutionHandler({
         kibana: {
           alerting: {
             instance_id: alertInstanceId,
+            action_group_id: actionGroup,
           },
           saved_objects: [
             { rel: SAVED_OBJECT_REL_PRIMARY, type: 'alert', id: alertId, ...namespace },

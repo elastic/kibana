@@ -17,6 +17,7 @@
  * under the License.
  */
 
-.homDataAdd__content .euiIcon__fillSecondary {
-  fill: $euiColorDarkestShade;
+// Accounting for no `flush="both"` prop on EuiButtonEmpty
+.homDataAdd__actionButton {
+  margin-right: 0;
 }

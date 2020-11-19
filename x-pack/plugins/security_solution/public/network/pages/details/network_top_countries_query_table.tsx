@@ -31,6 +31,7 @@ export const NetworkTopCountriesQueryTable = ({
     endDate,
     flowTarget,
     filterQuery,
+    indexNames: [],
     ip,
     skip,
     startDate,

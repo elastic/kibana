@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { loggerMock } from '@kbn/logging/target/mocks';
 import {
   mockOsCollector,
   mockProcessCollector,
@@ -30,7 +31,7 @@ describe('OpsMetricsCollector', () => {
 
   beforeEach(() => {
     const hapiServer = httpServiceMock.createInternalSetupContract().server;
-    collector = new OpsMetricsCollector(hapiServer, {});
+    collector = new OpsMetricsCollector(hapiServer, { logger: loggerMock.create() });
 
     mockOsCollector.collect.mockResolvedValue('osMetrics');
   });

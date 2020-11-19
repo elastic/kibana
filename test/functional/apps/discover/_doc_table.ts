@@ -31,7 +31,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     defaultIndex: 'logstash-*',
   };
 
-  describe('discover doc table', function describeIndexTests() {
+  // Failing: See https://github.com/elastic/kibana/issues/82445
+  describe.skip('discover doc table', function describeIndexTests() {
     const defaultRowsLimit = 50;
     const rowsHardLimit = 500;
 
@@ -88,7 +89,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await footer.getVisibleText()).to.have.string(rowsHardLimit);
     });
 
-    describe('expand a document row', function () {
+    // FLAKY: https://github.com/elastic/kibana/issues/81632
+    describe.skip('expand a document row', function () {
       const rowToInspect = 1;
       beforeEach(async function () {
         // close the toggle if open

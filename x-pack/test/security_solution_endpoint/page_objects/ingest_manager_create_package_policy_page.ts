@@ -5,6 +5,7 @@
  */
 
 import { FtrProviderContext } from '../ftr_provider_context';
+import { WebElementWrapper } from '../../../../test/functional/services/lib/web_element_wrapper';
 
 export function IngestManagerCreatePackagePolicy({
   getService,
@@ -13,6 +14,7 @@ export function IngestManagerCreatePackagePolicy({
   const testSubjects = getService('testSubjects');
   const find = getService('find');
   const pageObjects = getPageObjects(['common']);
+  const browser = getService('browser');
 
   return {
     /**
@@ -100,6 +102,39 @@ export function IngestManagerCreatePackagePolicy({
         hash: `/policies/${agentPolicyId}/edit-integration/${packagePolicyId}`,
       });
       await this.ensureOnEditPageOrFail();
+    },
+
+    /**
+     * Returns the Endpoint Callout that is displayed on the Integration Policy create/edit pages
+     */
+    async findEndpointActionsButton() {
+      const button = await testSubjects.find('endpointActions');
+      await this.scrollToCenterOfWindow(button);
+      return button;
+    },
+
+    /**
+     * Center a given Element on the Window viewport
+     * @param element
+     */
+    async scrollToCenterOfWindow(element: WebElementWrapper) {
+      const [elementPosition, windowSize] = await Promise.all([
+        element.getPosition(),
+        browser.getWindowSize(),
+      ]);
+      await browser.execute(
+        `document.scrollingElement.scrollTop = ${elementPosition.y - windowSize.height / 2}`
+      );
+    },
+
+    /**
+     * Will click on the given Endpoint Action (from the Actions dropdown)
+     * @param action
+     */
+    async selectEndpointAction(action: 'policy' | 'trustedApps') {
+      await (await this.findEndpointActionsButton()).click();
+      const testSubjId = action === 'policy' ? 'securityPolicy' : 'trustedAppsAction';
+      await (await testSubjects.find(testSubjId)).click();
     },
   };
 }

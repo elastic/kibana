@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import cloneDeep from 'lodash/cloneDeep';
+import { cloneDeep } from 'lodash';
 
 import mockAnomalyChartRecords from './__mocks__/mock_anomaly_chart_records.json';
 import mockDetectorsByJob from './__mocks__/mock_detectors_by_job.json';
@@ -15,7 +15,7 @@ import mockSeriesPromisesResponse from './__mocks__/mock_series_promises_respons
 //
 // 'call anomalyChangeListener with actual series config'
 // This test uses the standard mocks and uses the data as is provided via the mock files.
-// The mocked services check for values in the data (e.g. 'mock-job-id', 'farequore-2017')
+// The mocked services check for values in the data (e.g. 'mock-job-id', 'farequote-2017')
 // and return the mock data from the files.
 //
 // 'filtering should skip values of null'
@@ -88,14 +88,41 @@ jest.mock('../../util/string_utils', () => ({
   },
 }));
 
+jest.mock('../../util/dependency_cache', () => {
+  const dateMath = require('@elastic/datemath');
+  let _time = undefined;
+  const timefilter = {
+    setTime: (time) => {
+      _time = time;
+    },
+    getActiveBounds: () => {
+      return {
+        min: dateMath.parse(_time.from),
+        max: dateMath.parse(_time.to),
+      };
+    },
+  };
+  return {
+    getTimefilter: () => timefilter,
+  };
+});
+
 jest.mock('../explorer_dashboard_service', () => ({
   explorerService: {
     setCharts: jest.fn(),
   },
 }));
 
+import moment from 'moment';
 import { anomalyDataChange, getDefaultChartsData } from './explorer_charts_container_service';
 import { explorerService } from '../explorer_dashboard_service';
+import { getTimefilter } from '../../util/dependency_cache';
+
+const timefilter = getTimefilter();
+timefilter.setTime({
+  from: moment(1486425600000).toISOString(), // Feb 07 2017
+  to: moment(1486857600000).toISOString(), // Feb 12 2017
+});
 
 describe('explorerChartsContainerService', () => {
   afterEach(() => {

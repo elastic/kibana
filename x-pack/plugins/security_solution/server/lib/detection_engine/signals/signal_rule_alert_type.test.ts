@@ -18,11 +18,8 @@ import {
   sortExceptionItems,
 } from './utils';
 import { parseScheduleDates } from '../../../../common/detection_engine/parse_schedule_dates';
-import { RuleExecutorOptions } from './types';
-import {
-  searchAfterAndBulkCreate,
-  SearchAfterAndBulkCreateReturnType,
-} from './search_after_bulk_create';
+import { RuleExecutorOptions, SearchAfterAndBulkCreateReturnType } from './types';
+import { searchAfterAndBulkCreate } from './search_after_bulk_create';
 import { scheduleNotificationActions } from '../notifications/schedule_notification_actions';
 import { RuleAlertType } from '../rules/types';
 import { findMlSignals } from './find_ml_signals';
@@ -36,7 +33,17 @@ jest.mock('./rule_status_saved_objects_client');
 jest.mock('./rule_status_service');
 jest.mock('./search_after_bulk_create');
 jest.mock('./get_filter');
-jest.mock('./utils');
+jest.mock('./utils', () => {
+  const original = jest.requireActual('./utils');
+  return {
+    ...original,
+    getGapBetweenRuns: jest.fn(),
+    getGapMaxCatchupRatio: jest.fn(),
+    getListsClient: jest.fn(),
+    getExceptions: jest.fn(),
+    sortExceptionItems: jest.fn(),
+  };
+});
 jest.mock('../notifications/schedule_notification_actions');
 jest.mock('./find_ml_signals');
 jest.mock('./bulk_create_ml_signals');
@@ -131,6 +138,7 @@ describe('rules_notification_alert_type', () => {
 
     alert = signalRulesAlertType({
       logger,
+      eventsTelemetry: undefined,
       version,
       ml: mlMock,
       lists: listMock.createSetup(),
@@ -337,6 +345,7 @@ describe('rules_notification_alert_type', () => {
         payload = getPayload(ruleAlert, alertServices) as jest.Mocked<RuleExecutorOptions>;
         alert = signalRulesAlertType({
           logger,
+          eventsTelemetry: undefined,
           version,
           ml: undefined,
           lists: undefined,
@@ -383,6 +392,7 @@ describe('rules_notification_alert_type', () => {
           },
         ]);
         (findMlSignals as jest.Mock).mockResolvedValue({
+          _shards: {},
           hits: {
             hits: [],
           },
@@ -401,6 +411,7 @@ describe('rules_notification_alert_type', () => {
         payload = getPayload(ruleAlert, alertServices) as jest.Mocked<RuleExecutorOptions>;
         jobsSummaryMock.mockResolvedValue([]);
         (findMlSignals as jest.Mock).mockResolvedValue({
+          _shards: {},
           hits: {
             hits: [],
           },
@@ -409,6 +420,7 @@ describe('rules_notification_alert_type', () => {
           success: true,
           bulkCreateDuration: 0,
           createdItemsCount: 0,
+          errors: [],
         });
         await alert.executor(payload);
         expect(ruleStatusService.success).not.toHaveBeenCalled();
@@ -425,6 +437,7 @@ describe('rules_notification_alert_type', () => {
           },
         ]);
         (findMlSignals as jest.Mock).mockResolvedValue({
+          _shards: { failed: 0 },
           hits: {
             hits: [{}],
           },
@@ -433,6 +446,7 @@ describe('rules_notification_alert_type', () => {
           success: true,
           bulkCreateDuration: 1,
           createdItemsCount: 1,
+          errors: [],
         });
         await alert.executor(payload);
         expect(ruleStatusService.success).toHaveBeenCalled();
@@ -460,6 +474,7 @@ describe('rules_notification_alert_type', () => {
         });
         jobsSummaryMock.mockResolvedValue([]);
         (findMlSignals as jest.Mock).mockResolvedValue({
+          _shards: { failed: 0 },
           hits: {
             hits: [{}],
           },
@@ -468,6 +483,7 @@ describe('rules_notification_alert_type', () => {
           success: true,
           bulkCreateDuration: 1,
           createdItemsCount: 1,
+          errors: [],
         });
 
         await alert.executor(payload);
@@ -488,7 +504,7 @@ describe('rules_notification_alert_type', () => {
         await alert.executor(payload);
         expect(logger.error).toHaveBeenCalled();
         expect(logger.error.mock.calls[0][0]).toContain(
-          'An error occurred during rule execution: message: "Threat Match rule is missing threatQuery and/or threatIndex and/or threatMapping: threatQuery: "undefined" threatIndex: "undefined" threatMapping: "undefined"" name: "Detect Root/Admin Users" id: "04128c15-0d1b-4716-a4c5-46997ac7f3bd" rule id: "rule-1" signals index: ".siem-signals"'
+          'An error occurred during rule execution: message: "Indicator match is missing threatQuery and/or threatIndex and/or threatMapping: threatQuery: "undefined" threatIndex: "undefined" threatMapping: "undefined"" name: "Detect Root/Admin Users" id: "04128c15-0d1b-4716-a4c5-46997ac7f3bd" rule id: "rule-1" signals index: ".siem-signals"'
         );
       });
     });

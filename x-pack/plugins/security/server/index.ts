@@ -27,7 +27,7 @@ export {
   SAMLLogin,
   OIDCLogin,
 } from './authentication';
-export { AuditLogger } from './audit';
+export { LegacyAuditLogger } from './audit';
 export { SecurityPluginSetup };
 export { AuthenticatedUser } from '../common/model';
 

@@ -15,6 +15,8 @@ import {
 } from '@elastic/eui';
 import { ConfusionMatrix } from '../../../../common/analytics';
 
+const COL_INITIAL_WIDTH = 165; // in pixels
+
 interface ColumnData {
   actual_class: string;
   actual_class_doc_count: number;
@@ -27,10 +29,11 @@ export const MAX_COLUMNS = 6;
 
 export function getColumnData(confusionMatrixData: ConfusionMatrix[]) {
   const colData: Partial<ColumnData[]> = [];
-  const columns: Array<{ id: string; display?: any }> = [
+  const columns: Array<{ id: string; display?: any; initialWidth?: number }> = [
     {
       id: ACTUAL_CLASS_ID,
       display: <span />,
+      initialWidth: COL_INITIAL_WIDTH,
     },
   ];
 
@@ -51,7 +54,7 @@ export function getColumnData(confusionMatrixData: ConfusionMatrix[]) {
 
     const predictedClasses = classData.predicted_classes || [];
 
-    columns.push({ id: classData.actual_class });
+    columns.push({ id: classData.actual_class, initialWidth: COL_INITIAL_WIDTH });
 
     for (let i = 0; i < predictedClasses.length; i++) {
       const predictedClass = predictedClasses[i].predicted_class;
@@ -63,7 +66,7 @@ export function getColumnData(confusionMatrixData: ConfusionMatrix[]) {
   });
 
   if (showOther) {
-    columns.push({ id: OTHER_CLASS_ID });
+    columns.push({ id: OTHER_CLASS_ID, initialWidth: COL_INITIAL_WIDTH });
   }
 
   return { columns, columnData: colData };

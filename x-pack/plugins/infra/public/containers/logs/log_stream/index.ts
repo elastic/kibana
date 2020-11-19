@@ -4,11 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useState, useMemo } from 'react';
+import { useMemo, useEffect } from 'react';
+import useSetState from 'react-use/lib/useSetState';
+import usePrevious from 'react-use/lib/usePrevious';
 import { esKuery } from '../../../../../../../src/plugins/data/public';
 import { fetchLogEntries } from '../log_entries/api/fetch_log_entries';
 import { useTrackedPromise } from '../../../utils/use_tracked_promise';
 import { LogEntry, LogEntriesCursor } from '../../../../common/http_api';
+import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 
 interface LogStreamProps {
   sourceId: string;
@@ -20,9 +23,36 @@ interface LogStreamProps {
 
 interface LogStreamState {
   entries: LogEntry[];
-  fetchEntries: () => void;
-  loadingState: 'uninitialized' | 'loading' | 'success' | 'error';
+  topCursor: LogEntriesCursor | null;
+  bottomCursor: LogEntriesCursor | null;
+  hasMoreBefore: boolean;
+  hasMoreAfter: boolean;
 }
+
+type LoadingState = 'uninitialized' | 'loading' | 'success' | 'error';
+
+interface LogStreamReturn extends LogStreamState {
+  fetchEntries: () => void;
+  fetchPreviousEntries: () => void;
+  fetchNextEntries: () => void;
+  loadingState: LoadingState;
+  pageLoadingState: LoadingState;
+}
+
+const INITIAL_STATE: LogStreamState = {
+  entries: [],
+  topCursor: null,
+  bottomCursor: null,
+  // Assume there are pages available until the API proves us wrong
+  hasMoreBefore: true,
+  hasMoreAfter: true,
+};
+
+const EMPTY_DATA = {
+  entries: [],
+  topCursor: null,
+  bottomCursor: null,
+};
 
 export function useLogStream({
   sourceId,
@@ -30,8 +60,25 @@ export function useLogStream({
   endTimestamp,
   query,
   center,
-}: LogStreamProps): LogStreamState {
-  const [entries, setEntries] = useState<LogStreamState['entries']>([]);
+}: LogStreamProps): LogStreamReturn {
+  const { services } = useKibanaContextForPlugin();
+  const [state, setState] = useSetState<LogStreamState>(INITIAL_STATE);
+
+  // Ensure the pagination keeps working when the timerange gets extended
+  const prevStartTimestamp = usePrevious(startTimestamp);
+  const prevEndTimestamp = usePrevious(endTimestamp);
+
+  useEffect(() => {
+    if (prevStartTimestamp && prevStartTimestamp > startTimestamp) {
+      setState({ hasMoreBefore: true });
+    }
+  }, [prevStartTimestamp, startTimestamp, setState]);
+
+  useEffect(() => {
+    if (prevEndTimestamp && prevEndTimestamp < endTimestamp) {
+      setState({ hasMoreAfter: true });
+    }
+  }, [prevEndTimestamp, endTimestamp, setState]);
 
   const parsedQuery = useMemo(() => {
     return query
@@ -44,38 +91,145 @@ export function useLogStream({
     {
       cancelPreviousOn: 'creation',
       createPromise: () => {
-        setEntries([]);
+        setState(INITIAL_STATE);
         const fetchPosition = center ? { center } : { before: 'last' };
 
-        return fetchLogEntries({
-          sourceId,
-          startTimestamp,
-          endTimestamp,
-          query: parsedQuery,
-          ...fetchPosition,
-        });
+        return fetchLogEntries(
+          {
+            sourceId,
+            startTimestamp,
+            endTimestamp,
+            query: parsedQuery,
+            ...fetchPosition,
+          },
+          services.http.fetch
+        );
       },
       onResolve: ({ data }) => {
-        setEntries(data.entries);
+        setState((prevState) => ({
+          ...data,
+          hasMoreBefore: data.hasMoreBefore ?? prevState.hasMoreBefore,
+          hasMoreAfter: data.hasMoreAfter ?? prevState.hasMoreAfter,
+        }));
       },
     },
     [sourceId, startTimestamp, endTimestamp, query]
   );
 
-  const loadingState = useMemo(() => convertPromiseStateToLoadingState(entriesPromise.state), [
-    entriesPromise.state,
-  ]);
+  const [previousEntriesPromise, fetchPreviousEntries] = useTrackedPromise(
+    {
+      cancelPreviousOn: 'creation',
+      createPromise: () => {
+        if (state.topCursor === null) {
+          throw new Error(
+            'useLogState: Cannot fetch previous entries. No cursor is set.\nEnsure you have called `fetchEntries` at least once.'
+          );
+        }
+
+        if (!state.hasMoreBefore) {
+          return Promise.resolve({ data: EMPTY_DATA });
+        }
+
+        return fetchLogEntries(
+          {
+            sourceId,
+            startTimestamp,
+            endTimestamp,
+            query: parsedQuery,
+            before: state.topCursor,
+          },
+          services.http.fetch
+        );
+      },
+      onResolve: ({ data }) => {
+        if (!data.entries.length) {
+          return;
+        }
+        setState((prevState) => ({
+          entries: [...data.entries, ...prevState.entries],
+          hasMoreBefore: data.hasMoreBefore ?? prevState.hasMoreBefore,
+          topCursor: data.topCursor ?? prevState.topCursor,
+        }));
+      },
+    },
+    [sourceId, startTimestamp, endTimestamp, query, state.topCursor]
+  );
+
+  const [nextEntriesPromise, fetchNextEntries] = useTrackedPromise(
+    {
+      cancelPreviousOn: 'creation',
+      createPromise: () => {
+        if (state.bottomCursor === null) {
+          throw new Error(
+            'useLogState: Cannot fetch next entries. No cursor is set.\nEnsure you have called `fetchEntries` at least once.'
+          );
+        }
+
+        if (!state.hasMoreAfter) {
+          return Promise.resolve({ data: EMPTY_DATA });
+        }
+
+        return fetchLogEntries(
+          {
+            sourceId,
+            startTimestamp,
+            endTimestamp,
+            query: parsedQuery,
+            after: state.bottomCursor,
+          },
+          services.http.fetch
+        );
+      },
+      onResolve: ({ data }) => {
+        if (!data.entries.length) {
+          return;
+        }
+        setState((prevState) => ({
+          entries: [...prevState.entries, ...data.entries],
+          hasMoreAfter: data.hasMoreAfter ?? prevState.hasMoreAfter,
+          bottomCursor: data.bottomCursor ?? prevState.bottomCursor,
+        }));
+      },
+    },
+    [sourceId, startTimestamp, endTimestamp, query, state.bottomCursor]
+  );
+
+  const loadingState = useMemo<LoadingState>(
+    () => convertPromiseStateToLoadingState(entriesPromise.state),
+    [entriesPromise.state]
+  );
+
+  const pageLoadingState = useMemo<LoadingState>(() => {
+    const states = [previousEntriesPromise.state, nextEntriesPromise.state];
+
+    if (states.includes('pending')) {
+      return 'loading';
+    }
+
+    if (states.includes('rejected')) {
+      return 'error';
+    }
+
+    if (states.includes('resolved')) {
+      return 'success';
+    }
+
+    return 'uninitialized';
+  }, [previousEntriesPromise.state, nextEntriesPromise.state]);
 
   return {
-    entries,
+    ...state,
     fetchEntries,
+    fetchPreviousEntries,
+    fetchNextEntries,
     loadingState,
+    pageLoadingState,
   };
 }
 
 function convertPromiseStateToLoadingState(
   state: 'uninitialized' | 'pending' | 'resolved' | 'rejected'
-): LogStreamState['loadingState'] {
+): LoadingState {
   switch (state) {
     case 'uninitialized':
       return 'uninitialized';

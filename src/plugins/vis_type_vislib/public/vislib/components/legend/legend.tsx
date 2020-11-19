@@ -23,16 +23,21 @@ import { compact, uniqBy, map, every, isUndefined } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { EuiPopoverProps, EuiIcon, keys, htmlIdGenerator } from '@elastic/eui';
 
+import { PersistedState } from '../../../../../visualizations/public';
+import { IInterpreterRenderHandlers } from '../../../../../expressions/public';
+
 import { getDataActions } from '../../../services';
 import { CUSTOM_LEGEND_VIS_TYPES, LegendItem } from './models';
 import { VisLegendItem } from './legend_item';
 import { getPieNames } from './pie_utils';
+import { BasicVislibParams } from '../../../types';
 
 export interface VisLegendProps {
-  vis: any;
   vislibVis: any;
-  visData: any;
-  uiState: any;
+  visData: unknown;
+  uiState?: PersistedState;
+  fireEvent: IInterpreterRenderHandlers['event'];
+  addLegend: BasicVislibParams['addLegend'];
   position: 'top' | 'bottom' | 'left' | 'right';
 }
 
@@ -49,7 +54,10 @@ export class VisLegend extends PureComponent<VisLegendProps, VisLegendState> {
 
   constructor(props: VisLegendProps) {
     super(props);
-    const open = props.uiState.get('vis.legendOpen', true);
+
+    // TODO: Check when this bwc can safely be removed
+    const bwcLegendStateDefault = props.addLegend ?? true;
+    const open = props.uiState?.get('vis.legendOpen', bwcLegendStateDefault) as boolean;
 
     this.state = {
       open,
@@ -64,13 +72,9 @@ export class VisLegend extends PureComponent<VisLegendProps, VisLegendState> {
   }
 
   toggleLegend = () => {
-    const bwcAddLegend = this.props.vis.params.addLegend;
-    const bwcLegendStateDefault = bwcAddLegend == null ? true : bwcAddLegend;
-    const newOpen = !this.props.uiState.get('vis.legendOpen', bwcLegendStateDefault);
-    this.setState({ open: newOpen });
-    // open should be applied on template before we update uiState
-    setTimeout(() => {
-      this.props.uiState.set('vis.legendOpen', newOpen);
+    const newOpen = !this.state.open;
+    this.setState({ open: newOpen }, () => {
+      this.props.uiState?.set('vis.legendOpen', newOpen);
     });
   };
 
@@ -79,17 +83,23 @@ export class VisLegend extends PureComponent<VisLegendProps, VisLegendState> {
       return;
     }
 
-    const colors = this.props.uiState.get('vis.colors') || {};
+    const colors = this.props.uiState?.get('vis.colors') || {};
     if (colors[label] === color) delete colors[label];
     else colors[label] = color;
-    this.props.uiState.setSilent('vis.colors', null);
-    this.props.uiState.set('vis.colors', colors);
-    this.props.uiState.emit('colorChanged');
+    this.props.uiState?.setSilent('vis.colors', null);
+    this.props.uiState?.set('vis.colors', colors);
+    this.props.uiState?.emit('colorChanged');
     this.refresh();
   };
 
   filter = ({ values: data }: LegendItem, negate: boolean) => {
-    this.props.vis.API.events.filter({ data, negate });
+    this.props.fireEvent({
+      name: 'filterBucket',
+      data: {
+        data,
+        negate,
+      },
+    });
   };
 
   canFilter = async (item: LegendItem): Promise<boolean> => {
@@ -172,11 +182,8 @@ export class VisLegend extends PureComponent<VisLegendProps, VisLegendState> {
       return;
     } // make sure vislib is defined at this point
 
-    if (
-      this.props.uiState.get('vis.legendOpen') == null &&
-      this.props.vis.params.addLegend != null
-    ) {
-      this.setState({ open: this.props.vis.params.addLegend });
+    if (this.props.uiState?.get('vis.legendOpen') == null && this.props.addLegend != null) {
+      this.setState({ open: this.props.addLegend });
     }
 
     if (vislibVis.visConfig) {

@@ -11,6 +11,7 @@ import {
   IKibanaResponse,
 } from 'kibana/server';
 import { schema } from '@kbn/config-schema';
+import { InvalidatePendingApiKey } from '../../../../../../../plugins/alerts/server/types';
 import { RawAlert } from '../../../../../../../plugins/alerts/server/types';
 import { TaskInstance } from '../../../../../../../plugins/task_manager/server';
 import { FixtureSetupDeps, FixtureStartDeps } from './plugin';
@@ -182,6 +183,33 @@ export function defineRoutes(
         { runAt }
       );
       return res.ok({ body: result });
+    }
+  );
+
+  router.get(
+    {
+      path: '/api/alerts_fixture/api_keys_pending_invalidation',
+      validate: {},
+    },
+    async (
+      context: RequestHandlerContext,
+      req: KibanaRequest<any, any, any, any>,
+      res: KibanaResponseFactory
+    ): Promise<IKibanaResponse<any>> => {
+      try {
+        const [{ savedObjects }] = await core.getStartServices();
+        const savedObjectsWithTasksAndAlerts = await savedObjects.getScopedClient(req, {
+          includedHiddenTypes: ['api_key_pending_invalidation'],
+        });
+        const findResult = await savedObjectsWithTasksAndAlerts.find<InvalidatePendingApiKey>({
+          type: 'api_key_pending_invalidation',
+        });
+        return res.ok({
+          body: { apiKeysToInvalidate: findResult.saved_objects },
+        });
+      } catch (err) {
+        return res.badRequest({ body: err });
+      }
     }
   );
 }

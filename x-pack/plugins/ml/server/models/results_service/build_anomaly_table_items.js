@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import sortBy from 'lodash/sortBy';
-import each from 'lodash/each';
+import { sortBy, each } from 'lodash';
 import moment from 'moment-timezone';
 
 import {

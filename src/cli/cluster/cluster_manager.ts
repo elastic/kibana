@@ -19,6 +19,7 @@
 
 import { resolve } from 'path';
 import { format as formatUrl } from 'url';
+import Fs from 'fs';
 
 import opn from 'opn';
 import { REPO_ROOT } from '@kbn/utils';
@@ -109,6 +110,7 @@ export class ClusterManager {
         type: 'server',
         log: this.log,
         argv: serverArgv,
+        apmServiceName: 'kibana',
       })),
     ];
 
@@ -227,14 +229,19 @@ export class ClusterManager {
           fromRoot('src/legacy/server'),
           fromRoot('src/legacy/ui'),
           fromRoot('src/legacy/utils'),
-          fromRoot('x-pack/legacy/common'),
-          fromRoot('x-pack/legacy/plugins'),
-          fromRoot('x-pack/legacy/server'),
           fromRoot('config'),
           ...extraPaths,
         ].map((path) => resolve(path))
       )
     );
+
+    for (const watchPath of watchPaths) {
+      if (!Fs.existsSync(fromRoot(watchPath))) {
+        throw new Error(
+          `A watch directory [${watchPath}] does not exist, which will cause chokidar to fail. Either make sure the directory exists or remove it as a watch source in the ClusterManger`
+        );
+      }
+    }
 
     const ignorePaths = [
       /[\\\/](\..*|node_modules|bower_components|target|public|__[a-z0-9_]+__|coverage)([\\\/]|$)/,
@@ -242,7 +249,6 @@ export class ClusterManager {
       /\.md$/,
       /debug\.log$/,
       ...pluginInternalDirsIgnore,
-      fromRoot('src/legacy/server/sass/__tmp__'),
       fromRoot('x-pack/plugins/reporting/chromium'),
       fromRoot('x-pack/plugins/security_solution/cypress'),
       fromRoot('x-pack/plugins/apm/e2e'),
@@ -253,7 +259,6 @@ export class ClusterManager {
       fromRoot('x-pack/plugins/lists/server/scripts'),
       fromRoot('x-pack/plugins/security_solution/scripts'),
       fromRoot('x-pack/plugins/security_solution/server/lib/detection_engine/scripts'),
-      'plugins/java_languageserver',
     ];
 
     this.watcher = chokidar.watch(watchPaths, {

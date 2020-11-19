@@ -43,7 +43,6 @@ export const createEndpointTrustedAppsList = async ({
     const savedObject = await savedObjectsClient.create<ExceptionListSoSchema>(
       savedObjectType,
       {
-        _tags: [],
         comments: undefined,
         created_at: dateNow,
         created_by: user,
@@ -55,6 +54,7 @@ export const createEndpointTrustedAppsList = async ({
         list_type: 'list',
         meta: undefined,
         name: ENDPOINT_TRUSTED_APPS_LIST_NAME,
+        os_types: [],
         tags: [],
         tie_breaker_id: tieBreaker ?? uuid.v4(),
         type: 'endpoint',

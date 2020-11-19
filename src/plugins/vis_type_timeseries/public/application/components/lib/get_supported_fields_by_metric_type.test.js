@@ -18,18 +18,23 @@
  */
 
 import { getSupportedFieldsByMetricType } from './get_supported_fields_by_metric_type';
+import { KBN_FIELD_TYPES } from '../../../../../../plugins/data/public';
 
 describe('getSupportedFieldsByMetricType', () => {
   const shouldHaveHistogramAndNumbers = (type) =>
     it(`should return numbers and histogram for ${type}`, () => {
       expect(getSupportedFieldsByMetricType(type)).toEqual(['number', 'histogram']);
     });
+  const shouldSupportAllFieldTypes = (type) =>
+    it(`should return all field types for ${type}`, () => {
+      expect(getSupportedFieldsByMetricType(type)).toEqual(Object.values(KBN_FIELD_TYPES));
+    });
   const shouldHaveOnlyNumbers = (type) =>
     it(`should return only numbers for ${type}`, () => {
       expect(getSupportedFieldsByMetricType(type)).toEqual(['number']);
     });
 
-  shouldHaveHistogramAndNumbers('value_count');
+  shouldSupportAllFieldTypes('value_count');
   shouldHaveHistogramAndNumbers('avg');
   shouldHaveHistogramAndNumbers('sum');
 

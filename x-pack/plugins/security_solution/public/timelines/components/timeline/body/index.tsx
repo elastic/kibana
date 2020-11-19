@@ -10,7 +10,7 @@ import { inputsModel } from '../../../../common/store';
 import { BrowserFields, DocValueFields } from '../../../../common/containers/source';
 import { TimelineItem, TimelineNonEcsData } from '../../../../../common/search_strategy';
 import { Note } from '../../../../common/lib/note';
-import { ColumnHeaderOptions, EventType } from '../../../../timelines/store/timeline/model';
+import { ColumnHeaderOptions } from '../../../../timelines/store/timeline/model';
 import { AddNoteToEvent, UpdateNote } from '../../notes/helpers';
 import {
   OnColumnRemoved,
@@ -31,7 +31,7 @@ import { RowRenderer } from './renderers/row_renderer';
 import { Sort } from './sort';
 import { GraphOverlay } from '../../graph_overlay';
 import { DEFAULT_ICON_BUTTON_WIDTH } from '../helpers';
-import { TimelineId, TimelineType } from '../../../../../common/types/timeline';
+import { TimelineEventsType, TimelineId, TimelineType } from '../../../../../common/types/timeline';
 
 export interface BodyProps {
   addNoteToEvent: AddNoteToEvent;
@@ -45,7 +45,7 @@ export interface BodyProps {
   isEventViewer?: boolean;
   isSelectAllChecked: boolean;
   eventIdToNoteIds: Readonly<Record<string, string[]>>;
-  eventType?: EventType;
+  eventType?: TimelineEventsType;
   loadingEventIds: Readonly<string[]>;
   onColumnRemoved: OnColumnRemoved;
   onColumnResized: OnColumnResized;
@@ -57,6 +57,7 @@ export interface BodyProps {
   onUnPinEvent: OnUnPinEvent;
   pinnedEventIds: Readonly<Record<string, boolean>>;
   refetch: inputsModel.Refetch;
+  onRuleChange?: () => void;
   rowRenderers: RowRenderer[];
   selectedEventIds: Readonly<Record<string, TimelineNonEcsData[]>>;
   show: boolean;
@@ -68,11 +69,10 @@ export interface BodyProps {
   updateNote: UpdateNote;
 }
 
-export const hasAdditionalActions = (id: string, eventType?: EventType): boolean =>
-  id === TimelineId.detectionsPage ||
-  id === TimelineId.detectionsRulesDetailsPage ||
-  ((id === TimelineId.active && eventType && ['all', 'signal', 'alert'].includes(eventType)) ??
-    false);
+export const hasAdditionalActions = (id: TimelineId): boolean =>
+  [TimelineId.detectionsPage, TimelineId.detectionsRulesDetailsPage, TimelineId.active].includes(
+    id
+  );
 
 const EXTRA_WIDTH = 4; // px
 
@@ -86,7 +86,6 @@ export const Body = React.memo<BodyProps>(
     data,
     docValueFields,
     eventIdToNoteIds,
-    eventType,
     getNotesByIds,
     graphEventId,
     isEventViewer = false,
@@ -103,6 +102,7 @@ export const Body = React.memo<BodyProps>(
     pinnedEventIds,
     rowRenderers,
     refetch,
+    onRuleChange,
     selectedEventIds,
     show,
     showCheckboxes,
@@ -118,9 +118,11 @@ export const Body = React.memo<BodyProps>(
         getActionsColumnWidth(
           isEventViewer,
           showCheckboxes,
-          hasAdditionalActions(timelineId, eventType) ? DEFAULT_ICON_BUTTON_WIDTH + EXTRA_WIDTH : 0
+          hasAdditionalActions(timelineId as TimelineId)
+            ? DEFAULT_ICON_BUTTON_WIDTH + EXTRA_WIDTH
+            : 0
         ),
-      [isEventViewer, showCheckboxes, timelineId, eventType]
+      [isEventViewer, showCheckboxes, timelineId]
     );
 
     const columnWidths = useMemo(
@@ -134,6 +136,7 @@ export const Body = React.memo<BodyProps>(
         {graphEventId && (
           <GraphOverlay
             graphEventId={graphEventId}
+            isEventViewer={isEventViewer}
             timelineId={timelineId}
             timelineType={timelineType}
           />
@@ -185,6 +188,7 @@ export const Body = React.memo<BodyProps>(
               pinnedEventIds={pinnedEventIds}
               refetch={refetch}
               rowRenderers={rowRenderers}
+              onRuleChange={onRuleChange}
               selectedEventIds={selectedEventIds}
               showCheckboxes={showCheckboxes}
               toggleColumn={toggleColumn}

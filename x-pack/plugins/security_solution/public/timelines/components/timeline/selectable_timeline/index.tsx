@@ -16,7 +16,7 @@ import {
   EuiFilterGroup,
   EuiFilterButton,
 } from '@elastic/eui';
-import { isEmpty } from 'lodash/fp';
+import { isEmpty, debounce } from 'lodash/fp';
 import React, { memo, useCallback, useMemo, useState, useEffect, useRef } from 'react';
 import styled from 'styled-components';
 
@@ -120,9 +120,14 @@ const SelectableTimelineComponent: React.FC<SelectableTimelineProps> = ({
   const selectableListOuterRef = useRef<HTMLDivElement | null>(null);
   const selectableListInnerRef = useRef<HTMLDivElement | null>(null);
 
-  const onSearchTimeline = useCallback((val) => {
-    setSearchTimelineValue(val);
-  }, []);
+  const debouncedSetSearchTimelineValue = useMemo(() => debounce(500, setSearchTimelineValue), []);
+
+  const onSearchTimeline = useCallback(
+    (val) => {
+      debouncedSetSearchTimelineValue(val);
+    },
+    [debouncedSetSearchTimelineValue]
+  );
 
   const handleOnToggleOnlyFavorites = useCallback(() => {
     setOnlyFavorites(!onlyFavorites);
@@ -238,7 +243,7 @@ const SelectableTimelineComponent: React.FC<SelectableTimelineProps> = ({
     isLoading: loading,
     placeholder: useMemo(() => i18n.SEARCH_BOX_TIMELINE_PLACEHOLDER(timelineType), [timelineType]),
     onSearch: onSearchTimeline,
-    incremental: false,
+    incremental: true,
     inputRef: (node: HTMLInputElement | null) => {
       setSearchRef(node);
     },

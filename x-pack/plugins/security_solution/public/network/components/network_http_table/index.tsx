@@ -5,11 +5,11 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { useDispatch, useSelector, shallowEqual } from 'react-redux';
+import { useDispatch } from 'react-redux';
 
 import { networkActions, networkModel, networkSelectors } from '../../store';
 import { NetworkHttpEdges, NetworkHttpFields } from '../../../../common/search_strategy';
-import { State } from '../../../common/store';
+import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { Criteria, ItemsPerRow, PaginatedTable } from '../../../common/components/paginated_table';
 
 import { getNetworkHttpColumns } from './columns';
@@ -51,9 +51,8 @@ const NetworkHttpTableComponent: React.FC<NetworkHttpTableProps> = ({
 }) => {
   const dispatch = useDispatch();
   const getNetworkHttpSelector = networkSelectors.httpSelector();
-  const { activePage, limit, sort } = useSelector(
-    (state: State) => getNetworkHttpSelector(state, type),
-    shallowEqual
+  const { activePage, limit, sort } = useShallowEqualSelector((state) =>
+    getNetworkHttpSelector(state, type)
   );
   const tableType =
     type === networkModel.NetworkType.page

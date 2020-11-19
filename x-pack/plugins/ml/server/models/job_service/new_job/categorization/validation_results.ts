@@ -123,15 +123,19 @@ export class ValidationResults {
   public createNullValueResult(examples: Array<string | null | undefined>) {
     const nullCount = examples.filter((e) => e === null).length;
 
-    if (nullCount / examples.length >= NULL_COUNT_PERCENT_LIMIT) {
-      this._results.push({
-        id: VALIDATION_RESULT.NULL_VALUES,
-        valid: CATEGORY_EXAMPLES_VALIDATION_STATUS.PARTIALLY_VALID,
-        message: i18n.translate('xpack.ml.models.jobService.categorization.messages.nullValues', {
-          defaultMessage: 'More than {percent}% of field values are null.',
-          values: { percent: NULL_COUNT_PERCENT_LIMIT * 100 },
-        }),
-      });
+    // if all values are null, VALIDATION_RESULT.NO_EXAMPLES will be raised
+    // so we don't need to display this warning as well
+    if (nullCount !== examples.length) {
+      if (nullCount / examples.length >= NULL_COUNT_PERCENT_LIMIT) {
+        this._results.push({
+          id: VALIDATION_RESULT.NULL_VALUES,
+          valid: CATEGORY_EXAMPLES_VALIDATION_STATUS.PARTIALLY_VALID,
+          message: i18n.translate('xpack.ml.models.jobService.categorization.messages.nullValues', {
+            defaultMessage: 'More than {percent}% of field values are null.',
+            values: { percent: NULL_COUNT_PERCENT_LIMIT * 100 },
+          }),
+        });
+      }
     }
   }
 

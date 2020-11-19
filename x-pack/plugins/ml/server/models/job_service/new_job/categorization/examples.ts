@@ -56,18 +56,25 @@ export function categorizationExamplesProvider({
         }
       }
     }
-
     const { body } = await asCurrentUser.search<SearchResponse<{ [id: string]: string }>>({
       index: indexPatternTitle,
       size,
       body: {
-        _source: categorizationFieldName,
+        fields: [categorizationFieldName],
+        _source: false,
         query,
         sort: ['_doc'],
       },
     });
 
-    const tempExamples = body.hits.hits.map(({ _source }) => _source[categorizationFieldName]);
+    // hit.fields can be undefined if value is originally null
+    const tempExamples = body.hits.hits.map(({ fields }) =>
+      fields &&
+      Array.isArray(fields[categorizationFieldName]) &&
+      fields[categorizationFieldName].length > 0
+        ? fields[categorizationFieldName][0]
+        : null
+    );
 
     validationResults.createNullValueResult(tempExamples);
 
@@ -81,7 +88,6 @@ export function categorizationExamplesProvider({
       const examplesWithTokens = await getTokens(CHUNK_SIZE, allExamples, analyzer);
       return { examples: examplesWithTokens };
     } catch (err) {
-      // console.log('dropping to 50 chunk size');
       // if an error is thrown when loading the tokens, lower the chunk size by half and try again
       // the error may have been caused by too many tokens being found.
       // the _analyze endpoint has a maximum of 10000 tokens.

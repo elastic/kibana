@@ -8,7 +8,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 // we don't have the types for waitFor just yet, so using "as waitFor" for when we do
-import { wait as waitFor } from '@testing-library/react';
+import { waitFor } from '@testing-library/react';
 import '../../../common/mock/match_media';
 import {
   mockGlobalState,
@@ -84,31 +84,25 @@ describe('epicLocalStorage', () => {
       dataProviders: mockDataProviders,
       docValueFields: [],
       end: endDate,
-      eventType: 'raw' as TimelineComponentProps['eventType'],
       filters: [],
+      indexNames: [],
       indexPattern,
-      indexToAdd: [],
       isLive: false,
-      isLoadingSource: false,
       isSaving: false,
       itemsPerPage: 5,
       itemsPerPageOptions: [5, 10, 20],
       kqlMode: 'search' as TimelineComponentProps['kqlMode'],
       kqlQueryExpression: '',
-      loadingIndexName: false,
+      loadingSourcerer: false,
       onChangeItemsPerPage: jest.fn(),
       onClose: jest.fn(),
-      onDataProviderEdited: jest.fn(),
-      onDataProviderRemoved: jest.fn(),
-      onToggleDataProviderEnabled: jest.fn(),
-      onToggleDataProviderExcluded: jest.fn(),
-      onToggleDataProviderType: jest.fn(),
       show: true,
       showCallOutUnauthorizedMsg: false,
       start: startDate,
       status: TimelineStatus.active,
       sort,
       timelineType: TimelineType.default,
+      timerangeKind: 'absolute',
       toggleColumn: jest.fn(),
       usersViewing: ['elastic'],
     };

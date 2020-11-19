@@ -26,7 +26,9 @@ import {
   PanelNotFoundError,
   EmbeddableInput,
   isReferenceOrValueEmbeddable,
+  isErrorEmbeddable,
 } from '../../../../embeddable/public';
+import { NotificationsStart } from '../../../../../core/public';
 import { DashboardPanelState, DASHBOARD_CONTAINER_TYPE, DashboardContainer } from '..';
 
 export const ACTION_UNLINK_FROM_LIBRARY = 'unlinkFromLibrary';
@@ -40,14 +42,14 @@ export class UnlinkFromLibraryAction implements ActionByType<typeof ACTION_UNLIN
   public readonly id = ACTION_UNLINK_FROM_LIBRARY;
   public order = 15;
 
-  constructor() {}
+  constructor(private deps: { toasts: NotificationsStart['toasts'] }) {}
 
   public getDisplayName({ embeddable }: UnlinkFromLibraryActionContext) {
     if (!embeddable.getRoot() || !embeddable.getRoot().isContainer) {
       throw new IncompatibleActionError();
     }
     return i18n.translate('dashboard.panel.unlinkFromLibrary', {
-      defaultMessage: 'Unlink from library item',
+      defaultMessage: 'Unlink from library',
     });
   }
 
@@ -60,7 +62,8 @@ export class UnlinkFromLibraryAction implements ActionByType<typeof ACTION_UNLIN
 
   public async isCompatible({ embeddable }: UnlinkFromLibraryActionContext) {
     return Boolean(
-      embeddable.getInput()?.viewMode !== ViewMode.VIEW &&
+      !isErrorEmbeddable(embeddable) &&
+        embeddable.getInput()?.viewMode !== ViewMode.VIEW &&
         embeddable.getRoot() &&
         embeddable.getRoot().isContainer &&
         embeddable.getRoot().type === DASHBOARD_CONTAINER_TYPE &&
@@ -88,5 +91,18 @@ export class UnlinkFromLibraryAction implements ActionByType<typeof ACTION_UNLIN
       explicitInput: { ...newInput, id: uuid.v4() },
     };
     dashboard.replacePanel(panelToReplace, newPanel);
+
+    const title = embeddable.getTitle()
+      ? i18n.translate('dashboard.panel.unlinkFromLibrary.successMessageWithTitle', {
+          defaultMessage: `Panel '{panelTitle}' is no longer connected to the visualize library`,
+          values: { panelTitle: embeddable.getTitle() },
+        })
+      : i18n.translate('dashboard.panel.unlinkFromLibrary.successMessage', {
+          defaultMessage: `Panel is no longer connected to the visualize library`,
+        });
+    this.deps.toasts.addSuccess({
+      title,
+      'data-test-subj': 'unlinkPanelSuccess',
+    });
   }
 }

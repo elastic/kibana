@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -34,6 +34,78 @@ export const MapToolTipComponent = ({
   const [featureProps, setFeatureProps] = useState<ITooltipProperty[]>([]);
   const [featureGeometry, setFeatureGeometry] = useState<FeatureGeometry | null>(null);
   const [, setLayerName] = useState<string>('');
+
+  const handleCloseTooltip = useCallback(() => {
+    if (closeTooltip != null) {
+      closeTooltip();
+      setFeatureIndex(0);
+    }
+  }, [closeTooltip]);
+
+  const handlePreviousFeature = useCallback(() => {
+    setFeatureIndex((prevFeatureIndex) => prevFeatureIndex - 1);
+    setIsLoadingNextFeature(true);
+  }, []);
+
+  const handleNextFeature = useCallback(() => {
+    setFeatureIndex((prevFeatureIndex) => prevFeatureIndex + 1);
+    setIsLoadingNextFeature(true);
+  }, []);
+
+  const content = useMemo(() => {
+    if (isError) {
+      return (
+        <EuiFlexGroup justifyContent="spaceAround">
+          <EuiFlexItem grow={false}>{i18n.MAP_TOOL_TIP_ERROR}</EuiFlexItem>
+        </EuiFlexGroup>
+      );
+    }
+
+    if (isLoading && !isLoadingNextFeature) {
+      return (
+        <EuiFlexGroup justifyContent="spaceAround">
+          <EuiFlexItem grow={false}>
+            <EuiLoadingSpinner size="m" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      );
+    }
+
+    return (
+      <div>
+        {featureGeometry != null && featureGeometry.type === 'LineString' ? (
+          <LineToolTipContent
+            contextId={`${features[featureIndex].layerId}-${features[featureIndex].id}-${featureIndex}`}
+            featureProps={featureProps}
+          />
+        ) : (
+          <PointToolTipContent
+            contextId={`${features[featureIndex].layerId}-${features[featureIndex].id}-${featureIndex}`}
+            featureProps={featureProps}
+          />
+        )}
+        {features.length > 1 && (
+          <ToolTipFooter
+            featureIndex={featureIndex}
+            totalFeatures={features.length}
+            previousFeature={handlePreviousFeature}
+            nextFeature={handleNextFeature}
+          />
+        )}
+        {isLoadingNextFeature && <Loader data-test-subj="loading-panel" overlay size="m" />}
+      </div>
+    );
+  }, [
+    featureGeometry,
+    featureIndex,
+    featureProps,
+    features,
+    handleNextFeature,
+    handlePreviousFeature,
+    isError,
+    isLoading,
+    isLoadingNextFeature,
+  ]);
 
   useEffect(() => {
     // Early return if component doesn't yet have props -- result of mounting in portal before actual rendering
@@ -77,69 +149,17 @@ export const MapToolTipComponent = ({
     };
 
     fetchFeatureProps();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     featureIndex,
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    features
-      .map((f) => `${f.id}-${f.layerId}`)
-      .sort()
-      .join(),
+    features,
+    getLayerName,
+    isLoadingNextFeature,
+    loadFeatureGeometry,
+    loadFeatureProperties,
   ]);
 
-  if (isError) {
-    return (
-      <EuiFlexGroup justifyContent="spaceAround">
-        <EuiFlexItem grow={false}>{i18n.MAP_TOOL_TIP_ERROR}</EuiFlexItem>
-      </EuiFlexGroup>
-    );
-  }
-
-  return isLoading && !isLoadingNextFeature ? (
-    <EuiFlexGroup justifyContent="spaceAround">
-      <EuiFlexItem grow={false}>
-        <EuiLoadingSpinner size="m" />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  ) : (
-    <EuiOutsideClickDetector
-      onOutsideClick={() => {
-        if (closeTooltip != null) {
-          closeTooltip();
-          setFeatureIndex(0);
-        }
-      }}
-    >
-      <div>
-        {featureGeometry != null && featureGeometry.type === 'LineString' ? (
-          <LineToolTipContent
-            contextId={`${features[featureIndex].layerId}-${features[featureIndex].id}-${featureIndex}`}
-            featureProps={featureProps}
-          />
-        ) : (
-          <PointToolTipContent
-            contextId={`${features[featureIndex].layerId}-${features[featureIndex].id}-${featureIndex}`}
-            featureProps={featureProps}
-            closeTooltip={closeTooltip}
-          />
-        )}
-        {features.length > 1 && (
-          <ToolTipFooter
-            featureIndex={featureIndex}
-            totalFeatures={features.length}
-            previousFeature={() => {
-              setFeatureIndex(featureIndex - 1);
-              setIsLoadingNextFeature(true);
-            }}
-            nextFeature={() => {
-              setFeatureIndex(featureIndex + 1);
-              setIsLoadingNextFeature(true);
-            }}
-          />
-        )}
-        {isLoadingNextFeature && <Loader data-test-subj="loading-panel" overlay size="m" />}
-      </div>
-    </EuiOutsideClickDetector>
+  return (
+    <EuiOutsideClickDetector onOutsideClick={handleCloseTooltip}>{content}</EuiOutsideClickDetector>
   );
 };
 

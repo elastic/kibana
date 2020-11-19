@@ -404,6 +404,10 @@ function mockAlert(overloads: Partial<Alert> = {}): Alert {
     throttle: null,
     muteAll: false,
     mutedInstanceIds: [],
+    executionStatus: {
+      status: 'unknown',
+      lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
+    },
     ...overloads,
   };
 }

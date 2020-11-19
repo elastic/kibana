@@ -19,6 +19,7 @@
 
 import { noop } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import type { RequestAdapter } from 'src/plugins/inspector/common';
 
 import { BucketAggType, IBucketAggConfig } from './bucket_agg_type';
 import { BUCKET_TYPES } from './bucket_agg_types';
@@ -41,7 +42,6 @@ import {
 export const termsAggFilter = [
   '!top_hits',
   '!percentiles',
-  '!median',
   '!std_dev',
   '!derivative',
   '!moving_avg',
@@ -112,27 +112,32 @@ export const getTermsBucketAgg = () =>
 
         nestedSearchSource.setField('aggs', filterAgg);
 
-        const request = inspectorRequestAdapter.start(
-          i18n.translate('data.search.aggs.buckets.terms.otherBucketTitle', {
-            defaultMessage: 'Other bucket',
-          }),
-          {
-            description: i18n.translate('data.search.aggs.buckets.terms.otherBucketDescription', {
-              defaultMessage:
-                'This request counts the number of documents that fall ' +
-                'outside the criterion of the data buckets.',
+        let request: ReturnType<RequestAdapter['start']> | undefined;
+        if (inspectorRequestAdapter) {
+          request = inspectorRequestAdapter.start(
+            i18n.translate('data.search.aggs.buckets.terms.otherBucketTitle', {
+              defaultMessage: 'Other bucket',
             }),
-          }
-        );
-        nestedSearchSource.getSearchRequestBody().then((body) => {
-          request.json(body);
-        });
-        request.stats(getRequestInspectorStats(nestedSearchSource));
+            {
+              description: i18n.translate('data.search.aggs.buckets.terms.otherBucketDescription', {
+                defaultMessage:
+                  'This request counts the number of documents that fall ' +
+                  'outside the criterion of the data buckets.',
+              }),
+            }
+          );
+          nestedSearchSource.getSearchRequestBody().then((body) => {
+            request!.json(body);
+          });
+          request.stats(getRequestInspectorStats(nestedSearchSource));
+        }
 
         const response = await nestedSearchSource.fetch({ abortSignal });
-        request
-          .stats(getResponseInspectorStats(response, nestedSearchSource))
-          .ok({ json: response });
+        if (request) {
+          request
+            .stats(getResponseInspectorStats(response, nestedSearchSource))
+            .ok({ json: response });
+        }
         resp = mergeOtherBucketAggResponse(aggConfigs, resp, response, aggConfig, filterAgg());
       }
       if (aggConfig.params.missingBucket) {
@@ -198,14 +203,14 @@ export const getTermsBucketAgg = () =>
             return;
           }
 
-          const orderAggId = orderAgg.id;
+          const orderAggPath = orderAgg.getValueBucketPath();
 
           if (orderAgg.parentId && aggs) {
             orderAgg = aggs.byId(orderAgg.parentId);
           }
 
           output.subAggs = (output.subAggs || []).concat(orderAgg);
-          order[orderAggId] = dir;
+          order[orderAggPath] = dir;
         },
       },
       {

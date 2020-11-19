@@ -4,77 +4,30 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { SearchResponse } from 'elasticsearch';
+import { IScopedClusterClient } from 'kibana/server';
+import { ApiResponse } from '@elastic/elasticsearch';
 import { esKuery } from '../../../../../../../../src/plugins/data/server';
 import { SafeResolverEvent } from '../../../../../common/endpoint/types';
-import { ResolverQuery } from './base';
 import { PaginationBuilder } from '../utils/pagination';
 import { JsonObject } from '../../../../../../../../src/plugins/kibana_utils/common';
 
 /**
- * Builds a query for retrieving related events for a node.
+ * Builds a query for retrieving events.
  */
-export class EventsQuery extends ResolverQuery<SafeResolverEvent[]> {
-  private readonly kqlQuery: JsonObject[] = [];
-
+export class EventsQuery {
   constructor(
     private readonly pagination: PaginationBuilder,
-    indexPattern: string | string[],
-    endpointID?: string,
-    kql?: string
-  ) {
-    super(indexPattern, endpointID);
-    if (kql) {
-      this.kqlQuery.push(esKuery.toElasticsearchQuery(esKuery.fromKueryExpression(kql)));
-    }
-  }
+    private readonly indexPattern: string | string[]
+  ) {}
 
-  protected legacyQuery(endpointID: string, uniquePIDs: string[]): JsonObject {
+  private query(kqlQuery: JsonObject[]): JsonObject {
     return {
       query: {
         bool: {
           filter: [
-            ...this.kqlQuery,
-            {
-              terms: { 'endgame.unique_pid': uniquePIDs },
-            },
-            {
-              term: { 'agent.id': endpointID },
-            },
+            ...kqlQuery,
             {
               term: { 'event.kind': 'event' },
-            },
-            {
-              bool: {
-                must_not: {
-                  term: { 'event.category': 'process' },
-                },
-              },
-            },
-          ],
-        },
-      },
-      ...this.pagination.buildQueryFields('endgame.serial_event_id', 'desc'),
-    };
-  }
-
-  protected query(entityIDs: string[]): JsonObject {
-    return {
-      query: {
-        bool: {
-          filter: [
-            ...this.kqlQuery,
-            {
-              terms: { 'process.entity_id': entityIDs },
-            },
-            {
-              term: { 'event.kind': 'event' },
-            },
-            {
-              bool: {
-                must_not: {
-                  term: { 'event.category': 'process' },
-                },
-              },
             },
           ],
         },
@@ -83,7 +36,27 @@ export class EventsQuery extends ResolverQuery<SafeResolverEvent[]> {
     };
   }
 
-  formatResponse(response: SearchResponse<SafeResolverEvent>): SafeResolverEvent[] {
-    return this.getResults(response);
+  private buildSearch(kql: JsonObject[]) {
+    return {
+      body: this.query(kql),
+      index: this.indexPattern,
+    };
+  }
+
+  /**
+   * Searches ES for the specified events and format the response.
+   *
+   * @param client a client for searching ES
+   * @param kql an optional kql string for filtering the results
+   */
+  async search(client: IScopedClusterClient, kql?: string): Promise<SafeResolverEvent[]> {
+    const kqlQuery: JsonObject[] = [];
+    if (kql) {
+      kqlQuery.push(esKuery.toElasticsearchQuery(esKuery.fromKueryExpression(kql)));
+    }
+    const response: ApiResponse<SearchResponse<
+      SafeResolverEvent
+    >> = await client.asCurrentUser.search(this.buildSearch(kqlQuery));
+    return response.body.hits.hits.map((hit) => hit._source);
   }
 }

@@ -5,8 +5,10 @@
  */
 import React, { useState } from 'react';
 import { EuiCodeEditor, EuiFormRow } from '@elastic/eui';
+import { XJsonMode } from '@kbn/ace';
+
 import './add_message_variables.scss';
-import { useXJsonMode } from '../../../../../../src/plugins/es_ui_shared/static/ace_x_json/hooks';
+import { XJson } from '../../../../../../src/plugins/es_ui_shared/public';
 
 import { AddMessageVariables } from './add_message_variables';
 import { ActionVariable } from '../../types';
@@ -23,6 +25,9 @@ interface Props {
   onBlur?: () => void;
 }
 
+const { useXJsonMode } = XJson;
+const xJsonMode = new XJsonMode();
+
 export const JsonEditorWithMessageVariables: React.FunctionComponent<Props> = ({
   messageVariables,
   paramsProperty,
@@ -36,7 +41,7 @@ export const JsonEditorWithMessageVariables: React.FunctionComponent<Props> = ({
 }) => {
   const [cursorPosition, setCursorPosition] = useState<any>(null);
 
-  const { xJsonMode, convertToJson, setXJson, xJson } = useXJsonMode(inputTargetValue ?? null);
+  const { convertToJson, setXJson, xJson } = useXJsonMode(inputTargetValue ?? null);
 
   const onSelectMessageVariable = (variable: string) => {
     const templatedVar = `{{${variable}}}`;

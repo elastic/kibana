@@ -14,7 +14,8 @@ export const mockHistory = {
   location: {
     pathname: '/current-path',
   },
-};
+  listen: jest.fn(() => jest.fn()),
+} as any;
 export const mockLocation = {
   key: 'someKey',
   pathname: '/current-path',
@@ -24,8 +25,10 @@ export const mockLocation = {
 };
 
 jest.mock('react-router-dom', () => ({
+  ...(jest.requireActual('react-router-dom') as object),
   useHistory: jest.fn(() => mockHistory),
   useLocation: jest.fn(() => mockLocation),
+  useParams: jest.fn(() => ({})),
 }));
 
 /**

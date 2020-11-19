@@ -59,7 +59,7 @@ export function getSavedObjectFormat({
 
   return {
     doc: {
-      id: state.persistedId,
+      savedObjectId: state.persistedId,
       title: state.title,
       description: state.description,
       type: 'lens',

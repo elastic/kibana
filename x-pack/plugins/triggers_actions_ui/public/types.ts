@@ -3,7 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { HttpSetup, DocLinksStart } from 'kibana/public';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { HttpSetup, DocLinksStart, ToastsSetup } from 'kibana/public';
 import { ComponentType } from 'react';
 import { ActionGroup } from '../../alerts/common';
 import { ActionType } from '../../actions/common';
@@ -11,6 +12,7 @@ import { TypeRegistry } from './application/type_registry';
 import {
   SanitizedAlert as Alert,
   AlertAction,
+  AlertAggregations,
   AlertTaskState,
   AlertInstanceSummary,
   AlertInstanceStatus,
@@ -20,6 +22,7 @@ import {
 export {
   Alert,
   AlertAction,
+  AlertAggregations,
   AlertTaskState,
   AlertInstanceSummary,
   AlertInstanceStatus,
@@ -54,6 +57,8 @@ export interface ActionParamsProps<TParams> {
   messageVariables?: ActionVariable[];
   defaultMessage?: string;
   docLinks: DocLinksStart;
+  http: HttpSetup;
+  toastNotifications: ToastsSetup;
   actionConnector?: ActionConnector;
 }
 
@@ -62,15 +67,19 @@ export interface Pagination {
   size: number;
 }
 
-export interface ActionTypeModel<ActionConnector = any, ActionParams = any> {
+export interface ActionTypeModel<ActionConfig = any, ActionSecrets = any, ActionParams = any> {
   id: string;
   iconClass: string;
   selectMessage: string;
   actionTypeTitle?: string;
-  validateConnector: (connector: any) => ValidationResult;
+  validateConnector: (
+    connector: UserConfiguredActionConnector<ActionConfig, ActionSecrets>
+  ) => ValidationResult;
   validateParams: (actionParams: any) => ValidationResult;
   actionConnectorFields: React.LazyExoticComponent<
-    ComponentType<ActionConnectorFieldsProps<ActionConnector>>
+    ComponentType<
+      ActionConnectorFieldsProps<UserConfiguredActionConnector<ActionConfig, ActionSecrets>>
+    >
   > | null;
   actionParamsFields: React.LazyExoticComponent<
     ComponentType<ActionParamsProps<ActionParams>>
@@ -81,21 +90,42 @@ export interface ValidationResult {
   errors: Record<string, any>;
 }
 
-export interface ActionConnector {
-  secrets: Record<string, any>;
+interface ActionConnectorProps<Config, Secrets> {
+  secrets: Secrets;
   id: string;
   actionTypeId: string;
   name: string;
   referencedByCount?: number;
-  config: Record<string, any>;
+  config: Config;
   isPreconfigured: boolean;
 }
 
-export type ActionConnectorWithoutId = Omit<ActionConnector, 'id'>;
+export type PreConfiguredActionConnector = Omit<
+  ActionConnectorProps<never, never>,
+  'config' | 'secrets'
+> & {
+  isPreconfigured: true;
+};
 
-export interface ActionConnectorTableItem extends ActionConnector {
+export type UserConfiguredActionConnector<Config, Secrets> = ActionConnectorProps<
+  Config,
+  Secrets
+> & {
+  isPreconfigured: false;
+};
+
+export type ActionConnector<Config = Record<string, any>, Secrets = Record<string, any>> =
+  | PreConfiguredActionConnector
+  | UserConfiguredActionConnector<Config, Secrets>;
+
+export type ActionConnectorWithoutId<
+  Config = Record<string, any>,
+  Secrets = Record<string, any>
+> = Omit<UserConfiguredActionConnector<Config, Secrets>, 'id'>;
+
+export type ActionConnectorTableItem = ActionConnector & {
   actionType: ActionType['name'];
-}
+};
 
 export interface ActionVariable {
   name: string;
@@ -103,7 +133,7 @@ export interface ActionVariable {
 }
 
 export interface ActionVariables {
-  context: ActionVariable[];
+  context?: ActionVariable[];
   state: ActionVariable[];
   params: ActionVariable[];
 }
@@ -120,7 +150,7 @@ export interface AlertType {
 
 export type SanitizedAlertType = Omit<AlertType, 'apiKey'>;
 
-export type AlertWithoutId = Omit<Alert, 'id'>;
+export type AlertUpdates = Omit<Alert, 'id' | 'executionStatus'>;
 
 export interface AlertTableItem extends Alert {
   alertType: AlertType['name'];
@@ -144,7 +174,9 @@ export interface AlertTypeParamsExpressionProps<
 export interface AlertTypeModel<AlertParamsType = any, AlertsContextValue = any> {
   id: string;
   name: string | JSX.Element;
+  description: string;
   iconClass: string;
+  documentationUrl: string | ((docLinks: DocLinksStart) => string) | null;
   validate: (alertParams: AlertParamsType) => ValidationResult;
   alertParamsExpression:
     | React.FunctionComponent<any>

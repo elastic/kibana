@@ -22,7 +22,7 @@ import {
   Event,
   EndpointDocGenerator,
 } from '../../../../plugins/security_solution/common/endpoint/generate_data';
-import { InsertedEvents } from '../../services/resolver';
+import { InsertedEvents, processEventsIndex } from '../../services/resolver';
 import { createAncestryArray } from './common';
 
 export default function resolverAPIIntegrationTests({ getService }: FtrProviderContext) {
@@ -42,25 +42,33 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
       before(async () => {
         // Construct the following tree:
         // Origin -> infoEvent -> startEvent -> execEvent
-        origin = generator.generateEvent();
+        origin = generator.generateEvent({
+          eventsDataStream: EndpointDocGenerator.createDataStreamFromIndex(processEventsIndex),
+        });
         infoEvent = generator.generateEvent({
           parentEntityID: entityIDSafeVersion(origin),
           ancestry: createAncestryArray([origin]),
           eventType: ['info'],
+          eventsDataStream: EndpointDocGenerator.createDataStreamFromIndex(processEventsIndex),
         });
 
         startEvent = generator.generateEvent({
           parentEntityID: entityIDSafeVersion(infoEvent),
           ancestry: createAncestryArray([infoEvent, origin]),
           eventType: ['start'],
+          eventsDataStream: EndpointDocGenerator.createDataStreamFromIndex(processEventsIndex),
         });
 
         execEvent = generator.generateEvent({
           parentEntityID: entityIDSafeVersion(startEvent),
           ancestry: createAncestryArray([startEvent, infoEvent]),
           eventType: ['change'],
+          eventsDataStream: EndpointDocGenerator.createDataStreamFromIndex(processEventsIndex),
         });
-        genData = await resolver.insertEvents([origin, infoEvent, startEvent, execEvent]);
+        genData = await resolver.insertEvents(
+          [origin, infoEvent, startEvent, execEvent],
+          processEventsIndex
+        );
       });
 
       after(async () => {
@@ -88,11 +96,14 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
       before(async () => {
         // Construct the following tree:
         // Origin -> (infoEvent, startEvent, execEvent are all for the same node)
-        origin = generator.generateEvent();
+        origin = generator.generateEvent({
+          eventsDataStream: EndpointDocGenerator.createDataStreamFromIndex(processEventsIndex),
+        });
         startEvent = generator.generateEvent({
           parentEntityID: entityIDSafeVersion(origin),
           ancestry: createAncestryArray([origin]),
           eventType: ['start'],
+          eventsDataStream: EndpointDocGenerator.createDataStreamFromIndex(processEventsIndex),
         });
 
         infoEvent = generator.generateEvent({
@@ -100,6 +111,7 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
           ancestry: createAncestryArray([origin]),
           entityID: entityIDSafeVersion(startEvent),
           eventType: ['info'],
+          eventsDataStream: EndpointDocGenerator.createDataStreamFromIndex(processEventsIndex),
         });
 
         execEvent = generator.generateEvent({
@@ -107,8 +119,12 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
           ancestry: createAncestryArray([origin]),
           eventType: ['change'],
           entityID: entityIDSafeVersion(startEvent),
+          eventsDataStream: EndpointDocGenerator.createDataStreamFromIndex(processEventsIndex),
         });
-        genData = await resolver.insertEvents([origin, infoEvent, startEvent, execEvent]);
+        genData = await resolver.insertEvents(
+          [origin, infoEvent, startEvent, execEvent],
+          processEventsIndex
+        );
       });
 
       after(async () => {
@@ -141,11 +157,14 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
       before(async () => {
         // Construct the following tree:
         // Origin -> (infoEvent, startEvent, execEvent are all for the same node)
-        origin = generator.generateEvent();
+        origin = generator.generateEvent({
+          eventsDataStream: EndpointDocGenerator.createDataStreamFromIndex(processEventsIndex),
+        });
         startEvent = generator.generateEvent({
           parentEntityID: entityIDSafeVersion(origin),
           ancestry: createAncestryArray([origin]),
           eventType: ['start'],
+          eventsDataStream: EndpointDocGenerator.createDataStreamFromIndex(processEventsIndex),
         });
 
         infoEvent = generator.generateEvent({
@@ -154,6 +173,7 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
           ancestry: createAncestryArray([origin]),
           entityID: entityIDSafeVersion(startEvent),
           eventType: ['info'],
+          eventsDataStream: EndpointDocGenerator.createDataStreamFromIndex(processEventsIndex),
         });
 
         execEvent = generator.generateEvent({
@@ -162,8 +182,12 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
           ancestry: createAncestryArray([origin]),
           eventType: ['change'],
           entityID: entityIDSafeVersion(startEvent),
+          eventsDataStream: EndpointDocGenerator.createDataStreamFromIndex(processEventsIndex),
         });
-        genData = await resolver.insertEvents([origin, infoEvent, startEvent, execEvent]);
+        genData = await resolver.insertEvents(
+          [origin, infoEvent, startEvent, execEvent],
+          processEventsIndex
+        );
       });
 
       after(async () => {

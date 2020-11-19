@@ -5,4 +5,5 @@
  */
 
 export * from './operations';
-export { OperationType, IndexPatternColumn } from './definitions';
+export * from './layer_helpers';
+export { OperationType, IndexPatternColumn, FieldBasedIndexPatternColumn } from './definitions';

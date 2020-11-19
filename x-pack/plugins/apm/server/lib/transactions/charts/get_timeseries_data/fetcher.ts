@@ -4,26 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ESFilter } from '../../../../../typings/elasticsearch';
+import { ESFilter } from '../../../../../../../typings/elasticsearch';
+import { PromiseReturnType } from '../../../../../../observability/typings/common';
 import {
   SERVICE_NAME,
   TRANSACTION_NAME,
   TRANSACTION_RESULT,
   TRANSACTION_TYPE,
 } from '../../../../../common/elasticsearch_fieldnames';
-import { PromiseReturnType } from '../../../../../../observability/typings/common';
-import { getBucketSize } from '../../../helpers/get_bucket_size';
 import { rangeFilter } from '../../../../../common/utils/range_filter';
 import {
-  Setup,
-  SetupTimeRange,
-  SetupUIFilters,
-} from '../../../helpers/setup_request';
-import {
+  getDocumentTypeFilterForAggregatedTransactions,
   getProcessorEventForAggregatedTransactions,
   getTransactionDurationFieldForAggregatedTransactions,
-  getDocumentTypeFilterForAggregatedTransactions,
 } from '../../../helpers/aggregated_transactions';
+import { getBucketSize } from '../../../helpers/get_bucket_size';
+import { Setup, SetupTimeRange } from '../../../helpers/setup_request';
 
 export type ESResponse = PromiseReturnType<typeof timeseriesFetcher>;
 export function timeseriesFetcher({
@@ -36,10 +32,10 @@ export function timeseriesFetcher({
   serviceName: string;
   transactionType: string | undefined;
   transactionName: string | undefined;
-  setup: Setup & SetupTimeRange & SetupUIFilters;
+  setup: Setup & SetupTimeRange;
   searchAggregatedTransactions: boolean;
 }) {
-  const { start, end, uiFiltersES, apmEventClient } = setup;
+  const { start, end, apmEventClient } = setup;
   const { intervalString } = getBucketSize(start, end);
 
   const filter: ESFilter[] = [
@@ -48,7 +44,7 @@ export function timeseriesFetcher({
     ...getDocumentTypeFilterForAggregatedTransactions(
       searchAggregatedTransactions
     ),
-    ...uiFiltersES,
+    ...setup.esFilter,
   ];
 
   if (transactionName) {

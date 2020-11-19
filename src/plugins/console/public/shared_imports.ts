@@ -17,6 +17,8 @@
  * under the License.
  */
 
-import { sendRequest } from '../../es_ui_shared/public';
+import { sendRequest, XJson } from '../../es_ui_shared/public';
 
-export { sendRequest };
+const { collapseLiteralStrings, expandLiteralStrings } = XJson;
+
+export { sendRequest, collapseLiteralStrings, expandLiteralStrings };

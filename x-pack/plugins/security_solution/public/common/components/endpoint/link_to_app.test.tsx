@@ -44,7 +44,7 @@ describe('LinkToApp component', () => {
   });
   it('should support onClick prop', () => {
     // Take `_event` (even though it is not used) so that `jest.fn` will have a type that expects to be called with an event
-    const spyOnClickHandler: LinkToAppOnClickMock = jest.fn((_event) => {});
+    const spyOnClickHandler: LinkToAppOnClickMock = jest.fn().mockImplementation((_event) => {});
     const renderResult = render(
       <LinkToApp appId="ingestManager" href="/app/ingest" onClick={spyOnClickHandler}>
         {'link'}
@@ -98,20 +98,24 @@ describe('LinkToApp component', () => {
   });
   it('should still preventDefault if onClick callback throws', () => {
     // Take `_event` (even though it is not used) so that `jest.fn` will have a type that expects to be called with an event
-    const spyOnClickHandler: LinkToAppOnClickMock<never> = jest.fn((_event) => {
+    const spyOnClickHandler = jest.fn().mockImplementation((_event) => {
       throw new Error('test');
     });
-    const renderResult = render(
-      <LinkToApp appId="ingestManager" href="/app/ingest" onClick={spyOnClickHandler}>
-        {'link'}
-      </LinkToApp>
-    );
-    expect(() => renderResult.find('EuiLink').simulate('click')).toThrow();
-    const clickEventArg = spyOnClickHandler.mock.calls[0][0];
-    expect(clickEventArg.isDefaultPrevented()).toBe(true);
+    // eslint-disable-next-line no-empty
+    try {
+    } catch (e) {
+      const renderResult = render(
+        <LinkToApp appId="ingestManager" href="/app/ingest" onClick={spyOnClickHandler}>
+          {'link'}
+        </LinkToApp>
+      );
+      expect(() => renderResult.find('EuiLink').simulate('click')).toThrowError();
+      const clickEventArg = spyOnClickHandler.mock.calls[0][0];
+      expect(clickEventArg.isDefaultPrevented()).toBe(true);
+    }
   });
   it('should not navigate if onClick callback prevents default', () => {
-    const spyOnClickHandler: LinkToAppOnClickMock = jest.fn((ev) => {
+    const spyOnClickHandler: LinkToAppOnClickMock = jest.fn().mockImplementation((ev) => {
       ev.preventDefault();
     });
     const renderResult = render(

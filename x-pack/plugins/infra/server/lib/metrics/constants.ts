@@ -4,13 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 export const EMPTY_RESPONSE = {
-  series: [
-    {
-      id: '*',
-      keys: ['*'],
-      columns: [],
-      rows: [],
-    },
-  ],
+  series: [],
   info: { total: 0, afterKey: null, interval: 0 },
 };

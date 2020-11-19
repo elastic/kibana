@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { ServerExtType, Server } from 'hapi';
+import { ServerExtType, Server } from '@hapi/hapi';
 import Podium from 'podium';
 import { setupLogging } from './setup_logging';
 import { attachMetaData } from './metadata';

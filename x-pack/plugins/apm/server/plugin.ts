@@ -3,20 +3,24 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import { i18n } from '@kbn/i18n';
 import { combineLatest, Observable } from 'rxjs';
 import { map, take } from 'rxjs/operators';
 import {
   CoreSetup,
   CoreStart,
+  KibanaRequest,
   Logger,
   Plugin,
   PluginInitializerContext,
+  RequestHandlerContext,
 } from 'src/core/server';
 import { APMConfig, APMXPackConfig, mergeConfigs } from '.';
 import { APMOSSPluginSetup } from '../../../../src/plugins/apm_oss/server';
 import { HomeServerPluginSetup } from '../../../../src/plugins/home/server';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
+import { UI_SETTINGS } from '../../../../src/plugins/data/common';
 import { ActionsPlugin } from '../../actions/server';
 import { AlertingPlugin } from '../../alerts/server';
 import { CloudSetup } from '../../cloud/server';
@@ -29,6 +33,7 @@ import { TaskManagerSetupContract } from '../../task_manager/server';
 import { APM_FEATURE, registerFeaturesUsage } from './feature';
 import { registerApmAlerts } from './lib/alerts/register_apm_alerts';
 import { createApmTelemetry } from './lib/apm_telemetry';
+import { createApmEventClient } from './lib/helpers/create_es_client/create_apm_event_client';
 import { getInternalSavedObjectsClient } from './lib/helpers/get_internal_saved_objects_client';
 import { createApmAgentConfigurationIndex } from './lib/settings/agent_configuration/create_agent_config_index';
 import { getApmIndices } from './lib/settings/apm_indices/get_apm_indices';
@@ -36,10 +41,16 @@ import { createApmCustomLinkIndex } from './lib/settings/custom_link/create_cust
 import { createApmApi } from './routes/create_apm_api';
 import { apmIndices, apmTelemetry } from './saved_objects';
 import { createElasticCloudInstructions } from './tutorial/elastic_cloud';
+import { uiSettings } from './ui_settings';
 
 export interface APMPluginSetup {
   config$: Observable<APMConfig>;
   getApmIndices: () => ReturnType<typeof getApmIndices>;
+  createApmEventClient: (params: {
+    debug?: boolean;
+    request: KibanaRequest;
+    context: RequestHandlerContext;
+  }) => Promise<ReturnType<typeof createApmEventClient>>;
 }
 
 export class APMPlugin implements Plugin<APMPluginSetup> {
@@ -74,6 +85,8 @@ export class APMPlugin implements Plugin<APMPluginSetup> {
 
     core.savedObjects.registerType(apmIndices);
     core.savedObjects.registerType(apmTelemetry);
+
+    core.uiSettings.register(uiSettings);
 
     if (plugins.actions && plugins.alerts) {
       registerApmAlerts({
@@ -137,13 +150,41 @@ export class APMPlugin implements Plugin<APMPluginSetup> {
       },
     });
 
+    const boundGetApmIndices = async () =>
+      getApmIndices({
+        savedObjectsClient: await getInternalSavedObjectsClient(core),
+        config: await mergedConfig$.pipe(take(1)).toPromise(),
+      });
+
     return {
       config$: mergedConfig$,
-      getApmIndices: async () =>
-        getApmIndices({
-          savedObjectsClient: await getInternalSavedObjectsClient(core),
-          config: await mergedConfig$.pipe(take(1)).toPromise(),
-        }),
+      getApmIndices: boundGetApmIndices,
+      createApmEventClient: async ({
+        request,
+        context,
+        debug,
+      }: {
+        debug?: boolean;
+        request: KibanaRequest;
+        context: RequestHandlerContext;
+      }) => {
+        const [indices, includeFrozen] = await Promise.all([
+          boundGetApmIndices(),
+          context.core.uiSettings.client.get(UI_SETTINGS.SEARCH_INCLUDE_FROZEN),
+        ]);
+
+        const esClient = context.core.elasticsearch.legacy.client;
+
+        return createApmEventClient({
+          debug: debug ?? false,
+          esClient,
+          request,
+          indices,
+          options: {
+            includeFrozen,
+          },
+        });
+      },
     };
   }
 

@@ -18,11 +18,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { KIBANA_CONTEXT_NAME } from 'src/plugins/expressions/public';
-import { VisParams } from '../../../visualizations/public';
-import { TimeRange, Filter, esQuery, Query } from '../../../data/public';
+import { KibanaContext, TimeRange, Filter, esQuery, Query } from '../../../data/public';
 import { TimelionVisDependencies } from '../plugin';
 import { getTimezone } from './get_timezone';
+import { TimelionVisParams } from '../timelion_vis_fn';
+import { getDataSearch } from '../helpers/plugin_services';
 
 interface Stats {
   cacheCount: number;
@@ -58,7 +58,7 @@ export interface TimelionSuccessResponse {
   sheet: Sheet[];
   stats: Stats;
   visType: string;
-  type: KIBANA_CONTEXT_NAME;
+  type: KibanaContext['type'];
 }
 
 export function getTimelionRequestHandler({
@@ -77,7 +77,7 @@ export function getTimelionRequestHandler({
     timeRange: TimeRange;
     filters: Filter[];
     query: Query;
-    visParams: VisParams;
+    visParams: TimelionVisParams;
   }): Promise<TimelionSuccessResponse> {
     const expression = visParams.expression;
 
@@ -93,6 +93,7 @@ export function getTimelionRequestHandler({
 
     // parse the time range client side to make sure it behaves like other charts
     const timeRangeBounds = timefilter.calculateBounds(timeRange);
+    const sessionId = getDataSearch().session.getSessionId();
 
     try {
       return await http.post('/api/timelion/run', {
@@ -109,6 +110,7 @@ export function getTimelionRequestHandler({
             interval: visParams.interval,
             timezone,
           },
+          sessionId,
         }),
       });
     } catch (e) {

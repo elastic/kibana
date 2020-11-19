@@ -21,9 +21,10 @@ import _ from 'lodash';
 import React, { useEffect, useRef } from 'react';
 import { CoreStart } from 'src/core/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
+import { UiStatsMetricType } from '@kbn/analytics';
 import { KibanaContextProvider } from '../../../../kibana_react/public';
 import { QueryStart, SavedQuery } from '../../query';
-import { SearchBarOwnProps, SearchBar } from './search_bar';
+import { SearchBar, SearchBarOwnProps } from './';
 import { useFilterManager } from './lib/use_filter_manager';
 import { useTimefilter } from './lib/use_timefilter';
 import { useSavedQuery } from './lib/use_saved_query';
@@ -35,6 +36,7 @@ interface StatefulSearchBarDeps {
   core: CoreStart;
   data: Omit<DataPublicPluginStart, 'ui'>;
   storage: IStorageWrapper;
+  trackUiMetric?: (metricType: UiStatsMetricType, eventName: string | string[]) => void;
 }
 
 export type StatefulSearchBarProps = SearchBarOwnProps & {
@@ -119,7 +121,7 @@ const overrideDefaultBehaviors = (props: StatefulSearchBarProps) => {
   return props.useDefaultBehaviors ? {} : props;
 };
 
-export function createSearchBar({ core, storage, data }: StatefulSearchBarDeps) {
+export function createSearchBar({ core, storage, data, trackUiMetric }: StatefulSearchBarDeps) {
   // App name should come from the core application service.
   // Until it's available, we'll ask the user to provide it for the pre-wired component.
   return (props: StatefulSearchBarProps) => {
@@ -197,6 +199,7 @@ export function createSearchBar({ core, storage, data }: StatefulSearchBarDeps) 
           onClearSavedQuery={defaultOnClearSavedQuery(props, clearSavedQuery)}
           onSavedQueryUpdated={defaultOnSavedQueryUpdated(props, setSavedQuery)}
           onSaved={defaultOnSavedQueryUpdated(props, setSavedQuery)}
+          trackUiMetric={trackUiMetric}
           {...overrideDefaultBehaviors(props)}
         />
       </KibanaContextProvider>

@@ -18,11 +18,11 @@
  */
 
 import React from 'react';
-import { render, mount } from 'enzyme';
-import { MarkdownVisWrapper } from './markdown_vis_controller';
+import { wait, render } from '@testing-library/react';
+import MarkdownVisComponent from './markdown_vis_controller';
 
 describe('markdown vis controller', () => {
-  it('should set html from markdown params', () => {
+  it('should set html from markdown params', async () => {
     const vis = {
       params: {
         openLinksInNewTab: false,
@@ -32,13 +32,22 @@ describe('markdown vis controller', () => {
       },
     };
 
-    const wrapper = render(
-      <MarkdownVisWrapper visParams={vis.params} renderComplete={jest.fn()} fireEvent={jest.fn()} />
+    const { getByTestId, getByText } = render(
+      <MarkdownVisComponent {...vis.params} renderComplete={jest.fn()} />
     );
-    expect(wrapper.find('a').text()).toBe('markdown');
+
+    await wait(() => getByTestId('markdownBody'));
+
+    expect(getByText('markdown')).toMatchInlineSnapshot(`
+      <a
+        href="http://daringfireball.net/projects/markdown"
+      >
+        markdown
+      </a>
+    `);
   });
 
-  it('should not render the html', () => {
+  it('should not render the html', async () => {
     const vis = {
       params: {
         openLinksInNewTab: false,
@@ -47,13 +56,20 @@ describe('markdown vis controller', () => {
       },
     };
 
-    const wrapper = render(
-      <MarkdownVisWrapper visParams={vis.params} renderComplete={jest.fn()} fireEvent={jest.fn()} />
+    const { getByTestId, getByText } = render(
+      <MarkdownVisComponent {...vis.params} renderComplete={jest.fn()} />
     );
-    expect(wrapper.text()).toBe('Testing <a>html</a>\n');
+
+    await wait(() => getByTestId('markdownBody'));
+
+    expect(getByText(/testing/i)).toMatchInlineSnapshot(`
+      <p>
+        Testing &lt;a&gt;html&lt;/a&gt;
+      </p>
+    `);
   });
 
-  it('should update the HTML when render again with changed params', () => {
+  it('should update the HTML when render again with changed params', async () => {
     const vis = {
       params: {
         openLinksInNewTab: false,
@@ -62,13 +78,18 @@ describe('markdown vis controller', () => {
       },
     };
 
-    const wrapper = mount(
-      <MarkdownVisWrapper visParams={vis.params} renderComplete={jest.fn()} fireEvent={jest.fn()} />
+    const { getByTestId, getByText, rerender } = render(
+      <MarkdownVisComponent {...vis.params} renderComplete={jest.fn()} />
     );
-    expect(wrapper.text().trim()).toBe('Initial');
+
+    await wait(() => getByTestId('markdownBody'));
+
+    expect(getByText(/initial/i)).toBeInTheDocument();
+
     vis.params.markdown = 'Updated';
-    wrapper.setProps({ vis });
-    expect(wrapper.text().trim()).toBe('Updated');
+    rerender(<MarkdownVisComponent {...vis.params} renderComplete={jest.fn()} />);
+
+    expect(getByText(/Updated/i)).toBeInTheDocument();
   });
 
   describe('renderComplete', () => {
@@ -86,56 +107,47 @@ describe('markdown vis controller', () => {
       renderComplete.mockClear();
     });
 
-    it('should be called on initial rendering', () => {
-      mount(
-        <MarkdownVisWrapper
-          visParams={vis.params}
-          renderComplete={renderComplete}
-          fireEvent={jest.fn()}
-        />
+    it('should be called on initial rendering', async () => {
+      const { getByTestId } = render(
+        <MarkdownVisComponent {...vis.params} renderComplete={renderComplete} />
       );
-      expect(renderComplete.mock.calls.length).toBe(1);
+
+      await wait(() => getByTestId('markdownBody'));
+
+      expect(renderComplete).toHaveBeenCalledTimes(1);
     });
 
-    it('should be called on successive render when params change', () => {
-      mount(
-        <MarkdownVisWrapper
-          visParams={vis.params}
-          renderComplete={renderComplete}
-          fireEvent={jest.fn()}
-        />
+    it('should be called on successive render when params change', async () => {
+      const { getByTestId, rerender } = render(
+        <MarkdownVisComponent {...vis.params} renderComplete={renderComplete} />
       );
-      expect(renderComplete.mock.calls.length).toBe(1);
+
+      await wait(() => getByTestId('markdownBody'));
+
+      expect(renderComplete).toHaveBeenCalledTimes(1);
+
       renderComplete.mockClear();
       vis.params.markdown = 'changed';
-      mount(
-        <MarkdownVisWrapper
-          visParams={vis.params}
-          renderComplete={renderComplete}
-          fireEvent={jest.fn()}
-        />
-      );
-      expect(renderComplete.mock.calls.length).toBe(1);
+
+      rerender(<MarkdownVisComponent {...vis.params} renderComplete={renderComplete} />);
+
+      expect(renderComplete).toHaveBeenCalledTimes(1);
     });
 
-    it('should be called on successive render even without data change', () => {
-      mount(
-        <MarkdownVisWrapper
-          visParams={vis.params}
-          renderComplete={renderComplete}
-          fireEvent={jest.fn()}
-        />
+    it('should be called on successive render even without data change', async () => {
+      const { getByTestId, rerender } = render(
+        <MarkdownVisComponent {...vis.params} renderComplete={renderComplete} />
       );
-      expect(renderComplete.mock.calls.length).toBe(1);
+
+      await wait(() => getByTestId('markdownBody'));
+
+      expect(renderComplete).toHaveBeenCalledTimes(1);
+
       renderComplete.mockClear();
-      mount(
-        <MarkdownVisWrapper
-          visParams={vis.params}
-          renderComplete={renderComplete}
-          fireEvent={jest.fn()}
-        />
-      );
-      expect(renderComplete.mock.calls.length).toBe(1);
+
+      rerender(<MarkdownVisComponent {...vis.params} renderComplete={renderComplete} />);
+
+      expect(renderComplete).toHaveBeenCalledTimes(1);
     });
   });
 });

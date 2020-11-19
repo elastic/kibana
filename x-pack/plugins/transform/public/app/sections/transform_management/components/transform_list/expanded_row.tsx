@@ -11,8 +11,8 @@ import { Optional } from '@kbn/utility-types';
 import { i18n } from '@kbn/i18n';
 
 import moment from 'moment-timezone';
-import { formatHumanReadableDateTimeSeconds } from '../../../../../shared_imports';
 import { TransformListRow } from '../../../../common';
+import { useAppDependencies } from '../../../../app_dependencies';
 import { ExpandedRowDetailsPane, SectionConfig } from './expanded_row_details_pane';
 import { ExpandedRowJsonPane } from './expanded_row_json_pane';
 import { ExpandedRowMessagesPane } from './expanded_row_messages_pane';
@@ -24,6 +24,23 @@ function getItemDescription(value: any) {
   }
 
   return value.toString();
+}
+
+/**
+ * Creates a deterministic number based hash out of a string.
+ */
+export function stringHash(str: string): number {
+  let hash = 0;
+  let chr = 0;
+  if (str.length === 0) {
+    return hash;
+  }
+  for (let i = 0; i < str.length; i++) {
+    chr = str.charCodeAt(i);
+    hash = (hash << 5) - hash + chr; // eslint-disable-line no-bitwise
+    hash |= 0; // eslint-disable-line no-bitwise
+  }
+  return hash < 0 ? hash * -2 : hash;
 }
 
 interface Item {
@@ -38,6 +55,9 @@ interface Props {
 type StateValues = Optional<TransformListRow['stats'], 'stats' | 'checkpointing'>;
 
 export const ExpandedRow: FC<Props> = ({ item }) => {
+  const {
+    ml: { formatHumanReadableDateTimeSeconds },
+  } = useAppDependencies();
   const stateValues: StateValues = { ...item.stats };
   delete stateValues.stats;
   delete stateValues.checkpointing;
@@ -159,9 +179,11 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
     position: 'left',
   };
 
+  const tabId = stringHash(item.id);
+
   const tabs = [
     {
-      id: `transform-details-tab-${item.id}`,
+      id: `transform-details-tab-${tabId}`,
       'data-test-subj': 'transformDetailsTab',
       name: i18n.translate(
         'xpack.transform.transformList.transformDetails.tabs.transformDetailsLabel',
@@ -172,7 +194,7 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
       content: <ExpandedRowDetailsPane sections={[general, state, checkpointing]} />,
     },
     {
-      id: `transform-stats-tab-${item.id}`,
+      id: `transform-stats-tab-${tabId}`,
       'data-test-subj': 'transformStatsTab',
       name: i18n.translate(
         'xpack.transform.transformList.transformDetails.tabs.transformStatsLabel',
@@ -183,13 +205,13 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
       content: <ExpandedRowDetailsPane sections={[stats]} />,
     },
     {
-      id: `transform-json-tab-${item.id}`,
+      id: `transform-json-tab-${tabId}`,
       'data-test-subj': 'transformJsonTab',
       name: 'JSON',
       content: <ExpandedRowJsonPane json={item.config} />,
     },
     {
-      id: `transform-messages-tab-${item.id}`,
+      id: `transform-messages-tab-${tabId}`,
       'data-test-subj': 'transformMessagesTab',
       name: i18n.translate(
         'xpack.transform.transformList.transformDetails.tabs.transformMessagesLabel',
@@ -200,7 +222,7 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
       content: <ExpandedRowMessagesPane transformId={item.id} />,
     },
     {
-      id: `transform-preview-tab-${item.id}`,
+      id: `transform-preview-tab-${tabId}`,
       'data-test-subj': 'transformPreviewTab',
       name: i18n.translate(
         'xpack.transform.transformList.transformDetails.tabs.transformPreviewLabel',

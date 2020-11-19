@@ -6,16 +6,25 @@
 
 import { Ast } from '@kbn/interpreter/common';
 import { ScaleType } from '@elastic/charts';
-import { State, LayerConfig } from './types';
+import { PaletteRegistry } from 'src/plugins/charts/public';
+import { State, ValidLayer, LayerConfig } from './types';
 import { OperationMetadata, DatasourcePublicAPI } from '../types';
+import { getColumnToLabelMap } from './state_helpers';
 
-interface ValidLayer extends LayerConfig {
-  xAccessor: NonNullable<LayerConfig['xAccessor']>;
-}
+export const getSortedAccessors = (datasource: DatasourcePublicAPI, layer: LayerConfig) => {
+  const originalOrder = datasource
+    .getTableSpec()
+    .map(({ columnId }: { columnId: string }) => columnId)
+    .filter((columnId: string) => layer.accessors.includes(columnId));
+  // When we add a column it could be empty, and therefore have no order
+  return Array.from(new Set(originalOrder.concat(layer.accessors)));
+};
 
 export const toExpression = (
   state: State,
-  datasourceLayers: Record<string, DatasourcePublicAPI>
+  datasourceLayers: Record<string, DatasourcePublicAPI>,
+  paletteService: PaletteRegistry,
+  attributes: Partial<{ title: string; description: string }> = {}
 ): Ast | null => {
   if (!state || !state.layers.length) {
     return null;
@@ -31,12 +40,13 @@ export const toExpression = (
     });
   });
 
-  return buildExpression(state, metadata, datasourceLayers);
+  return buildExpression(state, metadata, datasourceLayers, paletteService, attributes);
 };
 
 export function toPreviewExpression(
   state: State,
-  datasourceLayers: Record<string, DatasourcePublicAPI>
+  datasourceLayers: Record<string, DatasourcePublicAPI>,
+  paletteService: PaletteRegistry
 ) {
   return toExpression(
     {
@@ -47,8 +57,11 @@ export function toPreviewExpression(
         ...state.legend,
         isVisible: false,
       },
+      valueLabels: 'hide',
     },
-    datasourceLayers
+    datasourceLayers,
+    paletteService,
+    {}
   );
 }
 
@@ -81,11 +94,24 @@ export function getScaleType(metadata: OperationMetadata | null, defaultScale: S
 export const buildExpression = (
   state: State,
   metadata: Record<string, Record<string, OperationMetadata | null>>,
-  datasourceLayers?: Record<string, DatasourcePublicAPI>
+  datasourceLayers: Record<string, DatasourcePublicAPI>,
+  paletteService: PaletteRegistry,
+  attributes: Partial<{ title: string; description: string }> = {}
 ): Ast | null => {
-  const validLayers = state.layers.filter((layer): layer is ValidLayer =>
-    Boolean(layer.accessors.length)
-  );
+  const validLayers = state.layers
+    .filter((layer): layer is ValidLayer => Boolean(layer.accessors.length))
+    .map((layer) => {
+      if (!datasourceLayers) {
+        return layer;
+      }
+      const sortedAccessors = getSortedAccessors(datasourceLayers[layer.layerId], layer);
+
+      return {
+        ...layer,
+        accessors: sortedAccessors,
+      };
+    });
+
   if (!validLayers.length) {
     return null;
   }
@@ -97,6 +123,8 @@ export const buildExpression = (
         type: 'function',
         function: 'lens_xy_chart',
         arguments: {
+          title: [attributes?.title || ''],
+          description: [attributes?.description || ''],
           xTitle: [state.xTitle || ''],
           yTitle: [state.yTitle || ''],
           yRightTitle: [state.yRightTitle || ''],
@@ -167,20 +195,9 @@ export const buildExpression = (
               ],
             },
           ],
+          valueLabels: [state?.valueLabels || 'hide'],
           layers: validLayers.map((layer) => {
-            const columnToLabel: Record<string, string> = {};
-
-            if (datasourceLayers) {
-              const datasource = datasourceLayers[layer.layerId];
-              layer.accessors
-                .concat(layer.splitAccessor ? [layer.splitAccessor] : [])
-                .forEach((accessor) => {
-                  const operation = datasource.getOperationForColumnId(accessor);
-                  if (operation?.label) {
-                    columnToLabel[accessor] = operation.label;
-                  }
-                });
-            }
+            const columnToLabel = getColumnToLabelMap(layer, datasourceLayers[layer.layerId]);
 
             const xAxisOperation =
               datasourceLayers &&
@@ -232,6 +249,29 @@ export const buildExpression = (
                     seriesType: [layer.seriesType],
                     accessors: layer.accessors,
                     columnToLabel: [JSON.stringify(columnToLabel)],
+                    ...(layer.palette
+                      ? {
+                          palette: [
+                            {
+                              type: 'expression',
+                              chain: [
+                                {
+                                  type: 'function',
+                                  function: 'theme',
+                                  arguments: {
+                                    variable: ['palette'],
+                                    default: [
+                                      paletteService
+                                        .get(layer.palette.name)
+                                        .toExpression(layer.palette.params),
+                                    ],
+                                  },
+                                },
+                              ],
+                            },
+                          ],
+                        }
+                      : {}),
                   },
                 },
               ],

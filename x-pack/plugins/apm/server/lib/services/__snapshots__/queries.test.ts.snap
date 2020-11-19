@@ -144,7 +144,7 @@ Array [
             },
             Object {
               "term": Object {
-                "my.custom.ui.filter": "foo-bar",
+                "service.environment": "test",
               },
             },
           ],
@@ -194,7 +194,7 @@ Array [
             },
             Object {
               "term": Object {
-                "my.custom.ui.filter": "foo-bar",
+                "service.environment": "test",
               },
             },
           ],
@@ -257,7 +257,7 @@ Array [
             },
             Object {
               "term": Object {
-                "my.custom.ui.filter": "foo-bar",
+                "service.environment": "test",
               },
             },
           ],
@@ -277,6 +277,13 @@ Array [
         "services": Object {
           "aggs": Object {
             "outcomes": Object {
+              "aggs": Object {
+                "count": Object {
+                  "value_count": Object {
+                    "field": "transaction.duration.us",
+                  },
+                },
+              },
               "terms": Object {
                 "field": "event.outcome",
               },
@@ -284,6 +291,13 @@ Array [
             "timeseries": Object {
               "aggs": Object {
                 "outcomes": Object {
+                  "aggs": Object {
+                    "count": Object {
+                      "value_count": Object {
+                        "field": "transaction.duration.us",
+                      },
+                    },
+                  },
                   "terms": Object {
                     "field": "event.outcome",
                   },
@@ -320,7 +334,7 @@ Array [
             },
             Object {
               "term": Object {
-                "my.custom.ui.filter": "foo-bar",
+                "service.environment": "test",
               },
             },
             Object {
@@ -352,6 +366,7 @@ Array [
             "environments": Object {
               "terms": Object {
                 "field": "service.environment",
+                "size": 100,
               },
             },
           },
@@ -375,7 +390,7 @@ Array [
             },
             Object {
               "term": Object {
-                "my.custom.ui.filter": "foo-bar",
+                "service.environment": "test",
               },
             },
           ],

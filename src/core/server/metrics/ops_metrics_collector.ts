@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Server as HapiServer } from 'hapi';
+import { Server as HapiServer } from '@hapi/hapi';
 import {
   ProcessMetricsCollector,
   OsMetricsCollector,

@@ -618,6 +618,37 @@
 {
   "type": "doc",
   "value": {
+    "id": "map:78116c8c-fd2a-11ea-adc1-0242ac120002",
+    "index": ".kibana",
+    "source": {
+      "map": {
+        "bounds": {
+          "coordinates": [
+            [
+              -140.62361,
+              54.11832
+            ],
+            [
+              -55.49169,
+              18.17193
+            ]
+          ],
+          "type": "envelope"
+        },
+        "description": "",
+        "layerListJSON": "[{\"id\":\"g1xkv\",\"label\":null,\"minZoom\":0,\"maxZoom\":24,\"sourceDescriptor\":{\"resolution\": \"SUPER_FINE\",\"type\":\"ES_GEO_GRID\",\"id\":\"9305f6ea-4518-4c06-95b9-33321aa38d6a\",\"indexPatternId\":\"c698b940-e149-11e8-a35a-370a8516603a\",\"geoField\":\"geo.coordinates\",\"requestType\":\"grid\",\"metrics\":[{\"type\":\"count\"},{\"type\":\"max\",\"field\":\"bytes\"}]},\"visible\":true,\"temporary\":false,\"style\":{\"type\":\"VECTOR\",\"properties\":{\"fillColor\":{\"type\":\"DYNAMIC\",\"options\":{\"field\":{\"label\":\"max of bytes\",\"name\":\"max_of_bytes\",\"origin\":\"source\"},\"color\":\"Blues\"}},\"lineColor\":{\"type\":\"STATIC\",\"options\":{\"color\":\"#cccccc\"}},\"lineWidth\":{\"type\":\"STATIC\",\"options\":{\"size\":1}},\"iconSize\":{\"type\":\"DYNAMIC\",\"options\":{\"field\":{\"label\":\"Count\",\"name\":\"doc_count\",\"origin\":\"source\"},\"minSize\":4,\"maxSize\":32}}},\"temporary\":true,\"previousStyle\":null},\"type\":\"TILED_VECTOR\"}]",
+        "mapStateJSON": "{\"zoom\":3.59,\"center\":{\"lon\":-98.05765,\"lat\":38.32288},\"timeFilters\":{\"from\":\"2015-09-20T00:00:00.000Z\",\"to\":\"2015-09-20T01:00:00.000Z\"},\"refreshConfig\":{\"isPaused\":true,\"interval\":1000}}",
+        "title": "geo grid vector grid example SUPER_FINE resolution",
+        "uiStateJSON": "{\"isDarkMode\":false}"
+      },
+      "type": "map"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
     "id": "map:346fbec0-1811-11e9-b78a-23d706cd2507",
     "index": ".kibana",
     "source": {

@@ -8,7 +8,7 @@ import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import { DraggableId } from 'react-beautiful-dnd';
 
-import { getAllFieldsByName, useWithSource } from '../../containers/source';
+import { getAllFieldsByName } from '../../containers/source';
 import { useAddToTimeline } from '../../hooks/use_add_to_timeline';
 import { WithCopyToClipboard } from '../../lib/clipboard/with_copy_to_clipboard';
 import { useKibana } from '../../lib/kibana';
@@ -20,6 +20,8 @@ import * as i18n from './translations';
 import { useManageTimeline } from '../../../timelines/components/manage_timeline';
 import { TimelineId } from '../../../../common/types/timeline';
 import { SELECTOR_TIMELINE_BODY_CLASS_NAME } from '../../../timelines/components/timeline/styles';
+import { SourcererScopeName } from '../../store/sourcerer/model';
+import { useSourcererScope } from '../../containers/sourcerer';
 
 interface Props {
   closePopOver?: () => void;
@@ -49,7 +51,7 @@ const DraggableWrapperHoverContentComponent: React.FC<Props> = ({
   const filterManagerBackup = useMemo(() => kibana.services.data.query.filterManager, [
     kibana.services.data.query.filterManager,
   ]);
-  const { getManageTimelineById, getTimelineFilterManager } = useManageTimeline();
+  const { getTimelineFilterManager } = useManageTimeline();
 
   const filterManager = useMemo(
     () =>
@@ -65,13 +67,16 @@ const DraggableWrapperHoverContentComponent: React.FC<Props> = ({
   //    this component is rendered in the context of the active timeline. This
   //    behavior enables the 'All events' view by appending the alerts index
   //    to the index pattern.
-  const { indexToAdd } = useMemo(
-    () =>
-      timelineId === TimelineId.active
-        ? getManageTimelineById(TimelineId.active)
-        : { indexToAdd: null },
-    [getManageTimelineById, timelineId]
-  );
+  const activeScope: SourcererScopeName =
+    timelineId === TimelineId.active
+      ? SourcererScopeName.timeline
+      : timelineId != null &&
+        [TimelineId.detectionsPage, TimelineId.detectionsRulesDetailsPage].includes(
+          timelineId as TimelineId
+        )
+      ? SourcererScopeName.detections
+      : SourcererScopeName.default;
+  const { browserFields, indexPattern, selectedPatterns } = useSourcererScope(activeScope);
 
   const handleStartDragToTimeline = useCallback(() => {
     startDragToTimeline();
@@ -94,7 +99,6 @@ const DraggableWrapperHoverContentComponent: React.FC<Props> = ({
         onFilterAdded();
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [closePopOver, field, value, filterManager, onFilterAdded]);
 
   const filterOutValue = useCallback(() => {
@@ -112,7 +116,6 @@ const DraggableWrapperHoverContentComponent: React.FC<Props> = ({
         onFilterAdded();
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [closePopOver, field, value, filterManager, onFilterAdded]);
 
   const handleGoGetTimelineId = useCallback(() => {
@@ -120,8 +123,6 @@ const DraggableWrapperHoverContentComponent: React.FC<Props> = ({
       goGetTimelineId(true);
     }
   }, [goGetTimelineId, timelineId]);
-
-  const { browserFields, indexPattern } = useWithSource('default', indexToAdd);
 
   return (
     <>
@@ -187,7 +188,7 @@ const DraggableWrapperHoverContentComponent: React.FC<Props> = ({
                 browserFields={browserFields}
                 field={field}
                 indexPattern={indexPattern}
-                indexToAdd={indexToAdd}
+                indexNames={selectedPatterns}
                 onFilterAdded={onFilterAdded}
                 timelineId={timelineId ?? undefined}
                 toggleTopN={toggleTopN}

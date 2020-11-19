@@ -68,6 +68,9 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
         description: 'a description',
         externalId: null,
         title: 'a title',
+        severity: '1',
+        urgency: '1',
+        impact: '1',
         updatedAt: '2020-06-17T04:37:45.147Z',
         updatedBy: { fullName: null, username: 'elastic' },
       },
@@ -303,12 +306,36 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
               params: {},
             })
             .then((resp: any) => {
-              expect(resp.body).to.eql({
-                actionId: simulatedActionId,
-                status: 'error',
-                retry: false,
-                message: `error validating action params: Cannot read property 'Symbol(Symbol.iterator)' of undefined`,
-              });
+              expect(Object.keys(resp.body)).to.eql(['status', 'actionId', 'message', 'retry']);
+              expect(resp.body.actionId).to.eql(simulatedActionId);
+              expect(resp.body.status).to.eql('error');
+              expect(resp.body.retry).to.eql(false);
+              // Node.js 12 oddity:
+              //
+              // The first time after the server is booted, the error message will be:
+              //
+              //     undefined is not iterable (cannot read property Symbol(Symbol.iterator))
+              //
+              // After this, the error will be:
+              //
+              //     Cannot destructure property 'value' of 'undefined' as it is undefined.
+              //
+              // The error seems to come from the exact same place in the code based on the
+              // exact same circomstances:
+              //
+              //     https://github.com/elastic/kibana/blob/b0a223ebcbac7e404e8ae6da23b2cc6a4b509ff1/packages/kbn-config-schema/src/types/literal_type.ts#L28
+              //
+              // What triggers the error is that the `handleError` function expects its 2nd
+              // argument to be an object containing a `valids` property of type array.
+              //
+              // In this test the object does not contain a `valids` property, so hence the
+              // error.
+              //
+              // Why the error message isn't the same in all scenarios is unknown to me and
+              // could be a bug in V8.
+              expect(resp.body.message).to.match(
+                /^error validating action params: (undefined is not iterable \(cannot read property Symbol\(Symbol.iterator\)\)|Cannot destructure property 'value' of 'undefined' as it is undefined\.)$/
+              );
             });
         });
 
@@ -325,7 +352,7 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: false,
                 message:
-                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getIncident]\n- [1.subAction]: expected value to equal [handshake]\n- [2.subAction]: expected value to equal [pushToService]',
+                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subAction]: expected value to equal [pushToService]',
               });
             });
         });
@@ -343,25 +370,7 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: false,
                 message:
-                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getIncident]\n- [1.subAction]: expected value to equal [handshake]\n- [2.subActionParams.savedObjectId]: expected value of type [string] but got [undefined]',
-              });
-            });
-        });
-
-        it('should handle failing with a simulated success without savedObjectId', async () => {
-          await supertest
-            .post(`/api/actions/action/${simulatedActionId}/_execute`)
-            .set('kbn-xsrf', 'foo')
-            .send({
-              params: { subAction: 'pushToService', subActionParams: {} },
-            })
-            .then((resp: any) => {
-              expect(resp.body).to.eql({
-                actionId: simulatedActionId,
-                status: 'error',
-                retry: false,
-                message:
-                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getIncident]\n- [1.subAction]: expected value to equal [handshake]\n- [2.subActionParams.savedObjectId]: expected value of type [string] but got [undefined]',
+                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subActionParams.title]: expected value of type [string] but got [undefined]',
               });
             });
         });
@@ -384,7 +393,7 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: false,
                 message:
-                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getIncident]\n- [1.subAction]: expected value to equal [handshake]\n- [2.subActionParams.title]: expected value of type [string] but got [undefined]',
+                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subActionParams.title]: expected value of type [string] but got [undefined]',
               });
             });
         });
@@ -412,7 +421,7 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: false,
                 message:
-                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getIncident]\n- [1.subAction]: expected value to equal [handshake]\n- [2.subActionParams.comments.0.commentId]: expected value of type [string] but got [undefined]',
+                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subActionParams.comments.0.commentId]: expected value of type [string] but got [undefined]',
               });
             });
         });
@@ -440,7 +449,7 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: false,
                 message:
-                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getIncident]\n- [1.subAction]: expected value to equal [handshake]\n- [2.subActionParams.comments.0.comment]: expected value of type [string] but got [undefined]',
+                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subActionParams.comments.0.comment]: expected value of type [string] but got [undefined]',
               });
             });
         });
@@ -461,6 +470,7 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
               },
             })
             .expect(200);
+
           expect(proxyHaveBeenCalled).to.equal(true);
           expect(result).to.eql({
             status: 'ok',

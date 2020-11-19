@@ -28,12 +28,12 @@ This page has moved. Please see the new section in the {heartbeat-ref}/securing-
 [role="exclude",id="infra-read-only-access"]
 == Configure source read-only access
 
-This page has moved. Please see the new section in the {metrics-guide}/configure-metrics-source.html[Metrics Monitoring Guide].
+This page has moved. Please see {observability-guide}/configure-settings.html[configure settings].
 
 [role="exclude",id="logs-read-only-access"]
 == Configure source read-only access
 
-This page has moved. Please see {logs-guide}/configure-logs-source.html[logs configuration].
+This page has moved. Please see {observability-guide}/configure-data-sources.html[configure data sources].
 
 [role="exclude",id="extend"]
 == Extend your use case
@@ -59,7 +59,7 @@ This page has moved. Please see <<reporting-getting-started>>.
 [role="exclude",id="add-sample-data"]
 == Add sample data
 
-This page has moved. Please see <<gs-get-data-into-kibana>>.
+This page has moved. Please see <<get-started>>.
 
 [role="exclude",id="tilemap"]
 == Coordinate map
@@ -100,3 +100,72 @@ This content has moved to the <<development-rbac, Security>> page.
 == TSVB
 
 This page was deleted. See <<tsvb>>.
+
+[role="exclude",id="managing-cross-cluster-replication"]
+== Cross-Cluster Replication
+
+This content has moved. See
+{ref}/ccr-getting-started.html[Set up cross-cluster replication].
+
+[role="exclude",id="working-remote-clusters"]
+== Remote clusters
+
+This content has moved. See
+{ref}/ccr-getting-started.html#ccr-getting-started-remote-cluster[Connect to a remote cluster].
+
+[role="exclude",id="adding-policy-to-index"]
+== Adding a policy to an index
+
+This content has moved. See
+{ref}/set-up-lifecycle-policy.html[Configure a lifecycle policy].
+
+[role="exclude",id="creating-index-lifecycle-policies"]
+== Creating an index lifecycle policy
+
+This content has moved. See
+{ref}/set-up-lifecycle-policy.html[Configure a lifecycle policy].
+
+[role="exclude",id="index-lifecycle-policies"]
+== Index Lifecycle Policies
+
+This content has moved. See
+{ref}/index-lifecycle-management.html[ILM: Manage the index lifecycle].
+
+[role="exclude",id="managing-index-lifecycle-policies"]
+== Managing index lifecycle policies
+
+This content has moved. See
+{ref}/index-lifecycle-management.html[ILM: Manage the index lifecycle].
+
+[role="exclude",id="tutorial-define-index"]
+== Define your index patterns
+
+This content has moved. See
+<<get-started, Quick start>>.
+
+[role="exclude",id="managing-indices"]
+== Index management
+
+This content has moved. See {ref}/index-mgmt.html[Index management].
+
+[role="exclude",id="field-filter"]
+== Filter by field
+
+This content has moved. See <<discover, **Discover**>>.
+
+
+[role="exclude",id="document-context"]
+== View a document in context
+
+This content has moved. See <<discover, **Discover**>>.
+
+
+[role="exclude",id="document-data"]
+== View document data
+
+This content has moved. See <<discover, **Discover**>>.
+
+[role="exclude",id="viewing-field-stats"]
+== View field data statistics
+
+This content has moved. See <<discover, **Discover**>>.

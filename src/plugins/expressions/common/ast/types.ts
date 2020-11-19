@@ -18,19 +18,18 @@
  */
 
 import { ExpressionValue, ExpressionValueError } from '../expression_types';
-import { ExpressionFunction } from '../../common';
 
 export type ExpressionAstNode =
   | ExpressionAstExpression
   | ExpressionAstFunction
   | ExpressionAstArgument;
 
-export interface ExpressionAstExpression {
+export type ExpressionAstExpression = {
   type: 'expression';
   chain: ExpressionAstFunction[];
-}
+};
 
-export interface ExpressionAstFunction {
+export type ExpressionAstFunction = {
   type: 'function';
   function: string;
   arguments: Record<string, ExpressionAstArgument[]>;
@@ -39,18 +38,18 @@ export interface ExpressionAstFunction {
    * Debug information added to each function when expression is executed in *debug mode*.
    */
   debug?: ExpressionAstFunctionDebug;
-}
+};
 
-export interface ExpressionAstFunctionDebug {
+export type ExpressionAstFunctionDebug = {
   /**
    * True if function successfully returned output, false if function threw.
    */
   success: boolean;
 
   /**
-   * Reference to the expression function this AST node represents.
+   * Id of expression function.
    */
-  fn: ExpressionFunction;
+  fn: string;
 
   /**
    * Input that expression function received as its first argument.
@@ -84,6 +83,6 @@ export interface ExpressionAstFunctionDebug {
    * timing starts after the arguments have been resolved.
    */
   duration: number | undefined;
-}
+};
 
 export type ExpressionAstArgument = string | boolean | number | ExpressionAstExpression;

@@ -5,20 +5,23 @@
  */
 
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
-import { getFindResultStatus, ruleStatusRequest } from '../__mocks__/request_responses';
+import { getFindResultStatus, ruleStatusRequest, getResult } from '../__mocks__/request_responses';
 import { serverMock, requestContextMock, requestMock } from '../__mocks__';
 import { findRulesStatusesRoute } from './find_rules_status_route';
+import { RuleStatusResponse } from '../../rules/types';
+import { AlertExecutionStatusErrorReasons } from '../../../../../../alerts/common';
+
+jest.mock('../../signals/rule_status_service');
 
 describe('find_statuses', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
 
-  beforeEach(() => {
+  beforeEach(async () => {
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
-
     clients.savedObjectsClient.find.mockResolvedValue(getFindResultStatus()); // successful status search
-
+    clients.alertsClient.get.mockResolvedValue(getResult());
     findRulesStatusesRoute(server.router);
   });
 
@@ -45,6 +48,33 @@ describe('find_statuses', () => {
         message: 'Test error',
         status_code: 500,
       });
+    });
+
+    test('returns success if rule status client writes an error status', async () => {
+      // 0. task manager tried to run the rule but couldn't, so the alerting framework
+      // wrote an error to the executionStatus.
+      const failingExecutionRule = getResult();
+      failingExecutionRule.executionStatus = {
+        status: 'error',
+        lastExecutionDate: failingExecutionRule.executionStatus.lastExecutionDate,
+        error: {
+          reason: AlertExecutionStatusErrorReasons.Read,
+          message: 'oops',
+        },
+      };
+
+      // 1. getFailingRules api found a rule where the executionStatus was 'error'
+      clients.alertsClient.get.mockResolvedValue({
+        ...failingExecutionRule,
+      });
+
+      const response = await server.inject(ruleStatusRequest(), context);
+      const body: RuleStatusResponse = response.body;
+      expect(response.status).toEqual(200);
+      expect(body[ruleStatusRequest().body.ids[0]].current_status?.status).toEqual('failed');
+      expect(body[ruleStatusRequest().body.ids[0]].current_status?.last_failure_message).toEqual(
+        'Reason: read Message: oops'
+      );
     });
   });
 

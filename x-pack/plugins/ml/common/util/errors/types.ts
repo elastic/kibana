@@ -5,7 +5,7 @@
  */
 
 import { HttpFetchError } from 'kibana/public';
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 
 export interface EsErrorRootCause {
   type: string;
@@ -31,6 +31,10 @@ export interface MLResponseError {
   };
 }
 
+export interface ErrorMessage {
+  message: string;
+}
+
 export interface MLErrorObject {
   message: string;
   statusCode?: number;
@@ -49,6 +53,10 @@ export function isEsErrorBody(error: any): error is EsErrorBody {
 
 export function isErrorString(error: any): error is string {
   return typeof error === 'string';
+}
+
+export function isErrorMessage(error: any): error is ErrorMessage {
+  return error && error.message !== undefined && typeof error.message === 'string';
 }
 
 export function isMLResponseError(error: any): error is MLResponseError {

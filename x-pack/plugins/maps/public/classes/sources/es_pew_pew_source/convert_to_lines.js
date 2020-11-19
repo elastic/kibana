@@ -5,7 +5,7 @@
  */
 
 import _ from 'lodash';
-import { extractPropertiesFromBucket } from '../../util/es_agg_utils';
+import { extractPropertiesFromBucket } from '../../../../common/elasticsearch_util';
 
 const LAT_INDEX = 0;
 const LON_INDEX = 1;

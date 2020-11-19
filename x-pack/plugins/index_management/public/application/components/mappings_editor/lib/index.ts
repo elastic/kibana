@@ -4,7 +4,27 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './utils';
+export {
+  getUniqueId,
+  getChildFieldsName,
+  getFieldMeta,
+  getTypeLabelFromField,
+  getFieldConfig,
+  getTypeMetaFromSource,
+  normalize,
+  deNormalize,
+  updateFieldsPathAfterFieldNameChange,
+  getAllChildFields,
+  getAllDescendantAliases,
+  getFieldAncestors,
+  filterTypesForMultiField,
+  filterTypesForNonRootFields,
+  getMaxNestedDepth,
+  buildFieldTreeFromIds,
+  shouldDeleteChildFieldsAfterTypeChange,
+  canUseMappingsEditor,
+  stripUndefinedValues,
+} from './utils';
 
 export * from './serializers';
 

@@ -30,7 +30,10 @@ export interface ExportTestCase {
   type: string;
   id?: string;
   successResult?: SuccessResult | SuccessResult[];
-  failure?: 400 | 403;
+  failure?: {
+    statusCode: 200 | 400 | 403; // if the user searches for only types they are not authorized for, they will get an empty 200 result
+    reason: 'unauthorized' | 'bad_request';
+  };
 }
 
 // additional sharedtype objects that exist but do not have common test cases defined
@@ -72,14 +75,17 @@ export const getTestCases = (spaceId?: string): { [key: string]: ExportTestCase 
   multiNamespaceType: {
     title: 'multi-namespace type',
     type: 'sharedtype',
-    successResult: (spaceId === SPACE_1_ID
-      ? [CASES.MULTI_NAMESPACE_DEFAULT_AND_SPACE_1, CASES.MULTI_NAMESPACE_ONLY_SPACE_1]
-      : spaceId === SPACE_2_ID
-      ? [CASES.MULTI_NAMESPACE_ONLY_SPACE_2]
-      : [CASES.MULTI_NAMESPACE_DEFAULT_AND_SPACE_1]
-    )
-      .concat([CONFLICT_1_OBJ, CONFLICT_2A_OBJ, CONFLICT_2B_OBJ, CONFLICT_3_OBJ, CONFLICT_4A_OBJ])
-      .flat(),
+    successResult: [
+      CASES.MULTI_NAMESPACE_ALL_SPACES,
+      ...(spaceId === SPACE_1_ID
+        ? [CASES.MULTI_NAMESPACE_DEFAULT_AND_SPACE_1, CASES.MULTI_NAMESPACE_ONLY_SPACE_1]
+        : spaceId === SPACE_2_ID
+        ? [CASES.MULTI_NAMESPACE_ONLY_SPACE_2]
+        : [CASES.MULTI_NAMESPACE_DEFAULT_AND_SPACE_1]
+      )
+        .concat([CONFLICT_1_OBJ, CONFLICT_2A_OBJ, CONFLICT_2B_OBJ, CONFLICT_3_OBJ, CONFLICT_4A_OBJ])
+        .flat(),
+    ],
   },
   namespaceAgnosticObject: {
     title: 'namespace-agnostic object',
@@ -90,41 +96,45 @@ export const getTestCases = (spaceId?: string): { [key: string]: ExportTestCase 
     type: 'globaltype',
     successResult: CASES.NAMESPACE_AGNOSTIC,
   },
-  hiddenObject: { title: 'hidden object', ...CASES.HIDDEN, failure: 400 },
-  hiddenType: { title: 'hidden type', type: 'hiddentype', failure: 400 },
+  hiddenObject: {
+    title: 'hidden object',
+    ...CASES.HIDDEN,
+    failure: { statusCode: 400, reason: 'bad_request' },
+  },
+  hiddenType: {
+    title: 'hidden type',
+    type: 'hiddentype',
+    failure: { statusCode: 400, reason: 'bad_request' },
+  },
 });
 export const createRequest = ({ type, id }: ExportTestCase) =>
   id ? { objects: [{ type, id }] } : { type };
-const getTestTitle = ({ failure, title }: ExportTestCase) => {
-  let description = 'success';
-  if (failure === 400) {
-    description = 'bad request';
-  } else if (failure === 403) {
-    description = 'forbidden';
-  }
-  return `${description} ["${title}"]`;
-};
+const getTestTitle = ({ failure, title }: ExportTestCase) =>
+  `${failure?.reason || 'success'} ["${title}"]`;
+
+const EMPTY_RESULT = { exportedCount: 0, missingRefCount: 0, missingReferences: [] };
 
 export function exportTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
-  const expectForbiddenBulkGet = expectResponses.forbiddenTypes('bulk_get');
-  const expectForbiddenFind = expectResponses.forbiddenTypes('find');
+  const expectSavedObjectForbiddenBulkGet = expectResponses.forbiddenTypes('bulk_get');
   const expectResponseBody = (testCase: ExportTestCase): ExpectResponseBody => async (
     response: Record<string, any>
   ) => {
     const { type, id, successResult = { type, id } as SuccessResult, failure } = testCase;
-    if (failure === 403) {
-      // In export only, the API uses "bulk_get" or "find" depending on the parameters it receives.
-      // The best that could be done here is to have an if statement to ensure at least one of the
-      // two errors has been thrown.
-      if (id) {
-        await expectForbiddenBulkGet(type)(response);
+    if (failure?.reason === 'unauthorized') {
+      // In export only, the API uses "bulkGet" or "find" depending on the parameters it receives.
+      if (failure.statusCode === 403) {
+        // "bulkGet" was unauthorized, which returns a forbidden error
+        await expectSavedObjectForbiddenBulkGet(type)(response);
+      } else if (failure.statusCode === 200) {
+        // "find" was unauthorized, which returns an empty result
+        expect(response.body).not.to.have.property('error');
+        expect(response.text).to.equal(JSON.stringify(EMPTY_RESULT));
       } else {
-        await expectForbiddenFind(type)(response);
+        throw new Error(`Unexpected failure status code: ${failure.statusCode}`);
       }
-    } else if (failure === 400) {
-      // 400
+    } else if (failure?.reason === 'bad_request') {
       expect(response.body.error).to.eql('Bad Request');
-      expect(response.body.statusCode).to.eql(failure);
+      expect(response.body.statusCode).to.eql(failure.statusCode);
       if (id) {
         expect(response.body.message).to.eql(
           `Trying to export object(s) with non-exportable types: ${type}:${id}`
@@ -132,6 +142,8 @@ export function exportTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
       } else {
         expect(response.body.message).to.eql(`Trying to export non-exportable type(s): ${type}`);
       }
+    } else if (failure?.reason) {
+      throw new Error(`Unexpected failure reason: ${failure.reason}`);
     } else {
       // 2xx
       expect(response.body).not.to.have.property('error');
@@ -159,19 +171,19 @@ export function exportTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
   };
   const createTestDefinitions = (
     testCases: ExportTestCase | ExportTestCase[],
-    forbidden: boolean,
+    failure: ExportTestCase['failure'] | false,
     options?: {
       responseBodyOverride?: ExpectResponseBody;
     }
   ): ExportTestDefinition[] => {
     let cases = Array.isArray(testCases) ? testCases : [testCases];
-    if (forbidden) {
+    if (failure) {
       // override the expected result in each test case
-      cases = cases.map((x) => ({ ...x, failure: 403 }));
+      cases = cases.map((x) => ({ ...x, failure }));
     }
     return cases.map((x) => ({
       title: getTestTitle(x),
-      responseStatusCode: x.failure ?? 200,
+      responseStatusCode: x.failure?.statusCode ?? 200,
       request: createRequest(x),
       responseBody: options?.responseBodyOverride || expectResponseBody(x),
     }));

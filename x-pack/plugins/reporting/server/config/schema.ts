@@ -45,7 +45,15 @@ const QueueSchema = schema.object({
 const RulesSchema = schema.object({
   allow: schema.boolean(),
   host: schema.maybe(schema.string()),
-  protocol: schema.maybe(schema.string()),
+  protocol: schema.maybe(
+    schema.string({
+      validate(value) {
+        if (!/:$/.test(value)) {
+          return 'must end in colon';
+        }
+      },
+    })
+  ),
 });
 
 const CaptureSchema = schema.object({

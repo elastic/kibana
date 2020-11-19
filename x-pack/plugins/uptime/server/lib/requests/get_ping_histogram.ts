@@ -37,6 +37,8 @@ export const getPingHistogram: UMElasticsearchQueryFn<
   }
   const filter = getFilterClause(from, to, additionalFilters);
 
+  const minInterval = getHistogramInterval(from, to, QUERY.DEFAULT_BUCKET_COUNT);
+
   const params = {
     index: dynamicSettings.heartbeatIndices,
     body: {
@@ -50,8 +52,7 @@ export const getPingHistogram: UMElasticsearchQueryFn<
         timeseries: {
           date_histogram: {
             field: '@timestamp',
-            fixed_interval:
-              bucketSize || getHistogramInterval(from, to, QUERY.DEFAULT_BUCKET_COUNT) + 'ms',
+            fixed_interval: bucketSize || minInterval + 'ms',
             missing: 0,
           },
           aggs: {
@@ -75,8 +76,7 @@ export const getPingHistogram: UMElasticsearchQueryFn<
     },
   };
 
-  const result = await callES('search', params);
-  const interval = result.aggregations?.timeseries?.interval;
+  const { body: result } = await callES.search(params);
   const buckets: HistogramQueryResult[] = result?.aggregations?.timeseries?.buckets ?? [];
   const histogram = buckets.map((bucket) => {
     const x: number = bucket.key;
@@ -91,6 +91,6 @@ export const getPingHistogram: UMElasticsearchQueryFn<
   });
   return {
     histogram,
-    interval,
+    minInterval,
   };
 };

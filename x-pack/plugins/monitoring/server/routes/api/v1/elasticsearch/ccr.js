@@ -126,7 +126,7 @@ function buildRequest(req, config, esIndexPattern) {
         field: 'ccr_stats.follower_index',
         inner_hits: {
           name: 'by_shard',
-          sort: [{ timestamp: 'desc' }],
+          sort: [{ timestamp: { order: 'desc', unmapped_type: 'long' } }],
           size: maxBucketSize,
           collapse: {
             field: 'ccr_stats.shard_id',

@@ -4,30 +4,32 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import '../__mocks__/shallow_usecontext.mock';
+import '../__mocks__/shallow_useeffect.mock';
 import '../__mocks__/kea.mock';
+import '../__mocks__/enterprise_search_url.mock';
+import { setMockValues, setMockActions } from '../__mocks__';
 
-import React, { useContext } from 'react';
+import React from 'react';
 import { Redirect } from 'react-router-dom';
 import { shallow } from 'enzyme';
-import { useValues, useActions } from 'kea';
 
 import { Layout, SideNav, SideNavLink } from '../shared/layout';
 import { SetupGuide } from './components/setup_guide';
 import { ErrorConnecting } from './components/error_connecting';
-import { EngineOverview } from './components/engine_overview';
+import { EnginesOverview } from './components/engines';
+import { EngineRouter } from './components/engine';
 import { AppSearch, AppSearchUnconfigured, AppSearchConfigured, AppSearchNav } from './';
 
 describe('AppSearch', () => {
   it('renders AppSearchUnconfigured when config.host is not set', () => {
-    (useContext as jest.Mock).mockImplementationOnce(() => ({ config: { host: '' } }));
+    setMockValues({ config: { host: '' } });
     const wrapper = shallow(<AppSearch />);
 
     expect(wrapper.find(AppSearchUnconfigured)).toHaveLength(1);
   });
 
   it('renders AppSearchConfigured when config.host set', () => {
-    (useContext as jest.Mock).mockImplementationOnce(() => ({ config: { host: 'some.url' } }));
+    setMockValues({ config: { host: 'some.url' } });
     const wrapper = shallow(<AppSearch />);
 
     expect(wrapper.find(AppSearchConfigured)).toHaveLength(1);
@@ -46,21 +48,22 @@ describe('AppSearchUnconfigured', () => {
 describe('AppSearchConfigured', () => {
   beforeEach(() => {
     // Mock resets
-    (useValues as jest.Mock).mockImplementation(() => ({ myRole: {} }));
-    (useActions as jest.Mock).mockImplementation(() => ({ initializeAppData: () => {} }));
+    setMockValues({ myRole: {} });
+    setMockActions({ initializeAppData: () => {} });
   });
 
   it('renders with layout', () => {
     const wrapper = shallow(<AppSearchConfigured />);
 
-    expect(wrapper.find(Layout)).toHaveLength(1);
-    expect(wrapper.find(Layout).prop('readOnlyMode')).toBeFalsy();
-    expect(wrapper.find(EngineOverview)).toHaveLength(1);
+    expect(wrapper.find(Layout)).toHaveLength(2);
+    expect(wrapper.find(Layout).last().prop('readOnlyMode')).toBeFalsy();
+    expect(wrapper.find(EnginesOverview)).toHaveLength(1);
+    expect(wrapper.find(EngineRouter)).toHaveLength(1);
   });
 
   it('initializes app data with passed props', () => {
     const initializeAppData = jest.fn();
-    (useActions as jest.Mock).mockImplementation(() => ({ initializeAppData }));
+    setMockActions({ initializeAppData });
 
     shallow(<AppSearchConfigured ilmEnabled={true} />);
 
@@ -69,8 +72,8 @@ describe('AppSearchConfigured', () => {
 
   it('does not re-initialize app data', () => {
     const initializeAppData = jest.fn();
-    (useActions as jest.Mock).mockImplementation(() => ({ initializeAppData }));
-    (useValues as jest.Mock).mockImplementation(() => ({ myRole: {}, hasInitialized: true }));
+    setMockActions({ initializeAppData });
+    setMockValues({ myRole: {}, hasInitialized: true });
 
     shallow(<AppSearchConfigured />);
 
@@ -78,7 +81,7 @@ describe('AppSearchConfigured', () => {
   });
 
   it('renders ErrorConnecting', () => {
-    (useValues as jest.Mock).mockImplementation(() => ({ myRole: {}, errorConnecting: true }));
+    setMockValues({ myRole: {}, errorConnecting: true });
 
     const wrapper = shallow(<AppSearchConfigured />);
 
@@ -86,11 +89,11 @@ describe('AppSearchConfigured', () => {
   });
 
   it('passes readOnlyMode state', () => {
-    (useValues as jest.Mock).mockImplementation(() => ({ myRole: {}, readOnlyMode: true }));
+    setMockValues({ myRole: {}, readOnlyMode: true });
 
     const wrapper = shallow(<AppSearchConfigured />);
 
-    expect(wrapper.find(Layout).prop('readOnlyMode')).toEqual(true);
+    expect(wrapper.find(Layout).first().prop('readOnlyMode')).toEqual(true);
   });
 
   describe('ability checks', () => {
@@ -107,32 +110,29 @@ describe('AppSearchNav', () => {
     expect(wrapper.find(SideNavLink).prop('to')).toEqual('/engines');
   });
 
+  it('renders an Engine subnav if passed', () => {
+    const wrapper = shallow(<AppSearchNav subNav={<div data-test-subj="subnav">Testing</div>} />);
+    const link = wrapper.find(SideNavLink).dive();
+
+    expect(link.find('[data-test-subj="subnav"]')).toHaveLength(1);
+  });
+
   it('renders the Settings link', () => {
-    (useValues as jest.Mock).mockImplementation(() => ({
-      myRole: { canViewSettings: true },
-    }));
+    setMockValues({ myRole: { canViewSettings: true } });
     const wrapper = shallow(<AppSearchNav />);
 
-    expect(wrapper.find(SideNavLink).last().prop('to')).toEqual(
-      'http://localhost:3002/as/settings/account'
-    );
+    expect(wrapper.find(SideNavLink).last().prop('to')).toEqual('/settings/account');
   });
 
   it('renders the Credentials link', () => {
-    (useValues as jest.Mock).mockImplementation(() => ({
-      myRole: { canViewAccountCredentials: true },
-    }));
+    setMockValues({ myRole: { canViewAccountCredentials: true } });
     const wrapper = shallow(<AppSearchNav />);
 
-    expect(wrapper.find(SideNavLink).last().prop('to')).toEqual(
-      'http://localhost:3002/as/credentials'
-    );
+    expect(wrapper.find(SideNavLink).last().prop('to')).toEqual('/credentials');
   });
 
   it('renders the Role Mappings link', () => {
-    (useValues as jest.Mock).mockImplementation(() => ({
-      myRole: { canViewRoleMappings: true },
-    }));
+    setMockValues({ myRole: { canViewRoleMappings: true } });
     const wrapper = shallow(<AppSearchNav />);
 
     expect(wrapper.find(SideNavLink).last().prop('to')).toEqual(

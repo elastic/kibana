@@ -8,11 +8,11 @@
 #
 # eg. Setting the environment variable:
 #
-#       ELASTICSEARCH_STARTUPTIMEOUT=60
+#       ELASTICSEARCH_LOGQUERIES=true
 #
 # will cause Kibana to be invoked with:
 #
-#       --elasticsearch.startupTimeout=60
+#       --elasticsearch.logQueries=true
 
 kibana_vars=(
     console.enabled
@@ -30,7 +30,6 @@ kibana_vars=(
     elasticsearch.logQueries
     elasticsearch.password
     elasticsearch.pingTimeout
-    elasticsearch.preserveHost
     elasticsearch.requestHeadersWhitelist
     elasticsearch.requestTimeout
     elasticsearch.shardTimeout
@@ -47,8 +46,11 @@ kibana_vars=(
     elasticsearch.ssl.truststore.path
     elasticsearch.ssl.truststore.password
     elasticsearch.ssl.verificationMode
-    elasticsearch.startupTimeout
     elasticsearch.username
+    enterpriseSearch.accessCheckTimeout
+    enterpriseSearch.accessCheckTimeoutWarning
+    enterpriseSearch.enabled
+    enterpriseSearch.host
     i18n.locale
     interpreter.enableInVisualize
     kibana.autocompleteTerminateAfter
@@ -95,6 +97,7 @@ kibana_vars=(
     path.data
     pid.file
     regionmap
+    security.showInsecureClusterWarning
     server.basePath
     server.customResponseHeaders
     server.compression.enabled
@@ -135,6 +138,7 @@ kibana_vars=(
     tilemap.url
     timelion.enabled
     vega.enableExternalUrls
+    xpack.actions.proxyUrl
     xpack.apm.enabled
     xpack.apm.serviceMapEnabled
     xpack.apm.ui.enabled
@@ -161,6 +165,7 @@ kibana_vars=(
     xpack.code.security.gitHostWhitelist
     xpack.code.security.gitProtocolWhitelist
     xpack.encryptedSavedObjects.encryptionKey
+    xpack.encryptedSavedObjects.keyRotation.decryptionOnlyKeys
     xpack.graph.enabled
     xpack.graph.canEditDrillDownUrls
     xpack.graph.savePolicy
@@ -232,9 +237,11 @@ kibana_vars=(
     xpack.security.authc.oidc.realm
     xpack.security.authc.saml.realm
     xpack.security.authc.saml.maxRedirectURLSize
+    xpack.security.authc.selector.enabled
     xpack.security.cookieName
     xpack.security.enabled
     xpack.security.encryptionKey
+    xpack.security.sameSiteCookies
     xpack.security.secureCookies
     xpack.security.sessionTimeout
     xpack.security.session.idleTimeout

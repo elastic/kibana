@@ -1,63 +1,29 @@
 [[managing-fields]]
-== Index patterns and fields
+== Field management
 
-The *Index patterns* UI helps you create and manage
-the index patterns that retrieve your data from {es}.
+Whenever possible,
+{kib} uses the same field type for display as {es}.  However, a few field types
+{es} supports are not available in {kib}. Use field formatters to customize how your
+fields are displayed in Kibana, regardless of how they are stored in {es}.
 
-[role="screenshot"]
-image::images/management-index-patterns.png[]
-
-[float]
-=== Create an index pattern
-
-An index pattern is the glue that connects {kib} to your {es} data. Create an
-index pattern whenever you load your own data into {kib}. To get started,
-click *Create index pattern*, and then follow the guided steps. Refer to
-<<index-patterns, Creating an index pattern>> for the types of index patterns
-that you can create.
-
-[float]
-=== Manage your index pattern
-
-To view the fields and associated data types in an index pattern, click its name in
-the *Index patterns* overview.
-
-[role="screenshot"]
-image::management/index-patterns/images/new-index-pattern.png["Index files and data types"]
-
-Use the icons to perform the following actions:
-
-* [[set-default-pattern]]*Set the default index pattern.* {kib} uses a badge to make users
-aware of which index pattern is the default. The first pattern
-you create is automatically designated as the default pattern. The default
-index pattern is loaded when you open *Discover*.
-
-* *Refresh the index fields list.* You can refresh the index fields list to
-pick up any newly-added fields. Doing so also resets the {kib} popularity counters
-for the fields. The popularity counters are used in *Discover* to sort fields in lists.
-
-* [[delete-pattern]]*Delete the index pattern.* This action removes the pattern from the list of
-Saved Objects in {kib}. You will not be able to recover field formatters,
-scripted fields, source filters, and field popularity data associated with the index pattern.
-Deleting an index pattern does
-not remove any indices or data documents from {es}.
-+
-WARNING: Deleting an index pattern breaks all visualizations, saved searches, and
-other saved objects that reference the pattern.
-
-[float]
-=== Edit a field
-
-To edit a field's properties, click the edit icon
-image:management/index-patterns/images/edit_icon.png[] in the detail view.
-You can set the field's format and popularity value.
-
-Kibana has field formatters for the following field types:
+Kibana provides these field formatters:
 
 * <<field-formatters-string, Strings>>
 * <<field-formatters-date, Dates>>
 * <<field-formatters-geopoint, Geopoints>>
 * <<field-formatters-numeric, Numbers>>
+
+To format a field:
+
+. Open the main menu, and click *Stack Management > Index Patterns*.
+. Click the index pattern that contains the field you want to format.
+. Find the field you want to format and click the edit icon (image:management/index-patterns/images/edit_icon.png[]).
+. Select a format and fill in the details.
++
+[role="screenshot"]
+image:management/index-patterns/images/edit-field-format.png["Edit field format"]
+
+
 
 [[field-formatters-string]]
 === String field formatters
@@ -114,12 +80,8 @@ WARNING: Computing data on the fly with scripted fields can be very resource int
 {kib} performance. Keep in mind that there's no built-in validation of a scripted field. If your scripts are
 buggy, you'll get exceptions whenever you try to view the dynamically generated data.
 
-When you define a scripted field in {kib}, you have a choice of scripting languages. In 5.0 and later, the default
-options are {ref}/modules-scripting-expression.html[Lucene expressions] and {ref}/modules-scripting-painless.html[Painless].
-While you can use other scripting languages if you enable dynamic scripting for them in {es}, this is not recommended
-because they cannot be sufficiently {ref}/modules-scripting-security.html[sandboxed].
-
-WARNING: In 5.0 and later, Groovy, JavaScript, and Python scripting are deprecated and unsupported.
+When you define a scripted field in {kib}, you have a choice of the {ref}/modules-scripting-expression.html[Lucene expressions] or the 
+{ref}/modules-scripting-painless.html[Painless] scripting language.
 
 You can reference any single value numeric field in your expressions, for example:
 
@@ -134,7 +96,7 @@ https://www.elastic.co/blog/using-painless-kibana-scripted-fields[Using Painless
 [[create-scripted-field]]
 === Create a scripted field
 
-. Open the menu, then go to *Stack Management > {kib} > Index Patterns*
+. Open the main menu, then click *Stack Management > Index Patterns*.
 . Select the index pattern you want to add a scripted field to.
 . Go to the *Scripted fields* tab for the index pattern, then click *Add scripted field*.
 . Enter a name for the scripted field.

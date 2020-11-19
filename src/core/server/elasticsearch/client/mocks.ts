@@ -18,6 +18,7 @@
  */
 import { Client, ApiResponse } from '@elastic/elasticsearch';
 import { TransportRequestPromise } from '@elastic/elasticsearch/lib/Transport';
+import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
 import { ElasticsearchClient } from './types';
 import { ICustomClusterClient } from './cluster_client';
 
@@ -31,6 +32,7 @@ const createInternalClientMock = (): DeeplyMockedKeys<Client> => {
     '_events',
     '_eventsCount',
     '_maxListeners',
+    'constructor',
     'name',
     'serializer',
     'connectionPool',
@@ -38,35 +40,57 @@ const createInternalClientMock = (): DeeplyMockedKeys<Client> => {
     'helpers',
   ];
 
+  const getAllPropertyDescriptors = (obj: Record<string, any>) => {
+    const descriptors = Object.entries(Object.getOwnPropertyDescriptors(obj));
+    let prototype = Object.getPrototypeOf(obj);
+    while (prototype != null && prototype !== Object.prototype) {
+      descriptors.push(...Object.entries(Object.getOwnPropertyDescriptors(prototype)));
+      prototype = Object.getPrototypeOf(prototype);
+    }
+    return descriptors;
+  };
+
   const mockify = (obj: Record<string, any>, omitted: string[] = []) => {
-    Object.keys(obj)
-      .filter((key) => !omitted.includes(key))
-      .forEach((key) => {
-        const propType = typeof obj[key];
-        if (propType === 'function') {
+    // the @elastic/elasticsearch::Client uses prototypical inheritance
+    // so we have to crawl up the prototype chain and get all descriptors
+    // to find everything that we should be mocking
+    const descriptors = getAllPropertyDescriptors(obj);
+    descriptors
+      .filter(([key]) => !omitted.includes(key))
+      .forEach(([key, descriptor]) => {
+        if (typeof descriptor.value === 'function') {
           obj[key] = jest.fn(() => createSuccessTransportRequestPromise({}));
-        } else if (propType === 'object' && obj[key] != null) {
-          mockify(obj[key]);
+        } else if (typeof obj[key] === 'object' && obj[key] != null) {
+          mockify(obj[key], omitted);
         }
       });
   };
 
   mockify(client, omittedProps);
 
-  // client got some read-only (getter) properties
-  // so we need to extend it to override the getter-only props.
-  const mock: any = { ...client };
+  client.close = jest.fn().mockReturnValue(Promise.resolve());
+  client.child = jest.fn().mockImplementation(() => createInternalClientMock());
 
-  mock.transport = {
+  const mockGetter = (obj: Record<string, any>, propertyName: string) => {
+    Object.defineProperty(obj, propertyName, {
+      configurable: true,
+      enumerable: false,
+      get: () => jest.fn(),
+      set: undefined,
+    });
+  };
+
+  // `on`, `off`, and `once` are properties without a setter.
+  // We can't `client.on = jest.fn()` because the following error will be thrown:
+  // TypeError: Cannot set property on of #<Client> which has only a getter
+  mockGetter(client, 'on');
+  mockGetter(client, 'off');
+  mockGetter(client, 'once');
+  client.transport = {
     request: jest.fn(),
   };
-  mock.close = jest.fn().mockReturnValue(Promise.resolve());
-  mock.child = jest.fn().mockImplementation(() => createInternalClientMock());
-  mock.on = jest.fn();
-  mock.off = jest.fn();
-  mock.once = jest.fn();
 
-  return (mock as unknown) as DeeplyMockedKeys<Client>;
+  return client as DeeplyMockedKeys<Client>;
 };
 
 export type ElasticsearchClientMock = DeeplyMockedKeys<ElasticsearchClient>;

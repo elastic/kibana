@@ -33,6 +33,7 @@ import {
   AppNavLinkStatus,
 } from '../../../core/public';
 
+import { MANAGEMENT_APP_ID } from '../common/contants';
 import {
   ManagementSectionsService,
   getSectionsServiceStartPrivate,
@@ -72,7 +73,7 @@ export class ManagementPlugin implements Plugin<ManagementSetup, ManagementStart
     }
 
     core.application.register({
-      id: 'management',
+      id: MANAGEMENT_APP_ID,
       title: i18n.translate('management.stackManagement.title', {
         defaultMessage: 'Stack Management',
       }),

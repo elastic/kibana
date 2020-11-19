@@ -7,19 +7,21 @@
 import { schema } from '@kbn/config-schema';
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
-import { ProcessorEvent } from '../../../common/processor_event';
+import { APMConfig } from '../..';
+import { ESSearchResponse } from '../../../../../typings/elasticsearch';
+import { AlertingPlugin } from '../../../../alerts/server';
 import { AlertType, ALERT_TYPES_CONFIG } from '../../../common/alert_types';
-import { ESSearchResponse } from '../../../typings/elasticsearch';
 import {
   PROCESSOR_EVENT,
+  SERVICE_ENVIRONMENT,
   SERVICE_NAME,
-  TRANSACTION_TYPE,
   TRANSACTION_DURATION,
+  TRANSACTION_TYPE,
 } from '../../../common/elasticsearch_fieldnames';
-import { AlertingPlugin } from '../../../../alerts/server';
-import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
-import { APMConfig } from '../..';
+import { ProcessorEvent } from '../../../common/processor_event';
+import { getDurationFormatter } from '../../../common/utils/formatters';
 import { getEnvironmentUiFilterES } from '../helpers/convert_ui_filters/get_environment_ui_filter_es';
+import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
 import { apmActionVariables } from './action_variables';
 
 interface RegisterAlertParams {
@@ -62,6 +64,7 @@ export function registerTransactionDurationAlertType({
         apmActionVariables.environment,
         apmActionVariables.threshold,
         apmActionVariables.triggerValue,
+        apmActionVariables.interval,
       ],
     },
     producer: 'apm',
@@ -72,6 +75,7 @@ export function registerTransactionDurationAlertType({
         config,
         savedObjectsClient: services.savedObjectsClient,
       });
+      const maxServiceEnvironments = config['xpack.apm.maxServiceEnvironments'];
 
       const searchParams = {
         index: indices['apm_oss.transactionIndices'],
@@ -106,6 +110,12 @@ export function registerTransactionDurationAlertType({
                       ],
                     },
                   },
+            environments: {
+              terms: {
+                field: SERVICE_ENVIRONMENT,
+                size: maxServiceEnvironments,
+              },
+            },
           },
         },
       };
@@ -119,7 +129,7 @@ export function registerTransactionDurationAlertType({
         return;
       }
 
-      const { agg } = response.aggregations;
+      const { agg, environments } = response.aggregations;
 
       const transactionDuration =
         'values' in agg ? Object.values(agg.values)[0] : agg?.value;
@@ -127,15 +137,25 @@ export function registerTransactionDurationAlertType({
       const threshold = alertParams.threshold * 1000;
 
       if (transactionDuration && transactionDuration > threshold) {
-        const alertInstance = services.alertInstanceFactory(
-          AlertType.TransactionDuration
-        );
-        alertInstance.scheduleActions(alertTypeConfig.defaultActionGroupId, {
-          transactionType: alertParams.transactionType,
-          serviceName: alertParams.serviceName,
-          environment: alertParams.environment,
-          threshold,
-          triggerValue: transactionDuration,
+        const durationFormatter = getDurationFormatter(transactionDuration);
+        const transactionDurationFormatted = durationFormatter(
+          transactionDuration
+        ).formatted;
+
+        environments.buckets.map((bucket) => {
+          const environment = bucket.key;
+          const alertInstance = services.alertInstanceFactory(
+            `${AlertType.TransactionDuration}_${environment}`
+          );
+
+          alertInstance.scheduleActions(alertTypeConfig.defaultActionGroupId, {
+            transactionType: alertParams.transactionType,
+            serviceName: alertParams.serviceName,
+            environment,
+            threshold,
+            triggerValue: transactionDurationFormatted,
+            interval: `${alertParams.windowSize}${alertParams.windowUnit}`,
+          });
         });
       }
     },

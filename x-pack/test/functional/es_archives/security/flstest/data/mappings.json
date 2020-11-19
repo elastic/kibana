@@ -3,6 +3,14 @@
   "value": {
     "index": "flstest",
     "mappings": {
+      "runtime": {
+        "runtime_customer_ssn": {
+          "type": "keyword",
+          "script": {
+            "source": "emit(doc['customer_ssn'].value + ' calculated at runtime')"
+          }
+        }
+      },
       "properties": {
         "customer_name": {
           "fields": {

@@ -14,92 +14,58 @@ describe('existingFields', () => {
     return {
       name,
       isScript: false,
-      isAlias: false,
-      path: name.split('.'),
+      isMeta: false,
       ...obj,
     };
   }
 
-  function indexPattern(_source: unknown, fields: unknown = {}) {
-    return { _source, fields };
+  function searchResults(fields: Record<string, unknown[]> = {}) {
+    return { fields };
   }
 
   it('should handle root level fields', () => {
     const result = existingFields(
-      [indexPattern({ foo: 'bar' }), indexPattern({ baz: 0 })],
+      [searchResults({ foo: ['bar'] }), searchResults({ baz: [0] })],
       [field('foo'), field('bar'), field('baz')]
     );
 
     expect(result).toEqual(['foo', 'baz']);
   });
 
-  it('should handle arrays of objects', () => {
+  it('should handle basic arrays, ignoring empty ones', () => {
     const result = existingFields(
-      [indexPattern({ stuff: [{ foo: 'bar' }, { baz: 0 }] })],
-      [field('stuff.foo'), field('stuff.bar'), field('stuff.baz')]
+      [searchResults({ stuff: ['heyo', 'there'], empty: [] })],
+      [field('stuff'), field('empty')]
     );
-
-    expect(result).toEqual(['stuff.foo', 'stuff.baz']);
-  });
-
-  it('should handle basic arrays', () => {
-    const result = existingFields([indexPattern({ stuff: ['heyo', 'there'] })], [field('stuff')]);
 
     expect(result).toEqual(['stuff']);
   });
 
-  it('should handle deep object structures', () => {
-    const result = existingFields(
-      [indexPattern({ geo: { coordinates: { lat: 40, lon: -77 } } })],
-      [field('geo.coordinates')]
-    );
-
-    expect(result).toEqual(['geo.coordinates']);
-  });
-
   it('should handle objects with dotted fields', () => {
     const result = existingFields(
-      [indexPattern({ 'geo.country_name': 'US' })],
+      [searchResults({ 'geo.country_name': ['US'] })],
       [field('geo.country_name')]
     );
 
     expect(result).toEqual(['geo.country_name']);
   });
 
-  it('should handle arrays with dotted fields on both sides', () => {
-    const result = existingFields(
-      [indexPattern({ 'process.cpu': [{ 'user.pct': 50 }] })],
-      [field('process.cpu.user.pct')]
-    );
-
-    expect(result).toEqual(['process.cpu.user.pct']);
-  });
-
-  it('should be false if it hits a positive leaf before the end of the path', () => {
-    const result = existingFields(
-      [indexPattern({ geo: { coordinates: 32 } })],
-      [field('geo.coordinates.lat')]
-    );
-
-    expect(result).toEqual([]);
-  });
-
-  it('should use path, not name', () => {
-    const result = existingFields(
-      [indexPattern({ stuff: [{ foo: 'bar' }, { baz: 0 }] })],
-      [field({ name: 'goober', path: ['stuff', 'foo'] })]
-    );
-
-    expect(result).toEqual(['goober']);
-  });
-
   it('supports scripted fields', () => {
     const result = existingFields(
-      [indexPattern({}, { bar: 'scriptvalue' })],
-      [field({ name: 'baz', isScript: true, path: ['bar'] })]
+      [searchResults({ bar: ['scriptvalue'] })],
+      [field({ name: 'bar', isScript: true })]
     );
 
-    expect(result).toEqual(['baz']);
+    expect(result).toEqual(['bar']);
+  });
+
+  it('supports meta fields', () => {
+    const result = existingFields(
+      [{ _mymeta: 'abc', ...searchResults({ bar: ['scriptvalue'] }) }],
+      [field({ name: '_mymeta', isMeta: true })]
+    );
+
+    expect(result).toEqual(['_mymeta']);
   });
 });
 
@@ -116,75 +82,28 @@ describe('buildFieldList', () => {
         { name: 'bar' },
         { name: '@bar' },
         { name: 'baz' },
+        { name: '_mymeta' },
       ]),
     },
     references: [],
   };
 
-  const mappings = {
-    testpattern: {
-      mappings: {
-        properties: {
-          '@bar': {
-            type: 'alias',
-            path: 'bar',
-          },
-        },
-      },
-    },
-  };
-
-  const fieldDescriptors = [
-    {
-      name: 'baz',
-      subType: { multi: { parent: 'a.b.c' } },
-    },
-  ];
-
-  it('uses field descriptors to determine the path', () => {
-    const fields = buildFieldList(indexPattern, mappings, fieldDescriptors);
-    expect(fields.find((f) => f.name === 'baz')).toMatchObject({
-      isAlias: false,
-      isScript: false,
-      name: 'baz',
-      path: ['a', 'b', 'c'],
-    });
-  });
-
-  it('uses aliases to determine the path', () => {
-    const fields = buildFieldList(indexPattern, mappings, fieldDescriptors);
-    expect(fields.find((f) => f.isAlias)).toMatchObject({
-      isAlias: true,
-      isScript: false,
-      name: '@bar',
-      path: ['bar'],
-    });
-  });
-
   it('supports scripted fields', () => {
-    const fields = buildFieldList(indexPattern, mappings, fieldDescriptors);
+    const fields = buildFieldList(indexPattern, []);
     expect(fields.find((f) => f.isScript)).toMatchObject({
-      isAlias: false,
       isScript: true,
       name: 'foo',
-      path: ['foo'],
       lang: 'painless',
       script: '2+2',
     });
   });
 
-  it('handles missing mappings', () => {
-    const fields = buildFieldList(indexPattern, {}, fieldDescriptors);
-    expect(fields.every((f) => f.isAlias === false)).toEqual(true);
-  });
-
-  it('handles empty fieldDescriptors by skipping multi-mappings', () => {
-    const fields = buildFieldList(indexPattern, mappings, []);
-    expect(fields.find((f) => f.name === 'baz')).toMatchObject({
-      isAlias: false,
+  it('supports meta fields', () => {
+    const fields = buildFieldList(indexPattern, ['_mymeta']);
+    expect(fields.find((f) => f.isMeta)).toMatchObject({
       isScript: false,
-      name: 'baz',
-      path: ['baz'],
+      isMeta: true,
+      name: '_mymeta',
     });
   });
 });

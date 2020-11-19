@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
 import { deleteEventsStream } from '../../security_solution_endpoint_api_int/apis/data_stream_helper';
 import { deleteAlertsStream } from '../../security_solution_endpoint_api_int/apis/data_stream_helper';
@@ -20,6 +21,7 @@ export interface DataStyle {
 export function SecurityHostsPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const pageObjects = getPageObjects(['common', 'header']);
   const testSubjects = getService('testSubjects');
+  const queryBar = getService('queryBar');
 
   /**
    * @function parseStyles
@@ -104,6 +106,49 @@ export function SecurityHostsPageProvider({ getService, getPageObjects }: FtrPro
       await deletePolicyStream(getService);
       await deleteMetadataStream(getService);
       await deleteTelemetryStream(getService);
+    },
+    /**
+     * Runs Nodes Events
+     */
+    async runNodeEvents(expectedData: string[]) {
+      await testSubjects.exists('resolver:submenu:button', { timeout: 400 });
+      const NodeSubmenuButtons = await testSubjects.findAll('resolver:submenu:button');
+      for (let b = 0; b < NodeSubmenuButtons.length; b++) {
+        await (await testSubjects.findAll('resolver:submenu:button'))[b].click();
+      }
+      await testSubjects.exists('resolver:map:node-submenu-item', { timeout: 400 });
+      const NodeSubmenuItems = await testSubjects.findAll('resolver:map:node-submenu-item');
+      for (let i = 0; i < NodeSubmenuItems.length; i++) {
+        await (await testSubjects.findAll('resolver:map:node-submenu-item'))[i].click();
+        const Events = await testSubjects.findAll('resolver:map:node-submenu-item');
+        // this sleep is for the AMP enabled run
+        await pageObjects.common.sleep(300);
+        const EventName = await Events[i]._webElement.getText();
+        const LinkText = await testSubjects.find('resolver:breadcrumbs:last');
+        const linkText = await LinkText._webElement.getText();
+        expect(EventName).to.equal(linkText);
+        expect(EventName).to.equal(expectedData[i]);
+      }
+      await testSubjects.click('full-screen');
+    },
+    /**
+     * Navigate to Events Panel
+     */
+    async navigateToEventsPanel() {
+      if (!(await testSubjects.exists('investigate-in-resolver-button', { timeout: 400 }))) {
+        await (await testSubjects.find('navigation-hosts')).click();
+        await testSubjects.click('navigation-events');
+        await testSubjects.existOrFail('event');
+      }
+    },
+    /**
+     * execute Query And Open Resolver
+     */
+    async executeQueryAndOpenResolver(query: string) {
+      await queryBar.setQuery(query);
+      await queryBar.submitQuery();
+      await testSubjects.click('full-screen');
+      await testSubjects.click('investigate-in-resolver-button');
     },
   };
 }

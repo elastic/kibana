@@ -59,13 +59,19 @@ export function registerSecurityUsageCollector({ usageCollection, config, licens
         type: 'boolean',
       },
       authProviderCount: {
-        type: 'number',
+        type: 'long',
       },
       enabledAuthProviders: {
-        type: 'keyword',
+        type: 'array',
+        items: {
+          type: 'keyword',
+        },
       },
       httpAuthSchemes: {
-        type: 'keyword',
+        type: 'array',
+        items: {
+          type: 'keyword',
+        },
       },
     },
     fetch: () => {

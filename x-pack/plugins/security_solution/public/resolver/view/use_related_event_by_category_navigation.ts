@@ -12,7 +12,7 @@ import * as selectors from '../store/selectors';
 /**
  * A hook that takes a nodeID and a record of categories, and returns a function that
  * navigates to the proper url when called with a category.
- * @deprecated
+ * @deprecated See `useLinkProps`
  */
 export function useRelatedEventByCategoryNavigation({
   nodeID,

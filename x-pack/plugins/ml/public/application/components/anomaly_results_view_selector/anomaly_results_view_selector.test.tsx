@@ -37,7 +37,9 @@ describe('AnomalyResultsViewSelector', () => {
     // Check the Single Metric Viewer element exists in the selector, and that it is checked.
     expect(getByTestId('mlAnomalyResultsViewSelectorSingleMetricViewer')).toBeInTheDocument();
     expect(
-      getByTestId('mlAnomalyResultsViewSelectorSingleMetricViewer').hasAttribute('checked')
+      getByTestId('mlAnomalyResultsViewSelectorSingleMetricViewer')
+        .querySelector('input')!
+        .hasAttribute('checked')
     ).toBe(true);
   });
 });

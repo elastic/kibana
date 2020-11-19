@@ -6,6 +6,7 @@
 
 import { RequestHandler, RequestHandlerContext } from 'kibana/server';
 import {
+  DeleteTrustedAppsRequestParams,
   GetTrustedAppsListRequest,
   GetTrustedListAppsResponse,
   PostTrustedAppCreateRequest,
@@ -13,7 +14,6 @@ import {
 import { EndpointAppContext } from '../../types';
 import { exceptionItemToTrustedAppItem, newTrustedAppItemToExceptionItem } from './utils';
 import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '../../../../../lists/common/constants';
-import { DeleteTrustedAppsRequestParams } from './types';
 import { ExceptionListClient } from '../../../../../lists/server';
 
 const exceptionListClientFromContext = (context: RequestHandlerContext): ExceptionListClient => {

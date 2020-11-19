@@ -15,6 +15,9 @@ import { getListArrayMock } from '../../../../common/detection_engine/schemas/ty
 import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
 import { parseScheduleDates } from '../../../../common/detection_engine/parse_schedule_dates';
 
+// @ts-expect-error
+moment.suppressDeprecationWarnings = true;
+
 import {
   generateId,
   parseInterval,
@@ -25,15 +28,30 @@ import {
   getListsClient,
   getSignalTimeTuples,
   getExceptions,
+  wrapBuildingBlocks,
+  generateSignalId,
+  createErrorsFromShard,
+  createSearchAfterReturnTypeFromResponse,
+  createSearchAfterReturnType,
+  mergeReturns,
+  createTotalHitsFromSearchResult,
+  lastValidDate,
 } from './utils';
-import { BulkResponseErrorAggregation } from './types';
+import { BulkResponseErrorAggregation, SearchAfterAndBulkCreateReturnType } from './types';
 import {
   sampleBulkResponse,
   sampleEmptyBulkResponse,
   sampleBulkError,
   sampleBulkErrorItem,
   mockLogger,
+  sampleSignalHit,
+  sampleDocSearchResultsWithSortId,
+  sampleEmptyDocSearchResults,
+  sampleDocSearchResultsNoSortIdNoHits,
+  repeatedSearchResultsWithSortId,
+  sampleDocSearchResultsNoSortId,
 } from './__mocks__/es_results';
+import { ShardError } from '../../types';
 
 const buildRuleMessage = buildRuleMessageFactory({
   id: 'fake id',
@@ -781,6 +799,497 @@ describe('utils', () => {
       });
 
       expect(exceptions).toEqual([]);
+    });
+  });
+
+  describe('wrapBuildingBlocks', () => {
+    it('should generate a unique id for each building block', () => {
+      const wrappedBlocks = wrapBuildingBlocks(
+        [sampleSignalHit(), sampleSignalHit()],
+        'test-index'
+      );
+      const blockIds: string[] = [];
+      wrappedBlocks.forEach((block) => {
+        expect(blockIds.includes(block._id)).toEqual(false);
+        blockIds.push(block._id);
+      });
+    });
+
+    it('should generate different ids for identical documents in different sequences', () => {
+      const wrappedBlockSequence1 = wrapBuildingBlocks([sampleSignalHit()], 'test-index');
+      const wrappedBlockSequence2 = wrapBuildingBlocks(
+        [sampleSignalHit(), sampleSignalHit()],
+        'test-index'
+      );
+      const blockId = wrappedBlockSequence1[0]._id;
+      wrappedBlockSequence2.forEach((block) => {
+        expect(block._id).not.toEqual(blockId);
+      });
+    });
+
+    it('should generate the same ids when given the same sequence twice', () => {
+      const wrappedBlockSequence1 = wrapBuildingBlocks(
+        [sampleSignalHit(), sampleSignalHit()],
+        'test-index'
+      );
+      const wrappedBlockSequence2 = wrapBuildingBlocks(
+        [sampleSignalHit(), sampleSignalHit()],
+        'test-index'
+      );
+      wrappedBlockSequence1.forEach((block, idx) => {
+        expect(block._id).toEqual(wrappedBlockSequence2[idx]._id);
+      });
+    });
+  });
+
+  describe('generateSignalId', () => {
+    it('generates a unique signal id for same signal with different rule id', () => {
+      const signalId1 = generateSignalId(sampleSignalHit().signal);
+      const modifiedSignal = sampleSignalHit();
+      modifiedSignal.signal.rule.id = 'some other rule id';
+      const signalIdModified = generateSignalId(modifiedSignal.signal);
+      expect(signalId1).not.toEqual(signalIdModified);
+    });
+  });
+
+  describe('createErrorsFromShard', () => {
+    test('empty errors will return an empty array', () => {
+      const createdErrors = createErrorsFromShard({ errors: [] });
+      expect(createdErrors).toEqual([]);
+    });
+
+    test('single error will return single converted array of a string of a reason', () => {
+      const errors: ShardError[] = [
+        {
+          shard: 1,
+          index: 'index-123',
+          node: 'node-123',
+          reason: {
+            type: 'some type',
+            reason: 'some reason',
+            index_uuid: 'uuid-123',
+            index: 'index-123',
+            caused_by: {
+              type: 'some type',
+              reason: 'some reason',
+            },
+          },
+        },
+      ];
+      const createdErrors = createErrorsFromShard({ errors });
+      expect(createdErrors).toEqual([
+        'reason: "some reason" type: "some type" caused by reason: "some reason" caused by type: "some type"',
+      ]);
+    });
+
+    test('two errors will return two converted arrays to a string of a reason', () => {
+      const errors: ShardError[] = [
+        {
+          shard: 1,
+          index: 'index-123',
+          node: 'node-123',
+          reason: {
+            type: 'some type',
+            reason: 'some reason',
+            index_uuid: 'uuid-123',
+            index: 'index-123',
+            caused_by: {
+              type: 'some type',
+              reason: 'some reason',
+            },
+          },
+        },
+        {
+          shard: 2,
+          index: 'index-345',
+          node: 'node-345',
+          reason: {
+            type: 'some type 2',
+            reason: 'some reason 2',
+            index_uuid: 'uuid-345',
+            index: 'index-345',
+            caused_by: {
+              type: 'some type 2',
+              reason: 'some reason 2',
+            },
+          },
+        },
+      ];
+      const createdErrors = createErrorsFromShard({ errors });
+      expect(createdErrors).toEqual([
+        'reason: "some reason" type: "some type" caused by reason: "some reason" caused by type: "some type"',
+        'reason: "some reason 2" type: "some type 2" caused by reason: "some reason 2" caused by type: "some type 2"',
+      ]);
+    });
+
+    test('You can have missing values for the shard errors and get the expected output of an empty string', () => {
+      const errors: ShardError[] = [
+        {
+          shard: 1,
+          index: 'index-123',
+          node: 'node-123',
+          reason: {},
+        },
+      ];
+      const createdErrors = createErrorsFromShard({ errors });
+      expect(createdErrors).toEqual(['']);
+    });
+
+    test('You can have a single value for the shard errors and get expected output without extra spaces anywhere', () => {
+      const errors: ShardError[] = [
+        {
+          shard: 1,
+          index: 'index-123',
+          node: 'node-123',
+          reason: {
+            reason: 'some reason something went wrong',
+          },
+        },
+      ];
+      const createdErrors = createErrorsFromShard({ errors });
+      expect(createdErrors).toEqual(['reason: "some reason something went wrong"']);
+    });
+
+    test('You can have two values for the shard errors and get expected output with one space exactly between the two values', () => {
+      const errors: ShardError[] = [
+        {
+          shard: 1,
+          index: 'index-123',
+          node: 'node-123',
+          reason: {
+            reason: 'some reason something went wrong',
+            caused_by: { type: 'some type' },
+          },
+        },
+      ];
+      const createdErrors = createErrorsFromShard({ errors });
+      expect(createdErrors).toEqual([
+        'reason: "some reason something went wrong" caused by type: "some type"',
+      ]);
+    });
+  });
+
+  describe('createSearchAfterReturnTypeFromResponse', () => {
+    test('empty results will return successful type', () => {
+      const searchResult = sampleEmptyDocSearchResults();
+      const newSearchResult = createSearchAfterReturnTypeFromResponse({
+        searchResult,
+        timestampOverride: undefined,
+      });
+      const expected: SearchAfterAndBulkCreateReturnType = {
+        bulkCreateTimes: [],
+        createdSignalsCount: 0,
+        errors: [],
+        lastLookBackDate: null,
+        searchAfterTimes: [],
+        success: true,
+      };
+      expect(newSearchResult).toEqual(expected);
+    });
+
+    test('multiple results will return successful type with expected success', () => {
+      const searchResult = sampleDocSearchResultsWithSortId();
+      const newSearchResult = createSearchAfterReturnTypeFromResponse({
+        searchResult,
+        timestampOverride: undefined,
+      });
+      const expected: SearchAfterAndBulkCreateReturnType = {
+        bulkCreateTimes: [],
+        createdSignalsCount: 0,
+        errors: [],
+        lastLookBackDate: new Date('2020-04-20T21:27:45.000Z'),
+        searchAfterTimes: [],
+        success: true,
+      };
+      expect(newSearchResult).toEqual(expected);
+    });
+
+    test('result with error will create success: false within the result set', () => {
+      const searchResult = sampleDocSearchResultsNoSortIdNoHits();
+      searchResult._shards.failed = 1;
+      const { success } = createSearchAfterReturnTypeFromResponse({
+        searchResult,
+        timestampOverride: undefined,
+      });
+      expect(success).toEqual(false);
+    });
+
+    test('result with error will create success: false within the result set if failed is 2 or more', () => {
+      const searchResult = sampleDocSearchResultsNoSortIdNoHits();
+      searchResult._shards.failed = 2;
+      const { success } = createSearchAfterReturnTypeFromResponse({
+        searchResult,
+        timestampOverride: undefined,
+      });
+      expect(success).toEqual(false);
+    });
+
+    test('result with error will create success: true within the result set if failed is 0', () => {
+      const searchResult = sampleDocSearchResultsNoSortIdNoHits();
+      searchResult._shards.failed = 0;
+      const { success } = createSearchAfterReturnTypeFromResponse({
+        searchResult,
+        timestampOverride: undefined,
+      });
+      expect(success).toEqual(true);
+    });
+
+    test('It will not set an invalid date time stamp from a non-existent @timestamp when the index is not 100% ECS compliant', () => {
+      const searchResult = sampleDocSearchResultsNoSortId();
+      (searchResult.hits.hits[0]._source['@timestamp'] as unknown) = undefined;
+      const { lastLookBackDate } = createSearchAfterReturnTypeFromResponse({
+        searchResult,
+        timestampOverride: undefined,
+      });
+      expect(lastLookBackDate).toEqual(null);
+    });
+
+    test('It will not set an invalid date time stamp from a null @timestamp when the index is not 100% ECS compliant', () => {
+      const searchResult = sampleDocSearchResultsNoSortId();
+      (searchResult.hits.hits[0]._source['@timestamp'] as unknown) = null;
+      const { lastLookBackDate } = createSearchAfterReturnTypeFromResponse({
+        searchResult,
+        timestampOverride: undefined,
+      });
+      expect(lastLookBackDate).toEqual(null);
+    });
+
+    test('It will not set an invalid date time stamp from an invalid @timestamp string', () => {
+      const searchResult = sampleDocSearchResultsNoSortId();
+      (searchResult.hits.hits[0]._source['@timestamp'] as unknown) = 'invalid';
+      const { lastLookBackDate } = createSearchAfterReturnTypeFromResponse({
+        searchResult,
+        timestampOverride: undefined,
+      });
+      expect(lastLookBackDate).toEqual(null);
+    });
+  });
+
+  describe('lastValidDate', () => {
+    test('It returns undefined if the search result contains a null timestamp', () => {
+      const searchResult = sampleDocSearchResultsNoSortId();
+      (searchResult.hits.hits[0]._source['@timestamp'] as unknown) = null;
+      const date = lastValidDate({ searchResult, timestampOverride: undefined });
+      expect(date).toEqual(undefined);
+    });
+
+    test('It returns undefined if the search result contains a undefined timestamp', () => {
+      const searchResult = sampleDocSearchResultsNoSortId();
+      (searchResult.hits.hits[0]._source['@timestamp'] as unknown) = undefined;
+      const date = lastValidDate({ searchResult, timestampOverride: undefined });
+      expect(date).toEqual(undefined);
+    });
+
+    test('It returns undefined if the search result contains an invalid string value', () => {
+      const searchResult = sampleDocSearchResultsNoSortId();
+      (searchResult.hits.hits[0]._source['@timestamp'] as unknown) = 'invalid value';
+      const date = lastValidDate({ searchResult, timestampOverride: undefined });
+      expect(date).toEqual(undefined);
+    });
+
+    test('It returns correct date time stamp if the search result contains an invalid string value', () => {
+      const searchResult = sampleDocSearchResultsNoSortId();
+      (searchResult.hits.hits[0]._source['@timestamp'] as unknown) = 'invalid value';
+      const date = lastValidDate({ searchResult, timestampOverride: undefined });
+      expect(date).toEqual(undefined);
+    });
+
+    test('It returns normal date time if set', () => {
+      const searchResult = sampleDocSearchResultsNoSortId();
+      const date = lastValidDate({ searchResult, timestampOverride: undefined });
+      expect(date?.toISOString()).toEqual('2020-04-20T21:27:45.000Z');
+    });
+
+    test('It returns date time from field if set there', () => {
+      const timestamp = '2020-10-07T19:27:19.136Z';
+      const searchResult = sampleDocSearchResultsNoSortId();
+      if (searchResult.hits.hits[0] == null) {
+        throw new TypeError('Test requires one element');
+      }
+      searchResult.hits.hits[0] = {
+        ...searchResult.hits.hits[0],
+        fields: {
+          '@timestamp': [timestamp],
+        },
+      };
+      const date = lastValidDate({ searchResult, timestampOverride: undefined });
+      expect(date?.toISOString()).toEqual(timestamp);
+    });
+
+    test('It returns timestampOverride date time if set', () => {
+      const override = '2020-10-07T19:20:28.049Z';
+      const searchResult = sampleDocSearchResultsNoSortId();
+      searchResult.hits.hits[0]._source.different_timestamp = new Date(override).toISOString();
+      const date = lastValidDate({ searchResult, timestampOverride: 'different_timestamp' });
+      expect(date?.toISOString()).toEqual(override);
+    });
+
+    test('It returns timestampOverride date time from fields if set on it', () => {
+      const override = '2020-10-07T19:36:31.110Z';
+      const searchResult = sampleDocSearchResultsNoSortId();
+      if (searchResult.hits.hits[0] == null) {
+        throw new TypeError('Test requires one element');
+      }
+      searchResult.hits.hits[0] = {
+        ...searchResult.hits.hits[0],
+        fields: {
+          different_timestamp: [override],
+        },
+      };
+      const date = lastValidDate({ searchResult, timestampOverride: 'different_timestamp' });
+      expect(date?.toISOString()).toEqual(override);
+    });
+  });
+
+  describe('createSearchAfterReturnType', () => {
+    test('createSearchAfterReturnType will return full object when nothing is passed', () => {
+      const searchAfterReturnType = createSearchAfterReturnType();
+      const expected: SearchAfterAndBulkCreateReturnType = {
+        bulkCreateTimes: [],
+        createdSignalsCount: 0,
+        errors: [],
+        lastLookBackDate: null,
+        searchAfterTimes: [],
+        success: true,
+      };
+      expect(searchAfterReturnType).toEqual(expected);
+    });
+
+    test('createSearchAfterReturnType can override all values', () => {
+      const searchAfterReturnType = createSearchAfterReturnType({
+        bulkCreateTimes: ['123'],
+        createdSignalsCount: 5,
+        errors: ['error 1'],
+        lastLookBackDate: new Date('2020-09-21T18:51:25.193Z'),
+        searchAfterTimes: ['123'],
+        success: false,
+      });
+      const expected: SearchAfterAndBulkCreateReturnType = {
+        bulkCreateTimes: ['123'],
+        createdSignalsCount: 5,
+        errors: ['error 1'],
+        lastLookBackDate: new Date('2020-09-21T18:51:25.193Z'),
+        searchAfterTimes: ['123'],
+        success: false,
+      };
+      expect(searchAfterReturnType).toEqual(expected);
+    });
+
+    test('createSearchAfterReturnType can override select values', () => {
+      const searchAfterReturnType = createSearchAfterReturnType({
+        createdSignalsCount: 5,
+        errors: ['error 1'],
+      });
+      const expected: SearchAfterAndBulkCreateReturnType = {
+        bulkCreateTimes: [],
+        createdSignalsCount: 5,
+        errors: ['error 1'],
+        lastLookBackDate: null,
+        searchAfterTimes: [],
+        success: true,
+      };
+      expect(searchAfterReturnType).toEqual(expected);
+    });
+  });
+
+  describe('mergeReturns', () => {
+    test('it merges a default "prev" and "next" correctly ', () => {
+      const merged = mergeReturns([createSearchAfterReturnType(), createSearchAfterReturnType()]);
+      const expected: SearchAfterAndBulkCreateReturnType = {
+        bulkCreateTimes: [],
+        createdSignalsCount: 0,
+        errors: [],
+        lastLookBackDate: null,
+        searchAfterTimes: [],
+        success: true,
+      };
+      expect(merged).toEqual(expected);
+    });
+
+    test('it merges search in with two default search results where "prev" "success" is false correctly', () => {
+      const { success } = mergeReturns([
+        createSearchAfterReturnType({ success: false }),
+        createSearchAfterReturnType(),
+      ]);
+      expect(success).toEqual(false);
+    });
+
+    test('it merges search in with two default search results where "next" "success" is false correctly', () => {
+      const { success } = mergeReturns([
+        createSearchAfterReturnType(),
+        createSearchAfterReturnType({ success: false }),
+      ]);
+      expect(success).toEqual(false);
+    });
+
+    test('it merges search where the lastLookBackDate is the "next" date when given', () => {
+      const { lastLookBackDate } = mergeReturns([
+        createSearchAfterReturnType({
+          lastLookBackDate: new Date('2020-08-21T19:21:46.194Z'),
+        }),
+        createSearchAfterReturnType({
+          lastLookBackDate: new Date('2020-09-21T19:21:46.194Z'),
+        }),
+      ]);
+      expect(lastLookBackDate).toEqual(new Date('2020-09-21T19:21:46.194Z'));
+    });
+
+    test('it merges search where the lastLookBackDate is the "prev" if given undefined for "next', () => {
+      const { lastLookBackDate } = mergeReturns([
+        createSearchAfterReturnType({
+          lastLookBackDate: new Date('2020-08-21T19:21:46.194Z'),
+        }),
+        createSearchAfterReturnType({
+          lastLookBackDate: undefined,
+        }),
+      ]);
+      expect(lastLookBackDate).toEqual(new Date('2020-08-21T19:21:46.194Z'));
+    });
+
+    test('it merges search where values from "next" and "prev" are computed together', () => {
+      const merged = mergeReturns([
+        createSearchAfterReturnType({
+          bulkCreateTimes: ['123'],
+          createdSignalsCount: 3,
+          errors: ['error 1', 'error 2'],
+          lastLookBackDate: new Date('2020-08-21T18:51:25.193Z'),
+          searchAfterTimes: ['123'],
+          success: true,
+        }),
+        createSearchAfterReturnType({
+          bulkCreateTimes: ['456'],
+          createdSignalsCount: 2,
+          errors: ['error 3'],
+          lastLookBackDate: new Date('2020-09-21T18:51:25.193Z'),
+          searchAfterTimes: ['567'],
+          success: true,
+        }),
+      ]);
+      const expected: SearchAfterAndBulkCreateReturnType = {
+        bulkCreateTimes: ['123', '456'], // concatenates the prev and next together
+        createdSignalsCount: 5, // Adds the 3 and 2 together
+        errors: ['error 1', 'error 2', 'error 3'], // concatenates the prev and next together
+        lastLookBackDate: new Date('2020-09-21T18:51:25.193Z'), // takes the next lastLookBackDate
+        searchAfterTimes: ['123', '567'], // concatenates the searchAfterTimes together
+        success: true, // Defaults to success true is all of it was successful
+      };
+      expect(merged).toEqual(expected);
+    });
+  });
+
+  describe('createTotalHitsFromSearchResult', () => {
+    test('it should return 0 for empty results', () => {
+      const result = createTotalHitsFromSearchResult({
+        searchResult: sampleEmptyDocSearchResults(),
+      });
+      expect(result).toEqual(0);
+    });
+
+    test('it should return 4 for 4 result sets', () => {
+      const result = createTotalHitsFromSearchResult({
+        searchResult: repeatedSearchResultsWithSortId(4, 1, ['1', '2', '3', '4']),
+      });
+      expect(result).toEqual(4);
     });
   });
 });

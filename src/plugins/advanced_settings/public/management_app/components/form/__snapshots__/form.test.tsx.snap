@@ -18,6 +18,32 @@ exports[`Form should not render no settings message when instructed not to 1`] =
                 General
               </h2>
             </EuiFlexItem>
+            <EuiFlexItem
+              grow={false}
+            >
+              <em>
+                <FormattedMessage
+                  defaultMessage="Search terms are hiding {settingsCount} settings {clearSearch}"
+                  id="advancedSettings.form.searchResultText"
+                  values={
+                    Object {
+                      "clearSearch": <EuiLink
+                        onClick={[Function]}
+                      >
+                        <em>
+                          <FormattedMessage
+                            defaultMessage="(clear search)"
+                            id="advancedSettings.form.clearSearchResultText"
+                            values={Object {}}
+                          />
+                        </em>
+                      </EuiLink>,
+                      "settingsCount": -1,
+                    }
+                  }
+                />
+              </em>
+            </EuiFlexItem>
           </EuiFlexGroup>
         </EuiText>
         <EuiSpacer
@@ -70,6 +96,34 @@ exports[`Form should not render no settings message when instructed not to 1`] =
               "readOnly": false,
               "requiresPageReload": false,
               "type": "string",
+              "value": "value",
+            }
+          }
+          toasts={Object {}}
+        />
+        <Field
+          clearChange={[Function]}
+          dockLinks={Object {}}
+          enableSaving={true}
+          handleChange={[Function]}
+          key="general:test:array"
+          setting={
+            Object {
+              "ariaName": "array test",
+              "category": Array [
+                "general",
+              ],
+              "defVal": Array [
+                "test",
+              ],
+              "description": "array foo",
+              "displayName": "Test array setting",
+              "isCustom": false,
+              "isOverridden": false,
+              "name": "general:test:array",
+              "readOnly": false,
+              "requiresPageReload": false,
+              "type": "array",
               "value": "value",
             }
           }
@@ -230,6 +284,32 @@ exports[`Form should render no settings message when there are no settings 1`] =
                 General
               </h2>
             </EuiFlexItem>
+            <EuiFlexItem
+              grow={false}
+            >
+              <em>
+                <FormattedMessage
+                  defaultMessage="Search terms are hiding {settingsCount} settings {clearSearch}"
+                  id="advancedSettings.form.searchResultText"
+                  values={
+                    Object {
+                      "clearSearch": <EuiLink
+                        onClick={[Function]}
+                      >
+                        <em>
+                          <FormattedMessage
+                            defaultMessage="(clear search)"
+                            id="advancedSettings.form.clearSearchResultText"
+                            values={Object {}}
+                          />
+                        </em>
+                      </EuiLink>,
+                      "settingsCount": -1,
+                    }
+                  }
+                />
+              </em>
+            </EuiFlexItem>
           </EuiFlexGroup>
         </EuiText>
         <EuiSpacer
@@ -282,6 +362,34 @@ exports[`Form should render no settings message when there are no settings 1`] =
               "readOnly": false,
               "requiresPageReload": false,
               "type": "string",
+              "value": "value",
+            }
+          }
+          toasts={Object {}}
+        />
+        <Field
+          clearChange={[Function]}
+          dockLinks={Object {}}
+          enableSaving={true}
+          handleChange={[Function]}
+          key="general:test:array"
+          setting={
+            Object {
+              "ariaName": "array test",
+              "category": Array [
+                "general",
+              ],
+              "defVal": Array [
+                "test",
+              ],
+              "description": "array foo",
+              "displayName": "Test array setting",
+              "isCustom": false,
+              "isOverridden": false,
+              "name": "general:test:array",
+              "readOnly": false,
+              "requiresPageReload": false,
+              "type": "array",
               "value": "value",
             }
           }
@@ -442,6 +550,32 @@ exports[`Form should render normally 1`] = `
                 General
               </h2>
             </EuiFlexItem>
+            <EuiFlexItem
+              grow={false}
+            >
+              <em>
+                <FormattedMessage
+                  defaultMessage="Search terms are hiding {settingsCount} settings {clearSearch}"
+                  id="advancedSettings.form.searchResultText"
+                  values={
+                    Object {
+                      "clearSearch": <EuiLink
+                        onClick={[Function]}
+                      >
+                        <em>
+                          <FormattedMessage
+                            defaultMessage="(clear search)"
+                            id="advancedSettings.form.clearSearchResultText"
+                            values={Object {}}
+                          />
+                        </em>
+                      </EuiLink>,
+                      "settingsCount": -1,
+                    }
+                  }
+                />
+              </em>
+            </EuiFlexItem>
           </EuiFlexGroup>
         </EuiText>
         <EuiSpacer
@@ -494,6 +628,34 @@ exports[`Form should render normally 1`] = `
               "readOnly": false,
               "requiresPageReload": false,
               "type": "string",
+              "value": "value",
+            }
+          }
+          toasts={Object {}}
+        />
+        <Field
+          clearChange={[Function]}
+          dockLinks={Object {}}
+          enableSaving={true}
+          handleChange={[Function]}
+          key="general:test:array"
+          setting={
+            Object {
+              "ariaName": "array test",
+              "category": Array [
+                "general",
+              ],
+              "defVal": Array [
+                "test",
+              ],
+              "description": "array foo",
+              "displayName": "Test array setting",
+              "isCustom": false,
+              "isOverridden": false,
+              "name": "general:test:array",
+              "readOnly": false,
+              "requiresPageReload": false,
+              "type": "array",
               "value": "value",
             }
           }
@@ -654,6 +816,32 @@ exports[`Form should render read-only when saving is disabled 1`] = `
                 General
               </h2>
             </EuiFlexItem>
+            <EuiFlexItem
+              grow={false}
+            >
+              <em>
+                <FormattedMessage
+                  defaultMessage="Search terms are hiding {settingsCount} settings {clearSearch}"
+                  id="advancedSettings.form.searchResultText"
+                  values={
+                    Object {
+                      "clearSearch": <EuiLink
+                        onClick={[Function]}
+                      >
+                        <em>
+                          <FormattedMessage
+                            defaultMessage="(clear search)"
+                            id="advancedSettings.form.clearSearchResultText"
+                            values={Object {}}
+                          />
+                        </em>
+                      </EuiLink>,
+                      "settingsCount": -1,
+                    }
+                  }
+                />
+              </em>
+            </EuiFlexItem>
           </EuiFlexGroup>
         </EuiText>
         <EuiSpacer
@@ -706,6 +894,34 @@ exports[`Form should render read-only when saving is disabled 1`] = `
               "readOnly": false,
               "requiresPageReload": false,
               "type": "string",
+              "value": "value",
+            }
+          }
+          toasts={Object {}}
+        />
+        <Field
+          clearChange={[Function]}
+          dockLinks={Object {}}
+          enableSaving={false}
+          handleChange={[Function]}
+          key="general:test:array"
+          setting={
+            Object {
+              "ariaName": "array test",
+              "category": Array [
+                "general",
+              ],
+              "defVal": Array [
+                "test",
+              ],
+              "description": "array foo",
+              "displayName": "Test array setting",
+              "isCustom": false,
+              "isOverridden": false,
+              "name": "general:test:array",
+              "readOnly": false,
+              "requiresPageReload": false,
+              "type": "array",
               "value": "value",
             }
           }

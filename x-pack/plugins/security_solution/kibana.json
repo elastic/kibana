@@ -15,7 +15,7 @@
     "inspector",
     "licensing",
     "maps",
-    "triggers_actions_ui",
+    "triggersActionsUi",
     "uiActions"
   ],
   "optionalPlugins": [
@@ -27,9 +27,11 @@
     "spaces",
     "usageCollection",
     "lists",
-    "home"
+    "home",
+    "telemetry",
+    "telemetryManagementSection"
   ],
   "server": true,
   "ui": true,
-  "requiredBundles": ["esUiShared", "ingestManager", "kibanaUtils", "kibanaReact", "lists"]
+  "requiredBundles": ["esUiShared", "ingestManager", "kibanaUtils", "kibanaReact", "lists", "ml"]
 }

@@ -9,16 +9,12 @@ import { omit } from 'lodash';
 import {
   setupRequest,
   Setup,
-  SetupUIFilters,
   SetupTimeRange,
 } from '../lib/helpers/setup_request';
 import { getEnvironments } from '../lib/ui_filters/get_environments';
 import { Projection } from '../projections/typings';
-import {
-  localUIFilterNames,
-  LocalUIFilterName,
-} from '../lib/ui_filters/local_ui_filters/config';
-import { getUiFiltersES } from '../lib/helpers/convert_ui_filters/get_ui_filters_es';
+import { localUIFilterNames } from '../lib/ui_filters/local_ui_filters/config';
+import { getEsFilter } from '../lib/helpers/convert_ui_filters/get_es_filter';
 import { getLocalUIFilters } from '../lib/ui_filters/local_ui_filters';
 import { getServicesProjection } from '../projections/services';
 import { getTransactionGroupsProjection } from '../projections/transaction_groups';
@@ -32,17 +28,18 @@ import { getServiceNodesProjection } from '../projections/service_nodes';
 import { getRumPageLoadTransactionsProjection } from '../projections/rum_page_load_transactions';
 import { getSearchAggregatedTransactions } from '../lib/helpers/aggregated_transactions';
 import { APMRequestHandlerContext } from './typings';
+import { LocalUIFilterName } from '../../common/ui_filter';
 
-export const uiFiltersEnvironmentsRoute = createRoute(() => ({
-  path: '/api/apm/ui_filters/environments',
-  params: {
+export const uiFiltersEnvironmentsRoute = createRoute({
+  endpoint: 'GET /api/apm/ui_filters/environments',
+  params: t.type({
     query: t.intersection([
       t.partial({
         serviceName: t.string,
       }),
       rangeRt,
     ]),
-  },
+  }),
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     const { serviceName } = context.params.query;
@@ -56,7 +53,7 @@ export const uiFiltersEnvironmentsRoute = createRoute(() => ({
       searchAggregatedTransactions,
     });
   },
-}));
+});
 
 const filterNamesRt = t.type({
   filterNames: jsonRt.pipe(
@@ -77,53 +74,53 @@ const localUiBaseQueryRt = t.intersection([
 ]);
 
 function createLocalFiltersRoute<
-  TPath extends string,
+  TEndpoint extends string,
   TProjection extends Projection,
   TQueryRT extends t.HasProps
 >({
-  path,
+  endpoint,
   getProjection,
   queryRt,
 }: {
-  path: TPath;
+  endpoint: TEndpoint;
   getProjection: GetProjection<
     TProjection,
     t.IntersectionC<[TQueryRT, BaseQueryType]>
   >;
   queryRt: TQueryRT;
 }) {
-  return createRoute(() => ({
-    path,
-    params: {
+  return createRoute({
+    endpoint,
+    params: t.type({
       query: t.intersection([localUiBaseQueryRt, queryRt]),
-    },
+    }),
     handler: async ({ context, request }) => {
       const setup = await setupRequest(context, request);
+      const { uiFilters } = setup;
       const { query } = context.params;
 
-      const { uiFilters, filterNames } = query;
-      const parsedUiFilters = JSON.parse(uiFilters);
+      const { filterNames } = query;
       const projection = await getProjection({
         query,
         context,
         setup: {
           ...setup,
-          uiFiltersES: getUiFiltersES(omit(parsedUiFilters, filterNames)),
+          esFilter: getEsFilter(omit(uiFilters, filterNames)),
         },
       });
 
       return getLocalUIFilters({
         projection,
         setup,
-        uiFilters: parsedUiFilters,
+        uiFilters,
         localFilterNames: filterNames,
       });
     },
-  }));
+  });
 }
 
 export const servicesLocalFiltersRoute = createLocalFiltersRoute({
-  path: `/api/apm/ui_filters/local_filters/services`,
+  endpoint: `GET /api/apm/ui_filters/local_filters/services`,
   getProjection: async ({ context, setup }) => {
     const searchAggregatedTransactions = await getSearchAggregatedTransactions(
       setup
@@ -135,7 +132,7 @@ export const servicesLocalFiltersRoute = createLocalFiltersRoute({
 });
 
 export const transactionGroupsLocalFiltersRoute = createLocalFiltersRoute({
-  path: '/api/apm/ui_filters/local_filters/transactionGroups',
+  endpoint: 'GET /api/apm/ui_filters/local_filters/transactionGroups',
   getProjection: async ({ context, setup, query }) => {
     const { transactionType, serviceName, transactionName } = query;
 
@@ -166,7 +163,7 @@ export const transactionGroupsLocalFiltersRoute = createLocalFiltersRoute({
 });
 
 export const tracesLocalFiltersRoute = createLocalFiltersRoute({
-  path: '/api/apm/ui_filters/local_filters/traces',
+  endpoint: 'GET /api/apm/ui_filters/local_filters/traces',
   getProjection: async ({ setup, context }) => {
     const searchAggregatedTransactions = await getSearchAggregatedTransactions(
       setup
@@ -181,7 +178,7 @@ export const tracesLocalFiltersRoute = createLocalFiltersRoute({
 });
 
 export const transactionsLocalFiltersRoute = createLocalFiltersRoute({
-  path: '/api/apm/ui_filters/local_filters/transactions',
+  endpoint: 'GET /api/apm/ui_filters/local_filters/transactions',
   getProjection: async ({ context, setup, query }) => {
     const { transactionType, serviceName, transactionName } = query;
 
@@ -205,7 +202,7 @@ export const transactionsLocalFiltersRoute = createLocalFiltersRoute({
 });
 
 export const metricsLocalFiltersRoute = createLocalFiltersRoute({
-  path: '/api/apm/ui_filters/local_filters/metrics',
+  endpoint: 'GET /api/apm/ui_filters/local_filters/metrics',
   getProjection: ({ setup, query }) => {
     const { serviceName, serviceNodeName } = query;
     return getMetricsProjection({
@@ -225,7 +222,7 @@ export const metricsLocalFiltersRoute = createLocalFiltersRoute({
 });
 
 export const errorGroupsLocalFiltersRoute = createLocalFiltersRoute({
-  path: '/api/apm/ui_filters/local_filters/errorGroups',
+  endpoint: 'GET /api/apm/ui_filters/local_filters/errorGroups',
   getProjection: ({ setup, query }) => {
     const { serviceName } = query;
     return getErrorGroupsProjection({
@@ -239,7 +236,7 @@ export const errorGroupsLocalFiltersRoute = createLocalFiltersRoute({
 });
 
 export const serviceNodesLocalFiltersRoute = createLocalFiltersRoute({
-  path: '/api/apm/ui_filters/local_filters/serviceNodes',
+  endpoint: 'GET /api/apm/ui_filters/local_filters/serviceNodes',
   getProjection: ({ setup, query }) => {
     const { serviceName } = query;
     return getServiceNodesProjection({
@@ -253,7 +250,7 @@ export const serviceNodesLocalFiltersRoute = createLocalFiltersRoute({
 });
 
 export const rumOverviewLocalFiltersRoute = createLocalFiltersRoute({
-  path: '/api/apm/ui_filters/local_filters/rumOverview',
+  endpoint: 'GET /api/apm/ui_filters/local_filters/rumOverview',
   getProjection: async ({ setup }) => {
     return getRumPageLoadTransactionsProjection({
       setup,
@@ -273,6 +270,6 @@ type GetProjection<
   context,
 }: {
   query: t.TypeOf<TQueryRT>;
-  setup: Setup & SetupUIFilters & SetupTimeRange;
+  setup: Setup & SetupTimeRange;
   context: APMRequestHandlerContext;
 }) => Promise<TProjection> | TProjection;

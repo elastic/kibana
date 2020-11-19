@@ -7,6 +7,7 @@
 import { getSuggestions } from './suggestion_helpers';
 import { createMockVisualization, createMockDatasource, DatasourceMock } from '../mocks';
 import { TableSuggestion, DatasourceSuggestion } from '../../types';
+import { PaletteOutput } from 'src/plugins/charts/public';
 
 const generateSuggestion = (state = {}, layerId: string = 'first'): DatasourceSuggestion => ({
   state,
@@ -171,6 +172,75 @@ describe('suggestion helpers', () => {
       droppedField
     );
     expect(multiDatasourceMap.mock3.getDatasourceSuggestionsForField).not.toHaveBeenCalled();
+  });
+
+  it('should call getDatasourceSuggestionsForVisualizeField when a visualizeTriggerField is passed', () => {
+    datasourceMap.mock.getDatasourceSuggestionsForVisualizeField.mockReturnValue([
+      generateSuggestion(),
+    ]);
+    getSuggestions({
+      visualizationMap: {
+        vis1: createMockVisualization(),
+      },
+      activeVisualizationId: 'vis1',
+      visualizationState: {},
+      datasourceMap,
+      datasourceStates,
+      visualizeTriggerFieldContext: {
+        indexPatternId: '1',
+        fieldName: 'test',
+      },
+    });
+    expect(datasourceMap.mock.getDatasourceSuggestionsForVisualizeField).toHaveBeenCalledWith(
+      datasourceStates.mock.state,
+      '1',
+      'test'
+    );
+  });
+
+  it('should call getDatasourceSuggestionsForVisualizeField from all datasources with a state', () => {
+    const multiDatasourceStates = {
+      mock: {
+        isLoading: false,
+        state: {},
+      },
+      mock2: {
+        isLoading: false,
+        state: {},
+      },
+    };
+    const multiDatasourceMap = {
+      mock: createMockDatasource('a'),
+      mock2: createMockDatasource('a'),
+      mock3: createMockDatasource('a'),
+    };
+    const visualizeTriggerField = {
+      indexPatternId: '1',
+      fieldName: 'test',
+    };
+    getSuggestions({
+      visualizationMap: {
+        vis1: createMockVisualization(),
+      },
+      activeVisualizationId: 'vis1',
+      visualizationState: {},
+      datasourceMap: multiDatasourceMap,
+      datasourceStates: multiDatasourceStates,
+      visualizeTriggerFieldContext: visualizeTriggerField,
+    });
+    expect(multiDatasourceMap.mock.getDatasourceSuggestionsForVisualizeField).toHaveBeenCalledWith(
+      multiDatasourceStates.mock.state,
+      '1',
+      'test'
+    );
+    expect(multiDatasourceMap.mock2.getDatasourceSuggestionsForVisualizeField).toHaveBeenCalledWith(
+      multiDatasourceStates.mock2.state,
+      '1',
+      'test'
+    );
+    expect(
+      multiDatasourceMap.mock3.getDatasourceSuggestionsForVisualizeField
+    ).not.toHaveBeenCalled();
   });
 
   it('should rank the visualizations by score', () => {
@@ -341,6 +411,64 @@ describe('suggestion helpers', () => {
     expect(mockVisualization2.getSuggestions).not.toHaveBeenCalledWith(
       expect.objectContaining({
         state: currentState,
+      })
+    );
+  });
+
+  it('should pass passed in main palette if specified', () => {
+    const mockVisualization1 = createMockVisualization();
+    const mockVisualization2 = createMockVisualization();
+    const mainPalette: PaletteOutput = { type: 'palette', name: 'mock' };
+    datasourceMap.mock.getDatasourceSuggestionsFromCurrentState.mockReturnValue([
+      generateSuggestion(0),
+      generateSuggestion(1),
+    ]);
+    getSuggestions({
+      visualizationMap: {
+        vis1: mockVisualization1,
+        vis2: mockVisualization2,
+      },
+      activeVisualizationId: 'vis1',
+      visualizationState: {},
+      datasourceMap,
+      datasourceStates,
+      mainPalette,
+    });
+    expect(mockVisualization1.getSuggestions).toHaveBeenCalledWith(
+      expect.objectContaining({
+        mainPalette,
+      })
+    );
+    expect(mockVisualization2.getSuggestions).toHaveBeenCalledWith(
+      expect.objectContaining({
+        mainPalette,
+      })
+    );
+  });
+
+  it('should query active visualization for main palette if not specified', () => {
+    const mockVisualization1 = createMockVisualization();
+    const mockVisualization2 = createMockVisualization();
+    const mainPalette: PaletteOutput = { type: 'palette', name: 'mock' };
+    mockVisualization1.getMainPalette = jest.fn(() => mainPalette);
+    datasourceMap.mock.getDatasourceSuggestionsFromCurrentState.mockReturnValue([
+      generateSuggestion(0),
+      generateSuggestion(1),
+    ]);
+    getSuggestions({
+      visualizationMap: {
+        vis1: mockVisualization1,
+        vis2: mockVisualization2,
+      },
+      activeVisualizationId: 'vis1',
+      visualizationState: {},
+      datasourceMap,
+      datasourceStates,
+    });
+    expect(mockVisualization1.getMainPalette).toHaveBeenCalledWith({});
+    expect(mockVisualization2.getSuggestions).toHaveBeenCalledWith(
+      expect.objectContaining({
+        mainPalette,
       })
     );
   });

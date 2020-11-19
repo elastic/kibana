@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import * as React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { ActionsConnectorsContextProvider } from '../../context/actions_connectors_context';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
@@ -35,7 +35,7 @@ describe('connector_edit_flyout', () => {
           show: true,
         },
       },
-      actionTypeRegistry: actionTypeRegistry as any,
+      actionTypeRegistry,
       alertTypeRegistry: {} as any,
       docLinks: { ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' },
     };
@@ -84,11 +84,7 @@ describe('connector_edit_flyout', () => {
             docLinks: deps.docLinks,
           }}
         >
-          <ConnectorEditFlyout
-            initialConnector={connector}
-            editFlyoutVisible={true}
-            setEditFlyoutVisibility={(state) => {}}
-          />
+          <ConnectorEditFlyout initialConnector={connector} onClose={() => {}} />
         </ActionsConnectorsContextProvider>
       </AppContextProvider>
     );
@@ -141,17 +137,13 @@ describe('connector_edit_flyout', () => {
             docLinks: deps.docLinks,
           }}
         >
-          <ConnectorEditFlyout
-            initialConnector={connector}
-            editFlyoutVisible={true}
-            setEditFlyoutVisibility={(state) => {}}
-          />
+          <ConnectorEditFlyout initialConnector={connector} onClose={() => {}} />
         </ActionsConnectorsContextProvider>
       </AppContextProvider>
     );
 
     const preconfiguredBadge = wrapper.find('[data-test-subj="preconfiguredBadge"]');
     expect(preconfiguredBadge.exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="saveEditedActionButton"]').exists()).toBeFalsy();
+    expect(wrapper.find('[data-test-subj="saveAndCloseEditedActionButton"]').exists()).toBeFalsy();
   });
 });

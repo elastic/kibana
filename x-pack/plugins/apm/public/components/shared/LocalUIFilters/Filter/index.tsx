@@ -113,7 +113,7 @@ function Filter({ name, title, options, onChange, value, showCount }: Props) {
           searchable={true}
         >
           {(list, search) => (
-            <SelectContainer>
+            <SelectContainer id={`local-filter-popover-${name}`}>
               <EuiFlexGroup direction="column" gutterSize="none">
                 <FlexItem grow={true}>
                   <EuiTitle size="xxxs" textTransform="uppercase">
@@ -159,6 +159,7 @@ function Filter({ name, title, options, onChange, value, showCount }: Props) {
       {value.length ? (
         <>
           <FilterBadgeList
+            name={name}
             onRemove={(val) => {
               onChange(value.filter((v) => val !== v));
             }}

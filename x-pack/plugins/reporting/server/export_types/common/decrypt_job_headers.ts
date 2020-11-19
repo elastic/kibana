@@ -7,24 +7,13 @@
 import { i18n } from '@kbn/i18n';
 import { cryptoFactory, LevelLogger } from '../../lib';
 
-interface HasEncryptedHeaders {
-  headers?: string;
-}
-
-export const decryptJobHeaders = async <
-  JobParamsType,
-  TaskPayloadType extends HasEncryptedHeaders
->({
-  encryptionKey,
-  job,
-  logger,
-}: {
-  encryptionKey?: string;
-  job: TaskPayloadType;
-  logger: LevelLogger;
-}): Promise<Record<string, string>> => {
+export const decryptJobHeaders = async (
+  encryptionKey: string | undefined,
+  headers: string,
+  logger: LevelLogger
+): Promise<Record<string, string>> => {
   try {
-    if (typeof job.headers !== 'string') {
+    if (typeof headers !== 'string') {
       throw new Error(
         i18n.translate('xpack.reporting.exportTypes.common.missingJobHeadersErrorMessage', {
           defaultMessage: 'Job headers are missing',
@@ -32,7 +21,7 @@ export const decryptJobHeaders = async <
       );
     }
     const crypto = cryptoFactory(encryptionKey);
-    const decryptedHeaders = (await crypto.decrypt(job.headers)) as Record<string, string>;
+    const decryptedHeaders = (await crypto.decrypt(headers)) as Record<string, string>;
     return decryptedHeaders;
   } catch (err) {
     logger.error(err);

@@ -11,157 +11,101 @@ import { ImportDataProps } from '../../detections/containers/detection_engine/ru
 
 jest.mock('../../common/lib/kibana', () => {
   return {
-    KibanaServices: { get: jest.fn(() => ({ http: { fetch: jest.fn() } })) },
+    KibanaServices: {
+      get: jest.fn(() => ({
+        http: {
+          fetch: jest.fn(),
+        },
+      })),
+    },
   };
 });
 
+const timelineData = {
+  columns: [
+    {
+      columnHeaderType: 'not-filtered',
+      id: '@timestamp',
+    },
+    {
+      columnHeaderType: 'not-filtered',
+      id: 'message',
+    },
+    {
+      columnHeaderType: 'not-filtered',
+      id: 'event.category',
+    },
+    {
+      columnHeaderType: 'not-filtered',
+      id: 'event.action',
+    },
+    {
+      columnHeaderType: 'not-filtered',
+      id: 'host.name',
+    },
+    {
+      columnHeaderType: 'not-filtered',
+      id: 'source.ip',
+    },
+    {
+      columnHeaderType: 'not-filtered',
+      id: 'destination.ip',
+    },
+    {
+      columnHeaderType: 'not-filtered',
+      id: 'user.name',
+    },
+  ],
+  dataProviders: [],
+  description: 'x',
+  eventType: 'all',
+  filters: [],
+  kqlMode: 'filter',
+  kqlQuery: {
+    filterQuery: null,
+  },
+  title: '',
+  timelineType: TimelineType.default,
+  templateTimelineVersion: null,
+  templateTimelineId: null,
+  dateRange: {
+    start: 1590998565409,
+    end: 1591084965409,
+  },
+  savedQueryId: null,
+  sort: {
+    columnId: '@timestamp',
+    sortDirection: 'desc',
+  },
+  status: TimelineStatus.active,
+};
+const mockPatchTimelineResponse = {
+  data: {
+    persistTimeline: {
+      code: 200,
+      message: 'success',
+      timeline: {
+        ...timelineData,
+        savedObjectId: '9d5693e0-a42a-11ea-b8f4-c5434162742a',
+        version: 'WzM0NSwxXQ==',
+      },
+    },
+  },
+};
 describe('persistTimeline', () => {
   describe('create draft timeline', () => {
     const timelineId = null;
     const initialDraftTimeline = {
-      columns: [
-        {
-          columnHeaderType: 'not-filtered',
-          id: '@timestamp',
-        },
-        {
-          columnHeaderType: 'not-filtered',
-          id: 'message',
-        },
-        {
-          columnHeaderType: 'not-filtered',
-          id: 'event.category',
-        },
-        {
-          columnHeaderType: 'not-filtered',
-          id: 'event.action',
-        },
-        {
-          columnHeaderType: 'not-filtered',
-          id: 'host.name',
-        },
-        {
-          columnHeaderType: 'not-filtered',
-          id: 'source.ip',
-        },
-        {
-          columnHeaderType: 'not-filtered',
-          id: 'destination.ip',
-        },
-        {
-          columnHeaderType: 'not-filtered',
-          id: 'user.name',
-        },
-      ],
-      dataProviders: [],
-      description: 'x',
-      eventType: 'all',
-      filters: [],
-      kqlMode: 'filter',
-      kqlQuery: {
-        filterQuery: null,
-      },
-      title: '',
-      timelineType: TimelineType.default,
-      templateTimelineVersion: null,
-      templateTimelineId: null,
-      dateRange: {
-        start: 1590998565409,
-        end: 1591084965409,
-      },
-      savedQueryId: null,
-      sort: {
-        columnId: '@timestamp',
-        sortDirection: 'desc',
-      },
+      ...timelineData,
       status: TimelineStatus.draft,
     };
     const mockDraftResponse = {
       data: {
         persistTimeline: {
           timeline: {
+            ...initialDraftTimeline,
             savedObjectId: '9d5693e0-a42a-11ea-b8f4-c5434162742a',
             version: 'WzMzMiwxXQ==',
-            columns: [
-              { columnHeaderType: 'not-filtered', id: '@timestamp' },
-              { columnHeaderType: 'not-filtered', id: 'message' },
-              { columnHeaderType: 'not-filtered', id: 'event.category' },
-              { columnHeaderType: 'not-filtered', id: 'event.action' },
-              { columnHeaderType: 'not-filtered', id: 'host.name' },
-              { columnHeaderType: 'not-filtered', id: 'source.ip' },
-              { columnHeaderType: 'not-filtered', id: 'destination.ip' },
-              { columnHeaderType: 'not-filtered', id: 'user.name' },
-            ],
-            dataProviders: [],
-            description: '',
-            eventType: 'all',
-            filters: [],
-            kqlMode: 'filter',
-            timelineType: 'default',
-            kqlQuery: { filterQuery: null },
-            title: '',
-            sort: { columnId: '@timestamp', sortDirection: 'desc' },
-            status: 'draft',
-            created: 1591091394733,
-            createdBy: 'angela',
-            updated: 1591091394733,
-            updatedBy: 'angela',
-            templateTimelineId: null,
-            templateTimelineVersion: null,
-            dateRange: { start: 1590998565409, end: 1591084965409 },
-            savedQueryId: null,
-            favorite: [],
-            eventIdToNoteIds: [],
-            noteIds: [],
-            notes: [],
-            pinnedEventIds: [],
-            pinnedEventsSaveObject: [],
-          },
-        },
-      },
-    };
-    const mockPatchTimelineResponse = {
-      data: {
-        persistTimeline: {
-          code: 200,
-          message: 'success',
-          timeline: {
-            savedObjectId: '9d5693e0-a42a-11ea-b8f4-c5434162742a',
-            version: 'WzM0NSwxXQ==',
-            columns: [
-              { columnHeaderType: 'not-filtered', id: '@timestamp' },
-              { columnHeaderType: 'not-filtered', id: 'message' },
-              { columnHeaderType: 'not-filtered', id: 'event.category' },
-              { columnHeaderType: 'not-filtered', id: 'event.action' },
-              { columnHeaderType: 'not-filtered', id: 'host.name' },
-              { columnHeaderType: 'not-filtered', id: 'source.ip' },
-              { columnHeaderType: 'not-filtered', id: 'destination.ip' },
-              { columnHeaderType: 'not-filtered', id: 'user.name' },
-            ],
-            dataProviders: [],
-            description: 'x',
-            eventType: 'all',
-            filters: [],
-            kqlMode: 'filter',
-            timelineType: 'default',
-            kqlQuery: { filterQuery: null },
-            title: '',
-            sort: { columnId: '@timestamp', sortDirection: 'desc' },
-            status: 'draft',
-            created: 1591092702804,
-            createdBy: 'angela',
-            updated: 1591092705206,
-            updatedBy: 'angela',
-            templateTimelineId: null,
-            templateTimelineVersion: null,
-            dateRange: { start: 1590998565409, end: 1591084965409 },
-            savedQueryId: null,
-            favorite: [],
-            eventIdToNoteIds: [],
-            noteIds: [],
-            notes: [],
-            pinnedEventIds: [],
-            pinnedEventsSaveObject: [],
           },
         },
       },
@@ -223,61 +167,7 @@ describe('persistTimeline', () => {
   describe('create draft timeline in read-only permission', () => {
     const timelineId = null;
     const initialDraftTimeline = {
-      columns: [
-        {
-          columnHeaderType: 'not-filtered',
-          id: '@timestamp',
-        },
-        {
-          columnHeaderType: 'not-filtered',
-          id: 'message',
-        },
-        {
-          columnHeaderType: 'not-filtered',
-          id: 'event.category',
-        },
-        {
-          columnHeaderType: 'not-filtered',
-          id: 'event.action',
-        },
-        {
-          columnHeaderType: 'not-filtered',
-          id: 'host.name',
-        },
-        {
-          columnHeaderType: 'not-filtered',
-          id: 'source.ip',
-        },
-        {
-          columnHeaderType: 'not-filtered',
-          id: 'destination.ip',
-        },
-        {
-          columnHeaderType: 'not-filtered',
-          id: 'user.name',
-        },
-      ],
-      dataProviders: [],
-      description: 'x',
-      eventType: 'all',
-      filters: [],
-      kqlMode: 'filter',
-      kqlQuery: {
-        filterQuery: null,
-      },
-      title: '',
-      timelineType: TimelineType.default,
-      templateTimelineVersion: null,
-      templateTimelineId: null,
-      dateRange: {
-        start: 1590998565409,
-        end: 1591084965409,
-      },
-      savedQueryId: null,
-      sort: {
-        columnId: '@timestamp',
-        sortDirection: 'desc',
-      },
+      ...timelineData,
       status: TimelineStatus.draft,
     };
 
@@ -325,104 +215,14 @@ describe('persistTimeline', () => {
 
   describe('create active timeline (import)', () => {
     const timelineId = null;
-    const importTimeline = {
-      columns: [
-        {
-          columnHeaderType: 'not-filtered',
-          id: '@timestamp',
-        },
-        {
-          columnHeaderType: 'not-filtered',
-          id: 'message',
-        },
-        {
-          columnHeaderType: 'not-filtered',
-          id: 'event.category',
-        },
-        {
-          columnHeaderType: 'not-filtered',
-          id: 'event.action',
-        },
-        {
-          columnHeaderType: 'not-filtered',
-          id: 'host.name',
-        },
-        {
-          columnHeaderType: 'not-filtered',
-          id: 'source.ip',
-        },
-        {
-          columnHeaderType: 'not-filtered',
-          id: 'destination.ip',
-        },
-        {
-          columnHeaderType: 'not-filtered',
-          id: 'user.name',
-        },
-      ],
-      dataProviders: [],
-      description: 'x',
-      eventType: 'all',
-      filters: [],
-      kqlMode: 'filter',
-      kqlQuery: {
-        filterQuery: null,
-      },
-      title: '',
-      timelineType: TimelineType.default,
-      templateTimelineVersion: null,
-      templateTimelineId: null,
-      dateRange: {
-        start: 1590998565409,
-        end: 1591084965409,
-      },
-      savedQueryId: null,
-      sort: {
-        columnId: '@timestamp',
-        sortDirection: 'desc',
-      },
-      status: TimelineStatus.active,
-    };
+    const importTimeline = timelineData;
     const mockPostTimelineResponse = {
       data: {
         persistTimeline: {
           timeline: {
+            ...timelineData,
             savedObjectId: '9d5693e0-a42a-11ea-b8f4-c5434162742a',
             version: 'WzMzMiwxXQ==',
-            columns: [
-              { columnHeaderType: 'not-filtered', id: '@timestamp' },
-              { columnHeaderType: 'not-filtered', id: 'message' },
-              { columnHeaderType: 'not-filtered', id: 'event.category' },
-              { columnHeaderType: 'not-filtered', id: 'event.action' },
-              { columnHeaderType: 'not-filtered', id: 'host.name' },
-              { columnHeaderType: 'not-filtered', id: 'source.ip' },
-              { columnHeaderType: 'not-filtered', id: 'destination.ip' },
-              { columnHeaderType: 'not-filtered', id: 'user.name' },
-            ],
-            dataProviders: [],
-            description: '',
-            eventType: 'all',
-            filters: [],
-            kqlMode: 'filter',
-            timelineType: 'default',
-            kqlQuery: { filterQuery: null },
-            title: '',
-            sort: { columnId: '@timestamp', sortDirection: 'desc' },
-            status: 'draft',
-            created: 1591091394733,
-            createdBy: 'angela',
-            updated: 1591091394733,
-            updatedBy: 'angela',
-            templateTimelineId: null,
-            templateTimelineVersion: null,
-            dateRange: { start: 1590998565409, end: 1591084965409 },
-            savedQueryId: null,
-            favorite: [],
-            eventIdToNoteIds: [],
-            noteIds: [],
-            notes: [],
-            pinnedEventIds: [],
-            pinnedEventsSaveObject: [],
           },
         },
       },
@@ -462,104 +262,16 @@ describe('persistTimeline', () => {
 
   describe('update active timeline', () => {
     const timelineId = '9d5693e0-a42a-11ea-b8f4-c5434162742a';
-    const inputTimeline = {
-      columns: [
-        {
-          columnHeaderType: 'not-filtered',
-          id: '@timestamp',
-        },
-        {
-          columnHeaderType: 'not-filtered',
-          id: 'message',
-        },
-        {
-          columnHeaderType: 'not-filtered',
-          id: 'event.category',
-        },
-        {
-          columnHeaderType: 'not-filtered',
-          id: 'event.action',
-        },
-        {
-          columnHeaderType: 'not-filtered',
-          id: 'host.name',
-        },
-        {
-          columnHeaderType: 'not-filtered',
-          id: 'source.ip',
-        },
-        {
-          columnHeaderType: 'not-filtered',
-          id: 'destination.ip',
-        },
-        {
-          columnHeaderType: 'not-filtered',
-          id: 'user.name',
-        },
-      ],
-      dataProviders: [],
-      description: 'x',
-      eventType: 'all',
-      filters: [],
-      kqlMode: 'filter',
-      kqlQuery: {
-        filterQuery: null,
-      },
-      title: '',
-      timelineType: TimelineType.default,
-      templateTimelineVersion: null,
-      templateTimelineId: null,
-      dateRange: {
-        start: 1590998565409,
-        end: 1591084965409,
-      },
-      savedQueryId: null,
-      sort: {
-        columnId: '@timestamp',
-        sortDirection: 'desc',
-      },
-      status: TimelineStatus.active,
-    };
-    const mockPatchTimelineResponse = {
+    const inputTimeline = timelineData;
+    const mockPatchTimelineResponseNew = {
       data: {
         persistTimeline: {
           timeline: {
-            savedObjectId: '9d5693e0-a42a-11ea-b8f4-c5434162742a',
+            ...mockPatchTimelineResponse.data.persistTimeline.timeline,
             version: 'WzMzMiwxXQ==',
-            columns: [
-              { columnHeaderType: 'not-filtered', id: '@timestamp' },
-              { columnHeaderType: 'not-filtered', id: 'message' },
-              { columnHeaderType: 'not-filtered', id: 'event.category' },
-              { columnHeaderType: 'not-filtered', id: 'event.action' },
-              { columnHeaderType: 'not-filtered', id: 'host.name' },
-              { columnHeaderType: 'not-filtered', id: 'source.ip' },
-              { columnHeaderType: 'not-filtered', id: 'destination.ip' },
-              { columnHeaderType: 'not-filtered', id: 'user.name' },
-            ],
-            dataProviders: [],
-            description: '',
-            eventType: 'all',
-            filters: [],
-            kqlMode: 'filter',
-            timelineType: 'default',
-            kqlQuery: { filterQuery: null },
-            title: '',
-            sort: { columnId: '@timestamp', sortDirection: 'desc' },
-            status: 'draft',
-            created: 1591091394733,
-            createdBy: 'angela',
-            updated: 1591091394733,
-            updatedBy: 'angela',
-            templateTimelineId: null,
-            templateTimelineVersion: null,
-            dateRange: { start: 1590998565409, end: 1591084965409 },
-            savedQueryId: null,
-            favorite: [],
-            eventIdToNoteIds: [],
-            noteIds: [],
-            notes: [],
-            pinnedEventIds: [],
-            pinnedEventsSaveObject: [],
+            description: 'x',
+            created: 1591092702804,
+            updated: 1591092705206,
           },
         },
       },
@@ -578,7 +290,7 @@ describe('persistTimeline', () => {
         http: {
           fetch: fetchMock,
           post: postMock,
-          patch: patchMock.mockReturnValue(mockPatchTimelineResponse),
+          patch: patchMock.mockReturnValue(mockPatchTimelineResponseNew),
         },
       });
       api.persistTimeline({ timelineId, timeline: inputTimeline, version });
@@ -674,7 +386,7 @@ describe('getDraftTimeline', () => {
 
     (KibanaServices.get as jest.Mock).mockReturnValue({
       http: {
-        get: getMock,
+        get: getMock.mockImplementation(() => Promise.resolve(mockPatchTimelineResponse)),
       },
     });
     api.getDraftTimeline(timelineType);
@@ -696,7 +408,7 @@ describe('cleanDraftTimeline', () => {
 
     (KibanaServices.get as jest.Mock).mockReturnValue({
       http: {
-        post: postMock,
+        post: postMock.mockImplementation(() => Promise.resolve(mockPatchTimelineResponse)),
       },
     });
   });

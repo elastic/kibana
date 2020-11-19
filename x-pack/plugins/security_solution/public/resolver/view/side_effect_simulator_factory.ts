@@ -37,7 +37,7 @@ export const sideEffectSimulatorFactory: () => SideEffectSimulator = () => {
   /**
    * Get the simulate `DOMRect` for `element`.
    */
-  const contentRectForElement: (target: Element) => DOMRect = (target) => {
+  const getBoundingClientRect: (target: Element) => DOMRect = (target) => {
     if (contentRects.has(target)) {
       return contentRects.get(target)!;
     }
@@ -58,13 +58,32 @@ export const sideEffectSimulatorFactory: () => SideEffectSimulator = () => {
   };
 
   /**
-   * Change `Element.prototype.getBoundingClientRect` to return our faked values.
+   * Last value written to the clipboard, of '' if no text has been written. Returned by the `controls`.
    */
-  jest
-    .spyOn(Element.prototype, 'getBoundingClientRect')
-    .mockImplementation(function (this: Element) {
-      return contentRectForElement(this);
+  let clipboardText: string = ''; // the `readText` method of the Clipboard API returns an empty string if the clipboard is empty.
+
+  function confirmTextWrittenToClipboard() {
+    const next = clipboardWriteTextQueue.shift();
+    if (next) {
+      const [text, resolve] = next;
+      clipboardText = text;
+      resolve();
+    }
+  }
+
+  /**
+   * Queue of `text` waiting to be written to the clipboard. Calling `resolve` will resolve the promise returned by the mock `writeTextToClipboard` method.
+   */
+  const clipboardWriteTextQueue: Array<[text: string, resolve: () => void]> = [];
+
+  /**
+   * Mock `writeText` method of the `Clipboard` API.
+   */
+  function writeTextToClipboard(text: string): Promise<void> {
+    return new Promise((resolve) => {
+      clipboardWriteTextQueue.push([text, resolve]);
     });
+  }
 
   /**
    * A mock implementation of `ResizeObserver` that works with our fake `getBoundingClientRect` and `simulateElementResize`
@@ -159,12 +178,20 @@ export const sideEffectSimulatorFactory: () => SideEffectSimulator = () => {
       },
 
       simulateElementResize,
+
+      get clipboardText() {
+        return clipboardText;
+      },
+
+      confirmTextWrittenToClipboard,
     },
     mock: {
       requestAnimationFrame,
       cancelAnimationFrame,
       timestamp,
       ResizeObserver: MockResizeObserver,
+      writeTextToClipboard,
+      getBoundingClientRect,
     },
   };
   return retval;

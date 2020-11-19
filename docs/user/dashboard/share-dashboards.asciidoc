@@ -23,5 +23,5 @@ tools. To create a short URL, you must have write access to {kib}.
 [[import-dashboards]]
 === Export the dashboard
 
-To export the dashboard, open the menu, then click *Stack Management > Saved Objects*. For more information,
+To export the dashboard, open the main menu, then click *Stack Management > Saved Objects*. For more information,
 refer to <<managing-saved-objects, Managing saved objects>>.

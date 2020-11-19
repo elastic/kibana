@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { LegacyAPICaller } from 'kibana/server';
+import { ElasticsearchClient } from 'src/core/server';
 
 // This can be removed when the ES client improves the types
 export interface ESClusterInfo {
@@ -25,24 +25,24 @@ export interface ESClusterInfo {
   cluster_name: string;
   version: {
     number: string;
-    build_flavor: string;
-    build_type: string;
-    build_hash: string;
-    build_date: string;
+    build_flavor?: string;
+    build_type?: string;
+    build_hash?: string;
+    build_date?: string;
     build_snapshot?: boolean;
-    lucene_version: string;
-    minimum_wire_compatibility_version: string;
-    minimum_index_compatibility_version: string;
+    lucene_version?: string;
+    minimum_wire_compatibility_version?: string;
+    minimum_index_compatibility_version?: string;
   };
 }
-
 /**
  * Get the cluster info from the connected cluster.
  *
  * This is the equivalent to GET /
  *
- * @param {function} callCluster The callWithInternalUser handler (exposed for testing)
+ * @param {function} esClient The asInternalUser handler (exposed for testing)
  */
-export function getClusterInfo(callCluster: LegacyAPICaller) {
-  return callCluster<ESClusterInfo>('info');
+export async function getClusterInfo(esClient: ElasticsearchClient) {
+  const { body } = await esClient.info<ESClusterInfo>();
+  return body;
 }

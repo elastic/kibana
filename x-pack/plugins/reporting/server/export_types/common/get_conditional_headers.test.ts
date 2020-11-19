@@ -6,7 +6,6 @@
 
 import { ReportingConfig } from '../../';
 import { createMockConfig, createMockConfigSchema } from '../../test_helpers';
-import { BasePayload } from '../../types';
 import { getConditionalHeaders } from './';
 
 let mockConfig: ReportingConfig;
@@ -24,11 +23,7 @@ describe('conditions', () => {
       baz: 'quix',
     };
 
-    const conditionalHeaders = getConditionalHeaders({
-      job: {} as BasePayload<any>,
-      filteredHeaders: permittedHeaders,
-      config: mockConfig,
-    });
+    const conditionalHeaders = getConditionalHeaders(mockConfig, permittedHeaders);
 
     expect(conditionalHeaders.conditions.hostname).toEqual(
       mockConfig.get('kibanaServer', 'hostname')
@@ -49,19 +44,7 @@ describe('config formatting', () => {
     const mockSchema = createMockConfigSchema(reportingConfig);
     mockConfig = createMockConfig(mockSchema);
 
-    const conditionalHeaders = getConditionalHeaders({
-      job: {
-        title: 'cool-job-bro',
-        type: 'csv',
-        jobParams: {
-          savedObjectId: 'abc-123',
-          isImmediate: false,
-          savedObjectType: 'search',
-        },
-      },
-      filteredHeaders: {},
-      config: mockConfig,
-    });
+    const conditionalHeaders = getConditionalHeaders(mockConfig, {});
     expect(conditionalHeaders.conditions.hostname).toEqual('great-hostname');
   });
 });

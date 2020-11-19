@@ -10,7 +10,14 @@ const trimStr = (toTrim: string) => {
   return typeof toTrim === 'string' ? toTrim.trim() : toTrim;
 };
 
-export class LevelLogger {
+export interface GenericLevelLogger {
+  debug: (msg: string) => void;
+  info: (msg: string) => void;
+  warning: (msg: string) => void;
+  error: (msg: Error) => void;
+}
+
+export class LevelLogger implements GenericLevelLogger {
   private _logger: LoggerFactory;
   private _tags: string[];
   public warning: (msg: string, tags?: string[]) => void;

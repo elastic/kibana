@@ -18,7 +18,7 @@ image::images/canvas-autoplay-interval.png[Element autoplay interval]
 . To start your presentation, click *View > Enter fullscreen mode*.
 +
 [role="screenshot"]
-image::images/canvas-fullscreen.png[Fullscreen mode]
+image::images/canvas-fullscreen.png[Image showing how to enter fullscreen mode from view dropdown]
 
 . When you are ready to exit fullscreen mode, press the Esc (Escape) key.
 
@@ -33,7 +33,7 @@ To get a closer look at a portion of your workpad, use the zoom options.
 . Select the zoom option.
 +
 [role="screenshot"]
-image::images/canvas-zoom-controls.png[Zoom controls]
+image::images/canvas-zoom-controls.png[Zoom controls, also in view dropdown]
 
 [float]
 [[configure-auto-refresh-interval]]

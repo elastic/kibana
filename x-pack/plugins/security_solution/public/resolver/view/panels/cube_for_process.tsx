@@ -43,7 +43,7 @@ export const CubeForProcess = memo(function ({
       className={className}
       width="2.15em"
       height="2.15em"
-      viewBox="0 0 100% 100%"
+      viewBox="0 0 34 34"
       data-test-subj={dataTestSubj}
       isOrigin={isOrigin}
     >

@@ -14,25 +14,28 @@ import { useUrlParams } from '../../../../hooks/useUrlParams';
 export function VisitorBreakdown() {
   const { urlParams, uiFilters } = useUrlParams();
 
-  const { start, end } = urlParams;
+  const { start, end, searchTerm } = urlParams;
 
   const { data, status } = useFetcher(
     (callApmApi) => {
-      if (start && end) {
+      const { serviceName } = uiFilters;
+
+      if (start && end && serviceName) {
         return callApmApi({
-          pathname: '/api/apm/rum-client/visitor-breakdown',
+          endpoint: 'GET /api/apm/rum-client/visitor-breakdown',
           params: {
             query: {
               start,
               end,
               uiFilters: JSON.stringify(uiFilters),
+              urlQuery: searchTerm,
             },
           },
         });
       }
       return Promise.resolve(null);
     },
-    [end, start, uiFilters]
+    [end, start, uiFilters, searchTerm]
   );
 
   return (
@@ -41,7 +44,7 @@ export function VisitorBreakdown() {
         <h3>{VisitorBreakdownLabel}</h3>
       </EuiTitle>
       <EuiSpacer size="s" />
-      <EuiFlexGroup>
+      <EuiFlexGroup style={{ height: 'calc(100% - 32px)' }}>
         <EuiFlexItem>
           <EuiTitle size="xs">
             <h4>{I18LABELS.browser}</h4>

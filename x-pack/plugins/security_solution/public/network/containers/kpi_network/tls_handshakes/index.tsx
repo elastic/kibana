@@ -8,7 +8,6 @@ import deepEqual from 'fast-deep-equal';
 import { noop } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { DEFAULT_INDEX_KEY } from '../../../../../common/constants';
 import { inputsModel } from '../../../../common/store';
 import { createFilter } from '../../../../common/containers/helpers';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -20,7 +19,11 @@ import {
 import { ESTermQuery } from '../../../../../common/typed_json';
 
 import * as i18n from './translations';
-import { AbortError } from '../../../../../../../../src/plugins/data/common';
+import {
+  isCompleteResponse,
+  isErrorResponse,
+} from '../../../../../../../../src/plugins/data/common';
+import { AbortError } from '../../../../../../../../src/plugins/kibana_utils/common';
 import { getInspectResponse } from '../../../../helpers';
 import { InspectResponse } from '../../../../types';
 
@@ -37,6 +40,7 @@ export interface NetworkKpiTlsHandshakesArgs {
 interface UseNetworkKpiTlsHandshakes {
   filterQuery?: ESTermQuery | string;
   endDate: string;
+  indexNames: string[];
   skip?: boolean;
   startDate: string;
 }
@@ -44,27 +48,31 @@ interface UseNetworkKpiTlsHandshakes {
 export const useNetworkKpiTlsHandshakes = ({
   filterQuery,
   endDate,
+  indexNames,
   skip = false,
   startDate,
 }: UseNetworkKpiTlsHandshakes): [boolean, NetworkKpiTlsHandshakesArgs] => {
-  const { data, notifications, uiSettings } = useKibana().services;
+  const { data, notifications } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
-  const defaultIndex = uiSettings.get<string[]>(DEFAULT_INDEX_KEY);
   const [loading, setLoading] = useState(false);
-  const [networkKpiTlsHandshakesRequest, setNetworkKpiTlsHandshakesRequest] = useState<
-    NetworkKpiTlsHandshakesRequestOptions
-  >({
-    defaultIndex,
-    factoryQueryType: NetworkKpiQueries.tlsHandshakes,
-    filterQuery: createFilter(filterQuery),
-    id: ID,
-    timerange: {
-      interval: '12h',
-      from: startDate,
-      to: endDate,
-    },
-  });
+  const [
+    networkKpiTlsHandshakesRequest,
+    setNetworkKpiTlsHandshakesRequest,
+  ] = useState<NetworkKpiTlsHandshakesRequestOptions | null>(
+    !skip
+      ? {
+          defaultIndex: indexNames,
+          factoryQueryType: NetworkKpiQueries.tlsHandshakes,
+          filterQuery: createFilter(filterQuery),
+          timerange: {
+            interval: '12h',
+            from: startDate,
+            to: endDate,
+          },
+        }
+      : null
+  );
 
   const [networkKpiTlsHandshakesResponse, setNetworkKpiTlsHandshakesResponse] = useState<
     NetworkKpiTlsHandshakesArgs
@@ -80,7 +88,10 @@ export const useNetworkKpiTlsHandshakes = ({
   });
 
   const networkKpiTlsHandshakesSearch = useCallback(
-    (request: NetworkKpiTlsHandshakesRequestOptions) => {
+    (request: NetworkKpiTlsHandshakesRequestOptions | null) => {
+      if (request == null) {
+        return;
+      }
       let didCancel = false;
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
@@ -96,7 +107,7 @@ export const useNetworkKpiTlsHandshakes = ({
           )
           .subscribe({
             next: (response) => {
-              if (!response.isPartial && !response.isRunning) {
+              if (isCompleteResponse(response)) {
                 if (!didCancel) {
                   setLoading(false);
                   setNetworkKpiTlsHandshakesResponse((prevResponse) => ({
@@ -107,7 +118,7 @@ export const useNetworkKpiTlsHandshakes = ({
                   }));
                 }
                 searchSubscription$.unsubscribe();
-              } else if (response.isPartial && !response.isRunning) {
+              } else if (isErrorResponse(response)) {
                 if (!didCancel) {
                   setLoading(false);
                 }
@@ -140,8 +151,9 @@ export const useNetworkKpiTlsHandshakes = ({
   useEffect(() => {
     setNetworkKpiTlsHandshakesRequest((prevRequest) => {
       const myRequest = {
-        ...prevRequest,
-        defaultIndex,
+        ...(prevRequest ?? {}),
+        defaultIndex: indexNames,
+        factoryQueryType: NetworkKpiQueries.tlsHandshakes,
         filterQuery: createFilter(filterQuery),
         timerange: {
           interval: '12h',
@@ -154,7 +166,7 @@ export const useNetworkKpiTlsHandshakes = ({
       }
       return prevRequest;
     });
-  }, [defaultIndex, endDate, filterQuery, skip, startDate]);
+  }, [indexNames, endDate, filterQuery, skip, startDate]);
 
   useEffect(() => {
     networkKpiTlsHandshakesSearch(networkKpiTlsHandshakesRequest);

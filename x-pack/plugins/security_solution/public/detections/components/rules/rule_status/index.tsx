@@ -69,7 +69,9 @@ const RuleStatusComponent: React.FC<RuleStatusProps> = ({ ruleId, ruleEnabled })
         <>
           <EuiFlexItem grow={false}>
             <EuiHealth color={getStatusColor(currentStatus?.status ?? null)}>
-              <EuiText size="xs">{currentStatus?.status ?? getEmptyTagValue()}</EuiText>
+              <EuiText data-test-subj="ruleStatus" size="xs">
+                {currentStatus?.status ?? getEmptyTagValue()}
+              </EuiText>
             </EuiHealth>
           </EuiFlexItem>
           {currentStatus?.status_date != null && currentStatus?.status != null && (
@@ -84,6 +86,7 @@ const RuleStatusComponent: React.FC<RuleStatusProps> = ({ ruleId, ruleEnabled })
           )}
           <EuiFlexItem grow={false}>
             <EuiButtonIcon
+              data-test-subj="refreshButton"
               color="primary"
               onClick={handleRefresh}
               iconType="refresh"

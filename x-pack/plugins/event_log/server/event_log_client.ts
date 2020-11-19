@@ -92,7 +92,7 @@ export class EventLogClient implements IEventLogClient {
     await this.savedObjectGetter(type, id);
 
     return await this.esContext.esAdapter.queryEventsBySavedObject(
-      this.esContext.esNames.alias,
+      this.esContext.esNames.indexPattern,
       namespace,
       type,
       id,

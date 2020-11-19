@@ -34,21 +34,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         operation: 'date_histogram',
         field: '@timestamp',
       });
-      await PageObjects.lens.closeDimensionEditor();
 
       await PageObjects.lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
         operation: 'sum',
         field: 'bytes',
       });
-      await PageObjects.lens.closeDimensionEditor();
 
       await PageObjects.lens.configureDimension({
         dimension: 'lnsXY_splitDimensionPanel > lns-empty-dimension',
         operation: 'terms',
         field: 'geo.src',
       });
-      await PageObjects.lens.closeDimensionEditor();
       expect(await find.allByCssSelector('.echLegendItem')).to.have.length(2);
 
       await PageObjects.lens.save('Afancilenstest');

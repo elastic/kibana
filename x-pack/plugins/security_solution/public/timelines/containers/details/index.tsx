@@ -9,7 +9,6 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import deepEqual from 'fast-deep-equal';
 
 import { inputsModel } from '../../../common/store';
-import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
 import { useKibana } from '../../../common/lib/kibana';
 import {
   DocValueFields,
@@ -18,6 +17,7 @@ import {
   TimelineEventsDetailsRequestOptions,
   TimelineEventsDetailsStrategyResponse,
 } from '../../../../common/search_strategy';
+import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/plugins/data/public';
 export interface EventsArgs {
   detailsData: TimelineEventsDetailsItem[] | null;
 }
@@ -35,10 +35,9 @@ export const useTimelineEventsDetails = ({
   eventId,
   skip,
 }: UseTimelineEventsDetailsProps): [boolean, EventsArgs['detailsData']] => {
-  const { data, notifications, uiSettings } = useKibana().services;
+  const { data, notifications } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
-  const defaultIndex = uiSettings.get<string[]>(DEFAULT_INDEX_KEY);
   const [loading, setLoading] = useState(false);
   const [
     timelineDetailsRequest,
@@ -50,7 +49,11 @@ export const useTimelineEventsDetails = ({
   );
 
   const timelineDetailsSearch = useCallback(
-    (request: TimelineEventsDetailsRequestOptions) => {
+    (request: TimelineEventsDetailsRequestOptions | null) => {
+      if (request == null) {
+        return;
+      }
+
       let didCancel = false;
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
@@ -66,13 +69,13 @@ export const useTimelineEventsDetails = ({
           )
           .subscribe({
             next: (response) => {
-              if (!response.isPartial && !response.isRunning) {
+              if (isCompleteResponse(response)) {
                 if (!didCancel) {
                   setLoading(false);
                   setTimelineDetailsResponse(response.data || []);
                 }
                 searchSubscription$.unsubscribe();
-              } else if (response.isPartial && !response.isRunning) {
+              } else if (isErrorResponse(response)) {
                 if (!didCancel) {
                   setLoading(false);
                 }
@@ -101,7 +104,6 @@ export const useTimelineEventsDetails = ({
     setTimelineDetailsRequest((prevRequest) => {
       const myRequest = {
         ...(prevRequest ?? {}),
-        defaultIndex,
         docValueFields,
         indexName,
         eventId,
@@ -112,12 +114,10 @@ export const useTimelineEventsDetails = ({
       }
       return prevRequest;
     });
-  }, [defaultIndex, docValueFields, eventId, indexName, skip]);
+  }, [docValueFields, eventId, indexName, skip]);
 
   useEffect(() => {
-    if (timelineDetailsRequest) {
-      timelineDetailsSearch(timelineDetailsRequest);
-    }
+    timelineDetailsSearch(timelineDetailsRequest);
   }, [timelineDetailsRequest, timelineDetailsSearch]);
 
   return [loading, timelineDetailsResponse];

@@ -6,12 +6,15 @@
 import React, { useCallback } from 'react';
 
 import {
+  EuiCallOut,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
   EuiFieldPassword,
   EuiSpacer,
+  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 
 import { isEmpty } from 'lodash';
@@ -95,7 +98,6 @@ const ResilientConnectorFields: React.FC<ActionConnectorFieldsProps<ResilientAct
               readOnly={readOnly}
               value={apiUrl || ''} // Needed to prevent uncontrolled input error when value is undefined
               data-test-subj="apiUrlFromInput"
-              placeholder="https://<site-url>"
               onChange={(evt) => handleOnChangeActionConfig('apiUrl', evt.target.value)}
               onBlur={() => {
                 if (!apiUrl) {
@@ -130,6 +132,20 @@ const ResilientConnectorFields: React.FC<ActionConnectorFieldsProps<ResilientAct
               }}
             />
           </EuiFormRow>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="m" />
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiTitle size="xxs">
+            <h4>{i18n.API_KEY_LABEL}</h4>
+          </EuiTitle>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="m" />
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiFormRow fullWidth>{getEncryptedFieldNotifyLabel(!action.id)}</EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
@@ -204,6 +220,24 @@ const ResilientConnectorFields: React.FC<ActionConnectorFieldsProps<ResilientAct
     </>
   );
 };
+
+function getEncryptedFieldNotifyLabel(isCreate: boolean) {
+  if (isCreate) {
+    return (
+      <EuiText size="s" data-test-subj="rememberValuesMessage">
+        {i18n.REMEMBER_VALUES_LABEL}
+      </EuiText>
+    );
+  }
+  return (
+    <EuiCallOut
+      size="s"
+      iconType="iInCircle"
+      title={i18n.REENTER_VALUES_LABEL}
+      data-test-subj="reenterValuesMessage"
+    />
+  );
+}
 
 // eslint-disable-next-line import/no-default-export
 export { ResilientConnectorFields as default };

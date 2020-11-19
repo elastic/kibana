@@ -17,15 +17,4 @@
  * under the License.
  */
 
-import { Observable } from 'rxjs';
-
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { getUsageCollector } from './get_usage_collector';
-
-export function registerVisualizationsCollector(
-  collectorSet: UsageCollectionSetup,
-  config: Observable<{ kibana: { index: string } }>
-): void {
-  const collector = collectorSet.makeUsageCollector(getUsageCollector(config));
-  collectorSet.registerCollector(collector);
-}
+export { registerVisualizationsCollector } from './register_visualizations_collector';

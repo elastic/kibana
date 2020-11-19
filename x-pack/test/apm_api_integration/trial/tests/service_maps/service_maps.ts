@@ -8,12 +8,13 @@ import querystring from 'querystring';
 import expect from '@kbn/expect';
 import { isEmpty, uniq } from 'lodash';
 import archives_metadata from '../../../common/archives_metadata';
-import { PromiseReturnType } from '../../../../../plugins/apm/typings/common';
-import { expectSnapshot } from '../../../common/match_snapshot';
+import { PromiseReturnType } from '../../../../../plugins/observability/typings/common';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 export default function serviceMapsApiTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
+  const supertestAsApmReadUserWithoutMlAccess = getService('supertestAsApmReadUserWithoutMlAccess');
+
   const esArchiver = getService('esArchiver');
 
   const archiveName = 'apm_8.0.0';
@@ -58,6 +59,7 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
 
           expectSnapshot(serviceNames).toMatchInline(`
             Array [
+              "elastic-co-frontend",
               "opbeans-dotnet",
               "opbeans-go",
               "opbeans-java",
@@ -95,7 +97,7 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
           body.elements.forEach((element: { data: Record<string, any> }) => {
             environments.add(element.data['service.environment']);
           });
-          expect(environments.size).to.eql(1);
+
           expect(environments.has(ENVIRONMENT_NOT_DEFINED)).to.eql(true);
           expectSnapshot(body).toMatch();
         });
@@ -108,7 +110,7 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
           const q = querystring.stringify({
             start: metadata.start,
             end: metadata.end,
-            uiFilters: {},
+            uiFilters: encodeURIComponent('{}'),
           });
           const response = await supertest.get(`/api/apm/service-map/service/opbeans-node?${q}`);
 
@@ -127,57 +129,44 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
       before(() => esArchiver.load(archiveName));
       after(() => esArchiver.unload(archiveName));
 
-      let response: PromiseReturnType<typeof supertest.get>;
+      describe('with the default apm user', () => {
+        let response: PromiseReturnType<typeof supertest.get>;
 
-      before(async () => {
-        response = await supertest.get(`/api/apm/service-map?start=${start}&end=${end}`);
-      });
-
-      it('returns service map elements with anomaly stats', () => {
-        expect(response.status).to.be(200);
-        const dataWithAnomalies = response.body.elements.filter(
-          (el: { data: { serviceAnomalyStats?: {} } }) => !isEmpty(el.data.serviceAnomalyStats)
-        );
-
-        expect(dataWithAnomalies).to.not.empty();
-
-        dataWithAnomalies.forEach(({ data }: any) => {
-          expect(
-            Object.values(data.serviceAnomalyStats).filter((value) => isEmpty(value))
-          ).to.not.empty();
+        before(async () => {
+          response = await supertest.get(`/api/apm/service-map?start=${start}&end=${end}`);
         });
-      });
 
-      it('returns the correct anomaly stats', () => {
-        const dataWithAnomalies = response.body.elements.filter(
-          (el: { data: { serviceAnomalyStats?: {} } }) => !isEmpty(el.data.serviceAnomalyStats)
-        );
+        it('returns service map elements with anomaly stats', () => {
+          expect(response.status).to.be(200);
+          const dataWithAnomalies = response.body.elements.filter(
+            (el: { data: { serviceAnomalyStats?: {} } }) => !isEmpty(el.data.serviceAnomalyStats)
+          );
 
-        expectSnapshot(dataWithAnomalies.length).toMatchInline(`6`);
-        expectSnapshot(dataWithAnomalies.slice(0, 3)).toMatchInline(`
+          expect(dataWithAnomalies).to.not.empty();
+
+          dataWithAnomalies.forEach(({ data }: any) => {
+            expect(
+              Object.values(data.serviceAnomalyStats).filter((value) => isEmpty(value))
+            ).to.not.empty();
+          });
+        });
+
+        it('returns the correct anomaly stats', () => {
+          const dataWithAnomalies = response.body.elements.filter(
+            (el: { data: { serviceAnomalyStats?: {} } }) => !isEmpty(el.data.serviceAnomalyStats)
+          );
+
+          expectSnapshot(dataWithAnomalies.length).toMatchInline(`5`);
+          expectSnapshot(dataWithAnomalies.slice(0, 3)).toMatchInline(`
           Array [
             Object {
               "data": Object {
-                "agent.name": "rum-js",
-                "id": "opbeans-rum",
-                "service.environment": "testing",
-                "service.name": "opbeans-rum",
-                "serviceAnomalyStats": Object {
-                  "anomalyScore": 0,
-                  "healthStatus": "healthy",
-                  "jobId": "apm-environment_not_defined-7ed6-high_mean_transaction_duration",
-                  "transactionType": "page-load",
-                },
-              },
-            },
-            Object {
-              "data": Object {
-                "agent.name": "python",
-                "id": "opbeans-python",
+                "agent.name": "ruby",
+                "id": "opbeans-ruby",
                 "service.environment": "production",
-                "service.name": "opbeans-python",
+                "service.name": "opbeans-ruby",
                 "serviceAnomalyStats": Object {
-                  "actualValue": 66218.08333333333,
+                  "actualValue": 141536.936507937,
                   "anomalyScore": 0,
                   "healthStatus": "healthy",
                   "jobId": "apm-production-229a-high_mean_transaction_duration",
@@ -192,7 +181,7 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
                 "service.environment": "production",
                 "service.name": "opbeans-java",
                 "serviceAnomalyStats": Object {
-                  "actualValue": 14901.319999999996,
+                  "actualValue": 559010.6,
                   "anomalyScore": 0,
                   "healthStatus": "healthy",
                   "jobId": "apm-production-229a-high_mean_transaction_duration",
@@ -200,10 +189,44 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
                 },
               },
             },
+            Object {
+              "data": Object {
+                "agent.name": "rum-js",
+                "id": "elastic-co-frontend",
+                "service.name": "elastic-co-frontend",
+                "serviceAnomalyStats": Object {
+                  "anomalyScore": 0,
+                  "healthStatus": "healthy",
+                  "jobId": "apm-environment_not_defined-7ed6-high_mean_transaction_duration",
+                  "transactionType": "page-load",
+                },
+              },
+            },
           ]
         `);
 
-        expectSnapshot(response.body).toMatch();
+          expectSnapshot(response.body).toMatch();
+        });
+      });
+
+      describe('with a user that does not have access to ML', () => {
+        let response: PromiseReturnType<typeof supertest.get>;
+
+        before(async () => {
+          response = await supertestAsApmReadUserWithoutMlAccess.get(
+            `/api/apm/service-map?start=${start}&end=${end}`
+          );
+        });
+
+        it('returns service map elements without anomaly stats', () => {
+          expect(response.status).to.be(200);
+
+          const dataWithAnomalies = response.body.elements.filter(
+            (el: { data: { serviceAnomalyStats?: {} } }) => !isEmpty(el.data.serviceAnomalyStats)
+          );
+
+          expect(dataWithAnomalies).to.be.empty();
+        });
       });
     });
   });

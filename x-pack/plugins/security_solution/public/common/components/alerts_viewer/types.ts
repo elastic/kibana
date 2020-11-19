@@ -15,7 +15,7 @@ type CommonQueryProps = HostsComponentsQueryProps | NetworkComponentQueryProps;
 export interface AlertsComponentsProps
   extends Pick<
     CommonQueryProps,
-    'deleteQuery' | 'endDate' | 'filterQuery' | 'skip' | 'setQuery' | 'startDate'
+    'deleteQuery' | 'endDate' | 'filterQuery' | 'indexNames' | 'skip' | 'setQuery' | 'startDate'
   > {
   timelineId: TimelineIdLiteral;
   pageFilters: Filter[];

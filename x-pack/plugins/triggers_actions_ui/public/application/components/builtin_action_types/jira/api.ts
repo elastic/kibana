@@ -42,3 +42,41 @@ export async function getFieldsByIssueType({
     signal,
   });
 }
+
+export async function getIssues({
+  http,
+  signal,
+  connectorId,
+  title,
+}: {
+  http: HttpSetup;
+  signal: AbortSignal;
+  connectorId: string;
+  title: string;
+}): Promise<Record<string, any>> {
+  return await http.post(`${BASE_ACTION_API_PATH}/action/${connectorId}/_execute`, {
+    body: JSON.stringify({
+      params: { subAction: 'issues', subActionParams: { title } },
+    }),
+    signal,
+  });
+}
+
+export async function getIssue({
+  http,
+  signal,
+  connectorId,
+  id,
+}: {
+  http: HttpSetup;
+  signal: AbortSignal;
+  connectorId: string;
+  id: string;
+}): Promise<Record<string, any>> {
+  return await http.post(`${BASE_ACTION_API_PATH}/action/${connectorId}/_execute`, {
+    body: JSON.stringify({
+      params: { subAction: 'issue', subActionParams: { id } },
+    }),
+    signal,
+  });
+}

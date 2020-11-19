@@ -8,18 +8,15 @@ import React, { FunctionComponent, useState } from 'react';
 import {
   EuiButton,
   EuiPopover,
+  EuiPopoverFooter,
   EuiButtonEmpty,
   EuiPopoverTitle,
   EuiSelectable,
-  EuiHorizontalRule,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
 } from '@elastic/eui';
 
 import { Document } from '../../../types';
 
-import { TestPipelineFlyoutTab } from '../test_pipeline_flyout_tabs';
+import { TestPipelineFlyoutTab } from '../test_pipeline_tabs';
 
 import './documents_dropdown.scss';
 
@@ -30,10 +27,10 @@ const i18nTexts = {
       defaultMessage: 'Documents:',
     }
   ),
-  addDocumentsButtonLabel: i18n.translate(
-    'xpack.ingestPipelines.pipelineEditor.testPipeline.documentsDropdown.buttonLabel',
+  editDocumentsButtonLabel: i18n.translate(
+    'xpack.ingestPipelines.pipelineEditor.testPipeline.documentsDropdown.editDocumentsButtonLabel',
     {
-      defaultMessage: 'Add documents',
+      defaultMessage: 'Edit documents',
     }
   ),
   popoverTitle: i18n.translate(
@@ -81,15 +78,16 @@ export const DocumentsDropdown: FunctionComponent<Props> = ({
       closePopover={() => setShowPopover(false)}
       button={managePipelineButton}
       panelPaddingSize="none"
-      withTitle
       repositionOnScroll
       data-test-subj="documentsDropdown"
       panelClassName="documentsDropdownPanel"
     >
       <EuiSelectable
         singleSelection
+        data-test-subj="documentList"
         options={documents.map((doc, index) => ({
           key: index.toString(),
+          'data-test-subj': 'documentListItem',
           checked: selectedDocumentIndex === index ? 'on' : undefined,
           label: i18n.translate('xpack.ingestPipelines.pipelineEditor.testPipeline.documentLabel', {
             defaultMessage: 'Document {documentNumber}',
@@ -107,32 +105,27 @@ export const DocumentsDropdown: FunctionComponent<Props> = ({
           setShowPopover(false);
         }}
       >
-        {(list, search) => (
-          <div>
+        {(list) => (
+          <>
             <EuiPopoverTitle>{i18nTexts.popoverTitle}</EuiPopoverTitle>
             {list}
-          </div>
+          </>
         )}
       </EuiSelectable>
 
-      <EuiHorizontalRule margin="xs" />
-
-      <EuiFlexGroup justifyContent="center">
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            size="s"
-            onClick={() => {
-              openFlyout('documents');
-              setShowPopover(false);
-            }}
-            data-test-subj="addDocumentsButton"
-          >
-            {i18nTexts.addDocumentsButtonLabel}
-          </EuiButton>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-
-      <EuiSpacer size="s" />
+      <EuiPopoverFooter>
+        <EuiButton
+          size="s"
+          fullWidth
+          onClick={() => {
+            openFlyout('documents');
+            setShowPopover(false);
+          }}
+          data-test-subj="editDocumentsButton"
+        >
+          {i18nTexts.editDocumentsButtonLabel}
+        </EuiButton>
+      </EuiPopoverFooter>
     </EuiPopover>
   );
 };

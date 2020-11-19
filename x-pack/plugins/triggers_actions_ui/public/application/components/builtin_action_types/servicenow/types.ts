@@ -5,11 +5,12 @@
  */
 
 import { CasesConfigurationMapping } from '../case_mappings';
+import { UserConfiguredActionConnector } from '../../../../types';
 
-export interface ServiceNowActionConnector {
-  config: ServiceNowConfig;
-  secrets: ServiceNowSecrets;
-}
+export type ServiceNowActionConnector = UserConfiguredActionConnector<
+  ServiceNowConfig,
+  ServiceNowSecrets
+>;
 
 export interface ServiceNowActionParams {
   subAction: string;
@@ -29,13 +30,13 @@ interface IncidentConfiguration {
   mapping: CasesConfigurationMapping[];
 }
 
-interface ServiceNowConfig {
+export interface ServiceNowConfig {
   apiUrl: string;
   incidentConfiguration?: IncidentConfiguration;
   isCaseOwned?: boolean;
 }
 
-interface ServiceNowSecrets {
+export interface ServiceNowSecrets {
   username: string;
   password: string;
 }

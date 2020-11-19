@@ -62,7 +62,10 @@ export function MachineLearningProvider(context: FtrProviderContext) {
   const dataFrameAnalyticsTable = MachineLearningDataFrameAnalyticsTableProvider(context);
   const dataVisualizer = MachineLearningDataVisualizerProvider(context);
   const dataVisualizerFileBased = MachineLearningDataVisualizerFileBasedProvider(context, commonUI);
-  const dataVisualizerIndexBased = MachineLearningDataVisualizerIndexBasedProvider(context);
+  const dataVisualizerIndexBased = MachineLearningDataVisualizerIndexBasedProvider(
+    context,
+    commonUI
+  );
   const jobManagement = MachineLearningJobManagementProvider(context, api);
   const jobSelection = MachineLearningJobSelectionProvider(context);
   const jobSourceSelection = MachineLearningJobSourceSelectionProvider(context);
@@ -78,9 +81,9 @@ export function MachineLearningProvider(context: FtrProviderContext) {
   const securityCommon = MachineLearningSecurityCommonProvider(context);
   const securityUI = MachineLearningSecurityUIProvider(context, securityCommon);
   const settings = MachineLearningSettingsProvider(context);
-  const settingsCalendar = MachineLearningSettingsCalendarProvider(context);
-  const settingsFilterList = MachineLearningSettingsFilterListProvider(context);
-  const singleMetricViewer = MachineLearningSingleMetricViewerProvider(context);
+  const settingsCalendar = MachineLearningSettingsCalendarProvider(context, commonUI);
+  const settingsFilterList = MachineLearningSettingsFilterListProvider(context, commonUI);
+  const singleMetricViewer = MachineLearningSingleMetricViewerProvider(context, commonUI);
   const testExecution = MachineLearningTestExecutionProvider(context);
   const testResources = MachineLearningTestResourcesProvider(context);
 

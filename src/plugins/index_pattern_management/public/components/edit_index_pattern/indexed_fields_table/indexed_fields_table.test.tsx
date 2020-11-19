@@ -19,7 +19,7 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { IndexPatternField, IIndexPattern } from 'src/plugins/data/public';
+import { IndexPatternField, IndexPattern } from 'src/plugins/data/public';
 import { IndexedFieldsTable } from './indexed_fields_table';
 
 jest.mock('@elastic/eui', () => ({
@@ -43,13 +43,11 @@ const helpers = {
 
 const indexPattern = ({
   getNonScriptedFields: () => fields,
-} as unknown) as IIndexPattern;
+  getFormatterForFieldNoDefault: () => ({ params: () => ({}) }),
+} as unknown) as IndexPattern;
 
 const mockFieldToIndexPatternField = (spec: Record<string, string | boolean | undefined>) => {
-  return new IndexPatternField(
-    (spec as unknown) as IndexPatternField['spec'],
-    spec.displayName as string
-  );
+  return new IndexPatternField((spec as unknown) as IndexPatternField['spec']);
 };
 
 const fields = [

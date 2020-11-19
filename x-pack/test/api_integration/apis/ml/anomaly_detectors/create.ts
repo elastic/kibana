@@ -87,11 +87,11 @@ export default ({ getService }: FtrProviderContext) => {
         model_plot_config: { enabled: true },
       },
       expected: {
-        responseCode: 404,
+        responseCode: 403,
         responseBody: {
-          statusCode: 404,
-          error: 'Not Found',
-          message: 'Not Found',
+          statusCode: 403,
+          error: 'Forbidden',
+          message: 'Forbidden',
         },
       },
     },

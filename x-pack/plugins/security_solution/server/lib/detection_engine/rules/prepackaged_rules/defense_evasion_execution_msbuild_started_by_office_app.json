@@ -23,7 +23,10 @@
   "severity": "high",
   "tags": [
     "Elastic",
-    "Windows"
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Defense Evasion"
   ],
   "threat": [
     {
@@ -36,7 +39,7 @@
       "technique": [
         {
           "id": "T1127",
-          "name": "Trusted Developer Utilities",
+          "name": "Trusted Developer Utilities Proxy Execution",
           "reference": "https://attack.mitre.org/techniques/T1127/"
         }
       ]
@@ -51,12 +54,12 @@
       "technique": [
         {
           "id": "T1127",
-          "name": "Trusted Developer Utilities",
+          "name": "Trusted Developer Utilities Proxy Execution",
           "reference": "https://attack.mitre.org/techniques/T1127/"
         }
       ]
     }
   ],
   "type": "query",
-  "version": 3
+  "version": 4
 }

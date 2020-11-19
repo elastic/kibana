@@ -61,6 +61,32 @@ const createMock = (): jest.Mocked<ExternalService> => {
         defaultValue: { name: 'Medium', id: '3' },
       },
     })),
+    getIssues: jest.fn().mockImplementation(() => [
+      {
+        id: '10267',
+        key: 'RJ-107',
+        title: 'Test title',
+      },
+    ]),
+    getIssue: jest.fn().mockImplementation(() => ({
+      id: '10267',
+      key: 'RJ-107',
+      title: 'Test title',
+    })),
+    getFields: jest.fn().mockImplementation(() => ({
+      description: {
+        allowedValues: [],
+        defaultValue: {},
+        required: true,
+        schema: { type: 'string' },
+      },
+      summary: {
+        allowedValues: [],
+        defaultValue: {},
+        required: true,
+        schema: { type: 'string' },
+      },
+    })),
   };
 
   service.createComment.mockImplementationOnce(() =>
@@ -85,7 +111,6 @@ const createMock = (): jest.Mocked<ExternalService> => {
 const externalServiceMock = {
   create: createMock,
 };
-
 const mapping: Map<string, Partial<MapRecord>> = new Map();
 
 mapping.set('title', {
@@ -120,6 +145,7 @@ const executorParams: ExecutorSubActionPushParams = {
   labels: ['kibana', 'elastic'],
   priority: 'High',
   issueType: '10006',
+  parent: null,
   comments: [
     {
       commentId: 'case-comment-1',

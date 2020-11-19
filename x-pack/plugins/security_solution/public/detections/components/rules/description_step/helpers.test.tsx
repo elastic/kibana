@@ -13,6 +13,7 @@ import {
   esFilters,
   FilterManager,
   UI_SETTINGS,
+  IndexPattern,
 } from '../../../../../../../../src/plugins/data/public';
 import { SeverityBadge } from '../severity_badge';
 
@@ -140,11 +141,11 @@ describe('helpers', () => {
         filterManager: mockFilterManager,
         query: mockQueryBarWithFilters.query,
         savedId: mockQueryBarWithFilters.saved_id,
-        indexPatterns: {
+        indexPatterns: ({
           fields: [{ name: 'event.category', type: 'test type' }],
           title: 'test title',
           getFormatterForField: () => ({ convert: (val: unknown) => val }),
-        },
+        } as unknown) as IndexPattern,
       });
       const wrapper = shallow<React.ReactElement>(result[0].description as React.ReactElement);
       const filterLabelComponent = wrapper.find(esFilters.FilterLabel).at(0);
@@ -167,8 +168,11 @@ describe('helpers', () => {
         query: mockQueryBarWithQuery.query,
         savedId: mockQueryBarWithQuery.saved_id,
       });
-      expect(result[0].title).toEqual(<>{i18n.QUERY_LABEL} </>);
-      expect(result[0].description).toEqual(<>{mockQueryBarWithQuery.query} </>);
+
+      expect(result[0].title).toEqual(<>{i18n.QUERY_LABEL}</>);
+      expect(shallow(result[0].description as React.ReactElement).text()).toEqual(
+        mockQueryBarWithQuery.query
+      );
     });
 
     test('returns expected array of ListItems when "savedId" exists', () => {
@@ -433,7 +437,7 @@ describe('helpers', () => {
     it('returns a humanized description for a threat_match type', () => {
       const [result]: ListItems[] = buildRuleTypeDescription('Test label', 'threat_match');
 
-      expect(result.description).toEqual('Threat Match');
+      expect(result.description).toEqual('Indicator Match');
     });
   });
 });

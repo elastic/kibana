@@ -47,6 +47,7 @@ describe('Matrix Histogram Component', () => {
     errorMessage: 'error',
     histogramType: MatrixHistogramType.alerts,
     id: 'mockId',
+    indexNames: [],
     isInspected: false,
     isPtrIncluded: false,
     setQuery: jest.fn(),

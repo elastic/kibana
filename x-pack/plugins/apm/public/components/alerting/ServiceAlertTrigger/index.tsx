@@ -34,11 +34,17 @@ export function ServiceAlertTrigger(props: Props) {
 
   useEffect(() => {
     // we only want to run this on mount to set default values
-    setAlertProperty('name', `${alertTypeName} | ${params.serviceName}`);
-    setAlertProperty('tags', [
-      'apm',
-      `service.name:${params.serviceName}`.toLowerCase(),
-    ]);
+
+    const alertName = params.serviceName
+      ? `${alertTypeName} | ${params.serviceName}`
+      : alertTypeName;
+    setAlertProperty('name', alertName);
+
+    const tags = ['apm'];
+    if (params.serviceName) {
+      tags.push(`service.name:${params.serviceName}`.toLowerCase());
+    }
+    setAlertProperty('tags', tags);
     Object.keys(params).forEach((key) => {
       setAlertParams(key, params[key]);
     });

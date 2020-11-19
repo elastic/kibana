@@ -11,7 +11,12 @@ import { Adapters } from 'src/plugins/inspector/public';
 import { FileLayer } from '@elastic/ems-client';
 import { Attribution, ImmutableSourceProperty, SourceEditorArgs } from '../source';
 import { AbstractVectorSource, GeoJsonWithMeta, IVectorSource } from '../vector_source';
-import { SOURCE_TYPES, FIELD_ORIGIN, VECTOR_SHAPE_TYPE } from '../../../../common/constants';
+import {
+  SOURCE_TYPES,
+  FIELD_ORIGIN,
+  VECTOR_SHAPE_TYPE,
+  FORMAT_TYPE,
+} from '../../../../common/constants';
 import { getEmsFileLayers } from '../../../meta';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import { UpdateSourceEditor } from './update_source_editor';
@@ -30,11 +35,9 @@ export const sourceTitle = i18n.translate('xpack.maps.source.emsFileTitle', {
 });
 
 export class EMSFileSource extends AbstractVectorSource implements IEmsFileSource {
-  static type = SOURCE_TYPES.EMS_FILE;
-
   static createDescriptor({ id, tooltipProperties = [] }: Partial<EMSFileSourceDescriptor>) {
     return {
-      type: EMSFileSource.type,
+      type: SOURCE_TYPES.EMS_FILE,
       id: id!,
       tooltipProperties,
     };
@@ -72,9 +75,7 @@ export class EMSFileSource extends AbstractVectorSource implements IEmsFileSourc
 
   async getEMSFileLayer(): Promise<FileLayer> {
     const emsFileLayers = await getEmsFileLayers();
-    const emsFileLayer = emsFileLayers.find(
-      (fileLayer) => fileLayer.getId() === this._descriptor.id
-    );
+    const emsFileLayer = emsFileLayers.find((fileLayer) => fileLayer.hasId(this._descriptor.id));
     if (!emsFileLayer) {
       throw new Error(
         i18n.translate('xpack.maps.source.emsFile.unableToFindIdErrorMessage', {
@@ -101,7 +102,7 @@ export class EMSFileSource extends AbstractVectorSource implements IEmsFileSourc
     const emsFileLayer = await this.getEMSFileLayer();
     // @ts-ignore
     const featureCollection = await AbstractVectorSource.getGeoJson({
-      format: emsFileLayer.getDefaultFormatType(),
+      format: emsFileLayer.getDefaultFormatType() as FORMAT_TYPE,
       featureCollectionPath: 'data',
       fetchUrl: emsFileLayer.getDefaultFormatUrl(),
     });

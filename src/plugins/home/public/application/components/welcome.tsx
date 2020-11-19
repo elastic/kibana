@@ -58,8 +58,8 @@ export class Welcome extends React.Component<Props> {
     }
   };
 
-  private redirecToSampleData() {
-    const path = this.services.addBasePath('#/tutorial_directory/sampleData');
+  private redirecToAddData() {
+    const path = this.services.addBasePath('#/tutorial_directory');
     window.location.href = path;
   }
 
@@ -70,7 +70,7 @@ export class Welcome extends React.Component<Props> {
 
   private onSampleDataConfirm = () => {
     this.services.trackUiMetric(METRIC_TYPE.CLICK, 'sampleDataConfirm');
-    this.redirecToSampleData();
+    this.redirecToAddData();
   };
 
   componentDidMount() {

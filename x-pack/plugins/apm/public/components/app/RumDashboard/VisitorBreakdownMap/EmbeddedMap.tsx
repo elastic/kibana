@@ -20,7 +20,7 @@ import {
   ViewMode,
   isErrorEmbeddable,
 } from '../../../../../../../../src/plugins/embeddable/public';
-import { getLayerList } from './LayerList';
+import { useLayerList } from './useLayerList';
 import { useUrlParams } from '../../../../hooks/useUrlParams';
 import { RenderTooltipContentParams } from '../../../../../../maps/public';
 import { MapToolTip } from './MapToolTip';
@@ -55,6 +55,8 @@ export function EmbeddedMapComponent() {
 
   const mapFilters = useMapFilters();
 
+  const layerList = useLayerList();
+
   const [embeddable, setEmbeddable] = useState<
     MapEmbeddable | ErrorEmbeddable | undefined
   >();
@@ -75,6 +77,7 @@ export function EmbeddedMapComponent() {
   );
 
   const input: MapEmbeddableInput = {
+    attributes: { title: '' },
     id: uuid.v4(),
     filters: mapFilters,
     refreshConfig: {
@@ -148,7 +151,7 @@ export function EmbeddedMapComponent() {
 
       if (embeddableObject && !isErrorEmbeddable(embeddableObject)) {
         embeddableObject.setRenderTooltipContent(renderTooltipContent);
-        await embeddableObject.setLayerList(getLayerList());
+        await embeddableObject.setLayerList(layerList);
       }
 
       setEmbeddable(embeddableObject);
@@ -162,10 +165,10 @@ export function EmbeddedMapComponent() {
 
   // We can only render after embeddable has already initialized
   useEffect(() => {
-    if (embeddableRoot.current && embeddable) {
+    if (embeddableRoot.current && embeddable && serviceName) {
       embeddable.render(embeddableRoot.current);
     }
-  }, [embeddable, embeddableRoot]);
+  }, [embeddable, embeddableRoot, serviceName]);
 
   return (
     <EmbeddedPanel>

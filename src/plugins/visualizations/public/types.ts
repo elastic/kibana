@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { ExpressionAstExpression } from 'src/plugins/expressions';
 import { SavedObject } from '../../../plugins/saved_objects/public';
 import {
   AggConfigOptions,
@@ -24,6 +25,7 @@ import {
   TimefilterContract,
 } from '../../../plugins/data/public';
 import { SerializedVis, Vis, VisParams } from './vis';
+import { ExprVis } from './expressions/vis';
 
 export { Vis, SerializedVis, VisParams };
 
@@ -35,7 +37,7 @@ export interface VisualizationController {
 
 export type VisualizationControllerConstructor = new (
   el: HTMLElement,
-  vis: Vis
+  vis: ExprVis
 ) => VisualizationController;
 
 export interface SavedVisState {
@@ -71,4 +73,7 @@ export interface VisToExpressionAstParams {
   abortSignal?: AbortSignal;
 }
 
-export type VisToExpressionAst = (vis: Vis, params: VisToExpressionAstParams) => string;
+export type VisToExpressionAst<TVisParams = VisParams> = (
+  vis: Vis<TVisParams>,
+  params: VisToExpressionAstParams
+) => Promise<ExpressionAstExpression> | ExpressionAstExpression;

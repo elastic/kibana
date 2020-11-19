@@ -3,13 +3,14 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { APMConfig } from '../';
+import { PromiseReturnType } from '../../../observability/typings/common';
 import {
   ESFilter,
-  ESSearchResponse,
   ESSearchRequest,
-} from '../../typings/elasticsearch';
-import { PromiseReturnType } from '../../typings/common';
-import { APMConfig } from '..';
+  ESSearchResponse,
+} from '../../../../typings/elasticsearch';
+import { UIFilters } from '../../typings/ui_filters';
 
 interface Options {
   mockResponse?: (
@@ -23,7 +24,8 @@ interface MockSetup {
   apmEventClient: any;
   internalClient: any;
   config: APMConfig;
-  uiFiltersES: ESFilter[];
+  uiFilters: UIFilters;
+  esFilter: ESFilter[];
   indices: {
     /* eslint-disable @typescript-eslint/naming-convention */
     'apm_oss.sourcemapIndices': string;
@@ -74,11 +76,15 @@ export async function inspectSearchParams(
 
             case 'xpack.apm.metricsInterval':
               return 30;
+
+            case 'xpack.apm.maxServiceEnvironments':
+              return 100;
           }
         },
       }
     ) as APMConfig,
-    uiFiltersES: [{ term: { 'my.custom.ui.filter': 'foo-bar' } }],
+    uiFilters: { environment: 'test' },
+    esFilter: [{ term: { 'service.environment': 'test' } }],
     indices: {
       /* eslint-disable @typescript-eslint/naming-convention */
       'apm_oss.sourcemapIndices': 'myIndex',

@@ -18,7 +18,7 @@ import { Location } from 'history';
 import React, { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { IBucket } from '../../../../../server/lib/transactions/distribution/get_buckets/transform';
+import { DistributionBucket } from '../../../../../server/lib/transactions/distribution/get_buckets';
 import { IUrlParams } from '../../../../context/UrlParamsContext/types';
 import { fromQuery, toQuery } from '../../../shared/Links/url_helpers';
 import { LoadingStatePrompt } from '../../../shared/LoadingStatePrompt';
@@ -34,7 +34,7 @@ interface Props {
   waterfall: IWaterfall;
   exceedsMax: boolean;
   isLoading: boolean;
-  traceSamples: IBucket['samples'];
+  traceSamples: DistributionBucket['samples'];
 }
 
 export function WaterfallWithSummmary({

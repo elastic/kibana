@@ -17,11 +17,23 @@
  * under the License.
  */
 import React from 'react';
+import { EuiDelayRender, EuiLoadingContent } from '@elastic/eui';
 import { useUiSetting } from '../ui_settings';
-import { CodeEditor as BaseEditor, Props } from './code_editor';
+import type { Props } from './code_editor';
+
+const LazyBaseEditor = React.lazy(() => import('./code_editor'));
+
+const Fallback = () => (
+  <EuiDelayRender>
+    <EuiLoadingContent lines={3} />
+  </EuiDelayRender>
+);
 
 export const CodeEditor: React.FunctionComponent<Props> = (props) => {
   const darkMode = useUiSetting<boolean>('theme:darkMode');
-
-  return <BaseEditor {...props} useDarkTheme={darkMode} />;
+  return (
+    <React.Suspense fallback={<Fallback />}>
+      <LazyBaseEditor {...props} useDarkTheme={darkMode} />
+    </React.Suspense>
+  );
 };

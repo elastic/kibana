@@ -4,15 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import '../__mocks__/shallow_usecontext.mock';
+import '../__mocks__/shallow_useeffect.mock';
 import '../__mocks__/kea.mock';
+import { setMockValues, setMockActions, mockKibanaValues } from '../__mocks__';
 
-import React, { useContext } from 'react';
+import React from 'react';
 import { Redirect } from 'react-router-dom';
 import { shallow } from 'enzyme';
-import { useValues, useActions } from 'kea';
 
 import { Layout } from '../shared/layout';
+import { WorkplaceSearchHeaderActions } from './components/layout';
 import { SetupGuide } from './views/setup_guide';
 import { ErrorState } from './views/error_state';
 import { Overview } from './views/overview';
@@ -21,14 +22,14 @@ import { WorkplaceSearch, WorkplaceSearchUnconfigured, WorkplaceSearchConfigured
 
 describe('WorkplaceSearch', () => {
   it('renders WorkplaceSearchUnconfigured when config.host is not set', () => {
-    (useContext as jest.Mock).mockImplementationOnce(() => ({ config: { host: '' } }));
+    setMockValues({ config: { host: '' } });
     const wrapper = shallow(<WorkplaceSearch />);
 
     expect(wrapper.find(WorkplaceSearchUnconfigured)).toHaveLength(1);
   });
 
   it('renders WorkplaceSearchConfigured when config.host set', () => {
-    (useContext as jest.Mock).mockImplementationOnce(() => ({ config: { host: 'some.url' } }));
+    setMockValues({ config: { host: 'some.url' } });
     const wrapper = shallow(<WorkplaceSearch />);
 
     expect(wrapper.find(WorkplaceSearchConfigured)).toHaveLength(1);
@@ -45,40 +46,39 @@ describe('WorkplaceSearchUnconfigured', () => {
 });
 
 describe('WorkplaceSearchConfigured', () => {
+  const initializeAppData = jest.fn();
+  const setContext = jest.fn();
+
   beforeEach(() => {
-    // Mock resets
-    (useValues as jest.Mock).mockImplementation(() => ({}));
-    (useActions as jest.Mock).mockImplementation(() => ({ initializeAppData: () => {} }));
+    jest.clearAllMocks();
+    setMockActions({ initializeAppData, setContext });
   });
 
-  it('renders with layout', () => {
+  it('renders layout and header actions', () => {
     const wrapper = shallow(<WorkplaceSearchConfigured />);
 
     expect(wrapper.find(Layout).prop('readOnlyMode')).toBeFalsy();
     expect(wrapper.find(Overview)).toHaveLength(1);
+    expect(mockKibanaValues.renderHeaderActions).toHaveBeenCalledWith(WorkplaceSearchHeaderActions);
   });
 
   it('initializes app data with passed props', () => {
-    const initializeAppData = jest.fn();
-    (useActions as jest.Mock).mockImplementation(() => ({ initializeAppData }));
-
     shallow(<WorkplaceSearchConfigured isFederatedAuth={true} />);
 
     expect(initializeAppData).toHaveBeenCalledWith({ isFederatedAuth: true });
   });
 
-  it('does not re-initialize app data', () => {
-    const initializeAppData = jest.fn();
-    (useActions as jest.Mock).mockImplementation(() => ({ initializeAppData }));
-    (useValues as jest.Mock).mockImplementation(() => ({ hasInitialized: true }));
+  it('does not re-initialize app data or re-render header actions', () => {
+    setMockValues({ hasInitialized: true });
 
     shallow(<WorkplaceSearchConfigured />);
 
     expect(initializeAppData).not.toHaveBeenCalled();
+    expect(mockKibanaValues.renderHeaderActions).not.toHaveBeenCalled();
   });
 
   it('renders ErrorState', () => {
-    (useValues as jest.Mock).mockImplementation(() => ({ errorConnecting: true }));
+    setMockValues({ errorConnecting: true });
 
     const wrapper = shallow(<WorkplaceSearchConfigured />);
 
@@ -86,7 +86,7 @@ describe('WorkplaceSearchConfigured', () => {
   });
 
   it('passes readOnlyMode state', () => {
-    (useValues as jest.Mock).mockImplementation(() => ({ readOnlyMode: true }));
+    setMockValues({ readOnlyMode: true });
 
     const wrapper = shallow(<WorkplaceSearchConfigured />);
 

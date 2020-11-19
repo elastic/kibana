@@ -4,17 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 // eslint-disable-next-line import/no-extraneous-dependencies
-require('@babel/register')({
-  extensions: ['.ts'],
-  plugins: [
-    '@babel/plugin-proposal-optional-chaining',
-    '@babel/plugin-proposal-nullish-coalescing-operator',
-  ],
-  presets: [
-    '@babel/typescript',
-    ['@babel/preset-env', { targets: { node: 'current' } }],
-  ],
-});
+require('@kbn/optimizer').registerNodeAutoTranspilation();
 
 const {
   aggregateLatencyMetrics,

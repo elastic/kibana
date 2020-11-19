@@ -49,4 +49,21 @@ describe('migrate match_all query', () => {
       },
     });
   });
+
+  it('should return original doc if searchSourceJSON cannot be parsed', () => {
+    const migratedDoc = migrateMatchAllQuery(
+      {
+        attributes: {
+          kibanaSavedObjectMeta: 'kibanaSavedObjectMeta',
+        },
+      } as Parameters<SavedObjectMigrationFn>[0],
+      savedObjectMigrationContext
+    );
+
+    expect(migratedDoc).toEqual({
+      attributes: {
+        kibanaSavedObjectMeta: 'kibanaSavedObjectMeta',
+      },
+    });
+  });
 });

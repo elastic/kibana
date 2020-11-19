@@ -113,7 +113,6 @@ export class PanelOptionsMenu extends React.Component<PanelOptionsMenuProps, Sta
             ? 'embeddablePanelContextMenuOpen'
             : 'embeddablePanelContextMenuClosed'
         }
-        withTitle
       >
         <EuiContextMenu
           initialPanelId="mainMenu"

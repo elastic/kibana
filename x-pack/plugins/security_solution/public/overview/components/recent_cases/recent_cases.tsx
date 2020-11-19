@@ -10,7 +10,7 @@ import styled from 'styled-components';
 
 import { Case } from '../../../cases/containers/types';
 import { getCaseDetailsUrl } from '../../../common/components/link_to/redirect_to_case';
-import { Markdown } from '../../../common/components/markdown';
+import { MarkdownRenderer } from '../../../common/components/markdown_editor';
 import { useFormatUrl } from '../../../common/components/link_to';
 import { IconWithCount } from '../recent_timelines/counts';
 import { LinkAnchor } from '../../../common/components/links';
@@ -52,7 +52,7 @@ const RecentCasesComponent = ({ cases }: { cases: Case[] }) => {
             {c.description && c.description.length && (
               <MarkdownContainer>
                 <EuiText color="subdued" size="xs">
-                  <Markdown disableLinks={true} raw={c.description} />
+                  <MarkdownRenderer disableLinks={true}>{c.description}</MarkdownRenderer>
                 </EuiText>
               </MarkdownContainer>
             )}

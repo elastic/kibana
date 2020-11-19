@@ -39,8 +39,10 @@ import {
 } from '../../mock';
 import { State, createStore } from '../../store';
 import { Provider as ReduxStoreProvider } from 'react-redux';
-import { KpiHostsData } from '../../../graphql/types';
-import { NetworkKpiStrategyResponse } from '../../../../common/search_strategy';
+import {
+  HostsKpiStrategyResponse,
+  NetworkKpiStrategyResponse,
+} from '../../../../common/search_strategy';
 
 const from = '2019-06-15T06:00:00.000Z';
 const to = '2019-06-18T06:00:00.000Z';
@@ -242,7 +244,7 @@ describe('useKpiMatrixStatus', () => {
     data,
   }: {
     fieldsMapping: Readonly<StatItems[]>;
-    data: NetworkKpiStrategyResponse | KpiHostsData;
+    data: NetworkKpiStrategyResponse | HostsKpiStrategyResponse;
   }) => {
     const statItemsProps: StatItemsProps[] = useKpiMatrixStatus(
       fieldsMapping,

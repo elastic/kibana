@@ -10,6 +10,7 @@ import { PluginsSetup } from '../plugin';
 import { KibanaFeature } from '../../../features/server';
 import { ILicense, LicensingPluginSetup } from '../../../licensing/server';
 import { pluginInitializerContextConfigMock } from 'src/core/server/mocks';
+import { createCollectorFetchContextMock } from 'src/plugins/usage_collection/server/mocks';
 
 interface SetupOpts {
   license?: Partial<ILicense>;
@@ -43,7 +44,7 @@ function setup({
   return {
     licensing,
     features: featuresSetup,
-    usageCollecion: {
+    usageCollection: {
       makeUsageCollector: (options: any) => new MockUsageCollector(options),
     },
   };
@@ -67,25 +68,32 @@ const defaultCallClusterMock = jest.fn().mockResolvedValue({
   },
 });
 
+const getMockFetchContext = (mockedCallCluster: jest.Mock) => {
+  return {
+    ...createCollectorFetchContextMock(),
+    callCluster: mockedCallCluster,
+  };
+};
+
 describe('error handling', () => {
   it('handles a 404 when searching for space usage', async () => {
-    const { features, licensing, usageCollecion } = setup({
+    const { features, licensing, usageCollection } = setup({
       license: { isAvailable: true, type: 'basic' },
     });
-    const { fetch: getSpacesUsage } = getSpacesUsageCollector(usageCollecion as any, {
+    const collector = getSpacesUsageCollector(usageCollection as any, {
       kibanaIndexConfig$: Rx.of({ kibana: { index: '.kibana' } }),
       features,
       licensing,
     });
 
-    await getSpacesUsage(jest.fn().mockRejectedValue({ status: 404 }));
+    await collector.fetch(getMockFetchContext(jest.fn().mockRejectedValue({ status: 404 })));
   });
 
   it('throws error for a non-404', async () => {
-    const { features, licensing, usageCollecion } = setup({
+    const { features, licensing, usageCollection } = setup({
       license: { isAvailable: true, type: 'basic' },
     });
-    const { fetch: getSpacesUsage } = getSpacesUsageCollector(usageCollecion as any, {
+    const collector = getSpacesUsageCollector(usageCollection as any, {
       kibanaIndexConfig$: Rx.of({ kibana: { index: '.kibana' } }),
       features,
       licensing,
@@ -94,7 +102,9 @@ describe('error handling', () => {
     const statusCodes = [401, 402, 403, 500];
     for (const statusCode of statusCodes) {
       const error = { status: statusCode };
-      await expect(getSpacesUsage(jest.fn().mockRejectedValue(error))).rejects.toBe(error);
+      await expect(
+        collector.fetch(getMockFetchContext(jest.fn().mockRejectedValue(error)))
+      ).rejects.toBe(error);
     }
   });
 });
@@ -102,15 +112,15 @@ describe('error handling', () => {
 describe('with a basic license', () => {
   let usageStats: UsageStats;
   beforeAll(async () => {
-    const { features, licensing, usageCollecion } = setup({
+    const { features, licensing, usageCollection } = setup({
       license: { isAvailable: true, type: 'basic' },
     });
-    const { fetch: getSpacesUsage } = getSpacesUsageCollector(usageCollecion as any, {
+    const collector = getSpacesUsageCollector(usageCollection as any, {
       kibanaIndexConfig$: pluginInitializerContextConfigMock({}).legacy.globalConfig$,
       features,
       licensing,
     });
-    usageStats = await getSpacesUsage(defaultCallClusterMock);
+    usageStats = await collector.fetch(getMockFetchContext(defaultCallClusterMock));
 
     expect(defaultCallClusterMock).toHaveBeenCalledWith('search', {
       body: {
@@ -152,13 +162,13 @@ describe('with a basic license', () => {
 describe('with no license', () => {
   let usageStats: UsageStats;
   beforeAll(async () => {
-    const { features, licensing, usageCollecion } = setup({ license: { isAvailable: false } });
-    const { fetch: getSpacesUsage } = getSpacesUsageCollector(usageCollecion as any, {
+    const { features, licensing, usageCollection } = setup({ license: { isAvailable: false } });
+    const collector = getSpacesUsageCollector(usageCollection as any, {
       kibanaIndexConfig$: pluginInitializerContextConfigMock({}).legacy.globalConfig$,
       features,
       licensing,
     });
-    usageStats = await getSpacesUsage(defaultCallClusterMock);
+    usageStats = await collector.fetch(getMockFetchContext(defaultCallClusterMock));
   });
 
   test('sets enabled to false', () => {
@@ -181,15 +191,15 @@ describe('with no license', () => {
 describe('with platinum license', () => {
   let usageStats: UsageStats;
   beforeAll(async () => {
-    const { features, licensing, usageCollecion } = setup({
+    const { features, licensing, usageCollection } = setup({
       license: { isAvailable: true, type: 'platinum' },
     });
-    const { fetch: getSpacesUsage } = getSpacesUsageCollector(usageCollecion as any, {
+    const collector = getSpacesUsageCollector(usageCollection as any, {
       kibanaIndexConfig$: pluginInitializerContextConfigMock({}).legacy.globalConfig$,
       features,
       licensing,
     });
-    usageStats = await getSpacesUsage(defaultCallClusterMock);
+    usageStats = await collector.fetch(getMockFetchContext(defaultCallClusterMock));
   });
 
   test('sets enabled to true', () => {

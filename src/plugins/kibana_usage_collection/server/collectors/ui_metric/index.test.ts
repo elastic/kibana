@@ -17,26 +17,29 @@
  * under the License.
  */
 
-import { savedObjectsRepositoryMock } from '../../../../../core/server/mocks';
+import { loggingSystemMock, savedObjectsRepositoryMock } from '../../../../../core/server/mocks';
 import {
-  CollectorOptions,
+  Collector,
   createUsageCollectionSetupMock,
+  createCollectorFetchContextMock,
 } from '../../../../usage_collection/server/usage_collection.mock';
 
 import { registerUiMetricUsageCollector } from './';
 
+const logger = loggingSystemMock.createLogger();
+
 describe('telemetry_ui_metric', () => {
-  let collector: CollectorOptions;
+  let collector: Collector<unknown, unknown>;
 
   const usageCollectionMock = createUsageCollectionSetupMock();
   usageCollectionMock.makeUsageCollector.mockImplementation((config) => {
-    collector = config;
+    collector = new Collector(logger, config);
     return createUsageCollectionSetupMock().makeUsageCollector(config);
   });
 
   const getUsageCollector = jest.fn();
   const registerType = jest.fn();
-  const callCluster = jest.fn();
+  const mockedFetchContext = createCollectorFetchContextMock();
 
   beforeAll(() =>
     registerUiMetricUsageCollector(usageCollectionMock, registerType, getUsageCollector)
@@ -47,7 +50,7 @@ describe('telemetry_ui_metric', () => {
   });
 
   test('if no savedObjectClient initialised, return undefined', async () => {
-    expect(await collector.fetch(callCluster)).toBeUndefined();
+    expect(await collector.fetch(mockedFetchContext)).toBeUndefined();
   });
 
   test('when savedObjectClient is initialised, return something', async () => {
@@ -61,7 +64,7 @@ describe('telemetry_ui_metric', () => {
     );
     getUsageCollector.mockImplementation(() => savedObjectClient);
 
-    expect(await collector.fetch(callCluster)).toStrictEqual({});
+    expect(await collector.fetch(mockedFetchContext)).toStrictEqual({});
     expect(savedObjectClient.bulkCreate).not.toHaveBeenCalled();
   });
 
@@ -85,7 +88,7 @@ describe('telemetry_ui_metric', () => {
 
     getUsageCollector.mockImplementation(() => savedObjectClient);
 
-    expect(await collector.fetch(callCluster)).toStrictEqual({
+    expect(await collector.fetch(mockedFetchContext)).toStrictEqual({
       testAppName: [
         { key: 'testKeyName1', value: 3 },
         { key: 'testKeyName2', value: 5 },

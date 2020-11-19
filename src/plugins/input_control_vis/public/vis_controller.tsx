@@ -31,12 +31,12 @@ import { RangeControl } from './control/range_control_factory';
 import { ListControl } from './control/list_control_factory';
 import { InputControlVisDependencies } from './plugin';
 import { FilterManager, Filter } from '../../data/public';
-import { VisParams, Vis } from '../../visualizations/public';
+import { VisParams, ExprVis } from '../../visualizations/public';
 
 export const createInputControlVisController = (deps: InputControlVisDependencies) => {
   return class InputControlVisController {
     private I18nContext?: I18nStart['Context'];
-    private isLoaded = false;
+    private _isLoaded = false;
 
     controls: Array<RangeControl | ListControl>;
     queryBarUpdateHandler: () => void;
@@ -45,7 +45,7 @@ export const createInputControlVisController = (deps: InputControlVisDependencie
     timeFilterSubscription: Subscription;
     visParams?: VisParams;
 
-    constructor(public el: Element, public vis: Vis) {
+    constructor(public el: Element, public vis: ExprVis) {
       this.controls = [];
 
       this.queryBarUpdateHandler = this.updateControlsFromKbn.bind(this);
@@ -58,7 +58,7 @@ export const createInputControlVisController = (deps: InputControlVisDependencie
         .getTimeUpdate$()
         .subscribe(() => {
           if (this.visParams?.useTimeFilter) {
-            this.isLoaded = false;
+            this._isLoaded = false;
           }
         });
     }
@@ -68,11 +68,11 @@ export const createInputControlVisController = (deps: InputControlVisDependencie
         const [{ i18n }] = await deps.core.getStartServices();
         this.I18nContext = i18n.Context;
       }
-      if (!this.isLoaded || !isEqual(visParams, this.visParams)) {
+      if (!this._isLoaded || !isEqual(visParams, this.visParams)) {
         this.visParams = visParams;
         this.controls = [];
         this.controls = await this.initControls();
-        this.isLoaded = true;
+        this._isLoaded = true;
       }
       this.drawVis();
     }

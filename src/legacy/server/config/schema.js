@@ -26,6 +26,10 @@ const HANDLED_IN_NEW_PLATFORM = Joi.any().description(
 );
 export default () =>
   Joi.object({
+    elastic: Joi.object({
+      apm: HANDLED_IN_NEW_PLATFORM,
+    }).default(),
+
     pkg: Joi.object({
       version: Joi.string().default(Joi.ref('$version')),
       branch: Joi.string().default(Joi.ref('$branch')),
@@ -39,12 +43,8 @@ export default () =>
       prod: Joi.boolean().default(Joi.ref('$prod')),
     }).default(),
 
-    dev: Joi.object({
-      basePathProxyTarget: Joi.number().default(5603),
-    }).default(),
-
+    dev: HANDLED_IN_NEW_PLATFORM,
     pid: HANDLED_IN_NEW_PLATFORM,
-
     csp: HANDLED_IN_NEW_PLATFORM,
 
     server: Joi.object({
@@ -82,96 +82,15 @@ export default () =>
 
     ops: Joi.object({
       interval: Joi.number().default(5000),
-      cGroupOverrides: Joi.object().keys({
-        cpuPath: Joi.string().default(),
-        cpuAcctPath: Joi.string().default(),
-      }),
+      cGroupOverrides: HANDLED_IN_NEW_PLATFORM,
     }).default(),
 
-    plugins: Joi.object({
-      paths: Joi.array().items(Joi.string()).default([]),
-      scanDirs: Joi.array().items(Joi.string()).default([]),
-      initialize: Joi.boolean().default(true),
-    }).default(),
-
+    plugins: HANDLED_IN_NEW_PLATFORM,
     path: HANDLED_IN_NEW_PLATFORM,
-
-    stats: Joi.object({
-      maximumWaitTimeForAllCollectorsInS: Joi.number().default(60),
-    }).default(),
-
-    status: Joi.object({
-      allowAnonymous: Joi.boolean().default(false),
-    }).default(),
-    map: Joi.object({
-      includeElasticMapsService: Joi.boolean().default(true),
-      proxyElasticMapsServiceInMaps: Joi.boolean().default(false),
-      tilemap: Joi.object({
-        url: Joi.string(),
-        options: Joi.object({
-          attribution: Joi.string(),
-          minZoom: Joi.number().min(0, 'Must be 0 or higher').default(0),
-          maxZoom: Joi.number().default(10),
-          tileSize: Joi.number(),
-          subdomains: Joi.array().items(Joi.string()).single(),
-          errorTileUrl: Joi.string().uri(),
-          tms: Joi.boolean(),
-          reuseTiles: Joi.boolean(),
-          bounds: Joi.array().items(Joi.array().items(Joi.number()).min(2).required()).min(2),
-          default: Joi.boolean(),
-        }).default({
-          default: true,
-        }),
-      }).default(),
-      regionmap: Joi.object({
-        includeElasticMapsService: Joi.boolean().default(true),
-        layers: Joi.array()
-          .items(
-            Joi.object({
-              url: Joi.string(),
-              format: Joi.object({
-                type: Joi.string().default('geojson'),
-              }).default({
-                type: 'geojson',
-              }),
-              meta: Joi.object({
-                feature_collection_path: Joi.string().default('data'),
-              }).default({
-                feature_collection_path: 'data',
-              }),
-              attribution: Joi.string(),
-              name: Joi.string(),
-              fields: Joi.array().items(
-                Joi.object({
-                  name: Joi.string(),
-                  description: Joi.string(),
-                })
-              ),
-            })
-          )
-          .default([]),
-      }).default(),
-      manifestServiceUrl: Joi.string().default('').allow(''),
-      emsFileApiUrl: Joi.string().default('https://vector.maps.elastic.co'),
-      emsTileApiUrl: Joi.string().default('https://tiles.maps.elastic.co'),
-      emsLandingPageUrl: Joi.string().default('https://maps.elastic.co/v7.9'),
-      emsFontLibraryUrl: Joi.string().default(
-        'https://tiles.maps.elastic.co/fonts/{fontstack}/{range}.pbf'
-      ),
-      emsTileLayerId: Joi.object({
-        bright: Joi.string().default('road_map'),
-        desaturated: Joi.string().default('road_map_desaturated'),
-        dark: Joi.string().default('dark_map'),
-      }).default({
-        bright: 'road_map',
-        desaturated: 'road_map_desaturated',
-        dark: 'dark_map',
-      }),
-    }).default(),
-
-    i18n: Joi.object({
-      locale: Joi.string().default('en'),
-    }).default(),
+    stats: HANDLED_IN_NEW_PLATFORM,
+    status: HANDLED_IN_NEW_PLATFORM,
+    map: HANDLED_IN_NEW_PLATFORM,
+    i18n: HANDLED_IN_NEW_PLATFORM,
 
     // temporarily moved here from the (now deleted) kibana legacy plugin
     kibana: Joi.object({
@@ -182,8 +101,5 @@ export default () =>
       autocompleteTimeout: Joi.number().integer().min(1).default(1000),
     }).default(),
 
-    savedObjects: Joi.object({
-      maxImportPayloadBytes: Joi.number().default(10485760),
-      maxImportExportSize: Joi.number().default(10000),
-    }).default(),
+    savedObjects: HANDLED_IN_NEW_PLATFORM,
   }).default();

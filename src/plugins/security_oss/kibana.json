@@ -1,0 +1,10 @@
+{
+  "id": "securityOss",
+  "version": "8.0.0",
+  "kibanaVersion": "kibana",
+  "configPath": ["security"],
+  "ui": true,
+  "server": true,
+  "requiredPlugins": [],
+  "requiredBundles": []
+}

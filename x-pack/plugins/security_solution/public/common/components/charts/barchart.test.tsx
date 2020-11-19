@@ -13,6 +13,7 @@ import { ThemeProvider } from 'styled-components';
 import { escapeDataProviderId } from '../drag_and_drop/helpers';
 import { TestProviders } from '../../mock';
 import '../../mock/match_media';
+import '../../mock/react_beautiful_dnd';
 
 import { BarChartBaseComponent, BarChartComponent } from './barchart';
 import { ChartSeriesData } from './common';
@@ -130,19 +131,6 @@ const mockConfig = {
   },
   customHeight: 324,
 };
-
-// Suppress warnings about "react-beautiful-dnd"
-/* eslint-disable no-console */
-const originalError = console.error;
-const originalWarn = console.warn;
-beforeAll(() => {
-  console.warn = jest.fn();
-  console.error = jest.fn();
-});
-afterAll(() => {
-  console.error = originalError;
-  console.warn = originalWarn;
-});
 
 describe('BarChartBaseComponent', () => {
   let shallowWrapper: ShallowWrapper;
@@ -350,7 +338,10 @@ describe.each(chartDataSets)('BarChart with stackByField', () => {
       )}-${escapeDataProviderId(datum.key)}`;
 
       expect(
-        wrapper.find(`div [data-rbd-draggable-id="${dataProviderId}"]`).first().text()
+        wrapper
+          .find(`[draggableId="${dataProviderId}"] [data-test-subj="providerContainer"]`)
+          .first()
+          .text()
       ).toEqual(datum.key);
     });
   });

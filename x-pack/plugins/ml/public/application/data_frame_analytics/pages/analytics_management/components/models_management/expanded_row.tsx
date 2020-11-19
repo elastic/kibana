@@ -20,15 +20,34 @@ import {
   EuiHorizontalRule,
   EuiFlexGroup,
   EuiTextColor,
+  EuiButtonEmpty,
+  EuiBadge,
 } from '@elastic/eui';
-// @ts-ignore
-import { formatDate } from '@elastic/eui/lib/services/format';
+import { EuiDescriptionListProps } from '@elastic/eui/src/components/description_list/description_list';
 import { ModelItemFull } from './models_list';
-import { TIME_FORMAT } from '../../../../../../../common/constants/time_format';
+import { useMlKibana } from '../../../../../contexts/kibana';
+import { timeFormatter } from '../../../../../../../common/util/date_utils';
 
 interface ExpandedRowProps {
   item: ModelItemFull;
 }
+
+const formatterDictionary: Record<string, (value: any) => JSX.Element | string | undefined> = {
+  tags: (tags: string[]) => {
+    if (tags.length === 0) return;
+    return (
+      <div>
+        {tags.map((tag) => (
+          <EuiBadge key={tag} color="hollow">
+            {tag}
+          </EuiBadge>
+        ))}
+      </div>
+    );
+  },
+  create_time: timeFormatter,
+  timestamp: timeFormatter,
+};
 
 export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
   const {
@@ -57,25 +76,51 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
     license_level,
   };
 
-  function formatToListItems(items: Record<string, any>) {
+  function formatToListItems(items: Record<string, any>): EuiDescriptionListProps['listItems'] {
     return Object.entries(items)
       .map(([title, value]) => {
-        if (title.includes('timestamp')) {
-          value = formatDate(value, TIME_FORMAT);
+        if (title in formatterDictionary) {
+          return {
+            title,
+            description: formatterDictionary[title](value),
+          };
         }
-        return { title, description: typeof value === 'object' ? JSON.stringify(value) : value };
+        return {
+          title,
+          description:
+            typeof value === 'object' ? (
+              <EuiCodeBlock
+                language="json"
+                fontSize="s"
+                paddingSize="s"
+                overflowHeight={300}
+                isCopyable={false}
+              >
+                {JSON.stringify(value, null, 2)}
+              </EuiCodeBlock>
+            ) : (
+              value
+            ),
+        };
       })
       .filter(({ description }) => {
         return description !== undefined;
       });
   }
 
+  const {
+    services: {
+      share,
+      application: { navigateToUrl },
+    },
+  } = useMlKibana();
+
   const tabs = [
     {
       id: 'details',
       name: (
         <FormattedMessage
-          id="xpack.ml.inference.modelsList.expandedRow.detailsTabLabel"
+          id="xpack.ml.trainedModels.modelsList.expandedRow.detailsTabLabel"
           defaultMessage="Details"
         />
       ),
@@ -88,7 +133,7 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
                 <EuiTitle size={'xs'}>
                   <h5>
                     <FormattedMessage
-                      id="xpack.ml.inference.modelsList.expandedRow.detailsTitle"
+                      id="xpack.ml.trainedModels.modelsList.expandedRow.detailsTitle"
                       defaultMessage="Details"
                     />
                   </h5>
@@ -111,7 +156,7 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
             id: 'config',
             name: (
               <FormattedMessage
-                id="xpack.ml.inference.modelsList.expandedRow.configTabLabel"
+                id="xpack.ml.trainedModels.modelsList.expandedRow.configTabLabel"
                 defaultMessage="Config"
               />
             ),
@@ -124,7 +169,7 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
                       <EuiTitle size={'xs'}>
                         <h5>
                           <FormattedMessage
-                            id="xpack.ml.inference.modelsList.expandedRow.inferenceConfigTitle"
+                            id="xpack.ml.trainedModels.modelsList.expandedRow.inferenceConfigTitle"
                             defaultMessage="Inference configuration"
                           />
                         </h5>
@@ -145,7 +190,7 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
                         <EuiTitle size={'xs'}>
                           <h5>
                             <FormattedMessage
-                              id="xpack.ml.inference.modelsList.expandedRow.analyticsConfigTitle"
+                              id="xpack.ml.trainedModels.modelsList.expandedRow.analyticsConfigTitle"
                               defaultMessage="Analytics configuration"
                             />
                           </h5>
@@ -169,7 +214,7 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
       id: 'stats',
       name: (
         <FormattedMessage
-          id="xpack.ml.inference.modelsList.expandedRow.statsTabLabel"
+          id="xpack.ml.trainedModels.modelsList.expandedRow.statsTabLabel"
           defaultMessage="Stats"
         />
       ),
@@ -183,7 +228,7 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
                   <EuiTitle size={'xs'}>
                     <h5>
                       <FormattedMessage
-                        id="xpack.ml.inference.modelsList.expandedRow.inferenceStatsTitle"
+                        id="xpack.ml.trainedModels.modelsList.expandedRow.inferenceStatsTitle"
                         defaultMessage="Inference stats"
                       />
                     </h5>
@@ -203,7 +248,7 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
                   <EuiTitle size={'xs'}>
                     <h5>
                       <FormattedMessage
-                        id="xpack.ml.inference.modelsList.expandedRow.ingestStatsTitle"
+                        id="xpack.ml.trainedModels.modelsList.expandedRow.ingestStatsTitle"
                         defaultMessage="Ingest stats"
                       />
                     </h5>
@@ -221,7 +266,7 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
                       <EuiTitle size={'xs'}>
                         <h5>
                           <FormattedMessage
-                            id="xpack.ml.inference.modelsList.expandedRow.byPipelineTitle"
+                            id="xpack.ml.trainedModels.modelsList.expandedRow.byPipelineTitle"
                             defaultMessage="By pipeline"
                           />
                         </h5>
@@ -255,7 +300,7 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
                               <EuiTitle size={'xxs'}>
                                 <h6>
                                   <FormattedMessage
-                                    id="xpack.ml.inference.modelsList.expandedRow.byProcessorTitle"
+                                    id="xpack.ml.trainedModels.modelsList.expandedRow.byProcessorTitle"
                                     defaultMessage="By processor"
                                   />
                                 </h6>
@@ -309,7 +354,7 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
             name: (
               <>
                 <FormattedMessage
-                  id="xpack.ml.inference.modelsList.expandedRow.pipelinesTabLabel"
+                  id="xpack.ml.trainedModels.modelsList.expandedRow.pipelinesTabLabel"
                   defaultMessage="Pipelines"
                 />{' '}
                 <EuiNotificationBadge>{stats.pipeline_count}</EuiNotificationBadge>
@@ -323,15 +368,41 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
                     return (
                       <EuiFlexItem key={pipelineName}>
                         <EuiPanel>
-                          <EuiTitle size={'xs'}>
-                            <h5>{pipelineName}</h5>
-                          </EuiTitle>
+                          <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+                            <EuiFlexItem grow={false}>
+                              <EuiTitle size={'xs'}>
+                                <h5>{pipelineName}</h5>
+                              </EuiTitle>
+                            </EuiFlexItem>
+                            <EuiFlexItem grow={false}>
+                              <EuiButtonEmpty
+                                onClick={async () => {
+                                  const ingestPipelinesAppUrlGenerator = share.urlGenerators.getUrlGenerator(
+                                    'INGEST_PIPELINES_APP_URL_GENERATOR'
+                                  );
+                                  await navigateToUrl(
+                                    await ingestPipelinesAppUrlGenerator.createUrl({
+                                      page: 'pipeline_edit',
+                                      pipelineId: pipelineName,
+                                      absolute: true,
+                                    })
+                                  );
+                                }}
+                              >
+                                <FormattedMessage
+                                  id="xpack.ml.trainedModels.modelsList.expandedRow.editPipelineLabel"
+                                  defaultMessage="Edit"
+                                />
+                              </EuiButtonEmpty>
+                            </EuiFlexItem>
+                          </EuiFlexGroup>
+
                           {description && <EuiText>{description}</EuiText>}
                           <EuiSpacer size={'m'} />
                           <EuiTitle size={'xxs'}>
                             <h6>
                               <FormattedMessage
-                                id="xpack.ml.inference.modelsList.expandedRow.processorsTitle"
+                                id="xpack.ml.trainedModels.modelsList.expandedRow.processorsTitle"
                                 defaultMessage="Processors"
                               />
                             </h6>

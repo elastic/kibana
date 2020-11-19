@@ -19,23 +19,18 @@
 
 import React, { Component } from 'react';
 import { createSelector } from 'reselect';
-import {
-  IndexPatternField,
-  IIndexPattern,
-  IFieldType,
-} from '../../../../../../plugins/data/public';
+import { IndexPatternField, IndexPattern, IFieldType } from '../../../../../../plugins/data/public';
 import { Table } from './components/table';
-import { getFieldFormat } from './lib';
 import { IndexedFieldItem } from './types';
 
 interface IndexedFieldsTableProps {
   fields: IndexPatternField[];
-  indexPattern: IIndexPattern;
+  indexPattern: IndexPattern;
   fieldFilter?: string;
   indexedFieldTypeFilter?: string;
   helpers: {
     redirectToRoute: (obj: any) => void;
-    getFieldInfo: (indexPattern: IIndexPattern, field: IFieldType) => string[];
+    getFieldInfo: (indexPattern: IndexPattern, field: IFieldType) => string[];
   };
   fieldWildcardMatcher: (filters: any[]) => (val: any) => boolean;
 }
@@ -77,7 +72,7 @@ export class IndexedFieldsTable extends Component<
           return {
             ...field.spec,
             displayName: field.displayName,
-            format: getFieldFormat(indexPattern, field.name),
+            format: indexPattern.getFormatterForFieldNoDefault(field.name)?.type?.title || '',
             excluded: fieldWildcardMatch ? fieldWildcardMatch(field.name) : false,
             info: helpers.getFieldInfo && helpers.getFieldInfo(indexPattern, field),
           };
@@ -94,7 +89,11 @@ export class IndexedFieldsTable extends Component<
     (fields, fieldFilter, indexedFieldTypeFilter) => {
       if (fieldFilter) {
         const normalizedFieldFilter = fieldFilter.toLowerCase();
-        fields = fields.filter((field) => field.name.toLowerCase().includes(normalizedFieldFilter));
+        fields = fields.filter(
+          (field) =>
+            field.name.toLowerCase().includes(normalizedFieldFilter) ||
+            (field.displayName && field.displayName.toLowerCase().includes(normalizedFieldFilter))
+        );
       }
 
       if (indexedFieldTypeFilter) {
