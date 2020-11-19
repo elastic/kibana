@@ -13,10 +13,11 @@ import { WORKPLACE_SEARCH_PLUGIN } from '../../../../../common/constants';
 import { SetupGuideLayout, SETUP_GUIDE_TITLE } from '../../../shared/setup_guide';
 import { SetWorkplaceSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { SendWorkplaceSearchTelemetry as SendTelemetry } from '../../../shared/telemetry';
+
 import GettingStarted from './assets/getting_started.png';
 
-const GETTING_STARTED_LINK_URL =
-  'https://www.elastic.co/guide/en/workplace-search/current/workplace-search-getting-started.html';
+import { DOCS_PREFIX } from '../../routes';
+const GETTING_STARTED_LINK_URL = `${DOCS_PREFIX}/workplace-search-getting-started.html`;
 
 export const SetupGuide: React.FC = () => {
   return (
