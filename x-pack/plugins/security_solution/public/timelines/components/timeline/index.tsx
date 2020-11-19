@@ -20,6 +20,7 @@ import { NotesTabContent } from '../notes';
 import { TimelineType } from '../../../../common/types/timeline';
 import * as i18n from './translations';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
+import { activeTimeline } from '../../containers/active_timeline_context';
 
 const TimelineContainer = styled.div`
   height: 100%;
@@ -68,6 +69,7 @@ const StatefulTimelineComponent: React.FC<Props> = ({ timelineId }) => {
           id: timelineId,
           columns: defaultHeaders,
           indexNames: selectedPatterns,
+          expandedEvent: activeTimeline.getExpandedEvent(),
           show: false,
         })
       );

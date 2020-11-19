@@ -23,6 +23,7 @@ import { KueryFilterQuery, SerializedFilterQuery } from '../../../common/store/m
 import { TimelineNonEcsData } from '../../../../common/search_strategy/timeline';
 import {
   TimelineEventsType,
+  TimelineExpandedEvent,
   TimelineTypeLiteral,
   TimelineType,
   RowRendererId,
@@ -114,6 +115,45 @@ export const addTimelineNoteToEvent = ({
   };
 };
 
+interface ToggleTimelineExpandedEventParams {
+  timelineId: string;
+  eventId: string;
+  indexName: string;
+  loading: boolean;
+  timelineById: TimelineById;
+}
+
+export const toggleTimelineExpandedEvent = ({
+  timelineId,
+  eventId,
+  indexName,
+  loading,
+  timelineById,
+}: ToggleTimelineExpandedEventParams): TimelineById => {
+  const timeline = timelineById[timelineId];
+  const existingExpandedEvent = timeline.expandedEvent;
+
+  let newExpandedEvent;
+
+  if (
+    existingExpandedEvent &&
+    existingExpandedEvent.eventId === eventId &&
+    existingExpandedEvent.loading === loading
+  ) {
+    newExpandedEvent = {};
+  } else {
+    newExpandedEvent = { eventId, indexName, loading };
+  }
+
+  return {
+    ...timelineById,
+    [timelineId]: {
+      ...timeline,
+      expandedEvent: newExpandedEvent,
+    },
+  };
+};
+
 interface AddTimelineParams {
   id: string;
   timeline: TimelineModel;
@@ -169,6 +209,7 @@ interface AddNewTimelineParams {
     end: string;
   };
   excludedRowRendererIds?: RowRendererId[];
+  expandedEvent?: TimelineExpandedEvent;
   filters?: Filter[];
   id: string;
   itemsPerPage?: number;
@@ -190,6 +231,7 @@ export const addNewTimeline = ({
   dataProviders = [],
   dateRange: maybeDateRange,
   excludedRowRendererIds = [],
+  expandedEvent = {},
   filters = timelineDefaults.filters,
   id,
   itemsPerPage = timelineDefaults.itemsPerPage,
@@ -218,6 +260,7 @@ export const addNewTimeline = ({
       columns,
       dataProviders,
       dateRange,
+      expandedEvent,
       excludedRowRendererIds,
       filters,
       itemsPerPage,

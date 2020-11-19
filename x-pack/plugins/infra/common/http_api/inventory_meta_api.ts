@@ -21,6 +21,7 @@ export const InventoryMetaResponseRT = rt.type({
 export const InventoryMetaRequestRT = rt.type({
   sourceId: rt.string,
   nodeType: ItemTypeRT,
+  currentTime: rt.number,
 });
 
 export type InventoryMetaRequest = rt.TypeOf<typeof InventoryMetaRequestRT>;

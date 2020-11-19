@@ -26,3 +26,10 @@ export const EVENT_DETAILS_PLACEHOLDER = i18n.translate(
     defaultMessage: 'Select an event to show event details',
   }
 );
+
+export const EVENT_DETAILS = i18n.translate(
+  'xpack.securitySolution.timeline.expandableEvent.titleLabel',
+  {
+    defaultMessage: 'Event details',
+  }
+);

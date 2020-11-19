@@ -9,14 +9,14 @@ import { setupRequest } from '../lib/helpers/setup_request';
 import { getServiceNodes } from '../lib/service_nodes';
 import { rangeRt, uiFiltersRt } from './default_api_types';
 
-export const serviceNodesRoute = createRoute(() => ({
-  path: '/api/apm/services/{serviceName}/serviceNodes',
-  params: {
+export const serviceNodesRoute = createRoute({
+  endpoint: 'GET /api/apm/services/{serviceName}/serviceNodes',
+  params: t.type({
     path: t.type({
       serviceName: t.string,
     }),
     query: t.intersection([rangeRt, uiFiltersRt]),
-  },
+  }),
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     const { params } = context;
@@ -27,4 +27,4 @@ export const serviceNodesRoute = createRoute(() => ({
       serviceName,
     });
   },
-}));
+});

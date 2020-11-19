@@ -20,7 +20,6 @@ import { RowRenderer } from './renderers/row_renderer';
 import { Sort } from './sort';
 import { DEFAULT_ICON_BUTTON_WIDTH } from '../helpers';
 import { TimelineEventsType, TimelineId } from '../../../../../common/types/timeline';
-import { ActiveTimelineExpandedEvent } from '../../../containers/active_timeline_context';
 
 export interface BodyProps {
   browserFields: BrowserFields;
@@ -28,14 +27,12 @@ export interface BodyProps {
   columnRenderers: ColumnRenderer[];
   data: TimelineItem[];
   docValueFields: DocValueFields[];
-  expanded: ActiveTimelineExpandedEvent;
   graphEventId?: string;
   isEventViewer?: boolean;
   isSelectAllChecked: boolean;
   eventIdToNoteIds: Readonly<Record<string, string[]>>;
   eventType?: TimelineEventsType;
   loadingEventIds: Readonly<string[]>;
-  onEventToggled: (event: TimelineItem) => void;
   onRowSelected: OnRowSelected;
   onSelectAll: OnSelectAll;
   pinnedEventIds: Readonly<Record<string, boolean>>;
@@ -64,12 +61,10 @@ export const Body = React.memo<BodyProps>(
     columnRenderers,
     data,
     eventIdToNoteIds,
-    expanded,
     graphEventId,
     isEventViewer = false,
     isSelectAllChecked,
     loadingEventIds,
-    onEventToggled,
     onRowSelected,
     onSelectAll,
     pinnedEventIds,
@@ -127,13 +122,11 @@ export const Body = React.memo<BodyProps>(
               columnHeaders={columnHeaders}
               columnRenderers={columnRenderers}
               data={data}
-              expanded={expanded}
               eventIdToNoteIds={eventIdToNoteIds}
               id={timelineId}
               isEventViewer={isEventViewer}
               loadingEventIds={loadingEventIds}
               onRowSelected={onRowSelected}
-              onEventToggled={onEventToggled}
               pinnedEventIds={pinnedEventIds}
               refetch={refetch}
               rowRenderers={rowRenderers}

@@ -13,6 +13,7 @@ import { TimelineNonEcsData } from '../../../../common/search_strategy/timeline'
 import { KueryFilterQuery, SerializedFilterQuery } from '../../../common/store/types';
 import type {
   TimelineEventsType,
+  TimelineExpandedEvent,
   TimelineType,
   TimelineStatus,
   RowRendererId,
@@ -57,6 +58,7 @@ export interface TimelineModel {
   eventIdToNoteIds: Record<string, string[]>;
   /** A list of Ids of excluded Row Renderers */
   excludedRowRendererIds: RowRendererId[];
+  expandedEvent: TimelineExpandedEvent;
   filters?: Filter[];
   /** When non-empty, display a graph view for this event */
   graphEventId?: string;
@@ -133,6 +135,7 @@ export type SubsetTimelineModel = Readonly<
     | 'eventType'
     | 'eventIdToNoteIds'
     | 'excludedRowRendererIds'
+    | 'expandedEvent'
     | 'graphEventId'
     | 'highlightedDropAndProviderId'
     | 'historyIds'

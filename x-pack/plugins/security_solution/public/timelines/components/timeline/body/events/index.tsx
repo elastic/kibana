@@ -26,12 +26,10 @@ interface Props {
   columnHeaders: ColumnHeaderOptions[];
   columnRenderers: ColumnRenderer[];
   data: TimelineItem[];
-  expanded: { eventId?: string; indexName?: string };
   eventIdToNoteIds: Readonly<Record<string, string[]>>;
   id: string;
   isEventViewer?: boolean;
   loadingEventIds: Readonly<string[]>;
-  onEventToggled: (event: TimelineItem) => void;
   onRowSelected: OnRowSelected;
   pinnedEventIds: Readonly<Record<string, boolean>>;
   refetch: inputsModel.Refetch;
@@ -48,14 +46,12 @@ const EventsComponent: React.FC<Props> = ({
   columnRenderers,
   data,
   eventIdToNoteIds,
-  expanded,
   id,
   isEventViewer = false,
   loadingEventIds,
   onRowSelected,
   pinnedEventIds,
   refetch,
-  onEventToggled,
   onRuleChange,
   rowRenderers,
   selectedEventIds,
@@ -72,13 +68,11 @@ const EventsComponent: React.FC<Props> = ({
         eventIdToNoteIds={eventIdToNoteIds}
         isEventPinned={eventIsPinned({ eventId: event._id, pinnedEventIds })}
         isEventViewer={isEventViewer}
-        isExpanded={expanded.eventId === event._id}
         key={`${event._id}_${event._index}`}
         loadingEventIds={loadingEventIds}
         onRowSelected={onRowSelected}
         refetch={refetch}
         rowRenderers={rowRenderers}
-        onEventToggled={() => onEventToggled(event)}
         onRuleChange={onRuleChange}
         selectedEventIds={selectedEventIds}
         showCheckboxes={showCheckboxes}

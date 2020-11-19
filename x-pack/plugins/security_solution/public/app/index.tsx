@@ -10,6 +10,15 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { SecurityApp } from './app';
 import { RenderAppProps } from './types';
 
+/* Uncomment only during debugging */
+const whyDidYouRender = require('@welldone-software/why-did-you-render'); // eslint-disable-line
+whyDidYouRender(React, {
+  include: [/^HomePage/],
+  trackAllPureComponents: false,
+  trackHooks: false,
+  collapseGroups: true,
+});
+
 export const renderApp = ({
   apolloClient,
   element,

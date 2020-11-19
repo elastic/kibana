@@ -11,7 +11,7 @@ import { TimelineEventsDetailsItem } from '../../../../common/search_strategy/ti
 import { ColumnHeaderOptions } from '../../../timelines/store/timeline/model';
 import { OnUpdateColumns } from '../../../timelines/components/timeline/events';
 
-import { EventDetails, View } from './event_details';
+import { EventDetails, EventsViewType, View } from './event_details';
 
 interface Props {
   browserFields: BrowserFields;
@@ -25,7 +25,7 @@ interface Props {
 export const StatefulEventDetails = React.memo<Props>(
   ({ browserFields, columnHeaders, data, id, onUpdateColumns, timelineId }) => {
     // TODO: Move to the store
-    const [view, setView] = useState<View>('table-view');
+    const [view, setView] = useState<View>(EventsViewType.tableView);
 
     return (
       <EventDetails

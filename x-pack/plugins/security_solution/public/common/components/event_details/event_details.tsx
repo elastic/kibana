@@ -16,7 +16,11 @@ import { EventFieldsBrowser } from './event_fields_browser';
 import { JsonView } from './json_view';
 import * as i18n from './translations';
 
-export type View = 'table-view' | 'json-view';
+export type View = EventsViewType.tableView | EventsViewType.jsonView;
+export enum EventsViewType {
+  tableView = 'table-view',
+  jsonView = 'json-view',
+}
 
 const CollapseLink = styled(EuiLink)`
   margin: 20px 0;
@@ -29,9 +33,9 @@ interface Props {
   columnHeaders: ColumnHeaderOptions[];
   data: TimelineEventsDetailsItem[];
   id: string;
-  view: View;
+  view: EventsViewType;
   onUpdateColumns: OnUpdateColumns;
-  onViewSelected: (selected: View) => void;
+  onViewSelected: (selected: EventsViewType) => void;
   timelineId: string;
 }
 
@@ -52,12 +56,14 @@ export const EventDetails = React.memo<Props>(
     onViewSelected,
     timelineId,
   }) => {
-    const handleTabClick = useCallback((e) => onViewSelected(e.id as View), [onViewSelected]);
+    const handleTabClick = useCallback((e) => onViewSelected(e.id as EventsViewType), [
+      onViewSelected,
+    ]);
 
     const tabs: EuiTabbedContentTab[] = useMemo(
       () => [
         {
-          id: 'table-view',
+          id: EventsViewType.tableView,
           name: i18n.TABLE,
           content: (
             <EventFieldsBrowser
@@ -71,7 +77,7 @@ export const EventDetails = React.memo<Props>(
           ),
         },
         {
-          id: 'json-view',
+          id: EventsViewType.jsonView,
           name: i18n.JSON_VIEW,
           content: <JsonView data={data} />,
         },

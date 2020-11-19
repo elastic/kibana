@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TimelineArgs } from '.';
+import { TimelineExpandedEvent } from '../../../common/types/timeline';
 import { TimelineEventsAllRequestOptions } from '../../../common/search_strategy/timeline';
+import { TimelineArgs } from '.';
 
 /*
  * Future Engineer
@@ -18,14 +19,9 @@ import { TimelineEventsAllRequestOptions } from '../../../common/search_strategy
  *
  */
 
-export interface ActiveTimelineExpandedEvent {
-  eventId?: string;
-  indexName?: string;
-}
-
 class ActiveTimelineEvents {
   private _activePage: number = 0;
-  private _expandedEvent: ActiveTimelineExpandedEvent = {};
+  private _expandedEvent: TimelineExpandedEvent = {};
   private _pageName: string = '';
   private _request: TimelineEventsAllRequestOptions | null = null;
   private _response: TimelineArgs | null = null;
@@ -42,7 +38,7 @@ class ActiveTimelineEvents {
     return this._expandedEvent;
   }
 
-  toggleExpandedEvent(expandedEvent: ActiveTimelineExpandedEvent) {
+  toggleExpandedEvent(expandedEvent: TimelineExpandedEvent) {
     if (expandedEvent.eventId === this._expandedEvent.eventId) {
       this._expandedEvent = {};
     } else {
@@ -50,7 +46,7 @@ class ActiveTimelineEvents {
     }
   }
 
-  setExpandedEvent(expandedEvent: ActiveTimelineExpandedEvent) {
+  setExpandedEvent(expandedEvent: TimelineExpandedEvent) {
     this._expandedEvent = expandedEvent;
   }
 

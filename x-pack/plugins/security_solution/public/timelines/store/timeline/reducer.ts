@@ -33,6 +33,7 @@ import {
   showCallOutUnauthorizedMsg,
   showTimeline,
   startTimelineSaving,
+  toggleExpandedEvent,
   unPinEvent,
   updateAutoSaveMsg,
   updateColumns,
@@ -42,7 +43,6 @@ import {
   updateDataProviderType,
   updateDescription,
   updateEventType,
-  updateHighlightedDropAndProviderId,
   updateIndexNames,
   updateIsFavorite,
   updateIsLive,
@@ -74,9 +74,9 @@ import {
   setDeletedTimelineEvents,
   setLoadingTimelineEvents,
   setSelectedTimelineEvents,
+  toggleTimelineExpandedEvent,
   unPinTimelineEvent,
   updateExcludedRowRenderersIds,
-  updateHighlightedDropAndProvider,
   updateKqlFilterQueryDraft,
   updateTimelineColumns,
   updateTimelineDescription,
@@ -178,6 +178,16 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
   .case(addNoteToEvent, (state, { id, noteId, eventId }) => ({
     ...state,
     timelineById: addTimelineNoteToEvent({ id, noteId, eventId, timelineById: state.timelineById }),
+  }))
+  .case(toggleExpandedEvent, (state, { timelineId, eventId, indexName, loading }) => ({
+    ...state,
+    timelineById: toggleTimelineExpandedEvent({
+      timelineId,
+      eventId,
+      indexName,
+      loading,
+      timelineById: state.timelineById,
+    }),
   }))
   .case(addProvider, (state, { id, provider }) => ({
     ...state,
@@ -466,14 +476,6 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
     timelineById: updateTimelinePerPageOptions({
       id,
       itemsPerPageOptions,
-      timelineById: state.timelineById,
-    }),
-  }))
-  .case(updateHighlightedDropAndProviderId, (state, { id, providerId }) => ({
-    ...state,
-    timelineById: updateHighlightedDropAndProvider({
-      id,
-      providerId,
       timelineById: state.timelineById,
     }),
   }))

@@ -5,7 +5,6 @@
  */
 
 import {
-  EuiTitle,
   EuiTabbedContent,
   EuiFlexGroup,
   EuiFlexItem,
@@ -23,7 +22,7 @@ import { connect, ConnectedProps, useDispatch } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 
 import { timelineActions, timelineSelectors } from '../../../store/timeline';
-import { Direction, TimelineItem } from '../../../../../common/search_strategy';
+import { Direction } from '../../../../../common/search_strategy';
 import { useTimelineEvents } from '../../../containers/index';
 import { useKibana } from '../../../../common/lib/kibana';
 import { defaultHeaders } from '../body/column_headers/default_headers';
@@ -38,11 +37,6 @@ import { esQuery, FilterManager } from '../../../../../../../../src/plugins/data
 import { useManageTimeline } from '../../manage_timeline';
 import { TimelineEventsType } from '../../../../../common/types/timeline';
 import { requiredFieldsForActions } from '../../../../detections/components/alerts_table/default_config';
-import { ExpandableEvent } from '../expandable_event';
-import {
-  activeTimeline,
-  ActiveTimelineExpandedEvent,
-} from '../../../containers/active_timeline_context';
 import { GraphOverlay } from '../../graph_overlay';
 import { SuperDatePicker } from '../../../../common/components/super_date_picker';
 import { EventDetailsWidthProvider } from '../../../../common/components/events_viewer/event_details_width_context';
@@ -54,6 +48,7 @@ import { inputsActions } from '../../../../common/store/inputs';
 import { timelineDefaults } from '../../../../timelines/store/timeline/defaults';
 import { useSourcererScope } from '../../../../common/containers/sourcerer';
 import { TimelineModel } from '../../../../timelines/store/timeline/model';
+import { EventDetails } from '../event_details';
 
 const TimelineHeaderContainer = styled.div`
   margin-top: 6px;
@@ -110,6 +105,14 @@ const DatePicker = styled(EuiFlexItem)`
 
 DatePicker.displayName = 'DatePicker';
 
+const VerticalRule = styled.div`
+  width: 2px;
+  height: 100%;
+  background: ${({ theme }) => theme.eui.euiColorLightShade};
+`;
+
+VerticalRule.displayName = 'VerticalRule';
+
 const StyledEuiTabbedContent = styled(EuiTabbedContent)`
   display: flex;
   flex-direction: column;
@@ -161,9 +164,6 @@ export const TimelineQueryTabContentComponent: React.FC<Props> = ({
   toggleLock,
 }) => {
   const dispatch = useDispatch();
-  const [expanded, setExpanded] = useState<ActiveTimelineExpandedEvent>(
-    activeTimeline.getExpandedEvent()
-  );
 
   const {
     browserFields,
@@ -174,19 +174,6 @@ export const TimelineQueryTabContentComponent: React.FC<Props> = ({
   } = useSourcererScope(SourcererScopeName.timeline);
 
   const onToggleLock = useCallback(() => toggleLock({ linkToId: 'timeline' }), [toggleLock]);
-
-  const onEventToggled = useCallback((event: TimelineItem) => {
-    const eventId = event._id;
-
-    setExpanded((currentExpanded) => {
-      if (currentExpanded.eventId === eventId) {
-        return {};
-      }
-
-      return { eventId, indexName: event._index! };
-    });
-    activeTimeline.toggleExpandedEvent({ eventId, indexName: event._index! });
-  }, []);
 
   const { uiSettings } = useKibana().services;
   const [filterManager] = useState<FilterManager>(new FilterManager(uiSettings));
@@ -367,9 +354,7 @@ export const TimelineQueryTabContentComponent: React.FC<Props> = ({
                     browserFields={browserFields}
                     data={events}
                     docValueFields={docValueFields}
-                    expanded={expanded}
                     id={timelineId}
-                    onEventToggled={onEventToggled}
                     refetch={refetch}
                     sort={sort}
                   />
@@ -396,14 +381,11 @@ export const TimelineQueryTabContentComponent: React.FC<Props> = ({
               </EventDetailsWidthProvider>
             ) : null}
           </ScrollableFlexItem>
+          <VerticalRule />
           <ScrollableFlexItem grow={1}>
-            <EuiTitle>
-              <h3>{'Event details'}</h3>
-            </EuiTitle>
-            <ExpandableEvent
+            <EventDetails
               browserFields={browserFields}
               docValueFields={docValueFields}
-              event={expanded}
               timelineId={timelineId}
             />
           </ScrollableFlexItem>

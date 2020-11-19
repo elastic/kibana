@@ -4,18 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiTextColor, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiTextColor, EuiLoadingContent, EuiTitle } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
 
+import { TimelineExpandedEvent } from '../../../../../common/types/timeline';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { BrowserFields, DocValueFields } from '../../../../common/containers/source';
 import { StatefulEventDetails } from '../../../../common/components/event_details/stateful_event_details';
 import { LazyAccordion } from '../../lazy_accordion';
 import { useTimelineEventsDetails } from '../../../containers/details';
 import { timelineActions, timelineSelectors } from '../../../store/timeline';
-import { ActiveTimelineExpandedEvent } from '../../../containers/active_timeline_context';
 import { getColumnHeaders } from '../body/column_headers/helpers';
 import { timelineDefaults } from '../../../store/timeline/defaults';
 import * as i18n from './translations';
@@ -31,9 +31,17 @@ ExpandableDetails.displayName = 'ExpandableDetails';
 interface Props {
   browserFields: BrowserFields;
   docValueFields: DocValueFields[];
-  event: ActiveTimelineExpandedEvent;
+  event: TimelineExpandedEvent;
   timelineId: string;
 }
+
+export const ExpandableEventTitle = React.memo(() => (
+  <EuiTitle size="s">
+    <h4>{i18n.EVENT_DETAILS}</h4>
+  </EuiTitle>
+));
+
+ExpandableEventTitle.displayName = 'ExpandableEventTitle';
 
 export const ExpandableEvent = React.memo<Props>(
   ({ browserFields, docValueFields, event, timelineId }) => {
@@ -77,7 +85,7 @@ export const ExpandableEvent = React.memo<Props>(
     }
 
     if (loading) {
-      return <EuiLoadingSpinner />;
+      return <EuiLoadingContent lines={10} />;
     }
 
     return (

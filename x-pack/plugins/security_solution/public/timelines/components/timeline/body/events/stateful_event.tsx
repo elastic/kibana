@@ -4,9 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useRef, useState, useCallback } from 'react';
+import React, { useRef, useMemo, useState, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 
+import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
+import { TimelineId } from '../../../../../../common/types/timeline';
 import { BrowserFields } from '../../../../../common/containers/source';
 import {
   TimelineItem,
@@ -25,6 +27,7 @@ import { useEventDetailsWidthContext } from '../../../../../common/components/ev
 import { EventColumnView } from './event_column_view';
 import { inputsModel } from '../../../../../common/store';
 import { timelineActions } from '../../../../store/timeline';
+import { activeTimeline } from '../../../../containers/active_timeline_context';
 
 interface Props {
   actionsColumnWidth: number;
@@ -34,9 +37,7 @@ interface Props {
   event: TimelineItem;
   eventIdToNoteIds: Readonly<Record<string, string[]>>;
   isEventViewer?: boolean;
-  isExpanded: boolean;
   loadingEventIds: Readonly<string[]>;
-  onEventToggled: () => void;
   onRowSelected: OnRowSelected;
   isEventPinned: boolean;
   refetch: inputsModel.Refetch;
@@ -65,9 +66,7 @@ const StatefulEventComponent: React.FC<Props> = ({
   eventIdToNoteIds,
   isEventViewer = false,
   isEventPinned = false,
-  isExpanded = false,
   loadingEventIds,
-  onEventToggled,
   onRowSelected,
   refetch,
   onRuleChange,
@@ -78,7 +77,15 @@ const StatefulEventComponent: React.FC<Props> = ({
 }) => {
   const dispatch = useDispatch();
   const [showNotes, setShowNotes] = useState<{ [eventId: string]: boolean }>({});
+  const expandedEvent = useDeepEqualSelector(
+    (state) => state.timeline.timelineById[timelineId].expandedEvent
+  );
   const divElement = useRef<HTMLDivElement | null>(null);
+
+  const isExpanded = useMemo(() => expandedEvent && expandedEvent.eventId === event._id, [
+    event._id,
+    expandedEvent,
+  ]);
 
   const onToggleShowNotes = useCallback(() => {
     const eventId = event._id;
@@ -94,6 +101,23 @@ const StatefulEventComponent: React.FC<Props> = ({
     (eventId) => dispatch(timelineActions.unPinEvent!({ id: timelineId, eventId })),
     [dispatch, timelineId]
   );
+  const handleOnEventToggled = useCallback(() => {
+    const eventId = event._id;
+    const indexName = event._index!;
+
+    dispatch(
+      timelineActions.toggleExpandedEvent({
+        timelineId,
+        eventId,
+        indexName,
+        loading: false,
+      })
+    );
+
+    if (timelineId === TimelineId.active) {
+      activeTimeline.toggleExpandedEvent({ eventId, indexName, loading: false });
+    }
+  }, [dispatch, event._id, event._index, timelineId]);
 
   const associateNote = useCallback(
     (noteId: string) => {
@@ -128,7 +152,7 @@ const StatefulEventComponent: React.FC<Props> = ({
         isEventPinned={isEventPinned}
         isEventViewer={isEventViewer}
         loadingEventIds={loadingEventIds}
-        onEventToggled={onEventToggled}
+        onEventToggled={handleOnEventToggled}
         onPinEvent={onPinEvent}
         onRowSelected={onRowSelected}
         onUnPinEvent={onUnPinEvent}
